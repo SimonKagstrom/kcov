@@ -1,0 +1,1902 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">751</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">71.1 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">534</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  VIC_SC.cpp - 6569R5 emulation (cycle based) </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Incompatibilities: </span>
+<span class="lineNum">     23 </span>              :  * ------------------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - Color of $ff bytes read when BA is low and AEC is high </span>
+<span class="lineNum">     26 </span>              :  *    is not correct </span>
+<span class="lineNum">     27 </span>              :  *  - Changes to border/background color are visible 7 pixels </span>
+<span class="lineNum">     28 </span>              :  *    too late </span>
+<span class="lineNum">     29 </span>              :  *  - Sprite data access doesn't respect BA </span>
+<span class="lineNum">     30 </span>              :  *  - Sprite collisions are only detected within the visible </span>
+<span class="lineNum">     31 </span>              :  *    screen area (excluding borders) </span>
+<span class="lineNum">     32 </span>              :  *  - Sprites are only drawn if they completely fit within the </span>
+<span class="lineNum">     33 </span>              :  *    left/right limits of the chunky bitmap </span>
+<span class="lineNum">     34 </span>              :  */ </span>
+<span class="lineNum">     35 </span>              :  </span>
+<span class="lineNum">     36 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     37 </span>              :  </span>
+<span class="lineNum">     38 </span>              : #include &quot;VIC.h&quot; </span>
+<span class="lineNum">     39 </span>              : #include &quot;C64.h&quot; </span>
+<span class="lineNum">     40 </span>              : #include &quot;CPUC64.h&quot; </span>
+<span class="lineNum">     41 </span>              : #include &quot;Display.h&quot; </span>
+<span class="lineNum">     42 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              : // First and last displayed line </span>
+<span class="lineNum">     46 </span>              : const int FIRST_DISP_LINE = 0x10; </span>
+<span class="lineNum">     47 </span>              : const int LAST_DISP_LINE = 0x11f; </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span>              : // First and last possible line for Bad Lines </span>
+<span class="lineNum">     50 </span>              : const int FIRST_DMA_LINE = 0x30; </span>
+<span class="lineNum">     51 </span>              : const int LAST_DMA_LINE = 0xf7; </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span>              : // Display window coordinates </span>
+<span class="lineNum">     54 </span>              : const int ROW25_YSTART = 0x33; </span>
+<span class="lineNum">     55 </span>              : const int ROW25_YSTOP = 0xfb; </span>
+<span class="lineNum">     56 </span>              : const int ROW24_YSTART = 0x37; </span>
+<span class="lineNum">     57 </span>              : const int ROW24_YSTOP = 0xf7; </span>
+<span class="lineNum">     58 </span>              :  </span>
+<span class="lineNum">     59 </span>              : #if defined(SMALL_DISPLAY) </span>
+<span class="lineNum">     60 </span>              : /* This does not work yet, the sprite code doesn't know about it. */ </span>
+<span class="lineNum">     61 </span>              : const int COL40_XSTART = 0x14; </span>
+<span class="lineNum">     62 </span>              : const int COL40_XSTOP = 0x154; </span>
+<span class="lineNum">     63 </span>              : const int COL38_XSTART = 0x1B; </span>
+<span class="lineNum">     64 </span>              : const int COL38_XSTOP = 0x14B; </span>
+<span class="lineNum">     65 </span>              : #else </span>
+<span class="lineNum">     66 </span>              : const int COL40_XSTART = 0x20; </span>
+<span class="lineNum">     67 </span>              : const int COL40_XSTOP = 0x160; </span>
+<span class="lineNum">     68 </span>              : const int COL38_XSTART = 0x27; </span>
+<span class="lineNum">     69 </span>              : const int COL38_XSTOP = 0x157; </span>
+<span class="lineNum">     70 </span>              : #endif </span>
+<span class="lineNum">     71 </span>              :  </span>
+<span class="lineNum">     72 </span>              :  </span>
+<span class="lineNum">     73 </span>              : // Tables for sprite X expansion </span>
+<span class="lineNum">     74 </span>              : uint16 ExpTable[256] = { </span>
+<span class="lineNum">     75 </span>              : 	0x0000, 0x0003, 0x000C, 0x000F, 0x0030, 0x0033, 0x003C, 0x003F, </span>
+<span class="lineNum">     76 </span>              : 	0x00C0, 0x00C3, 0x00CC, 0x00CF, 0x00F0, 0x00F3, 0x00FC, 0x00FF, </span>
+<span class="lineNum">     77 </span>              : 	0x0300, 0x0303, 0x030C, 0x030F, 0x0330, 0x0333, 0x033C, 0x033F, </span>
+<span class="lineNum">     78 </span>              : 	0x03C0, 0x03C3, 0x03CC, 0x03CF, 0x03F0, 0x03F3, 0x03FC, 0x03FF, </span>
+<span class="lineNum">     79 </span>              : 	0x0C00, 0x0C03, 0x0C0C, 0x0C0F, 0x0C30, 0x0C33, 0x0C3C, 0x0C3F, </span>
+<span class="lineNum">     80 </span>              : 	0x0CC0, 0x0CC3, 0x0CCC, 0x0CCF, 0x0CF0, 0x0CF3, 0x0CFC, 0x0CFF, </span>
+<span class="lineNum">     81 </span>              : 	0x0F00, 0x0F03, 0x0F0C, 0x0F0F, 0x0F30, 0x0F33, 0x0F3C, 0x0F3F, </span>
+<span class="lineNum">     82 </span>              : 	0x0FC0, 0x0FC3, 0x0FCC, 0x0FCF, 0x0FF0, 0x0FF3, 0x0FFC, 0x0FFF, </span>
+<span class="lineNum">     83 </span>              : 	0x3000, 0x3003, 0x300C, 0x300F, 0x3030, 0x3033, 0x303C, 0x303F, </span>
+<span class="lineNum">     84 </span>              : 	0x30C0, 0x30C3, 0x30CC, 0x30CF, 0x30F0, 0x30F3, 0x30FC, 0x30FF, </span>
+<span class="lineNum">     85 </span>              : 	0x3300, 0x3303, 0x330C, 0x330F, 0x3330, 0x3333, 0x333C, 0x333F, </span>
+<span class="lineNum">     86 </span>              : 	0x33C0, 0x33C3, 0x33CC, 0x33CF, 0x33F0, 0x33F3, 0x33FC, 0x33FF, </span>
+<span class="lineNum">     87 </span>              : 	0x3C00, 0x3C03, 0x3C0C, 0x3C0F, 0x3C30, 0x3C33, 0x3C3C, 0x3C3F, </span>
+<span class="lineNum">     88 </span>              : 	0x3CC0, 0x3CC3, 0x3CCC, 0x3CCF, 0x3CF0, 0x3CF3, 0x3CFC, 0x3CFF, </span>
+<span class="lineNum">     89 </span>              : 	0x3F00, 0x3F03, 0x3F0C, 0x3F0F, 0x3F30, 0x3F33, 0x3F3C, 0x3F3F, </span>
+<span class="lineNum">     90 </span>              : 	0x3FC0, 0x3FC3, 0x3FCC, 0x3FCF, 0x3FF0, 0x3FF3, 0x3FFC, 0x3FFF, </span>
+<span class="lineNum">     91 </span>              : 	0xC000, 0xC003, 0xC00C, 0xC00F, 0xC030, 0xC033, 0xC03C, 0xC03F, </span>
+<span class="lineNum">     92 </span>              : 	0xC0C0, 0xC0C3, 0xC0CC, 0xC0CF, 0xC0F0, 0xC0F3, 0xC0FC, 0xC0FF, </span>
+<span class="lineNum">     93 </span>              : 	0xC300, 0xC303, 0xC30C, 0xC30F, 0xC330, 0xC333, 0xC33C, 0xC33F, </span>
+<span class="lineNum">     94 </span>              : 	0xC3C0, 0xC3C3, 0xC3CC, 0xC3CF, 0xC3F0, 0xC3F3, 0xC3FC, 0xC3FF, </span>
+<span class="lineNum">     95 </span>              : 	0xCC00, 0xCC03, 0xCC0C, 0xCC0F, 0xCC30, 0xCC33, 0xCC3C, 0xCC3F, </span>
+<span class="lineNum">     96 </span>              : 	0xCCC0, 0xCCC3, 0xCCCC, 0xCCCF, 0xCCF0, 0xCCF3, 0xCCFC, 0xCCFF, </span>
+<span class="lineNum">     97 </span>              : 	0xCF00, 0xCF03, 0xCF0C, 0xCF0F, 0xCF30, 0xCF33, 0xCF3C, 0xCF3F, </span>
+<span class="lineNum">     98 </span>              : 	0xCFC0, 0xCFC3, 0xCFCC, 0xCFCF, 0xCFF0, 0xCFF3, 0xCFFC, 0xCFFF, </span>
+<span class="lineNum">     99 </span>              : 	0xF000, 0xF003, 0xF00C, 0xF00F, 0xF030, 0xF033, 0xF03C, 0xF03F, </span>
+<span class="lineNum">    100 </span>              : 	0xF0C0, 0xF0C3, 0xF0CC, 0xF0CF, 0xF0F0, 0xF0F3, 0xF0FC, 0xF0FF, </span>
+<span class="lineNum">    101 </span>              : 	0xF300, 0xF303, 0xF30C, 0xF30F, 0xF330, 0xF333, 0xF33C, 0xF33F, </span>
+<span class="lineNum">    102 </span>              : 	0xF3C0, 0xF3C3, 0xF3CC, 0xF3CF, 0xF3F0, 0xF3F3, 0xF3FC, 0xF3FF, </span>
+<span class="lineNum">    103 </span>              : 	0xFC00, 0xFC03, 0xFC0C, 0xFC0F, 0xFC30, 0xFC33, 0xFC3C, 0xFC3F, </span>
+<span class="lineNum">    104 </span>              : 	0xFCC0, 0xFCC3, 0xFCCC, 0xFCCF, 0xFCF0, 0xFCF3, 0xFCFC, 0xFCFF, </span>
+<span class="lineNum">    105 </span>              : 	0xFF00, 0xFF03, 0xFF0C, 0xFF0F, 0xFF30, 0xFF33, 0xFF3C, 0xFF3F, </span>
+<span class="lineNum">    106 </span>              : 	0xFFC0, 0xFFC3, 0xFFCC, 0xFFCF, 0xFFF0, 0xFFF3, 0xFFFC, 0xFFFF </span>
+<span class="lineNum">    107 </span>              : }; </span>
+<span class="lineNum">    108 </span>              :  </span>
+<span class="lineNum">    109 </span>              : uint16 MultiExpTable[256] = { </span>
+<span class="lineNum">    110 </span>              : 	0x0000, 0x0005, 0x000A, 0x000F, 0x0050, 0x0055, 0x005A, 0x005F, </span>
+<span class="lineNum">    111 </span>              : 	0x00A0, 0x00A5, 0x00AA, 0x00AF, 0x00F0, 0x00F5, 0x00FA, 0x00FF, </span>
+<span class="lineNum">    112 </span>              : 	0x0500, 0x0505, 0x050A, 0x050F, 0x0550, 0x0555, 0x055A, 0x055F, </span>
+<span class="lineNum">    113 </span>              : 	0x05A0, 0x05A5, 0x05AA, 0x05AF, 0x05F0, 0x05F5, 0x05FA, 0x05FF, </span>
+<span class="lineNum">    114 </span>              : 	0x0A00, 0x0A05, 0x0A0A, 0x0A0F, 0x0A50, 0x0A55, 0x0A5A, 0x0A5F, </span>
+<span class="lineNum">    115 </span>              : 	0x0AA0, 0x0AA5, 0x0AAA, 0x0AAF, 0x0AF0, 0x0AF5, 0x0AFA, 0x0AFF, </span>
+<span class="lineNum">    116 </span>              : 	0x0F00, 0x0F05, 0x0F0A, 0x0F0F, 0x0F50, 0x0F55, 0x0F5A, 0x0F5F, </span>
+<span class="lineNum">    117 </span>              : 	0x0FA0, 0x0FA5, 0x0FAA, 0x0FAF, 0x0FF0, 0x0FF5, 0x0FFA, 0x0FFF, </span>
+<span class="lineNum">    118 </span>              : 	0x5000, 0x5005, 0x500A, 0x500F, 0x5050, 0x5055, 0x505A, 0x505F, </span>
+<span class="lineNum">    119 </span>              : 	0x50A0, 0x50A5, 0x50AA, 0x50AF, 0x50F0, 0x50F5, 0x50FA, 0x50FF, </span>
+<span class="lineNum">    120 </span>              : 	0x5500, 0x5505, 0x550A, 0x550F, 0x5550, 0x5555, 0x555A, 0x555F, </span>
+<span class="lineNum">    121 </span>              : 	0x55A0, 0x55A5, 0x55AA, 0x55AF, 0x55F0, 0x55F5, 0x55FA, 0x55FF, </span>
+<span class="lineNum">    122 </span>              : 	0x5A00, 0x5A05, 0x5A0A, 0x5A0F, 0x5A50, 0x5A55, 0x5A5A, 0x5A5F, </span>
+<span class="lineNum">    123 </span>              : 	0x5AA0, 0x5AA5, 0x5AAA, 0x5AAF, 0x5AF0, 0x5AF5, 0x5AFA, 0x5AFF, </span>
+<span class="lineNum">    124 </span>              : 	0x5F00, 0x5F05, 0x5F0A, 0x5F0F, 0x5F50, 0x5F55, 0x5F5A, 0x5F5F, </span>
+<span class="lineNum">    125 </span>              : 	0x5FA0, 0x5FA5, 0x5FAA, 0x5FAF, 0x5FF0, 0x5FF5, 0x5FFA, 0x5FFF, </span>
+<span class="lineNum">    126 </span>              : 	0xA000, 0xA005, 0xA00A, 0xA00F, 0xA050, 0xA055, 0xA05A, 0xA05F, </span>
+<span class="lineNum">    127 </span>              : 	0xA0A0, 0xA0A5, 0xA0AA, 0xA0AF, 0xA0F0, 0xA0F5, 0xA0FA, 0xA0FF, </span>
+<span class="lineNum">    128 </span>              : 	0xA500, 0xA505, 0xA50A, 0xA50F, 0xA550, 0xA555, 0xA55A, 0xA55F, </span>
+<span class="lineNum">    129 </span>              : 	0xA5A0, 0xA5A5, 0xA5AA, 0xA5AF, 0xA5F0, 0xA5F5, 0xA5FA, 0xA5FF, </span>
+<span class="lineNum">    130 </span>              : 	0xAA00, 0xAA05, 0xAA0A, 0xAA0F, 0xAA50, 0xAA55, 0xAA5A, 0xAA5F, </span>
+<span class="lineNum">    131 </span>              : 	0xAAA0, 0xAAA5, 0xAAAA, 0xAAAF, 0xAAF0, 0xAAF5, 0xAAFA, 0xAAFF, </span>
+<span class="lineNum">    132 </span>              : 	0xAF00, 0xAF05, 0xAF0A, 0xAF0F, 0xAF50, 0xAF55, 0xAF5A, 0xAF5F, </span>
+<span class="lineNum">    133 </span>              : 	0xAFA0, 0xAFA5, 0xAFAA, 0xAFAF, 0xAFF0, 0xAFF5, 0xAFFA, 0xAFFF, </span>
+<span class="lineNum">    134 </span>              : 	0xF000, 0xF005, 0xF00A, 0xF00F, 0xF050, 0xF055, 0xF05A, 0xF05F, </span>
+<span class="lineNum">    135 </span>              : 	0xF0A0, 0xF0A5, 0xF0AA, 0xF0AF, 0xF0F0, 0xF0F5, 0xF0FA, 0xF0FF, </span>
+<span class="lineNum">    136 </span>              : 	0xF500, 0xF505, 0xF50A, 0xF50F, 0xF550, 0xF555, 0xF55A, 0xF55F, </span>
+<span class="lineNum">    137 </span>              : 	0xF5A0, 0xF5A5, 0xF5AA, 0xF5AF, 0xF5F0, 0xF5F5, 0xF5FA, 0xF5FF, </span>
+<span class="lineNum">    138 </span>              : 	0xFA00, 0xFA05, 0xFA0A, 0xFA0F, 0xFA50, 0xFA55, 0xFA5A, 0xFA5F, </span>
+<span class="lineNum">    139 </span>              : 	0xFAA0, 0xFAA5, 0xFAAA, 0xFAAF, 0xFAF0, 0xFAF5, 0xFAFA, 0xFAFF, </span>
+<span class="lineNum">    140 </span>              : 	0xFF00, 0xFF05, 0xFF0A, 0xFF0F, 0xFF50, 0xFF55, 0xFF5A, 0xFF5F, </span>
+<span class="lineNum">    141 </span>              : 	0xFFA0, 0xFFA5, 0xFFAA, 0xFFAF, 0xFFF0, 0xFFF5, 0xFFFA, 0xFFFF </span>
+<span class="lineNum">    142 </span>              : }; </span>
+<span class="lineNum">    143 </span>              :  </span>
+<span class="lineNum">    144 </span>              :  </span>
+<span class="lineNum">    145 </span>              :  </span>
+<span class="lineNum">    146 </span>              : /* </span>
+<span class="lineNum">    147 </span>              :  *  Constructor: Initialize variables </span>
+<span class="lineNum">    148 </span>              :  */ </span>
+<span class="lineNum">    149 </span>              :  </span>
+<span class="lineNum">    150 </span><span class="linePartCov">    3 / 6     : MOS6569::MOS6569(C64 *c64, C64Display *disp, MOS6510 *CPU, uint8 *RAM, uint8 *Char, uint8 *Color) </span>
+<span class="lineNum">    151 </span><span class="linePartCov">    5 / 10    : 	: ram(RAM), char_rom(Char), color_ram(Color), the_c64(c64), the_display(disp), the_cpu(CPU) </span>
+<span class="lineNum">    152 </span>              : { </span>
+<span class="lineNum">    153 </span>              : 	int i; </span>
+<span class="lineNum">    154 </span>              :  </span>
+<span class="lineNum">    155 </span><span class="linePartCov">    1 / 2     : 	is_bad_line = false; </span>
+<span class="lineNum">    156 </span><span class="linePartCov">    1 / 2     : 	spr_exp_y = 0; </span>
+<span class="lineNum">    157 </span>              : 	memset(mc_base, 0, sizeof(mc_base)); </span>
+<span class="lineNum">    158 </span>              :  </span>
+<span class="lineNum">    159 </span>              : 	// Set pointers </span>
+<span class="lineNum">    160 </span><span class="linePartCov">    1 / 2     : 	matrix_base = 0; </span>
+<span class="lineNum">    161 </span><span class="linePartCov">    1 / 2     : 	char_base = 0; </span>
+<span class="lineNum">    162 </span><span class="linePartCov">    1 / 2     : 	bitmap_base = 0; </span>
+<span class="lineNum">    163 </span>              :  </span>
+<span class="lineNum">    164 </span>              : 	// Get bitmap info </span>
+<span class="lineNum">    165 </span><span class="linePartCov">    1 / 2     : 	chunky_ptr = chunky_line_start = disp-&gt;BitmapBase(); </span>
+<span class="lineNum">    166 </span><span class="linePartCov">    2 / 4     : 	xmod = disp-&gt;BitmapXMod(); </span>
+<span class="lineNum">    167 </span>              :  </span>
+<span class="lineNum">    168 </span>              : 	// Initialize VIC registers </span>
+<span class="lineNum">    169 </span><span class="linePartCov">    1 / 2     : 	mx8 = 0; </span>
+<span class="lineNum">    170 </span><span class="linePartCov">    1 / 2     : 	ctrl1 = ctrl2 = 0; </span>
+<span class="lineNum">    171 </span><span class="linePartCov">    1 / 2     : 	lpx = lpy = 0; </span>
+<span class="lineNum">    172 </span><span class="linePartCov">    1 / 2     : 	me = mxe = mye = mdp = mmc = 0; </span>
+<span class="lineNum">    173 </span><span class="linePartCov">    1 / 2     : 	vbase = irq_flag = irq_mask = 0; </span>
+<span class="lineNum">    174 </span><span class="linePartCov">    1 / 2     : 	clx_spr = clx_bgr = 0; </span>
+<span class="lineNum">    175 </span><span class="linePartCov">    1 / 2     : 	cia_vabase = 0; </span>
+<span class="lineNum">    176 </span><span class="linePartCov">    2 / 4     : 	ec = b0c = b1c = b2c = b3c = mm0 = mm1 = 0; </span>
+<span class="lineNum">    177 </span><span class="linePartCov">    1 / 2     : 	for (i=0; i&lt;8; i++) mx[i] = my[i] = sc[i] = 0; </span>
+<span class="lineNum">    178 </span>              :  </span>
+<span class="lineNum">    179 </span>              : 	// Initialize other variables </span>
+<span class="lineNum">    180 </span><span class="linePartCov">    1 / 2     : 	raster_y = TOTAL_RASTERS - 1; </span>
+<span class="lineNum">    181 </span><span class="linePartCov">    1 / 2     : 	rc = 7; </span>
+<span class="lineNum">    182 </span><span class="linePartCov">    1 / 2     : 	irq_raster = vc = vc_base = x_scroll = y_scroll = 0; </span>
+<span class="lineNum">    183 </span><span class="linePartCov">    1 / 2     : 	dy_start = ROW24_YSTART; </span>
+<span class="lineNum">    184 </span><span class="linePartCov">    1 / 2     : 	dy_stop = ROW24_YSTOP; </span>
+<span class="lineNum">    185 </span><span class="linePartCov">    1 / 2     : 	ml_index = 0; </span>
+<span class="lineNum">    186 </span>              :  </span>
+<span class="lineNum">    187 </span><span class="linePartCov">    1 / 2     : 	cycle = 1; </span>
+<span class="lineNum">    188 </span><span class="linePartCov">    1 / 2     : 	display_idx = 0; </span>
+<span class="lineNum">    189 </span><span class="linePartCov">    1 / 2     : 	display_state = false; </span>
+<span class="lineNum">    190 </span><span class="linePartCov">    1 / 2     : 	border_on = ud_border_on = vblanking = false; </span>
+<span class="lineNum">    191 </span><span class="linePartCov">    1 / 2     : 	lp_triggered = draw_this_line = false; </span>
+<span class="lineNum">    192 </span>              :  </span>
+<span class="lineNum">    193 </span><span class="linePartCov">    2 / 4     : 	spr_dma_on = spr_disp_on = 0; </span>
+<span class="lineNum">    194 </span><span class="linePartCov">    1 / 2     : 	for (i=0; i&lt;8; i++) { </span>
+<span class="lineNum">    195 </span><span class="linePartCov">    1 / 2     : 		mc[i] = 63; </span>
+<span class="lineNum">    196 </span><span class="linePartCov">    1 / 2     : 		spr_ptr[i] = 0; </span>
+<span class="lineNum">    197 </span>              : 	} </span>
+<span class="lineNum">    198 </span>              :  </span>
+<span class="lineNum">    199 </span><span class="linePartCov">    1 / 2     : 	frame_skipped = false; </span>
+<span class="lineNum">    200 </span><span class="linePartCov">    1 / 2     : 	skip_counter = 1; </span>
+<span class="lineNum">    201 </span>              :  </span>
+<span class="lineNum">    202 </span>              : 	memset(spr_coll_buf, 0, 0x180); </span>
+<span class="lineNum">    203 </span>              : 	memset(fore_mask_buf, 0, 0x180/8); </span>
+<span class="lineNum">    204 </span>              :  </span>
+<span class="lineNum">    205 </span>              : 	// Preset colors to black </span>
+<span class="lineNum">    206 </span><span class="linePartCov">    1 / 2     : 	disp-&gt;InitColors(colors); </span>
+<span class="lineNum">    207 </span><span class="linePartCov">    2 / 4     : 	ec_color = b0c_color = b1c_color = b2c_color = b3c_color = mm0_color = mm1_color = colors[0]; </span>
+<span class="lineNum">    208 </span><span class="linePartCov">    2 / 4     : 	for (i=0; i&lt;8; i++) spr_color[i] = colors[0]; </span>
+<span class="lineNum">    209 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    210 </span>              :  </span>
+<span class="lineNum">    211 </span>              :  </span>
+<span class="lineNum">    212 </span>              : /* </span>
+<span class="lineNum">    213 </span>              :  *  Reinitialize the colors table for when the palette has changed </span>
+<span class="lineNum">    214 </span>              :  */ </span>
+<span class="lineNum">    215 </span>              :  </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 2     : void MOS6569::ReInitColors(void) </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    218 </span>              : 	int i; </span>
+<span class="lineNum">    219 </span>              :  </span>
+<span class="lineNum">    220 </span>              : 	// Build inverse color table. </span>
+<span class="lineNum">    221 </span>              : 	uint8 xlate_colors[256]; </span>
+<span class="lineNum">    222 </span>              : 	memset(xlate_colors, 0, sizeof(xlate_colors)); </span>
+<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 	for (i=0; i&lt;16; i++) </span>
+<span class="lineNum">    224 </span><span class="lineNoCov">    0 / 1     : 		xlate_colors[colors[i]] = i; </span>
+<span class="lineNum">    225 </span>              :  </span>
+<span class="lineNum">    226 </span>              : 	// Get the new colors. </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 	the_display-&gt;InitColors(colors); </span>
+<span class="lineNum">    228 </span>              :  </span>
+<span class="lineNum">    229 </span>              : 	// Build color translation table. </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 1     : 	for (i=0; i&lt;256; i++) </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 1     : 		xlate_colors[i] = colors[xlate_colors[i]]; </span>
+<span class="lineNum">    232 </span>              :  </span>
+<span class="lineNum">    233 </span>              : 	// Translate all the old colors variables. </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 2     : 	ec_color = colors[ec]; </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 	b0c_color = colors[b0c]; </span>
+<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 1     : 	b1c_color = colors[b1c]; </span>
+<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 1     : 	b2c_color = colors[b2c]; </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 1     : 	b3c_color = colors[b3c]; </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 	mm0_color = colors[mm0]; </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 1     : 	mm1_color = colors[mm1]; </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 	for (i=0; i&lt;8; i++) </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 1     : 		spr_color[i] = colors[sc[i]]; </span>
+<span class="lineNum">    243 </span>              :  </span>
+<span class="lineNum">    244 </span>              : 	// Translate the border color sample buffer. </span>
+<span class="lineNum">    245 </span><span class="lineNoCov">    0 / 1     : 	for (unsigned x = 0; x &lt; sizeof(border_color_sample); x++) </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 1     : 		border_color_sample[x] = xlate_colors[border_color_sample[x]]; </span>
+<span class="lineNum">    247 </span>              :  </span>
+<span class="lineNum">    248 </span>              : 	// Translate the chunky buffer. </span>
+<span class="lineNum">    249 </span><span class="lineNoCov">    0 / 1     : 	uint8 *scanline = the_display-&gt;BitmapBase(); </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 2     : 	for (int y=0; y&lt;DISPLAY_Y; y++) { </span>
+<span class="lineNum">    251 </span><span class="lineNoCov">    0 / 1     : 		for (int x=0; x&lt;DISPLAY_X; x++) </span>
+<span class="lineNum">    252 </span><span class="lineNoCov">    0 / 1     : 			scanline[x] = xlate_colors[scanline[x]]; </span>
+<span class="lineNum">    253 </span><span class="lineNoCov">    0 / 3     : 		scanline += xmod; </span>
+<span class="lineNum">    254 </span>              : 	} </span>
+<span class="lineNum">    255 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    256 </span>              :  </span>
+<span class="lineNum">    257 </span>              :  </span>
+<span class="lineNum">    258 </span>              : /* </span>
+<span class="lineNum">    259 </span>              :  *  Get VIC state </span>
+<span class="lineNum">    260 </span>              :  */ </span>
+<span class="lineNum">    261 </span>              :  </span>
+<span class="lineNum">    262 </span>              : void MOS6569::GetState(MOS6569State *vd) </span>
+<span class="lineNum">    263 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    264 </span>              : 	int i; </span>
+<span class="lineNum">    265 </span>              :  </span>
+<span class="lineNum">    266 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m0x = mx[0] &amp; 0xff; vd-&gt;m0y = my[0]; </span>
+<span class="lineNum">    267 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m1x = mx[1] &amp; 0xff; vd-&gt;m1y = my[1]; </span>
+<span class="lineNum">    268 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m2x = mx[2] &amp; 0xff; vd-&gt;m2y = my[2]; </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m3x = mx[3] &amp; 0xff; vd-&gt;m3y = my[3]; </span>
+<span class="lineNum">    270 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m4x = mx[4] &amp; 0xff; vd-&gt;m4y = my[4]; </span>
+<span class="lineNum">    271 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m5x = mx[5] &amp; 0xff; vd-&gt;m5y = my[5]; </span>
+<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m6x = mx[6] &amp; 0xff; vd-&gt;m6y = my[6]; </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m7x = mx[7] &amp; 0xff; vd-&gt;m7y = my[7]; </span>
+<span class="lineNum">    274 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;mx8 = mx8; </span>
+<span class="lineNum">    275 </span>              :  </span>
+<span class="lineNum">    276 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ctrl1 = (ctrl1 &amp; 0x7f) | ((raster_y &amp; 0x100) &gt;&gt; 1); </span>
+<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;raster = raster_y &amp; 0xff; </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;lpx = lpx; vd-&gt;lpy = lpy; </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ctrl2 = ctrl2; </span>
+<span class="lineNum">    280 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;vbase = vbase; </span>
+<span class="lineNum">    281 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;irq_flag = irq_flag; </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;irq_mask = irq_mask; </span>
+<span class="lineNum">    283 </span>              :  </span>
+<span class="lineNum">    284 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;me = me; vd-&gt;mxe = mxe; vd-&gt;mye = mye; vd-&gt;mdp = mdp; vd-&gt;mmc = mmc; </span>
+<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;mm = clx_spr; vd-&gt;md = clx_bgr; </span>
+<span class="lineNum">    286 </span>              :  </span>
+<span class="lineNum">    287 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ec = ec; </span>
+<span class="lineNum">    288 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;b0c = b0c; vd-&gt;b1c = b1c; vd-&gt;b2c = b2c; vd-&gt;b3c = b3c; </span>
+<span class="lineNum">    289 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;mm0 = mm0; vd-&gt;mm1 = mm1; </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m0c = sc[0]; </span>
+<span class="lineNum">    291 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m1c = sc[1]; </span>
+<span class="lineNum">    292 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m2c = sc[2]; </span>
+<span class="lineNum">    293 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m3c = sc[3]; </span>
+<span class="lineNum">    294 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m4c = sc[4]; </span>
+<span class="lineNum">    295 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m5c = sc[5]; </span>
+<span class="lineNum">    296 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;m6c = sc[6]; </span>
+<span class="lineNum">    297 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;m7c = sc[7]; </span>
+<span class="lineNum">    298 </span>              :  </span>
+<span class="lineNum">    299 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;pad0 = 0; </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;irq_raster = irq_raster; </span>
+<span class="lineNum">    301 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;vc = vc; </span>
+<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;vc_base = vc_base; </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;rc = rc; </span>
+<span class="lineNum">    304 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;spr_dma = spr_dma_on; </span>
+<span class="lineNum">    305 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;spr_disp = spr_disp_on; </span>
+<span class="lineNum">    306 </span><span class="lineNoCov">    0 / 1     : 	for (i=0; i&lt;8; i++) { </span>
+<span class="lineNum">    307 </span><span class="lineNoCov">    0 / 1     : 		vd-&gt;mc[i] = mc[i]; </span>
+<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 1     : 		vd-&gt;mc_base[i] = mc_base[i]; </span>
+<span class="lineNum">    309 </span>              : 	} </span>
+<span class="lineNum">    310 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;display_state = display_state; </span>
+<span class="lineNum">    311 </span><span class="lineNoCov">    0 / 4     : 	vd-&gt;bad_line = raster_y &gt;= FIRST_DMA_LINE &amp;&amp; raster_y &lt;= LAST_DMA_LINE &amp;&amp; ((raster_y &amp; 7) == y_scroll) &amp;&amp; bad_lines_enabled; </span>
+<span class="lineNum">    312 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;bad_line_enable = bad_lines_enabled; </span>
+<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;lp_triggered = lp_triggered; </span>
+<span class="lineNum">    314 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;border_on = border_on; </span>
+<span class="lineNum">    315 </span>              :  </span>
+<span class="lineNum">    316 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;bank_base = cia_vabase; </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 2     : 	vd-&gt;matrix_base = ((vbase &amp; 0xf0) &lt;&lt; 6) | cia_vabase; </span>
+<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 4     : 	vd-&gt;char_base = ((vbase &amp; 0x0e) &lt;&lt; 10) | cia_vabase; </span>
+<span class="lineNum">    319 </span><span class="lineNoCov">    0 / 4     : 	vd-&gt;bitmap_base = ((vbase &amp; 0x08) &lt;&lt; 10) | cia_vabase; </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 1     : 	for (i=0; i&lt;8; i++) </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 1     : 		vd-&gt;sprite_base[i] = spr_ptr[i] | cia_vabase; </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;cycle = cycle; </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;raster_x = raster_x; </span>
+<span class="lineNum">    325 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ml_index = ml_index; </span>
+<span class="lineNum">    326 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ref_cnt = ref_cnt; </span>
+<span class="lineNum">    327 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;last_vic_byte = LastVICByte; </span>
+<span class="lineNum">    328 </span><span class="lineNoCov">    0 / 1     : 	vd-&gt;ud_border_on = ud_border_on; </span>
+<span class="lineNum">    329 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    330 </span>              :  </span>
+<span class="lineNum">    331 </span>              :  </span>
+<span class="lineNum">    332 </span>              : /* </span>
+<span class="lineNum">    333 </span>              :  *  Set VIC state (only works if in VBlank) </span>
+<span class="lineNum">    334 </span>              :  */ </span>
+<span class="lineNum">    335 </span>              :  </span>
+<span class="lineNum">    336 </span><span class="lineCov">    3 / 3     : void MOS6569::SetState(MOS6569State *vd) </span>
+<span class="lineNum">    337 </span><span class="lineCov">    3 / 3     : { </span>
+<span class="lineNum">    338 </span>              : 	int i, j; </span>
+<span class="lineNum">    339 </span>              :  </span>
+<span class="lineNum">    340 </span><span class="lineCov">    1 / 1     : 	mx[0] = vd-&gt;m0x; my[0] = vd-&gt;m0y; </span>
+<span class="lineNum">    341 </span><span class="lineCov">    1 / 1     : 	mx[1] = vd-&gt;m1x; my[1] = vd-&gt;m1y; </span>
+<span class="lineNum">    342 </span><span class="lineCov">    1 / 1     : 	mx[2] = vd-&gt;m2x; my[2] = vd-&gt;m2y; </span>
+<span class="lineNum">    343 </span><span class="lineCov">    1 / 1     : 	mx[3] = vd-&gt;m3x; my[3] = vd-&gt;m3y; </span>
+<span class="lineNum">    344 </span><span class="lineCov">    1 / 1     : 	mx[4] = vd-&gt;m4x; my[4] = vd-&gt;m4y; </span>
+<span class="lineNum">    345 </span><span class="lineCov">    1 / 1     : 	mx[5] = vd-&gt;m5x; my[5] = vd-&gt;m5y; </span>
+<span class="lineNum">    346 </span><span class="lineCov">    1 / 1     : 	mx[6] = vd-&gt;m6x; my[6] = vd-&gt;m6y; </span>
+<span class="lineNum">    347 </span><span class="lineCov">    1 / 1     : 	mx[7] = vd-&gt;m7x; my[7] = vd-&gt;m7y; </span>
+<span class="lineNum">    348 </span><span class="lineCov">    1 / 1     : 	mx8 = vd-&gt;mx8; </span>
+<span class="lineNum">    349 </span><span class="linePartCov">    1 / 2     : 	for (i=0, j=1; i&lt;8; i++, j&lt;&lt;=1) { </span>
+<span class="lineNum">    350 </span><span class="lineCov">    1 / 1     : 		if (mx8 &amp; j) </span>
+<span class="lineNum">    351 </span><span class="lineNoCov">    0 / 1     : 			mx[i] |= 0x100; </span>
+<span class="lineNum">    352 </span>              : 		else </span>
+<span class="lineNum">    353 </span><span class="linePartCov">    1 / 2     : 			mx[i] &amp;= 0xff; </span>
+<span class="lineNum">    354 </span>              : 	} </span>
+<span class="lineNum">    355 </span>              :  </span>
+<span class="lineNum">    356 </span><span class="lineCov">    2 / 2     : 	ctrl1 = vd-&gt;ctrl1; </span>
+<span class="lineNum">    357 </span><span class="lineCov">    2 / 2     : 	ctrl2 = vd-&gt;ctrl2; </span>
+<span class="lineNum">    358 </span><span class="lineCov">    2 / 2     : 	x_scroll = ctrl2 &amp; 7; </span>
+<span class="lineNum">    359 </span><span class="lineCov">    2 / 2     : 	y_scroll = ctrl1 &amp; 7; </span>
+<span class="lineNum">    360 </span><span class="lineCov">    2 / 2     : 	if (ctrl1 &amp; 8) { </span>
+<span class="lineNum">    361 </span><span class="lineCov">    1 / 1     : 		dy_start = ROW25_YSTART; </span>
+<span class="lineNum">    362 </span><span class="lineCov">    1 / 1     : 		dy_stop = ROW25_YSTOP; </span>
+<span class="lineNum">    363 </span>              : 	} else { </span>
+<span class="lineNum">    364 </span><span class="lineNoCov">    0 / 1     : 		dy_start = ROW24_YSTART; </span>
+<span class="lineNum">    365 </span><span class="lineNoCov">    0 / 1     : 		dy_stop = ROW24_YSTOP; </span>
+<span class="lineNum">    366 </span>              : 	} </span>
+<span class="lineNum">    367 </span><span class="lineCov">    2 / 2     : 	display_idx = ((ctrl1 &amp; 0x60) | (ctrl2 &amp; 0x10)) &gt;&gt; 4; </span>
+<span class="lineNum">    368 </span>              :  </span>
+<span class="lineNum">    369 </span><span class="lineCov">    1 / 1     : 	raster_y = 0; </span>
+<span class="lineNum">    370 </span><span class="lineCov">    1 / 1     : 	lpx = vd-&gt;lpx; lpy = vd-&gt;lpy; </span>
+<span class="lineNum">    371 </span>              :  </span>
+<span class="lineNum">    372 </span><span class="lineCov">    1 / 1     : 	vbase = vd-&gt;vbase; </span>
+<span class="lineNum">    373 </span><span class="lineCov">    2 / 2     : 	cia_vabase = vd-&gt;bank_base; </span>
+<span class="lineNum">    374 </span><span class="lineCov">    2 / 2     : 	matrix_base = (vbase &amp; 0xf0) &lt;&lt; 6; </span>
+<span class="lineNum">    375 </span><span class="lineCov">    3 / 3     : 	char_base = (vbase &amp; 0x0e) &lt;&lt; 10; </span>
+<span class="lineNum">    376 </span><span class="lineCov">    3 / 3     : 	bitmap_base = (vbase &amp; 0x08) &lt;&lt; 10; </span>
+<span class="lineNum">    377 </span>              :  </span>
+<span class="lineNum">    378 </span><span class="lineCov">    1 / 1     : 	irq_flag = vd-&gt;irq_flag; </span>
+<span class="lineNum">    379 </span><span class="lineCov">    1 / 1     : 	irq_mask = vd-&gt;irq_mask; </span>
+<span class="lineNum">    380 </span>              :  </span>
+<span class="lineNum">    381 </span><span class="lineCov">    1 / 1     : 	me = vd-&gt;me; mxe = vd-&gt;mxe; mye = vd-&gt;mye; mdp = vd-&gt;mdp; mmc = vd-&gt;mmc; </span>
+<span class="lineNum">    382 </span><span class="lineCov">    1 / 1     : 	clx_spr = vd-&gt;mm; clx_bgr = vd-&gt;md; </span>
+<span class="lineNum">    383 </span>              :  </span>
+<span class="lineNum">    384 </span><span class="lineCov">    1 / 1     : 	ec = vd-&gt;ec; </span>
+<span class="lineNum">    385 </span><span class="lineCov">    1 / 1     : 	ec_color = colors[ec]; </span>
+<span class="lineNum">    386 </span>              :  </span>
+<span class="lineNum">    387 </span><span class="lineCov">    4 / 4     : 	b0c = vd-&gt;b0c; b1c = vd-&gt;b1c; b2c = vd-&gt;b2c; b3c = vd-&gt;b3c; </span>
+<span class="lineNum">    388 </span><span class="lineCov">    3 / 3     : 	b0c_color = colors[b0c]; </span>
+<span class="lineNum">    389 </span><span class="lineCov">    3 / 3     : 	b1c_color = colors[b1c]; </span>
+<span class="lineNum">    390 </span><span class="lineCov">    1 / 1     : 	b2c_color = colors[b2c]; </span>
+<span class="lineNum">    391 </span><span class="lineCov">    1 / 1     : 	b3c_color = colors[b3c]; </span>
+<span class="lineNum">    392 </span>              :  </span>
+<span class="lineNum">    393 </span><span class="lineCov">    4 / 4     : 	mm0 = vd-&gt;mm0; mm1 = vd-&gt;mm1; </span>
+<span class="lineNum">    394 </span><span class="lineCov">    3 / 3     : 	mm0_color = colors[mm0]; </span>
+<span class="lineNum">    395 </span><span class="lineCov">    2 / 2     : 	mm1_color = colors[mm1]; </span>
+<span class="lineNum">    396 </span>              :  </span>
+<span class="lineNum">    397 </span><span class="lineCov">    1 / 1     : 	sc[0] = vd-&gt;m0c; sc[1] = vd-&gt;m1c; </span>
+<span class="lineNum">    398 </span><span class="lineCov">    1 / 1     : 	sc[2] = vd-&gt;m2c; sc[3] = vd-&gt;m3c; </span>
+<span class="lineNum">    399 </span><span class="lineCov">    1 / 1     : 	sc[4] = vd-&gt;m4c; sc[5] = vd-&gt;m5c; </span>
+<span class="lineNum">    400 </span><span class="lineCov">    1 / 1     : 	sc[6] = vd-&gt;m6c; sc[7] = vd-&gt;m7c; </span>
+<span class="lineNum">    401 </span><span class="lineCov">    2 / 2     : 	for (i=0; i&lt;8; i++) </span>
+<span class="lineNum">    402 </span><span class="lineCov">    1 / 1     : 		spr_color[i] = colors[sc[i]]; </span>
+<span class="lineNum">    403 </span>              :  </span>
+<span class="lineNum">    404 </span><span class="lineCov">    1 / 1     : 	irq_raster = vd-&gt;irq_raster; </span>
+<span class="lineNum">    405 </span><span class="lineCov">    1 / 1     : 	vc = vd-&gt;vc; </span>
+<span class="lineNum">    406 </span><span class="lineCov">    1 / 1     : 	vc_base = vd-&gt;vc_base; </span>
+<span class="lineNum">    407 </span><span class="lineCov">    1 / 1     : 	rc = vd-&gt;rc; </span>
+<span class="lineNum">    408 </span><span class="lineCov">    1 / 1     : 	spr_dma_on = vd-&gt;spr_dma; </span>
+<span class="lineNum">    409 </span><span class="lineCov">    1 / 1     : 	spr_disp_on = vd-&gt;spr_disp; </span>
+<span class="lineNum">    410 </span><span class="lineCov">    1 / 1     : 	for (i=0; i&lt;8; i++) { </span>
+<span class="lineNum">    411 </span><span class="lineCov">    1 / 1     : 		mc[i] = vd-&gt;mc[i]; </span>
+<span class="lineNum">    412 </span><span class="lineCov">    1 / 1     : 		mc_base[i] = vd-&gt;mc_base[i]; </span>
+<span class="lineNum">    413 </span><span class="lineCov">    1 / 1     : 		spr_ptr[i] = vd-&gt;sprite_base[i] &amp; 0x3fff; </span>
+<span class="lineNum">    414 </span>              : 	} </span>
+<span class="lineNum">    415 </span><span class="lineCov">    1 / 1     : 	display_state = vd-&gt;display_state; </span>
+<span class="lineNum">    416 </span><span class="lineCov">    1 / 1     : 	bad_lines_enabled = vd-&gt;bad_line_enable; </span>
+<span class="lineNum">    417 </span><span class="lineCov">    1 / 1     : 	lp_triggered = vd-&gt;lp_triggered; </span>
+<span class="lineNum">    418 </span><span class="lineCov">    1 / 1     : 	border_on = vd-&gt;border_on; </span>
+<span class="lineNum">    419 </span>              :  </span>
+<span class="lineNum">    420 </span><span class="lineCov">    1 / 1     : 	cycle = vd-&gt;cycle; </span>
+<span class="lineNum">    421 </span><span class="lineCov">    1 / 1     : 	raster_x = vd-&gt;raster_x; </span>
+<span class="lineNum">    422 </span><span class="lineCov">    1 / 1     : 	ml_index = vd-&gt;ml_index; </span>
+<span class="lineNum">    423 </span><span class="lineCov">    1 / 1     : 	ref_cnt = vd-&gt;ref_cnt; </span>
+<span class="lineNum">    424 </span><span class="lineCov">    1 / 1     : 	LastVICByte = vd-&gt;last_vic_byte; </span>
+<span class="lineNum">    425 </span><span class="lineCov">    1 / 1     : 	ud_border_on = vd-&gt;ud_border_on; </span>
+<span class="lineNum">    426 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    427 </span>              :  </span>
+<span class="lineNum">    428 </span>              :  </span>
+<span class="lineNum">    429 </span>              : /* </span>
+<span class="lineNum">    430 </span>              :  *  Trigger raster IRQ </span>
+<span class="lineNum">    431 </span>              :  */ </span>
+<span class="lineNum">    432 </span>              :  </span>
+<span class="lineNum">    433 </span>              : inline void MOS6569::raster_irq(void) </span>
+<span class="lineNum">    434 </span>              : { </span>
+<span class="lineNum">    435 </span><span class="linePartCov">    4 / 8     : 	irq_flag |= 0x01; </span>
+<span class="lineNum">    436 </span><span class="linePartCov">    4 / 8     : 	if (irq_mask &amp; 0x01) { </span>
+<span class="lineNum">    437 </span><span class="linePartCov">    1 / 4     : 		irq_flag |= 0x80; </span>
+<span class="lineNum">    438 </span><span class="linePartCov">    1 / 4     : 		the_cpu-&gt;TriggerVICIRQ(); </span>
+<span class="lineNum">    439 </span>              : 	} </span>
+<span class="lineNum">    440 </span>              : } </span>
+<span class="lineNum">    441 </span>              :  </span>
+<span class="lineNum">    442 </span>              :  </span>
+<span class="lineNum">    443 </span>              : /* </span>
+<span class="lineNum">    444 </span>              :  *  Read from VIC register </span>
+<span class="lineNum">    445 </span>              :  */ </span>
+<span class="lineNum">    446 </span>              :  </span>
+<span class="lineNum">    447 </span>              : uint8 MOS6569::ReadRegister(uint16 adr) </span>
+<span class="lineNum">    448 </span><span class="lineCov">    3 / 3     : { </span>
+<span class="lineNum">    449 </span><span class="lineCov">    2 / 2     : 	switch (adr) { </span>
+<span class="lineNum">    450 </span>              : 		case 0x00: case 0x02: case 0x04: case 0x06: </span>
+<span class="lineNum">    451 </span>              : 		case 0x08: case 0x0a: case 0x0c: case 0x0e: </span>
+<span class="lineNum">    452 </span><span class="lineCov">    1 / 1     : 			return mx[adr &gt;&gt; 1]; </span>
+<span class="lineNum">    453 </span>              :  </span>
+<span class="lineNum">    454 </span>              : 		case 0x01: case 0x03: case 0x05: case 0x07: </span>
+<span class="lineNum">    455 </span>              : 		case 0x09: case 0x0b: case 0x0d: case 0x0f: </span>
+<span class="lineNum">    456 </span><span class="lineCov">    1 / 1     : 			return my[adr &gt;&gt; 1]; </span>
+<span class="lineNum">    457 </span>              :  </span>
+<span class="lineNum">    458 </span>              : 		case 0x10:	// Sprite X position MSB </span>
+<span class="lineNum">    459 </span><span class="lineCov">    1 / 1     : 			return mx8; </span>
+<span class="lineNum">    460 </span>              :  </span>
+<span class="lineNum">    461 </span>              : 		case 0x11:	// Control register 1 </span>
+<span class="lineNum">    462 </span><span class="lineCov">    2 / 2     : 			return (ctrl1 &amp; 0x7f) | ((raster_y &amp; 0x100) &gt;&gt; 1); </span>
+<span class="lineNum">    463 </span>              :  </span>
+<span class="lineNum">    464 </span>              : 		case 0x12:	// Raster counter </span>
+<span class="lineNum">    465 </span><span class="lineCov">    1 / 1     : 			return raster_y; </span>
+<span class="lineNum">    466 </span>              :  </span>
+<span class="lineNum">    467 </span>              : 		case 0x13:	// Light pen X </span>
+<span class="lineNum">    468 </span><span class="lineNoCov">    0 / 1     : 			return lpx; </span>
+<span class="lineNum">    469 </span>              :  </span>
+<span class="lineNum">    470 </span>              : 		case 0x14:	// Light pen Y </span>
+<span class="lineNum">    471 </span><span class="lineNoCov">    0 / 1     : 			return lpy; </span>
+<span class="lineNum">    472 </span>              :  </span>
+<span class="lineNum">    473 </span>              : 		case 0x15:	// Sprite enable </span>
+<span class="lineNum">    474 </span><span class="lineNoCov">    0 / 1     : 			return me; </span>
+<span class="lineNum">    475 </span>              :  </span>
+<span class="lineNum">    476 </span>              : 		case 0x16:	// Control register 2 </span>
+<span class="lineNum">    477 </span><span class="lineNoCov">    0 / 2     : 			return ctrl2 | 0xc0; </span>
+<span class="lineNum">    478 </span>              :  </span>
+<span class="lineNum">    479 </span>              : 		case 0x17:	// Sprite Y expansion </span>
+<span class="lineNum">    480 </span><span class="lineNoCov">    0 / 1     : 			return mye; </span>
+<span class="lineNum">    481 </span>              :  </span>
+<span class="lineNum">    482 </span>              : 		case 0x18:	// Memory pointers </span>
+<span class="lineNum">    483 </span><span class="lineNoCov">    0 / 2     : 			return vbase | 0x01; </span>
+<span class="lineNum">    484 </span>              :  </span>
+<span class="lineNum">    485 </span>              : 		case 0x19:	// IRQ flags </span>
+<span class="lineNum">    486 </span><span class="lineCov">    2 / 2     : 			return irq_flag | 0x70; </span>
+<span class="lineNum">    487 </span>              :  </span>
+<span class="lineNum">    488 </span>              : 		case 0x1a:	// IRQ mask </span>
+<span class="lineNum">    489 </span><span class="lineNoCov">    0 / 2     : 			return irq_mask | 0xf0; </span>
+<span class="lineNum">    490 </span>              :  </span>
+<span class="lineNum">    491 </span>              : 		case 0x1b:	// Sprite data priority </span>
+<span class="lineNum">    492 </span><span class="lineNoCov">    0 / 1     : 			return mdp; </span>
+<span class="lineNum">    493 </span>              :  </span>
+<span class="lineNum">    494 </span>              : 		case 0x1c:	// Sprite multicolor </span>
+<span class="lineNum">    495 </span><span class="lineNoCov">    0 / 1     : 			return mmc; </span>
+<span class="lineNum">    496 </span>              :  </span>
+<span class="lineNum">    497 </span>              : 		case 0x1d:	// Sprite X expansion </span>
+<span class="lineNum">    498 </span><span class="lineNoCov">    0 / 1     : 			return mxe; </span>
+<span class="lineNum">    499 </span>              :  </span>
+<span class="lineNum">    500 </span>              : 		case 0x1e:{	// Sprite-sprite collision </span>
+<span class="lineNum">    501 </span><span class="lineCov">    1 / 1     : 			uint8 ret = clx_spr; </span>
+<span class="lineNum">    502 </span><span class="lineCov">    1 / 1     : 			clx_spr = 0;	// Read and clear </span>
+<span class="lineNum">    503 </span>              : 			return ret; </span>
+<span class="lineNum">    504 </span>              : 		} </span>
+<span class="lineNum">    505 </span>              :  </span>
+<span class="lineNum">    506 </span>              : 		case 0x1f:{	// Sprite-background collision </span>
+<span class="lineNum">    507 </span><span class="lineCov">    1 / 1     : 			uint8 ret = clx_bgr; </span>
+<span class="lineNum">    508 </span><span class="lineCov">    1 / 1     : 			clx_bgr = 0;	// Read and clear </span>
+<span class="lineNum">    509 </span>              : 			return ret; </span>
+<span class="lineNum">    510 </span>              : 		} </span>
+<span class="lineNum">    511 </span>              :  </span>
+<span class="lineNum">    512 </span><span class="lineNoCov">    0 / 2     : 		case 0x20: return ec | 0xf0; </span>
+<span class="lineNum">    513 </span><span class="lineNoCov">    0 / 2     : 		case 0x21: return b0c | 0xf0; </span>
+<span class="lineNum">    514 </span><span class="lineNoCov">    0 / 2     : 		case 0x22: return b1c | 0xf0; </span>
+<span class="lineNum">    515 </span><span class="lineNoCov">    0 / 2     : 		case 0x23: return b2c | 0xf0; </span>
+<span class="lineNum">    516 </span><span class="lineNoCov">    0 / 2     : 		case 0x24: return b3c | 0xf0; </span>
+<span class="lineNum">    517 </span><span class="lineNoCov">    0 / 2     : 		case 0x25: return mm0 | 0xf0; </span>
+<span class="lineNum">    518 </span><span class="lineNoCov">    0 / 2     : 		case 0x26: return mm1 | 0xf0; </span>
+<span class="lineNum">    519 </span>              :  </span>
+<span class="lineNum">    520 </span>              : 		case 0x27: case 0x28: case 0x29: case 0x2a: </span>
+<span class="lineNum">    521 </span>              : 		case 0x2b: case 0x2c: case 0x2d: case 0x2e: </span>
+<span class="lineNum">    522 </span><span class="lineNoCov">    0 / 2     : 			return sc[adr - 0x27] | 0xf0; </span>
+<span class="lineNum">    523 </span>              :  </span>
+<span class="lineNum">    524 </span>              : 		default: </span>
+<span class="lineNum">    525 </span>              : 			return 0xff; </span>
+<span class="lineNum">    526 </span>              : 	} </span>
+<span class="lineNum">    527 </span><span class="linePartCov">   10 / 39    : } </span>
+<span class="lineNum">    528 </span>              :  </span>
+<span class="lineNum">    529 </span>              :  </span>
+<span class="lineNum">    530 </span>              : /* </span>
+<span class="lineNum">    531 </span>              :  *  Write to VIC register </span>
+<span class="lineNum">    532 </span>              :  */ </span>
+<span class="lineNum">    533 </span>              :  </span>
+<span class="lineNum">    534 </span><span class="lineCov">    1 / 1     : void MOS6569::WriteRegister(uint16 adr, uint8 byte) </span>
+<span class="lineNum">    535 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    536 </span><span class="lineCov">    1 / 1     : 	switch (adr) { </span>
+<span class="lineNum">    537 </span>              : 		case 0x00: case 0x02: case 0x04: case 0x06: </span>
+<span class="lineNum">    538 </span>              : 		case 0x08: case 0x0a: case 0x0c: case 0x0e: </span>
+<span class="lineNum">    539 </span><span class="lineCov">    1 / 1     : 			mx[adr &gt;&gt; 1] = (mx[adr &gt;&gt; 1] &amp; 0xff00) | byte; </span>
+<span class="lineNum">    540 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    541 </span>              :  </span>
+<span class="lineNum">    542 </span>              : 		case 0x10:{ </span>
+<span class="lineNum">    543 </span>              : 			int i, j; </span>
+<span class="lineNum">    544 </span><span class="lineCov">    1 / 1     : 			mx8 = byte; </span>
+<span class="lineNum">    545 </span><span class="lineCov">    1 / 1     : 			for (i=0, j=1; i&lt;8; i++, j&lt;&lt;=1) { </span>
+<span class="lineNum">    546 </span><span class="lineCov">    1 / 1     : 				if (mx8 &amp; j) </span>
+<span class="lineNum">    547 </span><span class="lineCov">    1 / 1     : 					mx[i] |= 0x100; </span>
+<span class="lineNum">    548 </span>              : 				else </span>
+<span class="lineNum">    549 </span><span class="lineCov">    2 / 2     : 					mx[i] &amp;= 0xff; </span>
+<span class="lineNum">    550 </span>              : 			} </span>
+<span class="lineNum">    551 </span>              : 			break; </span>
+<span class="lineNum">    552 </span>              : 		} </span>
+<span class="lineNum">    553 </span>              :  </span>
+<span class="lineNum">    554 </span>              : 		case 0x01: case 0x03: case 0x05: case 0x07: </span>
+<span class="lineNum">    555 </span>              : 		case 0x09: case 0x0b: case 0x0d: case 0x0f: </span>
+<span class="lineNum">    556 </span><span class="lineCov">    1 / 1     : 			my[adr &gt;&gt; 1] = byte; </span>
+<span class="lineNum">    557 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    558 </span>              :  </span>
+<span class="lineNum">    559 </span>              : 		case 0x11:{	// Control register 1 </span>
+<span class="lineNum">    560 </span><span class="lineCov">    1 / 1     : 			ctrl1 = byte; </span>
+<span class="lineNum">    561 </span><span class="lineCov">    3 / 3     : 			y_scroll = byte &amp; 7; </span>
+<span class="lineNum">    562 </span>              :  </span>
+<span class="lineNum">    563 </span><span class="lineCov">    4 / 4     : 			uint16 new_irq_raster = (irq_raster &amp; 0xff) | ((byte &amp; 0x80) &lt;&lt; 1); </span>
+<span class="lineNum">    564 </span><span class="lineCov">    1 / 1     : 			if (irq_raster != new_irq_raster &amp;&amp; raster_y == new_irq_raster) </span>
+<span class="lineNum">    565 </span>              : 				raster_irq(); </span>
+<span class="lineNum">    566 </span><span class="lineCov">    1 / 1     : 			irq_raster = new_irq_raster; </span>
+<span class="lineNum">    567 </span>              :  </span>
+<span class="lineNum">    568 </span><span class="lineCov">    2 / 2     : 			if (byte &amp; 8) { </span>
+<span class="lineNum">    569 </span><span class="lineCov">    1 / 1     : 				dy_start = ROW25_YSTART; </span>
+<span class="lineNum">    570 </span><span class="lineCov">    1 / 1     : 				dy_stop = ROW25_YSTOP; </span>
+<span class="lineNum">    571 </span>              : 			} else { </span>
+<span class="lineNum">    572 </span><span class="lineCov">    1 / 1     : 				dy_start = ROW24_YSTART; </span>
+<span class="lineNum">    573 </span><span class="lineCov">    1 / 1     : 				dy_stop = ROW24_YSTOP; </span>
+<span class="lineNum">    574 </span>              : 			} </span>
+<span class="lineNum">    575 </span>              :  </span>
+<span class="lineNum">    576 </span>              : 			// In line $30, the DEN bit controls if Bad Lines can occur </span>
+<span class="lineNum">    577 </span><span class="linePartCov">    1 / 2     : 			if (raster_y == 0x30 &amp;&amp; byte &amp; 0x10) </span>
+<span class="lineNum">    578 </span><span class="lineNoCov">    0 / 1     : 				bad_lines_enabled = true; </span>
+<span class="lineNum">    579 </span>              :  </span>
+<span class="lineNum">    580 </span>              : 			// Bad Line condition? </span>
+<span class="lineNum">    581 </span><span class="lineCov">    2 / 2     : 			is_bad_line = (raster_y &gt;= FIRST_DMA_LINE &amp;&amp; raster_y &lt;= LAST_DMA_LINE &amp;&amp; ((raster_y &amp; 7) == y_scroll) &amp;&amp; bad_lines_enabled); </span>
+<span class="lineNum">    582 </span>              :  </span>
+<span class="lineNum">    583 </span><span class="lineCov">    1 / 1     : 			display_idx = ((ctrl1 &amp; 0x60) | (ctrl2 &amp; 0x10)) &gt;&gt; 4; </span>
+<span class="lineNum">    584 </span>              : 			break; </span>
+<span class="lineNum">    585 </span>              : 		} </span>
+<span class="lineNum">    586 </span>              :  </span>
+<span class="lineNum">    587 </span>              : 		case 0x12:{	// Raster counter </span>
+<span class="lineNum">    588 </span><span class="lineCov">    1 / 1     : 			uint16 new_irq_raster = (irq_raster &amp; 0xff00) | byte; </span>
+<span class="lineNum">    589 </span><span class="lineCov">    1 / 1     : 			if (irq_raster != new_irq_raster &amp;&amp; raster_y == new_irq_raster) </span>
+<span class="lineNum">    590 </span>              : 				raster_irq(); </span>
+<span class="lineNum">    591 </span><span class="lineCov">    1 / 1     : 			irq_raster = new_irq_raster; </span>
+<span class="lineNum">    592 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    593 </span>              : 		} </span>
+<span class="lineNum">    594 </span>              :  </span>
+<span class="lineNum">    595 </span>              : 		case 0x15:	// Sprite enable </span>
+<span class="lineNum">    596 </span><span class="lineCov">    1 / 1     : 			me = byte; </span>
+<span class="lineNum">    597 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    598 </span>              :  </span>
+<span class="lineNum">    599 </span>              : 		case 0x16:	// Control register 2 </span>
+<span class="lineNum">    600 </span><span class="lineCov">    1 / 1     : 			ctrl2 = byte; </span>
+<span class="lineNum">    601 </span><span class="lineCov">    2 / 2     : 			x_scroll = byte &amp; 7; </span>
+<span class="lineNum">    602 </span><span class="lineCov">    1 / 1     : 			display_idx = ((ctrl1 &amp; 0x60) | (ctrl2 &amp; 0x10)) &gt;&gt; 4; </span>
+<span class="lineNum">    603 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    604 </span>              :  </span>
+<span class="lineNum">    605 </span>              : 		case 0x17:	// Sprite Y expansion </span>
+<span class="lineNum">    606 </span><span class="lineCov">    1 / 1     : 			mye = byte; </span>
+<span class="lineNum">    607 </span><span class="lineCov">    1 / 1     : 			spr_exp_y |= ~byte; </span>
+<span class="lineNum">    608 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    609 </span>              :  </span>
+<span class="lineNum">    610 </span>              : 		case 0x18:	// Memory pointers </span>
+<span class="lineNum">    611 </span><span class="lineCov">    1 / 1     : 			vbase = byte; </span>
+<span class="lineNum">    612 </span><span class="lineCov">    1 / 1     : 			matrix_base = (byte &amp; 0xf0) &lt;&lt; 6; </span>
+<span class="lineNum">    613 </span><span class="lineCov">    3 / 3     : 			char_base = (byte &amp; 0x0e) &lt;&lt; 10; </span>
+<span class="lineNum">    614 </span><span class="lineCov">    3 / 3     : 			bitmap_base = (byte &amp; 0x08) &lt;&lt; 10; </span>
+<span class="lineNum">    615 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    616 </span>              :  </span>
+<span class="lineNum">    617 </span>              : 		case 0x19: // IRQ flags </span>
+<span class="lineNum">    618 </span><span class="lineCov">    2 / 2     : 			irq_flag = irq_flag &amp; (~byte &amp; 0x0f); </span>
+<span class="lineNum">    619 </span><span class="lineCov">    2 / 2     : 			if (irq_flag &amp; irq_mask)	// Set master bit if allowed interrupt still pending </span>
+<span class="lineNum">    620 </span><span class="lineNoCov">    0 / 1     : 				irq_flag |= 0x80; </span>
+<span class="lineNum">    621 </span>              : 			else </span>
+<span class="lineNum">    622 </span>              : 				the_cpu-&gt;ClearVICIRQ();	// Else clear interrupt </span>
+<span class="lineNum">    623 </span>              : 			break; </span>
+<span class="lineNum">    624 </span>              : 		 </span>
+<span class="lineNum">    625 </span>              : 		case 0x1a:	// IRQ mask </span>
+<span class="lineNum">    626 </span><span class="lineCov">    1 / 1     : 			irq_mask = byte &amp; 0x0f; </span>
+<span class="lineNum">    627 </span><span class="lineCov">    2 / 2     : 			if (irq_flag &amp; irq_mask) {	// Trigger interrupt if pending and now allowed </span>
+<span class="lineNum">    628 </span><span class="lineNoCov">    0 / 1     : 				irq_flag |= 0x80; </span>
+<span class="lineNum">    629 </span><span class="lineNoCov">    0 / 1     : 				the_cpu-&gt;TriggerVICIRQ(); </span>
+<span class="lineNum">    630 </span>              : 			} else { </span>
+<span class="lineNum">    631 </span><span class="lineCov">    1 / 1     : 				irq_flag &amp;= 0x7f; </span>
+<span class="lineNum">    632 </span>              : 				the_cpu-&gt;ClearVICIRQ(); </span>
+<span class="lineNum">    633 </span>              : 			} </span>
+<span class="lineNum">    634 </span>              : 			break; </span>
+<span class="lineNum">    635 </span>              :  </span>
+<span class="lineNum">    636 </span>              : 		case 0x1b:	// Sprite data priority </span>
+<span class="lineNum">    637 </span><span class="lineCov">    1 / 1     : 			mdp = byte; </span>
+<span class="lineNum">    638 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    639 </span>              :  </span>
+<span class="lineNum">    640 </span>              : 		case 0x1c:	// Sprite multicolor </span>
+<span class="lineNum">    641 </span><span class="lineCov">    1 / 1     : 			mmc = byte; </span>
+<span class="lineNum">    642 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    643 </span>              :  </span>
+<span class="lineNum">    644 </span>              : 		case 0x1d:	// Sprite X expansion </span>
+<span class="lineNum">    645 </span><span class="lineCov">    1 / 1     : 			mxe = byte; </span>
+<span class="lineNum">    646 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    647 </span>              :  </span>
+<span class="lineNum">    648 </span><span class="lineCov">    1 / 1     : 		case 0x20: ec_color = colors[ec = byte]; break; </span>
+<span class="lineNum">    649 </span><span class="lineCov">    1 / 1     : 		case 0x21: b0c_color = colors[b0c = byte]; break; </span>
+<span class="lineNum">    650 </span><span class="lineCov">    1 / 1     : 		case 0x22: b1c_color = colors[b1c = byte]; break; </span>
+<span class="lineNum">    651 </span><span class="lineCov">    1 / 1     : 		case 0x23: b2c_color = colors[b2c = byte]; break; </span>
+<span class="lineNum">    652 </span><span class="lineCov">    1 / 1     : 		case 0x24: b3c_color = colors[b3c = byte]; break; </span>
+<span class="lineNum">    653 </span><span class="lineCov">    1 / 1     : 		case 0x25: mm0_color = colors[mm0 = byte]; break; </span>
+<span class="lineNum">    654 </span><span class="lineCov">    1 / 1     : 		case 0x26: mm1_color = colors[mm1 = byte]; break; </span>
+<span class="lineNum">    655 </span>              :  </span>
+<span class="lineNum">    656 </span>              : 		case 0x27: case 0x28: case 0x29: case 0x2a: </span>
+<span class="lineNum">    657 </span>              : 		case 0x2b: case 0x2c: case 0x2d: case 0x2e: </span>
+<span class="lineNum">    658 </span><span class="lineCov">    1 / 1     : 			spr_color[adr - 0x27] = colors[sc[adr - 0x27] = byte]; </span>
+<span class="lineNum">    659 </span>              : 			break; </span>
+<span class="lineNum">    660 </span>              : 	} </span>
+<span class="lineNum">    661 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    662 </span>              :  </span>
+<span class="lineNum">    663 </span>              :  </span>
+<span class="lineNum">    664 </span>              : /* </span>
+<span class="lineNum">    665 </span>              :  *  CIA VA14/15 has changed </span>
+<span class="lineNum">    666 </span>              :  */ </span>
+<span class="lineNum">    667 </span>              :  </span>
+<span class="lineNum">    668 </span>              : void MOS6569::ChangedVA(uint16 new_va) </span>
+<span class="lineNum">    669 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    670 </span><span class="lineCov">    1 / 1     : 	cia_vabase = new_va &lt;&lt; 14; </span>
+<span class="lineNum">    671 </span><span class="lineCov">    1 / 1     : 	WriteRegister(0x18, vbase); // Force update of memory pointers </span>
+<span class="lineNum">    672 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    673 </span>              :  </span>
+<span class="lineNum">    674 </span>              :  </span>
+<span class="lineNum">    675 </span>              : /* </span>
+<span class="lineNum">    676 </span>              :  *  Trigger lightpen interrupt, latch lightpen coordinates </span>
+<span class="lineNum">    677 </span>              :  */ </span>
+<span class="lineNum">    678 </span>              :  </span>
+<span class="lineNum">    679 </span>              : void MOS6569::TriggerLightpen(void) </span>
+<span class="lineNum">    680 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    681 </span><span class="lineNoCov">    0 / 1     : 	if (!lp_triggered) {		// Lightpen triggers only once per frame </span>
+<span class="lineNum">    682 </span><span class="lineNoCov">    0 / 1     : 		lp_triggered = true; </span>
+<span class="lineNum">    683 </span>              :  </span>
+<span class="lineNum">    684 </span><span class="lineNoCov">    0 / 2     : 		lpx = raster_x &gt;&gt; 1;	// Latch current coordinates </span>
+<span class="lineNum">    685 </span><span class="lineNoCov">    0 / 1     : 		lpy = raster_y; </span>
+<span class="lineNum">    686 </span>              :  </span>
+<span class="lineNum">    687 </span><span class="lineNoCov">    0 / 2     : 		irq_flag |= 0x08;		// Trigger IRQ </span>
+<span class="lineNum">    688 </span><span class="lineNoCov">    0 / 2     : 		if (irq_mask &amp; 0x08) { </span>
+<span class="lineNum">    689 </span><span class="lineNoCov">    0 / 1     : 			irq_flag |= 0x80; </span>
+<span class="lineNum">    690 </span><span class="lineNoCov">    0 / 1     : 			the_cpu-&gt;TriggerVICIRQ(); </span>
+<span class="lineNum">    691 </span>              : 		} </span>
+<span class="lineNum">    692 </span>              : 	} </span>
+<span class="lineNum">    693 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    694 </span>              :  </span>
+<span class="lineNum">    695 </span>              :  </span>
+<span class="lineNum">    696 </span>              : /* </span>
+<span class="lineNum">    697 </span>              :  *  Read a byte from the VIC's address space </span>
+<span class="lineNum">    698 </span>              :  */ </span>
+<span class="lineNum">    699 </span>              :  </span>
+<span class="lineNum">    700 </span>              : inline uint8 MOS6569::read_byte(uint16 adr) </span>
+<span class="lineNum">    701 </span>              : { </span>
+<span class="lineNum">    702 </span><span class="linePartCov">   44 / 50    : 	uint16 va = adr | cia_vabase; </span>
+<span class="lineNum">    703 </span><span class="linePartCov">   44 / 50    : 	if ((va &amp; 0x7000) == 0x1000) </span>
+<span class="lineNum">    704 </span><span class="lineNoCov">    0 / 9     : 		return LastVICByte = char_rom[va &amp; 0x0fff]; </span>
+<span class="lineNum">    705 </span>              : 	else </span>
+<span class="lineNum">    706 </span><span class="linePartCov">   44 / 50    : 		return LastVICByte = ram[va]; </span>
+<span class="lineNum">    707 </span>              : } </span>
+<span class="lineNum">    708 </span>              :  </span>
+<span class="lineNum">    709 </span>              :  </span>
+<span class="lineNum">    710 </span>              : /* </span>
+<span class="lineNum">    711 </span>              :  *  Quick memset of 8 bytes </span>
+<span class="lineNum">    712 </span>              :  */ </span>
+<span class="lineNum">    713 </span>              :  </span>
+<span class="lineNum">    714 </span>              : inline void memset8(uint8 *p, uint8 c) </span>
+<span class="lineNum">    715 </span>              : { </span>
+<span class="lineNum">    716 </span><span class="linePartCov">    6 / 9     : 	p[0] = p[1] = p[2] = p[3] = p[4] = p[5] = p[6] = p[7] = c; </span>
+<span class="lineNum">    717 </span>              : } </span>
+<span class="lineNum">    718 </span>              :  </span>
+<span class="lineNum">    719 </span>              :  </span>
+<span class="lineNum">    720 </span>              : /* </span>
+<span class="lineNum">    721 </span>              :  *  Video matrix access </span>
+<span class="lineNum">    722 </span>              :  */ </span>
+<span class="lineNum">    723 </span>              :  </span>
+<span class="lineNum">    724 </span>              : void MOS6569::matrix_access(void) </span>
+<span class="lineNum">    725 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    726 </span><span class="lineCov">    1 / 1     : 	if (the_cpu-&gt;BALow) { </span>
+<span class="lineNum">    727 </span><span class="lineCov">    1 / 1     : 		if (the_c64-&gt;CycleCounter-first_ba_cycle &lt; 3) </span>
+<span class="lineNum">    728 </span><span class="lineNoCov">    0 / 1     : 			matrix_line[ml_index] = color_line[ml_index] = 0xff; </span>
+<span class="lineNum">    729 </span>              : 		else { </span>
+<span class="lineNum">    730 </span><span class="lineCov">    2 / 2     : 			uint16 adr = (vc &amp; 0x03ff) | matrix_base; </span>
+<span class="lineNum">    731 </span><span class="lineCov">    2 / 2     : 			matrix_line[ml_index] = read_byte(adr); </span>
+<span class="lineNum">    732 </span><span class="lineCov">    1 / 1     : 			color_line[ml_index] = color_ram[adr &amp; 0x03ff]; </span>
+<span class="lineNum">    733 </span>              : 		} </span>
+<span class="lineNum">    734 </span>              : 	} </span>
+<span class="lineNum">    735 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    736 </span>              :  </span>
+<span class="lineNum">    737 </span>              :  </span>
+<span class="lineNum">    738 </span>              : /* </span>
+<span class="lineNum">    739 </span>              :  *  Graphics data access </span>
+<span class="lineNum">    740 </span>              :  */ </span>
+<span class="lineNum">    741 </span>              :  </span>
+<span class="lineNum">    742 </span>              : void MOS6569::graphics_access(void) </span>
+<span class="lineNum">    743 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    744 </span><span class="lineCov">    1 / 1     : 	if (display_state) { </span>
+<span class="lineNum">    745 </span>              :  </span>
+<span class="lineNum">    746 </span>              : 		uint16 adr; </span>
+<span class="lineNum">    747 </span><span class="lineCov">    1 / 1     : 		if (ctrl1 &amp; 0x20)	// Bitmap </span>
+<span class="lineNum">    748 </span><span class="lineCov">    1 / 1     : 			adr = ((vc &amp; 0x03ff) &lt;&lt; 3) | bitmap_base | rc; </span>
+<span class="lineNum">    749 </span>              : 		else				// Text </span>
+<span class="lineNum">    750 </span><span class="lineCov">    1 / 1     : 			adr = (matrix_line[ml_index] &lt;&lt; 3) | char_base | rc; </span>
+<span class="lineNum">    751 </span><span class="lineCov">    1 / 1     : 		if (ctrl1 &amp; 0x40)	// ECM </span>
+<span class="lineNum">    752 </span><span class="lineNoCov">    0 / 1     : 			adr &amp;= 0xf9ff; </span>
+<span class="lineNum">    753 </span><span class="lineCov">    1 / 1     : 		gfx_data = read_byte(adr); </span>
+<span class="lineNum">    754 </span><span class="lineCov">    2 / 2     : 		char_data = matrix_line[ml_index]; </span>
+<span class="lineNum">    755 </span><span class="lineCov">    1 / 1     : 		color_data = color_line[ml_index]; </span>
+<span class="lineNum">    756 </span><span class="lineCov">    1 / 1     : 		ml_index++; </span>
+<span class="lineNum">    757 </span><span class="lineCov">    1 / 1     : 		vc++; </span>
+<span class="lineNum">    758 </span>              :  </span>
+<span class="lineNum">    759 </span>              : 	} else { </span>
+<span class="lineNum">    760 </span>              :  </span>
+<span class="lineNum">    761 </span>              : 		// Display is off </span>
+<span class="lineNum">    762 </span><span class="lineCov">    2 / 2     : 		gfx_data = read_byte(ctrl1 &amp; 0x40 ? 0x39ff : 0x3fff); </span>
+<span class="lineNum">    763 </span><span class="lineCov">    1 / 1     : 		char_data = color_data = 0; </span>
+<span class="lineNum">    764 </span>              : 	} </span>
+<span class="lineNum">    765 </span><span class="lineCov">    2 / 2     : } </span>
+<span class="lineNum">    766 </span>              :  </span>
+<span class="lineNum">    767 </span>              :  </span>
+<span class="lineNum">    768 </span>              : /* </span>
+<span class="lineNum">    769 </span>              :  *  Background display (8 pixels) </span>
+<span class="lineNum">    770 </span>              :  */ </span>
+<span class="lineNum">    771 </span>              :  </span>
+<span class="lineNum">    772 </span>              : void MOS6569::draw_background(void) </span>
+<span class="lineNum">    773 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    774 </span><span class="lineCov">    1 / 1     : 	uint8 *p = chunky_ptr; </span>
+<span class="lineNum">    775 </span>              : 	uint8 c; </span>
+<span class="lineNum">    776 </span>              :  </span>
+<span class="lineNum">    777 </span><span class="lineCov">    2 / 2     : 	if (!draw_this_line) </span>
+<span class="lineNum">    778 </span>              : 		return; </span>
+<span class="lineNum">    779 </span>              :  </span>
+<span class="lineNum">    780 </span><span class="lineCov">    2 / 2     : 	switch (display_idx) { </span>
+<span class="lineNum">    781 </span>              : 		case 0:		// Standard text </span>
+<span class="lineNum">    782 </span>              : 		case 1:		// Multicolor text </span>
+<span class="lineNum">    783 </span>              : 		case 3:		// Multicolor bitmap </span>
+<span class="lineNum">    784 </span>              : 			c = b0c_color; </span>
+<span class="lineNum">    785 </span>              : 			break; </span>
+<span class="lineNum">    786 </span>              : 		case 2:		// Standard bitmap </span>
+<span class="lineNum">    787 </span><span class="lineNoCov">    0 / 1     : 			c = colors[last_char_data]; </span>
+<span class="lineNum">    788 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">    789 </span>              : 		case 4:		// ECM text </span>
+<span class="lineNum">    790 </span><span class="lineNoCov">    0 / 1     : 			if (last_char_data &amp; 0x80) </span>
+<span class="lineNum">    791 </span><span class="lineNoCov">    0 / 1     : 				if (last_char_data &amp; 0x40) </span>
+<span class="lineNum">    792 </span><span class="lineNoCov">    0 / 1     : 					c = b3c_color; </span>
+<span class="lineNum">    793 </span>              : 				else </span>
+<span class="lineNum">    794 </span><span class="lineNoCov">    0 / 1     : 					c = b2c_color; </span>
+<span class="lineNum">    795 </span>              : 			else </span>
+<span class="lineNum">    796 </span><span class="lineNoCov">    0 / 1     : 				if (last_char_data &amp; 0x40) </span>
+<span class="lineNum">    797 </span><span class="lineNoCov">    0 / 1     : 					c = b1c_color; </span>
+<span class="lineNum">    798 </span>              : 				else </span>
+<span class="lineNum">    799 </span><span class="lineCov">    1 / 1     : 					c = b0c_color; </span>
+<span class="lineNum">    800 </span>              : 			break; </span>
+<span class="lineNum">    801 </span>              : 		default: </span>
+<span class="lineNum">    802 </span><span class="lineNoCov">    0 / 1     : 			c = colors[0]; </span>
+<span class="lineNum">    803 </span>              : 			break; </span>
+<span class="lineNum">    804 </span>              : 	} </span>
+<span class="lineNum">    805 </span>              : 	memset8(p, c); </span>
+<span class="lineNum">    806 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    807 </span>              :  </span>
+<span class="lineNum">    808 </span>              :  </span>
+<span class="lineNum">    809 </span>              : /* </span>
+<span class="lineNum">    810 </span>              :  *  Graphics display (8 pixels) </span>
+<span class="lineNum">    811 </span>              :  */ </span>
+<span class="lineNum">    812 </span>              :  </span>
+<span class="lineNum">    813 </span>              : void MOS6569::draw_graphics(void) </span>
+<span class="lineNum">    814 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    815 </span><span class="lineCov">    2 / 2     : 	uint8 *p = chunky_ptr + x_scroll; </span>
+<span class="lineNum">    816 </span>              : 	uint8 c[4], data; </span>
+<span class="lineNum">    817 </span>              :  </span>
+<span class="lineNum">    818 </span><span class="lineCov">    2 / 2     : 	if (!draw_this_line) </span>
+<span class="lineNum">    819 </span>              : 		return; </span>
+<span class="lineNum">    820 </span><span class="lineCov">    1 / 1     : 	if (ud_border_on) { </span>
+<span class="lineNum">    821 </span><span class="lineCov">    1 / 1     : 		draw_background(); </span>
+<span class="lineNum">    822 </span>              : 		return; </span>
+<span class="lineNum">    823 </span>              : 	} </span>
+<span class="lineNum">    824 </span>              :  </span>
+<span class="lineNum">    825 </span><span class="lineCov">    1 / 1     : 	switch (display_idx) { </span>
+<span class="lineNum">    826 </span>              :  </span>
+<span class="lineNum">    827 </span>              : 		case 0:		// Standard text </span>
+<span class="lineNum">    828 </span><span class="lineCov">    1 / 1     : 			c[0] = b0c_color; </span>
+<span class="lineNum">    829 </span><span class="lineCov">    1 / 1     : 			c[1] = colors[color_data]; </span>
+<span class="lineNum">    830 </span><span class="lineCov">    1 / 1     : 			goto draw_std; </span>
+<span class="lineNum">    831 </span>              :  </span>
+<span class="lineNum">    832 </span>              : 		case 1:		// Multicolor text </span>
+<span class="lineNum">    833 </span><span class="lineCov">    1 / 1     : 			if (color_data &amp; 8) { </span>
+<span class="lineNum">    834 </span><span class="lineCov">    1 / 1     : 				c[0] = b0c_color; </span>
+<span class="lineNum">    835 </span><span class="lineCov">    1 / 1     : 				c[1] = b1c_color; </span>
+<span class="lineNum">    836 </span><span class="lineCov">    1 / 1     : 				c[2] = b2c_color; </span>
+<span class="lineNum">    837 </span><span class="lineCov">    1 / 1     : 				c[3] = colors[color_data &amp; 7]; </span>
+<span class="lineNum">    838 </span><span class="lineCov">    1 / 1     : 				goto draw_multi; </span>
+<span class="lineNum">    839 </span>              : 			} else { </span>
+<span class="lineNum">    840 </span><span class="lineCov">    1 / 1     : 				c[0] = b0c_color; </span>
+<span class="lineNum">    841 </span><span class="lineCov">    1 / 1     : 				c[1] = colors[color_data]; </span>
+<span class="lineNum">    842 </span><span class="lineCov">    1 / 1     : 				goto draw_std; </span>
+<span class="lineNum">    843 </span>              : 			} </span>
+<span class="lineNum">    844 </span>              :  </span>
+<span class="lineNum">    845 </span>              : 		case 2:		// Standard bitmap </span>
+<span class="lineNum">    846 </span><span class="lineNoCov">    0 / 1     : 			c[0] = colors[char_data]; </span>
+<span class="lineNum">    847 </span><span class="lineNoCov">    0 / 1     : 			c[1] = colors[char_data &gt;&gt; 4]; </span>
+<span class="lineNum">    848 </span>              : 			goto draw_std; </span>
+<span class="lineNum">    849 </span>              :  </span>
+<span class="lineNum">    850 </span>              : 		case 3:		// Multicolor bitmap </span>
+<span class="lineNum">    851 </span><span class="lineCov">    1 / 1     : 			c[0]= b0c_color; </span>
+<span class="lineNum">    852 </span><span class="lineCov">    1 / 1     : 			c[1] = colors[char_data &gt;&gt; 4]; </span>
+<span class="lineNum">    853 </span><span class="lineCov">    1 / 1     : 			c[2] = colors[char_data]; </span>
+<span class="lineNum">    854 </span><span class="lineCov">    1 / 1     : 			c[3] = colors[color_data]; </span>
+<span class="lineNum">    855 </span>              : 			goto draw_multi; </span>
+<span class="lineNum">    856 </span>              :  </span>
+<span class="lineNum">    857 </span>              : 		case 4:		// ECM text </span>
+<span class="lineNum">    858 </span><span class="lineNoCov">    0 / 1     : 			if (char_data &amp; 0x80) </span>
+<span class="lineNum">    859 </span><span class="lineNoCov">    0 / 1     : 				if (char_data &amp; 0x40) </span>
+<span class="lineNum">    860 </span><span class="lineNoCov">    0 / 1     : 					c[0] = b3c_color; </span>
+<span class="lineNum">    861 </span>              : 				else </span>
+<span class="lineNum">    862 </span><span class="lineNoCov">    0 / 1     : 					c[0] = b2c_color; </span>
+<span class="lineNum">    863 </span>              : 			else </span>
+<span class="lineNum">    864 </span><span class="lineNoCov">    0 / 1     : 				if (char_data &amp; 0x40) </span>
+<span class="lineNum">    865 </span><span class="lineNoCov">    0 / 1     : 					c[0] = b1c_color; </span>
+<span class="lineNum">    866 </span>              : 				else </span>
+<span class="lineNum">    867 </span><span class="lineNoCov">    0 / 1     : 					c[0] = b0c_color; </span>
+<span class="lineNum">    868 </span><span class="lineNoCov">    0 / 1     : 			c[1] = colors[color_data]; </span>
+<span class="lineNum">    869 </span><span class="lineNoCov">    0 / 1     : 			goto draw_std; </span>
+<span class="lineNum">    870 </span>              :  </span>
+<span class="lineNum">    871 </span>              : 		case 5:		// Invalid multicolor text </span>
+<span class="lineNum">    872 </span><span class="lineNoCov">    0 / 1     : 			memset8(p, colors[0]); </span>
+<span class="lineNum">    873 </span><span class="lineNoCov">    0 / 1     : 			if (color_data &amp; 8) { </span>
+<span class="lineNum">    874 </span>              : 				fore_mask_ptr[0] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &gt;&gt; x_scroll; </span>
+<span class="lineNum">    875 </span>              : 				fore_mask_ptr[1] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &lt;&lt; (8-x_scroll); </span>
+<span class="lineNum">    876 </span>              : 			} else { </span>
+<span class="lineNum">    877 </span>              : 				fore_mask_ptr[0] |= gfx_data &gt;&gt; x_scroll; </span>
+<span class="lineNum">    878 </span>              : 				fore_mask_ptr[1] |= gfx_data &lt;&lt; (7-x_scroll); </span>
+<span class="lineNum">    879 </span>              : 			} </span>
+<span class="lineNum">    880 </span>              : 			return; </span>
+<span class="lineNum">    881 </span>              :  </span>
+<span class="lineNum">    882 </span>              : 		case 6:		// Invalid standard bitmap </span>
+<span class="lineNum">    883 </span><span class="lineNoCov">    0 / 1     : 			memset8(p, colors[0]); </span>
+<span class="lineNum">    884 </span><span class="lineNoCov">    0 / 2     : 			fore_mask_ptr[0] |= gfx_data &gt;&gt; x_scroll; </span>
+<span class="lineNum">    885 </span><span class="lineNoCov">    0 / 2     : 			fore_mask_ptr[1] |= gfx_data &lt;&lt; (7-x_scroll); </span>
+<span class="lineNum">    886 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
+<span class="lineNum">    887 </span>              :  </span>
+<span class="lineNum">    888 </span>              : 		case 7:		// Invalid multicolor bitmap </span>
+<span class="lineNum">    889 </span><span class="lineNoCov">    0 / 1     : 			memset8(p, colors[0]); </span>
+<span class="lineNum">    890 </span><span class="lineNoCov">    0 / 1     : 			fore_mask_ptr[0] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &gt;&gt; x_scroll; </span>
+<span class="lineNum">    891 </span><span class="lineNoCov">    0 / 1     : 			fore_mask_ptr[1] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &lt;&lt; (8-x_scroll); </span>
+<span class="lineNum">    892 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
+<span class="lineNum">    893 </span>              :  </span>
+<span class="lineNum">    894 </span>              : 		default:	// Can't happen </span>
+<span class="lineNum">    895 </span>              : 			return; </span>
+<span class="lineNum">    896 </span>              : 	} </span>
+<span class="lineNum">    897 </span>              :  </span>
+<span class="lineNum">    898 </span>              : draw_std: </span>
+<span class="lineNum">    899 </span>              :  </span>
+<span class="lineNum">    900 </span><span class="lineCov">    2 / 2     : 	fore_mask_ptr[0] |= gfx_data &gt;&gt; x_scroll; </span>
+<span class="lineNum">    901 </span><span class="lineCov">    2 / 2     : 	fore_mask_ptr[1] |= gfx_data &lt;&lt; (7-x_scroll); </span>
+<span class="lineNum">    902 </span>              :  </span>
+<span class="lineNum">    903 </span>              : 	data = gfx_data; </span>
+<span class="lineNum">    904 </span><span class="lineCov">    2 / 2     : 	p[7] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    905 </span><span class="lineCov">    3 / 3     : 	p[6] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    906 </span><span class="lineCov">    3 / 3     : 	p[5] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    907 </span><span class="lineCov">    3 / 3     : 	p[4] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    908 </span><span class="lineCov">    3 / 3     : 	p[3] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    909 </span><span class="lineCov">    3 / 3     : 	p[2] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    910 </span><span class="lineCov">    3 / 3     : 	p[1] = c[data &amp; 1]; data &gt;&gt;= 1; </span>
+<span class="lineNum">    911 </span><span class="lineCov">    2 / 2     : 	p[0] = c[data]; </span>
+<span class="lineNum">    912 </span><span class="lineCov">    1 / 1     : 	return; </span>
+<span class="lineNum">    913 </span>              :  </span>
+<span class="lineNum">    914 </span>              : draw_multi: </span>
+<span class="lineNum">    915 </span>              :  </span>
+<span class="lineNum">    916 </span><span class="lineCov">    1 / 1     : 	fore_mask_ptr[0] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &gt;&gt; x_scroll; </span>
+<span class="lineNum">    917 </span><span class="lineCov">    1 / 1     : 	fore_mask_ptr[1] |= ((gfx_data &amp; 0xaa) | (gfx_data &amp; 0xaa) &gt;&gt; 1) &lt;&lt; (8-x_scroll); </span>
+<span class="lineNum">    918 </span>              :  </span>
+<span class="lineNum">    919 </span>              : 	data = gfx_data; </span>
+<span class="lineNum">    920 </span><span class="lineCov">    2 / 2     : 	p[7] = p[6] = c[data &amp; 3]; data &gt;&gt;= 2; </span>
+<span class="lineNum">    921 </span><span class="lineCov">    3 / 3     : 	p[5] = p[4] = c[data &amp; 3]; data &gt;&gt;= 2; </span>
+<span class="lineNum">    922 </span><span class="lineCov">    3 / 3     : 	p[3] = p[2] = c[data &amp; 3]; data &gt;&gt;= 2; </span>
+<span class="lineNum">    923 </span><span class="lineCov">    2 / 2     : 	p[1] = p[0] = c[data]; </span>
+<span class="lineNum">    924 </span>              : 	return; </span>
+<span class="lineNum">    925 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    926 </span>              :  </span>
+<span class="lineNum">    927 </span>              :  </span>
+<span class="lineNum">    928 </span>              : /* </span>
+<span class="lineNum">    929 </span>              :  *  Sprite display </span>
+<span class="lineNum">    930 </span>              :  */ </span>
+<span class="lineNum">    931 </span>              :  </span>
+<span class="lineNum">    932 </span>              : inline void MOS6569::draw_sprites(void) </span>
+<span class="lineNum">    933 </span>              : { </span>
+<span class="lineNum">    934 </span>              : 	int i; </span>
+<span class="lineNum">    935 </span>              : 	int snum, sbit;		// Sprite number/bit mask </span>
+<span class="lineNum">    936 </span>              : 	int spr_coll=0, gfx_coll=0; </span>
+<span class="lineNum">    937 </span>              :  </span>
+<span class="lineNum">    938 </span>              : 	// Clear sprite collision buffer </span>
+<span class="lineNum">    939 </span>              : 	{ </span>
+<span class="lineNum">    940 </span><span class="lineCov">    1 / 1     : 		uint32 *lp = (uint32 *)spr_coll_buf - 1; </span>
+<span class="lineNum">    941 </span><span class="lineCov">    1 / 1     : 		for (i=0; i&lt;DISPLAY_X/4; i++) </span>
+<span class="lineNum">    942 </span><span class="lineCov">    1 / 1     : 			*++lp = 0; </span>
+<span class="lineNum">    943 </span>              : 	} </span>
+<span class="lineNum">    944 </span>              :  </span>
+<span class="lineNum">    945 </span>              : 	// Loop for all sprites </span>
+<span class="lineNum">    946 </span><span class="lineCov">    1 / 1     : 	for (snum=0, sbit=1; snum&lt;8; snum++, sbit&lt;&lt;=1) { </span>
+<span class="lineNum">    947 </span>              :  </span>
+<span class="lineNum">    948 </span>              : 		// Is sprite visible? </span>
+<span class="lineNum">    949 </span><span class="lineCov">    1 / 1     : 		if ((spr_draw &amp; sbit) &amp;&amp; mx[snum] &lt;= DISPLAY_X-32) { </span>
+<span class="lineNum">    950 </span>              : #ifdef __POWERPC__ </span>
+<span class="lineNum">    951 </span>              : 			uint8 *p = (uint8 *)chunky_tmp + mx[snum] + 8; </span>
+<span class="lineNum">    952 </span>              : #else </span>
+<span class="lineNum">    953 </span><span class="lineCov">    2 / 2     : 			uint8 *p = chunky_line_start + mx[snum] + 8; </span>
+<span class="lineNum">    954 </span>              : #endif </span>
+<span class="lineNum">    955 </span><span class="lineCov">    1 / 1     : 			uint8 *q = spr_coll_buf + mx[snum] + 8; </span>
+<span class="lineNum">    956 </span><span class="lineCov">    2 / 2     : 			uint8 color = spr_color[snum]; </span>
+<span class="lineNum">    957 </span>              :  </span>
+<span class="lineNum">    958 </span>              : 			// Fetch sprite data and mask </span>
+<span class="lineNum">    959 </span><span class="lineCov">    3 / 3     : 			uint32 sdata = (spr_draw_data[snum][0] &lt;&lt; 24) | (spr_draw_data[snum][1] &lt;&lt; 16) | (spr_draw_data[snum][2] &lt;&lt; 8); </span>
+<span class="lineNum">    960 </span>              :  </span>
+<span class="lineNum">    961 </span>              : 			int spr_mask_pos = mx[snum] + 8;	// Sprite bit position in fore_mask_buf </span>
+<span class="lineNum">    962 </span>              : 			 </span>
+<span class="lineNum">    963 </span><span class="lineCov">    3 / 3     : 			uint8 *fmbp = fore_mask_buf + (spr_mask_pos / 8); </span>
+<span class="lineNum">    964 </span><span class="lineCov">    2 / 2     : 			int sshift = spr_mask_pos &amp; 7; </span>
+<span class="lineNum">    965 </span>              : 			uint32 fore_mask = (((*(fmbp+0) &lt;&lt; 24) | (*(fmbp+1) &lt;&lt; 16) | (*(fmbp+2) &lt;&lt; 8) </span>
+<span class="lineNum">    966 </span><span class="lineCov">    4 / 4     : 				  		    | (*(fmbp+3))) &lt;&lt; sshift) | (*(fmbp+4) &gt;&gt; (8-sshift)); </span>
+<span class="lineNum">    967 </span>              :  </span>
+<span class="lineNum">    968 </span><span class="lineCov">    2 / 2     : 			if (mxe &amp; sbit) {		// X-expanded </span>
+<span class="lineNum">    969 </span><span class="lineNoCov">    0 / 1     : 				if (mx[snum] &gt; DISPLAY_X-56) </span>
+<span class="lineNum">    970 </span>              : 					continue; </span>
+<span class="lineNum">    971 </span>              :  </span>
+<span class="lineNum">    972 </span>              : 				uint32 sdata_l = 0, sdata_r = 0, fore_mask_r; </span>
+<span class="lineNum">    973 </span>              : 				fore_mask_r = (((*(fmbp+4) &lt;&lt; 24) | (*(fmbp+5) &lt;&lt; 16) | (*(fmbp+6) &lt;&lt; 8) </span>
+<span class="lineNum">    974 </span><span class="lineNoCov">    0 / 1     : 						| (*(fmbp+7))) &lt;&lt; sshift) | (*(fmbp+8) &gt;&gt; (8-sshift)); </span>
+<span class="lineNum">    975 </span>              :  </span>
+<span class="lineNum">    976 </span><span class="lineNoCov">    0 / 1     : 				if (mmc &amp; sbit) {	// Multicolor mode </span>
+<span class="lineNum">    977 </span>              : 					uint32 plane0_l, plane0_r, plane1_l, plane1_r; </span>
+<span class="lineNum">    978 </span>              :  </span>
+<span class="lineNum">    979 </span>              : 					// Expand sprite data </span>
+<span class="lineNum">    980 </span><span class="lineNoCov">    0 / 4     : 					sdata_l = MultiExpTable[sdata &gt;&gt; 24 &amp; 0xff] &lt;&lt; 16 | MultiExpTable[sdata &gt;&gt; 16 &amp; 0xff]; </span>
+<span class="lineNum">    981 </span><span class="lineNoCov">    0 / 4     : 					sdata_r = MultiExpTable[sdata &gt;&gt; 8 &amp; 0xff] &lt;&lt; 16; </span>
+<span class="lineNum">    982 </span>              :  </span>
+<span class="lineNum">    983 </span>              : 					// Convert sprite chunky pixels to bitplanes </span>
+<span class="lineNum">    984 </span><span class="lineNoCov">    0 / 1     : 					plane0_l = (sdata_l &amp; 0x55555555) | (sdata_l &amp; 0x55555555) &lt;&lt; 1; </span>
+<span class="lineNum">    985 </span><span class="lineNoCov">    0 / 1     : 					plane1_l = (sdata_l &amp; 0xaaaaaaaa) | (sdata_l &amp; 0xaaaaaaaa) &gt;&gt; 1; </span>
+<span class="lineNum">    986 </span><span class="lineNoCov">    0 / 1     : 					plane0_r = (sdata_r &amp; 0x55555555) | (sdata_r &amp; 0x55555555) &lt;&lt; 1; </span>
+<span class="lineNum">    987 </span><span class="lineNoCov">    0 / 1     : 					plane1_r = (sdata_r &amp; 0xaaaaaaaa) | (sdata_r &amp; 0xaaaaaaaa) &gt;&gt; 1; </span>
+<span class="lineNum">    988 </span>              :  </span>
+<span class="lineNum">    989 </span>              : 					// Collision with graphics? </span>
+<span class="lineNum">    990 </span><span class="lineNoCov">    0 / 1     : 					if ((fore_mask &amp; (plane0_l | plane1_l)) || (fore_mask_r &amp; (plane0_r | plane1_r))) { </span>
+<span class="lineNum">    991 </span><span class="lineNoCov">    0 / 1     : 						gfx_coll |= sbit; </span>
+<span class="lineNum">    992 </span><span class="lineNoCov">    0 / 1     : 						if (mdp &amp; sbit)	{ </span>
+<span class="lineNum">    993 </span><span class="lineNoCov">    0 / 1     : 							plane0_l &amp;= ~fore_mask;	// Mask sprite if in background </span>
+<span class="lineNum">    994 </span><span class="lineNoCov">    0 / 1     : 							plane1_l &amp;= ~fore_mask; </span>
+<span class="lineNum">    995 </span><span class="lineNoCov">    0 / 2     : 							plane0_r &amp;= ~fore_mask_r; </span>
+<span class="lineNum">    996 </span><span class="lineNoCov">    0 / 1     : 							plane1_r &amp;= ~fore_mask_r; </span>
+<span class="lineNum">    997 </span>              : 						} </span>
+<span class="lineNum">    998 </span>              : 					} </span>
+<span class="lineNum">    999 </span>              :  </span>
+<span class="lineNum">   1000 </span>              : 					// Paint sprite </span>
+<span class="lineNum">   1001 </span><span class="lineNoCov">    0 / 1     : 					for (i=0; i&lt;32; i++, plane0_l&lt;&lt;=1, plane1_l&lt;&lt;=1) { </span>
+<span class="lineNum">   1002 </span>              : 						uint8 col; </span>
+<span class="lineNum">   1003 </span><span class="lineNoCov">    0 / 1     : 						if (plane1_l &amp; 0x80000000) { </span>
+<span class="lineNum">   1004 </span><span class="lineNoCov">    0 / 1     : 							if (plane0_l &amp; 0x80000000) </span>
+<span class="lineNum">   1005 </span><span class="lineNoCov">    0 / 1     : 								col = mm1_color; </span>
+<span class="lineNum">   1006 </span>              : 							else </span>
+<span class="lineNum">   1007 </span>              : 								col = color; </span>
+<span class="lineNum">   1008 </span>              : 						} else { </span>
+<span class="lineNum">   1009 </span><span class="lineNoCov">    0 / 1     : 							if (plane0_l &amp; 0x80000000) </span>
+<span class="lineNum">   1010 </span><span class="lineNoCov">    0 / 1     : 								col = mm0_color; </span>
+<span class="lineNum">   1011 </span>              : 							else </span>
+<span class="lineNum">   1012 </span>              : 								continue; </span>
+<span class="lineNum">   1013 </span>              : 						} </span>
+<span class="lineNum">   1014 </span><span class="lineNoCov">    0 / 1     : 						if (q[i]) </span>
+<span class="lineNum">   1015 </span><span class="lineNoCov">    0 / 1     : 							spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1016 </span>              : 						else { </span>
+<span class="lineNum">   1017 </span><span class="lineNoCov">    0 / 1     : 							p[i] = col; </span>
+<span class="lineNum">   1018 </span><span class="lineNoCov">    0 / 1     : 							q[i] = sbit; </span>
+<span class="lineNum">   1019 </span>              : 						} </span>
+<span class="lineNum">   1020 </span>              : 					} </span>
+<span class="lineNum">   1021 </span><span class="lineNoCov">    0 / 1     : 					for (; i&lt;48; i++, plane0_r&lt;&lt;=1, plane1_r&lt;&lt;=1) { </span>
+<span class="lineNum">   1022 </span>              : 						uint8 col; </span>
+<span class="lineNum">   1023 </span><span class="lineNoCov">    0 / 1     : 						if (plane1_r &amp; 0x80000000) { </span>
+<span class="lineNum">   1024 </span><span class="lineNoCov">    0 / 1     : 							if (plane0_r &amp; 0x80000000) </span>
+<span class="lineNum">   1025 </span><span class="lineNoCov">    0 / 1     : 								col = mm1_color; </span>
+<span class="lineNum">   1026 </span>              : 							else </span>
+<span class="lineNum">   1027 </span>              : 								col = color; </span>
+<span class="lineNum">   1028 </span>              : 						} else { </span>
+<span class="lineNum">   1029 </span><span class="lineNoCov">    0 / 1     : 							if (plane0_r &amp; 0x80000000) </span>
+<span class="lineNum">   1030 </span><span class="lineNoCov">    0 / 1     : 								col = mm0_color; </span>
+<span class="lineNum">   1031 </span>              : 							else </span>
+<span class="lineNum">   1032 </span>              : 								continue; </span>
+<span class="lineNum">   1033 </span>              : 						} </span>
+<span class="lineNum">   1034 </span><span class="lineNoCov">    0 / 1     : 						if (q[i]) </span>
+<span class="lineNum">   1035 </span><span class="lineNoCov">    0 / 1     : 							spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1036 </span>              : 						else { </span>
+<span class="lineNum">   1037 </span><span class="lineNoCov">    0 / 1     : 							p[i] = col; </span>
+<span class="lineNum">   1038 </span><span class="lineNoCov">    0 / 1     : 							q[i] = sbit; </span>
+<span class="lineNum">   1039 </span>              : 						} </span>
+<span class="lineNum">   1040 </span>              : 					} </span>
+<span class="lineNum">   1041 </span>              :  </span>
+<span class="lineNum">   1042 </span>              : 				} else {			// Standard mode </span>
+<span class="lineNum">   1043 </span>              :  </span>
+<span class="lineNum">   1044 </span>              : 					// Expand sprite data </span>
+<span class="lineNum">   1045 </span><span class="lineNoCov">    0 / 4     : 					sdata_l = ExpTable[sdata &gt;&gt; 24 &amp; 0xff] &lt;&lt; 16 | ExpTable[sdata &gt;&gt; 16 &amp; 0xff]; </span>
+<span class="lineNum">   1046 </span><span class="lineNoCov">    0 / 4     : 					sdata_r = ExpTable[sdata &gt;&gt; 8 &amp; 0xff] &lt;&lt; 16; </span>
+<span class="lineNum">   1047 </span>              :  </span>
+<span class="lineNum">   1048 </span>              : 					// Collision with graphics? </span>
+<span class="lineNum">   1049 </span><span class="lineNoCov">    0 / 2     : 					if ((fore_mask &amp; sdata_l) || (fore_mask_r &amp; sdata_r)) { </span>
+<span class="lineNum">   1050 </span><span class="lineNoCov">    0 / 1     : 						gfx_coll |= sbit; </span>
+<span class="lineNum">   1051 </span><span class="lineNoCov">    0 / 1     : 						if (mdp &amp; sbit)	{ </span>
+<span class="lineNum">   1052 </span><span class="lineNoCov">    0 / 1     : 							sdata_l &amp;= ~fore_mask;	// Mask sprite if in background </span>
+<span class="lineNum">   1053 </span><span class="lineNoCov">    0 / 2     : 							sdata_r &amp;= ~fore_mask_r; </span>
+<span class="lineNum">   1054 </span>              : 						} </span>
+<span class="lineNum">   1055 </span>              : 					} </span>
+<span class="lineNum">   1056 </span>              :  </span>
+<span class="lineNum">   1057 </span>              : 					// Paint sprite </span>
+<span class="lineNum">   1058 </span><span class="lineNoCov">    0 / 1     : 					for (i=0; i&lt;32; i++, sdata_l&lt;&lt;=1) </span>
+<span class="lineNum">   1059 </span><span class="lineNoCov">    0 / 1     : 						if (sdata_l &amp; 0x80000000) { </span>
+<span class="lineNum">   1060 </span><span class="lineNoCov">    0 / 1     : 							if (q[i])	// Collision with sprite? </span>
+<span class="lineNum">   1061 </span><span class="lineNoCov">    0 / 1     : 								spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1062 </span>              : 							else {		// Draw pixel if no collision </span>
+<span class="lineNum">   1063 </span><span class="lineNoCov">    0 / 1     : 								p[i] = color; </span>
+<span class="lineNum">   1064 </span><span class="lineNoCov">    0 / 1     : 								q[i] = sbit; </span>
+<span class="lineNum">   1065 </span>              : 							} </span>
+<span class="lineNum">   1066 </span>              : 						} </span>
+<span class="lineNum">   1067 </span><span class="lineNoCov">    0 / 1     : 					for (; i&lt;48; i++, sdata_r&lt;&lt;=1) </span>
+<span class="lineNum">   1068 </span><span class="lineNoCov">    0 / 1     : 						if (sdata_r &amp; 0x80000000) { </span>
+<span class="lineNum">   1069 </span><span class="lineNoCov">    0 / 1     : 							if (q[i]) 	// Collision with sprite? </span>
+<span class="lineNum">   1070 </span><span class="lineNoCov">    0 / 1     : 								spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1071 </span>              : 							else {		// Draw pixel if no collision </span>
+<span class="lineNum">   1072 </span><span class="lineNoCov">    0 / 1     : 								p[i] = color; </span>
+<span class="lineNum">   1073 </span><span class="lineNoCov">    0 / 1     : 								q[i] = sbit; </span>
+<span class="lineNum">   1074 </span>              : 							} </span>
+<span class="lineNum">   1075 </span>              : 						} </span>
+<span class="lineNum">   1076 </span>              : 				} </span>
+<span class="lineNum">   1077 </span>              :  </span>
+<span class="lineNum">   1078 </span>              : 			} else {				// Unexpanded </span>
+<span class="lineNum">   1079 </span>              :  </span>
+<span class="lineNum">   1080 </span><span class="lineCov">    1 / 1     : 				if (mmc &amp; sbit) {	// Multicolor mode </span>
+<span class="lineNum">   1081 </span>              : 					uint32 plane0, plane1; </span>
+<span class="lineNum">   1082 </span>              :  </span>
+<span class="lineNum">   1083 </span>              : 					// Convert sprite chunky pixels to bitplanes </span>
+<span class="lineNum">   1084 </span><span class="lineCov">    2 / 2     : 					plane0 = (sdata &amp; 0x55555555) | (sdata &amp; 0x55555555) &lt;&lt; 1; </span>
+<span class="lineNum">   1085 </span><span class="lineCov">    2 / 2     : 					plane1 = (sdata &amp; 0xaaaaaaaa) | (sdata &amp; 0xaaaaaaaa) &gt;&gt; 1; </span>
+<span class="lineNum">   1086 </span>              :  </span>
+<span class="lineNum">   1087 </span>              : 					// Collision with graphics? </span>
+<span class="lineNum">   1088 </span><span class="lineCov">    1 / 1     : 					if (fore_mask &amp; (plane0 | plane1)) { </span>
+<span class="lineNum">   1089 </span><span class="lineCov">    1 / 1     : 						gfx_coll |= sbit; </span>
+<span class="lineNum">   1090 </span><span class="lineCov">    1 / 1     : 						if (mdp &amp; sbit) { </span>
+<span class="lineNum">   1091 </span><span class="lineNoCov">    0 / 1     : 							plane0 &amp;= ~fore_mask;	// Mask sprite if in background </span>
+<span class="lineNum">   1092 </span><span class="lineNoCov">    0 / 1     : 							plane1 &amp;= ~fore_mask; </span>
+<span class="lineNum">   1093 </span>              : 						} </span>
+<span class="lineNum">   1094 </span>              : 					} </span>
+<span class="lineNum">   1095 </span>              :  </span>
+<span class="lineNum">   1096 </span>              : 					// Paint sprite </span>
+<span class="lineNum">   1097 </span><span class="lineCov">    1 / 1     : 					for (i=0; i&lt;24; i++, plane0&lt;&lt;=1, plane1&lt;&lt;=1) { </span>
+<span class="lineNum">   1098 </span>              : 						uint8 col; </span>
+<span class="lineNum">   1099 </span><span class="lineCov">    1 / 1     : 						if (plane1 &amp; 0x80000000) { </span>
+<span class="lineNum">   1100 </span><span class="lineCov">    1 / 1     : 							if (plane0 &amp; 0x80000000) </span>
+<span class="lineNum">   1101 </span><span class="lineCov">    1 / 1     : 								col = mm1_color; </span>
+<span class="lineNum">   1102 </span>              : 							else </span>
+<span class="lineNum">   1103 </span>              : 								col = color; </span>
+<span class="lineNum">   1104 </span>              : 						} else { </span>
+<span class="lineNum">   1105 </span><span class="lineCov">    1 / 1     : 							if (plane0 &amp; 0x80000000) </span>
+<span class="lineNum">   1106 </span><span class="lineCov">    1 / 1     : 								col = mm0_color; </span>
+<span class="lineNum">   1107 </span>              : 							else </span>
+<span class="lineNum">   1108 </span>              : 								continue; </span>
+<span class="lineNum">   1109 </span>              : 						} </span>
+<span class="lineNum">   1110 </span><span class="lineCov">    1 / 1     : 						if (q[i]) </span>
+<span class="lineNum">   1111 </span><span class="lineCov">    1 / 1     : 							spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1112 </span>              : 						else { </span>
+<span class="lineNum">   1113 </span><span class="lineCov">    1 / 1     : 							p[i] = col; </span>
+<span class="lineNum">   1114 </span><span class="lineCov">    1 / 1     : 							q[i] = sbit; </span>
+<span class="lineNum">   1115 </span>              : 						} </span>
+<span class="lineNum">   1116 </span>              : 					} </span>
+<span class="lineNum">   1117 </span>              :  </span>
+<span class="lineNum">   1118 </span>              : 				} else {			// Standard mode </span>
+<span class="lineNum">   1119 </span>              :  </span>
+<span class="lineNum">   1120 </span>              : 					// Collision with graphics? </span>
+<span class="lineNum">   1121 </span><span class="lineCov">    1 / 1     : 					if (fore_mask &amp; sdata) { </span>
+<span class="lineNum">   1122 </span><span class="lineNoCov">    0 / 1     : 						gfx_coll |= sbit; </span>
+<span class="lineNum">   1123 </span><span class="lineNoCov">    0 / 1     : 						if (mdp &amp; sbit) </span>
+<span class="lineNum">   1124 </span><span class="lineNoCov">    0 / 1     : 							sdata &amp;= ~fore_mask;	// Mask sprite if in background </span>
+<span class="lineNum">   1125 </span>              : 					} </span>
+<span class="lineNum">   1126 </span>              : 	 </span>
+<span class="lineNum">   1127 </span>              : 					// Paint sprite </span>
+<span class="lineNum">   1128 </span><span class="lineCov">    1 / 1     : 					for (i=0; i&lt;24; i++, sdata&lt;&lt;=1) </span>
+<span class="lineNum">   1129 </span><span class="lineCov">    1 / 1     : 						if (sdata &amp; 0x80000000) { </span>
+<span class="lineNum">   1130 </span><span class="lineCov">    1 / 1     : 							if (q[i]) {	// Collision with sprite? </span>
+<span class="lineNum">   1131 </span><span class="lineCov">    1 / 1     : 								spr_coll |= q[i] | sbit; </span>
+<span class="lineNum">   1132 </span>              : 							} else {		// Draw pixel if no collision </span>
+<span class="lineNum">   1133 </span><span class="lineCov">    1 / 1     : 								p[i] = color; </span>
+<span class="lineNum">   1134 </span><span class="lineCov">    1 / 1     : 								q[i] = sbit; </span>
+<span class="lineNum">   1135 </span>              : 							} </span>
+<span class="lineNum">   1136 </span>              : 						} </span>
+<span class="lineNum">   1137 </span>              : 				} </span>
+<span class="lineNum">   1138 </span>              : 			} </span>
+<span class="lineNum">   1139 </span>              : 		} </span>
+<span class="lineNum">   1140 </span>              : 	} </span>
+<span class="lineNum">   1141 </span>              :  </span>
+<span class="lineNum">   1142 </span><span class="lineCov">    1 / 1     : 	if (ThePrefs.SpriteCollisions) { </span>
+<span class="lineNum">   1143 </span>              :  </span>
+<span class="lineNum">   1144 </span>              : 		// Check sprite-sprite collisions </span>
+<span class="lineNum">   1145 </span><span class="lineCov">    1 / 1     : 		if (clx_spr) </span>
+<span class="lineNum">   1146 </span><span class="lineCov">    1 / 1     : 			clx_spr |= spr_coll; </span>
+<span class="lineNum">   1147 </span>              : 		else { </span>
+<span class="lineNum">   1148 </span><span class="lineCov">    1 / 1     : 			clx_spr |= spr_coll; </span>
+<span class="lineNum">   1149 </span><span class="lineCov">    2 / 2     : 			irq_flag |= 0x04; </span>
+<span class="lineNum">   1150 </span><span class="lineCov">    2 / 2     : 			if (irq_mask &amp; 0x04) { </span>
+<span class="lineNum">   1151 </span><span class="lineNoCov">    0 / 1     : 				irq_flag |= 0x80; </span>
+<span class="lineNum">   1152 </span><span class="lineNoCov">    0 / 1     : 				the_cpu-&gt;TriggerVICIRQ(); </span>
+<span class="lineNum">   1153 </span>              : 			} </span>
+<span class="lineNum">   1154 </span>              : 		} </span>
+<span class="lineNum">   1155 </span>              :  </span>
+<span class="lineNum">   1156 </span>              : 		// Check sprite-background collisions </span>
+<span class="lineNum">   1157 </span><span class="lineCov">    1 / 1     : 		if (clx_bgr) </span>
+<span class="lineNum">   1158 </span><span class="lineCov">    1 / 1     : 			clx_bgr |= gfx_coll; </span>
+<span class="lineNum">   1159 </span>              : 		else { </span>
+<span class="lineNum">   1160 </span><span class="lineCov">    2 / 2     : 			clx_bgr |= gfx_coll; </span>
+<span class="lineNum">   1161 </span><span class="lineCov">    3 / 3     : 			irq_flag |= 0x02; </span>
+<span class="lineNum">   1162 </span><span class="lineCov">    2 / 2     : 			if (irq_mask &amp; 0x02) { </span>
+<span class="lineNum">   1163 </span><span class="lineNoCov">    0 / 1     : 				irq_flag |= 0x80; </span>
+<span class="lineNum">   1164 </span><span class="lineNoCov">    0 / 1     : 				the_cpu-&gt;TriggerVICIRQ(); </span>
+<span class="lineNum">   1165 </span>              : 			} </span>
+<span class="lineNum">   1166 </span>              : 		} </span>
+<span class="lineNum">   1167 </span>              : 	} </span>
+<span class="lineNum">   1168 </span>              : } </span>
+<span class="lineNum">   1169 </span>              :  </span>
+<span class="lineNum">   1170 </span>              :  </span>
+<span class="lineNum">   1171 </span>              : #ifdef __POWERPC__ </span>
+<span class="lineNum">   1172 </span>              : static asm void fastcopy(register uchar *dst, register uchar *src); </span>
+<span class="lineNum">   1173 </span>              : static asm void fastcopy(register uchar *dst, register uchar *src) </span>
+<span class="lineNum">   1174 </span>              : { </span>
+<span class="lineNum">   1175 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1176 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1177 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1178 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1179 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1180 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1181 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1182 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1183 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1184 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1185 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1186 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1187 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1188 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1189 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1190 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1191 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1192 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1193 </span>              :  </span>
+<span class="lineNum">   1194 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1195 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1196 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1197 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1198 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1199 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1200 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1201 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1202 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1203 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1204 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1205 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1206 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1207 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1208 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1209 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1210 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1211 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1212 </span>              :  </span>
+<span class="lineNum">   1213 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1214 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1215 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1216 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1217 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1218 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1219 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1220 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1221 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1222 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1223 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1224 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1225 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1226 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1227 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1228 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1229 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1230 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1231 </span>              :  </span>
+<span class="lineNum">   1232 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1233 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1234 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1235 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1236 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1237 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1238 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1239 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1240 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1241 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1242 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1243 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1244 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1245 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1246 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1247 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1248 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1249 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1250 </span>              :  </span>
+<span class="lineNum">   1251 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1252 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1253 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1254 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1255 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1256 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1257 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1258 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1259 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1260 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1261 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1262 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1263 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1264 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1265 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1266 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1267 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1268 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1269 </span>              :  </span>
+<span class="lineNum">   1270 </span>              : 	lfd		fp0,0(src) </span>
+<span class="lineNum">   1271 </span>              : 	lfd		fp1,8(src) </span>
+<span class="lineNum">   1272 </span>              : 	lfd		fp2,16(src) </span>
+<span class="lineNum">   1273 </span>              : 	lfd		fp3,24(src) </span>
+<span class="lineNum">   1274 </span>              : 	lfd		fp4,32(src) </span>
+<span class="lineNum">   1275 </span>              : 	lfd		fp5,40(src) </span>
+<span class="lineNum">   1276 </span>              : 	lfd		fp6,48(src) </span>
+<span class="lineNum">   1277 </span>              : 	lfd		fp7,56(src) </span>
+<span class="lineNum">   1278 </span>              : 	addi	src,src,64 </span>
+<span class="lineNum">   1279 </span>              : 	stfd	fp0,0(dst) </span>
+<span class="lineNum">   1280 </span>              : 	stfd	fp1,8(dst) </span>
+<span class="lineNum">   1281 </span>              : 	stfd	fp2,16(dst) </span>
+<span class="lineNum">   1282 </span>              : 	stfd	fp3,24(dst) </span>
+<span class="lineNum">   1283 </span>              : 	stfd	fp4,32(dst) </span>
+<span class="lineNum">   1284 </span>              : 	stfd	fp5,40(dst) </span>
+<span class="lineNum">   1285 </span>              : 	stfd	fp6,48(dst) </span>
+<span class="lineNum">   1286 </span>              : 	stfd	fp7,56(dst) </span>
+<span class="lineNum">   1287 </span>              : 	addi	dst,dst,64 </span>
+<span class="lineNum">   1288 </span>              : 	blr		 </span>
+<span class="lineNum">   1289 </span>              : } </span>
+<span class="lineNum">   1290 </span>              : #endif </span>
+<span class="lineNum">   1291 </span>              :  </span>
+<span class="lineNum">   1292 </span>              :  </span>
+<span class="lineNum">   1293 </span>              : /* </span>
+<span class="lineNum">   1294 </span>              :  *  Emulate one clock cycle, returns true if new raster line has started </span>
+<span class="lineNum">   1295 </span>              :  */ </span>
+<span class="lineNum">   1296 </span>              :  </span>
+<span class="lineNum">   1297 </span>              : // Set BA low </span>
+<span class="lineNum">   1298 </span>              : #define SetBALow \ </span>
+<span class="lineNum">   1299 </span>              : 	if (!the_cpu-&gt;BALow) { \ </span>
+<span class="lineNum">   1300 </span>              : 		first_ba_cycle = the_c64-&gt;CycleCounter; \ </span>
+<span class="lineNum">   1301 </span>              : 		the_cpu-&gt;BALow = true; \ </span>
+<span class="lineNum">   1302 </span>              : 	} </span>
+<span class="lineNum">   1303 </span>              :  </span>
+<span class="lineNum">   1304 </span>              : // Turn on display if Bad Line </span>
+<span class="lineNum">   1305 </span>              : #define DisplayIfBadLine \ </span>
+<span class="lineNum">   1306 </span>              : 	if (is_bad_line) \ </span>
+<span class="lineNum">   1307 </span>              : 		display_state = true; </span>
+<span class="lineNum">   1308 </span>              :  </span>
+<span class="lineNum">   1309 </span>              : // Turn on display and matrix access if Bad Line </span>
+<span class="lineNum">   1310 </span>              : #define FetchIfBadLine \ </span>
+<span class="lineNum">   1311 </span>              : 	if (is_bad_line) { \ </span>
+<span class="lineNum">   1312 </span>              : 		display_state = true; \ </span>
+<span class="lineNum">   1313 </span>              : 		SetBALow; \ </span>
+<span class="lineNum">   1314 </span>              : 	} </span>
+<span class="lineNum">   1315 </span>              :  </span>
+<span class="lineNum">   1316 </span>              : // Turn on display and matrix access and reset RC if Bad Line </span>
+<span class="lineNum">   1317 </span>              : #define RCIfBadLine \ </span>
+<span class="lineNum">   1318 </span>              : 	if (is_bad_line) { \ </span>
+<span class="lineNum">   1319 </span>              : 		display_state = true; \ </span>
+<span class="lineNum">   1320 </span>              : 		rc = 0; \ </span>
+<span class="lineNum">   1321 </span>              : 		SetBALow; \ </span>
+<span class="lineNum">   1322 </span>              : 	} </span>
+<span class="lineNum">   1323 </span>              :  </span>
+<span class="lineNum">   1324 </span>              : // Idle access </span>
+<span class="lineNum">   1325 </span>              : #define IdleAccess \ </span>
+<span class="lineNum">   1326 </span>              : 	read_byte(0x3fff) </span>
+<span class="lineNum">   1327 </span>              :  </span>
+<span class="lineNum">   1328 </span>              : // Refresh access </span>
+<span class="lineNum">   1329 </span>              : #define RefreshAccess \ </span>
+<span class="lineNum">   1330 </span>              : 	read_byte(0x3f00 | ref_cnt--) </span>
+<span class="lineNum">   1331 </span>              :  </span>
+<span class="lineNum">   1332 </span>              : // Turn on sprite DMA if necessary </span>
+<span class="lineNum">   1333 </span>              : #define CheckSpriteDMA \ </span>
+<span class="lineNum">   1334 </span>              : 	mask = 1; \ </span>
+<span class="lineNum">   1335 </span>              : 	for (i=0; i&lt;8; i++, mask&lt;&lt;=1) \ </span>
+<span class="lineNum">   1336 </span>              : 		if ((me &amp; mask) &amp;&amp; (raster_y &amp; 0xff) == my[i]) { \ </span>
+<span class="lineNum">   1337 </span>              : 			spr_dma_on |= mask; \ </span>
+<span class="lineNum">   1338 </span>              : 			mc_base[i] = 0; \ </span>
+<span class="lineNum">   1339 </span>              : 			if (mye &amp; mask) \ </span>
+<span class="lineNum">   1340 </span>              : 				spr_exp_y &amp;= ~mask; \ </span>
+<span class="lineNum">   1341 </span>              : 		} </span>
+<span class="lineNum">   1342 </span>              :  </span>
+<span class="lineNum">   1343 </span>              : // Fetch sprite data pointer </span>
+<span class="lineNum">   1344 </span>              : #define SprPtrAccess(num) \ </span>
+<span class="lineNum">   1345 </span>              : 	spr_ptr[num] = read_byte(matrix_base | 0x03f8 | num) &lt;&lt; 6; </span>
+<span class="lineNum">   1346 </span>              :  </span>
+<span class="lineNum">   1347 </span>              : // Fetch sprite data, increment data counter </span>
+<span class="lineNum">   1348 </span>              : #define SprDataAccess(num, bytenum) \ </span>
+<span class="lineNum">   1349 </span>              : 	if (spr_dma_on &amp; (1 &lt;&lt; num)) { \ </span>
+<span class="lineNum">   1350 </span>              : 		spr_data[num][bytenum] = read_byte((mc[num] &amp; 0x3f) | spr_ptr[num]); \ </span>
+<span class="lineNum">   1351 </span>              : 		mc[num]++; \ </span>
+<span class="lineNum">   1352 </span>              : 	} else if (bytenum == 1) \ </span>
+<span class="lineNum">   1353 </span>              : 		IdleAccess; </span>
+<span class="lineNum">   1354 </span>              :  </span>
+<span class="lineNum">   1355 </span>              : // Sample border color and increment chunky_ptr and fore_mask_ptr </span>
+<span class="lineNum">   1356 </span>              : #define SampleBorder \ </span>
+<span class="lineNum">   1357 </span>              : 	if (draw_this_line) { \ </span>
+<span class="lineNum">   1358 </span>              : 		if (border_on) \ </span>
+<span class="lineNum">   1359 </span>              : 			border_color_sample[cycle-13] = ec_color; \ </span>
+<span class="lineNum">   1360 </span>              : 		chunky_ptr += 8; \ </span>
+<span class="lineNum">   1361 </span>              : 		fore_mask_ptr++; \ </span>
+<span class="lineNum">   1362 </span>              : 	} </span>
+<span class="lineNum">   1363 </span>              :  </span>
+<span class="lineNum">   1364 </span>              :  </span>
+<span class="lineNum">   1365 </span><span class="lineCov">    4 / 4     : bool MOS6569::EmulateCycle(void) </span>
+<span class="lineNum">   1366 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">   1367 </span>              : 	uint8 mask; </span>
+<span class="lineNum">   1368 </span>              : 	int i; </span>
+<span class="lineNum">   1369 </span>              :  </span>
+<span class="lineNum">   1370 </span><span class="lineCov">    2 / 2     : 	switch (cycle) { </span>
+<span class="lineNum">   1371 </span>              :  </span>
+<span class="lineNum">   1372 </span>              : 		// Fetch sprite pointer 3, increment raster counter, trigger raster IRQ, </span>
+<span class="lineNum">   1373 </span>              : 		// test for Bad Line, reset BA if sprites 3 and 4 off, read data of sprite 3 </span>
+<span class="lineNum">   1374 </span>              : 		case 1: </span>
+<span class="lineNum">   1375 </span><span class="lineCov">    1 / 1     : 			if (raster_y == TOTAL_RASTERS-1) </span>
+<span class="lineNum">   1376 </span>              :  </span>
+<span class="lineNum">   1377 </span>              : 				// Trigger VBlank in cycle 2 </span>
+<span class="lineNum">   1378 </span><span class="lineCov">    1 / 1     : 				vblanking = true; </span>
+<span class="lineNum">   1379 </span>              :  </span>
+<span class="lineNum">   1380 </span>              : 			else { </span>
+<span class="lineNum">   1381 </span>              :  </span>
+<span class="lineNum">   1382 </span>              : 				// Increment raster counter </span>
+<span class="lineNum">   1383 </span><span class="lineCov">    2 / 2     : 				raster_y++; </span>
+<span class="lineNum">   1384 </span>              :  </span>
+<span class="lineNum">   1385 </span>              : 				// Trigger raster IRQ if IRQ line reached </span>
+<span class="lineNum">   1386 </span><span class="lineCov">    2 / 2     : 				if (raster_y == irq_raster) </span>
+<span class="lineNum">   1387 </span>              : 					raster_irq(); </span>
+<span class="lineNum">   1388 </span>              :  </span>
+<span class="lineNum">   1389 </span>              : 				// In line $30, the DEN bit controls if Bad Lines can occur </span>
+<span class="lineNum">   1390 </span><span class="lineCov">    1 / 1     : 				if (raster_y == 0x30) </span>
+<span class="lineNum">   1391 </span><span class="lineCov">    1 / 1     : 					bad_lines_enabled = ctrl1 &amp; 0x10; </span>
+<span class="lineNum">   1392 </span>              :  </span>
+<span class="lineNum">   1393 </span>              : 				// Bad Line condition? </span>
+<span class="lineNum">   1394 </span><span class="lineCov">    2 / 2     : 				is_bad_line = (raster_y &gt;= FIRST_DMA_LINE &amp;&amp; raster_y &lt;= LAST_DMA_LINE &amp;&amp; ((raster_y &amp; 7) == y_scroll) &amp;&amp; bad_lines_enabled); </span>
+<span class="lineNum">   1395 </span>              :  </span>
+<span class="lineNum">   1396 </span>              : 				// Don't draw all lines, hide some at the top and bottom </span>
+<span class="lineNum">   1397 </span><span class="lineCov">    3 / 3     : 				draw_this_line = (raster_y &gt;= FIRST_DISP_LINE &amp;&amp; raster_y &lt;= LAST_DISP_LINE &amp;&amp; !frame_skipped); </span>
+<span class="lineNum">   1398 </span>              : 			} </span>
+<span class="lineNum">   1399 </span>              :  </span>
+<span class="lineNum">   1400 </span>              : 			// First sample of border state </span>
+<span class="lineNum">   1401 </span><span class="lineCov">    1 / 1     : 			border_on_sample[0] = border_on; </span>
+<span class="lineNum">   1402 </span>              :  </span>
+<span class="lineNum">   1403 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(3); </span>
+<span class="lineNum">   1404 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(3, 0); </span>
+<span class="lineNum">   1405 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1406 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x18)) </span>
+<span class="lineNum">   1407 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1408 </span>              : 			break; </span>
+<span class="lineNum">   1409 </span>              :  </span>
+<span class="lineNum">   1410 </span>              : 		// Set BA for sprite 5, read data of sprite 3 </span>
+<span class="lineNum">   1411 </span>              : 		case 2: </span>
+<span class="lineNum">   1412 </span><span class="lineCov">    1 / 1     : 			if (vblanking) { </span>
+<span class="lineNum">   1413 </span>              :  </span>
+<span class="lineNum">   1414 </span>              : 				// Vertical blank, reset counters </span>
+<span class="lineNum">   1415 </span><span class="lineCov">    1 / 1     : 				raster_y = vc_base = 0; </span>
+<span class="lineNum">   1416 </span><span class="lineCov">    1 / 1     : 				ref_cnt = 0xff; </span>
+<span class="lineNum">   1417 </span><span class="lineCov">    1 / 1     : 				lp_triggered = vblanking = false; </span>
+<span class="lineNum">   1418 </span>              :  </span>
+<span class="lineNum">   1419 </span><span class="lineCov">    3 / 3     : 				if (!(frame_skipped = --skip_counter)) </span>
+<span class="lineNum">   1420 </span><span class="lineCov">    1 / 1     : 					skip_counter = ThePrefs.SkipFrames; </span>
+<span class="lineNum">   1421 </span>              :  </span>
+<span class="lineNum">   1422 </span><span class="lineCov">    1 / 1     : 				the_c64-&gt;VBlank(!frame_skipped); </span>
+<span class="lineNum">   1423 </span>              :  </span>
+<span class="lineNum">   1424 </span>              : 				// Get bitmap pointer for next frame. This must be done </span>
+<span class="lineNum">   1425 </span>              : 				// after calling the_c64-&gt;VBlank() because the preferences </span>
+<span class="lineNum">   1426 </span>              : 				// and screen configuration may have been changed there </span>
+<span class="lineNum">   1427 </span><span class="lineCov">    1 / 1     : 				chunky_line_start = the_display-&gt;BitmapBase(); </span>
+<span class="lineNum">   1428 </span><span class="lineCov">    2 / 2     : 				xmod = the_display-&gt;BitmapXMod(); </span>
+<span class="lineNum">   1429 </span>              :  </span>
+<span class="lineNum">   1430 </span>              : 				// Trigger raster IRQ if IRQ in line 0 </span>
+<span class="lineNum">   1431 </span><span class="lineCov">    2 / 2     : 				if (irq_raster == 0) </span>
+<span class="lineNum">   1432 </span>              : 					raster_irq(); </span>
+<span class="lineNum">   1433 </span>              :  </span>
+<span class="lineNum">   1434 </span>              : 			} </span>
+<span class="lineNum">   1435 </span>              :  </span>
+<span class="lineNum">   1436 </span>              : 			// Our output goes here </span>
+<span class="lineNum">   1437 </span>              : #ifdef __POWERPC__ </span>
+<span class="lineNum">   1438 </span>              : 			chunky_ptr = (uint8 *)chunky_tmp; </span>
+<span class="lineNum">   1439 </span>              : #else </span>
+<span class="lineNum">   1440 </span><span class="lineCov">    2 / 2     : 			chunky_ptr = chunky_line_start; </span>
+<span class="lineNum">   1441 </span>              : #endif </span>
+<span class="lineNum">   1442 </span>              :  </span>
+<span class="lineNum">   1443 </span>              : 			// Clear foreground mask </span>
+<span class="lineNum">   1444 </span><span class="lineCov">    1 / 1     : 			memset(fore_mask_buf, 0, DISPLAY_X/8); </span>
+<span class="lineNum">   1445 </span><span class="lineCov">    1 / 1     : 			fore_mask_ptr = fore_mask_buf; </span>
+<span class="lineNum">   1446 </span>              :  </span>
+<span class="lineNum">   1447 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(3,1); </span>
+<span class="lineNum">   1448 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(3,2); </span>
+<span class="lineNum">   1449 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1450 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x20) </span>
+<span class="lineNum">   1451 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1452 </span>              : 			break; </span>
+<span class="lineNum">   1453 </span>              :  </span>
+<span class="lineNum">   1454 </span>              : 		// Fetch sprite pointer 4, reset BA is sprite 4 and 5 off </span>
+<span class="lineNum">   1455 </span>              : 		case 3: </span>
+<span class="lineNum">   1456 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(4); </span>
+<span class="lineNum">   1457 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(4, 0); </span>
+<span class="lineNum">   1458 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1459 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x30)) </span>
+<span class="lineNum">   1460 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1461 </span>              : 			break; </span>
+<span class="lineNum">   1462 </span>              :  </span>
+<span class="lineNum">   1463 </span>              : 		// Set BA for sprite 6, read data of sprite 4  </span>
+<span class="lineNum">   1464 </span>              : 		case 4: </span>
+<span class="lineNum">   1465 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(4, 1); </span>
+<span class="lineNum">   1466 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(4, 2); </span>
+<span class="lineNum">   1467 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1468 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x40) </span>
+<span class="lineNum">   1469 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1470 </span>              : 			break; </span>
+<span class="lineNum">   1471 </span>              :  </span>
+<span class="lineNum">   1472 </span>              : 		// Fetch sprite pointer 5, reset BA if sprite 5 and 6 off </span>
+<span class="lineNum">   1473 </span>              : 		case 5: </span>
+<span class="lineNum">   1474 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(5); </span>
+<span class="lineNum">   1475 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(5, 0); </span>
+<span class="lineNum">   1476 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1477 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x60)) </span>
+<span class="lineNum">   1478 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1479 </span>              : 			break; </span>
+<span class="lineNum">   1480 </span>              :  </span>
+<span class="lineNum">   1481 </span>              : 		// Set BA for sprite 7, read data of sprite 5 </span>
+<span class="lineNum">   1482 </span>              : 		case 6: </span>
+<span class="lineNum">   1483 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(5, 1); </span>
+<span class="lineNum">   1484 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(5, 2); </span>
+<span class="lineNum">   1485 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1486 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x80) </span>
+<span class="lineNum">   1487 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1488 </span>              : 			break; </span>
+<span class="lineNum">   1489 </span>              :  </span>
+<span class="lineNum">   1490 </span>              : 		// Fetch sprite pointer 6, reset BA if sprite 6 and 7 off </span>
+<span class="lineNum">   1491 </span>              : 		case 7: </span>
+<span class="lineNum">   1492 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(6); </span>
+<span class="lineNum">   1493 </span><span class="linePartCov">    2 / 3     : 			SprDataAccess(6, 0); </span>
+<span class="lineNum">   1494 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1495 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0xc0)) </span>
+<span class="lineNum">   1496 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1497 </span>              : 			break; </span>
+<span class="lineNum">   1498 </span>              :  </span>
+<span class="lineNum">   1499 </span>              : 		// Read data of sprite 6 </span>
+<span class="lineNum">   1500 </span>              : 		case 8: </span>
+<span class="lineNum">   1501 </span><span class="linePartCov">    1 / 2     : 			SprDataAccess(6, 1); </span>
+<span class="lineNum">   1502 </span><span class="linePartCov">    1 / 2     : 			SprDataAccess(6, 2); </span>
+<span class="lineNum">   1503 </span>              : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1504 </span>              : 			break; </span>
+<span class="lineNum">   1505 </span>              :  </span>
+<span class="lineNum">   1506 </span>              : 		// Fetch sprite pointer 7, reset BA if sprite 7 off </span>
+<span class="lineNum">   1507 </span>              : 		case 9: </span>
+<span class="lineNum">   1508 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(7); </span>
+<span class="lineNum">   1509 </span><span class="linePartCov">    2 / 3     : 			SprDataAccess(7, 0); </span>
+<span class="lineNum">   1510 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1511 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x80)) </span>
+<span class="lineNum">   1512 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1513 </span>              : 			break; </span>
+<span class="lineNum">   1514 </span>              :  </span>
+<span class="lineNum">   1515 </span>              : 		// Read data of sprite 7 </span>
+<span class="lineNum">   1516 </span>              : 		case 10: </span>
+<span class="lineNum">   1517 </span><span class="linePartCov">    1 / 2     : 			SprDataAccess(7, 1); </span>
+<span class="lineNum">   1518 </span><span class="linePartCov">    1 / 2     : 			SprDataAccess(7, 2); </span>
+<span class="lineNum">   1519 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1520 </span>              : 			break; </span>
+<span class="lineNum">   1521 </span>              :  </span>
+<span class="lineNum">   1522 </span>              : 		// Refresh, reset BA </span>
+<span class="lineNum">   1523 </span>              : 		case 11: </span>
+<span class="lineNum">   1524 </span><span class="lineCov">    2 / 2     : 			RefreshAccess; </span>
+<span class="lineNum">   1525 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1526 </span>              : 			the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1527 </span>              : 			break; </span>
+<span class="lineNum">   1528 </span>              :  </span>
+<span class="lineNum">   1529 </span>              : 		// Refresh, turn on matrix access if Bad Line </span>
+<span class="lineNum">   1530 </span>              : 		case 12: </span>
+<span class="lineNum">   1531 </span><span class="lineCov">    2 / 2     : 			RefreshAccess; </span>
+<span class="lineNum">   1532 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1533 </span>              : 			break; </span>
+<span class="lineNum">   1534 </span>              :  </span>
+<span class="lineNum">   1535 </span>              : 		// Refresh, turn on matrix access if Bad Line, reset raster_x, graphics display starts here </span>
+<span class="lineNum">   1536 </span>              : 		case 13: </span>
+<span class="lineNum">   1537 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1538 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1539 </span><span class="lineCov">    2 / 2     : 			RefreshAccess; </span>
+<span class="lineNum">   1540 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1541 </span><span class="lineCov">    1 / 1     : 			raster_x = 0xfffc; </span>
+<span class="lineNum">   1542 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1543 </span>              :  </span>
+<span class="lineNum">   1544 </span>              : 		// Refresh, VCBASE-&gt;VCCOUNT, turn on matrix access and reset RC if Bad Line </span>
+<span class="lineNum">   1545 </span>              : 		case 14: </span>
+<span class="lineNum">   1546 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1547 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1548 </span><span class="lineCov">    2 / 2     : 			RefreshAccess; </span>
+<span class="lineNum">   1549 </span><span class="lineCov">    1 / 1     : 			RCIfBadLine; </span>
+<span class="lineNum">   1550 </span><span class="lineCov">    1 / 1     : 			vc = vc_base; </span>
+<span class="lineNum">   1551 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1552 </span>              :  </span>
+<span class="lineNum">   1553 </span>              : 		// Refresh and matrix access, increment mc_base by 2 if y expansion flipflop is set </span>
+<span class="lineNum">   1554 </span>              : 		case 15: </span>
+<span class="lineNum">   1555 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1556 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1557 </span><span class="lineCov">    2 / 2     : 			RefreshAccess; </span>
+<span class="lineNum">   1558 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1559 </span>              :  </span>
+<span class="lineNum">   1560 </span><span class="lineCov">    1 / 1     : 			for (i=0; i&lt;8; i++) </span>
+<span class="lineNum">   1561 </span><span class="lineCov">    1 / 1     : 				if (spr_exp_y &amp; (1 &lt;&lt; i)) </span>
+<span class="lineNum">   1562 </span><span class="lineCov">    1 / 1     : 					mc_base[i] += 2; </span>
+<span class="lineNum">   1563 </span>              :  </span>
+<span class="lineNum">   1564 </span><span class="lineCov">    1 / 1     : 			ml_index = 0; </span>
+<span class="lineNum">   1565 </span><span class="lineCov">    1 / 1     : 			matrix_access(); </span>
+<span class="lineNum">   1566 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1567 </span>              :  </span>
+<span class="lineNum">   1568 </span>              : 		// Graphics and matrix access, increment mc_base by 1 if y expansion flipflop is set </span>
+<span class="lineNum">   1569 </span>              : 		// and check if sprite DMA can be turned off </span>
+<span class="lineNum">   1570 </span>              : 		case 16: </span>
+<span class="lineNum">   1571 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1572 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1573 </span><span class="lineCov">    1 / 1     : 			graphics_access(); </span>
+<span class="lineNum">   1574 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1575 </span>              :  </span>
+<span class="lineNum">   1576 </span>              : 			mask = 1; </span>
+<span class="lineNum">   1577 </span><span class="lineCov">    1 / 1     : 			for (i=0; i&lt;8; i++, mask&lt;&lt;=1) { </span>
+<span class="lineNum">   1578 </span><span class="lineCov">    3 / 3     : 				if (spr_exp_y &amp; mask) </span>
+<span class="lineNum">   1579 </span><span class="lineCov">    1 / 1     : 					mc_base[i]++; </span>
+<span class="lineNum">   1580 </span><span class="lineCov">    1 / 1     : 				if ((mc_base[i] &amp; 0x3f) == 0x3f) </span>
+<span class="lineNum">   1581 </span><span class="lineCov">    2 / 2     : 					spr_dma_on &amp;= ~mask; </span>
+<span class="lineNum">   1582 </span>              : 			} </span>
+<span class="lineNum">   1583 </span>              :  </span>
+<span class="lineNum">   1584 </span><span class="lineCov">    1 / 1     : 			matrix_access(); </span>
+<span class="lineNum">   1585 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1586 </span>              :  </span>
+<span class="lineNum">   1587 </span>              : 		// Graphics and matrix access, turn off border in 40 column mode, display window starts here </span>
+<span class="lineNum">   1588 </span>              : 		case 17: </span>
+<span class="lineNum">   1589 </span><span class="lineCov">    1 / 1     : 			if (ctrl2 &amp; 8) { </span>
+<span class="lineNum">   1590 </span><span class="lineCov">    1 / 1     : 				if (raster_y == dy_stop) </span>
+<span class="lineNum">   1591 </span><span class="lineCov">    1 / 1     : 					ud_border_on = true; </span>
+<span class="lineNum">   1592 </span>              : 				else { </span>
+<span class="lineNum">   1593 </span><span class="lineCov">    1 / 1     : 					if (ctrl1 &amp; 0x10) { </span>
+<span class="lineNum">   1594 </span><span class="lineCov">    1 / 1     : 						if (raster_y == dy_start) </span>
+<span class="lineNum">   1595 </span><span class="lineCov">    1 / 1     : 							border_on = ud_border_on = false; </span>
+<span class="lineNum">   1596 </span>              : 						else </span>
+<span class="lineNum">   1597 </span>              : 							if (!ud_border_on) </span>
+<span class="lineNum">   1598 </span>              : 								border_on = false; </span>
+<span class="lineNum">   1599 </span>              : 					} else </span>
+<span class="lineNum">   1600 </span><span class="lineCov">    2 / 2     : 						if (!ud_border_on) </span>
+<span class="lineNum">   1601 </span><span class="lineCov">    1 / 1     : 							border_on = false; </span>
+<span class="lineNum">   1602 </span>              : 				} </span>
+<span class="lineNum">   1603 </span>              : 			} </span>
+<span class="lineNum">   1604 </span>              :  </span>
+<span class="lineNum">   1605 </span>              : 			// Second sample of border state </span>
+<span class="lineNum">   1606 </span><span class="lineCov">    1 / 1     : 			border_on_sample[1] = border_on; </span>
+<span class="lineNum">   1607 </span>              :  </span>
+<span class="lineNum">   1608 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1609 </span><span class="lineCov">    1 / 1     : 			draw_graphics(); </span>
+<span class="lineNum">   1610 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1611 </span><span class="lineCov">    1 / 1     : 			graphics_access(); </span>
+<span class="lineNum">   1612 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1613 </span><span class="lineCov">    1 / 1     : 			matrix_access(); </span>
+<span class="lineNum">   1614 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1615 </span>              :  </span>
+<span class="lineNum">   1616 </span>              : 		// Turn off border in 38 column mode </span>
+<span class="lineNum">   1617 </span>              : 		case 18: </span>
+<span class="lineNum">   1618 </span><span class="lineCov">    1 / 1     : 			if (!(ctrl2 &amp; 8)) { </span>
+<span class="lineNum">   1619 </span><span class="lineCov">    1 / 1     : 				if (raster_y == dy_stop) </span>
+<span class="lineNum">   1620 </span><span class="lineCov">    1 / 1     : 					ud_border_on = true; </span>
+<span class="lineNum">   1621 </span>              : 				else { </span>
+<span class="lineNum">   1622 </span><span class="lineCov">    1 / 1     : 					if (ctrl1 &amp; 0x10) { </span>
+<span class="lineNum">   1623 </span><span class="lineNoCov">    0 / 1     : 						if (raster_y == dy_start) </span>
+<span class="lineNum">   1624 </span><span class="lineNoCov">    0 / 1     : 							border_on = ud_border_on = false; </span>
+<span class="lineNum">   1625 </span>              : 						else </span>
+<span class="lineNum">   1626 </span>              : 							if (!ud_border_on) </span>
+<span class="lineNum">   1627 </span>              : 								border_on = false; </span>
+<span class="lineNum">   1628 </span>              : 					} else </span>
+<span class="lineNum">   1629 </span><span class="lineCov">    2 / 2     : 						if (!ud_border_on) </span>
+<span class="lineNum">   1630 </span><span class="lineCov">    1 / 1     : 							border_on = false; </span>
+<span class="lineNum">   1631 </span>              : 				} </span>
+<span class="lineNum">   1632 </span>              : 			} </span>
+<span class="lineNum">   1633 </span>              :  </span>
+<span class="lineNum">   1634 </span>              : 			// Third sample of border state </span>
+<span class="lineNum">   1635 </span><span class="lineCov">    1 / 1     : 			border_on_sample[2] = border_on; </span>
+<span class="lineNum">   1636 </span>              :  </span>
+<span class="lineNum">   1637 </span>              : 			// Falls through </span>
+<span class="lineNum">   1638 </span>              :  </span>
+<span class="lineNum">   1639 </span>              : 		// Graphics and matrix access </span>
+<span class="lineNum">   1640 </span>              : 		case 19: case 20: case 21: case 22: case 23: case 24: </span>
+<span class="lineNum">   1641 </span>              : 		case 25: case 26: case 27: case 28: case 29: case 30: </span>
+<span class="lineNum">   1642 </span>              : 		case 31: case 32: case 33: case 34: case 35: case 36: </span>
+<span class="lineNum">   1643 </span>              : 		case 37: case 38: case 39: case 40: case 41: case 42: </span>
+<span class="lineNum">   1644 </span>              : 		case 43: case 44: case 45: case 46: case 47: case 48: </span>
+<span class="lineNum">   1645 </span>              : 		case 49: case 50: case 51: case 52: case 53: case 54:	// Gnagna... </span>
+<span class="lineNum">   1646 </span><span class="lineCov">    1 / 1     : 			draw_graphics(); </span>
+<span class="lineNum">   1647 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1648 </span><span class="lineCov">    1 / 1     : 			graphics_access(); </span>
+<span class="lineNum">   1649 </span><span class="lineCov">    1 / 1     : 			FetchIfBadLine; </span>
+<span class="lineNum">   1650 </span><span class="lineCov">    1 / 1     : 			matrix_access(); </span>
+<span class="lineNum">   1651 </span><span class="lineCov">    1 / 1     : 			last_char_data = char_data; </span>
+<span class="lineNum">   1652 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">   1653 </span>              :  </span>
+<span class="lineNum">   1654 </span>              : 		// Last graphics access, turn off matrix access, turn on sprite DMA if Y coordinate is </span>
+<span class="lineNum">   1655 </span>              : 		// right and sprite is enabled, handle sprite y expansion, set BA for sprite 0 </span>
+<span class="lineNum">   1656 </span>              : 		case 55: </span>
+<span class="lineNum">   1657 </span><span class="lineCov">    1 / 1     : 			draw_graphics(); </span>
+<span class="lineNum">   1658 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1659 </span><span class="lineCov">    1 / 1     : 			graphics_access(); </span>
+<span class="lineNum">   1660 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1661 </span>              :  </span>
+<span class="lineNum">   1662 </span>              : 			// Invert y expansion flipflop if bit in MYE is set </span>
+<span class="lineNum">   1663 </span>              : 			mask = 1; </span>
+<span class="lineNum">   1664 </span><span class="lineCov">    2 / 2     : 			for (i=0; i&lt;8; i++, mask&lt;&lt;=1) </span>
+<span class="lineNum">   1665 </span><span class="lineCov">    2 / 2     : 				if (mye &amp; mask) </span>
+<span class="lineNum">   1666 </span><span class="lineNoCov">    0 / 1     : 					spr_exp_y ^= mask; </span>
+<span class="lineNum">   1667 </span><span class="lineCov">    1 / 1     : 			CheckSpriteDMA; </span>
+<span class="lineNum">   1668 </span>              :  </span>
+<span class="lineNum">   1669 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x01) {	// Don't remove these braces! </span>
+<span class="lineNum">   1670 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1671 </span>              : 			} else </span>
+<span class="lineNum">   1672 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1673 </span>              : 			break; </span>
+<span class="lineNum">   1674 </span>              :  </span>
+<span class="lineNum">   1675 </span>              : 		// Turn on border in 38 column mode, turn on sprite DMA if Y coordinate is right and </span>
+<span class="lineNum">   1676 </span>              : 		// sprite is enabled, set BA for sprite 0, display window ends here </span>
+<span class="lineNum">   1677 </span>              : 		case 56: </span>
+<span class="lineNum">   1678 </span><span class="lineCov">    1 / 1     : 			if (!(ctrl2 &amp; 8)) </span>
+<span class="lineNum">   1679 </span><span class="lineCov">    1 / 1     : 				border_on = true; </span>
+<span class="lineNum">   1680 </span>              :  </span>
+<span class="lineNum">   1681 </span>              : 			// Fourth sample of border state </span>
+<span class="lineNum">   1682 </span><span class="lineCov">    1 / 1     : 			border_on_sample[3] = border_on; </span>
+<span class="lineNum">   1683 </span>              :  </span>
+<span class="lineNum">   1684 </span><span class="lineCov">    1 / 1     : 			draw_graphics(); </span>
+<span class="lineNum">   1685 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1686 </span>              : 			IdleAccess; </span>
+<span class="lineNum">   1687 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1688 </span><span class="lineCov">    1 / 1     : 			CheckSpriteDMA; </span>
+<span class="lineNum">   1689 </span>              :  </span>
+<span class="lineNum">   1690 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x01) </span>
+<span class="lineNum">   1691 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1692 </span>              : 			break; </span>
+<span class="lineNum">   1693 </span>              :  </span>
+<span class="lineNum">   1694 </span>              : 		// Turn on border in 40 column mode, set BA for sprite 1, paint sprites </span>
+<span class="lineNum">   1695 </span>              : 		case 57: </span>
+<span class="lineNum">   1696 </span><span class="lineCov">    1 / 1     : 			if (ctrl2 &amp; 8) </span>
+<span class="lineNum">   1697 </span><span class="lineCov">    1 / 1     : 				border_on = true; </span>
+<span class="lineNum">   1698 </span>              :  </span>
+<span class="lineNum">   1699 </span>              : 			// Fifth sample of border state </span>
+<span class="lineNum">   1700 </span><span class="lineCov">    1 / 1     : 			border_on_sample[4] = border_on; </span>
+<span class="lineNum">   1701 </span>              :  </span>
+<span class="lineNum">   1702 </span>              : 			// Sample spr_disp_on and spr_data for sprite drawing </span>
+<span class="lineNum">   1703 </span><span class="lineCov">    2 / 2     : 			if ((spr_draw = spr_disp_on) != 0) </span>
+<span class="lineNum">   1704 </span>              : 				memcpy(spr_draw_data, spr_data, 8*4); </span>
+<span class="lineNum">   1705 </span>              :  </span>
+<span class="lineNum">   1706 </span>              : 			// Turn off sprite display if DMA is off </span>
+<span class="lineNum">   1707 </span>              : 			mask = 1; </span>
+<span class="lineNum">   1708 </span><span class="lineCov">    2 / 2     : 			for (i=0; i&lt;8; i++, mask&lt;&lt;=1) </span>
+<span class="lineNum">   1709 </span><span class="lineCov">    1 / 1     : 				if ((spr_disp_on &amp; mask) &amp;&amp; !(spr_dma_on &amp; mask)) </span>
+<span class="lineNum">   1710 </span><span class="lineCov">    1 / 1     : 					spr_disp_on &amp;= ~mask; </span>
+<span class="lineNum">   1711 </span>              :  </span>
+<span class="lineNum">   1712 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1713 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1714 </span>              : 			IdleAccess; </span>
+<span class="lineNum">   1715 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1716 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x02) </span>
+<span class="lineNum">   1717 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1718 </span>              : 			break; </span>
+<span class="lineNum">   1719 </span>              :  </span>
+<span class="lineNum">   1720 </span>              : 		// Fetch sprite pointer 0, mc_base-&gt;mc, turn on sprite display if necessary, </span>
+<span class="lineNum">   1721 </span>              : 		// turn off display if RC=7, read data of sprite 0 </span>
+<span class="lineNum">   1722 </span>              : 		case 58: </span>
+<span class="lineNum">   1723 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1724 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1725 </span>              :  </span>
+<span class="lineNum">   1726 </span>              : 			mask = 1; </span>
+<span class="lineNum">   1727 </span><span class="lineCov">    1 / 1     : 			for (i=0; i&lt;8; i++, mask&lt;&lt;=1) { </span>
+<span class="lineNum">   1728 </span><span class="lineCov">    1 / 1     : 				mc[i] = mc_base[i]; </span>
+<span class="lineNum">   1729 </span><span class="lineCov">    2 / 2     : 				if ((spr_dma_on &amp; mask) &amp;&amp; (raster_y &amp; 0xff) == my[i]) </span>
+<span class="lineNum">   1730 </span><span class="lineCov">    1 / 1     : 					spr_disp_on |= mask; </span>
+<span class="lineNum">   1731 </span>              : 			} </span>
+<span class="lineNum">   1732 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(0); </span>
+<span class="lineNum">   1733 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(0, 0); </span>
+<span class="lineNum">   1734 </span>              :  </span>
+<span class="lineNum">   1735 </span><span class="lineCov">    1 / 1     : 			if (rc == 7) { </span>
+<span class="lineNum">   1736 </span><span class="lineCov">    2 / 2     : 				vc_base = vc; </span>
+<span class="lineNum">   1737 </span><span class="lineCov">    1 / 1     : 				display_state = false; </span>
+<span class="lineNum">   1738 </span>              : 			} </span>
+<span class="lineNum">   1739 </span><span class="lineCov">    1 / 1     : 			if (is_bad_line || display_state) { </span>
+<span class="lineNum">   1740 </span><span class="lineCov">    1 / 1     : 				display_state = true; </span>
+<span class="lineNum">   1741 </span><span class="lineCov">    2 / 2     : 				rc = (rc + 1) &amp; 7; </span>
+<span class="lineNum">   1742 </span>              : 			} </span>
+<span class="lineNum">   1743 </span>              : 			break; </span>
+<span class="lineNum">   1744 </span>              :  </span>
+<span class="lineNum">   1745 </span>              : 		// Set BA for sprite 2, read data of sprite 0 </span>
+<span class="lineNum">   1746 </span>              : 		case 59: </span>
+<span class="lineNum">   1747 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1748 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1749 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(0, 1); </span>
+<span class="lineNum">   1750 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(0, 2); </span>
+<span class="lineNum">   1751 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1752 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x04) </span>
+<span class="lineNum">   1753 </span>              : 				SetBALow; </span>
+<span class="lineNum">   1754 </span>              : 			break; </span>
+<span class="lineNum">   1755 </span>              :  </span>
+<span class="lineNum">   1756 </span>              : 		// Fetch sprite pointer 1, reset BA if sprite 1 and 2 off, graphics display ends here </span>
+<span class="lineNum">   1757 </span>              : 		case 60: </span>
+<span class="lineNum">   1758 </span><span class="lineCov">    1 / 1     : 			draw_background(); </span>
+<span class="lineNum">   1759 </span><span class="lineCov">    1 / 1     : 			SampleBorder; </span>
+<span class="lineNum">   1760 </span>              :  </span>
+<span class="lineNum">   1761 </span><span class="lineCov">    1 / 1     : 			if (draw_this_line) { </span>
+<span class="lineNum">   1762 </span>              :  </span>
+<span class="lineNum">   1763 </span>              : 				// Draw sprites </span>
+<span class="lineNum">   1764 </span><span class="lineCov">    1 / 1     : 				if (spr_draw &amp;&amp; ThePrefs.SpritesOn) </span>
+<span class="lineNum">   1765 </span>              : 					draw_sprites(); </span>
+<span class="lineNum">   1766 </span>              :  </span>
+<span class="lineNum">   1767 </span>              : 				// Draw border </span>
+<span class="lineNum">   1768 </span>              : #ifdef __POWERPC__ </span>
+<span class="lineNum">   1769 </span>              : 				if (border_on_sample[0]) </span>
+<span class="lineNum">   1770 </span>              : 					for (i=0; i&lt;4; i++) </span>
+<span class="lineNum">   1771 </span>              : 						memset8((uint8 *)chunky_tmp+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1772 </span>              : 				if (border_on_sample[1]) </span>
+<span class="lineNum">   1773 </span>              : 					memset8((uint8 *)chunky_tmp+4*8, border_color_sample[4]); </span>
+<span class="lineNum">   1774 </span>              : 				if (border_on_sample[2]) </span>
+<span class="lineNum">   1775 </span>              : 					for (i=5; i&lt;43; i++) </span>
+<span class="lineNum">   1776 </span>              : 						memset8((uint8 *)chunky_tmp+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1777 </span>              : 				if (border_on_sample[3]) </span>
+<span class="lineNum">   1778 </span>              : 					memset8((uint8 *)chunky_tmp+43*8, border_color_sample[43]); </span>
+<span class="lineNum">   1779 </span>              : 				if (border_on_sample[4]) </span>
+<span class="lineNum">   1780 </span>              : 					for (i=44; i&lt;DISPLAY_X/8; i++) </span>
+<span class="lineNum">   1781 </span>              : 						memset8((uint8 *)chunky_tmp+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1782 </span>              : #else </span>
+<span class="lineNum">   1783 </span><span class="lineCov">    1 / 1     : 				if (border_on_sample[0]) </span>
+<span class="lineNum">   1784 </span><span class="lineCov">    3 / 3     : 					for (i=0; i&lt;4; i++) </span>
+<span class="lineNum">   1785 </span><span class="lineCov">    2 / 2     : 						memset8(chunky_line_start+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1786 </span><span class="lineCov">    1 / 1     : 				if (border_on_sample[1]) </span>
+<span class="lineNum">   1787 </span><span class="lineCov">    1 / 1     : 					memset8(chunky_line_start+4*8, border_color_sample[4]); </span>
+<span class="lineNum">   1788 </span><span class="lineCov">    1 / 1     : 				if (border_on_sample[2]) </span>
+<span class="lineNum">   1789 </span><span class="lineCov">    3 / 3     : 					for (i=5; i&lt;43; i++) </span>
+<span class="lineNum">   1790 </span><span class="lineCov">    2 / 2     : 						memset8(chunky_line_start+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1791 </span><span class="lineCov">    1 / 1     : 				if (border_on_sample[3]) </span>
+<span class="lineNum">   1792 </span><span class="lineCov">    1 / 1     : 					memset8(chunky_line_start+43*8, border_color_sample[43]); </span>
+<span class="lineNum">   1793 </span><span class="lineCov">    1 / 1     : 				if (border_on_sample[4]) </span>
+<span class="lineNum">   1794 </span><span class="lineCov">    3 / 3     : 					for (i=44; i&lt;DISPLAY_X/8; i++) </span>
+<span class="lineNum">   1795 </span><span class="lineCov">    2 / 2     : 						memset8(chunky_line_start+i*8, border_color_sample[i]); </span>
+<span class="lineNum">   1796 </span>              : #endif </span>
+<span class="lineNum">   1797 </span>              :  </span>
+<span class="lineNum">   1798 </span>              : #ifdef __POWERPC__ </span>
+<span class="lineNum">   1799 </span>              : 				// Copy temporary buffer to bitmap </span>
+<span class="lineNum">   1800 </span>              : 				fastcopy(chunky_line_start, (uint8 *)chunky_tmp); </span>
+<span class="lineNum">   1801 </span>              : #endif </span>
+<span class="lineNum">   1802 </span>              :  </span>
+<span class="lineNum">   1803 </span>              : 				// Increment pointer in chunky buffer </span>
+<span class="lineNum">   1804 </span><span class="lineCov">    1 / 1     : 				chunky_line_start += xmod; </span>
+<span class="lineNum">   1805 </span>              : 			} </span>
+<span class="lineNum">   1806 </span>              :  </span>
+<span class="lineNum">   1807 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(1); </span>
+<span class="lineNum">   1808 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(1, 0); </span>
+<span class="lineNum">   1809 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1810 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x06)) </span>
+<span class="lineNum">   1811 </span>              : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1812 </span>              : 			break; </span>
+<span class="lineNum">   1813 </span>              :  </span>
+<span class="lineNum">   1814 </span>              : 		// Set BA for sprite 3, read data of sprite 1 </span>
+<span class="lineNum">   1815 </span>              : 		case 61: </span>
+<span class="lineNum">   1816 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(1, 1); </span>
+<span class="lineNum">   1817 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(1, 2); </span>
+<span class="lineNum">   1818 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1819 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x08) </span>
+<span class="lineNum">   1820 </span><span class="lineCov">    2 / 2     : 				SetBALow; </span>
+<span class="lineNum">   1821 </span>              : 			break; </span>
+<span class="lineNum">   1822 </span>              :  </span>
+<span class="lineNum">   1823 </span>              : 		// Read sprite pointer 2, reset BA if sprite 2 and 3 off, read data of sprite 2 </span>
+<span class="lineNum">   1824 </span>              : 		case 62: </span>
+<span class="lineNum">   1825 </span><span class="lineCov">    2 / 2     : 			SprPtrAccess(2); </span>
+<span class="lineNum">   1826 </span><span class="lineCov">    3 / 3     : 			SprDataAccess(2, 0); </span>
+<span class="lineNum">   1827 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1828 </span><span class="lineCov">    1 / 1     : 			if (!(spr_dma_on &amp; 0x0c)) </span>
+<span class="lineNum">   1829 </span><span class="lineCov">    1 / 1     : 				the_cpu-&gt;BALow = false; </span>
+<span class="lineNum">   1830 </span>              : 			break; </span>
+<span class="lineNum">   1831 </span>              :  </span>
+<span class="lineNum">   1832 </span>              : 		// Set BA for sprite 4, read data of sprite 2 </span>
+<span class="lineNum">   1833 </span>              : 		case 63: </span>
+<span class="lineNum">   1834 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(2, 1); </span>
+<span class="lineNum">   1835 </span><span class="lineCov">    2 / 2     : 			SprDataAccess(2, 2); </span>
+<span class="lineNum">   1836 </span><span class="lineCov">    1 / 1     : 			DisplayIfBadLine; </span>
+<span class="lineNum">   1837 </span>              :  </span>
+<span class="lineNum">   1838 </span><span class="lineCov">    1 / 1     : 			if (raster_y == dy_stop) </span>
+<span class="lineNum">   1839 </span><span class="lineCov">    1 / 1     : 				ud_border_on = true; </span>
+<span class="lineNum">   1840 </span>              : 			else </span>
+<span class="lineNum">   1841 </span><span class="lineCov">    1 / 1     : 				if (ctrl1 &amp; 0x10 &amp;&amp; raster_y == dy_start) </span>
+<span class="lineNum">   1842 </span><span class="lineCov">    1 / 1     : 					ud_border_on = false; </span>
+<span class="lineNum">   1843 </span>              :  </span>
+<span class="lineNum">   1844 </span><span class="lineCov">    1 / 1     : 			if (spr_dma_on &amp; 0x10) </span>
+<span class="lineNum">   1845 </span><span class="lineCov">    1 / 1     : 				SetBALow; </span>
+<span class="lineNum">   1846 </span>              :  </span>
+<span class="lineNum">   1847 </span>              : 			// Last cycle </span>
+<span class="lineNum">   1848 </span><span class="lineCov">    1 / 1     : 			raster_x += 8; </span>
+<span class="lineNum">   1849 </span><span class="lineCov">    1 / 1     : 			cycle = 1; </span>
+<span class="lineNum">   1850 </span><span class="lineCov">    2 / 2     : 			return true; </span>
+<span class="lineNum">   1851 </span>              : 	} </span>
+<span class="lineNum">   1852 </span>              :  </span>
+<span class="lineNum">   1853 </span>              : 	// Next cycle </span>
+<span class="lineNum">   1854 </span><span class="lineCov">    1 / 1     : 	raster_x += 8; </span>
+<span class="lineNum">   1855 </span><span class="lineCov">    2 / 2     : 	cycle++; </span>
+<span class="lineNum">   1856 </span>              : 	return false; </span>
+<span class="lineNum">   1857 </span><span class="lineCov">    1 / 1     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

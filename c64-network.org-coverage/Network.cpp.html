@@ -1,0 +1,1307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">459</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">0.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">0</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  Network.h - Network handling </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 2009 Simon Kagstrom </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     22 </span>              : #include &quot;Network.h&quot; </span>
+<span class="lineNum">     23 </span>              : #include &quot;Display.h&quot; </span>
+<span class="lineNum">     24 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     25 </span>              : #include &quot;main.h&quot; </span>
+<span class="lineNum">     26 </span>              : #include &quot;C64.h&quot; </span>
+<span class="lineNum">     27 </span>              :  </span>
+<span class="lineNum">     28 </span>              : #include &quot;utils.hh&quot; </span>
+<span class="lineNum">     29 </span>              : #include &quot;data_store.hh&quot; </span>
+<span class="lineNum">     30 </span>              : #include &quot;gui/gui.hh&quot; </span>
+<span class="lineNum">     31 </span>              : #include &quot;gui/status_bar.hh&quot; </span>
+<span class="lineNum">     32 </span>              : #include &quot;gui/network_user_menu.hh&quot; </span>
+<span class="lineNum">     33 </span>              : #include &quot;gui/network_server_messages.hh&quot; </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : #if defined(GEKKO) </span>
+<span class="lineNum">     36 </span>              : # include &lt;wiiuse/wpad.h&gt; </span>
+<span class="lineNum">     37 </span>              : #endif </span>
+<span class="lineNum">     38 </span>              :  </span>
+<span class="lineNum">     39 </span>              : #define N_SQUARES_W 16 </span>
+<span class="lineNum">     40 </span>              : #define N_SQUARES_H 8 </span>
+<span class="lineNum">     41 </span>              :  </span>
+<span class="lineNum">     42 </span>              : #define SQUARE_W (DISPLAY_X / N_SQUARES_W) </span>
+<span class="lineNum">     43 </span>              : #define SQUARE_H (DISPLAY_Y / N_SQUARES_H) </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              : #define SQUARE_TO_X(square) ( ((square) % N_SQUARES_W) * SQUARE_W ) </span>
+<span class="lineNum">     46 </span>              : #define SQUARE_TO_Y(square) ( ((square) / N_SQUARES_W) * SQUARE_H ) </span>
+<span class="lineNum">     47 </span>              :  </span>
+<span class="lineNum">     48 </span>              : /* Worst cases for RLE and DIFF */ </span>
+<span class="lineNum">     49 </span>              : #define RAW_SIZE  ( (SQUARE_W * SQUARE_H) / 2 ) </span>
+<span class="lineNum">     50 </span>              : #define RLE_SIZE  ( RAW_SIZE * 4 + 8) </span>
+<span class="lineNum">     51 </span>              : #define DIFF_SIZE ( RAW_SIZE * 4 + 8) </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span>              : #if 0 </span>
+<span class="lineNum">     54 </span>              : class ConnectionFSM : public TimeoutHandler </span>
+<span class="lineNum">     55 </span>              : { </span>
+<span class="lineNum">     56 </span>              : public: </span>
+<span class="lineNum">     57 </span>              : 	ConnectionFSM() </span>
+<span class="lineNum">     58 </span>              : 	{ </span>
+<span class="lineNum">     59 </span>              : 		this-&gt;rese(); </span>
+<span class="lineNum">     60 </span>              : 	} </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              : 	void connectToPeer() </span>
+<span class="lineNum">     63 </span>              : 	{ </span>
+<span class="lineNum">     64 </span>              : 		this-&gt;setState(CONNECT_TO_PEER); </span>
+<span class="lineNum">     65 </span>              : 	} </span>
+<span class="lineNum">     66 </span>              :  </span>
+<span class="lineNum">     67 </span>              : 	void peerConnected() </span>
+<span class="lineNum">     68 </span>              : 	{ </span>
+<span class="lineNum">     69 </span>              : 		/* Reset the FSM */ </span>
+<span class="lineNum">     70 </span>              : 		this-&gt;reset(); </span>
+<span class="lineNum">     71 </span>              : 	} </span>
+<span class="lineNum">     72 </span>              :  </span>
+<span class="lineNum">     73 </span>              : 	void connectToBroker() </span>
+<span class="lineNum">     74 </span>              : 	{ </span>
+<span class="lineNum">     75 </span>              : 		this-&gt;setState(CONNECT_TO_BROKER); </span>
+<span class="lineNum">     76 </span>              :  </span>
+<span class="lineNum">     77 </span>              : 		Gui::gui-&gt;controller-&gt;arm(this, 4000); </span>
+<span class="lineNum">     78 </span>              : 	} </span>
+<span class="lineNum">     79 </span>              :  </span>
+<span class="lineNum">     80 </span>              : 	void timeoutCallback() </span>
+<span class="lineNum">     81 </span>              : 	{ </span>
+<span class="lineNum">     82 </span>              : 		/* New state, everything is fine */ </span>
+<span class="lineNum">     83 </span>              : 		if (this-&gt;last_state != this-&gt;state) </span>
+<span class="lineNum">     84 </span>              : 			return; </span>
+<span class="lineNum">     85 </span>              :  </span>
+<span class="lineNum">     86 </span>              : 		switch(state) </span>
+<span class="lineNum">     87 </span>              : 		{ </span>
+<span class="lineNum">     88 </span>              : 		default: </span>
+<span class="lineNum">     89 </span>              : 			break; </span>
+<span class="lineNum">     90 </span>              : 		} </span>
+<span class="lineNum">     91 </span>              : 	} </span>
+<span class="lineNum">     92 </span>              :  </span>
+<span class="lineNum">     93 </span>              : 	void reset() </span>
+<span class="lineNum">     94 </span>              : 	{ </span>
+<span class="lineNum">     95 </span>              : 		this-&gt;state = 0; </span>
+<span class="lineNum">     96 </span>              : 		this-&gt;last_state = -1; </span>
+<span class="lineNum">     97 </span>              : 	} </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span>              : 	static ConnectionFSM fsm; </span>
+<span class="lineNum">    100 </span>              :  </span>
+<span class="lineNum">    101 </span>              : private: </span>
+<span class="lineNum">    102 </span>              :  </span>
+<span class="lineNum">    103 </span>              : 	void setState(int state) </span>
+<span class="lineNum">    104 </span>              : 	{ </span>
+<span class="lineNum">    105 </span>              : 		this-&gt;last_state = this-&gt;state; </span>
+<span class="lineNum">    106 </span>              : 		this-&gt;state = state; </span>
+<span class="lineNum">    107 </span>              : 	} </span>
+<span class="lineNum">    108 </span>              :  </span>
+<span class="lineNum">    109 </span>              : 	int state, last_state; </span>
+<span class="lineNum">    110 </span>              : }; </span>
+<span class="lineNum">    111 </span>              : #endif </span>
+<span class="lineNum">    112 </span>              :  </span>
+<span class="lineNum">    113 </span><span class="lineNoCov">    0 / 4     : Network::Network(const char *remote_host, int port) </span>
+<span class="lineNum">    114 </span>              : { </span>
+<span class="lineNum">    115 </span>              : 	const size_t size = NETWORK_UPDATE_SIZE; </span>
+<span class="lineNum">    116 </span>              :  </span>
+<span class="lineNum">    117 </span>              : 	this-&gt;InitNetwork(); </span>
+<span class="lineNum">    118 </span>              :  </span>
+<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;is_master = true; /* Assume true */ </span>
+<span class="lineNum">    120 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;connected = false; </span>
+<span class="lineNum">    121 </span>              :  </span>
+<span class="lineNum">    122 </span>              : 	/* &quot;big enough&quot; buffer */ </span>
+<span class="lineNum">    123 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;ud = (NetworkUpdate*)xmalloc( size ); </span>
+<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;receive_ud = (NetworkUpdate*)xmalloc( size ); </span>
+<span class="lineNum">    125 </span>              :  </span>
+<span class="lineNum">    126 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">    127 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;traffic = 0; </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;last_traffic = 0; </span>
+<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;target_kbps = 160000; /* kilobit per seconds */ </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;kbps = 0; </span>
+<span class="lineNum">    131 </span>              :  </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;raw_buf = (uint8*)malloc(RAW_SIZE); </span>
+<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;rle_buf = (uint8*)malloc(RLE_SIZE); </span>
+<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 4     : 	this-&gt;diff_buf = (uint8*)malloc(DIFF_SIZE); </span>
+<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 6     : 	assert(this-&gt;raw_buf &amp;&amp; this-&gt;rle_buf &amp;&amp; this-&gt;diff_buf); </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;cur_joystick_data = 0; </span>
+<span class="lineNum">    137 </span>              :  </span>
+<span class="lineNum">    138 </span>              : 	/* Go from lower right to upper left */ </span>
+<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;refresh_square = N_SQUARES_W * N_SQUARES_H - 1; </span>
+<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 4     : 	this-&gt;square_updated = (uint32*)malloc( N_SQUARES_W * N_SQUARES_H * sizeof(uint32)); </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 6     : 	assert(this-&gt;square_updated); </span>
+<span class="lineNum">    142 </span>              : 	memset(this-&gt;square_updated, 0, N_SQUARES_W * N_SQUARES_H * sizeof(uint32)); </span>
+<span class="lineNum">    143 </span>              :  </span>
+<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 4     : 	this-&gt;screen = (uint8 *)malloc(DISPLAY_X * DISPLAY_Y); </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 6     : 	assert(this-&gt;screen); </span>
+<span class="lineNum">    146 </span>              :  </span>
+<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;sound_head = this-&gt;sound_tail = 0; </span>
+<span class="lineNum">    148 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;sound_last_cycles = SDL_GetTicks(); </span>
+<span class="lineNum">    149 </span>              : 	memset(this-&gt;sound_active, 0, sizeof(this-&gt;sound_active)); </span>
+<span class="lineNum">    150 </span>              :  </span>
+<span class="lineNum">    151 </span>              : 	/* Assume black screen */ </span>
+<span class="lineNum">    152 </span>              : 	memset(this-&gt;screen, 0, DISPLAY_X * DISPLAY_Y); </span>
+<span class="lineNum">    153 </span>              : 	memset(this-&gt;screenshot, 0, sizeof(this-&gt;screenshot)); </span>
+<span class="lineNum">    154 </span>              :  </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 2     : 	Network::networking_started = true; </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;peer_selected = -1; </span>
+<span class="lineNum">    157 </span>              : 	/* Peer addresses, if it fails we are out of luck */ </span>
+<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 4     : 	panic_if (this-&gt;InitSocket() == false, </span>
+<span class="lineNum">    159 </span>              : 			&quot;Could not init the socket\n&quot;); </span>
+<span class="lineNum">    160 </span>              :  </span>
+<span class="lineNum">    161 </span>              : 	/* Setup the socket addresses */ </span>
+<span class="lineNum">    162 </span>              : 	memset(&amp;this-&gt;peer_addr, 0, sizeof(this-&gt;peer_addr)); </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 2     : 	memset(&amp;this-&gt;server_addr, 0, sizeof(this-&gt;server_addr)); </span>
+<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 5     : 	panic_if (this-&gt;InitSockaddr(&amp;this-&gt;server_addr, remote_host, port) == false, </span>
+<span class="lineNum">    165 </span>              : 			&quot;Can't initialize socket address to server\n&quot;); </span>
+<span class="lineNum">    166 </span>              :  </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;connection_error_message = &quot;Connection OK&quot;; </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    169 </span>              :  </span>
+<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 6     : Network::~Network() </span>
+<span class="lineNum">    171 </span>              : { </span>
+<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 4     : 	free(this-&gt;ud); </span>
+<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;receive_ud); </span>
+<span class="lineNum">    174 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;square_updated); </span>
+<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;raw_buf); </span>
+<span class="lineNum">    176 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;rle_buf); </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;diff_buf); </span>
+<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 2     : 	free(this-&gt;screen); </span>
+<span class="lineNum">    179 </span>              :  </span>
+<span class="lineNum">    180 </span>              : 	this-&gt;CloseSocket(); </span>
+<span class="lineNum">    181 </span>              : 	this-&gt;ShutdownNetwork(); </span>
+<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    183 </span>              :  </span>
+<span class="lineNum">    184 </span>              : void Network::Tick(int ms) </span>
+<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 2     : 	if (ms == 0) </span>
+<span class="lineNum">    187 </span>              : 		ms = 1; </span>
+<span class="lineNum">    188 </span>              : 	int last_kbps = ((this-&gt;traffic - this-&gt;last_traffic) * 8) * (1000 / ms); </span>
+<span class="lineNum">    189 </span>              :  </span>
+<span class="lineNum">    190 </span>              : 	/* 1/3 of the new value, 2/3 of the old */ </span>
+<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;kbps = 2 * (this-&gt;kbps / 3) + (last_kbps / 3); </span>
+<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;last_traffic = this-&gt;traffic; </span>
+<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              : bool Network::DecodeDisplayDiff(struct NetworkUpdate *src, </span>
+<span class="lineNum">    196 </span>              : 		int x_start, int y_start) </span>
+<span class="lineNum">    197 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 1     : 	struct NetworkUpdateDisplay *dp = (struct NetworkUpdateDisplay *)src-&gt;data; </span>
+<span class="lineNum">    199 </span>              : 	int p = 0; </span>
+<span class="lineNum">    200 </span>              : 	int x = x_start; </span>
+<span class="lineNum">    201 </span>              : 	int y = y_start; </span>
+<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 	int sz = src-&gt;size - sizeof(NetworkUpdate) - sizeof(NetworkUpdateDisplay); </span>
+<span class="lineNum">    203 </span>              :  </span>
+<span class="lineNum">    204 </span>              : 	/* Something is wrong if this is true... */ </span>
+<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 	if (sz % 2 != 0) </span>
+<span class="lineNum">    206 </span>              : 		return false; </span>
+<span class="lineNum">    207 </span>              :  </span>
+<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 2     : 	while (p &lt; sz) </span>
+<span class="lineNum">    209 </span>              : 	{ </span>
+<span class="lineNum">    210 </span>              : 		uint8 len = dp-&gt;data[p]; </span>
+<span class="lineNum">    211 </span>              : 		uint8 color = dp-&gt;data[p+1]; </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 		int x_diff = (x - x_start + len) % SQUARE_W; </span>
+<span class="lineNum">    213 </span>              : 		int y_diff = (x - x_start + len) / SQUARE_W; </span>
+<span class="lineNum">    214 </span>              :  </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 4     : 		x = x_start + x_diff; </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 1     : 		y = y + y_diff; </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 4     : 		this-&gt;screen[y * DISPLAY_X + x] = color; </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 		p += 2; </span>
+<span class="lineNum">    219 </span>              : 	} </span>
+<span class="lineNum">    220 </span>              :  </span>
+<span class="lineNum">    221 </span>              : 	return true; </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    223 </span>              :  </span>
+<span class="lineNum">    224 </span>              : bool Network::DecodeDisplayRLE(struct NetworkUpdate *src, </span>
+<span class="lineNum">    225 </span>              : 		int x_start, int y_start) </span>
+<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 2     : 	struct NetworkUpdateDisplay *dp = (struct NetworkUpdateDisplay *)src-&gt;data; </span>
+<span class="lineNum">    228 </span>              : 	int p = 0; </span>
+<span class="lineNum">    229 </span>              : 	int x = x_start; </span>
+<span class="lineNum">    230 </span>              : 	int y = y_start; </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 2     : 	int sz = src-&gt;size - sizeof(NetworkUpdate) - sizeof(NetworkUpdateDisplay); </span>
+<span class="lineNum">    232 </span>              :  </span>
+<span class="lineNum">    233 </span>              : 	/* Something is wrong if this is true... */ </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : 	if (sz % 2 != 0) </span>
+<span class="lineNum">    235 </span>              : 		return false; </span>
+<span class="lineNum">    236 </span>              :  </span>
+<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 2     : 	while (p &lt; sz) </span>
+<span class="lineNum">    238 </span>              : 	{ </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 		uint8 len = dp-&gt;data[p]; </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 2     : 		uint8 color = dp-&gt;data[p+1]; </span>
+<span class="lineNum">    241 </span>              :  </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 3     : 		while (len &gt; 0) </span>
+<span class="lineNum">    243 </span>              : 		{ </span>
+<span class="lineNum">    244 </span><span class="lineNoCov">    0 / 3     : 			this-&gt;screen[y * DISPLAY_X + x] = color; </span>
+<span class="lineNum">    245 </span><span class="lineNoCov">    0 / 1     : 			len--; </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 1     : 			x++; </span>
+<span class="lineNum">    247 </span><span class="lineNoCov">    0 / 1     : 			if ((x - x_start) % SQUARE_W == 0) </span>
+<span class="lineNum">    248 </span>              : 			{ </span>
+<span class="lineNum">    249 </span>              : 				x = x_start; </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 1     : 				y++; </span>
+<span class="lineNum">    251 </span>              : 			} </span>
+<span class="lineNum">    252 </span>              : 		} </span>
+<span class="lineNum">    253 </span><span class="lineNoCov">    0 / 1     : 		p += 2; </span>
+<span class="lineNum">    254 </span>              : 	} </span>
+<span class="lineNum">    255 </span>              :  </span>
+<span class="lineNum">    256 </span>              : 	return true; </span>
+<span class="lineNum">    257 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    258 </span>              :  </span>
+<span class="lineNum">    259 </span>              : bool Network::DecodeDisplayRaw(struct NetworkUpdate *src, </span>
+<span class="lineNum">    260 </span>              : 		int x_start, int y_start) </span>
+<span class="lineNum">    261 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    262 </span><span class="lineNoCov">    0 / 2     : 	struct NetworkUpdateDisplay *dp = (struct NetworkUpdateDisplay *)src-&gt;data; </span>
+<span class="lineNum">    263 </span>              : 	const int raw_w = SQUARE_W / 2; </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span><span class="lineNoCov">    0 / 2     : 	for (int y = y_start; y &lt; y_start + SQUARE_H; y++) </span>
+<span class="lineNum">    266 </span>              : 	{ </span>
+<span class="lineNum">    267 </span><span class="lineNoCov">    0 / 1     : 		for (int x = x_start; x &lt; x_start + SQUARE_W; x += 2) </span>
+<span class="lineNum">    268 </span>              : 		{ </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 2     : 			uint8 v = dp-&gt;data[(y - y_start) * raw_w + (x - x_start) / 2]; </span>
+<span class="lineNum">    270 </span>              : 			uint8 a = v &gt;&gt; 4; </span>
+<span class="lineNum">    271 </span>              : 			uint8 b = v &amp; 0xf; </span>
+<span class="lineNum">    272 </span>              :  </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 2     : 			this-&gt;screen[ y * DISPLAY_X + x ] = a; </span>
+<span class="lineNum">    274 </span><span class="lineNoCov">    0 / 3     : 			this-&gt;screen[ y * DISPLAY_X + x + 1 ] = b; </span>
+<span class="lineNum">    275 </span>              : 		} </span>
+<span class="lineNum">    276 </span>              : 	} </span>
+<span class="lineNum">    277 </span>              :  </span>
+<span class="lineNum">    278 </span>              : 	return true; </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    280 </span>              :  </span>
+<span class="lineNum">    281 </span>              : bool Network::CompareSquare(uint8 *a, uint8 *b) </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    283 </span><span class="lineNoCov">    0 / 5     : 	for (int y = 0; y &lt; SQUARE_H; y++) </span>
+<span class="lineNum">    284 </span>              : 	{ </span>
+<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 2     : 		for (int x = 0; x &lt; SQUARE_W; x += 4) </span>
+<span class="lineNum">    286 </span>              : 		{ </span>
+<span class="lineNum">    287 </span>              : 			uint32 va = *((uint32*)&amp;a[ y * DISPLAY_X + x ]); </span>
+<span class="lineNum">    288 </span>              : 			uint32 vb = *((uint32*)&amp;b[ y * DISPLAY_X + x ]); </span>
+<span class="lineNum">    289 </span>              :  </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 2     : 			if (va != vb) </span>
+<span class="lineNum">    291 </span>              : 				return false; </span>
+<span class="lineNum">    292 </span>              : 		} </span>
+<span class="lineNum">    293 </span>              : 	} </span>
+<span class="lineNum">    294 </span>              :  </span>
+<span class="lineNum">    295 </span>              : 	return true; </span>
+<span class="lineNum">    296 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    297 </span>              :  </span>
+<span class="lineNum">    298 </span>              : void Network::EncodeDisplay(uint8 *master, uint8 *remote) </span>
+<span class="lineNum">    299 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 1     : 	for ( int sq = 0; sq &lt; N_SQUARES_H * N_SQUARES_W; sq++ ) </span>
+<span class="lineNum">    301 </span>              : 	{ </span>
+<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 2     : 		uint8 *p_master = &amp;master[ SQUARE_TO_Y(sq) * DISPLAY_X + SQUARE_TO_X(sq) ]; </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 2     : 		uint8 *p_remote = &amp;remote[ SQUARE_TO_Y(sq) * DISPLAY_X + SQUARE_TO_X(sq) ]; </span>
+<span class="lineNum">    304 </span>              :  </span>
+<span class="lineNum">    305 </span>              : 		/* Refresh periodically or if the squares differ */ </span>
+<span class="lineNum">    306 </span><span class="lineNoCov">    0 / 2     : 		if ( (this-&gt;refresh_square == sq &amp;&amp; this-&gt;kbps &lt; this-&gt;target_kbps * 0.7) || </span>
+<span class="lineNum">    307 </span>              : 				this-&gt;CompareSquare(p_master, p_remote) == false) </span>
+<span class="lineNum">    308 </span>              : 		{ </span>
+<span class="lineNum">    309 </span><span class="lineNoCov">    0 / 1     : 			NetworkUpdate *dst = (NetworkUpdate *)this-&gt;cur_ud; </span>
+<span class="lineNum">    310 </span>              :  </span>
+<span class="lineNum">    311 </span>              : 			/* Updated, encode this */ </span>
+<span class="lineNum">    312 </span>              : 			this-&gt;EncodeDisplaySquare(dst, master, remote, sq, </span>
+<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 1     : 					this-&gt;refresh_square != sq); </span>
+<span class="lineNum">    314 </span>              : 			this-&gt;AddNetworkUpdate(dst); </span>
+<span class="lineNum">    315 </span>              :  </span>
+<span class="lineNum">    316 </span>              : 			/* This has been refreshed, move to the next one */ </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;refresh_square == sq) </span>
+<span class="lineNum">    318 </span>              : 			{ </span>
+<span class="lineNum">    319 </span><span class="lineNoCov">    0 / 2     : 				this-&gt;refresh_square--; </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 2     : 				if (this-&gt;refresh_square &lt; 0) </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 1     : 					this-&gt;refresh_square = N_SQUARES_H * N_SQUARES_W - 1; </span>
+<span class="lineNum">    322 </span>              : 			} </span>
+<span class="lineNum">    323 </span>              : 		} </span>
+<span class="lineNum">    324 </span>              : 		else </span>
+<span class="lineNum">    325 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;square_updated[sq] = 0; </span>
+<span class="lineNum">    326 </span>              : 	} </span>
+<span class="lineNum">    327 </span>              : 	memcpy(remote, master, DISPLAY_X * DISPLAY_Y); </span>
+<span class="lineNum">    328 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    329 </span>              :  </span>
+<span class="lineNum">    330 </span>              :  </span>
+<span class="lineNum">    331 </span>              : size_t Network::EncodeDisplaySquare(struct NetworkUpdate *dst, </span>
+<span class="lineNum">    332 </span>              : 		uint8 *screen, uint8 *remote, int square, </span>
+<span class="lineNum">    333 </span>              : 		bool use_diff) </span>
+<span class="lineNum">    334 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    335 </span><span class="lineNoCov">    0 / 2     : 	struct NetworkUpdateDisplay *dp = (struct NetworkUpdateDisplay *)dst-&gt;data; </span>
+<span class="lineNum">    336 </span><span class="lineNoCov">    0 / 5     : 	const int x_start = SQUARE_TO_X(square); </span>
+<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 2     : 	const int y_start = SQUARE_TO_Y(square); </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 4     : 	uint8 rle_color = screen[ y_start * DISPLAY_X + x_start ]; </span>
+<span class="lineNum">    339 </span>              : 	int rle_len = 0, diff_len = 0; </span>
+<span class="lineNum">    340 </span>              : 	size_t rle_sz = 0, diff_sz = 0; </span>
+<span class="lineNum">    341 </span>              : 	const int raw_w = SQUARE_W / 2; </span>
+<span class="lineNum">    342 </span>              : 	int type = DISPLAY_UPDATE_RAW; </span>
+<span class="lineNum">    343 </span>              : 	size_t out; </span>
+<span class="lineNum">    344 </span>              :  </span>
+<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 4     : 	for (int y = y_start; y &lt; y_start + SQUARE_H; y++) </span>
+<span class="lineNum">    346 </span>              : 	{ </span>
+<span class="lineNum">    347 </span>              : 		memset( &amp;this-&gt;raw_buf[(y - y_start) * raw_w], 0, raw_w ); </span>
+<span class="lineNum">    348 </span>              :  </span>
+<span class="lineNum">    349 </span><span class="lineNoCov">    0 / 2     : 		for (int x = x_start; x &lt; x_start + SQUARE_W; x++) </span>
+<span class="lineNum">    350 </span>              : 		{ </span>
+<span class="lineNum">    351 </span><span class="lineNoCov">    0 / 2     : 			uint8 col_s = screen[ y * DISPLAY_X + x ]; </span>
+<span class="lineNum">    352 </span><span class="lineNoCov">    0 / 2     : 			uint8 col_r = remote[ y * DISPLAY_X + x ]; </span>
+<span class="lineNum">    353 </span>              : 			bool is_odd = (x &amp; 1) == 1; </span>
+<span class="lineNum">    354 </span><span class="lineNoCov">    0 / 3     : 			int raw_shift = (is_odd ? 0 : 4); </span>
+<span class="lineNum">    355 </span>              :  </span>
+<span class="lineNum">    356 </span>              : 			/* Every second is shifted */ </span>
+<span class="lineNum">    357 </span>              : 			this-&gt;raw_buf[ (y - y_start) * raw_w + (x - x_start) / 2 ] |= </span>
+<span class="lineNum">    358 </span><span class="lineNoCov">    0 / 2     : 				(col_s &lt;&lt; raw_shift); </span>
+<span class="lineNum">    359 </span>              :  </span>
+<span class="lineNum">    360 </span><span class="lineNoCov">    0 / 2     : 			if (rle_color != col_s || </span>
+<span class="lineNum">    361 </span>              : 					rle_len &gt;= 255) </span>
+<span class="lineNum">    362 </span>              : 			{ </span>
+<span class="lineNum">    363 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;rle_buf[rle_sz] = rle_len; </span>
+<span class="lineNum">    364 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;rle_buf[rle_sz + 1] = rle_color; </span>
+<span class="lineNum">    365 </span><span class="lineNoCov">    0 / 2     : 				rle_sz += 2; </span>
+<span class="lineNum">    366 </span>              :  </span>
+<span class="lineNum">    367 </span>              : 				rle_len = 0; </span>
+<span class="lineNum">    368 </span>              : 				rle_color = col_s; </span>
+<span class="lineNum">    369 </span>              : 			} </span>
+<span class="lineNum">    370 </span>              :  </span>
+<span class="lineNum">    371 </span><span class="lineNoCov">    0 / 3     : 			if (col_r != col_s || diff_len &gt;= 255) </span>
+<span class="lineNum">    372 </span>              : 			{ </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;diff_buf[diff_sz] = diff_len; </span>
+<span class="lineNum">    374 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;diff_buf[diff_sz + 1] = col_s; </span>
+<span class="lineNum">    375 </span><span class="lineNoCov">    0 / 3     : 				diff_sz += 2; </span>
+<span class="lineNum">    376 </span>              : 				diff_len = 0; </span>
+<span class="lineNum">    377 </span>              : 			} </span>
+<span class="lineNum">    378 </span>              :  </span>
+<span class="lineNum">    379 </span>              : 			diff_len++; </span>
+<span class="lineNum">    380 </span>              : 			rle_len++; </span>
+<span class="lineNum">    381 </span>              : 		} </span>
+<span class="lineNum">    382 </span>              : 	} </span>
+<span class="lineNum">    383 </span>              :  </span>
+<span class="lineNum">    384 </span>              : 	/* The last section for RLE */ </span>
+<span class="lineNum">    385 </span>              : 	if (rle_len != 0) </span>
+<span class="lineNum">    386 </span>              : 	{ </span>
+<span class="lineNum">    387 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;rle_buf[rle_sz] = rle_len; </span>
+<span class="lineNum">    388 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;rle_buf[rle_sz + 1] = rle_color; </span>
+<span class="lineNum">    389 </span>              :  </span>
+<span class="lineNum">    390 </span><span class="lineNoCov">    0 / 1     : 		rle_sz += 2; </span>
+<span class="lineNum">    391 </span>              : 	} </span>
+<span class="lineNum">    392 </span>              :  </span>
+<span class="lineNum">    393 </span>              : 	out = RAW_SIZE; </span>
+<span class="lineNum">    394 </span><span class="lineNoCov">    0 / 3     : 	if (use_diff &amp;&amp; (diff_sz &lt; rle_sz &amp;&amp; diff_sz &lt; RAW_SIZE)) </span>
+<span class="lineNum">    395 </span>              : 	{ </span>
+<span class="lineNum">    396 </span>              : 		memcpy(dp-&gt;data, this-&gt;diff_buf, diff_sz); </span>
+<span class="lineNum">    397 </span>              : 		type = DISPLAY_UPDATE_DIFF; </span>
+<span class="lineNum">    398 </span>              : 		out = diff_sz; </span>
+<span class="lineNum">    399 </span>              : 	} </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 1     : 	else if (rle_sz &lt; RAW_SIZE) </span>
+<span class="lineNum">    401 </span>              : 	{ </span>
+<span class="lineNum">    402 </span>              : 		memcpy(dp-&gt;data, this-&gt;rle_buf, rle_sz); </span>
+<span class="lineNum">    403 </span>              : 		type = DISPLAY_UPDATE_RLE; </span>
+<span class="lineNum">    404 </span>              : 		out = rle_sz; </span>
+<span class="lineNum">    405 </span>              : 	}		 </span>
+<span class="lineNum">    406 </span>              : 	else </span>
+<span class="lineNum">    407 </span>              : 		memcpy(dp-&gt;data, this-&gt;raw_buf, RAW_SIZE); </span>
+<span class="lineNum">    408 </span>              :  </span>
+<span class="lineNum">    409 </span>              : 	/* Setup the structure */ </span>
+<span class="lineNum">    410 </span><span class="lineNoCov">    0 / 2     : 	dp-&gt;square = square; </span>
+<span class="lineNum">    411 </span>              : 	dst = InitNetworkUpdate(dst, type, </span>
+<span class="lineNum">    412 </span>              : 			sizeof(struct NetworkUpdate) + sizeof(struct NetworkUpdateDisplay) + out); </span>
+<span class="lineNum">    413 </span><span class="lineNoCov">    0 / 3     : 	this-&gt;square_updated[square] = out | (type &lt;&lt; 16); </span>
+<span class="lineNum">    414 </span>              :  </span>
+<span class="lineNum">    415 </span>              : 	return dst-&gt;size; </span>
+<span class="lineNum">    416 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    417 </span>              :  </span>
+<span class="lineNum">    418 </span>              : bool Network::DecodeDisplayUpdate(struct NetworkUpdate *src) </span>
+<span class="lineNum">    419 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    420 </span>              : 	struct NetworkUpdateDisplay *dp = (struct NetworkUpdateDisplay *)src-&gt;data; </span>
+<span class="lineNum">    421 </span><span class="lineNoCov">    0 / 1     : 	int square = dp-&gt;square; </span>
+<span class="lineNum">    422 </span><span class="lineNoCov">    0 / 3     : 	const int square_x = SQUARE_TO_X(square); </span>
+<span class="lineNum">    423 </span><span class="lineNoCov">    0 / 2     : 	const int square_y = SQUARE_TO_Y(square); </span>
+<span class="lineNum">    424 </span>              :  </span>
+<span class="lineNum">    425 </span><span class="lineNoCov">    0 / 2     : 	if (src-&gt;type == DISPLAY_UPDATE_DIFF) </span>
+<span class="lineNum">    426 </span><span class="lineNoCov">    0 / 1     : 		return this-&gt;DecodeDisplayDiff(src, square_x, square_y); </span>
+<span class="lineNum">    427 </span><span class="lineNoCov">    0 / 1     : 	else if (src-&gt;type == DISPLAY_UPDATE_RAW) </span>
+<span class="lineNum">    428 </span><span class="lineNoCov">    0 / 1     : 		return this-&gt;DecodeDisplayRaw(src, square_x, square_y); </span>
+<span class="lineNum">    429 </span><span class="lineNoCov">    0 / 1     : 	else if (src-&gt;type == DISPLAY_UPDATE_RLE) </span>
+<span class="lineNum">    430 </span><span class="lineNoCov">    0 / 1     : 		return this-&gt;DecodeDisplayRLE(src, square_x, square_y); </span>
+<span class="lineNum">    431 </span>              :  </span>
+<span class="lineNum">    432 </span>              : 	/* Error */ </span>
+<span class="lineNum">    433 </span>              : 	return false; </span>
+<span class="lineNum">    434 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    435 </span>              :  </span>
+<span class="lineNum">    436 </span>              : void Network::EncodeTextMessage(const char *str, bool broadcast) </span>
+<span class="lineNum">    437 </span><span class="lineNoCov">    0 / 4     : { </span>
+<span class="lineNum">    438 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *dst = (NetworkUpdate *)this-&gt;cur_ud; </span>
+<span class="lineNum">    439 </span>              : 	struct NetworkUpdateTextMessage *tm = (struct NetworkUpdateTextMessage*)dst-&gt;data; </span>
+<span class="lineNum">    440 </span><span class="lineNoCov">    0 / 1     : 	char *p = (char*)tm-&gt;data; </span>
+<span class="lineNum">    441 </span><span class="lineNoCov">    0 / 4     : 	size_t len = strlen(ThePrefs.NetworkName) + strlen(str) + 4; </span>
+<span class="lineNum">    442 </span>              :  </span>
+<span class="lineNum">    443 </span><span class="lineNoCov">    0 / 1     : 	tm-&gt;flags = broadcast ? NETWORK_UPDATE_TEXT_MESSAGE_BROADCAST : 0; </span>
+<span class="lineNum">    444 </span><span class="lineNoCov">    0 / 1     : 	len += (len &amp; 3); </span>
+<span class="lineNum">    445 </span>              : 	dst = InitNetworkUpdate(dst, TEXT_MESSAGE, </span>
+<span class="lineNum">    446 </span>              : 			sizeof(NetworkUpdate) + sizeof(struct NetworkUpdateTextMessage) + len); </span>
+<span class="lineNum">    447 </span>              : 	memset(p, 0, len); </span>
+<span class="lineNum">    448 </span>              : 	snprintf(p, len - 1, &quot;%s: %s&quot;, ThePrefs.NetworkName, str); </span>
+<span class="lineNum">    449 </span>              :  </span>
+<span class="lineNum">    450 </span><span class="lineNoCov">    0 / 1     : 	if (broadcast) </span>
+<span class="lineNum">    451 </span>              : 	{ </span>
+<span class="lineNum">    452 </span>              : 		uint8_t *p_dst = (uint8_t *)dst; </span>
+<span class="lineNum">    453 </span>              : 		NetworkUpdate *stop = InitNetworkUpdate((NetworkUpdate*)(p_dst + dst-&gt;size), </span>
+<span class="lineNum">    454 </span><span class="lineNoCov">    0 / 1     : 				STOP, sizeof(NetworkUpdate)); </span>
+<span class="lineNum">    455 </span>              :  </span>
+<span class="lineNum">    456 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;MarshalData(dst); </span>
+<span class="lineNum">    457 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;MarshalData(stop); </span>
+<span class="lineNum">    458 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;SendUpdateDirect(&amp;this-&gt;server_addr, dst); </span>
+<span class="lineNum">    459 </span>              : 	} </span>
+<span class="lineNum">    460 </span>              : 	else </span>
+<span class="lineNum">    461 </span>              : 		this-&gt;AddNetworkUpdate(dst); </span>
+<span class="lineNum">    462 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    463 </span>              :  </span>
+<span class="lineNum">    464 </span>              :  </span>
+<span class="lineNum">    465 </span>              : void Network::EnqueueSound(uint32 linecnt_diff, uint8 adr, uint8 val) </span>
+<span class="lineNum">    466 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    467 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdateSoundInfo *cur = &amp;this-&gt;sound_active[this-&gt;sound_head]; </span>
+<span class="lineNum">    468 </span>              :  </span>
+<span class="lineNum">    469 </span><span class="lineNoCov">    0 / 2     : 	cur-&gt;adr = adr; </span>
+<span class="lineNum">    470 </span><span class="lineNoCov">    0 / 1     : 	cur-&gt;val = val; </span>
+<span class="lineNum">    471 </span><span class="lineNoCov">    0 / 1     : 	cur-&gt;delay_cycles = linecnt_diff; </span>
+<span class="lineNum">    472 </span>              :  </span>
+<span class="lineNum">    473 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;sound_head++; </span>
+<span class="lineNum">    474 </span>              :  </span>
+<span class="lineNum">    475 </span><span class="lineNoCov">    0 / 2     : 	if (this-&gt;sound_head &gt;= NETWORK_SOUND_BUF_SIZE) </span>
+<span class="lineNum">    476 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;sound_head = 0; </span>
+<span class="lineNum">    477 </span>              :  </span>
+<span class="lineNum">    478 </span>              : 	/* Head has reached tail */ </span>
+<span class="lineNum">    479 </span><span class="lineNoCov">    0 / 1     : 	if (this-&gt;sound_head == this-&gt;sound_tail) </span>
+<span class="lineNum">    480 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;sound_tail = (this-&gt;sound_head + 1) % NETWORK_SOUND_BUF_SIZE; </span>
+<span class="lineNum">    481 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    482 </span>              :  </span>
+<span class="lineNum">    483 </span>              : void Network::RegisterSidWrite(uint32 linecnt, uint8 adr, uint8 val) </span>
+<span class="lineNum">    484 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    485 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;EnqueueSound(linecnt - this-&gt;sound_last_cycles, adr, val); </span>
+<span class="lineNum">    486 </span>              :  </span>
+<span class="lineNum">    487 </span>              : 	/* Update the cycle counter */ </span>
+<span class="lineNum">    488 </span><span class="lineNoCov">    0 / 1     : 	sound_last_cycles = linecnt; </span>
+<span class="lineNum">    489 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    490 </span>              :  </span>
+<span class="lineNum">    491 </span>              : void Network::FlushSound(void) </span>
+<span class="lineNum">    492 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    493 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *dst = this-&gt;cur_ud; </span>
+<span class="lineNum">    494 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdateSound *snd = (NetworkUpdateSound *)dst-&gt;data; </span>
+<span class="lineNum">    495 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdateSoundInfo *snd_info = snd-&gt;info; </span>
+<span class="lineNum">    496 </span>              :  </span>
+<span class="lineNum">    497 </span><span class="lineNoCov">    0 / 1     : 	snd-&gt;flags = 0; </span>
+<span class="lineNum">    498 </span><span class="lineNoCov">    0 / 4     : 	snd-&gt;n_items = this-&gt;sound_head - this-&gt;sound_tail; </span>
+<span class="lineNum">    499 </span>              :  </span>
+<span class="lineNum">    500 </span><span class="lineNoCov">    0 / 2     : 	if (this-&gt;sound_head &lt; this-&gt;sound_tail) { </span>
+<span class="lineNum">    501 </span><span class="lineNoCov">    0 / 1     : 		snd-&gt;n_items = NETWORK_SOUND_BUF_SIZE - this-&gt;sound_tail + this-&gt;sound_head; </span>
+<span class="lineNum">    502 </span>              : 		memcpy(snd_info, &amp;this-&gt;sound_active[this-&gt;sound_tail], </span>
+<span class="lineNum">    503 </span>              : 				(NETWORK_SOUND_BUF_SIZE - this-&gt;sound_tail) * sizeof(struct NetworkUpdateSoundInfo)); </span>
+<span class="lineNum">    504 </span>              : 		memcpy(snd_info + NETWORK_SOUND_BUF_SIZE - this-&gt;sound_tail, </span>
+<span class="lineNum">    505 </span>              : 				&amp;this-&gt;sound_active[0], </span>
+<span class="lineNum">    506 </span>              : 				this-&gt;sound_head * sizeof(struct NetworkUpdateSoundInfo)); </span>
+<span class="lineNum">    507 </span>              : 	} </span>
+<span class="lineNum">    508 </span>              : 	else </span>
+<span class="lineNum">    509 </span>              : 	{ </span>
+<span class="lineNum">    510 </span>              : 		memcpy(snd_info, &amp;this-&gt;sound_active[this-&gt;sound_tail], </span>
+<span class="lineNum">    511 </span>              : 				(this-&gt;sound_head - this-&gt;sound_tail) * sizeof(struct NetworkUpdateSoundInfo)); </span>
+<span class="lineNum">    512 </span>              : 	} </span>
+<span class="lineNum">    513 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;sound_tail = this-&gt;sound_head; </span>
+<span class="lineNum">    514 </span>              :  </span>
+<span class="lineNum">    515 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;sound_last_send = SDL_GetTicks(); </span>
+<span class="lineNum">    516 </span>              :  </span>
+<span class="lineNum">    517 </span>              : 	InitNetworkUpdate(dst, SOUND_UPDATE, sizeof(NetworkUpdate) + </span>
+<span class="lineNum">    518 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdateSound) + sizeof(NetworkUpdateSoundInfo) * snd-&gt;n_items); </span>
+<span class="lineNum">    519 </span>              : 	this-&gt;AddNetworkUpdate(dst); </span>
+<span class="lineNum">    520 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;sound_last_cycles = TheC64-&gt;linecnt; </span>
+<span class="lineNum">    521 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    522 </span>              :  </span>
+<span class="lineNum">    523 </span>              : struct NetworkUpdateSoundInfo *Network::DequeueSound() </span>
+<span class="lineNum">    524 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    525 </span>              : 	struct NetworkUpdateSoundInfo *out; </span>
+<span class="lineNum">    526 </span>              :  </span>
+<span class="lineNum">    527 </span><span class="lineNoCov">    0 / 2     : 	if (this-&gt;sound_tail == this-&gt;sound_head) </span>
+<span class="lineNum">    528 </span>              : 		return NULL; </span>
+<span class="lineNum">    529 </span>              : 	out = &amp;this-&gt;sound_active[this-&gt;sound_tail]; </span>
+<span class="lineNum">    530 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;sound_tail = (this-&gt;sound_tail + 1) % NETWORK_SOUND_BUF_SIZE; </span>
+<span class="lineNum">    531 </span>              :  </span>
+<span class="lineNum">    532 </span><span class="lineNoCov">    0 / 1     : 	return out; </span>
+<span class="lineNum">    533 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    534 </span>              :  </span>
+<span class="lineNum">    535 </span>              : void Network::EncodeJoystickUpdate(uint8 v) </span>
+<span class="lineNum">    536 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    537 </span><span class="lineNoCov">    0 / 1     : 	struct NetworkUpdate *dst = this-&gt;cur_ud; </span>
+<span class="lineNum">    538 </span>              : 	struct NetworkUpdateJoystick *j = (NetworkUpdateJoystick *)dst-&gt;data; </span>
+<span class="lineNum">    539 </span>              :  </span>
+<span class="lineNum">    540 </span><span class="lineNoCov">    0 / 3     : 	if (TheC64-&gt;network_connection_type == MASTER || this-&gt;cur_joystick_data == v) </span>
+<span class="lineNum">    541 </span>              : 		return; </span>
+<span class="lineNum">    542 </span>              : 	dst = InitNetworkUpdate(dst, JOYSTICK_UPDATE, </span>
+<span class="lineNum">    543 </span>              : 			sizeof(NetworkUpdate) + sizeof(NetworkUpdateJoystick)); </span>
+<span class="lineNum">    544 </span><span class="lineNoCov">    0 / 1     : 	j-&gt;val = v; </span>
+<span class="lineNum">    545 </span>              :  </span>
+<span class="lineNum">    546 </span>              : 	this-&gt;AddNetworkUpdate(dst); </span>
+<span class="lineNum">    547 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;cur_joystick_data = v; </span>
+<span class="lineNum">    548 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    549 </span>              :  </span>
+<span class="lineNum">    550 </span>              : void Network::ResetNetworkUpdate(void) </span>
+<span class="lineNum">    551 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    552 </span>              : 	memset(this-&gt;ud, 0, NETWORK_UPDATE_SIZE); </span>
+<span class="lineNum">    553 </span>              : 	memset(this-&gt;receive_ud, 0, NETWORK_UPDATE_SIZE); </span>
+<span class="lineNum">    554 </span>              :  </span>
+<span class="lineNum">    555 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;cur_ud = InitNetworkUpdate(this-&gt;ud, STOP, sizeof(NetworkUpdate)); </span>
+<span class="lineNum">    556 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    557 </span>              :  </span>
+<span class="lineNum">    558 </span>              : void Network::DrawTransferredBlocks(SDL_Surface *screen) </span>
+<span class="lineNum">    559 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    560 </span>              : 	const int x_border = (DISPLAY_X - FULL_DISPLAY_X / 2); </span>
+<span class="lineNum">    561 </span>              : 	const int y_border = (DISPLAY_Y - FULL_DISPLAY_Y / 2); </span>
+<span class="lineNum">    562 </span>              :  </span>
+<span class="lineNum">    563 </span><span class="lineNoCov">    0 / 1     : 	for (int sq = 0; sq &lt; N_SQUARES_W * N_SQUARES_H; sq++) </span>
+<span class="lineNum">    564 </span>              : 	{ </span>
+<span class="lineNum">    565 </span><span class="lineNoCov">    0 / 1     : 		int x = SQUARE_TO_X(sq) * 2 - x_border; </span>
+<span class="lineNum">    566 </span><span class="lineNoCov">    0 / 2     : 		int y = SQUARE_TO_Y(sq) * 2 - y_border; </span>
+<span class="lineNum">    567 </span>              : 		int w = SQUARE_W * 2; </span>
+<span class="lineNum">    568 </span>              : 		int h = SQUARE_H * 2; </span>
+<span class="lineNum">    569 </span>              :  </span>
+<span class="lineNum">    570 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;square_updated[sq]) </span>
+<span class="lineNum">    571 </span>              : 		{ </span>
+<span class="lineNum">    572 </span><span class="lineNoCov">    0 / 3     : 			SDL_Rect l = {x,     y,     1, h}; </span>
+<span class="lineNum">    573 </span><span class="lineNoCov">    0 / 3     : 			SDL_Rect r = {x + w, y,     1, h}; </span>
+<span class="lineNum">    574 </span><span class="lineNoCov">    0 / 2     : 			SDL_Rect u = {x,     y,     w, 1}; </span>
+<span class="lineNum">    575 </span><span class="lineNoCov">    0 / 4     : 			SDL_Rect d = {x,     y + h, w, 1}; </span>
+<span class="lineNum">    576 </span>              : 			uint32 raw = this-&gt;square_updated[sq]; </span>
+<span class="lineNum">    577 </span><span class="lineNoCov">    0 / 4     : 			SDL_Rect size = {x,  y,  2 * ((raw &amp; 0xffff) / 17), 4}; </span>
+<span class="lineNum">    578 </span>              : 			uint32 color = 4; </span>
+<span class="lineNum">    579 </span>              :  </span>
+<span class="lineNum">    580 </span><span class="lineNoCov">    0 / 2     : 			if ((raw &gt;&gt; 16) == DISPLAY_UPDATE_RLE) </span>
+<span class="lineNum">    581 </span>              : 				color = 5; </span>
+<span class="lineNum">    582 </span><span class="lineNoCov">    0 / 1     : 			else if ((raw &gt;&gt; 16) == DISPLAY_UPDATE_DIFF) </span>
+<span class="lineNum">    583 </span>              : 				color = 6; </span>
+<span class="lineNum">    584 </span>              :  </span>
+<span class="lineNum">    585 </span><span class="lineNoCov">    0 / 3     : 			SDL_FillRect(screen, &amp;l, 19); </span>
+<span class="lineNum">    586 </span><span class="lineNoCov">    0 / 1     : 			SDL_FillRect(screen, &amp;r, 19); </span>
+<span class="lineNum">    587 </span><span class="lineNoCov">    0 / 1     : 			SDL_FillRect(screen, &amp;u, 19); </span>
+<span class="lineNum">    588 </span><span class="lineNoCov">    0 / 1     : 			SDL_FillRect(screen, &amp;d, 19); </span>
+<span class="lineNum">    589 </span>              :  </span>
+<span class="lineNum">    590 </span><span class="lineNoCov">    0 / 1     : 			SDL_FillRect(screen, &amp;size, color); </span>
+<span class="lineNum">    591 </span>              : 		} </span>
+<span class="lineNum">    592 </span>              : 	} </span>
+<span class="lineNum">    593 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    594 </span>              :  </span>
+<span class="lineNum">    595 </span>              : bool Network::ReceiveUpdate() </span>
+<span class="lineNum">    596 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    597 </span>              : 	struct timeval tv; </span>
+<span class="lineNum">    598 </span>              :  </span>
+<span class="lineNum">    599 </span>              : 	memset(&amp;tv, 0, sizeof(tv)); </span>
+<span class="lineNum">    600 </span><span class="lineNoCov">    0 / 1     : 	return this-&gt;ReceiveUpdate(this-&gt;receive_ud, NETWORK_UPDATE_SIZE, &amp;tv); </span>
+<span class="lineNum">    601 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    602 </span>              :  </span>
+<span class="lineNum">    603 </span>              : bool Network::ReceiveUpdate(struct timeval *tv) </span>
+<span class="lineNum">    604 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    605 </span><span class="lineNoCov">    0 / 1     : 	return this-&gt;ReceiveUpdate(this-&gt;receive_ud, NETWORK_UPDATE_SIZE, tv); </span>
+<span class="lineNum">    606 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    607 </span>              :  </span>
+<span class="lineNum">    608 </span>              : bool Network::ReceiveUpdate(NetworkUpdate *dst, size_t total_sz, </span>
+<span class="lineNum">    609 </span>              : 		struct timeval *tv) </span>
+<span class="lineNum">    610 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    611 </span><span class="lineNoCov">    0 / 1     : 	uint8 *p = (uint8*)dst; </span>
+<span class="lineNum">    612 </span>              : 	size_t sz_left = total_sz; </span>
+<span class="lineNum">    613 </span>              : 	size_t received = 0; </span>
+<span class="lineNum">    614 </span>              : 	bool has_stop = false; </span>
+<span class="lineNum">    615 </span>              :  </span>
+<span class="lineNum">    616 </span><span class="lineNoCov">    0 / 2     : 	if (sz_left &lt;= 0) </span>
+<span class="lineNum">    617 </span>              : 		return false; </span>
+<span class="lineNum">    618 </span>              :  </span>
+<span class="lineNum">    619 </span>              : 	/* Receive the header */ </span>
+<span class="lineNum">    620 </span>              : 	do { </span>
+<span class="lineNum">    621 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;Select(this-&gt;sock, tv) == false) </span>
+<span class="lineNum">    622 </span>              : 			return false; </span>
+<span class="lineNum">    623 </span>              : 		/* Only timeout the first run */ </span>
+<span class="lineNum">    624 </span>              : 		tv = NULL; </span>
+<span class="lineNum">    625 </span>              :  </span>
+<span class="lineNum">    626 </span>              : 		ssize_t actual_sz = this-&gt;ReceiveFrom(p, this-&gt;sock, </span>
+<span class="lineNum">    627 </span><span class="lineNoCov">    0 / 2     : 				4096, NULL); </span>
+<span class="lineNum">    628 </span><span class="lineNoCov">    0 / 2     : 		if (actual_sz &lt;= 0) </span>
+<span class="lineNum">    629 </span>              : 			return false; </span>
+<span class="lineNum">    630 </span>              :  </span>
+<span class="lineNum">    631 </span><span class="lineNoCov">    0 / 1     : 		received += actual_sz; </span>
+<span class="lineNum">    632 </span><span class="lineNoCov">    0 / 1     : 		if (ntohs(dst-&gt;magic) != FRODO_NETWORK_MAGIC) { </span>
+<span class="lineNum">    633 </span>              : 			printf(&quot;Packet with wrong magic received\n&quot;); </span>
+<span class="lineNum">    634 </span>              : 			return false; </span>
+<span class="lineNum">    635 </span>              : 		} </span>
+<span class="lineNum">    636 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;ScanDataForStop(dst, received) == true) </span>
+<span class="lineNum">    637 </span>              : 			break; </span>
+<span class="lineNum">    638 </span>              :  </span>
+<span class="lineNum">    639 </span>              : 		sz_left -= actual_sz; </span>
+<span class="lineNum">    640 </span><span class="lineNoCov">    0 / 1     : 		p = p + actual_sz; </span>
+<span class="lineNum">    641 </span>              : 	} while (!has_stop); </span>
+<span class="lineNum">    642 </span>              :  </span>
+<span class="lineNum">    643 </span><span class="lineNoCov">    0 / 1     : 	if (this-&gt;DeMarshalAllData(dst, received) == false) { </span>
+<span class="lineNum">    644 </span>              : 		printf(&quot;Demarshal error\n&quot;); </span>
+<span class="lineNum">    645 </span><span class="lineNoCov">    0 / 2     : 		return false; </span>
+<span class="lineNum">    646 </span>              : 	} </span>
+<span class="lineNum">    647 </span>              :  </span>
+<span class="lineNum">    648 </span>              : 	return true; </span>
+<span class="lineNum">    649 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    650 </span>              :  </span>
+<span class="lineNum">    651 </span>              :  </span>
+<span class="lineNum">    652 </span>              : bool Network::SendUpdateDirect(struct sockaddr_in *addr, NetworkUpdate *src) </span>
+<span class="lineNum">    653 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    654 </span>              : 	uint8_t *p = (uint8_t *)src; </span>
+<span class="lineNum">    655 </span>              : 	size_t sz; </span>
+<span class="lineNum">    656 </span>              : 	ssize_t v; </span>
+<span class="lineNum">    657 </span>              :  </span>
+<span class="lineNum">    658 </span><span class="lineNoCov">    0 / 1     : 	sz = ntohl(src-&gt;size) + sizeof(NetworkUpdate); /* stop */ </span>
+<span class="lineNum">    659 </span><span class="lineNoCov">    0 / 1     : 	if (sz &lt;= 0) </span>
+<span class="lineNum">    660 </span>              : 		return false; </span>
+<span class="lineNum">    661 </span>              :  </span>
+<span class="lineNum">    662 </span>              : 	v = this-&gt;SendTo((void*)p, this-&gt;sock, </span>
+<span class="lineNum">    663 </span><span class="lineNoCov">    0 / 1     : 			sz, addr); </span>
+<span class="lineNum">    664 </span><span class="lineNoCov">    0 / 1     : 	if (v &lt;= 0 || (size_t)v != sz) </span>
+<span class="lineNum">    665 </span>              : 		return false; </span>
+<span class="lineNum">    666 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;traffic += sz; </span>
+<span class="lineNum">    667 </span>              :  </span>
+<span class="lineNum">    668 </span><span class="lineNoCov">    0 / 1     : 	return true; </span>
+<span class="lineNum">    669 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    670 </span>              :  </span>
+<span class="lineNum">    671 </span>              : bool Network::SendUpdate(struct sockaddr_in *addr) </span>
+<span class="lineNum">    672 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    673 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *src = this-&gt;ud; </span>
+<span class="lineNum">    674 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *stop = InitNetworkUpdate(this-&gt;cur_ud, STOP, sizeof(NetworkUpdate)); </span>
+<span class="lineNum">    675 </span>              : 	size_t sz; </span>
+<span class="lineNum">    676 </span>              :  </span>
+<span class="lineNum">    677 </span>              : 	/* Nothing to send, that's OK */ </span>
+<span class="lineNum">    678 </span><span class="lineNoCov">    0 / 3     : 	if ( src == stop ) </span>
+<span class="lineNum">    679 </span>              : 		return true; </span>
+<span class="lineNum">    680 </span>              :  </span>
+<span class="lineNum">    681 </span>              : 	/* Add a stop at the end of the update */ </span>
+<span class="lineNum">    682 </span>              : 	this-&gt;AddNetworkUpdate(stop); </span>
+<span class="lineNum">    683 </span>              :  </span>
+<span class="lineNum">    684 </span><span class="lineNoCov">    0 / 1     : 	if (this-&gt;MarshalAllData(src) == false) </span>
+<span class="lineNum">    685 </span>              : 		return false; </span>
+<span class="lineNum">    686 </span>              :  </span>
+<span class="lineNum">    687 </span>              : 	sz = this-&gt;GetNetworkUpdateSize(); </span>
+<span class="lineNum">    688 </span><span class="lineNoCov">    0 / 1     : 	if (sz &lt;= 0) </span>
+<span class="lineNum">    689 </span>              : 		return false; </span>
+<span class="lineNum">    690 </span>              : 	size_t cur_sz = 0; </span>
+<span class="lineNum">    691 </span><span class="lineNoCov">    0 / 1     : 	uint8 *p = (uint8*)src; </span>
+<span class="lineNum">    692 </span><span class="lineNoCov">    0 / 1     : 	do </span>
+<span class="lineNum">    693 </span>              : 	{ </span>
+<span class="lineNum">    694 </span><span class="lineNoCov">    0 / 1     : 		size_t size_to_send = this-&gt;FillNetworkBuffer((NetworkUpdate*)p); </span>
+<span class="lineNum">    695 </span>              : 		ssize_t v; </span>
+<span class="lineNum">    696 </span>              :  </span>
+<span class="lineNum">    697 </span>              : 		v = this-&gt;SendTo((void*)p, this-&gt;sock, </span>
+<span class="lineNum">    698 </span><span class="lineNoCov">    0 / 1     : 				size_to_send, addr); </span>
+<span class="lineNum">    699 </span><span class="lineNoCov">    0 / 1     : 		if (v &lt;= 0 || (size_t)v != size_to_send) </span>
+<span class="lineNum">    700 </span>              : 			return false; </span>
+<span class="lineNum">    701 </span><span class="lineNoCov">    0 / 1     : 		cur_sz += size_to_send; </span>
+<span class="lineNum">    702 </span><span class="lineNoCov">    0 / 1     : 		p += size_to_send; </span>
+<span class="lineNum">    703 </span>              : 	} while (cur_sz &lt; sz); </span>
+<span class="lineNum">    704 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;traffic += cur_sz; </span>
+<span class="lineNum">    705 </span>              :  </span>
+<span class="lineNum">    706 </span><span class="lineNoCov">    0 / 1     : 	return true; </span>
+<span class="lineNum">    707 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    708 </span>              :  </span>
+<span class="lineNum">    709 </span>              : size_t Network::FillNetworkBuffer(NetworkUpdate *cur) </span>
+<span class="lineNum">    710 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    711 </span>              : 	size_t sz = 0; </span>
+<span class="lineNum">    712 </span>              : 	size_t cur_sz; </span>
+<span class="lineNum">    713 </span>              : 	int cnt = 0; </span>
+<span class="lineNum">    714 </span>              :  </span>
+<span class="lineNum">    715 </span><span class="lineNoCov">    0 / 1     : 	while(1) </span>
+<span class="lineNum">    716 </span>              : 	{ </span>
+<span class="lineNum">    717 </span><span class="lineNoCov">    0 / 1     : 		cur_sz = ntohl(cur-&gt;size); </span>
+<span class="lineNum">    718 </span>              :  </span>
+<span class="lineNum">    719 </span><span class="lineNoCov">    0 / 1     : 		if (sz + cur_sz &gt;= 4096) </span>
+<span class="lineNum">    720 </span>              : 			break; </span>
+<span class="lineNum">    721 </span>              :  </span>
+<span class="lineNum">    722 </span>              : 		cnt++; </span>
+<span class="lineNum">    723 </span>              : 		sz += cur_sz; </span>
+<span class="lineNum">    724 </span><span class="lineNoCov">    0 / 1     : 		if (ntohs(cur-&gt;type) == STOP) </span>
+<span class="lineNum">    725 </span>              : 			break; </span>
+<span class="lineNum">    726 </span><span class="lineNoCov">    0 / 1     : 		cur = (NetworkUpdate*)((uint8*)cur + cur_sz); </span>
+<span class="lineNum">    727 </span>              : 	} </span>
+<span class="lineNum">    728 </span>              : 	assert(sz &lt;= 4096); </span>
+<span class="lineNum">    729 </span>              :  </span>
+<span class="lineNum">    730 </span>              : 	return sz; </span>
+<span class="lineNum">    731 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    732 </span>              :  </span>
+<span class="lineNum">    733 </span>              :  </span>
+<span class="lineNum">    734 </span>              : void Network::AddNetworkUpdate(NetworkUpdate *update) </span>
+<span class="lineNum">    735 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    736 </span>              : 	uint8 *next = (uint8*)this-&gt;cur_ud + update-&gt;size; </span>
+<span class="lineNum">    737 </span>              :  </span>
+<span class="lineNum">    738 </span><span class="lineNoCov">    0 / 12    : 	this-&gt;cur_ud = (NetworkUpdate*)next; </span>
+<span class="lineNum">    739 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    740 </span>              :  </span>
+<span class="lineNum">    741 </span>              : bool Network::MarshalData(NetworkUpdate *p) </span>
+<span class="lineNum">    742 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    743 </span><span class="lineNoCov">    0 / 2     : 	switch (p-&gt;type) </span>
+<span class="lineNum">    744 </span>              : 	{ </span>
+<span class="lineNum">    745 </span>              : 	case DISPLAY_UPDATE_RAW: </span>
+<span class="lineNum">    746 </span>              : 	case DISPLAY_UPDATE_RLE: </span>
+<span class="lineNum">    747 </span>              : 	case DISPLAY_UPDATE_DIFF: </span>
+<span class="lineNum">    748 </span>              : 	case JOYSTICK_UPDATE: </span>
+<span class="lineNum">    749 </span>              : 	case DISCONNECT: </span>
+<span class="lineNum">    750 </span>              : 	case CONNECT_TO_PEER: </span>
+<span class="lineNum">    751 </span>              : 	case TEXT_MESSAGE: </span>
+<span class="lineNum">    752 </span>              : 	case STOP: </span>
+<span class="lineNum">    753 </span>              : 		break; </span>
+<span class="lineNum">    754 </span>              : 	case BANDWIDTH_PING: </span>
+<span class="lineNum">    755 </span>              : 	case BANDWIDTH_ACK: </span>
+<span class="lineNum">    756 </span>              : 	case PING: </span>
+<span class="lineNum">    757 </span>              : 	case ACK: </span>
+<span class="lineNum">    758 </span>              : 	{ </span>
+<span class="lineNum">    759 </span>              : 		NetworkUpdatePingAck *pa = (NetworkUpdatePingAck *)p-&gt;data; </span>
+<span class="lineNum">    760 </span><span class="lineNoCov">    0 / 1     : 		pa-&gt;seq = htonl(pa-&gt;seq); </span>
+<span class="lineNum">    761 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    762 </span>              : 	case SELECT_PEER: </span>
+<span class="lineNum">    763 </span>              : 	{ </span>
+<span class="lineNum">    764 </span>              : 		NetworkUpdateSelectPeer *sp = (NetworkUpdateSelectPeer *)p-&gt;data; </span>
+<span class="lineNum">    765 </span><span class="lineNoCov">    0 / 1     : 		sp-&gt;server_id = htonl(sp-&gt;server_id); </span>
+<span class="lineNum">    766 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    767 </span>              : 	case REGISTER_DATA: </span>
+<span class="lineNum">    768 </span>              : 	{ </span>
+<span class="lineNum">    769 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateRegisterData *ds = (NetworkUpdateRegisterData *)p-&gt;data; </span>
+<span class="lineNum">    770 </span>              :  </span>
+<span class="lineNum">    771 </span><span class="lineNoCov">    0 / 1     : 		ds-&gt;key = htonl(ds-&gt;key); </span>
+<span class="lineNum">    772 </span><span class="lineNoCov">    0 / 1     : 		ds-&gt;metadata = htonl(ds-&gt;metadata); </span>
+<span class="lineNum">    773 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    774 </span>              : 	case LIST_PEERS: </span>
+<span class="lineNum">    775 </span>              : 	{ </span>
+<span class="lineNum">    776 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateListPeers *lp = (NetworkUpdateListPeers *)p-&gt;data; </span>
+<span class="lineNum">    777 </span><span class="lineNoCov">    0 / 3     : 		for (unsigned int i = 0; i &lt; lp-&gt;n_peers; i++) </span>
+<span class="lineNum">    778 </span>              : 		{ </span>
+<span class="lineNum">    779 </span>              : 			NetworkUpdatePeerInfo *peer = &amp;lp-&gt;peers[i]; </span>
+<span class="lineNum">    780 </span>              :  </span>
+<span class="lineNum">    781 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;key = htons(peer-&gt;key); </span>
+<span class="lineNum">    782 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;private_port = htons(peer-&gt;private_port); </span>
+<span class="lineNum">    783 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;public_port = htons(peer-&gt;public_port); </span>
+<span class="lineNum">    784 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;is_master = htons(peer-&gt;is_master); </span>
+<span class="lineNum">    785 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;server_id = htonl(peer-&gt;server_id); </span>
+<span class="lineNum">    786 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;version = htonl(peer-&gt;version); </span>
+<span class="lineNum">    787 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;avatar = htons(peer-&gt;avatar); </span>
+<span class="lineNum">    788 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;screenshot_key = htonl(peer-&gt;screenshot_key); </span>
+<span class="lineNum">    789 </span>              : 		} </span>
+<span class="lineNum">    790 </span><span class="lineNoCov">    0 / 2     : 		lp-&gt;n_peers = htonl(lp-&gt;n_peers); </span>
+<span class="lineNum">    791 </span><span class="lineNoCov">    0 / 3     : 		lp-&gt;your_port = htons(lp-&gt;your_port); </span>
+<span class="lineNum">    792 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    793 </span>              : 	case CONNECT_TO_BROKER: </span>
+<span class="lineNum">    794 </span>              : 	{ </span>
+<span class="lineNum">    795 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdatePeerInfo *pi = (NetworkUpdatePeerInfo *)p-&gt;data; </span>
+<span class="lineNum">    796 </span>              :  </span>
+<span class="lineNum">    797 </span>              : 		/* The rest is simply ignored */ </span>
+<span class="lineNum">    798 </span><span class="lineNoCov">    0 / 1     : 		pi-&gt;is_master = htons(pi-&gt;is_master); </span>
+<span class="lineNum">    799 </span><span class="lineNoCov">    0 / 1     : 		pi-&gt;key = htons(pi-&gt;key); </span>
+<span class="lineNum">    800 </span><span class="lineNoCov">    0 / 1     : 		pi-&gt;version = htonl(pi-&gt;version); </span>
+<span class="lineNum">    801 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    802 </span>              : 	case SOUND_UPDATE: </span>
+<span class="lineNum">    803 </span>              : 	{ </span>
+<span class="lineNum">    804 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateSound *snd = (NetworkUpdateSound *)p-&gt;data; </span>
+<span class="lineNum">    805 </span>              : 		NetworkUpdateSoundInfo *info = (NetworkUpdateSoundInfo *)snd-&gt;info; </span>
+<span class="lineNum">    806 </span><span class="lineNoCov">    0 / 1     : 		int items = snd-&gt;n_items; </span>
+<span class="lineNum">    807 </span>              :  </span>
+<span class="lineNum">    808 </span><span class="lineNoCov">    0 / 1     : 		snd-&gt;flags = htons(snd-&gt;flags); </span>
+<span class="lineNum">    809 </span><span class="lineNoCov">    0 / 1     : 		snd-&gt;n_items = htons(snd-&gt;n_items); </span>
+<span class="lineNum">    810 </span>              :  </span>
+<span class="lineNum">    811 </span><span class="lineNoCov">    0 / 2     : 		for (int i = 0; i &lt; items; i++) </span>
+<span class="lineNum">    812 </span>              : 		{ </span>
+<span class="lineNum">    813 </span>              : 			NetworkUpdateSoundInfo *cur = &amp;info[i]; </span>
+<span class="lineNum">    814 </span>              :  </span>
+<span class="lineNum">    815 </span><span class="lineNoCov">    0 / 1     : 			cur-&gt;delay_cycles = htons(cur-&gt;delay_cycles); </span>
+<span class="lineNum">    816 </span>              : 		} </span>
+<span class="lineNum">    817 </span>              : 	} break; </span>
+<span class="lineNum">    818 </span>              : 	default: </span>
+<span class="lineNum">    819 </span>              : 		/* Unknown data... */ </span>
+<span class="lineNum">    820 </span>              : 		fprintf(stderr, &quot;Got unknown data %d while marshalling. Something is wrong\n&quot;, </span>
+<span class="lineNum">    821 </span>              : 				p-&gt;type); </span>
+<span class="lineNum">    822 </span>              : 		return false; </span>
+<span class="lineNum">    823 </span>              : 	} </span>
+<span class="lineNum">    824 </span>              :  </span>
+<span class="lineNum">    825 </span><span class="lineNoCov">    0 / 3     : 	p-&gt;size = htonl(p-&gt;size); </span>
+<span class="lineNum">    826 </span><span class="lineNoCov">    0 / 1     : 	p-&gt;magic = htons(p-&gt;magic); </span>
+<span class="lineNum">    827 </span><span class="lineNoCov">    0 / 2     : 	p-&gt;type = htons(p-&gt;type); </span>
+<span class="lineNum">    828 </span>              :  </span>
+<span class="lineNum">    829 </span>              : 	return true; </span>
+<span class="lineNum">    830 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    831 </span>              :  </span>
+<span class="lineNum">    832 </span>              : bool Network::MarshalAllData(NetworkUpdate *ud) </span>
+<span class="lineNum">    833 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    834 </span>              : 	NetworkUpdate *p = ud; </span>
+<span class="lineNum">    835 </span>              :  </span>
+<span class="lineNum">    836 </span>              : 	/* Already marshalled? */ </span>
+<span class="lineNum">    837 </span><span class="lineNoCov">    0 / 2     : 	if (ntohs(p-&gt;magic) == FRODO_NETWORK_MAGIC) { </span>
+<span class="lineNum">    838 </span>              : 		return true; </span>
+<span class="lineNum">    839 </span>              : 	} </span>
+<span class="lineNum">    840 </span>              :  </span>
+<span class="lineNum">    841 </span><span class="lineNoCov">    0 / 1     : 	while (p-&gt;type != STOP) </span>
+<span class="lineNum">    842 </span>              : 	{ </span>
+<span class="lineNum">    843 </span>              : 		NetworkUpdate *nxt = this-&gt;GetNext(p); </span>
+<span class="lineNum">    844 </span>              :  </span>
+<span class="lineNum">    845 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;MarshalData(p) == false) </span>
+<span class="lineNum">    846 </span>              : 			return false; </span>
+<span class="lineNum">    847 </span>              : 		p = nxt; </span>
+<span class="lineNum">    848 </span>              : 	} </span>
+<span class="lineNum">    849 </span>              :  </span>
+<span class="lineNum">    850 </span>              : 	/* The stop tag */ </span>
+<span class="lineNum">    851 </span><span class="lineNoCov">    0 / 2     : 	return this-&gt;MarshalData(p); </span>
+<span class="lineNum">    852 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    853 </span>              :  </span>
+<span class="lineNum">    854 </span>              : bool Network::DeMarshalData(NetworkUpdate *p) </span>
+<span class="lineNum">    855 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    856 </span><span class="lineNoCov">    0 / 3     : 	p-&gt;size = ntohl(p-&gt;size); </span>
+<span class="lineNum">    857 </span><span class="lineNoCov">    0 / 3     : 	p-&gt;magic = ntohs(p-&gt;magic); </span>
+<span class="lineNum">    858 </span><span class="lineNoCov">    0 / 3     : 	p-&gt;type = ntohs(p-&gt;type); </span>
+<span class="lineNum">    859 </span>              :  </span>
+<span class="lineNum">    860 </span><span class="lineNoCov">    0 / 3     : 	if (p-&gt;magic != FRODO_NETWORK_MAGIC) </span>
+<span class="lineNum">    861 </span>              : 		return false; </span>
+<span class="lineNum">    862 </span>              :  </span>
+<span class="lineNum">    863 </span><span class="lineNoCov">    0 / 2     : 	switch (p-&gt;type) </span>
+<span class="lineNum">    864 </span>              : 	{ </span>
+<span class="lineNum">    865 </span>              : 	case DISPLAY_UPDATE_RAW: </span>
+<span class="lineNum">    866 </span>              : 	case DISPLAY_UPDATE_RLE: </span>
+<span class="lineNum">    867 </span>              : 	case DISPLAY_UPDATE_DIFF: </span>
+<span class="lineNum">    868 </span>              : 	case JOYSTICK_UPDATE: </span>
+<span class="lineNum">    869 </span>              : 	case DISCONNECT: </span>
+<span class="lineNum">    870 </span>              : 	case CONNECT_TO_PEER: </span>
+<span class="lineNum">    871 </span>              : 	case TEXT_MESSAGE: </span>
+<span class="lineNum">    872 </span>              : 	case STOP: </span>
+<span class="lineNum">    873 </span>              : 		/* Nothing to do, just bytes */ </span>
+<span class="lineNum">    874 </span>              : 		break; </span>
+<span class="lineNum">    875 </span>              : 	case BANDWIDTH_PING: </span>
+<span class="lineNum">    876 </span>              : 	case BANDWIDTH_ACK: </span>
+<span class="lineNum">    877 </span>              : 	case PING: </span>
+<span class="lineNum">    878 </span>              : 	case ACK: </span>
+<span class="lineNum">    879 </span>              : 	{ </span>
+<span class="lineNum">    880 </span>              : 		NetworkUpdatePingAck *pa = (NetworkUpdatePingAck *)p-&gt;data; </span>
+<span class="lineNum">    881 </span><span class="lineNoCov">    0 / 1     : 		pa-&gt;seq = ntohl(pa-&gt;seq); </span>
+<span class="lineNum">    882 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    883 </span>              : 	case SELECT_PEER: </span>
+<span class="lineNum">    884 </span>              : 	{ </span>
+<span class="lineNum">    885 </span>              : 		NetworkUpdateSelectPeer *sp = (NetworkUpdateSelectPeer *)p-&gt;data; </span>
+<span class="lineNum">    886 </span><span class="lineNoCov">    0 / 1     : 		sp-&gt;server_id = ntohl(sp-&gt;server_id); </span>
+<span class="lineNum">    887 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    888 </span>              : 	case REGISTER_DATA: </span>
+<span class="lineNum">    889 </span>              : 	{ </span>
+<span class="lineNum">    890 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateRegisterData *ds = (NetworkUpdateRegisterData *)p-&gt;data; </span>
+<span class="lineNum">    891 </span>              :  </span>
+<span class="lineNum">    892 </span><span class="lineNoCov">    0 / 1     : 		ds-&gt;key = ntohl(ds-&gt;key); </span>
+<span class="lineNum">    893 </span><span class="lineNoCov">    0 / 1     : 		ds-&gt;metadata = ntohl(ds-&gt;metadata); </span>
+<span class="lineNum">    894 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    895 </span>              : 	case LIST_PEERS: </span>
+<span class="lineNum">    896 </span>              : 	{ </span>
+<span class="lineNum">    897 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateListPeers *lp = (NetworkUpdateListPeers *)p-&gt;data; </span>
+<span class="lineNum">    898 </span>              :  </span>
+<span class="lineNum">    899 </span><span class="lineNoCov">    0 / 3     : 		lp-&gt;n_peers = ntohl(lp-&gt;n_peers); </span>
+<span class="lineNum">    900 </span><span class="lineNoCov">    0 / 3     : 		for (unsigned int i = 0; i &lt; lp-&gt;n_peers; i++) </span>
+<span class="lineNum">    901 </span>              : 		{ </span>
+<span class="lineNum">    902 </span>              : 			NetworkUpdatePeerInfo *peer = &amp;lp-&gt;peers[i]; </span>
+<span class="lineNum">    903 </span>              :  </span>
+<span class="lineNum">    904 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;key = ntohs(peer-&gt;key); </span>
+<span class="lineNum">    905 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;private_port = ntohs(peer-&gt;private_port); </span>
+<span class="lineNum">    906 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;public_port = ntohs(peer-&gt;public_port); </span>
+<span class="lineNum">    907 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;is_master = ntohs(peer-&gt;is_master); </span>
+<span class="lineNum">    908 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;server_id = ntohl(peer-&gt;server_id); </span>
+<span class="lineNum">    909 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;version = ntohl(peer-&gt;version); </span>
+<span class="lineNum">    910 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;avatar = ntohs(peer-&gt;avatar); </span>
+<span class="lineNum">    911 </span><span class="lineNoCov">    0 / 1     : 			peer-&gt;screenshot_key = ntohl(peer-&gt;screenshot_key); </span>
+<span class="lineNum">    912 </span>              : 		} </span>
+<span class="lineNum">    913 </span><span class="lineNoCov">    0 / 1     : 		lp-&gt;your_port = ntohs(lp-&gt;your_port); </span>
+<span class="lineNum">    914 </span><span class="lineNoCov">    0 / 1     : 	} break; </span>
+<span class="lineNum">    915 </span>              : 	case SOUND_UPDATE: </span>
+<span class="lineNum">    916 </span>              : 	{ </span>
+<span class="lineNum">    917 </span><span class="lineNoCov">    0 / 1     : 		NetworkUpdateSound *snd = (NetworkUpdateSound *)p-&gt;data; </span>
+<span class="lineNum">    918 </span>              : 		NetworkUpdateSoundInfo *info = (NetworkUpdateSoundInfo *)snd-&gt;info; </span>
+<span class="lineNum">    919 </span>              :  </span>
+<span class="lineNum">    920 </span><span class="lineNoCov">    0 / 3     : 		snd-&gt;flags = ntohs(snd-&gt;flags); </span>
+<span class="lineNum">    921 </span><span class="lineNoCov">    0 / 3     : 		snd-&gt;n_items = ntohs(snd-&gt;n_items); </span>
+<span class="lineNum">    922 </span><span class="lineNoCov">    0 / 3     : 		for (unsigned int i = 0; i &lt; snd-&gt;n_items; i++) </span>
+<span class="lineNum">    923 </span>              : 		{ </span>
+<span class="lineNum">    924 </span>              : 			NetworkUpdateSoundInfo *cur = &amp;info[i]; </span>
+<span class="lineNum">    925 </span>              :  </span>
+<span class="lineNum">    926 </span><span class="lineNoCov">    0 / 1     : 			cur-&gt;delay_cycles = ntohs(cur-&gt;delay_cycles); </span>
+<span class="lineNum">    927 </span>              : 		} </span>
+<span class="lineNum">    928 </span>              : 	} break; </span>
+<span class="lineNum">    929 </span>              : 	default: </span>
+<span class="lineNum">    930 </span>              : 		/* Unknown data... */ </span>
+<span class="lineNum">    931 </span>              : 		printf(&quot;Got unknown data: %d\n&quot;, p-&gt;type); </span>
+<span class="lineNum">    932 </span><span class="lineNoCov">    0 / 2     : 		return false; </span>
+<span class="lineNum">    933 </span>              : 	} </span>
+<span class="lineNum">    934 </span>              :  </span>
+<span class="lineNum">    935 </span>              : 	return true; </span>
+<span class="lineNum">    936 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    937 </span>              :  </span>
+<span class="lineNum">    938 </span>              : bool Network::DeMarshalAllData(NetworkUpdate *ud, size_t max_size) </span>
+<span class="lineNum">    939 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    940 </span>              : 	NetworkUpdate *p = ud; </span>
+<span class="lineNum">    941 </span>              : 	int cnt = 0; </span>
+<span class="lineNum">    942 </span>              : 	size_t sz = 0; </span>
+<span class="lineNum">    943 </span>              :  </span>
+<span class="lineNum">    944 </span><span class="lineNoCov">    0 / 2     : 	while (ntohs(p-&gt;type) != STOP &amp;&amp; </span>
+<span class="lineNum">    945 </span><span class="lineNoCov">    0 / 1     : 			sz + ntohl(p-&gt;size) &lt; max_size) </span>
+<span class="lineNum">    946 </span>              : 	{ </span>
+<span class="lineNum">    947 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;DeMarshalData(p) == false) </span>
+<span class="lineNum">    948 </span>              : 			return false; </span>
+<span class="lineNum">    949 </span><span class="lineNoCov">    0 / 1     : 		sz += p-&gt;size; </span>
+<span class="lineNum">    950 </span>              : 		cnt++; </span>
+<span class="lineNum">    951 </span>              : 		p = this-&gt;GetNext(p); </span>
+<span class="lineNum">    952 </span>              : 	} </span>
+<span class="lineNum">    953 </span>              :  </span>
+<span class="lineNum">    954 </span><span class="lineNoCov">    0 / 2     : 	return this-&gt;DeMarshalData(p); </span>
+<span class="lineNum">    955 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    956 </span>              :  </span>
+<span class="lineNum">    957 </span>              : bool Network::ScanDataForStop(NetworkUpdate *ud, size_t max_size) </span>
+<span class="lineNum">    958 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    959 </span>              : 	NetworkUpdate *p = ud; </span>
+<span class="lineNum">    960 </span>              : 	size_t sz = 0; </span>
+<span class="lineNum">    961 </span>              :  </span>
+<span class="lineNum">    962 </span><span class="lineNoCov">    0 / 2     : 	while (ntohs(p-&gt;type) != STOP &amp;&amp; </span>
+<span class="lineNum">    963 </span><span class="lineNoCov">    0 / 1     : 			sz + ntohl(p-&gt;size) &lt; max_size) </span>
+<span class="lineNum">    964 </span>              : 	{ </span>
+<span class="lineNum">    965 </span>              : 		size_t cur_sz = ntohl(p-&gt;size); </span>
+<span class="lineNum">    966 </span>              :  </span>
+<span class="lineNum">    967 </span>              : 		sz += cur_sz; </span>
+<span class="lineNum">    968 </span><span class="lineNoCov">    0 / 1     : 		p = (NetworkUpdate*)((uint8*)p + cur_sz); </span>
+<span class="lineNum">    969 </span>              : 	} </span>
+<span class="lineNum">    970 </span>              :  </span>
+<span class="lineNum">    971 </span>              : 	/* The stop tag (maybe) */ </span>
+<span class="lineNum">    972 </span><span class="lineNoCov">    0 / 1     : 	return ntohs(p-&gt;type) == STOP; </span>
+<span class="lineNum">    973 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    974 </span>              :  </span>
+<span class="lineNum">    975 </span>              :  </span>
+<span class="lineNum">    976 </span>              : bool Network::DecodeUpdate(C64Display *display, uint8 *js, MOS6581 *dst) </span>
+<span class="lineNum">    977 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    978 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *p = this-&gt;receive_ud; </span>
+<span class="lineNum">    979 </span>              : 	bool out = true; </span>
+<span class="lineNum">    980 </span>              :  </span>
+<span class="lineNum">    981 </span><span class="lineNoCov">    0 / 3     : 	while (p-&gt;type != STOP) </span>
+<span class="lineNum">    982 </span>              : 	{ </span>
+<span class="lineNum">    983 </span><span class="lineNoCov">    0 / 2     : 		if (p-&gt;magic != FRODO_NETWORK_MAGIC) </span>
+<span class="lineNum">    984 </span>              : 			break; </span>
+<span class="lineNum">    985 </span><span class="lineNoCov">    0 / 1     : 		switch(p-&gt;type) </span>
+<span class="lineNum">    986 </span>              : 		{ </span>
+<span class="lineNum">    987 </span>              : 		case SOUND_UPDATE: </span>
+<span class="lineNum">    988 </span>              : 		{ </span>
+<span class="lineNum">    989 </span>              : 			/* No sound updates _to_ the master */ </span>
+<span class="lineNum">    990 </span><span class="lineNoCov">    0 / 1     : 			if (TheC64-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">    991 </span>              : 				break; </span>
+<span class="lineNum">    992 </span><span class="lineNoCov">    0 / 1     : 			NetworkUpdateSound *snd = (NetworkUpdateSound *)p-&gt;data; </span>
+<span class="lineNum">    993 </span>              : 			NetworkUpdateSoundInfo *info = (NetworkUpdateSoundInfo *)snd-&gt;info; </span>
+<span class="lineNum">    994 </span>              :  </span>
+<span class="lineNum">    995 </span><span class="lineNoCov">    0 / 4     : 			for (unsigned int i = 0; i &lt; snd-&gt;n_items; i++) </span>
+<span class="lineNum">    996 </span>              : 			{ </span>
+<span class="lineNum">    997 </span>              : 				NetworkUpdateSoundInfo *cur = &amp;info[i]; </span>
+<span class="lineNum">    998 </span>              :  </span>
+<span class="lineNum">    999 </span><span class="lineNoCov">    0 / 2     : 				this-&gt;EnqueueSound(cur-&gt;delay_cycles, cur-&gt;adr, cur-&gt;val); </span>
+<span class="lineNum">   1000 </span>              : 			} </span>
+<span class="lineNum">   1001 </span>              : 		} break; </span>
+<span class="lineNum">   1002 </span>              : 		case DISPLAY_UPDATE_RAW: </span>
+<span class="lineNum">   1003 </span>              : 		case DISPLAY_UPDATE_RLE: </span>
+<span class="lineNum">   1004 </span>              : 		case DISPLAY_UPDATE_DIFF: </span>
+<span class="lineNum">   1005 </span>              : 			/* No screen updates _to_ the master */ </span>
+<span class="lineNum">   1006 </span><span class="lineNoCov">    0 / 1     : 			if (TheC64-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">   1007 </span>              : 				break; </span>
+<span class="lineNum">   1008 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;DecodeDisplayUpdate(p) == false) </span>
+<span class="lineNum">   1009 </span>              : 				out = false; </span>
+<span class="lineNum">   1010 </span>              : 			break; </span>
+<span class="lineNum">   1011 </span>              : 		case JOYSTICK_UPDATE: </span>
+<span class="lineNum">   1012 </span>              : 			/* No joystick updates _from_ the master */ </span>
+<span class="lineNum">   1013 </span><span class="lineNoCov">    0 / 1     : 			if (js &amp;&amp; TheC64-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">   1014 </span>              : 			{ </span>
+<span class="lineNum">   1015 </span>              : 				NetworkUpdateJoystick *j = (NetworkUpdateJoystick *)p-&gt;data; </span>
+<span class="lineNum">   1016 </span><span class="lineNoCov">    0 / 1     : 				*js = j-&gt;val; </span>
+<span class="lineNum">   1017 </span>              : 			} </span>
+<span class="lineNum">   1018 </span>              : 			break; </span>
+<span class="lineNum">   1019 </span>              : 		case TEXT_MESSAGE: </span>
+<span class="lineNum">   1020 </span>              : 		{ </span>
+<span class="lineNum">   1021 </span>              : 			NetworkUpdateTextMessage *tm = (NetworkUpdateTextMessage*)p-&gt;data; </span>
+<span class="lineNum">   1022 </span>              :  </span>
+<span class="lineNum">   1023 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;status_bar-&gt;queueMessage((const char*)tm-&gt;data); </span>
+<span class="lineNum">   1024 </span>              : 			/* Queue up text message */ </span>
+<span class="lineNum">   1025 </span><span class="lineNoCov">    0 / 1     : 			if (tm-&gt;flags &amp; NETWORK_UPDATE_TEXT_MESSAGE_BROADCAST) </span>
+<span class="lineNum">   1026 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;server_msgs-&gt;queueMessage((const char *)tm-&gt;data); </span>
+<span class="lineNum">   1027 </span>              : 		} break; </span>
+<span class="lineNum">   1028 </span>              : 		case REGISTER_DATA: </span>
+<span class="lineNum">   1029 </span>              : 		{ </span>
+<span class="lineNum">   1030 </span>              : 			NetworkUpdateRegisterData *rd = (NetworkUpdateRegisterData *)p-&gt;data; </span>
+<span class="lineNum">   1031 </span>              :  </span>
+<span class="lineNum">   1032 </span>              : 			DataStore::ds-&gt;registerNetworkData(rd-&gt;key, rd-&gt;metadata, rd-&gt;data, </span>
+<span class="lineNum">   1033 </span><span class="lineNoCov">    0 / 1     : 					p-&gt;size - (sizeof(NetworkUpdateRegisterData) + sizeof(NetworkUpdate))); </span>
+<span class="lineNum">   1034 </span><span class="lineNoCov">    0 / 1     : 		} break; </span>
+<span class="lineNum">   1035 </span>              : 		case BANDWIDTH_PING: </span>
+<span class="lineNum">   1036 </span>              : 		case PING: </span>
+<span class="lineNum">   1037 </span>              : 		{ </span>
+<span class="lineNum">   1038 </span>              : 			NetworkUpdatePingAck *ping = (NetworkUpdatePingAck *)p-&gt;data; </span>
+<span class="lineNum">   1039 </span>              : 			uint16 type = ACK; </span>
+<span class="lineNum">   1040 </span>              :  </span>
+<span class="lineNum">   1041 </span><span class="lineNoCov">    0 / 1     : 			if (p-&gt;type == BANDWIDTH_PING) </span>
+<span class="lineNum">   1042 </span>              : 				type = BANDWIDTH_ACK; </span>
+<span class="lineNum">   1043 </span><span class="lineNoCov">    0 / 3     : 			this-&gt;SendPingAck(&amp;this-&gt;server_addr, ping-&gt;seq, type, p-&gt;size); </span>
+<span class="lineNum">   1044 </span><span class="lineNoCov">    0 / 1     : 		} break; </span>
+<span class="lineNum">   1045 </span>              : 		case LIST_PEERS: </span>
+<span class="lineNum">   1046 </span>              : 		{ </span>
+<span class="lineNum">   1047 </span><span class="lineNoCov">    0 / 1     : 			NetworkUpdateListPeers *lp = (NetworkUpdateListPeers *)p-&gt;data; </span>
+<span class="lineNum">   1048 </span>              :  </span>
+<span class="lineNum">   1049 </span><span class="lineNoCov">    0 / 2     : 			if (lp-&gt;n_peers == 1 &amp;&amp; (lp-&gt;flags &amp; NETWORK_UPDATE_LIST_PEERS_IS_CONNECT)) </span>
+<span class="lineNum">   1050 </span>              : 			{ </span>
+<span class="lineNum">   1051 </span>              : 				NetworkUpdatePeerInfo *pi = &amp;lp-&gt;peers[0]; </span>
+<span class="lineNum">   1052 </span>              : 				const char *hostname; </span>
+<span class="lineNum">   1053 </span>              :  </span>
+<span class="lineNum">   1054 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Connecting to peer...&quot;); </span>
+<span class="lineNum">   1055 </span><span class="lineNoCov">    0 / 2     : 				hostname = ip_to_str(pi-&gt;public_ip); </span>
+<span class="lineNum">   1056 </span><span class="lineNoCov">    0 / 3     : 				this-&gt;InitSockaddr(&amp;this-&gt;peer_addr, hostname, pi-&gt;public_port); </span>
+<span class="lineNum">   1057 </span><span class="lineNoCov">    0 / 1     : 				free((void*)hostname); </span>
+<span class="lineNum">   1058 </span>              :  </span>
+<span class="lineNum">   1059 </span>              : 				/* Twice for luck (network equipment might drop these) */ </span>
+<span class="lineNum">   1060 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;ConnectToPeer(); </span>
+<span class="lineNum">   1061 </span><span class="lineNoCov">    0 / 1     : 				SDL_Delay(500); </span>
+<span class="lineNum">   1062 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;ConnectToPeer(); </span>
+<span class="lineNum">   1063 </span>              :  </span>
+<span class="lineNum">   1064 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;is_master = true; </span>
+<span class="lineNum">   1065 </span><span class="lineNoCov">    0 / 2     : 				TheC64-&gt;network_connection_type = MASTER; </span>
+<span class="lineNum">   1066 </span>              : 				break; </span>
+<span class="lineNum">   1067 </span>              : 			} </span>
+<span class="lineNum">   1068 </span>              :  </span>
+<span class="lineNum">   1069 </span><span class="lineNoCov">    0 / 2     : 			for (unsigned i = 0; i &lt; lp-&gt;n_peers; i++) </span>
+<span class="lineNum">   1070 </span>              : 			{ </span>
+<span class="lineNum">   1071 </span><span class="lineNoCov">    0 / 1     : 				if (lp-&gt;peers[i].version != FRODO_NETWORK_PROTOCOL_VERSION) </span>
+<span class="lineNum">   1072 </span>              : 				{ </span>
+<span class="lineNum">   1073 </span>              : 					warning(&quot;Peer %d has wrong version: %d vs %d\n&quot;, </span>
+<span class="lineNum">   1074 </span>              : 							i, lp-&gt;peers[i].version, FRODO_NETWORK_PROTOCOL_VERSION); </span>
+<span class="lineNum">   1075 </span>              : 					break; </span>
+<span class="lineNum">   1076 </span>              : 				} </span>
+<span class="lineNum">   1077 </span>              : 			} </span>
+<span class="lineNum">   1078 </span><span class="lineNoCov">    0 / 2     : 			if (lp-&gt;n_peers == 0) </span>
+<span class="lineNum">   1079 </span>              : 			{ </span>
+<span class="lineNum">   1080 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;No peers, waiting for connection...&quot;); </span>
+<span class="lineNum">   1081 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;is_master = true; </span>
+<span class="lineNum">   1082 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">   1083 </span>              : 			} </span>
+<span class="lineNum">   1084 </span>              : 			/* FIXME! Not necessarily true! */ </span>
+<span class="lineNum">   1085 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;is_master = false; </span>
+<span class="lineNum">   1086 </span>              :  </span>
+<span class="lineNum">   1087 </span><span class="lineNoCov">    0 / 2     : 			Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Got list of peers&quot;); </span>
+<span class="lineNum">   1088 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;nuv-&gt;setPeers(lp); </span>
+<span class="lineNum">   1089 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;activate(); </span>
+<span class="lineNum">   1090 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;pushView(Gui::gui-&gt;nuv); </span>
+<span class="lineNum">   1091 </span><span class="lineNoCov">    0 / 1     : 		} break; </span>
+<span class="lineNum">   1092 </span>              : 		case CONNECT_TO_PEER: </span>
+<span class="lineNum">   1093 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Connected to peer!&quot;); </span>
+<span class="lineNum">   1094 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;is_master) </span>
+<span class="lineNum">   1095 </span><span class="lineNoCov">    0 / 1     : 				TheC64-&gt;network_connection_type = MASTER; </span>
+<span class="lineNum">   1096 </span>              : 			else </span>
+<span class="lineNum">   1097 </span><span class="lineNoCov">    0 / 1     : 				TheC64-&gt;network_connection_type = CLIENT; </span>
+<span class="lineNum">   1098 </span>              : 			break; </span>
+<span class="lineNum">   1099 </span>              : 		case BANDWIDTH_ACK: </span>
+<span class="lineNum">   1100 </span>              : 		case ACK: </span>
+<span class="lineNum">   1101 </span>              : 			/* We won't receive this, but it also doesn't really matter */ </span>
+<span class="lineNum">   1102 </span>              : 			break; </span>
+<span class="lineNum">   1103 </span>              : 		case DISCONNECT: </span>
+<span class="lineNum">   1104 </span>              : 			printf(&quot;Got disconnect\n&quot;); </span>
+<span class="lineNum">   1105 </span><span class="lineNoCov">    0 / 1     : 			TheC64-&gt;network_connection_type = NONE; </span>
+<span class="lineNum">   1106 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;Disconnect(); </span>
+<span class="lineNum">   1107 </span><span class="lineNoCov">    0 / 1     : 			return false; </span>
+<span class="lineNum">   1108 </span>              : 		default: </span>
+<span class="lineNum">   1109 </span>              : 			break; </span>
+<span class="lineNum">   1110 </span>              : 		} </span>
+<span class="lineNum">   1111 </span>              : 		p = this-&gt;GetNext(p); </span>
+<span class="lineNum">   1112 </span>              : 	} </span>
+<span class="lineNum">   1113 </span>              :  </span>
+<span class="lineNum">   1114 </span>              : 	return out; </span>
+<span class="lineNum">   1115 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">   1116 </span>              :  </span>
+<span class="lineNum">   1117 </span>              : bool Network::AppendScreenshot(NetworkUpdatePeerInfo *pi) </span>
+<span class="lineNum">   1118 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">   1119 </span>              : 	NetworkUpdateRegisterData *dsu; </span>
+<span class="lineNum">   1120 </span>              : 	NetworkUpdate *ud; </span>
+<span class="lineNum">   1121 </span>              : 	SDL_Surface *scr; </span>
+<span class="lineNum">   1122 </span>              : 	void *png; </span>
+<span class="lineNum">   1123 </span>              : 	size_t sz; </span>
+<span class="lineNum">   1124 </span>              : 	bool out = NULL; </span>
+<span class="lineNum">   1125 </span>              :  </span>
+<span class="lineNum">   1126 </span><span class="lineNoCov">    0 / 2     : 	scr = Gui::gui-&gt;screenshot; </span>
+<span class="lineNum">   1127 </span><span class="lineNoCov">    0 / 1     : 	if (!scr) </span>
+<span class="lineNum">   1128 </span>              : 		goto out; </span>
+<span class="lineNum">   1129 </span>              :  </span>
+<span class="lineNum">   1130 </span><span class="lineNoCov">    0 / 2     : 	png = sdl_surface_to_png(scr, &amp;sz); </span>
+<span class="lineNum">   1131 </span><span class="lineNoCov">    0 / 2     : 	if (!png) </span>
+<span class="lineNum">   1132 </span>              : 		goto out; </span>
+<span class="lineNum">   1133 </span><span class="lineNoCov">    0 / 1     : 	if ((sz &amp; 3) != 0) </span>
+<span class="lineNum">   1134 </span><span class="lineNoCov">    0 / 1     : 		sz += 4 - (sz &amp; 3); </span>
+<span class="lineNum">   1135 </span>              :  </span>
+<span class="lineNum">   1136 </span>              : 	ud = InitNetworkUpdate(this-&gt;cur_ud, REGISTER_DATA, </span>
+<span class="lineNum">   1137 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdate) + sizeof(NetworkUpdateRegisterData) + sz); </span>
+<span class="lineNum">   1138 </span><span class="lineNoCov">    0 / 1     : 	dsu = (NetworkUpdateRegisterData *)ud-&gt;data; </span>
+<span class="lineNum">   1139 </span><span class="lineNoCov">    0 / 3     : 	dsu-&gt;key = DataStore::ds-&gt;getNextKey(); </span>
+<span class="lineNum">   1140 </span><span class="lineNoCov">    0 / 1     : 	dsu-&gt;metadata = 0; </span>
+<span class="lineNum">   1141 </span>              : 	memcpy(dsu-&gt;data, png, sz); </span>
+<span class="lineNum">   1142 </span>              : 	this-&gt;AddNetworkUpdate(ud); </span>
+<span class="lineNum">   1143 </span>              :  </span>
+<span class="lineNum">   1144 </span>              : 	out = true; </span>
+<span class="lineNum">   1145 </span><span class="lineNoCov">    0 / 2     : 	free(png); </span>
+<span class="lineNum">   1146 </span>              :  </span>
+<span class="lineNum">   1147 </span>              : out: </span>
+<span class="lineNum">   1148 </span>              : 	return out; </span>
+<span class="lineNum">   1149 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1150 </span>              :  </span>
+<span class="lineNum">   1151 </span>              : bool Network::ConnectToBroker() </span>
+<span class="lineNum">   1152 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">   1153 </span>              : 	NetworkUpdate *ud = InitNetworkUpdate(this-&gt;cur_ud, CONNECT_TO_BROKER, </span>
+<span class="lineNum">   1154 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdate) + sizeof(NetworkUpdatePeerInfo)); </span>
+<span class="lineNum">   1155 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdatePeerInfo *pi = (NetworkUpdatePeerInfo *)ud-&gt;data; </span>
+<span class="lineNum">   1156 </span>              : 	bool out; </span>
+<span class="lineNum">   1157 </span>              :  </span>
+<span class="lineNum">   1158 </span><span class="lineNoCov">    0 / 2     : 	Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Connecting to broker...&quot;); </span>
+<span class="lineNum">   1159 </span>              : 	/* Reset peer selection */ </span>
+<span class="lineNum">   1160 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;peer_selected = -1; </span>
+<span class="lineNum">   1161 </span>              :  </span>
+<span class="lineNum">   1162 </span><span class="lineNoCov">    0 / 2     : 	pi-&gt;key = ThePrefs.NetworkKey; </span>
+<span class="lineNum">   1163 </span><span class="lineNoCov">    0 / 1     : 	pi-&gt;version = FRODO_NETWORK_PROTOCOL_VERSION; </span>
+<span class="lineNum">   1164 </span><span class="lineNoCov">    0 / 1     : 	pi-&gt;avatar = ThePrefs.NetworkAvatar; </span>
+<span class="lineNum">   1165 </span><span class="lineNoCov">    0 / 2     : 	pi-&gt;region = ThePrefs.NetworkRegion; </span>
+<span class="lineNum">   1166 </span><span class="lineNoCov">    0 / 1     : 	pi-&gt;screenshot_key = 0; </span>
+<span class="lineNum">   1167 </span>              :  </span>
+<span class="lineNum">   1168 </span>              : 	strcpy((char*)pi-&gt;name, ThePrefs.NetworkName); </span>
+<span class="lineNum">   1169 </span>              : 	this-&gt;AddNetworkUpdate(ud); </span>
+<span class="lineNum">   1170 </span><span class="lineNoCov">    0 / 1     : 	out = this-&gt;AppendScreenshot(pi); </span>
+<span class="lineNum">   1171 </span><span class="lineNoCov">    0 / 1     : 	if (out) </span>
+<span class="lineNum">   1172 </span>              : 		out = this-&gt;SendServerUpdate(); </span>
+<span class="lineNum">   1173 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">   1174 </span>              :  </span>
+<span class="lineNum">   1175 </span>              : 	return out; </span>
+<span class="lineNum">   1176 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1177 </span>              :  </span>
+<span class="lineNum">   1178 </span>              : void Network::SendPingAck(struct sockaddr_in *addr, int seq, uint16 type, size_t size_to_send) </span>
+<span class="lineNum">   1179 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">   1180 </span>              : 	NetworkUpdate *ud = InitNetworkUpdate(this-&gt;ud, type, </span>
+<span class="lineNum">   1181 </span><span class="lineNoCov">    0 / 2     : 			sizeof(NetworkUpdate) + sizeof(NetworkUpdatePingAck) + size_to_send); </span>
+<span class="lineNum">   1182 </span>              : 	NetworkUpdatePingAck *p = (NetworkUpdatePingAck*)ud-&gt;data; </span>
+<span class="lineNum">   1183 </span>              : 	uint8_t *p_next = (uint8_t *)ud + sizeof(NetworkUpdate) + sizeof(NetworkUpdatePingAck) + size_to_send; </span>
+<span class="lineNum">   1184 </span><span class="lineNoCov">    0 / 1     : 	NetworkUpdate *stop = InitNetworkUpdate((NetworkUpdate *)p_next, STOP, sizeof(NetworkUpdate)); </span>
+<span class="lineNum">   1185 </span>              :  </span>
+<span class="lineNum">   1186 </span><span class="lineNoCov">    0 / 2     : 	p-&gt;seq = seq; </span>
+<span class="lineNum">   1187 </span>              :  </span>
+<span class="lineNum">   1188 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;MarshalData(ud); </span>
+<span class="lineNum">   1189 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;MarshalData(stop); </span>
+<span class="lineNum">   1190 </span>              :  </span>
+<span class="lineNum">   1191 </span><span class="lineNoCov">    0 / 4     : 	this-&gt;SendUpdateDirect(addr, ud); </span>
+<span class="lineNum">   1192 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">   1193 </span>              :  </span>
+<span class="lineNum">   1194 </span>              : bool Network::SelectPeer(uint32 id) </span>
+<span class="lineNum">   1195 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">   1196 </span>              : 	NetworkUpdate *ud = InitNetworkUpdate(this-&gt;ud, SELECT_PEER, </span>
+<span class="lineNum">   1197 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdate) + sizeof(NetworkUpdateSelectPeer)); </span>
+<span class="lineNum">   1198 </span>              : 	NetworkUpdateSelectPeer *p = (NetworkUpdateSelectPeer*)ud-&gt;data; </span>
+<span class="lineNum">   1199 </span>              : 	bool out; </span>
+<span class="lineNum">   1200 </span>              :  </span>
+<span class="lineNum">   1201 </span><span class="lineNoCov">    0 / 2     : 	p-&gt;server_id = id; </span>
+<span class="lineNum">   1202 </span>              : 	this-&gt;AddNetworkUpdate(ud); </span>
+<span class="lineNum">   1203 </span>              : 	out = this-&gt;SendServerUpdate(); </span>
+<span class="lineNum">   1204 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">   1205 </span>              :  </span>
+<span class="lineNum">   1206 </span>              : 	return out;		 </span>
+<span class="lineNum">   1207 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1208 </span>              :  </span>
+<span class="lineNum">   1209 </span>              : bool Network::SelectPeer(const char *hostname, uint16_t port, uint32_t server_id) </span>
+<span class="lineNum">   1210 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">   1211 </span><span class="lineNoCov">    0 / 1     : 	if (!hostname) </span>
+<span class="lineNum">   1212 </span>              : 	{ </span>
+<span class="lineNum">   1213 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;peer_selected = 0; </span>
+<span class="lineNum">   1214 </span><span class="lineNoCov">    0 / 1     : 		return true; </span>
+<span class="lineNum">   1215 </span>              : 	} </span>
+<span class="lineNum">   1216 </span>              :  </span>
+<span class="lineNum">   1217 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;SelectPeer(server_id); </span>
+<span class="lineNum">   1218 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;InitSockaddr(&amp;this-&gt;peer_addr, hostname, port); </span>
+<span class="lineNum">   1219 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;is_master = false; </span>
+<span class="lineNum">   1220 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;peer_selected = 1; </span>
+<span class="lineNum">   1221 </span>              :  </span>
+<span class="lineNum">   1222 </span>              : 	return true; </span>
+<span class="lineNum">   1223 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1224 </span>              :  </span>
+<span class="lineNum">   1225 </span>              :  </span>
+<span class="lineNum">   1226 </span>              : bool Network::ConnectToPeer() </span>
+<span class="lineNum">   1227 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">   1228 </span>              : 	NetworkUpdate *ud = InitNetworkUpdate(this-&gt;ud, CONNECT_TO_PEER, </span>
+<span class="lineNum">   1229 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdate)); </span>
+<span class="lineNum">   1230 </span>              : 	bool out; </span>
+<span class="lineNum">   1231 </span>              :  </span>
+<span class="lineNum">   1232 </span>              : 	this-&gt;AddNetworkUpdate(ud); </span>
+<span class="lineNum">   1233 </span>              : 	out = this-&gt;SendPeerUpdate(); </span>
+<span class="lineNum">   1234 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">   1235 </span>              :  </span>
+<span class="lineNum">   1236 </span>              : 	return out; </span>
+<span class="lineNum">   1237 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1238 </span>              :  </span>
+<span class="lineNum">   1239 </span>              : void Network::Disconnect() </span>
+<span class="lineNum">   1240 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">   1241 </span><span class="lineNoCov">    0 / 2     : 	Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Disconnecting&quot;); </span>
+<span class="lineNum">   1242 </span>              :  </span>
+<span class="lineNum">   1243 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">   1244 </span>              : 	NetworkUpdate *disconnect = InitNetworkUpdate(this-&gt;cur_ud, DISCONNECT, </span>
+<span class="lineNum">   1245 </span><span class="lineNoCov">    0 / 1     : 			sizeof(NetworkUpdate)); </span>
+<span class="lineNum">   1246 </span>              :  </span>
+<span class="lineNum">   1247 </span>              : 	/* Add a stop at the end of the update */ </span>
+<span class="lineNum">   1248 </span>              : 	this-&gt;AddNetworkUpdate(disconnect); </span>
+<span class="lineNum">   1249 </span>              :  </span>
+<span class="lineNum">   1250 </span>              : 	this-&gt;SendPeerUpdate(); </span>
+<span class="lineNum">   1251 </span>              : 	this-&gt;SendServerUpdate(); </span>
+<span class="lineNum">   1252 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">   1253 </span>              :  </span>
+<span class="lineNum">   1254 </span>              :  </span>
+<span class="lineNum">   1255 </span>              : bool Network::networking_started = false; </span>
+<span class="lineNum">   1256 </span>              :  </span>
+<span class="lineNum">   1257 </span>              : #if defined(GEKKO) </span>
+<span class="lineNum">   1258 </span>              : #include &quot;NetworkWii.h&quot; </span>
+<span class="lineNum">   1259 </span>              : #else </span>
+<span class="lineNum">   1260 </span>              : /* BSD-style sockets */ </span>
+<span class="lineNum">   1261 </span>              : #include &quot;NetworkUnix.h&quot; </span>
+<span class="lineNum">   1262 </span>              : #endif </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

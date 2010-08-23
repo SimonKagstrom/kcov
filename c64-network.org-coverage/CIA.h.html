@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">6</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">66.7 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">4</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  CIA.h - 6526 emulation </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : #ifndef _CIA_H </span>
+<span class="lineNum">     22 </span>              : #define _CIA_H </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     25 </span>              :  </span>
+<span class="lineNum">     26 </span>              :  </span>
+<span class="lineNum">     27 </span>              : class MOS6510; </span>
+<span class="lineNum">     28 </span>              : class MOS6502_1541; </span>
+<span class="lineNum">     29 </span>              : class MOS6569; </span>
+<span class="lineNum">     30 </span>              : struct MOS6526State; </span>
+<span class="lineNum">     31 </span>              :  </span>
+<span class="lineNum">     32 </span>              :  </span>
+<span class="lineNum">     33 </span>              : class MOS6526 { </span>
+<span class="lineNum">     34 </span>              : public: </span>
+<span class="lineNum">     35 </span>              : 	MOS6526(MOS6510 *CPU); </span>
+<span class="lineNum">     36 </span>              :  </span>
+<span class="lineNum">     37 </span>              : 	void Reset(void); </span>
+<span class="lineNum">     38 </span>              : 	void GetState(MOS6526State *cs); </span>
+<span class="lineNum">     39 </span>              : 	void SetState(MOS6526State *cs); </span>
+<span class="lineNum">     40 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">     41 </span>              : 	void CheckIRQs(void); </span>
+<span class="lineNum">     42 </span>              : 	void EmulateCycle(void); </span>
+<span class="lineNum">     43 </span>              : #else </span>
+<span class="lineNum">     44 </span>              : 	void EmulateLine(int cycles); </span>
+<span class="lineNum">     45 </span>              : #endif </span>
+<span class="lineNum">     46 </span>              : 	void CountTOD(void); </span>
+<span class="lineNum">     47 </span>              : 	virtual void TriggerInterrupt(int bit)=0; </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span>              : protected: </span>
+<span class="lineNum">     50 </span>              : 	MOS6510 *the_cpu;	// Pointer to 6510 </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span>              : 	uint8 pra, prb, ddra, ddrb; </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span>              : 	uint16 ta, tb, latcha, latchb; </span>
+<span class="lineNum">     55 </span>              :  </span>
+<span class="lineNum">     56 </span>              : 	uint8 tod_10ths, tod_sec, tod_min, tod_hr; </span>
+<span class="lineNum">     57 </span>              : 	uint8 alm_10ths, alm_sec, alm_min, alm_hr; </span>
+<span class="lineNum">     58 </span>              :  </span>
+<span class="lineNum">     59 </span>              : 	uint8 sdr, icr, cra, crb; </span>
+<span class="lineNum">     60 </span>              : 	uint8 int_mask; </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              : 	int tod_divider;	// TOD frequency divider </span>
+<span class="lineNum">     63 </span>              :  </span>
+<span class="lineNum">     64 </span>              : 	bool tod_halt,		// Flag: TOD halted </span>
+<span class="lineNum">     65 </span>              : 		 ta_cnt_phi2,	// Flag: Timer A is counting Phi 2 </span>
+<span class="lineNum">     66 </span>              : 		 tb_cnt_phi2,	// Flag: Timer B is counting Phi 2 </span>
+<span class="lineNum">     67 </span>              : 	     tb_cnt_ta;		// Flag: Timer B is counting underflows of Timer A </span>
+<span class="lineNum">     68 </span>              :  </span>
+<span class="lineNum">     69 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">     70 </span>              : 	bool ta_irq_next_cycle,		// Flag: Trigger TA IRQ in next cycle </span>
+<span class="lineNum">     71 </span>              : 		 tb_irq_next_cycle,		// Flag: Trigger TB IRQ in next cycle </span>
+<span class="lineNum">     72 </span>              : 		 has_new_cra,			// Flag: New value for CRA pending </span>
+<span class="lineNum">     73 </span>              : 		 has_new_crb;			// Flag: New value for CRB pending </span>
+<span class="lineNum">     74 </span>              : 	char ta_state, tb_state;	// Timer A/B states </span>
+<span class="lineNum">     75 </span>              : 	uint8 new_cra, new_crb;		// New values for CRA/CRB </span>
+<span class="lineNum">     76 </span>              : #endif </span>
+<span class="lineNum">     77 </span>              : }; </span>
+<span class="lineNum">     78 </span>              :  </span>
+<span class="lineNum">     79 </span>              :  </span>
+<span class="lineNum">     80 </span>              : class MOS6526_1 : public MOS6526 { </span>
+<span class="lineNum">     81 </span>              : public: </span>
+<span class="lineNum">     82 </span>              : 	MOS6526_1(MOS6510 *CPU, MOS6569 *VIC); </span>
+<span class="lineNum">     83 </span>              :  </span>
+<span class="lineNum">     84 </span>              : 	void Reset(void); </span>
+<span class="lineNum">     85 </span>              : 	uint8 ReadRegister(uint16 adr); </span>
+<span class="lineNum">     86 </span>              : 	void WriteRegister(uint16 adr, uint8 byte); </span>
+<span class="lineNum">     87 </span>              : 	virtual void TriggerInterrupt(int bit); </span>
+<span class="lineNum">     88 </span>              :  </span>
+<span class="lineNum">     89 </span>              : 	uint8 KeyMatrix[8];	// C64 keyboard matrix, 1 bit/key (0: key down, 1: key up) </span>
+<span class="lineNum">     90 </span>              : 	uint8 RevMatrix[8];	// Reversed keyboard matrix </span>
+<span class="lineNum">     91 </span>              :  </span>
+<span class="lineNum">     92 </span>              : 	uint8 Joystick1;	// Joystick 1 AND value </span>
+<span class="lineNum">     93 </span>              : 	uint8 Joystick2;	// Joystick 2 AND value </span>
+<span class="lineNum">     94 </span>              :  </span>
+<span class="lineNum">     95 </span>              : private: </span>
+<span class="lineNum">     96 </span>              : 	void check_lp(void); </span>
+<span class="lineNum">     97 </span>              :  </span>
+<span class="lineNum">     98 </span>              : 	MOS6569 *the_vic; </span>
+<span class="lineNum">     99 </span>              :  </span>
+<span class="lineNum">    100 </span>              : 	uint8 prev_lp;		// Previous state of LP line (bit 4) </span>
+<span class="lineNum">    101 </span>              : }; </span>
+<span class="lineNum">    102 </span>              :  </span>
+<span class="lineNum">    103 </span>              :  </span>
+<span class="lineNum">    104 </span>              : class MOS6526_2 : public MOS6526{ </span>
+<span class="lineNum">    105 </span>              : public: </span>
+<span class="lineNum">    106 </span>              : 	MOS6526_2(MOS6510 *CPU, MOS6569 *VIC, MOS6502_1541 *CPU1541); </span>
+<span class="lineNum">    107 </span>              :  </span>
+<span class="lineNum">    108 </span>              : 	void Reset(void); </span>
+<span class="lineNum">    109 </span>              : 	uint8 ReadRegister(uint16 adr); </span>
+<span class="lineNum">    110 </span>              : 	void WriteRegister(uint16 adr, uint8 byte); </span>
+<span class="lineNum">    111 </span>              : 	virtual void TriggerInterrupt(int bit); </span>
+<span class="lineNum">    112 </span>              :  </span>
+<span class="lineNum">    113 </span>              : 	uint8 IECLines;		// State of IEC lines (bit 7 - DATA, bit 6 - CLK, bit 4 - ATN) </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span>              : private: </span>
+<span class="lineNum">    116 </span>              : 	MOS6569 *the_vic; </span>
+<span class="lineNum">    117 </span>              : 	MOS6502_1541 *the_cpu_1541; </span>
+<span class="lineNum">    118 </span>              : }; </span>
+<span class="lineNum">    119 </span>              :  </span>
+<span class="lineNum">    120 </span>              :  </span>
+<span class="lineNum">    121 </span>              : // CIA state </span>
+<span class="lineNum">    122 </span>              : struct MOS6526State { </span>
+<span class="lineNum">    123 </span>              : 	uint8 pra; </span>
+<span class="lineNum">    124 </span>              : 	uint8 ddra; </span>
+<span class="lineNum">    125 </span>              : 	uint8 prb; </span>
+<span class="lineNum">    126 </span>              : 	uint8 ddrb; </span>
+<span class="lineNum">    127 </span>              : 	uint8 ta_lo; </span>
+<span class="lineNum">    128 </span>              : 	uint8 ta_hi; </span>
+<span class="lineNum">    129 </span>              : 	uint8 tb_lo; </span>
+<span class="lineNum">    130 </span>              : 	uint8 tb_hi; </span>
+<span class="lineNum">    131 </span>              : 	uint8 tod_10ths; </span>
+<span class="lineNum">    132 </span>              : 	uint8 tod_sec; </span>
+<span class="lineNum">    133 </span>              : 	uint8 tod_min; </span>
+<span class="lineNum">    134 </span>              : 	uint8 tod_hr; </span>
+<span class="lineNum">    135 </span>              : 	uint8 sdr; </span>
+<span class="lineNum">    136 </span>              : 	uint8 int_data;		// Pending interrupts </span>
+<span class="lineNum">    137 </span>              : 	uint8 cra; </span>
+<span class="lineNum">    138 </span>              : 	uint8 crb; </span>
+<span class="lineNum">    139 </span>              : 						// Additional registers </span>
+<span class="lineNum">    140 </span>              : 	uint16 latcha;		// Timer latches </span>
+<span class="lineNum">    141 </span>              : 	uint16 latchb; </span>
+<span class="lineNum">    142 </span>              : 	uint8 alm_10ths;	// Alarm time </span>
+<span class="lineNum">    143 </span>              : 	uint8 alm_sec; </span>
+<span class="lineNum">    144 </span>              : 	uint8 alm_min; </span>
+<span class="lineNum">    145 </span>              : 	uint8 alm_hr; </span>
+<span class="lineNum">    146 </span>              : 	uint8 int_mask;		// Enabled interrupts </span>
+<span class="lineNum">    147 </span>              : }; </span>
+<span class="lineNum">    148 </span>              :  </span>
+<span class="lineNum">    149 </span>              :  </span>
+<span class="lineNum">    150 </span>              : /* </span>
+<span class="lineNum">    151 </span>              :  *  Emulate CIA for one cycle/raster line </span>
+<span class="lineNum">    152 </span>              :  */ </span>
+<span class="lineNum">    153 </span>              :  </span>
+<span class="lineNum">    154 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">    155 </span>              : inline void MOS6526::CheckIRQs(void) </span>
+<span class="lineNum">    156 </span>              : { </span>
+<span class="lineNum">    157 </span>              : 	// Trigger pending interrupts </span>
+<span class="lineNum">    158 </span><span class="lineCov">    2 / 2     : 	if (ta_irq_next_cycle) { </span>
+<span class="lineNum">    159 </span><span class="linePartCov">    1 / 2     : 		ta_irq_next_cycle = false; </span>
+<span class="lineNum">    160 </span><span class="linePartCov">    1 / 3     : 		TriggerInterrupt(1); </span>
+<span class="lineNum">    161 </span>              : 	} </span>
+<span class="lineNum">    162 </span><span class="lineCov">    2 / 2     : 	if (tb_irq_next_cycle) { </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 2     : 		tb_irq_next_cycle = false; </span>
+<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 4     : 		TriggerInterrupt(2); </span>
+<span class="lineNum">    165 </span>              : 	} </span>
+<span class="lineNum">    166 </span>              : } </span>
+<span class="lineNum">    167 </span>              : #else </span>
+<span class="lineNum">    168 </span>              : inline void MOS6526::EmulateLine(int cycles) </span>
+<span class="lineNum">    169 </span>              : { </span>
+<span class="lineNum">    170 </span>              : 	unsigned long tmp; </span>
+<span class="lineNum">    171 </span>              :  </span>
+<span class="lineNum">    172 </span>              : 	// Timer A </span>
+<span class="lineNum">    173 </span>              : 	if (ta_cnt_phi2) { </span>
+<span class="lineNum">    174 </span>              : 		ta = tmp = ta - cycles;		// Decrement timer </span>
+<span class="lineNum">    175 </span>              :  </span>
+<span class="lineNum">    176 </span>              : 		if (tmp &gt; 0xffff) {			// Underflow? </span>
+<span class="lineNum">    177 </span>              : 			ta = latcha;			// Reload timer </span>
+<span class="lineNum">    178 </span>              :  </span>
+<span class="lineNum">    179 </span>              : 			if (cra &amp; 8) {			// One-shot? </span>
+<span class="lineNum">    180 </span>              : 				cra &amp;= 0xfe; </span>
+<span class="lineNum">    181 </span>              : 				ta_cnt_phi2 = false; </span>
+<span class="lineNum">    182 </span>              : 			} </span>
+<span class="lineNum">    183 </span>              : 			TriggerInterrupt(1); </span>
+<span class="lineNum">    184 </span>              : 			if (tb_cnt_ta) {		// Timer B counting underflows of Timer A? </span>
+<span class="lineNum">    185 </span>              : 				tb = tmp = tb - 1;	// tmp = --tb doesn't work </span>
+<span class="lineNum">    186 </span>              : 				if (tmp &gt; 0xffff) goto tb_underflow; </span>
+<span class="lineNum">    187 </span>              : 			} </span>
+<span class="lineNum">    188 </span>              : 		} </span>
+<span class="lineNum">    189 </span>              : 	} </span>
+<span class="lineNum">    190 </span>              :  </span>
+<span class="lineNum">    191 </span>              : 	// Timer B </span>
+<span class="lineNum">    192 </span>              : 	if (tb_cnt_phi2) { </span>
+<span class="lineNum">    193 </span>              : 		tb = tmp = tb - cycles;		// Decrement timer </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              : 		if (tmp &gt; 0xffff) {			// Underflow? </span>
+<span class="lineNum">    196 </span>              : tb_underflow: </span>
+<span class="lineNum">    197 </span>              : 			tb = latchb; </span>
+<span class="lineNum">    198 </span>              :  </span>
+<span class="lineNum">    199 </span>              : 			if (crb &amp; 8) {			// One-shot? </span>
+<span class="lineNum">    200 </span>              : 				crb &amp;= 0xfe; </span>
+<span class="lineNum">    201 </span>              : 				tb_cnt_phi2 = false; </span>
+<span class="lineNum">    202 </span>              : 				tb_cnt_ta = false; </span>
+<span class="lineNum">    203 </span>              : 			} </span>
+<span class="lineNum">    204 </span>              : 			TriggerInterrupt(2); </span>
+<span class="lineNum">    205 </span>              : 		} </span>
+<span class="lineNum">    206 </span>              : 	} </span>
+<span class="lineNum">    207 </span>              : } </span>
+<span class="lineNum">    208 </span>              : #endif </span>
+<span class="lineNum">    209 </span>              :  </span>
+<span class="lineNum">    210 </span>              : #endif </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

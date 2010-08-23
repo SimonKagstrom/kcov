@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">10</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">80.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">8</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : #ifndef __UTILS_H__ </span>
+<span class="lineNum">      2 </span>              : #define __UTILS_H__ </span>
+<span class="lineNum">      3 </span>              :  </span>
+<span class="lineNum">      4 </span>              : #include &lt;string.h&gt; </span>
+<span class="lineNum">      5 </span>              : #include &lt;stdio.h&gt; </span>
+<span class="lineNum">      6 </span>              : #include &lt;stdlib.h&gt; </span>
+<span class="lineNum">      7 </span>              : #include &lt;assert.h&gt; </span>
+<span class="lineNum">      8 </span>              :  </span>
+<span class="lineNum">      9 </span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">     10 </span>              : #include &lt;SDL_ttf.h&gt; </span>
+<span class="lineNum">     11 </span>              :  </span>
+<span class="lineNum">     12 </span>              : class Font; </span>
+<span class="lineNum">     13 </span>              :  </span>
+<span class="lineNum">     14 </span>              : #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x)) </span>
+<span class="lineNum">     15 </span>              :  </span>
+<span class="lineNum">     16 </span>              : #define BUG_ON(cond) </span>
+<span class="lineNum">     17 </span>              :  </span>
+<span class="lineNum">     18 </span>              : #define panic(x...) do \ </span>
+<span class="lineNum">     19 </span>              :   { \ </span>
+<span class="lineNum">     20 </span>              :     fprintf(stderr, &quot;=============PANIC PANIC PANIC===========\n&quot;); \ </span>
+<span class="lineNum">     21 </span>              :     fprintf(stderr, &quot;%s:%d: &quot;, __FILE__, __LINE__); fprintf(stderr, x); \ </span>
+<span class="lineNum">     22 </span>              :     fprintf(stderr, &quot;=========================================\n&quot;); \ </span>
+<span class="lineNum">     23 </span>              :     assert(0); \ </span>
+<span class="lineNum">     24 </span>              :     exit(1); \ </span>
+<span class="lineNum">     25 </span>              :   } while(0) </span>
+<span class="lineNum">     26 </span>              :  </span>
+<span class="lineNum">     27 </span>              : #define warning(x...) do \ </span>
+<span class="lineNum">     28 </span>              :   { \ </span>
+<span class="lineNum">     29 </span>              :     fprintf(stderr, &quot;==============WARNING WARNING============\n&quot;); \ </span>
+<span class="lineNum">     30 </span>              :     fprintf(stderr, &quot;%s:%d: &quot;, __FILE__, __LINE__); fprintf(stderr, x); \ </span>
+<span class="lineNum">     31 </span>              :     fprintf(stderr, &quot;=========================================\n&quot;); \ </span>
+<span class="lineNum">     32 </span>              :   } while(0) </span>
+<span class="lineNum">     33 </span>              :  </span>
+<span class="lineNum">     34 </span>              : #define panic_if(cond, x...) \ </span>
+<span class="lineNum">     35 </span>              :   do { if ((cond)) panic(x); } while(0) </span>
+<span class="lineNum">     36 </span>              :  </span>
+<span class="lineNum">     37 </span>              : #define warning_if(cond, x...) \ </span>
+<span class="lineNum">     38 </span>              :   do { if ((cond)) warning(x); } while(0) </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              : static inline char *xstrdup(const char *s) </span>
+<span class="lineNum">     41 </span>              : { </span>
+<span class="lineNum">     42 </span><span class="linePartCov">   34 / 86    :   char *out = strdup(s); </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span><span class="linePartCov">   32 / 106   :   panic_if(!out, &quot;strdup failed&quot;); </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              :   return out; </span>
+<span class="lineNum">     47 </span>              : } </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span>              : static inline void *xmalloc(size_t sz) </span>
+<span class="lineNum">     50 </span><span class="lineCov">    3 / 3     : { </span>
+<span class="lineNum">     51 </span><span class="linePartCov">   30 / 51    :   void *out = malloc(sz); </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span><span class="linePartCov">   29 / 77    :   panic_if(!out, &quot;malloc failed&quot;); </span>
+<span class="lineNum">     54 </span>              :   memset(out, 0, sz); </span>
+<span class="lineNum">     55 </span>              :  </span>
+<span class="lineNum">     56 </span>              :   return out; </span>
+<span class="lineNum">     57 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     58 </span>              :  </span>
+<span class="lineNum">     59 </span>              : static inline void *xrealloc(void *ptr, size_t sz) </span>
+<span class="lineNum">     60 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     61 </span><span class="linePartCov">    5 / 23    :   void *out = realloc(ptr, sz); </span>
+<span class="lineNum">     62 </span>              :  </span>
+<span class="lineNum">     63 </span><span class="linePartCov">    5 / 34    :   panic_if(!out, &quot;malloc failed&quot;); </span>
+<span class="lineNum">     64 </span>              :  </span>
+<span class="lineNum">     65 </span>              :   return out; </span>
+<span class="lineNum">     66 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     67 </span>              :  </span>
+<span class="lineNum">     68 </span>              : #define xsnprintf(buf, size, fmt, x...) do { \ </span>
+<span class="lineNum">     69 </span>              :     int r = snprintf(buf, size, fmt, x); \ </span>
+<span class="lineNum">     70 </span>              :     panic_if(r &lt; 0 || r &gt;= (int)(size), &quot;snprintf failed for %s with %d\n&quot;, fmt, r); \ </span>
+<span class="lineNum">     71 </span>              : } while(0) </span>
+<span class="lineNum">     72 </span>              :  </span>
+<span class="lineNum">     73 </span>              : TTF_Font *read_and_alloc_font(const char *path, int pt_size); </span>
+<span class="lineNum">     74 </span>              :  </span>
+<span class="lineNum">     75 </span>              : bool ext_matches_list(const char *name, const char **exts); </span>
+<span class="lineNum">     76 </span>              :  </span>
+<span class="lineNum">     77 </span>              : const char **get_file_list(const char *base_dir, const char *exts[]); </span>
+<span class="lineNum">     78 </span>              :  </span>
+<span class="lineNum">     79 </span>              : void *sdl_surface_to_png(SDL_Surface *src, size_t *out_sz); </span>
+<span class="lineNum">     80 </span>              :  </span>
+<span class="lineNum">     81 </span>              : SDL_Surface *sdl_surface_from_data(void *data, size_t sz); </span>
+<span class="lineNum">     82 </span>              :  </span>
+<span class="lineNum">     83 </span>              : void highlight_background(SDL_Surface *where, Font *font, </span>
+<span class="lineNum">     84 </span>              : 		SDL_Surface *bg_left, SDL_Surface *bg_middle, SDL_Surface *bg_right, </span>
+<span class="lineNum">     85 </span>              : 		int x, int y, int w, int h); </span>
+<span class="lineNum">     86 </span>              :  </span>
+<span class="lineNum">     87 </span>              : const char *ip_to_str(uint8_t *ip_in); </span>
+<span class="lineNum">     88 </span>              :  </span>
+<span class="lineNum">     89 </span>              : const char *region_to_str(int region); </span>
+<span class="lineNum">     90 </span>              :  </span>
+<span class="lineNum">     91 </span>              : SDL_Surface *sdl_surface_8bit_copy(SDL_Surface *src); </span>
+<span class="lineNum">     92 </span>              :  </span>
+<span class="lineNum">     93 </span>              : #endif /* __UTILS_H__ */ </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

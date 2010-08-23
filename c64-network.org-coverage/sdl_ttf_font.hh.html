@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">20</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">80.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">16</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">      2 </span>              : #include &lt;SDL_ttf.h&gt; </span>
+<span class="lineNum">      3 </span>              :  </span>
+<span class="lineNum">      4 </span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">      5 </span>              : #include &quot;font.hh&quot; </span>
+<span class="lineNum">      6 </span>              :  </span>
+<span class="lineNum">      7 </span>              : #ifndef __SDL_TTF_FONT_HH__ </span>
+<span class="lineNum">      8 </span>              : #define __SDL_TTF_FONT_HH__ </span>
+<span class="lineNum">      9 </span>              :  </span>
+<span class="lineNum">     10 </span>              : class Font_TTF : public Font </span>
+<span class="lineNum">     11 </span>              : { </span>
+<span class="lineNum">     12 </span>              : public: </span>
+<span class="lineNum">     13 </span>              : 	Font_TTF(TTF_Font *font, </span>
+<span class="lineNum">     14 </span>              : 			int r, int g, int b) </span>
+<span class="lineNum">     15 </span><span class="lineCov">    1 / 1     : 	{ </span>
+<span class="lineNum">     16 </span><span class="lineCov">    2 / 2     : 		this-&gt;clr = (SDL_Color){r, g, b}; </span>
+<span class="lineNum">     17 </span><span class="lineCov">    1 / 1     : 		this-&gt;font = font; </span>
+<span class="lineNum">     18 </span>              : 	} </span>
+<span class="lineNum">     19 </span>              :  </span>
+<span class="lineNum">     20 </span><span class="lineNoCov">    0 / 4     : 	~Font_TTF() </span>
+<span class="lineNum">     21 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
+<span class="lineNum">     22 </span><span class="lineNoCov">    0 / 4     : 		TTF_CloseFont(this-&gt;font); </span>
+<span class="lineNum">     23 </span><span class="lineNoCov">    0 / 4     : 	} </span>
+<span class="lineNum">     24 </span>              :  </span>
+<span class="lineNum">     25 </span><span class="lineCov">    1 / 1     : 	int getHeight(const char *str) </span>
+<span class="lineNum">     26 </span>              : 	{ </span>
+<span class="lineNum">     27 </span>              : 		int tw, th; </span>
+<span class="lineNum">     28 </span>              :  </span>
+<span class="lineNum">     29 </span><span class="lineCov">    1 / 1     : 		TTF_SizeText(this-&gt;font, str, &amp;tw, &amp;th); </span>
+<span class="lineNum">     30 </span>              :  </span>
+<span class="lineNum">     31 </span>              : 		return th; </span>
+<span class="lineNum">     32 </span><span class="linePartCov">    1 / 2     : 	} </span>
+<span class="lineNum">     33 </span>              :  </span>
+<span class="lineNum">     34 </span><span class="lineCov">    1 / 1     : 	int getWidth(const char *str) </span>
+<span class="lineNum">     35 </span>              : 	{ </span>
+<span class="lineNum">     36 </span>              : 		int tw, th; </span>
+<span class="lineNum">     37 </span>              :  </span>
+<span class="lineNum">     38 </span><span class="lineCov">    1 / 1     : 		TTF_SizeText(this-&gt;font, str, &amp;tw, &amp;th); </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              : 		return tw; </span>
+<span class="lineNum">     41 </span><span class="linePartCov">    1 / 2     : 	} </span>
+<span class="lineNum">     42 </span>              :  </span>
+<span class="lineNum">     43 </span><span class="lineCov">    2 / 2     : 	void draw(SDL_Surface *where, const char *msg, </span>
+<span class="lineNum">     44 </span>              : 			int x, int y, int w, int h) </span>
+<span class="lineNum">     45 </span>              : 	{ </span>
+<span class="lineNum">     46 </span>              : 		SDL_Surface *p; </span>
+<span class="lineNum">     47 </span>              : 		SDL_Rect dst; </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span><span class="lineCov">    2 / 2     : 		p = TTF_RenderText_Blended(this-&gt;font, msg, this-&gt;clr); </span>
+<span class="lineNum">     50 </span><span class="linePartCov">    2 / 5     : 		panic_if(!p, &quot;TTF error for '%s': %s\n&quot;, msg, TTF_GetError()); </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span><span class="lineCov">    2 / 2     : 		dst = (SDL_Rect){x, y, w, h}; </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span><span class="lineCov">    2 / 2     : 		SDL_BlitSurface(p, NULL, where, &amp;dst); </span>
+<span class="lineNum">     55 </span><span class="lineCov">    1 / 1     : 		SDL_FreeSurface(p); </span>
+<span class="lineNum">     56 </span><span class="lineCov">    1 / 1     : 	} </span>
+<span class="lineNum">     57 </span>              :  </span>
+<span class="lineNum">     58 </span>              : protected: </span>
+<span class="lineNum">     59 </span>              : 	TTF_Font *font; </span>
+<span class="lineNum">     60 </span>              : 	SDL_Color clr; </span>
+<span class="lineNum">     61 </span>              : }; </span>
+<span class="lineNum">     62 </span>              :  </span>
+<span class="lineNum">     63 </span>              : #endif </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

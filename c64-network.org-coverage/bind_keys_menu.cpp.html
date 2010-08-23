@@ -1,0 +1,474 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-08-23 20:44:07</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">198</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="headerValue" width="15%">4.5 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">9</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">      2 </span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">      3 </span>              : #include &quot;help_box.hh&quot; </span>
+<span class="lineNum">      4 </span>              : #include &quot;dialogue_box.hh&quot; </span>
+<span class="lineNum">      5 </span>              : #include &quot;virtual_keyboard.hh&quot; </span>
+<span class="lineNum">      6 </span>              :  </span>
+<span class="lineNum">      7 </span>              : class BindKeysMenu; </span>
+<span class="lineNum">      8 </span>              :  </span>
+<span class="lineNum">      9 </span>              : class AnalogueBindListener : public DialogueListener </span>
+<span class="lineNum">     10 </span>              : { </span>
+<span class="lineNum">     11 </span>              : public: </span>
+<span class="lineNum">     12 </span>              : 	AnalogueBindListener(BindKeysMenu *menu) </span>
+<span class="lineNum">     13 </span>              : 	{ </span>
+<span class="lineNum">     14 </span>              : 		this-&gt;menu = menu; </span>
+<span class="lineNum">     15 </span>              : 	} </span>
+<span class="lineNum">     16 </span>              :  </span>
+<span class="lineNum">     17 </span><span class="lineNoCov">    0 / 1     : 	void escapeCallback(DialogueBox *which, int selected) </span>
+<span class="lineNum">     18 </span>              : 	{ </span>
+<span class="lineNum">     19 </span><span class="lineNoCov">    0 / 2     : 		delete this; </span>
+<span class="lineNum">     20 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">     21 </span>              :  </span>
+<span class="lineNum">     22 </span>              : 	void selectCallback(DialogueBox *which, int selected); </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span>              : private: </span>
+<span class="lineNum">     25 </span>              : 	BindKeysMenu *menu; </span>
+<span class="lineNum">     26 </span>              : }; </span>
+<span class="lineNum">     27 </span>              :  </span>
+<span class="lineNum">     28 </span>              : class BindKeysView; </span>
+<span class="lineNum">     29 </span>              : class BindKeysMenu : public Menu, public KeyboardListener </span>
+<span class="lineNum">     30 </span>              : { </span>
+<span class="lineNum">     31 </span>              : 	/* This is a very popular class with many friends */ </span>
+<span class="lineNum">     32 </span>              : 	friend class BindKeysView; </span>
+<span class="lineNum">     33 </span>              : 	friend class AnalogueBindListener; </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : public: </span>
+<span class="lineNum">     36 </span><span class="lineCov">    2 / 2     : 	BindKeysMenu(Font *font, HelpBox *help) : Menu(font) </span>
+<span class="lineNum">     37 </span>              : 	{ </span>
+<span class="lineNum">     38 </span><span class="lineCov">    1 / 1     : 		this-&gt;help = help; </span>
+<span class="lineNum">     39 </span>              : 		memset(this-&gt;hm, 0, sizeof(this-&gt;hm)); </span>
+<span class="lineNum">     40 </span><span class="lineCov">    1 / 1     : 		this-&gt;setText(bind_key_menu_messages); </span>
+<span class="lineNum">     41 </span>              : 	} </span>
+<span class="lineNum">     42 </span>              :  </span>
+<span class="lineNum">     43 </span>              : 	~BindKeysMenu() </span>
+<span class="lineNum">     44 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
+<span class="lineNum">     45 </span>              : 		this-&gt;freeHelpMessages(); </span>
+<span class="lineNum">     46 </span><span class="lineNoCov">    0 / 2     : 	} </span>
+<span class="lineNum">     47 </span>              :  </span>
+<span class="lineNum">     48 </span><span class="lineNoCov">    0 / 2     : 	virtual void selectCallback(int which) </span>
+<span class="lineNum">     49 </span>              : 	{ </span>
+<span class="lineNum">     50 </span>              : 		int *ck = NULL; </span>
+<span class="lineNum">     51 </span>              : 		/* Either the virtual keyboard or the analogue menu */ </span>
+<span class="lineNum">     52 </span>              : 		bool use_virtkbd = true; </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span><span class="lineNoCov">    0 / 2     : 		switch(which) </span>
+<span class="lineNum">     55 </span>              : 		{ </span>
+<span class="lineNum">     56 </span>              : 		case 0: /* Wiimote */ </span>
+<span class="lineNum">     57 </span><span class="lineNoCov">    0 / 2     : 			switch (this-&gt;p_submenus[0].sel) </span>
+<span class="lineNum">     58 </span>              : 			{ </span>
+<span class="lineNum">     59 </span><span class="lineNoCov">    0 / 1     : 			case 0: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[0]; break; </span>
+<span class="lineNum">     60 </span><span class="lineNoCov">    0 / 1     : 			case 1: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[1]; break; </span>
+<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 1     : 			case 2: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[2]; break; </span>
+<span class="lineNum">     62 </span><span class="lineNoCov">    0 / 1     : 			case 3: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[3]; break; </span>
+<span class="lineNum">     63 </span><span class="lineNoCov">    0 / 1     : 			case 4: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[5]; break; </span>
+<span class="lineNum">     64 </span><span class="lineNoCov">    0 / 1     : 			case 5: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[4]; break; </span>
+<span class="lineNum">     65 </span>              : 			default: </span>
+<span class="lineNum">     66 </span><span class="lineNoCov">    0 / 1     : 				panic(&quot;Wiimote: impossible selection %d&quot;, this-&gt;p_submenus[0].sel); break; </span>
+<span class="lineNum">     67 </span>              : 			} </span>
+<span class="lineNum">     68 </span>              : 			break; </span>
+<span class="lineNum">     69 </span>              : 		case 2: /* Nunchuk */ </span>
+<span class="lineNum">     70 </span><span class="lineNoCov">    0 / 2     : 			switch (this-&gt;p_submenus[1].sel) </span>
+<span class="lineNum">     71 </span>              : 			{ </span>
+<span class="lineNum">     72 </span><span class="lineNoCov">    0 / 1     : 			case 0: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[7]; break; </span>
+<span class="lineNum">     73 </span><span class="lineNoCov">    0 / 1     : 			case 1: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[8]; break; </span>
+<span class="lineNum">     74 </span>              : 			default: </span>
+<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 1     : 				panic(&quot;Nunchuk: impossible selection %d&quot;, this-&gt;p_submenus[1].sel); break; </span>
+<span class="lineNum">     76 </span>              : 			} </span>
+<span class="lineNum">     77 </span>              : 			break; </span>
+<span class="lineNum">     78 </span>              : 		case 4: /* Classic */ </span>
+<span class="lineNum">     79 </span><span class="lineNoCov">    0 / 2     : 			switch (this-&gt;p_submenus[2].sel) </span>
+<span class="lineNum">     80 </span>              : 			{ </span>
+<span class="lineNum">     81 </span><span class="lineNoCov">    0 / 1     : 			case 0: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[9]; break; </span>
+<span class="lineNum">     82 </span><span class="lineNoCov">    0 / 1     : 			case 1: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[10]; break; </span>
+<span class="lineNum">     83 </span><span class="lineNoCov">    0 / 2     : 			case 2: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[11]; break; </span>
+<span class="lineNum">     84 </span><span class="lineNoCov">    0 / 1     : 			case 3: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[12]; break; </span>
+<span class="lineNum">     85 </span><span class="lineNoCov">    0 / 1     : 			case 4: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[13]; break; </span>
+<span class="lineNum">     86 </span><span class="lineNoCov">    0 / 1     : 			case 5: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[14]; break; </span>
+<span class="lineNum">     87 </span><span class="lineNoCov">    0 / 1     : 			case 6: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[15]; break; </span>
+<span class="lineNum">     88 </span><span class="lineNoCov">    0 / 1     : 			case 7: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[16]; break; </span>
+<span class="lineNum">     89 </span><span class="lineNoCov">    0 / 1     : 			case 8: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[18]; break; </span>
+<span class="lineNum">     90 </span><span class="lineNoCov">    0 / 1     : 			case 9: ck = &amp;Gui::gui-&gt;np-&gt;JoystickButtons[17]; break; </span>
+<span class="lineNum">     91 </span>              : 			default: </span>
+<span class="lineNum">     92 </span><span class="lineNoCov">    0 / 1     : 				panic(&quot;Classic: impossible selection %d&quot;, this-&gt;p_submenus[2].sel); break; </span>
+<span class="lineNum">     93 </span>              : 			} </span>
+<span class="lineNum">     94 </span>              : 			break; </span>
+<span class="lineNum">     95 </span>              : 		case 7: </span>
+<span class="lineNum">     96 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;np-&gt;SetupJoystickDefaults(); </span>
+<span class="lineNum">     97 </span><span class="lineNoCov">    0 / 2     : 			this-&gt;updateHelpMessages(); </span>
+<span class="lineNum">     98 </span>              : 			return; </span>
+<span class="lineNum">     99 </span>              : 		default: </span>
+<span class="lineNum">    100 </span><span class="lineNoCov">    0 / 1     : 			panic(&quot;Impossible menu option\n&quot;); </span>
+<span class="lineNum">    101 </span>              : 			break; </span>
+<span class="lineNum">    102 </span>              : 		} </span>
+<span class="lineNum">    103 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;cur_key = ck; </span>
+<span class="lineNum">    104 </span>              :  </span>
+<span class="lineNum">    105 </span>              : 		if (use_virtkbd) </span>
+<span class="lineNum">    106 </span>              : 		{ </span>
+<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 2     : 			VirtualKeyboard::kbd-&gt;activate(false); </span>
+<span class="lineNum">    108 </span><span class="lineNoCov">    0 / 3     : 			VirtualKeyboard::kbd-&gt;registerListener(this); </span>
+<span class="lineNum">    109 </span>              : 		} </span>
+<span class="lineNum">    110 </span>              : 		else </span>
+<span class="lineNum">    111 </span>              : 		{ </span>
+<span class="lineNum">    112 </span>              : 			AnalogueBindListener *bl = new AnalogueBindListener(this); </span>
+<span class="lineNum">    113 </span>              : 			DialogueBox *dlg = new DialogueBox(select_analogue_dlg); </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span>              : 			dlg-&gt;registerListener(bl); </span>
+<span class="lineNum">    116 </span>              : 			Gui::gui-&gt;pushDialogueBox(dlg); </span>
+<span class="lineNum">    117 </span>              : 		} </span>
+<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 2     : 	} </span>
+<span class="lineNum">    119 </span>              :  </span>
+<span class="lineNum">    120 </span><span class="lineCov">    1 / 1     : 	virtual void hoverCallback(int which) </span>
+<span class="lineNum">    121 </span>              : 	{ </span>
+<span class="lineNum">    122 </span><span class="lineCov">    1 / 1     : 		this-&gt;help-&gt;updateHelpMessage(which); </span>
+<span class="lineNum">    123 </span><span class="linePartCov">    1 / 2     : 	} </span>
+<span class="lineNum">    124 </span>              :  </span>
+<span class="lineNum">    125 </span><span class="lineNoCov">    0 / 1     : 	virtual void escapeCallback(int which) </span>
+<span class="lineNum">    126 </span>              : 	{ </span>
+<span class="lineNum">    127 </span><span class="lineNoCov">    0 / 3     : 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    129 </span>              :  </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 	virtual void keyCallback(bool shift, const char *str) </span>
+<span class="lineNum">    131 </span>              : 	{ </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 3     : 		panic_if(!this-&gt;cur_key, &quot;No key selected but keyboard active???\n&quot;); </span>
+<span class="lineNum">    133 </span>              :  </span>
+<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 1     : 		*this-&gt;cur_key = this-&gt;stringToKeycode(str); </span>
+<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;updateHelpMessages(); </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;help-&gt;updateHelpMessage(this-&gt;cur_sel); </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 		VirtualKeyboard::kbd-&gt;deactivate(); </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;cur_key = NULL; </span>
+<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    140 </span>              :  </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 6     : 	void updateHelpMessages() </span>
+<span class="lineNum">    142 </span>              : 	{ </span>
+<span class="lineNum">    143 </span>              : 		this-&gt;freeHelpMessages(); </span>
+<span class="lineNum">    144 </span>              :  </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;1: %s&quot;, stringToPtr_Wiimote(&quot;1&quot;))); </span>
+<span class="lineNum">    146 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;2: %s&quot;, stringToPtr_Wiimote(&quot;2&quot;))); </span>
+<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;A: %s&quot;, stringToPtr_Wiimote(&quot;A&quot;))); </span>
+<span class="lineNum">    148 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;B: %s&quot;, stringToPtr_Wiimote(&quot;B&quot;))); </span>
+<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;+: %s&quot;, stringToPtr_Wiimote(&quot;+&quot;))); </span>
+<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[0] = this-&gt;addOne(this-&gt;hm[0], this-&gt;allocOne(&quot;-: %s&quot;, stringToPtr_Wiimote(&quot;-&quot;))); </span>
+<span class="lineNum">    151 </span>              :  </span>
+<span class="lineNum">    152 </span>              : 		/* Nunchuk */ </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;Z: %s&quot;, stringToPtr_Nunchuk(&quot;Z&quot;))); </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;C: %s&quot;, stringToPtr_Nunchuk(&quot;C&quot;))); </span>
+<span class="lineNum">    155 </span>              :  </span>
+<span class="lineNum">    156 </span>              : 		/* Classic */ </span>
+<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;a: %s&quot;, stringToPtr_Classic(&quot;a&quot;))); </span>
+<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;b: %s&quot;, stringToPtr_Classic(&quot;b&quot;))); </span>
+<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;x: %s&quot;, stringToPtr_Classic(&quot;x&quot;))); </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;y: %s&quot;, stringToPtr_Classic(&quot;y&quot;))); </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;L: %s&quot;, stringToPtr_Classic(&quot;L&quot;))); </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;R: %s&quot;, stringToPtr_Classic(&quot;R&quot;))); </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;Zl: %s&quot;, stringToPtr_Classic(&quot;Zl&quot;))); </span>
+<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;Zr: %s&quot;, stringToPtr_Classic(&quot;Zr&quot;))); </span>
+<span class="lineNum">    165 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;+: %s&quot;, stringToPtr_Classic(&quot;+&quot;))); </span>
+<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[4] = this-&gt;addOne(this-&gt;hm[4], this-&gt;allocOne(&quot;-: %s&quot;, stringToPtr_Classic(&quot;-&quot;))); </span>
+<span class="lineNum">    167 </span>              :  </span>
+<span class="lineNum">    168 </span>              : 		/* </span>
+<span class="lineNum">    169 </span>              : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;l: %s&quot;, stringToPtr_Classic(&quot;l&quot;))); </span>
+<span class="lineNum">    170 </span>              : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;r: %s&quot;, stringToPtr_Classic(&quot;r&quot;))); </span>
+<span class="lineNum">    171 </span>              : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;R-toggle: %s&quot;, stringToPtr_Classic(&quot;RA&quot;))); </span>
+<span class="lineNum">    172 </span>              : 		this-&gt;hm[2] = this-&gt;addOne(this-&gt;hm[2], this-&gt;allocOne(&quot;L-toggle: %s&quot;, stringToPtr_Classic(&quot;LA&quot;))); </span>
+<span class="lineNum">    173 </span>              : 		*/ </span>
+<span class="lineNum">    174 </span>              :  </span>
+<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;hm[7] = this-&gt;addOne(this-&gt;hm[11], xstrdup(&quot;Revert to defaults&quot;)); </span>
+<span class="lineNum">    176 </span>              :  </span>
+<span class="lineNum">    177 </span>              : 		this-&gt;help-&gt;setHelpMessages(this-&gt;hm); </span>
+<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    179 </span>              :  </span>
+<span class="lineNum">    180 </span>              : private: </span>
+<span class="lineNum">    181 </span>              : 	void freeHelpMessages() </span>
+<span class="lineNum">    182 </span>              : 	{ </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 3     : 		for (unsigned i = 0; i &lt; ARRAY_SIZE(this-&gt;hm); i++) </span>
+<span class="lineNum">    184 </span>              : 		{ </span>
+<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 3     : 			if (this-&gt;hm[i]) </span>
+<span class="lineNum">    186 </span>              : 			{ </span>
+<span class="lineNum">    187 </span><span class="lineNoCov">    0 / 6     : 				for (int j = 0; this-&gt;hm[i][j]; j++) </span>
+<span class="lineNum">    188 </span><span class="lineNoCov">    0 / 3     : 					free((void*)this-&gt;hm[i][j]); </span>
+<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 3     : 				free(this-&gt;hm[i]); </span>
+<span class="lineNum">    190 </span>              : 			} </span>
+<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 3     : 			this-&gt;hm[i] = NULL; </span>
+<span class="lineNum">    192 </span>              : 		} </span>
+<span class="lineNum">    193 </span>              : 	} </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              : #define EQ(b) (strcmp(str, b) == 0) </span>
+<span class="lineNum">    196 </span><span class="lineNoCov">    0 / 2     : 	int *stringToPtr_Classic(const char *str) </span>
+<span class="lineNum">    197 </span>              : 	{ </span>
+<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 2     : 		if (EQ(&quot;Up&quot;)) </span>
+<span class="lineNum">    199 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[0]; </span>
+<span class="lineNum">    200 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Down&quot;)) </span>
+<span class="lineNum">    201 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[1]; </span>
+<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Left&quot;)) </span>
+<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[2]; </span>
+<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Right&quot;)) </span>
+<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[3]; </span>
+<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;LAH&quot;)) </span>
+<span class="lineNum">    207 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[0]; </span>
+<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;LAV&quot;)) </span>
+<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[1]; </span>
+<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;RAH&quot;)) </span>
+<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[2]; </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;RAV&quot;)) </span>
+<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[3]; </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;RA&quot;)) </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[4]; </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;LA&quot;)) </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[5]; </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;a&quot;)) </span>
+<span class="lineNum">    219 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[9]; </span>
+<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;b&quot;)) </span>
+<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[10]; </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;x&quot;)) </span>
+<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[11]; </span>
+<span class="lineNum">    224 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;y&quot;)) </span>
+<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[12]; </span>
+<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;L&quot;)) </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[13]; </span>
+<span class="lineNum">    228 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;R&quot;)) </span>
+<span class="lineNum">    229 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[14]; </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Zl&quot;)) </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[15]; </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Zr&quot;)) </span>
+<span class="lineNum">    233 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[16]; </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;-&quot;)) </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[17]; </span>
+<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;+&quot;)) </span>
+<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 2     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[18]; </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Home&quot;)) </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[19]; </span>
+<span class="lineNum">    240 </span>              :  </span>
+<span class="lineNum">    241 </span>              : 		/* Shound never happen! */ </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 1     : 		panic(&quot;Illegal string %s\n&quot;, str); </span>
+<span class="lineNum">    243 </span>              :  </span>
+<span class="lineNum">    244 </span>              : 		return NULL; </span>
+<span class="lineNum">    245 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    246 </span>              :  </span>
+<span class="lineNum">    247 </span>              : 	int *stringToPtr_Nunchuk(const char *str) </span>
+<span class="lineNum">    248 </span>              : 	{ </span>
+<span class="lineNum">    249 </span>              : 		if (EQ(&quot;Horiz&quot;)) </span>
+<span class="lineNum">    250 </span>              : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[0]; </span>
+<span class="lineNum">    251 </span>              : 		if (EQ(&quot;Vert&quot;)) </span>
+<span class="lineNum">    252 </span>              : 			return &amp;Gui::gui-&gt;np-&gt;JoystickAxes[1]; </span>
+<span class="lineNum">    253 </span>              : 		if (EQ(&quot;Z&quot;)) </span>
+<span class="lineNum">    254 </span>              : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[7]; </span>
+<span class="lineNum">    255 </span>              : 		if (EQ(&quot;C&quot;)) </span>
+<span class="lineNum">    256 </span>              : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[8]; </span>
+<span class="lineNum">    257 </span>              :  </span>
+<span class="lineNum">    258 </span>              : 		/* Shound never happen! */ </span>
+<span class="lineNum">    259 </span>              : 		panic(&quot;Illegal string %s\n&quot;, str); </span>
+<span class="lineNum">    260 </span>              :  </span>
+<span class="lineNum">    261 </span>              : 		return NULL; </span>
+<span class="lineNum">    262 </span>              : 	} </span>
+<span class="lineNum">    263 </span>              :  </span>
+<span class="lineNum">    264 </span><span class="lineNoCov">    0 / 2     : 	int *stringToPtr_Wiimote(const char *str) </span>
+<span class="lineNum">    265 </span>              : 	{ </span>
+<span class="lineNum">    266 </span><span class="lineNoCov">    0 / 2     : 		if (EQ(&quot;Up&quot;)) </span>
+<span class="lineNum">    267 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[0]; </span>
+<span class="lineNum">    268 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Down&quot;)) </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[1]; </span>
+<span class="lineNum">    270 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Left&quot;)) </span>
+<span class="lineNum">    271 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[2]; </span>
+<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Right&quot;)) </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickHats[3]; </span>
+<span class="lineNum">    274 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;A&quot;)) </span>
+<span class="lineNum">    275 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[0]; </span>
+<span class="lineNum">    276 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;B&quot;)) </span>
+<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[1]; </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;1&quot;)) </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[2]; </span>
+<span class="lineNum">    280 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;2&quot;)) </span>
+<span class="lineNum">    281 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[3]; </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;-&quot;)) </span>
+<span class="lineNum">    283 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[4]; </span>
+<span class="lineNum">    284 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;+&quot;)) </span>
+<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[5]; </span>
+<span class="lineNum">    286 </span><span class="lineNoCov">    0 / 1     : 		if (EQ(&quot;Home&quot;)) </span>
+<span class="lineNum">    287 </span><span class="lineNoCov">    0 / 1     : 			return &amp;Gui::gui-&gt;np-&gt;JoystickButtons[6]; </span>
+<span class="lineNum">    288 </span>              :  </span>
+<span class="lineNum">    289 </span>              : 		/* Shound never happen! */ </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 2     : 		panic(&quot;Illegal string %s\n&quot;, str); </span>
+<span class="lineNum">    291 </span>              :  </span>
+<span class="lineNum">    292 </span>              : 		return NULL; </span>
+<span class="lineNum">    293 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    294 </span>              : #undef EQ </span>
+<span class="lineNum">    295 </span>              :  </span>
+<span class="lineNum">    296 </span>              : 	const char **addOne(const char **dst, const char *what) </span>
+<span class="lineNum">    297 </span>              : 	{ </span>
+<span class="lineNum">    298 </span>              : 		int cur; </span>
+<span class="lineNum">    299 </span>              : 		int n = 0; </span>
+<span class="lineNum">    300 </span>              :  </span>
+<span class="lineNum">    301 </span><span class="lineNoCov">    0 / 19    : 		if (dst != NULL) </span>
+<span class="lineNum">    302 </span>              : 		{ </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 24    : 			for (n = 0; dst[n]; n++) </span>
+<span class="lineNum">    304 </span>              : 				; </span>
+<span class="lineNum">    305 </span>              : 		} </span>
+<span class="lineNum">    306 </span>              : 		cur = n; </span>
+<span class="lineNum">    307 </span>              : 		n++; </span>
+<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 4     : 		dst = (const char **)xrealloc(dst, (n+1) * sizeof(const char*)); </span>
+<span class="lineNum">    309 </span><span class="lineNoCov">    0 / 19    : 		dst[cur] = what; </span>
+<span class="lineNum">    310 </span><span class="lineNoCov">    0 / 23    : 		dst[n] = NULL; </span>
+<span class="lineNum">    311 </span>              :  </span>
+<span class="lineNum">    312 </span>              : 		return dst; </span>
+<span class="lineNum">    313 </span>              : 	} </span>
+<span class="lineNum">    314 </span>              :  </span>
+<span class="lineNum">    315 </span><span class="lineNoCov">    0 / 7     : 	const char *allocOne(const char *fmt, int *what) </span>
+<span class="lineNum">    316 </span>              : 	{ </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 2     : 		const char *str = this-&gt;bindingToString(*what); </span>
+<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 1     : 		size_t len = strlen(str) + strlen(fmt) + 2; </span>
+<span class="lineNum">    319 </span>              : 		char *out = (char *)xmalloc(len); </span>
+<span class="lineNum">    320 </span>              :  </span>
+<span class="lineNum">    321 </span>              : 		sprintf(out, fmt, str); </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span>              : 		return out; </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    325 </span>              :  </span>
+<span class="lineNum">    326 </span>              : 	int stringToKeycode(const char *str) </span>
+<span class="lineNum">    327 </span>              : 	{ </span>
+<span class="lineNum">    328 </span><span class="lineNoCov">    0 / 1     : 		if (strcmp(str, &quot;None&quot;) == 0) </span>
+<span class="lineNum">    329 </span>              : 			return 0; </span>
+<span class="lineNum">    330 </span>              :  </span>
+<span class="lineNum">    331 </span>              : 		/* default: */ </span>
+<span class="lineNum">    332 </span><span class="lineNoCov">    0 / 1     : 		return VirtualKeyboard::kbd-&gt;stringToKeycode(str); </span>
+<span class="lineNum">    333 </span>              : 	} </span>
+<span class="lineNum">    334 </span>              :  </span>
+<span class="lineNum">    335 </span>              : 	const char *bindingToString(int val) </span>
+<span class="lineNum">    336 </span>              : 	{ </span>
+<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 4     : 		switch(val) </span>
+<span class="lineNum">    338 </span>              : 		{ </span>
+<span class="lineNum">    339 </span>              : 		case JOY_NONE: </span>
+<span class="lineNum">    340 </span>              : 			return &quot;None&quot;; </span>
+<span class="lineNum">    341 </span>              : 		case JOY_HORIZ: </span>
+<span class="lineNum">    342 </span>              : 			return &quot;Horizontal&quot;; </span>
+<span class="lineNum">    343 </span>              : 		case JOY_VERT: </span>
+<span class="lineNum">    344 </span>              : 			return &quot;Vertical&quot;; </span>
+<span class="lineNum">    345 </span>              : 		case JOY_FIRE: </span>
+<span class="lineNum">    346 </span>              : 			return &quot;Fire&quot;; </span>
+<span class="lineNum">    347 </span>              : 		default: </span>
+<span class="lineNum">    348 </span>              : 			break; </span>
+<span class="lineNum">    349 </span>              : 		} </span>
+<span class="lineNum">    350 </span>              :  </span>
+<span class="lineNum">    351 </span>              : 		/* default: */ </span>
+<span class="lineNum">    352 </span><span class="lineNoCov">    0 / 2     : 		return VirtualKeyboard::kbd-&gt;keycodeToString(val); </span>
+<span class="lineNum">    353 </span>              : 	} </span>
+<span class="lineNum">    354 </span>              :  </span>
+<span class="lineNum">    355 </span>              : 	HelpBox *help; </span>
+<span class="lineNum">    356 </span>              : 	int *cur_key; </span>
+<span class="lineNum">    357 </span>              : 	const char **hm[14]; </span>
+<span class="lineNum">    358 </span>              : }; </span>
+<span class="lineNum">    359 </span>              :  </span>
+<span class="lineNum">    360 </span>              : void AnalogueBindListener::selectCallback(DialogueBox *which, int selected) </span>
+<span class="lineNum">    361 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    362 </span><span class="lineNoCov">    0 / 1     : 	switch(selected) </span>
+<span class="lineNum">    363 </span>              : 	{ </span>
+<span class="lineNum">    364 </span>              : 	case 1: </span>
+<span class="lineNum">    365 </span><span class="lineNoCov">    0 / 1     : 		*menu-&gt;cur_key = JOY_HORIZ; break; </span>
+<span class="lineNum">    366 </span>              : 	case 2: </span>
+<span class="lineNum">    367 </span><span class="lineNoCov">    0 / 2     : 		*menu-&gt;cur_key = JOY_VERT; break; </span>
+<span class="lineNum">    368 </span>              : 	case 0: </span>
+<span class="lineNum">    369 </span>              : 	default: </span>
+<span class="lineNum">    370 </span><span class="lineNoCov">    0 / 1     : 		*menu-&gt;cur_key = JOY_NONE; break; </span>
+<span class="lineNum">    371 </span>              : 	} </span>
+<span class="lineNum">    372 </span>              :  </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;menu-&gt;updateHelpMessages(); </span>
+<span class="lineNum">    374 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;menu-&gt;help-&gt;updateHelpMessage(this-&gt;menu-&gt;cur_sel); </span>
+<span class="lineNum">    375 </span>              :  </span>
+<span class="lineNum">    376 </span><span class="lineNoCov">    0 / 2     : 	delete this; </span>
+<span class="lineNum">    377 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    378 </span>              :  </span>
+<span class="lineNum">    379 </span>              :  </span>
+<span class="lineNum">    380 </span>              : class BindKeysView : public GuiView </span>
+<span class="lineNum">    381 </span>              : { </span>
+<span class="lineNum">    382 </span>              : public: </span>
+<span class="lineNum">    383 </span><span class="lineCov">    1 / 1     : 	BindKeysView() : GuiView() </span>
+<span class="lineNum">    384 </span>              : 	{ </span>
+<span class="lineNum">    385 </span><span class="lineCov">    1 / 1     : 		this-&gt;help = new HelpBox(Gui::gui-&gt;small_font, NULL); </span>
+<span class="lineNum">    386 </span><span class="lineCov">    2 / 2     : 		this-&gt;menu = new BindKeysMenu(Gui::gui-&gt;small_font, this-&gt;help); </span>
+<span class="lineNum">    387 </span>              : 	} </span>
+<span class="lineNum">    388 </span>              :  </span>
+<span class="lineNum">    389 </span>              : 	~BindKeysView() </span>
+<span class="lineNum">    390 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
+<span class="lineNum">    391 </span><span class="lineNoCov">    0 / 6     : 		delete this-&gt;help; </span>
+<span class="lineNum">    392 </span><span class="lineNoCov">    0 / 4     : 		delete this-&gt;menu; </span>
+<span class="lineNum">    393 </span>              : 	} </span>
+<span class="lineNum">    394 </span>              :  </span>
+<span class="lineNum">    395 </span><span class="lineNoCov">    0 / 2     : 	void viewPushCallback() </span>
+<span class="lineNum">    396 </span>              : 	{ </span>
+<span class="lineNum">    397 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;menu-&gt;updateHelpMessages(); </span>
+<span class="lineNum">    398 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;help-&gt;updateHelpMessage(0); </span>
+<span class="lineNum">    399 </span><span class="lineNoCov">    0 / 2     : 	} </span>
+<span class="lineNum">    400 </span>              :  </span>
+<span class="lineNum">    401 </span><span class="lineNoCov">    0 / 1     : 	void runLogic() </span>
+<span class="lineNum">    402 </span>              : 	{ </span>
+<span class="lineNum">    403 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;menu-&gt;runLogic(); </span>
+<span class="lineNum">    404 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    405 </span>              :  </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 	void pushEvent(event_t ev) </span>
+<span class="lineNum">    407 </span>              : 	{ </span>
+<span class="lineNum">    408 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;menu-&gt;pushEvent(ev); </span>
+<span class="lineNum">    409 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    410 </span>              :  </span>
+<span class="lineNum">    411 </span><span class="lineNoCov">    0 / 3     : 	void draw(SDL_Surface *where) </span>
+<span class="lineNum">    412 </span>              : 	{ </span>
+<span class="lineNum">    413 </span>              : 		 SDL_Rect dst; </span>
+<span class="lineNum">    414 </span>              :  </span>
+<span class="lineNum">    415 </span>              : 		 /* Blit the backgrounds */ </span>
+<span class="lineNum">    416 </span><span class="lineNoCov">    0 / 1     : 		 dst = (SDL_Rect){20,45,300,400}; </span>
+<span class="lineNum">    417 </span><span class="lineNoCov">    0 / 3     : 		 SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
+<span class="lineNum">    418 </span>              :  </span>
+<span class="lineNum">    419 </span><span class="lineNoCov">    0 / 1     : 		 dst = (SDL_Rect){350,13,0,0}; </span>
+<span class="lineNum">    420 </span><span class="lineNoCov">    0 / 2     : 		 SDL_BlitSurface(Gui::gui-&gt;bind_key_box, NULL, where, &amp;dst); </span>
+<span class="lineNum">    421 </span>              :  </span>
+<span class="lineNum">    422 </span><span class="lineNoCov">    0 / 1     : 		 this-&gt;menu-&gt;draw(where, 50, 70, 300, 400); </span>
+<span class="lineNum">    423 </span><span class="lineNoCov">    0 / 1     : 		 this-&gt;help-&gt;draw(where, 358, 28, 264, 210); </span>
+<span class="lineNum">    424 </span><span class="lineNoCov">    0 / 2     : 	} </span>
+<span class="lineNum">    425 </span>              :  </span>
+<span class="lineNum">    426 </span>              : protected: </span>
+<span class="lineNum">    427 </span>              : 	BindKeysMenu *menu; </span>
+<span class="lineNum">    428 </span>              : 	HelpBox *help; </span>
+<span class="lineNum">    429 </span>              : }; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: Kcov (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>
