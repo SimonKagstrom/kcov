@@ -2,6 +2,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <utils.h>
 #include <kc.h>
@@ -597,6 +599,8 @@ static int should_exit;
 static void *report_thread(void *priv)
 {
 	int i;
+
+	mkdir(g_dir, 0755);
 
 	write_css(g_dir);
 	write_pngs(g_dir);
