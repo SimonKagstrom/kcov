@@ -1,0 +1,633 @@
+#define _GNU_SOURCE
+#include <pthread.h>
+#include <unistd.h>
+#include <time.h>
+
+#include <utils.h>
+#include <kc.h>
+
+
+static const char icon_ruby[] =
+  { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00,
+0x25, 0xdb, 0x56, 0xca, 0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4d, 0x45, 0x07, 0xd2, 0x07, 0x11, 0x0f,
+0x18, 0x10, 0x5d, 0x57, 0x34, 0x6e, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0b,
+0x12, 0x00, 0x00, 0x0b, 0x12, 0x01, 0xd2, 0xdd, 0x7e, 0xfc, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d,
+0x41, 0x00, 0x00, 0xb1, 0x8f, 0x0b, 0xfc, 0x61, 0x05, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4c, 0x54, 0x45,
+0xff, 0x35, 0x2f, 0x00, 0x00, 0x00, 0xd0, 0x33, 0x9a, 0x9d, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+0x54, 0x78, 0xda, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0xe5, 0x27, 0xde, 0xfc, 0x00, 0x00,
+0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82 };
+
+static const char icon_amber[] =
+  { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00,
+0x25, 0xdb, 0x56, 0xca, 0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4d, 0x45, 0x07, 0xd2, 0x07, 0x11, 0x0f,
+0x28, 0x04, 0x98, 0xcb, 0xd6, 0xe0, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0b,
+0x12, 0x00, 0x00, 0x0b, 0x12, 0x01, 0xd2, 0xdd, 0x7e, 0xfc, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d,
+0x41, 0x00, 0x00, 0xb1, 0x8f, 0x0b, 0xfc, 0x61, 0x05, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4c, 0x54, 0x45,
+0xff, 0xe0, 0x50, 0x00, 0x00, 0x00, 0xa2, 0x7a, 0xda, 0x7e, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+0x54, 0x78, 0xda, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0xe5, 0x27, 0xde, 0xfc, 0x00, 0x00,
+0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82 };
+
+static const char icon_emerald[] =
+  { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00, 0x25,
+0xdb, 0x56, 0xca, 0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4d, 0x45, 0x07, 0xd2, 0x07, 0x11, 0x0f, 0x22, 0x2b,
+0xc9, 0xf5, 0x03, 0x33, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0b, 0x12, 0x00, 0x00,
+0x0b, 0x12, 0x01, 0xd2, 0xdd, 0x7e, 0xfc, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d, 0x41, 0x00, 0x00, 0xb1,
+0x8f, 0x0b, 0xfc, 0x61, 0x05, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4c, 0x54, 0x45, 0x1b, 0xea, 0x59, 0x0a, 0x0a,
+0x0a, 0x0f, 0xba, 0x50, 0x83, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x63, 0x60, 0x00,
+0x00, 0x00, 0x02, 0x00, 0x01, 0xe5, 0x27, 0xde, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+0x42, 0x60, 0x82 };
+
+static const char icon_snow[] =
+  { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00,
+0x25, 0xdb, 0x56, 0xca, 0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4d, 0x45, 0x07, 0xd2, 0x07, 0x11, 0x0f,
+0x1e, 0x1d, 0x75, 0xbc, 0xef, 0x55, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0b,
+0x12, 0x00, 0x00, 0x0b, 0x12, 0x01, 0xd2, 0xdd, 0x7e, 0xfc, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d,
+0x41, 0x00, 0x00, 0xb1, 0x8f, 0x0b, 0xfc, 0x61, 0x05, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4c, 0x54, 0x45,
+0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x55, 0xc2, 0xd3, 0x7e, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+0x54, 0x78, 0xda, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0xe5, 0x27, 0xde, 0xfc, 0x00, 0x00,
+0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82 };
+
+static const char icon_glass[] =
+  { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00,
+0x25, 0xdb, 0x56, 0xca, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d, 0x41, 0x00, 0x00, 0xb1, 0x8f, 0x0b,
+0xfc, 0x61, 0x05, 0x00, 0x00, 0x00, 0x06, 0x50, 0x4c, 0x54, 0x45, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00,
+0x55, 0xc2, 0xd3, 0x7e, 0x00, 0x00, 0x00, 0x01, 0x74, 0x52, 0x4e, 0x53, 0x00, 0x40, 0xe6, 0xd8, 0x66,
+0x00, 0x00, 0x00, 0x01, 0x62, 0x4b, 0x47, 0x44, 0x00, 0x88, 0x05, 0x1d, 0x48, 0x00, 0x00, 0x00, 0x09,
+0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0b, 0x12, 0x00, 0x00, 0x0b, 0x12, 0x01, 0xd2, 0xdd, 0x7e, 0xfc,
+0x00, 0x00, 0x00, 0x07, 0x74, 0x49, 0x4d, 0x45, 0x07, 0xd2, 0x07, 0x13, 0x0f, 0x08, 0x19, 0xc4, 0x40,
+0x56, 0x10, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x60, 0x00, 0x00, 0x00,
+0x02, 0x00, 0x01, 0x48, 0xaf, 0xa4, 0x71, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
+0x60, 0x82 };
+
+const char css_text[] = "/* Based upon the lcov CSS style, style files can be reused */\n"
+		"body { color: #000000; background-color: #FFFFFF; }\n"
+		"a:link { color: #284FA8; text-decoration: underline; }\n"
+		"a:visited { color: #00CB40; text-decoration: underline; }\n"
+		"a:active { color: #FF0040; text-decoration: underline; }\n"
+		"td.title { text-align: center; padding-bottom: 10px; font-size: 20pt; font-weight: bold; }\n"
+		"td.ruler { background-color: #6688D4; }\n"
+		"td.headerItem { text-align: right; padding-right: 6px; font-family: sans-serif; font-weight: bold; }\n"
+		"td.headerValue { text-align: left; color: #284FA8; font-family: sans-serif; font-weight: bold; }\n"
+		"td.versionInfo { text-align: center; padding-top:  2px; }\n"
+		"pre.source { font-family: monospace; white-space: pre; }\n"
+		"span.lineNum { background-color: #EFE383; }\n"
+		"span.lineCov { background-color: #CAD7FE; }\n"
+		"span.linePartCov { background-color: #FFEA20; }\n"
+		"span.lineNoCov { background-color: #FF6230; }\n"
+		"td.tableHead { text-align: center; color: #FFFFFF; background-color: #6688D4; font-family: sans-serif; font-size: 120%; font-weight: bold; }\n"
+		"td.coverFile { text-align: left; padding-left: 10px; padding-right: 20px; color: #284FA8; background-color: #DAE7FE; font-family: monospace; }\n"
+		"td.coverBar { padding-left: 10px; padding-right: 10px; background-color: #DAE7FE; }\n"
+		"td.coverBarOutline { background-color: #000000; }\n"
+		"td.coverPerHi { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #A7FC9D; font-weight: bold; }\n"
+		"td.coverNumHi { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #A7FC9D; }\n"
+		"td.coverPerMed { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FFEA20; font-weight: bold; }\n"
+		"td.coverNumMed { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FFEA20; }\n"
+		"td.coverPerLo { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FF0000; font-weight: bold; }\n"
+		"td.coverNumLo { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FF0000; }\n";
+
+static const char **allocated_objs;
+static int n_allocs;
+static int cur_allocation = 0;
+static void cleanup_allocations(void)
+{
+	int i;
+
+	for (i = 0; i < n_allocs; i++) {
+		free((void*)allocated_objs[i]);
+		allocated_objs[i] = NULL;
+	}
+	cur_allocation = 0;
+}
+
+void *add_allocation(void *x)
+{
+	if (cur_allocation >= n_allocs) {
+		int last = n_allocs;
+		int i;
+
+		n_allocs = n_allocs + 512;
+		allocated_objs = xrealloc(allocated_objs,
+				n_allocs * sizeof(const char *));
+		for (i = last; i < n_allocs; i++)
+			allocated_objs[i] = NULL;
+	}
+
+	allocated_objs[cur_allocation] = x;
+	cur_allocation++;
+
+	return x;
+}
+
+static void write_pngs(const char *dir)
+{
+	xwrite_file(dir, "ruby.png", icon_ruby, sizeof(icon_ruby));
+	xwrite_file(dir, "amber.png", icon_amber, sizeof(icon_amber));
+	xwrite_file(dir, "emerald.png", icon_emerald, sizeof(icon_emerald));
+	xwrite_file(dir, "snow.png", icon_snow, sizeof(icon_snow));
+	xwrite_file(dir, "glass.png", icon_glass, sizeof(icon_glass));
+}
+
+static const char *construct_bar(double percent)
+{
+   const char* color = "ruby.png";
+   char buf[255];
+   int width = (int)(percent+0.5);
+
+   if (percent >= 50)
+	   color = "emerald.png";
+   else if (percent>=15)
+	   color = "amber.png";
+   else if (percent <= 1)
+	   color = "snow.png";
+
+   xsnprintf(buf, sizeof(buf),
+		   "<img src=\"%s\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/><img src=\"snow.png\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/>",
+		   color, width, percent, 100 - width, percent);
+
+   return add_allocation(xstrdup(buf));
+}
+
+static void write_css(const char *dir)
+{
+	xwrite_file(dir, "/bcov.css", css_text, sizeof(css_text));
+}
+
+static char *escape_helper(char *dst, char *what)
+{
+	int len = strlen(what);
+
+	strcpy(dst, what);
+
+	return dst + len;
+}
+
+static const char *outfile_name_from_kc_file(struct kc_file *kc_file)
+{
+	char *p = strrchr(kc_file->filename, '/');
+	char *out;
+
+	if (!p)
+		return NULL;
+
+	out = xmalloc(strlen(p) + 8);
+	xsnprintf(out, strlen(p) + 8, "%s.html", p + 1);
+	add_allocation(out);
+
+	return out;
+}
+
+static const char *tmp_outfile_name_from_kc_file(struct kc_file *kc_file)
+{
+	char *p = strrchr(kc_file->filename, '/');
+	char *out;
+
+	if (!p)
+		return NULL;
+
+	out = xmalloc(strlen(p) + 16);
+	xsnprintf(out, strlen(p) + 16, "%s.html.tmp", p + 1);
+	add_allocation(out);
+
+	return out;
+}
+
+
+static const char *dir_concat_report(const char *dir, const char *filename)
+{
+	return add_allocation((void*)dir_concat(dir, filename));
+}
+
+static const char *escape_html(const char *s)
+{
+	char buf[4096];
+	char *dst = buf;
+	size_t len = strlen(s);
+	int i;
+
+	memset(buf, 0, sizeof(buf));
+	for (i = 0; i < len; i++) {
+		char c = s[i];
+
+		if ((c & 0xff) > 127) {
+			char tmp_val[16];
+
+			xsnprintf(tmp_val, sizeof(tmp_val), "&#%x;", c & 0xff);
+			dst = escape_helper(dst, tmp_val);
+		} else {
+			switch (c) {
+			case '<':
+				dst = escape_helper(dst, "&lt;");
+				break;
+			case '>':
+				dst = escape_helper(dst, "&gt;");
+				break;
+			case '&':
+				dst = escape_helper(dst, "&amp;");
+				break;
+			case '\"':
+				dst = escape_helper(dst, "&quot;");
+				break;
+			case '\n': case '\r':
+				dst = escape_helper(dst, " ");
+				break;
+			default:
+				*dst = c;
+				dst++;
+				break;
+			}
+		}
+	}
+
+	return add_allocation(strdup(buf));
+}
+
+static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
+		int lines, int active_lines)
+{
+	char date_buf[80];
+	time_t t;
+	struct tm *tm;
+
+	t = time(NULL);
+	tm = localtime(&t);
+	strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", tm);
+	fprintf(fp,
+			"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+			"<html>\n"
+			"<head>\n"
+			"  <title>Coverage - %s</title>\n"
+			"  <link rel=\"stylesheet\" type=\"text/css\" href=\"bcov.css\"/>\n"
+			"</head>\n"
+			"<body>\n"
+			"<table width=\"100%%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n"
+			"  <tr><td class=\"title\">Coverage Report</td></tr>\n"
+			"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
+			"  <tr>\n"
+			"    <td width=\"100%%\">\n"
+			"      <table cellpadding=\"1\" border=\"0\" width=\"100%%\">\n"
+			"        <tr>\n"
+			"          <td class=\"headerItem\" width=\"20%%\">Command:</td>\n"
+			"          <td class=\"headerValue\" width=\"80%%\" colspan=6>%s</td>\n"
+			"        </tr>\n"
+			"        <tr>\n"
+			"          <td class=\"headerItem\" width=\"20%%\">Date:</td>\n"
+			"          <td class=\"headerValue\" width=\"15%%\">%s</td>\n"
+			"          <td width=\"5%%\"></td>\n"
+			"          <td class=\"headerItem\" width=\"20%%\">Instrumented&nbsp;lines:</td>\n"
+			"          <td class=\"headerValue\" width=\"10%%\">%d</td>\n"
+			"        </tr>\n"
+			"        <tr>\n"
+			"          <td class=\"headerItem\" width=\"20%%\">Code&nbsp;covered:</td>\n"
+			"          <td class=\"headerValue\" width=\"15%%\">%.1f %%</td>\n"
+			"          <td width=\"5%%\"></td>\n"
+			"          <td class=\"headerItem\" width=\"20%%\">Executed&nbsp;lines:</td>\n"
+			"          <td class=\"headerValue\" width=\"10%%\">%d</td>\n"
+			"        </tr>\n"
+			"      </table>\n"
+			"    </td>\n"
+			"  </tr>\n"
+			"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
+			"</table>\n",
+			escape_html(kc->module_name), /* Title */
+			escape_html(kc->module_name), /* Command */
+			date_buf,
+			lines,
+			lines == 0 ? 0 : ((float)active_lines / (float)lines) * 100,
+			active_lines
+	);
+}
+
+static void write_footer(FILE *fp)
+{
+	fprintf(fp,
+			"<table width=\"100%%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n"
+			"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
+			"  <tr><td class=\"versionInfo\">Generated by: Kcov (based on <a href=\"http://bcov.sourceforge.net\">bcov</a>)</td></tr>\n"
+			"</table>\n"
+			"<br/>\n"
+			"</body>\n"
+			"</html>\n");
+}
+
+static int write_file_report(const char *dir, struct kc *kc, struct kc_file *kc_file)
+{
+	const char *tmp_outfile_name = tmp_outfile_name_from_kc_file(kc_file);
+	const char *outfile_name = outfile_name_from_kc_file(kc_file);
+	FILE *out_fp;
+	FILE *fp;
+	int lineno = 1;
+	int total_hits = 0;
+
+	if (!tmp_outfile_name)
+		return -1;
+
+	fp = fopen(kc_file->filename, "r");
+	if (!fp)
+		return -1;
+
+	out_fp = fopen(dir_concat_report(dir, tmp_outfile_name), "w");
+	if (!out_fp)
+		return -1;
+
+	fprintf(out_fp, "<pre class=\"source\">\n");
+
+	/* Read the lines of the source file */
+	while (!feof(fp)) {
+		char *line = NULL;
+		struct kc_line *kc_line = kc_file_lookup_line(kc_file, lineno);
+		size_t sz = 0;
+
+		if (getline(&line, &sz, fp) < 0) {
+			break;
+		}
+
+		fprintf(out_fp,
+				"<span class=\"lineNum\">%7d </span>",
+				lineno);
+
+		if (kc_line) {
+			const char *line_class = "lineNoCov";
+			int hits = 0;
+			int i;
+
+			/* Count hits */
+			for (i = 0; i < kc_line->n_addrs; i++) {
+				struct kc_addr *addr = kc_line->addrs[i];
+
+				hits += addr->hits;
+			}
+			/* Full, partial or no coverage? */
+			if (hits >= kc_line->possible_hits)
+				line_class = "lineCov";
+			else if (hits != 0)
+				line_class = "linePartCov";
+			fprintf(out_fp,
+					"<span class=\"%s\"> %4u / %-4u  : ",
+					line_class, hits, kc_line->possible_hits);
+			if (hits)
+				total_hits++;
+		}
+		else
+			fprintf(out_fp,	"              : ");
+
+		fprintf(out_fp, "%s</span>\n", escape_html(line));
+
+		free(line);
+		lineno++;
+	}
+	fprintf(out_fp, "</pre>\n");
+
+	write_footer(out_fp);
+
+	fclose(fp);
+	fclose(out_fp);
+
+
+	fp = fopen(dir_concat_report(dir, "tmp"), "w");
+	if (!fp)
+		return -1;
+	write_header(fp, kc, NULL, g_hash_table_size(kc_file->lines),
+			total_hits);
+	fclose(fp);
+
+	concat_files(dir_concat_report(dir, outfile_name),
+			dir_concat_report(dir, "tmp"),
+			dir_concat_report(dir, tmp_outfile_name));
+	unlink(dir_concat_report(dir, "tmp"));
+	unlink(dir_concat_report(dir, tmp_outfile_name));
+
+	return 0;
+}
+
+
+static int kc_file_cmp(const void *pa, const void *pb)
+{
+	struct kc_file *a = *(struct kc_file **)pa;
+	struct kc_file *b = *(struct kc_file **)pb;
+
+	return strcmp(a->filename, b->filename);
+}
+
+
+static int report_path(const char *path, struct kc *kc)
+{
+	const char **p = kc->only_report_paths;
+	int i = 0;
+
+	while (p[i])
+	{
+		if (strstr(path, p[i]))
+			return 1;
+
+		i++;
+	}
+
+	return 0;
+}
+
+static int exclude_path(const char *path, struct kc *kc)
+{
+	const char **p = kc->exclude_paths;
+	int i = 0;
+
+	while (p[i])
+	{
+		if (strstr(path, p[i]))
+			return 1;
+
+		i++;
+	}
+
+	return 0;
+}
+
+static int write_index(const char *dir, struct kc *kc)
+{
+	GHashTableIter iter;
+	const char *key;
+	struct kc_file *kc_file;
+	struct kc_file **files;
+	int total_lines = 0;
+	int total_active_lines = 0;
+	int n_files = 0;
+	FILE *fp;
+	int file_idx;
+
+	fp = fopen(dir_concat_report(dir, "index.html.main"), "w");
+	if (!fp)
+		return -1;
+
+	fprintf(fp,
+			"<center>\n"
+			"  <table width=\"80%%\" cellpadding=\"2\" cellspacing=\"1\" border=\"0\">\n"
+			"    <tr>\n"
+			"      <td width=\"50%%\"><br/></td>\n"
+			"      <td width=\"15%%\"></td>\n"
+			"      <td width=\"15%%\"></td>\n"
+			"      <td width=\"20%%\"></td>\n"
+			"    </tr>\n"
+			"    <tr>\n"
+			"      <td class=\"tableHead\">Filename</td>\n"
+			"      <td class=\"tableHead\" colspan=\"3\">Coverage</td>\n"
+			"    </tr>\n");
+
+	/* Sort the files by name */
+	files = add_allocation(xmalloc(g_hash_table_size(kc->files) * sizeof(struct kc_file *)));
+	g_hash_table_iter_init(&iter, kc->files);
+	while (g_hash_table_iter_next(&iter, (gpointer*)&key, (gpointer*)&kc_file)) {
+		files[n_files] = kc_file;
+		n_files++;
+	}
+	qsort(files, g_hash_table_size(kc->files), sizeof(struct kc_file *), kc_file_cmp);
+	for (file_idx = 0; file_idx < n_files; file_idx++) {
+		double percentage = 0;
+		const char *percentage_text = "Lo";
+		int active_lines = 0;
+		GHashTableIter line_iter;
+		int n_lines;
+		struct kc_line *line_val;
+		int line_key;
+
+		kc_file = files[file_idx];
+
+		if (!report_path(kc_file->filename, kc))
+			continue;
+
+		if (exclude_path(kc_file->filename, kc))
+			continue;
+
+		if (!file_exists(kc_file->filename))
+			continue;
+
+		/* Count the percentage of hits */
+		n_lines = g_hash_table_size(kc_file->lines);
+		g_hash_table_iter_init(&line_iter, kc_file->lines);
+		while (g_hash_table_iter_next(&line_iter,
+				(gpointer*)&line_key, (gpointer*)&line_val)) {
+			int i;
+
+			for (i = 0; i < line_val->n_addrs; i++) {
+				if (line_val->addrs[i]->hits > 0) {
+					/* Only care about full lines */
+					active_lines++;
+					break;
+				}
+			}
+		}
+
+		if (n_lines != 0)
+			percentage = ((double)active_lines / (double)n_lines) * 100;
+
+		total_lines += n_lines;
+		total_active_lines += active_lines;
+
+		if (percentage > 16 && percentage < 50)
+			percentage_text = "Med";
+		else if (percentage >= 50)
+			percentage_text = "Hi";
+
+		fprintf(fp,
+				"    <tr>\n"
+				"      <td class=\"coverFile\"><a href=\"%s\">%s</a></td>\n"
+				"      <td class=\"coverBar\" align=\"center\">\n"
+				"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">%s</td></tr></table>\n"
+				"      </td>\n"
+				"      <td class=\"coverPer%s\">%.1f&nbsp;%%</td>\n"
+				"      <td class=\"coverNum%s\">%d&nbsp;/&nbsp;%d&nbsp;lines</td>\n"
+				"    </tr>\n",
+				outfile_name_from_kc_file(kc_file),
+				kc_file->filename,
+				construct_bar(percentage),
+				percentage_text, percentage,
+				percentage_text, active_lines, n_lines);
+	}
+	fprintf(fp,
+			"  </table>\n"
+			"</center>\n"
+			"<br/>\n");
+
+	write_footer(fp);
+	fclose(fp);
+
+	fp = fopen(dir_concat_report(dir, "index.html.hdr"), "w");
+	if (!fp)
+		return -1;
+	write_header(fp, kc, NULL, total_lines, total_active_lines);
+	fclose(fp);
+
+	concat_files(dir_concat_report(dir, "index.html"),
+			dir_concat_report(dir, "index.html.hdr"),
+			dir_concat_report(dir, "index.html.main"));
+	unlink(dir_concat_report(dir, "index.html.hdr"));
+	unlink(dir_concat_report(dir, "index.html.main"));
+
+	return 0;
+}
+
+static void write_report(const char *dir, struct kc *kc)
+{
+	GHashTableIter iter;
+	const char *key;
+	struct kc_file *val;
+
+	/* Write an index first */
+	write_index(dir, kc);
+
+	g_hash_table_iter_init(&iter, kc->files);
+	while (g_hash_table_iter_next(&iter, (gpointer*)&key, (gpointer*)&val)) {
+		if (file_exists(val->filename))
+			write_file_report(dir, kc, val);
+	}
+
+	cleanup_allocations();
+}
+
+
+
+static pthread_t thread;
+static const char *g_dir;
+static struct kc *g_kc;
+static int should_exit;
+
+static void *report_thread(void *priv)
+{
+	int i;
+
+	write_css(g_dir);
+	write_pngs(g_dir);
+
+	while (1) {
+		if (i % 5 == 0)
+			write_report(g_dir, g_kc);
+		if (should_exit)
+			break;
+		sleep(1);
+		i++;
+		sync();
+	}
+	write_report(g_dir, g_kc);
+
+	pthread_exit(NULL);
+}
+
+void stop_report_thread(void)
+{
+	should_exit = 1;
+	pthread_join(thread, NULL);
+}
+
+
+void run_report_thread(const char *dir, struct kc *kc)
+{
+	int ret;
+
+	g_dir = dir;
+	g_kc = kc;
+	ret = pthread_create(&thread, NULL, report_thread, NULL);
+	panic_if (ret < 0, "Can't create thread");
+}
