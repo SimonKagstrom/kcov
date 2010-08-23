@@ -109,7 +109,6 @@ int main(int argc, char *argv[])
 		only_report_paths[0] = "";
 		only_report_paths[1] = NULL;
 	}
-	printf("VOBB: %s, %s, %s, %s\n", write_path, read_path, out_dir, in_file);
 
 	kc = kc_open_elf(in_file);
 	kc->only_report_paths = only_report_paths;
