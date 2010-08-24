@@ -2,8 +2,15 @@
 <BODY>
 <H1>Kcov - code coverage</H1>
 
+Kcov is a code coverage tester based on <A HREF="http://bcov.sf.net">bcov</A> by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications. Using kcov is as simple as
+
 <P>
-<A HREF="c64-network.org-coverage/index.html">Example coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A>.
+<PRE>
+  $ kcov /path/to/outdir executable [args for the executable]
+</PRE>
+
+<P>
+And you can see some <A HREF="c64-network.org-coverage/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> here. A screenshot for the lazy can be found below:
 
 <P>
 <IMG SRC="kcov.png">
