@@ -598,7 +598,7 @@ static int should_exit;
 
 static void *report_thread(void *priv)
 {
-	int i;
+	int i = 0;
 
 	mkdir(g_dir, 0755);
 
