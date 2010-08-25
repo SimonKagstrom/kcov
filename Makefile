@@ -1,5 +1,5 @@
-CFLAGS=`pkg-config --cflags glib-2.0` -I/home/simkag/local/include
-LDFLAGS=`pkg-config --libs glib-2.0` -L/home/simkag/local/lib -lelf -ldwarf -lpthread
+CFLAGS=`pkg-config --cflags glib-2.0`
+LDFLAGS=`pkg-config --libs glib-2.0` -lelf -ldwarf -lpthread
 
 %.o: %.c
 	gcc -g -c -Iinclude $(CFLAGS) -Wall -o $@ $<
