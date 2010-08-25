@@ -345,6 +345,8 @@ static int write_file_report(const char *dir, struct kc *kc, struct kc_file *kc_
 		size_t sz = 0;
 
 		if (getline(&line, &sz, fp) < 0) {
+			if (line)
+				free(line);
 			break;
 		}
 
@@ -623,6 +625,7 @@ void stop_report_thread(void)
 {
 	should_exit = 1;
 	pthread_join(thread, NULL);
+	cleanup_allocations();
 }
 
 
