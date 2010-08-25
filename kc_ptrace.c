@@ -120,9 +120,9 @@ static int do_ptrace_run(struct kc *kc)
 
 		pid_t r = waitpid(-1, &status, __WALL);
 
-		// Got no one?
+		// Got no one? Child probably died
 		if (r == -1)
-			return PT_CODE_ERROR;
+			return PT_CODE_EXIT;
 		active_child = r;
 
 		// A signal?

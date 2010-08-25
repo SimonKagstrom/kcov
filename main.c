@@ -19,7 +19,6 @@ static void usage(void)
 
 static void on_ctrlc(int sig)
 {
-	printf("Ctrl-c, exiting\n");
 	stop_report_thread();
 	exit(0);
 }
