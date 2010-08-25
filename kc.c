@@ -12,14 +12,6 @@
 #include <utils.h>
 #include <report.h>
 
-static gint cmp_addr(gconstpointer _a, gconstpointer _b)
-{
-	const struct kc_addr *a = _a;
-	const struct kc_addr *b = _b;
-
-	return (a->addr - b->addr) == 0;
-}
-
 static gint cmp_line(gconstpointer _a, gconstpointer _b)
 {
 	const struct kc_line *a = _a;
