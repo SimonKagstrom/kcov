@@ -8,6 +8,7 @@ struct kc_line;
 struct kc_file
 {
 	const char *filename;
+	double percentage;
 
 	GHashTable *lines;
 };

@@ -9,6 +9,7 @@ static void usage(void)
 {
 	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
 			"Where [OPTIONS] are\n"
+			"  -s sort-type             how to sort files: f[ile] (filename, default), p[ercentage]\n"
 			"  -p only-include-paths    comma-separated list of paths to include in the report\n"
 			"  -x exclude-paths         comma-separated list of paths to exclude in the report\n"
 			"  -w write-file            file to write breakpoints to for kernel usage\n"
@@ -26,6 +27,7 @@ static void on_ctrlc(int sig)
 static const char *write_path = NULL;
 static const char *read_path = NULL;
 static const char *out_dir = NULL;
+static const char *sort_type = NULL;
 static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
 static const char **exclude_paths = (const char *[]){NULL};
@@ -63,6 +65,13 @@ static void parse_arguments(int argc, char *const argv[])
 
 		if (strcmp(cur, "-p") == 0 && i < argc - 1) {
 			only_report_paths = get_comma_separated_strvec(argv[i + 1]);
+
+			i++;
+			after_opts = i + 1;
+			continue;
+		}
+		if (strcmp(cur, "-s") == 0 && i < argc - 1) {
+			sort_type = argv[i + 1];
 
 			i++;
 			after_opts = i + 1;
@@ -112,6 +121,13 @@ int main(int argc, char *argv[])
 	kc = kc_open_elf(in_file);
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
+
+	if (sort_type) {
+		if (sort_type[0] == 'f')
+			kc->sort_type = FILENAME;
+		else if (sort_type[0] == 'p')
+			kc->sort_type = COVERAGE_PERCENT;
+	}
 
 	run_report_thread(out_dir, kc);
 

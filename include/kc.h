@@ -17,11 +17,18 @@ enum
 	PTRACE_PID,
 };
 
+enum report_sort_type
+{
+	FILENAME,
+	COVERAGE_PERCENT,
+};
+
 struct kc
 {
 	const char **only_report_paths;
 	const char **exclude_paths;
 	const char *module_name;
+	enum report_sort_type sort_type;
 	int type;
 
 	ptrdiff_t base_addr;

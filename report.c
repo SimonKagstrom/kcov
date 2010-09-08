@@ -417,6 +417,15 @@ static int kc_file_cmp(const void *pa, const void *pb)
 	return strcmp(a->filename, b->filename);
 }
 
+static int kc_percentage_cmp(const void *pa, const void *pb)
+{
+	struct kc_file *a = *(struct kc_file **)pa;
+	struct kc_file *b = *(struct kc_file **)pb;
+
+	return (int)(a->percentage - b->percentage);
+}
+
+
 
 static int report_path(const char *path, struct kc *kc)
 {
@@ -487,7 +496,8 @@ static int write_index(const char *dir, struct kc *kc)
 		files[n_files] = kc_file;
 		n_files++;
 	}
-	qsort(files, g_hash_table_size(kc->files), sizeof(struct kc_file *), kc_file_cmp);
+	qsort(files, g_hash_table_size(kc->files), sizeof(struct kc_file *),
+			kc->sort_type == COVERAGE_PERCENT ? kc_percentage_cmp : kc_file_cmp);
 	for (file_idx = 0; file_idx < n_files; file_idx++) {
 		double percentage = 0;
 		const char *percentage_text = "Lo";
@@ -526,6 +536,7 @@ static int write_index(const char *dir, struct kc *kc)
 
 		if (n_lines != 0)
 			percentage = ((double)active_lines / (double)n_lines) * 100;
+		kc_file->percentage = percentage;
 
 		total_lines += n_lines;
 		total_active_lines += active_lines;
@@ -616,6 +627,8 @@ static void *report_thread(void *priv)
 		i++;
 		sync();
 	}
+	/* Do this twice to collect percentages from last round */
+	write_report(g_dir, g_kc);
 	write_report(g_dir, g_kc);
 
 	pthread_exit(NULL);

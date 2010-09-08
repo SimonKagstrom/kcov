@@ -166,6 +166,7 @@ struct kc *kc_open_elf(const char *filename)
 	kc->addrs = g_hash_table_new(g_int_hash, g_int_equal);
 	kc->lines = g_hash_table_new(hash_line, cmp_line);
 	kc->files = g_hash_table_new(g_str_hash, g_str_equal);
+	kc->sort_type = FILENAME;
 
 	if (err == DW_DLV_NO_ENTRY)
 		goto out_ok;

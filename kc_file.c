@@ -9,6 +9,7 @@ struct kc_file *kc_file_new(const char *filename)
 
 	out->filename = xstrdup(filename);
 	out->lines = g_hash_table_new(g_int_hash, g_int_equal);
+	out->percentage = 0;
 
 	return out;
 }
