@@ -54,7 +54,7 @@ void kc_add_addr(struct kc *kc, unsigned long addr_in, int line_nr, const char *
 		line = table_line;
 	}
 
-	addr = kc_addr_new(addr_in, line);
+	addr = kc_addr_new(addr_in);
 	if (!table_line)
 		g_hash_table_insert(kc->lines, line, line);
 	g_hash_table_insert(kc->addrs, (gpointer*)&addr->addr, addr);
