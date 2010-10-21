@@ -102,6 +102,6 @@ void kprobe_coverage_run(struct kc *kc, const char *write_path,
 			continue;
 		addr = kc_lookup_addr(kc, l_addr);
 		if (addr)
-			addr->hits++;
+			kc_addr_register_hit(addr);
 	}
 }

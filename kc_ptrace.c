@@ -100,7 +100,7 @@ void ptrace_eliminate_breakpoint(struct kc_addr *addr)
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
    poke_byte(ptr, addr->saved_code);
-   addr->hits++;
+   kc_addr_register_hit(addr);
 }
 
 enum {
