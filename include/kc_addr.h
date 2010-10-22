@@ -6,7 +6,7 @@ struct kc_line;
 struct kc_addr
 {
 	unsigned long addr;
-	unsigned int hits;
+	unsigned long hits;
 	unsigned long saved_code; /* Not used by kprobe-coverage */
 };
 
