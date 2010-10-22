@@ -68,7 +68,7 @@ static inline void *xrealloc(void *ptr, size_t sz)
 
 
 extern int write_file(const char *dir, const char *filename,
-		const char* data, size_t len);
+		const void* data, size_t len);
 
 extern void *read_file(size_t *out_size, const char *fmt, ...);
 
