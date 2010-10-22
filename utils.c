@@ -2,6 +2,46 @@
 #include <utils.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdarg.h>
+
+void *read_file(size_t *out_size, const char *fmt, ...)
+{
+	struct stat buf;
+	char path[2048];
+	va_list ap;
+	void *data;
+	size_t size;
+	FILE *f;
+	int r;
+
+	/* Create the filename */
+	assert ( fmt != NULL );
+	va_start(ap, fmt);
+	r = vsnprintf(path, 2048, fmt, ap);
+	va_end(ap);
+
+	if (lstat(path, &buf) < 0)
+		return NULL;
+
+	size = buf.st_size;
+	data = xmalloc(size + 2); /* NULL-terminate, if used as string */
+	f = fopen(path, "r");
+	if (!f)
+	{
+		free(data);
+		return NULL;
+	}
+	if (fread(data, 1, size, f) != size)
+	{
+		free(data);
+		data = NULL;
+	}
+	fclose(f);
+
+	*out_size = size;
+
+	return data;
+}
 
 int write_file(const char *dir, const char *filename,
 		const char* data, size_t len)
