@@ -25,6 +25,9 @@ enum report_sort_type
 
 struct kc
 {
+	const char *out_dir;
+	const char *in_file;
+
 	const char **only_report_paths;
 	const char **exclude_paths;
 	const char *module_name;
