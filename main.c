@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
 	}
 
 	kc = kc_open_elf(in_file);
+	if (!kc)
+		usage();
 	kc->out_dir = out_dir;
 	kc->in_file = in_file;
 	kc->only_report_paths = only_report_paths;
