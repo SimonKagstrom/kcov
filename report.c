@@ -631,6 +631,8 @@ static void *report_thread(void *priv)
 	write_report(g_dir, g_kc);
 	write_report(g_dir, g_kc);
 
+	kc_write_db(g_kc);
+
 	pthread_exit(NULL);
 }
 

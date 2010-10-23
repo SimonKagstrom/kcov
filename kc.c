@@ -1,4 +1,7 @@
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sys/fcntl.h>
 #include <stdlib.h>
@@ -238,4 +241,86 @@ out_err:
 void kc_close(struct kc *kc)
 {
 	free(kc);
+}
+
+
+
+static uint64_t get_file_checksum(struct kc *kc)
+{
+	struct stat st;
+
+	if (lstat(kc->in_file, &st) < 0)
+		return 0;
+
+	return ((uint64_t)st.st_mtim.tv_sec << 32) | ((uint64_t)st.st_mtim.tv_nsec);
+}
+
+void kc_db_marshal(struct kc_data_db *db)
+{
+}
+
+void kc_db_unmarshal(struct kc_data_db *db)
+{
+}
+
+void kc_read_db(struct kc *kc)
+{
+	struct kc_data_db *db;
+	uint64_t checksum;
+	size_t sz;
+	int i;
+
+	db = read_file(&sz, "%s/kcov.db", kc->out_dir);
+	if (!db)
+		return;
+	kc_db_unmarshal(db);
+	checksum = get_file_checksum(kc);
+	if (db->elf_checksum != checksum)
+		goto out;
+
+	for (i = 0; i < db->n_addrs; i++) {
+		struct kc_addr *db_addr = &db->addrs[i];
+		struct kc_addr *tgt;
+
+		kc_addr_unmarshall(db_addr);
+
+		tgt = kc_lookup_addr(kc, db_addr->addr);
+		if (!tgt)
+			continue;
+
+		tgt->hits += db_addr->hits;
+	}
+
+out:
+	free(db);
+}
+
+void kc_write_db(struct kc *kc)
+{
+	struct kc_data_db *db;
+	struct kc_addr *val;
+	GHashTableIter iter;
+	unsigned long key;
+	guint sz;
+	int cnt = 0;
+
+	sz = g_hash_table_size(kc->addrs);
+	db = xmalloc(sizeof(struct kc_data_db) + sizeof(struct kc_addr) * sz);
+	db->n_addrs = sz;
+	db->elf_checksum = get_file_checksum(kc);
+
+	g_hash_table_iter_init(&iter, kc->addrs);
+	while (g_hash_table_iter_next(&iter, (gpointer*)&key, (gpointer*)&val)) {
+		struct kc_addr *db_addr = &db->addrs[cnt];
+
+		memcpy(db_addr, val, sizeof(struct kc_addr));
+		kc_addr_marshall(db_addr);
+
+		cnt++;
+	}
+	kc_db_marshal(db);
+	write_file(kc->out_dir, "kcov.db", db,
+			sizeof(struct kc_data_db) + sz * sizeof(struct kc_addr));
+
+	free(db);
 }

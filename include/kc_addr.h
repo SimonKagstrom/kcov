@@ -14,4 +14,8 @@ extern struct kc_addr *kc_addr_new(unsigned long addr);
 
 extern void kc_addr_register_hit(struct kc_addr *addr);
 
+extern void kc_addr_marshall(struct kc_addr *addr);
+
+extern void kc_addr_unmarshall(struct kc_addr *addr);
+
 #endif

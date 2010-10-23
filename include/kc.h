@@ -7,6 +7,7 @@
 #include "kc_addr.h"
 
 #include <stddef.h>
+#include <stdint.h>
 #include <glib.h>
 #include <pthread.h>
 
@@ -45,6 +46,14 @@ struct kc
 	GList *pending_list;
 };
 
+struct kc_data_db
+{
+	uint64_t elf_checksum;
+	unsigned long n_addrs;
+
+	struct kc_addr addrs[];
+};
+
 struct kc_debug_backend
 {
 
@@ -66,6 +75,15 @@ extern void kc_add_addr(struct kc *kc, unsigned long addr, int line, const char 
 extern void kc_read_back_breakpoints(struct kc *kc, const char *filename);
 
 extern void kc_generate_webpage(struct kc *kc, const char *outdir);
+
+
+extern void kc_read_db(struct kc *kc);
+
+extern void kc_write_db(struct kc *kc);
+
+extern void kc_db_marshal(struct kc_data_db *db);
+
+extern void kc_db_unmarshal(struct kc_data_db *db);
 
 
 /* Kernel */

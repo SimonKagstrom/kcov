@@ -126,6 +126,9 @@ int main(int argc, char *argv[])
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
 
+	/* Re-read the old settings, if it exists */
+	kc_read_db(kc);
+
 	if (sort_type) {
 		if (sort_type[0] == 'f')
 			kc->sort_type = FILENAME;
