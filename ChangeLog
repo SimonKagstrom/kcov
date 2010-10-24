@@ -1,0 +1,19 @@
+Kcov (2):
+	* Misc fixes
+
+	* Add ability to specify low/high limits
+
+	* Add state saving between runs. Re-starting the same program
+	  will then add to existing coverage instead of starting from
+	  scratch. 
+
+	* Link to web page in the report
+
+	* Add option to sort by percentage or file name
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Oct 24 09:15:39 CEST 2010
+
+Kcov (1):
+	* Initial release
+	
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
