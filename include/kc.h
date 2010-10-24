@@ -29,6 +29,9 @@ struct kc
 	const char *out_dir;
 	const char *in_file;
 
+	unsigned long low_limit;
+	unsigned long high_limit;
+
 	const char **only_report_paths;
 	const char **exclude_paths;
 	const char *module_name;

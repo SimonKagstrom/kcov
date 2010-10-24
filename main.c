@@ -5,19 +5,6 @@
 #include <kc.h>
 #include <utils.h>
 
-static void usage(void)
-{
-	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
-			"Where [OPTIONS] are\n"
-			"  -s sort-type             how to sort files: f[ile] (filename, default), p[ercentage]\n"
-			"  -p only-include-paths    comma-separated list of paths to include in the report\n"
-			"  -x exclude-paths         comma-separated list of paths to exclude in the report\n"
-			"  -w write-file            file to write breakpoints to for kernel usage\n"
-			"  -r read-file             file to read hit breakpoints from for kernel usage\n"
-			"");
-	exit(1);
-}
-
 static void on_ctrlc(int sig)
 {
 	stop_report_thread();
@@ -32,6 +19,22 @@ static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
 static const char **exclude_paths = (const char *[]){NULL};
 static char *const *program_args;
+static unsigned long low_limit = 16;
+static unsigned long high_limit = 50;
+
+static void usage(void)
+{
+	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
+			"Where [OPTIONS] are\n"
+			"  -s sort-type             how to sort files: f[ile] (filename, default), p[ercentage]\n"
+			"  -l low,high              setup limits for low/high coverage (default %lu,%lu)\n"
+			"  -p only-include-paths    comma-separated list of paths to include in the report\n"
+			"  -x exclude-paths         comma-separated list of paths to exclude in the report\n"
+			"  -w write-file            file to write breakpoints to for kernel usage\n"
+			"  -r read-file             file to read hit breakpoints from for kernel usage\n"
+			"", low_limit, high_limit);
+	exit(1);
+}
 
 static const char **get_comma_separated_strvec(const char *src)
 {
@@ -75,6 +78,30 @@ static void parse_arguments(int argc, char *const argv[])
 
 			i++;
 			after_opts = i + 1;
+			continue;
+		}
+		if (strcmp(cur, "-l") == 0 && i < argc - 1) {
+			const char **limits = get_comma_separated_strvec(argv[i + 1]);
+			char *endp;
+			const char **p = limits;
+
+			if (limits[0] == NULL || limits[1] == NULL)
+				usage();
+
+			low_limit = strtoul(limits[0], &endp, 0);
+			if (endp == limits[0])
+				usage();
+			high_limit = strtoul(limits[1], &endp, 0);
+			if (endp == limits[1])
+				usage();
+
+			i++;
+			after_opts = i + 1;
+			while (*p)
+			{
+				free((void*)*p);
+				p++;
+			}
 			continue;
 		}
 		if (strcmp(cur, "-x") == 0 && i < argc - 1) {
@@ -125,6 +152,8 @@ int main(int argc, char *argv[])
 	kc->in_file = in_file;
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
+	kc->low_limit = low_limit;
+	kc->high_limit = high_limit;
 
 	/* Re-read the old settings, if it exists */
 	kc_read_db(kc);

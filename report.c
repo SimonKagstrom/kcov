@@ -541,9 +541,9 @@ static int write_index(const char *dir, struct kc *kc)
 		total_lines += n_lines;
 		total_active_lines += active_lines;
 
-		if (percentage > 16 && percentage < 50)
+		if (percentage > kc->low_limit && percentage < kc->high_limit)
 			percentage_text = "Med";
-		else if (percentage >= 50)
+		else if (percentage >= kc->high_limit)
 			percentage_text = "Hi";
 
 		fprintf(fp,
