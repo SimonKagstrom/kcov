@@ -9,8 +9,26 @@ Kcov is a code coverage tester based on <A HREF="http://bcov.sf.net">bcov</A> by
   $ kcov /path/to/outdir executable [args for the executable]
 </PRE>
 
+<P>So what are the similarities and differences when comparing kcov with bcov? First the similarities:
+
+<UL>
+<LI>Both generate lcov-style HTML output</LI>
+<LI>Both use DWARF debugging information to do coverage analysis on binaries compiled without special options</LI>
+<LI>Both store data incrementally, so that you can re-run your program with different arguments to build on the coverage collection</LI>
+<LI>Both are based on the same source code - that of bcov</LI>
+</UL>
+
+The differences are:
+
+<UL>
+<LI>kcov collects coverage information and generates HTML output in a single step, whereas bcov first collects data and then generates HTML on the output</LI>
+<LI>kcov generates an updated web page every second, so long-running programs can be watched "live"</LI>
+<LI></LI>
+<LI>bcov is written in C++, kcov in C</LI>
+</UL>
+
 <P>
-And you can see some <A HREF="c64-network.org-coverage/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A>. A screenshot can be found below:
+You can see some <A HREF="c64-network.org-coverage/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A> and more information on the implementation can be found <A HREF=""></A>. A screenshot can be found below:
 
 <P>
 <IMG SRC="kcov.png">
