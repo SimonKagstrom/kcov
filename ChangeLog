@@ -5,7 +5,7 @@ Kcov (2):
 
 	* Add state saving between runs. Re-starting the same program
 	  will then add to existing coverage instead of starting from
-	  scratch. 
+	  scratch.
 
 	* Link to web page in the report
 
@@ -15,5 +15,5 @@ Kcov (2):
 
 Kcov (1):
 	* Initial release
-	
+
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
