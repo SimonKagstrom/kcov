@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann
+ *
+ * See COPYING for license details
+ */
 #include <kc_file.h>
 #include <kc_line.h>
 #include <utils.h>

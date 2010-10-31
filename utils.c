@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom
+ *
+ * See COPYING for license details
+ */
 #include <stdio.h>
 #include <utils.h>
 #include <sys/types.h>

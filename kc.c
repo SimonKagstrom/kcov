@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann
+ *
+ * See COPYING for license details
+ */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/types.h>

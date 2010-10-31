@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann
+ *
+ * See COPYING for license details
+ */
 #ifndef __KC_ELF_H__
 #define __KC_ELF_H__
 

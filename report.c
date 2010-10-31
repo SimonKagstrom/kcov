@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Thomas Neumann, Simon Kagstrom
+ *
+ * See COPYING for license details
+ */
 #define _GNU_SOURCE
 #include <pthread.h>
 #include <unistd.h>

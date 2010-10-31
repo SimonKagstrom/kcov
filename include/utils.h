@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom
+ *
+ * See COPYING for license details
+ */
 #ifndef __UTILS_H__
 #define __UTILS_H__
 

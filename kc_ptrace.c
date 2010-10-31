@@ -1,12 +1,12 @@
 /*
+ * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann
+ *
+ * See COPYING for license details
+ *
  * Taken from bcov:Debugger.cpp:
  *
  * Copyright (C) 2007 Thomas Neumann
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation version 2.
-*/
+ */
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>

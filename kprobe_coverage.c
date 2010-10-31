@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2010 Simon Kagstrom
+ *
+ * See COPYING for license details
+ */
 #define _GNU_SOURCE
 
 #include <kc.h>
