@@ -26,11 +26,13 @@ static const char **exclude_paths = (const char *[]){NULL};
 static char *const *program_args;
 static unsigned long low_limit = 16;
 static unsigned long high_limit = 50;
+static pid_t ptrace_pid;
 
 static void usage(void)
 {
 	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
 			"Where [OPTIONS] are\n"
+			"  -p PID                 trace PID instead of executing in-file\n"
 			"  -s sort-type           how to sort files: f[ilename] (default), p[ercent]\n"
 			"  -l low,high            setup limits for low/high coverage (default %lu,%lu)\n"
 			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
@@ -71,6 +73,17 @@ static void parse_arguments(int argc, char *const argv[])
 	for (i = 0; i < argc; i++) {
 		const char *cur = argv[i];
 
+		if (strcmp(cur, "-p") == 0 && i < argc - 1) {
+			char *endp;
+
+			ptrace_pid = strtoul(argv[i + 1], &endp, 0);
+			if (endp == argv[i + 1])
+				usage();
+
+			i++;
+			after_opts = i + 1;
+			continue;
+		}
 		if (strcmp(cur, "-i") == 0 && i < argc - 1) {
 			only_report_paths = get_comma_separated_strvec(argv[i + 1]);
 
@@ -153,6 +166,9 @@ int main(int argc, char *argv[])
 	kc = kc_open_elf(in_file);
 	if (!kc)
 		usage();
+	if (ptrace_pid != 0)
+		kc->type = PTRACE_PID;
+
 	kc->out_dir = out_dir;
 	kc->in_file = in_file;
 	kc->only_report_paths = only_report_paths;
@@ -178,6 +194,10 @@ int main(int argc, char *argv[])
 	case PTRACE_FILE:
 		kc->module_name = xstrdup(in_file);
 		ptrace_run(kc, program_args);
+		break;
+	case PTRACE_PID:
+		kc->module_name = xstrdup(in_file);
+		ptrace_pid_run(kc, ptrace_pid);
 		break;
 	case KPROBE_COVERAGE:
 		kprobe_coverage_run(kc, write_path, read_path);

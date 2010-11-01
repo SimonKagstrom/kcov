@@ -98,7 +98,9 @@ extern void kc_db_unmarshal(struct kc_data_db *db);
 extern void kprobe_coverage_run(struct kc *kc,
 		const char *write_file, const char *read_file);
 
-/* Ptrace */
+/* Ptrace - file and running PID */
 extern int ptrace_run(struct kc *kc, char *const argv[]);
+extern int ptrace_pid_run(struct kc *kc, pid_t pid);
+
 
 #endif

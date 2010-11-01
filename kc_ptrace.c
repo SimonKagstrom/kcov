@@ -10,6 +10,7 @@
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>
+#include <sys/errno.h>
 
 #include <kc.h>
 #include <utils.h>
@@ -220,6 +221,27 @@ int ptrace_run(struct kc *kc, char *const argv[])
 		fprintf(stderr, "Can't fork child!\n");
 		return -1;
 	}
+
+	ptrace_setup_breakpoints(kc);
+
+	ptrace_run_debugger(kc);
+
+	return 0;
+}
+
+int ptrace_pid_run(struct kc *kc, pid_t pid)
+{
+	active_child = child = pid;
+
+	errno = 0;
+	ptrace(PTRACE_ATTACH, active_child, 0, 0);
+	if (errno) {
+		const char *err = strerror(errno);
+
+		fprintf(stderr, "Can't attach to %d. Error %s\n", pid, err);
+		return -1;
+	}
+	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
 
 	ptrace_setup_breakpoints(kc);
 
