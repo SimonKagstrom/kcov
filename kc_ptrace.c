@@ -182,8 +182,6 @@ static void ptrace_run_debugger(struct kc *kc)
 
 static pid_t fork_child(const char *executable, char *const argv[])
 {
-	pid_t child;
-
 	/* Basic check first */
 	if (access(executable, X_OK) != 0)
 		return -1;
