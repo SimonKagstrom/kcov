@@ -38,8 +38,13 @@ static void usage(void)
 			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
 			"  -x exclude-paths       comma-separated list of paths to exclude in the report\n"
 			"  -w write-file          file to write breakpoints to for kernel usage\n"
-			"  -r read-file           file to read hit breakpoints from for kernel usage\n"
-			"", low_limit, high_limit);
+			"  -r read-file           file to read hit breakpoints from for kernel usage\n\n"
+			"Examples:\n"
+			"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
+			"  kcov -p 1000 /tmp/frodo ./frodo  # Check coverage for PID 1000 (frodo)\n"
+			"  kcov -i /src/frodo/ /tmp/frodo ./frodo  # Only include files from /src/frodo\n"
+			"",
+			low_limit, high_limit);
 	exit(1);
 }
 
