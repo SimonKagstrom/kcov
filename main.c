@@ -33,7 +33,7 @@ static void usage(void)
 			"Where [OPTIONS] are\n"
 			"  -s sort-type           how to sort files: f[ilename] (default), p[ercent]\n"
 			"  -l low,high            setup limits for low/high coverage (default %lu,%lu)\n"
-			"  -p only-include-paths  comma-separated list of paths to include in the report\n"
+			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
 			"  -x exclude-paths       comma-separated list of paths to exclude in the report\n"
 			"  -w write-file          file to write breakpoints to for kernel usage\n"
 			"  -r read-file           file to read hit breakpoints from for kernel usage\n"
@@ -71,7 +71,7 @@ static void parse_arguments(int argc, char *const argv[])
 	for (i = 0; i < argc; i++) {
 		const char *cur = argv[i];
 
-		if (strcmp(cur, "-p") == 0 && i < argc - 1) {
+		if (strcmp(cur, "-i") == 0 && i < argc - 1) {
 			only_report_paths = get_comma_separated_strvec(argv[i + 1]);
 
 			i++;
