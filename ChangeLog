@@ -1,4 +1,6 @@
 Kcov (3):
+	* Add ability to trace running processes by PID
+
 	* Fix copyright headers
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
