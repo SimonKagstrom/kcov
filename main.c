@@ -32,7 +32,8 @@ static void usage(void)
 {
 	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
 			"Where [OPTIONS] are\n"
-			"  -p PID                 trace PID instead of executing in-file\n"
+			"  -p PID                 trace PID instead of executing in-file,\n"
+			"                         in-file is optional in this case\n"
 			"  -s sort-type           how to sort files: f[ilename] (default), p[ercent]\n"
 			"  -l low,high            setup limits for low/high coverage (default %lu,%lu)\n"
 			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
@@ -41,7 +42,7 @@ static void usage(void)
 			"  -r read-file           file to read hit breakpoints from for kernel usage\n\n"
 			"Examples:\n"
 			"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
-			"  kcov -p 1000 /tmp/frodo ./frodo  # Check coverage for PID 1000 (frodo)\n"
+			"  kcov -p 1000 /tmp/frodo          # Check coverage for PID 1000\n"
 			"  kcov -i /src/frodo/ /tmp/frodo ./frodo  # Only include files from /src/frodo\n"
 			"",
 			low_limit, high_limit);
@@ -74,6 +75,7 @@ static void parse_arguments(int argc, char *const argv[])
 {
 	int i;
 	int after_opts = 0;
+	int extra_needed = 2;
 
 	for (i = 0; i < argc; i++) {
 		const char *cur = argv[i];
@@ -87,6 +89,7 @@ static void parse_arguments(int argc, char *const argv[])
 
 			i++;
 			after_opts = i + 1;
+			extra_needed = 1;
 			continue;
 		}
 		if (strcmp(cur, "-i") == 0 && i < argc - 1) {
@@ -148,10 +151,13 @@ static void parse_arguments(int argc, char *const argv[])
 		}
 	}
 
-	if (argc < after_opts + 2)
+	/* When tracing by PID, the filename is optional */
+	if (argc < after_opts + extra_needed)
 		usage();
+
 	out_dir = argv[after_opts];
-	in_file = argv[after_opts + 1];
+	if (argc >= after_opts + 2)
+		in_file = argv[after_opts + 1];
 	program_args = &argv[after_opts + 1];
 }
 
@@ -173,7 +179,6 @@ int main(int argc, char *argv[])
 		usage();
 
 	kc->out_dir = out_dir;
-	kc->in_file = in_file;
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
 	kc->low_limit = low_limit;
@@ -195,11 +200,11 @@ int main(int argc, char *argv[])
 
 	switch(kc->type) {
 	case PTRACE_FILE:
-		kc->module_name = xstrdup(in_file);
+		kc->module_name = xstrdup(kc->in_file);
 		ptrace_run(kc, program_args);
 		break;
 	case PTRACE_PID:
-		kc->module_name = xstrdup(in_file);
+		kc->module_name = xstrdup(kc->in_file);
 		ptrace_pid_run(kc, ptrace_pid);
 		break;
 	case KPROBE_COVERAGE:

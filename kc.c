@@ -146,6 +146,23 @@ static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf
 	}
 }
 
+static const char *lookup_filename_by_pid(pid_t pid)
+{
+	char linkpath[80 + 1];
+	char path[1024];
+	ssize_t err;
+
+	snprintf(linkpath, sizeof(linkpath) - 1, "/proc/%d/exe", pid);
+	linkpath[sizeof(linkpath) - 1 ] = '\0';
+
+	err = readlink(linkpath, path, sizeof(path));
+	if (err < 0)
+		return NULL;
+
+	/* This allocation will be lost, but that's OK - this function
+	 * is only called once at startup anyway. */
+	return xstrdup(path);
+}
 
 struct kc *kc_open_elf(const char *filename, pid_t pid)
 {
@@ -155,6 +172,15 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 	struct kc *kc;
 	int err;
 	int fd;
+
+	if (pid != 0 && filename == NULL) {
+		filename = lookup_filename_by_pid(pid);
+
+		if (!filename) {
+			error("Can't lookup filename of PID %d\n", pid);
+			return NULL;
+		}
+	}
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0)
@@ -170,6 +196,7 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 	/* Zeroes everything */
 	kc = xmalloc(sizeof(struct kc));
 	kc->module_name = xstrdup("");
+	kc->in_file = filename;
 
 	kc->addrs = g_hash_table_new(g_int_hash, g_int_equal);
 	kc->lines = g_hash_table_new(hash_line, cmp_line);
