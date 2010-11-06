@@ -147,7 +147,7 @@ static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf
 }
 
 
-struct kc *kc_open_elf(const char *filename)
+struct kc *kc_open_elf(const char *filename, pid_t pid)
 {
 	Dwarf_Unsigned header;
 	struct Elf *elf;
@@ -181,6 +181,8 @@ struct kc *kc_open_elf(const char *filename)
 
 	err = dwarf_get_elf(dbg, &elf, NULL);
 	lookup_elf_type(kc, filename, elf);
+	if (pid != 0)
+		kc->type = PTRACE_PID;
 
 	/* Iterate over the headers */
 	while (dwarf_next_cu_header(dbg, 0, 0, 0, 0,

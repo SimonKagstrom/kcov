@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <glib.h>
+#include <sys/types.h>
 #include <pthread.h>
 
 enum
@@ -67,7 +68,7 @@ struct kc_debug_backend
 
 };
 
-extern struct kc *kc_open_elf(const char *filename);
+extern struct kc *kc_open_elf(const char *filename, pid_t pid);
 
 extern void kc_close(struct kc *kc);
 

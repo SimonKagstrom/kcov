@@ -168,11 +168,9 @@ int main(int argc, char *argv[])
 		only_report_paths[1] = NULL;
 	}
 
-	kc = kc_open_elf(in_file);
+	kc = kc_open_elf(in_file, ptrace_pid);
 	if (!kc)
 		usage();
-	if (ptrace_pid != 0)
-		kc->type = PTRACE_PID;
 
 	kc->out_dir = out_dir;
 	kc->in_file = in_file;
