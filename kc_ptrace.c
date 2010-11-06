@@ -249,3 +249,10 @@ int ptrace_pid_run(struct kc *kc, pid_t pid)
 
 	return 0;
 }
+
+int ptrace_detach(struct kc *kc)
+{
+	ptrace(PTRACE_DETACH, active_child, 0, 0);
+
+	return 0;
+}

@@ -646,6 +646,9 @@ void stop_report_thread(void)
 	should_exit = 1;
 	pthread_join(thread, NULL);
 	cleanup_allocations();
+
+	if (g_kc->type == PTRACE_PID || g_kc->type == PTRACE_FILE)
+		ptrace_detach(g_kc);
 }
 
 

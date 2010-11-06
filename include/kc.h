@@ -103,5 +103,6 @@ extern void kprobe_coverage_run(struct kc *kc,
 extern int ptrace_run(struct kc *kc, char *const argv[]);
 extern int ptrace_pid_run(struct kc *kc, pid_t pid);
 
+int ptrace_detach(struct kc *kc);
 
 #endif
