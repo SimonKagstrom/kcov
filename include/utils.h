@@ -16,9 +16,9 @@
 
 #define BUG_ON(cond)
 
-#define panic(x...) do \
+#define error(x...) do \
   { \
-    fprintf(stderr, "=============PANIC PANIC PANIC===========\n"); \
+    fprintf(stderr, "=============ERROR ERROR ERROR===========\n"); \
     fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); fprintf(stderr, x); \
     fprintf(stderr, "=========================================\n"); \
     assert(0); \
@@ -31,6 +31,8 @@
     fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); fprintf(stderr, x); \
     fprintf(stderr, "=========================================\n"); \
   } while(0)
+
+#define panic(x...) do { error(x); abort(); } while(0)
 
 #define panic_if(cond, x...) \
   do { if ((cond)) panic(x); } while(0)
