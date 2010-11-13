@@ -252,6 +252,17 @@ int ptrace_pid_run(struct kc *kc, pid_t pid)
 
 int ptrace_detach(struct kc *kc)
 {
+	GHashTableIter iter;
+	struct kc_addr *val;
+	unsigned long key;
+
+	/* Eliminate all unhit breakpoints */
+	g_hash_table_iter_init(&iter, kc->addrs);
+	while (g_hash_table_iter_next(&iter, (gpointer*)&key, (gpointer*)&val)) {
+		if (!val->hits)
+			ptrace_eliminate_breakpoint(val);
+	}
+
 	ptrace(PTRACE_DETACH, active_child, 0, 0);
 
 	return 0;
