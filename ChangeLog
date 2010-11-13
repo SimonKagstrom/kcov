@@ -1,9 +1,11 @@
 Kcov (3):
+	* Various bug fixes
+
 	* Add ability to trace running processes by PID
 
 	* Fix copyright headers
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Nov 13 08:13:03 CET 2010
 
 Kcov (2):
 	* Misc fixes
