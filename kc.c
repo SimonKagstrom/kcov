@@ -152,6 +152,7 @@ static const char *lookup_filename_by_pid(pid_t pid)
 	char path[1024];
 	ssize_t err;
 
+	memset(path, 0, sizeof(path));
 	snprintf(linkpath, sizeof(linkpath) - 1, "/proc/%d/exe", pid);
 	linkpath[sizeof(linkpath) - 1 ] = '\0';
 
