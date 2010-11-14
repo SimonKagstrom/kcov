@@ -17,26 +17,21 @@
 
 static pid_t active_child, child;
 
-static unsigned char peek_byte(const void *ptr)
+static unsigned long get_aligned(unsigned long addr)
 {
-	unsigned long addr = (unsigned long)ptr;
-	unsigned long aligned = (addr / sizeof(long)) * sizeof(long);
-	union { long val; unsigned char data[sizeof(long)]; } data;
-
-	data.val = ptrace(PTRACE_PEEKTEXT, active_child, aligned, 0);
-
-	return data.data[addr - aligned];
+	return (addr / sizeof(long)) * sizeof(long);
 }
 
-static void poke_byte(unsigned long addr, unsigned char c)
+static unsigned long peek_word(unsigned long addr)
 {
-	unsigned long aligned = (addr / sizeof(long)) * sizeof(long);
-	union { long val; unsigned char data[sizeof(long)]; } data;
+	unsigned long aligned = get_aligned(addr);
 
-	data.val = ptrace(PTRACE_PEEKTEXT, active_child, aligned, 0);
-	data.data[addr - aligned] = c;
+	return ptrace(PTRACE_PEEKTEXT, active_child, aligned, 0);
+}
 
-	ptrace(PTRACE_POKETEXT, active_child, aligned, data.val);
+static void poke_word(unsigned long addr, unsigned long val)
+{
+	ptrace(PTRACE_POKETEXT, active_child, aligned, val);
 }
 
 static void *ptrace_get_ip(void)
@@ -73,11 +68,16 @@ static void ptrace_setup_breakpoints(struct kc *kc)
 	g_hash_table_iter_init(&iter, kc->addrs);
 	while (g_hash_table_iter_next(&iter,
 			(gpointer*)&key, (gpointer*)&addr)) {
-		uint8_t old_byte = peek_byte((void *)addr->addr);
+		unsigned long aligned_addr = get_aligned(addr->addr);
+		unsigned long old_word = peek_word(addr->addr);
 
-		addr->saved_code = old_byte;
+		addr->saved_code = old_word;
 #if defined(__x86_64__)||defined(__i386__)
-      poke_byte(addr->addr, 0xCC);
+		unsigned long offs = addr->addr - aligned_addr;
+		unsigned long shift = 8 * offs;
+		unsigned long val = (old_word & ~(0xff << shift)) | (0xcc << shift);
+
+		poke_word(aligned_addr, val);
 #else
    #error specify how to set a breakpoint
 #endif
@@ -100,7 +100,7 @@ void ptrace_eliminate_breakpoint(struct kc_addr *addr)
 #endif
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
-   poke_byte(ptr, addr->saved_code);
+   poke_word(get_aligned(ptr), addr->saved_code);
    kc_addr_register_hit(addr);
 }
 
