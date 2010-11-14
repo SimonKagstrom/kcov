@@ -46,7 +46,8 @@ static void *ptrace_get_ip(void)
 #elif defined(__i386__)
    return (void*)(regs.eip);
 #else
-   #error specify how to read the IP
+   #warning specify how to read the IP
+   return NULL;
 #endif
 }
 
@@ -55,7 +56,8 @@ void* ptrace_get_ip_before_trap(void)
 #if defined(__x86_64__) || defined(__i386__)
    return (char*)(ptrace_get_ip()) - 1;
 #else
-   #error specify how to adjust the IP after a breakpoint
+   #warning specify how to adjust the IP after a breakpoint
+   return NULL;
 #endif
 }
 
@@ -79,7 +81,7 @@ static void ptrace_setup_breakpoints(struct kc *kc)
 
 		poke_word(aligned_addr, val);
 #else
-   #error specify how to set a breakpoint
+   #warning specify how to set a breakpoint
 #endif
 	}
 }
@@ -96,7 +98,8 @@ void ptrace_eliminate_breakpoint(struct kc_addr *addr)
 #elif defined(__i386__)
    ptr = (unsigned long)(--regs.eip);
 #else
-   #error specify how to adjust the IP after a breakpoint
+   #warning specify how to adjust the IP after a breakpoint
+   return;
 #endif
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
@@ -215,6 +218,11 @@ static pid_t fork_child(const char *executable, char *const argv[])
 
 int ptrace_run(struct kc *kc, char *const argv[])
 {
+#if !defined(__x86_64__) && !defined(__i386__)
+	error("This architecture needs to be added to kcov for ptrace coverage\n");
+	return -1;
+#endif
+
 	active_child = fork_child(argv[0], &argv[0]);
 
 	if (active_child < 0) {
