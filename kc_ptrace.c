@@ -11,6 +11,7 @@
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <sys/errno.h>
+#include <unistd.h>
 
 #include <kc.h>
 #include <utils.h>
