@@ -31,7 +31,7 @@ static unsigned long peek_word(unsigned long addr)
 
 static void poke_word(unsigned long addr, unsigned long val)
 {
-	ptrace(PTRACE_POKETEXT, active_child, aligned, val);
+	ptrace(PTRACE_POKETEXT, active_child, addr, val);
 }
 
 static void *ptrace_get_ip(void)
