@@ -8,6 +8,7 @@
  * Copyright (C) 2007 Thomas Neumann
  */
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <sys/errno.h>
@@ -37,7 +38,7 @@ static void poke_word(unsigned long addr, unsigned long val)
 
 static void *ptrace_get_ip(void)
 {
-   struct user_regs_struct regs;
+   struct pt_regs regs;
 
    memset(&regs, 0, sizeof(regs));
    ptrace(PTRACE_GETREGS, active_child, 0, &regs);
