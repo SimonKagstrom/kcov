@@ -122,3 +122,8 @@ out_dst:
 
 	return ret;
 }
+
+unsigned long get_aligned(unsigned long addr)
+{
+	return (addr / sizeof(long)) * sizeof(long);
+}

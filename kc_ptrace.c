@@ -19,11 +19,6 @@
 
 static pid_t active_child, child;
 
-static unsigned long get_aligned(unsigned long addr)
-{
-	return (addr / sizeof(long)) * sizeof(long);
-}
-
 static unsigned long peek_word(unsigned long addr)
 {
 	unsigned long aligned = get_aligned(addr);
