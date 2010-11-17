@@ -42,6 +42,7 @@ struct kc
 	const char **exclude_paths;
 	const char *module_name;
 	enum report_sort_type sort_type;
+	unsigned int e_machine;
 	int type;
 
 	ptrdiff_t base_addr;

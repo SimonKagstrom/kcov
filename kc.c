@@ -94,6 +94,7 @@ static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf
 	kc->type = PTRACE_FILE;
 	if (!hdr || elf_getshdrstrndx(elf, &shstrndx) < 0)
 		return;
+	kc->e_machine = (unsigned int)hdr->e_machine;
 
 	is_32 = hdr->e_ident[EI_CLASS] == ELFCLASS32;
 
