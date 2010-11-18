@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include <kc.h>
+#include <kc_ptrace_arch.h>
 #include <utils.h>
 
 static pid_t active_child, child;
@@ -31,31 +32,15 @@ static void poke_word(unsigned long addr, unsigned long val)
 	ptrace(PTRACE_POKETEXT, active_child, addr, val);
 }
 
-static void *ptrace_get_ip(void)
+static unsigned long ptrace_get_ip_before_trap(struct kc *kc)
 {
-   struct pt_regs regs;
+	uint8_t regs[1024];
+	struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
 
-   memset(&regs, 0, sizeof(regs));
-   ptrace(PTRACE_GETREGS, active_child, 0, &regs);
+	memset(&regs, 0, sizeof(regs));
+	ptrace(PTRACE_GETREGS, active_child, 0, &regs);
 
-#if defined(__x86_64__)
-   return (void*)(regs.rip);
-#elif defined(__i386__)
-   return (void*)(regs.eip);
-#else
-   #warning specify how to read the IP
-   return NULL;
-#endif
-}
-
-void* ptrace_get_ip_before_trap(void)
-{
-#if defined(__x86_64__) || defined(__i386__)
-   return (char*)(ptrace_get_ip()) - 1;
-#else
-   #warning specify how to adjust the IP after a breakpoint
-   return NULL;
-#endif
+	return arch->get_pc(kc, &regs);
 }
 
 static void ptrace_setup_breakpoints(struct kc *kc)
@@ -63,44 +48,38 @@ static void ptrace_setup_breakpoints(struct kc *kc)
 	GHashTableIter iter;
 	unsigned long key;
 	struct kc_addr *addr;
+	struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
+
+	if (!arch)
+		error("The architecture %d isn't supported by KCOV yet\n",
+				kc->e_machine);
 
 	g_hash_table_iter_init(&iter, kc->addrs);
 	while (g_hash_table_iter_next(&iter,
 			(gpointer*)&key, (gpointer*)&addr)) {
 		unsigned long aligned_addr = get_aligned(addr->addr);
 		unsigned long old_word = peek_word(addr->addr);
+		unsigned long new_word;
 
 		addr->saved_code = old_word;
-#if defined(__x86_64__)||defined(__i386__)
-		unsigned long offs = addr->addr - aligned_addr;
-		unsigned long shift = 8 * offs;
-		unsigned long val = (old_word & ~(0xff << shift)) | (0xcc << shift);
+		new_word = arch->setup_breakpoint(kc, addr->addr, old_word);
 
-		poke_word(aligned_addr, val);
-#else
-   #warning specify how to set a breakpoint
-#endif
+		poke_word(aligned_addr, new_word);
 	}
 }
 
-void ptrace_eliminate_breakpoint(struct kc_addr *addr)
+void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr)
 {
-   struct user_regs_struct regs;
-   memset(&regs, 0, sizeof(regs));
-   unsigned long ptr;
+   uint8_t regs[1024];
+   struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
 
+   /* arch C't be NULL, or we would have exited when setting up BPs */
+   memset(&regs, 0, sizeof(regs));
    ptrace(PTRACE_GETREGS, active_child, 0, &regs);
-#if defined(__x86_64__)
-   ptr = (unsigned long)(--regs.rip);
-#elif defined(__i386__)
-   ptr = (unsigned long)(--regs.eip);
-#else
-   #warning specify how to adjust the IP after a breakpoint
-   return;
-#endif
+   arch->adjust_pc_after_breakpoint(kc, &regs);
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
-   poke_word(get_aligned(ptr), addr->saved_code);
+   poke_word(get_aligned(addr->addr), addr->saved_code);
    kc_addr_register_hit(addr);
 }
 
@@ -170,11 +149,11 @@ static void ptrace_run_debugger(struct kc *kc)
 			return;
 		case PT_CODE_TRAP:
 		{
-			void *where = ptrace_get_ip_before_trap();
-			struct kc_addr *addr = kc_lookup_addr(kc, (unsigned long)where);
+			unsigned long where = ptrace_get_ip_before_trap(kc);
+			struct kc_addr *addr = kc_lookup_addr(kc, where);
 
 			if (addr)
-				ptrace_eliminate_breakpoint(addr);
+				ptrace_eliminate_breakpoint(kc, addr);
 
 		} break;
       }
@@ -215,11 +194,6 @@ static pid_t fork_child(const char *executable, char *const argv[])
 
 int ptrace_run(struct kc *kc, char *const argv[])
 {
-#if !defined(__x86_64__) && !defined(__i386__)
-	error("This architecture needs to be added to kcov for ptrace coverage\n");
-	return -1;
-#endif
-
 	active_child = fork_child(argv[0], &argv[0]);
 
 	if (active_child < 0) {
@@ -265,7 +239,7 @@ int ptrace_detach(struct kc *kc)
 	g_hash_table_iter_init(&iter, kc->addrs);
 	while (g_hash_table_iter_next(&iter, (gpointer*)&key, (gpointer*)&val)) {
 		if (!val->hits)
-			ptrace_eliminate_breakpoint(val);
+			ptrace_eliminate_breakpoint(kc, val);
 	}
 
 	ptrace(PTRACE_DETACH, active_child, 0, 0);

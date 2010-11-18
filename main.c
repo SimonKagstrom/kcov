@@ -10,6 +10,8 @@
 #include <kc.h>
 #include <utils.h>
 
+#include <kc_ptrace_arch.h>
+
 static void on_ctrlc(int sig)
 {
 	stop_report_thread();
@@ -167,6 +169,9 @@ int main(int argc, char *argv[])
 
 	if (argc < 2)
 		usage();
+
+	kc_ptrace_arch_setup();
+
 	parse_arguments(argc - 1, &argv[1]);
 	if (!only_report_paths) {
 		only_report_paths = xmalloc(sizeof(const char *) * 2);
