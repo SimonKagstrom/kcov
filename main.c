@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <libgen.h>
 
 #include <kc.h>
 #include <utils.h>
@@ -166,6 +167,7 @@ static void parse_arguments(int argc, char *const argv[])
 int main(int argc, char *argv[])
 {
 	struct kc *kc;
+	char *bn;
 
 	if (argc < 2)
 		usage();
@@ -182,12 +184,16 @@ int main(int argc, char *argv[])
 	kc = kc_open_elf(in_file, ptrace_pid);
 	if (!kc)
 		usage();
+	bn = strdup(in_file);
 
 	kc->out_dir = out_dir;
+	kc->binary_filename = basename(bn);
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
 	kc->low_limit = low_limit;
 	kc->high_limit = high_limit;
+
+	panic_if(!kc->binary_filename, "basename failed\n");
 
 	/* Re-read the old settings, if it exists */
 	kc_read_db(kc);

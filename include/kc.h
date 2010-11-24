@@ -33,6 +33,7 @@ enum report_sort_type
 struct kc
 {
 	const char *out_dir;
+	const char *binary_filename;
 	const char *in_file;
 
 	unsigned long low_limit;
