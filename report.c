@@ -616,6 +616,7 @@ static int should_exit;
 
 static void *report_thread(void *priv)
 {
+	struct kc *kc = priv;
 	int i = 0;
 
 	mkdir(g_dir, 0755);
@@ -625,7 +626,7 @@ static void *report_thread(void *priv)
 
 	while (1) {
 		if (i % 5 == 0)
-			write_report(g_dir, g_kc);
+			write_report(g_dir, kc);
 		if (should_exit)
 			break;
 		sleep(1);
@@ -633,10 +634,10 @@ static void *report_thread(void *priv)
 		sync();
 	}
 	/* Do this twice to collect percentages from last round */
-	write_report(g_dir, g_kc);
-	write_report(g_dir, g_kc);
+	write_report(g_dir, kc);
+	write_report(g_dir, kc);
 
-	kc_write_db(g_kc);
+	kc_write_db(kc);
 
 	pthread_exit(NULL);
 }
@@ -652,12 +653,12 @@ void stop_report_thread(void)
 }
 
 
-void run_report_thread(const char *dir, struct kc *kc)
+void run_report_thread(struct kc *kc)
 {
 	int ret;
 
-	g_dir = dir;
+	g_dir = kc->out_dir;
 	g_kc = kc;
-	ret = pthread_create(&thread, NULL, report_thread, NULL);
+	ret = pthread_create(&thread, NULL, report_thread, kc);
 	panic_if (ret < 0, "Can't create thread");
 }

@@ -75,7 +75,7 @@ extern void kc_close(struct kc *kc);
 
 extern struct kc_addr *kc_lookup_addr(struct kc *kc, unsigned long addr);
 
-extern void run_report_thread(const char *dir, struct kc *kc);
+extern void run_report_thread(struct kc *kc);
 
 extern void stop_report_thread(void);
 

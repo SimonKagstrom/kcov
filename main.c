@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 			kc->sort_type = COVERAGE_PERCENT;
 	}
 
-	run_report_thread(out_dir, kc);
+	run_report_thread(kc);
 
 	signal(SIGINT, on_ctrlc);
 
