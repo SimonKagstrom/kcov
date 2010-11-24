@@ -15,4 +15,4 @@ clean:
 	rm -f kcov *.o
 
 
-arch/arch.o: arch/arch.c
+arch/arch.o: arch/arch.c arch/i386.c

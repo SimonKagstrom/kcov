@@ -2,6 +2,8 @@
 #include <elf.h> /* EM_NUM */
 #include <utils.h>
 
+#include "i386.c"
+
 /* Allow for lots of architectures! */
 static struct kc_ptrace_arch *archs[EM_NUM];
 
@@ -29,4 +31,5 @@ void kc_ptrace_arch_register(struct kc_ptrace_arch *arch)
 
 void kc_ptrace_arch_setup(void)
 {
+	kc_ptrace_arch_register(&i386_arch);
 }
