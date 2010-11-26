@@ -306,7 +306,7 @@ void kc_read_db(struct kc *kc)
 	size_t sz;
 	int i;
 
-	db = read_file(&sz, "%s/kcov.db", kc->out_dir);
+	db = read_file(&sz, "%s/%s/kcov.db", kc->out_dir, kc->binary_filename);
 	if (!db)
 		return;
 	kc_db_unmarshal(db);
@@ -359,4 +359,45 @@ void kc_write_db(struct kc *kc)
 			"%s/kcov.db", kc->out_dir);
 
 	free(db);
+}
+
+int kc_coverage_db_read(const char *dir, struct kc_coverage_db *dst)
+{
+	struct kc_coverage_db *db;
+	size_t sz;
+
+	db = read_file(&sz, "%s/kcov_coverage.db", dir);
+	if (!db)
+		return -1;
+	if (sz != sizeof(struct kc_coverage_db)) {
+		warning("Coverage db size wrong: %u vs %u\n",
+				sz, sizeof(struct kc_coverage_db));
+		free(db);
+		return -1;
+	}
+
+	*dst = *db;
+	kc_coverage_db_unmarshal(dst);
+	free(db);
+
+	return 0;
+}
+
+void kc_coverage_db_write(const char *dir, struct kc_coverage_db *src)
+{
+	struct kc_coverage_db db;
+
+	db = *src;
+	kc_coverage_db_marshal(&db);
+
+	write_file(&db, sizeof(struct kc_coverage_db),
+			"%s/kcov_coverage.db", dir);
+}
+
+void kc_coverage_db_marshal(struct kc_coverage_db *db)
+{
+}
+
+void kc_coverage_db_unmarshal(struct kc_coverage_db *db)
+{
 }

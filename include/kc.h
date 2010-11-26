@@ -30,6 +30,12 @@ enum report_sort_type
 	COVERAGE_PERCENT,
 };
 
+struct kc_coverage_db
+{
+	uint32_t n_lines;
+	uint32_t n_covered_lines;
+};
+
 struct kc
 {
 	const char *out_dir;
@@ -55,6 +61,8 @@ struct kc
 	GList *hit_list;
 	pthread_mutex_t pending_mutex;
 	GList *pending_list;
+
+	struct kc_coverage_db total_coverage;
 };
 
 struct kc_data_db
@@ -95,6 +103,22 @@ extern void kc_write_db(struct kc *kc);
 extern void kc_db_marshal(struct kc_data_db *db);
 
 extern void kc_db_unmarshal(struct kc_data_db *db);
+
+/**
+ * Read the coverage database
+ *
+ * @param dir the directory to read from
+ * @param dst the structure to read into
+ *
+ * @return 0 if the read was successful, < 0 otherwise
+ */
+extern int kc_coverage_db_read(const char *dir, struct kc_coverage_db *dst);
+
+extern void kc_coverage_db_write(const char *dir, struct kc_coverage_db *src);
+
+extern void kc_coverage_db_marshal(struct kc_coverage_db *db);
+
+extern void kc_coverage_db_unmarshal(struct kc_coverage_db *db);
 
 
 /* Kernel */
