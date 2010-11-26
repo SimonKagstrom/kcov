@@ -48,15 +48,20 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 	return data;
 }
 
-int write_file(const char *dir, const char *filename,
-		const void* data, size_t len)
+int write_file(const void *data, size_t len, const char *fmt, ...)
 {
-	char buf[255];
+	char path[2048];
+	va_list ap;
 	FILE *fp;
 	int ret = 0;
 
-	xsnprintf(buf, sizeof(buf), "%s/%s", dir, filename);
-	fp = fopen(buf, "w");
+	/* Create the filename */
+	assert ( fmt != NULL );
+	va_start(ap, fmt);
+	vsnprintf(path, 2048, fmt, ap);
+	va_end(ap);
+
+	fp = fopen(path, "w");
 	if (!fp)
 		return -1;
 

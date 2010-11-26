@@ -132,11 +132,11 @@ void *add_allocation(void *x)
 
 static void write_pngs(const char *dir)
 {
-	xwrite_file(dir, "ruby.png", icon_ruby, sizeof(icon_ruby));
-	xwrite_file(dir, "amber.png", icon_amber, sizeof(icon_amber));
-	xwrite_file(dir, "emerald.png", icon_emerald, sizeof(icon_emerald));
-	xwrite_file(dir, "snow.png", icon_snow, sizeof(icon_snow));
-	xwrite_file(dir, "glass.png", icon_glass, sizeof(icon_glass));
+	xwrite_file(icon_ruby, sizeof(icon_ruby), "%s/ruby.png", dir);
+	xwrite_file(icon_amber, sizeof(icon_amber), "%s/amber.png", dir);
+	xwrite_file(icon_emerald, sizeof(icon_emerald), "%s/emerald.png", dir);
+	xwrite_file(icon_snow, sizeof(icon_snow), "%s/snow.png", dir);
+	xwrite_file(icon_glass, sizeof(icon_glass), "%s/glass.png", dir);
 }
 
 static const char *construct_bar(double percent)
@@ -161,7 +161,7 @@ static const char *construct_bar(double percent)
 
 static void write_css(const char *dir)
 {
-	xwrite_file(dir, "/bcov.css", css_text, sizeof(css_text));
+	xwrite_file(css_text, sizeof(css_text), "%s/bcov.css", dir);
 }
 
 static char *escape_helper(char *dst, char *what)

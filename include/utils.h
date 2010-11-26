@@ -74,15 +74,14 @@ static inline void *xrealloc(void *ptr, size_t sz)
 } while(0)
 
 
-extern int write_file(const char *dir, const char *filename,
-		const void* data, size_t len);
+extern int write_file(const void *data, size_t len, const char *fmt, ...);
 
 extern void *read_file(size_t *out_size, const char *fmt, ...);
 
 extern const char *dir_concat(const char *dir, const char *filename);
 
-#define xwrite_file(dir, filename, data, len) do { \
-	int r = write_file(dir, filename, data, len); \
+#define xwrite_file(data, len, dir...) do { \
+	int r = write_file(data, len, dir); \
 	panic_if (r != 0, "write_file failed with %d\n", r); \
 } while(0)
 

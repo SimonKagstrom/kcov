@@ -355,8 +355,8 @@ void kc_write_db(struct kc *kc)
 		cnt++;
 	}
 	kc_db_marshal(db);
-	write_file(kc->out_dir, "kcov.db", db,
-			sizeof(struct kc_data_db) + sz * sizeof(struct kc_addr));
+	write_file(db, sizeof(struct kc_data_db) + sz * sizeof(struct kc_addr),
+			"%s/kcov.db", kc->out_dir);
 
 	free(db);
 }
