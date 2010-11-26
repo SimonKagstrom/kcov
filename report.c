@@ -9,6 +9,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 #include <utils.h>
 #include <kc.h>
@@ -574,6 +575,9 @@ static int write_index(const char *dir, struct kc *kc)
 	write_footer(fp);
 	fclose(fp);
 
+	kc->total_coverage.n_lines = total_lines;
+	kc->total_coverage.n_covered_lines = total_active_lines;
+
 	fp = fopen(dir_concat_report(dir, "index.html.hdr"), "w");
 	if (!fp)
 		return -1;
@@ -589,12 +593,111 @@ static int write_index(const char *dir, struct kc *kc)
 	return 0;
 }
 
+static int write_global_index(struct kc *kc, const char *dir_name)
+{
+	struct dirent *de;
+	int total_active_lines = 0;
+	int total_lines = 0;
+	DIR *dir;
+	FILE *fp;
+
+	fp = fopen(dir_concat_report(dir_name, "index.html.main"), "w");
+	if (!fp)
+		return -1;
+
+	fprintf(fp,
+			"<center>\n"
+			"  <table width=\"80%%\" cellpadding=\"2\" cellspacing=\"1\" border=\"0\">\n"
+			"    <tr>\n"
+			"      <td width=\"50%%\"><br/></td>\n"
+			"      <td width=\"15%%\"></td>\n"
+			"      <td width=\"15%%\"></td>\n"
+			"      <td width=\"20%%\"></td>\n"
+			"    </tr>\n"
+			"    <tr>\n"
+			"      <td class=\"tableHead\">Filename</td>\n"
+			"      <td class=\"tableHead\" colspan=\"3\">Coverage</td>\n"
+			"    </tr>\n");
+
+	dir = opendir(dir_name);
+	panic_if(!dir, "Can't open directory %s\n", dir_name);
+
+	de = readdir(dir);
+	while (de)
+	{
+		struct kc_coverage_db db;
+		const char *percentage_text = "Lo";
+		double percentage = 0;
+		char buf[2048];
+		int r;
+
+		r = snprintf(buf, sizeof(buf), "%s/%s", dir_name, de->d_name);
+		panic_if(r == sizeof(buf), "Buffer overflow");
+
+		/* Read the coverage database but skip if it isn't there */
+		if (kc_coverage_db_read(buf, &db) < 0) {
+			de = readdir(dir);
+			continue;
+		}
+		total_lines += db.n_lines;
+		total_active_lines += db.n_covered_lines;
+
+		if (db.n_covered_lines != 0)
+			percentage = ((double)db.n_covered_lines / (double)db.n_lines) * 100;
+
+		if (percentage > kc->low_limit && percentage < kc->high_limit)
+			percentage_text = "Med";
+		else if (percentage >= kc->high_limit)
+			percentage_text = "Hi";
+
+		fprintf(fp,
+				"    <tr>\n"
+				"      <td class=\"coverFile\"><a href=\"%s/index.html\">%s</a></td>\n"
+				"      <td class=\"coverBar\" align=\"center\">\n"
+				"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">%s</td></tr></table>\n"
+				"      </td>\n"
+				"      <td class=\"coverPer%s\">%.1f&nbsp;%%</td>\n"
+				"      <td class=\"coverNum%s\">%d&nbsp;/&nbsp;%d&nbsp;lines</td>\n"
+				"    </tr>\n",
+				de->d_name,
+				de->d_name,
+				construct_bar(percentage),
+				percentage_text, percentage,
+				percentage_text, db.n_covered_lines, db.n_lines);
+
+		de = readdir(dir);
+	}
+	closedir(dir);
+
+	fprintf(fp,
+			"  </table>\n"
+			"</center>\n"
+			"<br/>\n");
+
+	write_footer(fp);
+	fclose(fp);
+
+	fp = fopen(dir_concat_report(dir_name, "index.html.hdr"), "w");
+	panic_if (!fp, "Can't open header file - there won't be any report\n");
+	write_header(fp, kc, NULL, total_lines, total_active_lines);
+	fclose(fp);
+
+	concat_files(dir_concat_report(dir_name, "index.html"),
+			dir_concat_report(dir_name, "index.html.hdr"),
+			dir_concat_report(dir_name, "index.html.main"));
+	unlink(dir_concat_report(dir_name, "index.html.hdr"));
+	unlink(dir_concat_report(dir_name, "index.html.main"));
+
+	return 0;
+}
+
 static void write_report(const char *dir, struct kc *kc)
 {
 	GHashTableIter iter;
 	const char *key;
 	struct kc_file *val;
 
+	memset(&kc->total_coverage, 0, sizeof(kc->total_coverage));
 	/* Write an index first */
 	write_index(dir, kc);
 
@@ -603,6 +706,9 @@ static void write_report(const char *dir, struct kc *kc)
 		if (file_exists(val->filename))
 			write_file_report(dir, kc, val);
 	}
+
+	kc_coverage_db_write(dir, &kc->total_coverage);
+	write_global_index(kc, kc->out_dir);
 
 	cleanup_allocations();
 }
@@ -617,16 +723,23 @@ static int should_exit;
 static void *report_thread(void *priv)
 {
 	struct kc *kc = priv;
+	const char *binary_dir;
 	int i = 0;
 
-	mkdir(g_dir, 0755);
+	binary_dir = dir_concat(kc->out_dir, kc->binary_filename);
 
-	write_css(g_dir);
-	write_pngs(g_dir);
+	mkdir(kc->out_dir, 0755);
+
+	mkdir(binary_dir, 0755);
+
+	write_css(kc->out_dir);
+	write_pngs(kc->out_dir);
+	write_css(binary_dir);
+	write_pngs(binary_dir);
 
 	while (1) {
 		if (i % 5 == 0)
-			write_report(g_dir, kc);
+			write_report(binary_dir, kc);
 		if (should_exit)
 			break;
 		sleep(1);
@@ -634,10 +747,12 @@ static void *report_thread(void *priv)
 		sync();
 	}
 	/* Do this twice to collect percentages from last round */
-	write_report(g_dir, kc);
-	write_report(g_dir, kc);
+	write_report(binary_dir, kc);
+	write_report(binary_dir, kc);
 
 	kc_write_db(kc);
+
+	free((void *)binary_dir);
 
 	pthread_exit(NULL);
 }
