@@ -258,7 +258,7 @@ static const char *escape_html(const char *s)
 }
 
 static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
-		int lines, int active_lines)
+		int lines, int active_lines, int do_write_command)
 {
 	const char *percentage_text = "Lo";
 	double percentage;
@@ -289,11 +289,18 @@ static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
 			"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
 			"  <tr>\n"
 			"    <td width=\"100%%\">\n"
-			"      <table cellpadding=\"1\" border=\"0\" width=\"100%%\">\n"
-			"        <tr>\n"
-			"          <td class=\"headerItem\" width=\"20%%\">Command:</td>\n"
-			"          <td class=\"headerValue\" width=\"80%%\" colspan=6>%s</td>\n"
-			"        </tr>\n"
+			"      <table cellpadding=\"1\" border=\"0\" width=\"100%%\">\n",
+			do_write_command ? escape_html(kc->module_name) : "overview" /* Title */
+	);
+	if (do_write_command)
+		fprintf(fp,
+				"        <tr>\n"
+				"          <td class=\"headerItem\" width=\"20%%\">Command:</td>\n"
+				"          <td class=\"headerValue\" width=\"80%%\" colspan=6>%s</td>\n"
+				"        </tr>\n",
+				escape_html(kc->module_name) /* Command */
+		);
+	fprintf(fp,
 			"        <tr>\n"
 			"          <td class=\"headerItem\" width=\"20%%\">Date:</td>\n"
 			"          <td class=\"headerValue\" width=\"15%%\">%s</td>\n"
@@ -313,8 +320,6 @@ static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
 			"  </tr>\n"
 			"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
 			"</table>\n",
-			escape_html(kc->module_name), /* Title */
-			escape_html(kc->module_name), /* Command */
 			date_buf,
 			lines,
 			percentage_text,
@@ -415,7 +420,7 @@ static int write_file_report(const char *dir, struct kc *kc, struct kc_file *kc_
 	if (!fp)
 		return -1;
 	write_header(fp, kc, NULL, g_hash_table_size(kc_file->lines),
-			total_hits);
+			total_hits, 1);
 	fclose(fp);
 
 	concat_files(dir_concat_report(dir, outfile_name),
@@ -594,7 +599,7 @@ static int write_index(const char *dir, struct kc *kc)
 	fp = fopen(dir_concat_report(dir, "index.html.hdr"), "w");
 	if (!fp)
 		return -1;
-	write_header(fp, kc, NULL, total_lines, total_active_lines);
+	write_header(fp, kc, NULL, total_lines, total_active_lines, 1);
 	fclose(fp);
 
 	concat_files(dir_concat_report(dir, "index.html"),
@@ -692,7 +697,7 @@ static int write_global_index(struct kc *kc, const char *dir_name)
 
 	fp = fopen(dir_concat_report(dir_name, "index.html.hdr"), "w");
 	panic_if (!fp, "Can't open header file - there won't be any report\n");
-	write_header(fp, kc, NULL, total_lines, total_active_lines);
+	write_header(fp, kc, NULL, total_lines, total_active_lines, 0);
 	fclose(fp);
 
 	concat_files(dir_concat_report(dir_name, "index.html"),
