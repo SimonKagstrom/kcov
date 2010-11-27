@@ -1,0 +1,566 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">170</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftLo" width="15%">0.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">0</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  1541fs.cpp - 1541 emulation in host file system </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Notes: </span>
+<span class="lineNum">     23 </span>              :  * ------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - If the directory is opened (file name &quot;$&quot;), a temporary file </span>
+<span class="lineNum">     26 </span>              :  *    with the structure of a 1541 directory file is created and </span>
+<span class="lineNum">     27 </span>              :  *    opened. It can then be accessed in the same way as all other </span>
+<span class="lineNum">     28 </span>              :  *    files. </span>
+<span class="lineNum">     29 </span>              :  * </span>
+<span class="lineNum">     30 </span>              :  * Incompatibilities: </span>
+<span class="lineNum">     31 </span>              :  * ------------------ </span>
+<span class="lineNum">     32 </span>              :  * </span>
+<span class="lineNum">     33 </span>              :  *  - No &quot;raw&quot; directory reading </span>
+<span class="lineNum">     34 </span>              :  *  - No relative/sequential/user files </span>
+<span class="lineNum">     35 </span>              :  *  - Only &quot;I&quot; and &quot;UJ&quot; commands implemented </span>
+<span class="lineNum">     36 </span>              :  */ </span>
+<span class="lineNum">     37 </span>              :  </span>
+<span class="lineNum">     38 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              : #include &quot;1541fs.h&quot; </span>
+<span class="lineNum">     41 </span>              : #include &quot;IEC.h&quot; </span>
+<span class="lineNum">     42 </span>              : #include &quot;main.h&quot; </span>
+<span class="lineNum">     43 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : // Prototypes </span>
+<span class="lineNum">     47 </span>              : static bool match(const char *p, const char *n); </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span>              :  </span>
+<span class="lineNum">     50 </span>              : /* </span>
+<span class="lineNum">     51 </span>              :  *  Constructor: Prepare emulation </span>
+<span class="lineNum">     52 </span>              :  */ </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span><span class="lineNoCov">    0 / 8     : FSDrive::FSDrive(IEC *iec, const char *path) : Drive(iec) </span>
+<span class="lineNum">     55 </span>              : { </span>
+<span class="lineNum">     56 </span><span class="lineNoCov">    0 / 2     : 	strcpy(orig_dir_path, path); </span>
+<span class="lineNum">     57 </span><span class="lineNoCov">    0 / 2     : 	dir_path[0] = 0; </span>
+<span class="lineNum">     58 </span>              :  </span>
+<span class="lineNum">     59 </span><span class="lineNoCov">    0 / 2     : 	if (change_dir(orig_dir_path)) { </span>
+<span class="lineNum">     60 </span><span class="lineNoCov">    0 / 2     : 		for (int i=0; i&lt;16; i++) </span>
+<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 2     : 			file[i] = NULL; </span>
+<span class="lineNum">     62 </span>              :  </span>
+<span class="lineNum">     63 </span><span class="lineNoCov">    0 / 2     : 		Reset(); </span>
+<span class="lineNum">     64 </span>              :  </span>
+<span class="lineNum">     65 </span><span class="lineNoCov">    0 / 2     : 		Ready = true; </span>
+<span class="lineNum">     66 </span>              : 	} </span>
+<span class="lineNum">     67 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">     68 </span>              :  </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span>              : /* </span>
+<span class="lineNum">     71 </span>              :  *  Destructor </span>
+<span class="lineNum">     72 </span>              :  */ </span>
+<span class="lineNum">     73 </span>              :  </span>
+<span class="lineNum">     74 </span><span class="lineNoCov">    0 / 9     : FSDrive::~FSDrive() </span>
+<span class="lineNum">     75 </span>              : { </span>
+<span class="lineNum">     76 </span><span class="lineNoCov">    0 / 6     : 	if (Ready) { </span>
+<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 3     : 		close_all_channels(); </span>
+<span class="lineNum">     78 </span><span class="lineNoCov">    0 / 3     : 		Ready = false; </span>
+<span class="lineNum">     79 </span>              : 	} </span>
+<span class="lineNum">     80 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">     81 </span>              :  </span>
+<span class="lineNum">     82 </span>              :  </span>
+<span class="lineNum">     83 </span>              : /* </span>
+<span class="lineNum">     84 </span>              :  *  Change emulation directory </span>
+<span class="lineNum">     85 </span>              :  */ </span>
+<span class="lineNum">     86 </span>              :  </span>
+<span class="lineNum">     87 </span>              : bool FSDrive::change_dir(char *dirpath) </span>
+<span class="lineNum">     88 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     89 </span>              : #ifndef __riscos__ </span>
+<span class="lineNum">     90 </span>              : 	DIR *dir; </span>
+<span class="lineNum">     91 </span>              :  </span>
+<span class="lineNum">     92 </span><span class="lineNoCov">    0 / 1     : 	if ((dir = opendir(dirpath)) != NULL) { </span>
+<span class="lineNum">     93 </span><span class="lineNoCov">    0 / 2     : 		closedir(dir); </span>
+<span class="lineNum">     94 </span>              : 		strcpy(dir_path, dirpath); </span>
+<span class="lineNum">     95 </span>              : 		strncpy(dir_title, dir_path, 16); </span>
+<span class="lineNum">     96 </span>              : 		return true; </span>
+<span class="lineNum">     97 </span>              : 	} else </span>
+<span class="lineNum">     98 </span>              : 		return false; </span>
+<span class="lineNum">     99 </span>              : #else </span>
+<span class="lineNum">    100 </span>              : 	int Info[4]; </span>
+<span class="lineNum">    101 </span>              :  </span>
+<span class="lineNum">    102 </span>              : 	if ((ReadCatalogueInfo(dirpath,Info) &amp; 2) != 0)	{ // Directory or image file </span>
+<span class="lineNum">    103 </span>              : 		strcpy(dir_path, dirpath); </span>
+<span class="lineNum">    104 </span>              : 		strncpy(dir_title, dir_path, 16); </span>
+<span class="lineNum">    105 </span>              : 		return true; </span>
+<span class="lineNum">    106 </span>              : 	} else </span>
+<span class="lineNum">    107 </span>              : 		return false; </span>
+<span class="lineNum">    108 </span>              : #endif </span>
+<span class="lineNum">    109 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    110 </span>              :  </span>
+<span class="lineNum">    111 </span>              :  </span>
+<span class="lineNum">    112 </span>              : /* </span>
+<span class="lineNum">    113 </span>              :  *  Open channel </span>
+<span class="lineNum">    114 </span>              :  */ </span>
+<span class="lineNum">    115 </span>              :  </span>
+<span class="lineNum">    116 </span>              : uint8 FSDrive::Open(int channel, const uint8 *name, int name_len) </span>
+<span class="lineNum">    117 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_OK); </span>
+<span class="lineNum">    119 </span>              :  </span>
+<span class="lineNum">    120 </span>              : 	// Channel 15: Execute file name as command </span>
+<span class="lineNum">    121 </span><span class="lineNoCov">    0 / 1     : 	if (channel == 15) { </span>
+<span class="lineNum">    122 </span><span class="lineNoCov">    0 / 1     : 		execute_cmd(name, name_len); </span>
+<span class="lineNum">    123 </span>              : 		return ST_OK; </span>
+<span class="lineNum">    124 </span>              : 	} </span>
+<span class="lineNum">    125 </span>              :  </span>
+<span class="lineNum">    126 </span>              : 	// Close previous file if still open </span>
+<span class="lineNum">    127 </span><span class="lineNoCov">    0 / 1     : 	if (file[channel]) { </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 		fclose(file[channel]); </span>
+<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 1     : 		file[channel] = NULL; </span>
+<span class="lineNum">    130 </span>              : 	} </span>
+<span class="lineNum">    131 </span>              :  </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 1     : 	if (name[0] == '#') { </span>
+<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_NOCHANNEL); </span>
+<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 2     : 		return ST_OK; </span>
+<span class="lineNum">    135 </span>              : 	} </span>
+<span class="lineNum">    136 </span>              :  </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 	if (name[0] == '$') </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 5     : 		return open_directory(channel, name + 1, name_len - 1); </span>
+<span class="lineNum">    139 </span>              :  </span>
+<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 5     : 	return open_file(channel, name, name_len); </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 9     : } </span>
+<span class="lineNum">    142 </span>              :  </span>
+<span class="lineNum">    143 </span>              :  </span>
+<span class="lineNum">    144 </span>              : /* </span>
+<span class="lineNum">    145 </span>              :  *  Open file </span>
+<span class="lineNum">    146 </span>              :  */ </span>
+<span class="lineNum">    147 </span>              :  </span>
+<span class="lineNum">    148 </span>              : uint8 FSDrive::open_file(int channel, const uint8 *name, int name_len) </span>
+<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    150 </span>              : 	char plain_name[NAMEBUF_LENGTH]; </span>
+<span class="lineNum">    151 </span>              : 	int plain_name_len; </span>
+<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 1     : 	int mode = FMODE_READ; </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 1     : 	int type = FTYPE_PRG; </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 	int rec_len = 0; </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 3     : 	parse_file_name(name, name_len, (uint8 *)plain_name, plain_name_len, mode, type, rec_len, true); </span>
+<span class="lineNum">    156 </span>              :  </span>
+<span class="lineNum">    157 </span>              : 	// Channel 0 is READ, channel 1 is WRITE </span>
+<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 1     : 	if (channel == 0 || channel == 1) { </span>
+<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : 		mode = channel ? FMODE_WRITE : FMODE_READ; </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 2     : 		if (type == FTYPE_DEL) </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : 			type = FTYPE_PRG; </span>
+<span class="lineNum">    162 </span>              : 	} </span>
+<span class="lineNum">    163 </span>              :  </span>
+<span class="lineNum">    164 </span>              : 	bool writing = (mode == FMODE_WRITE || mode == FMODE_APPEND); </span>
+<span class="lineNum">    165 </span>              :  </span>
+<span class="lineNum">    166 </span>              : 	// Expand wildcards (only allowed on reading) </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 2     : 	if (strchr(plain_name, '*') || strchr(plain_name, '?')) { </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 		if (writing) { </span>
+<span class="lineNum">    169 </span><span class="lineNoCov">    0 / 1     : 			set_error(ERR_SYNTAX33); </span>
+<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 1     : 			return ST_OK; </span>
+<span class="lineNum">    171 </span>              : 		} else </span>
+<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 1     : 			find_first_file(plain_name); </span>
+<span class="lineNum">    173 </span>              : 	} </span>
+<span class="lineNum">    174 </span>              :  </span>
+<span class="lineNum">    175 </span>              : 	// Relative files are not supported </span>
+<span class="lineNum">    176 </span><span class="lineNoCov">    0 / 1     : 	if (type == FTYPE_REL) { </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 1     : 		return ST_OK; </span>
+<span class="lineNum">    179 </span>              : 	} </span>
+<span class="lineNum">    180 </span>              :  </span>
+<span class="lineNum">    181 </span>              : 	// Select fopen() mode according to file mode </span>
+<span class="lineNum">    182 </span>              : 	const char *mode_str = &quot;rb&quot;; </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 2     : 	switch (mode) { </span>
+<span class="lineNum">    184 </span>              : 		case FMODE_WRITE: </span>
+<span class="lineNum">    185 </span>              : 			mode_str = &quot;wb&quot;; </span>
+<span class="lineNum">    186 </span>              : 			break; </span>
+<span class="lineNum">    187 </span>              : 		case FMODE_APPEND: </span>
+<span class="lineNum">    188 </span>              : 			mode_str = &quot;ab&quot;; </span>
+<span class="lineNum">    189 </span>              : 			break; </span>
+<span class="lineNum">    190 </span>              : 	} </span>
+<span class="lineNum">    191 </span>              :  </span>
+<span class="lineNum">    192 </span>              : 	// Open file </span>
+<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : 	if (chdir(dir_path)) </span>
+<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_NOTREADY); </span>
+<span class="lineNum">    195 </span><span class="lineNoCov">    0 / 1     : 	else if ((file[channel] = fopen(plain_name, mode_str)) != NULL) { </span>
+<span class="lineNum">    196 </span><span class="lineNoCov">    0 / 1     : 		if (mode == FMODE_READ || mode == FMODE_M)	// Read and buffer first byte </span>
+<span class="lineNum">    197 </span><span class="lineNoCov">    0 / 1     : 			read_char[channel] = fgetc(file[channel]); </span>
+<span class="lineNum">    198 </span>              : 	} else </span>
+<span class="lineNum">    199 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_FILENOTFOUND); </span>
+<span class="lineNum">    200 </span><span class="lineNoCov">    0 / 1     : 	if (chdir(AppDirPath) &lt; 0) </span>
+<span class="lineNum">    201 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_NOTREADY); </span>
+<span class="lineNum">    202 </span>              :  </span>
+<span class="lineNum">    203 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    205 </span>              :  </span>
+<span class="lineNum">    206 </span>              :  </span>
+<span class="lineNum">    207 </span>              : /* </span>
+<span class="lineNum">    208 </span>              :  *  Find first file matching wildcard pattern and get its real name </span>
+<span class="lineNum">    209 </span>              :  */ </span>
+<span class="lineNum">    210 </span>              :  </span>
+<span class="lineNum">    211 </span>              : // Return true if name 'n' matches pattern 'p' </span>
+<span class="lineNum">    212 </span>              : static bool match(const char *p, const char *n) </span>
+<span class="lineNum">    213 </span>              : { </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 5     : 	if (!*p)		// Null pattern matches everything </span>
+<span class="lineNum">    215 </span>              : 		return true; </span>
+<span class="lineNum">    216 </span>              :  </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 2     : 	do { </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 2     : 		if (*p == '*')	// Wildcard '*' matches all following characters </span>
+<span class="lineNum">    219 </span>              : 			return true; </span>
+<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 2     : 		if ((*p != *n) &amp;&amp; (*p != '?'))	// Wildcard '?' matches single character </span>
+<span class="lineNum">    221 </span>              : 			return false; </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 2     : 		p++; n++; </span>
+<span class="lineNum">    223 </span>              : 	} while (*p); </span>
+<span class="lineNum">    224 </span>              :  </span>
+<span class="lineNum">    225 </span>              : 	return !*n; </span>
+<span class="lineNum">    226 </span>              : } </span>
+<span class="lineNum">    227 </span>              :  </span>
+<span class="lineNum">    228 </span>              : void FSDrive::find_first_file(char *pattern) </span>
+<span class="lineNum">    229 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    230 </span>              : #ifndef __riscos__ </span>
+<span class="lineNum">    231 </span>              : 	DIR *dir; </span>
+<span class="lineNum">    232 </span>              : 	struct dirent *de; </span>
+<span class="lineNum">    233 </span>              :  </span>
+<span class="lineNum">    234 </span>              : 	// Open directory for reading and skip '.' and '..' </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 	if ((dir = opendir(dir_path)) == NULL) </span>
+<span class="lineNum">    236 </span>              : 		return; </span>
+<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 2     : 	de = readdir(dir); </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 5     : 	while (de &amp;&amp; (0 == strcmp(&quot;.&quot;, de-&gt;d_name) || 0 == strcmp(&quot;..&quot;, de-&gt;d_name)))  </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 2     : 		de = readdir(dir); </span>
+<span class="lineNum">    240 </span>              :  </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 2     : 	while (de) { </span>
+<span class="lineNum">    242 </span>              :  </span>
+<span class="lineNum">    243 </span>              : 		// Match found? Then copy real file name </span>
+<span class="lineNum">    244 </span><span class="lineNoCov">    0 / 3     : 		if (match(pattern, de-&gt;d_name)) { </span>
+<span class="lineNum">    245 </span>              : 			strncpy(pattern, de-&gt;d_name, NAMEBUF_LENGTH); </span>
+<span class="lineNum">    246 </span>              : 			closedir(dir); </span>
+<span class="lineNum">    247 </span>              : 			return; </span>
+<span class="lineNum">    248 </span>              : 		} </span>
+<span class="lineNum">    249 </span>              :  </span>
+<span class="lineNum">    250 </span>              : 		// Get next directory entry </span>
+<span class="lineNum">    251 </span><span class="lineNoCov">    0 / 1     : 		de = readdir(dir); </span>
+<span class="lineNum">    252 </span>              : 	} </span>
+<span class="lineNum">    253 </span>              :  </span>
+<span class="lineNum">    254 </span><span class="lineNoCov">    0 / 4     : 	closedir(dir); </span>
+<span class="lineNum">    255 </span>              : #else </span>
+<span class="lineNum">    256 </span>              : 	dir_env de; </span>
+<span class="lineNum">    257 </span>              : 	char Buffer[NAMEBUF_LENGTH]; </span>
+<span class="lineNum">    258 </span>              :  </span>
+<span class="lineNum">    259 </span>              : 	de.offset = 0; de.buffsize = NAMEBUF_LENGTH; de.match = name; </span>
+<span class="lineNum">    260 </span>              : 	do { </span>
+<span class="lineNum">    261 </span>              : 		de.readno = 1; </span>
+<span class="lineNum">    262 </span>              : 		if (ReadDirName(dir_path,Buffer,&amp;de) != NULL) </span>
+<span class="lineNum">    263 </span>              : 			de.offset = -1; </span>
+<span class="lineNum">    264 </span>              : 		else if (de.offset != -1 &amp;&amp; match(name,Buffer)) { </span>
+<span class="lineNum">    265 </span>              : 			strncpy(name, Buffer, NAMEBUF_LENGTH); </span>
+<span class="lineNum">    266 </span>              : 			return; </span>
+<span class="lineNum">    267 </span>              : 		} </span>
+<span class="lineNum">    268 </span>              : 	} while (de.readno &gt; 0); </span>
+<span class="lineNum">    269 </span>              : #endif </span>
+<span class="lineNum">    270 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    271 </span>              :  </span>
+<span class="lineNum">    272 </span>              :  </span>
+<span class="lineNum">    273 </span>              : /* </span>
+<span class="lineNum">    274 </span>              :  *  Open directory, create temporary file </span>
+<span class="lineNum">    275 </span>              :  */ </span>
+<span class="lineNum">    276 </span>              :  </span>
+<span class="lineNum">    277 </span>              : uint8 FSDrive::open_directory(int channel, const uint8 *pattern, int pattern_len) </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 2     : 	char buf[] = &quot;\001\004\001\001\0\0\022\042                \042 00 2A&quot;; </span>
+<span class="lineNum">    280 </span>              : 	char str[NAMEBUF_LENGTH]; </span>
+<span class="lineNum">    281 </span>              : 	char *p, *q; </span>
+<span class="lineNum">    282 </span>              : 	int i; </span>
+<span class="lineNum">    283 </span>              : 	DIR *dir; </span>
+<span class="lineNum">    284 </span>              : 	struct dirent *de; </span>
+<span class="lineNum">    285 </span>              : 	struct stat statbuf; </span>
+<span class="lineNum">    286 </span>              :  </span>
+<span class="lineNum">    287 </span>              : 	// Special treatment for &quot;$0&quot; </span>
+<span class="lineNum">    288 </span><span class="lineNoCov">    0 / 2     : 	if (pattern[0] == '0' &amp;&amp; pattern[1] == 0) { </span>
+<span class="lineNum">    289 </span>              : 		pattern++; </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 2     : 		pattern_len--; </span>
+<span class="lineNum">    291 </span>              : 	} </span>
+<span class="lineNum">    292 </span>              :  </span>
+<span class="lineNum">    293 </span>              : 	// Skip everything before the ':' in the pattern </span>
+<span class="lineNum">    294 </span>              : 	uint8 *t = (uint8 *)memchr(pattern, ':', pattern_len); </span>
+<span class="lineNum">    295 </span>              : 	if (t) </span>
+<span class="lineNum">    296 </span><span class="lineNoCov">    0 / 1     : 		pattern = t + 1; </span>
+<span class="lineNum">    297 </span>              :  </span>
+<span class="lineNum">    298 </span>              : 	// Convert pattern to ASCII </span>
+<span class="lineNum">    299 </span>              : 	char ascii_pattern[NAMEBUF_LENGTH]; </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 2     : 	petscii2ascii(ascii_pattern, pattern, NAMEBUF_LENGTH); </span>
+<span class="lineNum">    301 </span>              :  </span>
+<span class="lineNum">    302 </span>              : 	// Open directory for reading and skip '.' and '..' </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 1     : 	if ((dir = opendir(dir_path)) == NULL) { </span>
+<span class="lineNum">    304 </span><span class="lineNoCov">    0 / 1     : 		set_error(ERR_NOTREADY); </span>
+<span class="lineNum">    305 </span><span class="lineNoCov">    0 / 1     : 		return ST_OK; </span>
+<span class="lineNum">    306 </span>              : 	} </span>
+<span class="lineNum">    307 </span><span class="lineNoCov">    0 / 2     : 	de = readdir(dir); </span>
+<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 5     : 	while (de &amp;&amp; (0 == strcmp(&quot;.&quot;, de-&gt;d_name) || 0 == strcmp(&quot;..&quot;, de-&gt;d_name)))  </span>
+<span class="lineNum">    309 </span><span class="lineNoCov">    0 / 2     : 		de = readdir(dir); </span>
+<span class="lineNum">    310 </span>              :  </span>
+<span class="lineNum">    311 </span>              : 	// Create temporary file </span>
+<span class="lineNum">    312 </span><span class="lineNoCov">    0 / 2     : 	if ((file[channel] = tmpfile()) == NULL) { </span>
+<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 1     : 		closedir(dir); </span>
+<span class="lineNum">    314 </span><span class="lineNoCov">    0 / 2     : 		return ST_OK; </span>
+<span class="lineNum">    315 </span>              : 	} </span>
+<span class="lineNum">    316 </span>              :  </span>
+<span class="lineNum">    317 </span>              : 	// Create directory title </span>
+<span class="lineNum">    318 </span>              : 	p = &amp;buf[8]; </span>
+<span class="lineNum">    319 </span><span class="lineNoCov">    0 / 2     : 	for (i=0; i&lt;16 &amp;&amp; dir_title[i]; i++) </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 1     : 		*p++ = ascii2petscii(dir_title[i]); </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 1     : 	fwrite(buf, 1, 32, file[channel]); </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span>              : 	// Create and write one line for every directory entry </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 2     : 	while (de) { </span>
+<span class="lineNum">    325 </span>              :  </span>
+<span class="lineNum">    326 </span>              : 		// Include only files matching the ascii_pattern </span>
+<span class="lineNum">    327 </span><span class="lineNoCov">    0 / 2     : 		if (match(ascii_pattern, de-&gt;d_name)) { </span>
+<span class="lineNum">    328 </span>              :  </span>
+<span class="lineNum">    329 </span>              : 			// Get file statistics </span>
+<span class="lineNum">    330 </span><span class="lineNoCov">    0 / 1     : 			if (chdir(dir_path) &lt; 0) </span>
+<span class="lineNum">    331 </span>              : 				continue; </span>
+<span class="lineNum">    332 </span>              : 			stat(de-&gt;d_name, &amp;statbuf); </span>
+<span class="lineNum">    333 </span><span class="lineNoCov">    0 / 1     : 			if (chdir(AppDirPath) &lt; 0) </span>
+<span class="lineNum">    334 </span>              : 				continue; </span>
+<span class="lineNum">    335 </span>              :  </span>
+<span class="lineNum">    336 </span>              : 			// Clear line with spaces and terminate with null byte </span>
+<span class="lineNum">    337 </span>              : 			memset(buf, ' ', 31); </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 1     : 			buf[31] = 0; </span>
+<span class="lineNum">    339 </span>              :  </span>
+<span class="lineNum">    340 </span>              : 			p = buf; </span>
+<span class="lineNum">    341 </span><span class="lineNoCov">    0 / 1     : 			*p++ = 0x01;	// Dummy line link </span>
+<span class="lineNum">    342 </span><span class="lineNoCov">    0 / 1     : 			*p++ = 0x01; </span>
+<span class="lineNum">    343 </span>              :  </span>
+<span class="lineNum">    344 </span>              : 			// Calculate size in blocks (254 bytes each) </span>
+<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 3     : 			i = (statbuf.st_size + 254) / 254; </span>
+<span class="lineNum">    346 </span><span class="lineNoCov">    0 / 1     : 			*p++ = i &amp; 0xff; </span>
+<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 2     : 			*p++ = (i &gt;&gt; 8) &amp; 0xff; </span>
+<span class="lineNum">    348 </span>              :  </span>
+<span class="lineNum">    349 </span>              : 			p++; </span>
+<span class="lineNum">    350 </span><span class="lineNoCov">    0 / 3     : 			if (i &lt; 10) p++;	// Less than 10: add one space </span>
+<span class="lineNum">    351 </span><span class="lineNoCov">    0 / 3     : 			if (i &lt; 100) p++;	// Less than 100: add another space </span>
+<span class="lineNum">    352 </span>              :  </span>
+<span class="lineNum">    353 </span>              : 			// Convert and insert file name </span>
+<span class="lineNum">    354 </span>              : 			strcpy(str, de-&gt;d_name); </span>
+<span class="lineNum">    355 </span><span class="lineNoCov">    0 / 2     : 			*p++ = '\&quot;'; </span>
+<span class="lineNum">    356 </span>              : 			q = p; </span>
+<span class="lineNum">    357 </span><span class="lineNoCov">    0 / 3     : 			for (i=0; i&lt;16 &amp;&amp; str[i]; i++) </span>
+<span class="lineNum">    358 </span><span class="lineNoCov">    0 / 2     : 				*q++ = ascii2petscii(str[i]); </span>
+<span class="lineNum">    359 </span><span class="lineNoCov">    0 / 1     : 			*q++ = '\&quot;'; </span>
+<span class="lineNum">    360 </span>              : 			p += 18; </span>
+<span class="lineNum">    361 </span>              :  </span>
+<span class="lineNum">    362 </span>              : 			// File type </span>
+<span class="lineNum">    363 </span><span class="lineNoCov">    0 / 1     : 			if (S_ISDIR(statbuf.st_mode)) { </span>
+<span class="lineNum">    364 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'D'; </span>
+<span class="lineNum">    365 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'I'; </span>
+<span class="lineNum">    366 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'R'; </span>
+<span class="lineNum">    367 </span>              : 			} else { </span>
+<span class="lineNum">    368 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'P'; </span>
+<span class="lineNum">    369 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'R'; </span>
+<span class="lineNum">    370 </span><span class="lineNoCov">    0 / 1     : 				*p++ = 'G'; </span>
+<span class="lineNum">    371 </span>              : 			} </span>
+<span class="lineNum">    372 </span>              :  </span>
+<span class="lineNum">    373 </span>              : 			// Write line </span>
+<span class="lineNum">    374 </span><span class="lineNoCov">    0 / 1     : 			fwrite(buf, 1, 32, file[channel]); </span>
+<span class="lineNum">    375 </span>              : 		} </span>
+<span class="lineNum">    376 </span>              :  </span>
+<span class="lineNum">    377 </span>              : 		// Get next directory entry </span>
+<span class="lineNum">    378 </span><span class="lineNoCov">    0 / 1     : 		de = readdir(dir); </span>
+<span class="lineNum">    379 </span>              : 	} </span>
+<span class="lineNum">    380 </span>              :  </span>
+<span class="lineNum">    381 </span>              : 	// Final line </span>
+<span class="lineNum">    382 </span><span class="lineNoCov">    0 / 1     : 	fwrite(&quot;\001\001\0\0BLOCKS FREE.             \0\0&quot;, 1, 32, file[channel]); </span>
+<span class="lineNum">    383 </span>              :  </span>
+<span class="lineNum">    384 </span>              : 	// Rewind file for reading and read first byte </span>
+<span class="lineNum">    385 </span><span class="lineNoCov">    0 / 1     : 	rewind(file[channel]); </span>
+<span class="lineNum">    386 </span><span class="lineNoCov">    0 / 1     : 	read_char[channel] = fgetc(file[channel]); </span>
+<span class="lineNum">    387 </span>              :  </span>
+<span class="lineNum">    388 </span>              : 	// Close directory </span>
+<span class="lineNum">    389 </span><span class="lineNoCov">    0 / 1     : 	closedir(dir); </span>
+<span class="lineNum">    390 </span>              :  </span>
+<span class="lineNum">    391 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    392 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    393 </span>              :  </span>
+<span class="lineNum">    394 </span>              :  </span>
+<span class="lineNum">    395 </span>              : /* </span>
+<span class="lineNum">    396 </span>              :  *  Close channel </span>
+<span class="lineNum">    397 </span>              :  */ </span>
+<span class="lineNum">    398 </span>              :  </span>
+<span class="lineNum">    399 </span>              : uint8 FSDrive::Close(int channel) </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    401 </span><span class="lineNoCov">    0 / 1     : 	if (channel == 15) { </span>
+<span class="lineNum">    402 </span><span class="lineNoCov">    0 / 1     : 		close_all_channels(); </span>
+<span class="lineNum">    403 </span><span class="lineNoCov">    0 / 1     : 		return ST_OK; </span>
+<span class="lineNum">    404 </span>              : 	} </span>
+<span class="lineNum">    405 </span>              :  </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 	if (file[channel]) { </span>
+<span class="lineNum">    407 </span><span class="lineNoCov">    0 / 1     : 		fclose(file[channel]); </span>
+<span class="lineNum">    408 </span><span class="lineNoCov">    0 / 1     : 		file[channel] = NULL; </span>
+<span class="lineNum">    409 </span>              : 	} </span>
+<span class="lineNum">    410 </span>              :  </span>
+<span class="lineNum">    411 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    412 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    413 </span>              :  </span>
+<span class="lineNum">    414 </span>              :  </span>
+<span class="lineNum">    415 </span>              : /* </span>
+<span class="lineNum">    416 </span>              :  *  Close all channels </span>
+<span class="lineNum">    417 </span>              :  */ </span>
+<span class="lineNum">    418 </span>              :  </span>
+<span class="lineNum">    419 </span>              : void FSDrive::close_all_channels(void) </span>
+<span class="lineNum">    420 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    421 </span><span class="lineNoCov">    0 / 2     : 	for (int i=0; i&lt;15; i++) </span>
+<span class="lineNum">    422 </span><span class="lineNoCov">    0 / 2     : 		Close(i); </span>
+<span class="lineNum">    423 </span>              :  </span>
+<span class="lineNum">    424 </span><span class="lineNoCov">    0 / 1     : 	cmd_len = 0; </span>
+<span class="lineNum">    425 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    426 </span>              :  </span>
+<span class="lineNum">    427 </span>              :  </span>
+<span class="lineNum">    428 </span>              : /* </span>
+<span class="lineNum">    429 </span>              :  *  Read from channel </span>
+<span class="lineNum">    430 </span>              :  */ </span>
+<span class="lineNum">    431 </span>              :  </span>
+<span class="lineNum">    432 </span>              : uint8 FSDrive::Read(int channel, uint8 &amp;byte) </span>
+<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    434 </span>              : 	int c; </span>
+<span class="lineNum">    435 </span>              :  </span>
+<span class="lineNum">    436 </span>              : 	// Channel 15: Error channel </span>
+<span class="lineNum">    437 </span><span class="lineNoCov">    0 / 1     : 	if (channel == 15) { </span>
+<span class="lineNum">    438 </span><span class="lineNoCov">    0 / 1     : 		byte = *error_ptr++; </span>
+<span class="lineNum">    439 </span>              :  </span>
+<span class="lineNum">    440 </span><span class="lineNoCov">    0 / 1     : 		if (byte != '\r') </span>
+<span class="lineNum">    441 </span>              : 			return ST_OK; </span>
+<span class="lineNum">    442 </span>              : 		else {	// End of message </span>
+<span class="lineNum">    443 </span><span class="lineNoCov">    0 / 1     : 			set_error(ERR_OK); </span>
+<span class="lineNum">    444 </span><span class="lineNoCov">    0 / 1     : 			return ST_EOF; </span>
+<span class="lineNum">    445 </span>              : 		} </span>
+<span class="lineNum">    446 </span>              : 	} </span>
+<span class="lineNum">    447 </span>              :  </span>
+<span class="lineNum">    448 </span><span class="lineNoCov">    0 / 1     : 	if (!file[channel]) return ST_READ_TIMEOUT; </span>
+<span class="lineNum">    449 </span>              :  </span>
+<span class="lineNum">    450 </span>              : 	// Read one byte </span>
+<span class="lineNum">    451 </span><span class="lineNoCov">    0 / 1     : 	byte = read_char[channel]; </span>
+<span class="lineNum">    452 </span><span class="lineNoCov">    0 / 1     : 	c = fgetc(file[channel]); </span>
+<span class="lineNum">    453 </span><span class="lineNoCov">    0 / 1     : 	if (c == EOF) </span>
+<span class="lineNum">    454 </span>              : 		return ST_EOF; </span>
+<span class="lineNum">    455 </span>              : 	else { </span>
+<span class="lineNum">    456 </span><span class="lineNoCov">    0 / 1     : 		read_char[channel] = c; </span>
+<span class="lineNum">    457 </span>              : 		return ST_OK; </span>
+<span class="lineNum">    458 </span>              : 	} </span>
+<span class="lineNum">    459 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    460 </span>              :  </span>
+<span class="lineNum">    461 </span>              :  </span>
+<span class="lineNum">    462 </span>              : /* </span>
+<span class="lineNum">    463 </span>              :  *  Write to channel </span>
+<span class="lineNum">    464 </span>              :  */ </span>
+<span class="lineNum">    465 </span>              :  </span>
+<span class="lineNum">    466 </span>              : uint8 FSDrive::Write(int channel, uint8 byte, bool eoi) </span>
+<span class="lineNum">    467 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    468 </span>              : 	// Channel 15: Collect chars and execute command on EOI </span>
+<span class="lineNum">    469 </span><span class="lineNoCov">    0 / 1     : 	if (channel == 15) { </span>
+<span class="lineNum">    470 </span><span class="lineNoCov">    0 / 1     : 		if (cmd_len &gt;= 58) </span>
+<span class="lineNum">    471 </span>              : 			return ST_TIMEOUT; </span>
+<span class="lineNum">    472 </span>              : 		 </span>
+<span class="lineNum">    473 </span><span class="lineNoCov">    0 / 2     : 		cmd_buf[cmd_len++] = byte; </span>
+<span class="lineNum">    474 </span>              :  </span>
+<span class="lineNum">    475 </span><span class="lineNoCov">    0 / 3     : 		if (eoi) { </span>
+<span class="lineNum">    476 </span><span class="lineNoCov">    0 / 1     : 			execute_cmd(cmd_buf, cmd_len); </span>
+<span class="lineNum">    477 </span><span class="lineNoCov">    0 / 1     : 			cmd_len = 0; </span>
+<span class="lineNum">    478 </span>              : 		} </span>
+<span class="lineNum">    479 </span>              : 		return ST_OK; </span>
+<span class="lineNum">    480 </span>              : 	} </span>
+<span class="lineNum">    481 </span>              :  </span>
+<span class="lineNum">    482 </span><span class="lineNoCov">    0 / 1     : 	if (!file[channel]) { </span>
+<span class="lineNum">    483 </span><span class="lineNoCov">    0 / 2     : 		set_error(ERR_FILENOTOPEN); </span>
+<span class="lineNum">    484 </span>              : 		return ST_TIMEOUT; </span>
+<span class="lineNum">    485 </span>              : 	} </span>
+<span class="lineNum">    486 </span>              :  </span>
+<span class="lineNum">    487 </span><span class="lineNoCov">    0 / 1     : 	if (putc(byte, file[channel]) == EOF) { </span>
+<span class="lineNum">    488 </span><span class="lineNoCov">    0 / 2     : 		set_error(ERR_WRITE25); </span>
+<span class="lineNum">    489 </span><span class="lineNoCov">    0 / 1     : 		return ST_TIMEOUT; </span>
+<span class="lineNum">    490 </span>              : 	} </span>
+<span class="lineNum">    491 </span>              :  </span>
+<span class="lineNum">    492 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    493 </span><span class="lineNoCov">    0 / 5     : } </span>
+<span class="lineNum">    494 </span>              :  </span>
+<span class="lineNum">    495 </span>              :  </span>
+<span class="lineNum">    496 </span>              : /* </span>
+<span class="lineNum">    497 </span>              :  *  Execute drive commands </span>
+<span class="lineNum">    498 </span>              :  */ </span>
+<span class="lineNum">    499 </span>              :  </span>
+<span class="lineNum">    500 </span>              : // INITIALIZE </span>
+<span class="lineNum">    501 </span>              : void FSDrive::initialize_cmd(void) </span>
+<span class="lineNum">    502 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    503 </span><span class="lineNoCov">    0 / 1     : 	close_all_channels(); </span>
+<span class="lineNum">    504 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    505 </span>              :  </span>
+<span class="lineNum">    506 </span>              : // VALIDATE </span>
+<span class="lineNum">    507 </span>              : void FSDrive::validate_cmd(void) </span>
+<span class="lineNum">    508 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    509 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    510 </span>              :  </span>
+<span class="lineNum">    511 </span>              :  </span>
+<span class="lineNum">    512 </span>              : /* </span>
+<span class="lineNum">    513 </span>              :  *  Reset drive </span>
+<span class="lineNum">    514 </span>              :  */ </span>
+<span class="lineNum">    515 </span>              :  </span>
+<span class="lineNum">    516 </span>              : void FSDrive::Reset(void) </span>
+<span class="lineNum">    517 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    518 </span><span class="lineNoCov">    0 / 1     : 	close_all_channels(); </span>
+<span class="lineNum">    519 </span><span class="lineNoCov">    0 / 1     : 	cmd_len = 0;	 </span>
+<span class="lineNum">    520 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_STARTUP); </span>
+<span class="lineNum">    521 </span><span class="lineNoCov">    0 / 1     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

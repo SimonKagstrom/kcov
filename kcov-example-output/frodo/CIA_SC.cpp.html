@@ -1,0 +1,822 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">371</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">47.7 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">177</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  CIA_SC.cpp - Single-cycle 6526 emulation </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2009 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Notes: </span>
+<span class="lineNum">     23 </span>              :  * ------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - The Emulate() function is called for every emulated Phi2 </span>
+<span class="lineNum">     26 </span>              :  *    clock cycle. It counts down the timers and triggers </span>
+<span class="lineNum">     27 </span>              :  *    interrupts if necessary. </span>
+<span class="lineNum">     28 </span>              :  *  - The TOD clocks are counted by CountTOD() during the VBlank, so </span>
+<span class="lineNum">     29 </span>              :  *    the input frequency is 50Hz </span>
+<span class="lineNum">     30 </span>              :  *  - The fields KeyMatrix and RevMatrix contain one bit for each </span>
+<span class="lineNum">     31 </span>              :  *    key on the C64 keyboard (0: key pressed, 1: key released). </span>
+<span class="lineNum">     32 </span>              :  *    KeyMatrix is used for normal keyboard polling (PRA-&gt;PRB), </span>
+<span class="lineNum">     33 </span>              :  *    RevMatrix for reversed polling (PRB-&gt;PRA). </span>
+<span class="lineNum">     34 </span>              :  * </span>
+<span class="lineNum">     35 </span>              :  * Incompatibilities: </span>
+<span class="lineNum">     36 </span>              :  * ------------------ </span>
+<span class="lineNum">     37 </span>              :  * </span>
+<span class="lineNum">     38 </span>              :  *  - The TOD clock should not be stopped on a read access, but be </span>
+<span class="lineNum">     39 </span>              :  *    latched </span>
+<span class="lineNum">     40 </span>              :  *  - The SDR interrupt is faked </span>
+<span class="lineNum">     41 </span>              :  *  - Some small incompatibilities with the timers </span>
+<span class="lineNum">     42 </span>              :  */ </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : #include &quot;CIA.h&quot; </span>
+<span class="lineNum">     47 </span>              : #include &quot;CPUC64.h&quot; </span>
+<span class="lineNum">     48 </span>              : #include &quot;CPU1541.h&quot; </span>
+<span class="lineNum">     49 </span>              : #include &quot;VIC.h&quot; </span>
+<span class="lineNum">     50 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span>              : // Timer states </span>
+<span class="lineNum">     54 </span>              : enum { </span>
+<span class="lineNum">     55 </span>              : 	T_STOP, </span>
+<span class="lineNum">     56 </span>              : 	T_WAIT_THEN_COUNT, </span>
+<span class="lineNum">     57 </span>              : 	T_LOAD_THEN_STOP, </span>
+<span class="lineNum">     58 </span>              : 	T_LOAD_THEN_COUNT, </span>
+<span class="lineNum">     59 </span>              : 	T_LOAD_THEN_WAIT_THEN_COUNT, </span>
+<span class="lineNum">     60 </span>              : 	T_COUNT, </span>
+<span class="lineNum">     61 </span>              : 	T_COUNT_THEN_STOP </span>
+<span class="lineNum">     62 </span>              : }; </span>
+<span class="lineNum">     63 </span>              :  </span>
+<span class="lineNum">     64 </span>              :  </span>
+<span class="lineNum">     65 </span>              : /* </span>
+<span class="lineNum">     66 </span>              :  *  Constructors </span>
+<span class="lineNum">     67 </span>              :  */ </span>
+<span class="lineNum">     68 </span>              :  </span>
+<span class="lineNum">     69 </span><span class="linePartCov">    2 / 12    : MOS6526::MOS6526(MOS6510 *CPU) : the_cpu(CPU) { has_new_cra = false; has_new_crb = false; } </span>
+<span class="lineNum">     70 </span><span class="linePartCov">    3 / 8     : MOS6526_1::MOS6526_1(MOS6510 *CPU, MOS6569 *VIC) : MOS6526(CPU), the_vic(VIC) {} </span>
+<span class="lineNum">     71 </span><span class="linePartCov">    3 / 8     : MOS6526_2::MOS6526_2(MOS6510 *CPU, MOS6569 *VIC, MOS6502_1541 *CPU1541) : MOS6526(CPU), the_vic(VIC), the_cpu_1541(CPU1541) {} </span>
+<span class="lineNum">     72 </span>              :  </span>
+<span class="lineNum">     73 </span>              :  </span>
+<span class="lineNum">     74 </span>              : /* </span>
+<span class="lineNum">     75 </span>              :  *  Reset the CIA </span>
+<span class="lineNum">     76 </span>              :  */ </span>
+<span class="lineNum">     77 </span>              :  </span>
+<span class="lineNum">     78 </span>              : void MOS6526::Reset(void) </span>
+<span class="lineNum">     79 </span><span class="linePartCov">    1 / 2     : { </span>
+<span class="lineNum">     80 </span><span class="lineCov">    1 / 1     : 	pra = prb = ddra = ddrb = 0; </span>
+<span class="lineNum">     81 </span>              :  </span>
+<span class="lineNum">     82 </span><span class="lineCov">    1 / 1     : 	ta = tb = 0xffff; </span>
+<span class="lineNum">     83 </span><span class="lineCov">    1 / 1     : 	latcha = latchb = 1; </span>
+<span class="lineNum">     84 </span>              :  </span>
+<span class="lineNum">     85 </span><span class="lineCov">    1 / 1     : 	tod_10ths = tod_sec = tod_min = tod_hr = 0; </span>
+<span class="lineNum">     86 </span><span class="lineCov">    1 / 1     : 	alm_10ths = alm_sec = alm_min = alm_hr = 0; </span>
+<span class="lineNum">     87 </span>              :  </span>
+<span class="lineNum">     88 </span><span class="lineCov">    1 / 1     : 	sdr = icr = cra = crb = int_mask = 0; </span>
+<span class="lineNum">     89 </span>              :  </span>
+<span class="lineNum">     90 </span><span class="lineCov">    1 / 1     : 	tod_halt = false; </span>
+<span class="lineNum">     91 </span><span class="lineCov">    1 / 1     : 	tod_divider = 0; </span>
+<span class="lineNum">     92 </span>              :  </span>
+<span class="lineNum">     93 </span><span class="lineCov">    1 / 1     : 	ta_cnt_phi2 = tb_cnt_phi2 = tb_cnt_ta = false; </span>
+<span class="lineNum">     94 </span>              :  </span>
+<span class="lineNum">     95 </span><span class="lineCov">    1 / 1     : 	ta_irq_next_cycle = tb_irq_next_cycle = false; </span>
+<span class="lineNum">     96 </span><span class="lineCov">    1 / 1     : 	ta_state = tb_state = T_STOP; </span>
+<span class="lineNum">     97 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span>              : void MOS6526_1::Reset(void) </span>
+<span class="lineNum">    100 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    101 </span><span class="lineCov">    1 / 1     : 	MOS6526::Reset(); </span>
+<span class="lineNum">    102 </span>              :  </span>
+<span class="lineNum">    103 </span>              : 	// Clear keyboard matrix and joystick states </span>
+<span class="lineNum">    104 </span><span class="lineCov">    1 / 1     : 	for (int i=0; i&lt;8; i++) </span>
+<span class="lineNum">    105 </span><span class="lineCov">    1 / 1     : 		KeyMatrix[i] = RevMatrix[i] = 0xff; </span>
+<span class="lineNum">    106 </span>              :  </span>
+<span class="lineNum">    107 </span><span class="lineCov">    1 / 1     : 	Joystick1 = Joystick2 = 0xff; </span>
+<span class="lineNum">    108 </span><span class="lineCov">    1 / 1     : 	prev_lp = 0x10; </span>
+<span class="lineNum">    109 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    110 </span>              :  </span>
+<span class="lineNum">    111 </span>              : void MOS6526_2::Reset(void) </span>
+<span class="lineNum">    112 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    113 </span><span class="lineCov">    1 / 1     : 	MOS6526::Reset(); </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span>              : 	// VA14/15 = 0 </span>
+<span class="lineNum">    116 </span><span class="lineCov">    1 / 1     : 	the_vic-&gt;ChangedVA(0); </span>
+<span class="lineNum">    117 </span>              :  </span>
+<span class="lineNum">    118 </span>              : 	// IEC </span>
+<span class="lineNum">    119 </span><span class="lineCov">    1 / 1     : 	IECLines = 0xd0; </span>
+<span class="lineNum">    120 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    121 </span>              :  </span>
+<span class="lineNum">    122 </span>              :  </span>
+<span class="lineNum">    123 </span>              : /* </span>
+<span class="lineNum">    124 </span>              :  *  Get CIA state </span>
+<span class="lineNum">    125 </span>              :  */ </span>
+<span class="lineNum">    126 </span>              :  </span>
+<span class="lineNum">    127 </span>              : void MOS6526::GetState(MOS6526State *cs) </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;pra = pra; </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;prb = prb; </span>
+<span class="lineNum">    131 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;ddra = ddra; </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;ddrb = ddrb; </span>
+<span class="lineNum">    133 </span>              :  </span>
+<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;ta_lo = ta &amp; 0xff; </span>
+<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;ta_hi = ta &gt;&gt; 8; </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tb_lo = tb &amp; 0xff; </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tb_hi = tb &gt;&gt; 8; </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;latcha = latcha; </span>
+<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;latchb = latchb; </span>
+<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;cra = cra; </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;crb = crb; </span>
+<span class="lineNum">    142 </span>              :  </span>
+<span class="lineNum">    143 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tod_10ths = tod_10ths; </span>
+<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tod_sec = tod_sec; </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tod_min = tod_min; </span>
+<span class="lineNum">    146 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;tod_hr = tod_hr; </span>
+<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;alm_10ths = alm_10ths; </span>
+<span class="lineNum">    148 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;alm_sec = alm_sec; </span>
+<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;alm_min = alm_min; </span>
+<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;alm_hr = alm_hr; </span>
+<span class="lineNum">    151 </span>              :  </span>
+<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;sdr = sdr; </span>
+<span class="lineNum">    153 </span>              :  </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;int_data = icr; </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     : 	cs-&gt;int_mask = int_mask; </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    157 </span>              :  </span>
+<span class="lineNum">    158 </span>              :  </span>
+<span class="lineNum">    159 </span>              : /* </span>
+<span class="lineNum">    160 </span>              :  *  Restore CIA state </span>
+<span class="lineNum">    161 </span>              :  */ </span>
+<span class="lineNum">    162 </span>              :  </span>
+<span class="lineNum">    163 </span>              : void MOS6526::SetState(MOS6526State *cs) </span>
+<span class="lineNum">    164 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    165 </span><span class="lineCov">    1 / 1     : 	pra = cs-&gt;pra; </span>
+<span class="lineNum">    166 </span><span class="lineCov">    1 / 1     : 	prb = cs-&gt;prb; </span>
+<span class="lineNum">    167 </span><span class="lineCov">    1 / 1     : 	ddra = cs-&gt;ddra; </span>
+<span class="lineNum">    168 </span><span class="lineCov">    1 / 1     : 	ddrb = cs-&gt;ddrb; </span>
+<span class="lineNum">    169 </span>              :  </span>
+<span class="lineNum">    170 </span><span class="lineCov">    1 / 1     : 	ta = (cs-&gt;ta_hi &lt;&lt; 8) | cs-&gt;ta_lo; </span>
+<span class="lineNum">    171 </span><span class="lineCov">    1 / 1     : 	tb = (cs-&gt;tb_hi &lt;&lt; 8) | cs-&gt;tb_lo; </span>
+<span class="lineNum">    172 </span><span class="lineCov">    1 / 1     : 	latcha = cs-&gt;latcha; </span>
+<span class="lineNum">    173 </span><span class="lineCov">    1 / 1     : 	latchb = cs-&gt;latchb; </span>
+<span class="lineNum">    174 </span><span class="lineCov">    1 / 1     : 	cra = cs-&gt;cra; </span>
+<span class="lineNum">    175 </span><span class="lineCov">    2 / 2     : 	crb = cs-&gt;crb; </span>
+<span class="lineNum">    176 </span>              :  </span>
+<span class="lineNum">    177 </span><span class="lineCov">    1 / 1     : 	tod_10ths = cs-&gt;tod_10ths; </span>
+<span class="lineNum">    178 </span><span class="lineCov">    1 / 1     : 	tod_sec = cs-&gt;tod_sec; </span>
+<span class="lineNum">    179 </span><span class="lineCov">    1 / 1     : 	tod_min = cs-&gt;tod_min; </span>
+<span class="lineNum">    180 </span><span class="lineCov">    1 / 1     : 	tod_hr = cs-&gt;tod_hr; </span>
+<span class="lineNum">    181 </span><span class="lineCov">    1 / 1     : 	alm_10ths = cs-&gt;alm_10ths; </span>
+<span class="lineNum">    182 </span><span class="lineCov">    1 / 1     : 	alm_sec = cs-&gt;alm_sec; </span>
+<span class="lineNum">    183 </span><span class="lineCov">    1 / 1     : 	alm_min = cs-&gt;alm_min; </span>
+<span class="lineNum">    184 </span><span class="lineCov">    1 / 1     : 	alm_hr = cs-&gt;alm_hr; </span>
+<span class="lineNum">    185 </span>              :  </span>
+<span class="lineNum">    186 </span><span class="lineCov">    1 / 1     : 	sdr = cs-&gt;sdr; </span>
+<span class="lineNum">    187 </span>              :  </span>
+<span class="lineNum">    188 </span><span class="lineCov">    1 / 1     : 	icr = cs-&gt;int_data; </span>
+<span class="lineNum">    189 </span><span class="linePartCov">    1 / 2     : 	int_mask = cs-&gt;int_mask; </span>
+<span class="lineNum">    190 </span>              :  </span>
+<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 1     : 	tod_halt = false; </span>
+<span class="lineNum">    192 </span><span class="lineCov">    3 / 3     : 	ta_cnt_phi2 = ((cra &amp; 0x20) == 0x00); </span>
+<span class="lineNum">    193 </span><span class="lineCov">    2 / 2     : 	tb_cnt_phi2 = ((crb &amp; 0x60) == 0x00); </span>
+<span class="lineNum">    194 </span><span class="lineCov">    1 / 1     : 	tb_cnt_ta = ((crb &amp; 0x60) == 0x40); </span>
+<span class="lineNum">    195 </span>              :  </span>
+<span class="lineNum">    196 </span><span class="lineCov">    4 / 4     : 	ta_state = (cra &amp; 1) ? T_COUNT : T_STOP; </span>
+<span class="lineNum">    197 </span><span class="linePartCov">    3 / 4     : 	tb_state = (crb &amp; 1) ? T_COUNT : T_STOP; </span>
+<span class="lineNum">    198 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    199 </span>              :  </span>
+<span class="lineNum">    200 </span>              :  </span>
+<span class="lineNum">    201 </span>              : /* </span>
+<span class="lineNum">    202 </span>              :  *  Read from register (CIA 1) </span>
+<span class="lineNum">    203 </span>              :  */ </span>
+<span class="lineNum">    204 </span>              :  </span>
+<span class="lineNum">    205 </span>              : uint8 MOS6526_1::ReadRegister(uint16 adr) </span>
+<span class="lineNum">    206 </span><span class="linePartCov">    1 / 2     : { </span>
+<span class="lineNum">    207 </span><span class="linePartCov">    1 / 2     : 	switch (adr) { </span>
+<span class="lineNum">    208 </span>              : 		case 0x00: { </span>
+<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 			uint8 ret = pra | ~ddra, tst = (prb | ~ddrb) &amp; Joystick1; </span>
+<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x01)) ret &amp;= RevMatrix[0];	// AND all active columns </span>
+<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x02)) ret &amp;= RevMatrix[1]; </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x04)) ret &amp;= RevMatrix[2]; </span>
+<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x08)) ret &amp;= RevMatrix[3]; </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x10)) ret &amp;= RevMatrix[4]; </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x20)) ret &amp;= RevMatrix[5]; </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x40)) ret &amp;= RevMatrix[6]; </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 			if (!(tst &amp; 0x80)) ret &amp;= RevMatrix[7]; </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 			return ret &amp; Joystick2; </span>
+<span class="lineNum">    219 </span>              : 		} </span>
+<span class="lineNum">    220 </span>              : 		case 0x01: { </span>
+<span class="lineNum">    221 </span><span class="lineCov">    1 / 1     : 			uint8 ret = ~ddrb, tst = (pra | ~ddra) &amp; Joystick2; </span>
+<span class="lineNum">    222 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x01)) ret &amp;= KeyMatrix[0];	// AND all active rows </span>
+<span class="lineNum">    223 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x02)) ret &amp;= KeyMatrix[1]; </span>
+<span class="lineNum">    224 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x04)) ret &amp;= KeyMatrix[2]; </span>
+<span class="lineNum">    225 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x08)) ret &amp;= KeyMatrix[3]; </span>
+<span class="lineNum">    226 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x10)) ret &amp;= KeyMatrix[4]; </span>
+<span class="lineNum">    227 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x20)) ret &amp;= KeyMatrix[5]; </span>
+<span class="lineNum">    228 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x40)) ret &amp;= KeyMatrix[6]; </span>
+<span class="lineNum">    229 </span><span class="lineCov">    1 / 1     : 			if (!(tst &amp; 0x80)) ret &amp;= KeyMatrix[7]; </span>
+<span class="lineNum">    230 </span><span class="lineCov">    1 / 1     : 			return (ret | (prb &amp; ddrb)) &amp; Joystick1; </span>
+<span class="lineNum">    231 </span>              : 		} </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 1     : 		case 0x02: return ddra; </span>
+<span class="lineNum">    233 </span><span class="lineNoCov">    0 / 1     : 		case 0x03: return ddrb; </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : 		case 0x04: return ta; </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 		case 0x05: return ta &gt;&gt; 8; </span>
+<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 1     : 		case 0x06: return tb; </span>
+<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 1     : 		case 0x07: return tb &gt;&gt; 8; </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 1     : 		case 0x08: tod_halt = false; return tod_10ths; </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 		case 0x09: return tod_sec; </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 1     : 		case 0x0a: return tod_min; </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 		case 0x0b: tod_halt = true; return tod_hr; </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 1     : 		case 0x0c: return sdr; </span>
+<span class="lineNum">    243 </span>              : 		case 0x0d: { </span>
+<span class="lineNum">    244 </span><span class="lineCov">    1 / 1     : 			uint8 ret = icr;			// Read and clear ICR </span>
+<span class="lineNum">    245 </span><span class="lineCov">    1 / 1     : 			icr = 0; </span>
+<span class="lineNum">    246 </span>              : 			the_cpu-&gt;ClearCIAIRQ();		// Clear IRQ </span>
+<span class="lineNum">    247 </span><span class="lineCov">    1 / 1     : 			return ret; </span>
+<span class="lineNum">    248 </span>              : 		} </span>
+<span class="lineNum">    249 </span><span class="lineCov">    1 / 1     : 		case 0x0e: return cra; </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 1     : 		case 0x0f: return crb; </span>
+<span class="lineNum">    251 </span>              : 	} </span>
+<span class="lineNum">    252 </span>              : 	return 0;	// Can't happen </span>
+<span class="lineNum">    253 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    254 </span>              :  </span>
+<span class="lineNum">    255 </span>              :  </span>
+<span class="lineNum">    256 </span>              : /* </span>
+<span class="lineNum">    257 </span>              :  *  Read from register (CIA 2) </span>
+<span class="lineNum">    258 </span>              :  */ </span>
+<span class="lineNum">    259 </span>              :  </span>
+<span class="lineNum">    260 </span>              : uint8 MOS6526_2::ReadRegister(uint16 adr) </span>
+<span class="lineNum">    261 </span><span class="linePartCov">    2 / 3     : { </span>
+<span class="lineNum">    262 </span><span class="linePartCov">    1 / 2     : 	switch (adr) { </span>
+<span class="lineNum">    263 </span>              : 		case 0x00: </span>
+<span class="lineNum">    264 </span>              : 			return ((pra | ~ddra) &amp; 0x3f) </span>
+<span class="lineNum">    265 </span><span class="lineCov">    1 / 1     : 				| (IECLines &amp; the_cpu_1541-&gt;IECLines); </span>
+<span class="lineNum">    266 </span><span class="lineNoCov">    0 / 2     : 		case 0x01: return prb | ~ddrb; </span>
+<span class="lineNum">    267 </span><span class="lineNoCov">    0 / 1     : 		case 0x02: return ddra; </span>
+<span class="lineNum">    268 </span><span class="lineNoCov">    0 / 1     : 		case 0x03: return ddrb; </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 1     : 		case 0x04: return ta; </span>
+<span class="lineNum">    270 </span><span class="lineNoCov">    0 / 1     : 		case 0x05: return ta &gt;&gt; 8; </span>
+<span class="lineNum">    271 </span><span class="lineNoCov">    0 / 1     : 		case 0x06: return tb; </span>
+<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : 		case 0x07: return tb &gt;&gt; 8; </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 		case 0x08: tod_halt = false; return tod_10ths; </span>
+<span class="lineNum">    274 </span><span class="lineNoCov">    0 / 1     : 		case 0x09: return tod_sec; </span>
+<span class="lineNum">    275 </span><span class="lineNoCov">    0 / 1     : 		case 0x0a: return tod_min; </span>
+<span class="lineNum">    276 </span><span class="lineNoCov">    0 / 1     : 		case 0x0b: tod_halt = true; return tod_hr; </span>
+<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 		case 0x0c: return sdr; </span>
+<span class="lineNum">    278 </span>              : 		case 0x0d: { </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 			uint8 ret = icr; // Read and clear ICR </span>
+<span class="lineNum">    280 </span><span class="lineNoCov">    0 / 1     : 			icr = 0; </span>
+<span class="lineNum">    281 </span>              : 			the_cpu-&gt;ClearNMI(); </span>
+<span class="lineNum">    282 </span>              : 			return ret; </span>
+<span class="lineNum">    283 </span>              : 		} </span>
+<span class="lineNum">    284 </span><span class="lineNoCov">    0 / 1     : 		case 0x0e: return cra; </span>
+<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 1     : 		case 0x0f: return crb; </span>
+<span class="lineNum">    286 </span>              : 	} </span>
+<span class="lineNum">    287 </span>              : 	return 0;	// Can't happen </span>
+<span class="lineNum">    288 </span><span class="linePartCov">    1 / 17    : } </span>
+<span class="lineNum">    289 </span>              :  </span>
+<span class="lineNum">    290 </span>              :  </span>
+<span class="lineNum">    291 </span>              : /* </span>
+<span class="lineNum">    292 </span>              :  *  Write to register (CIA 1) </span>
+<span class="lineNum">    293 </span>              :  */ </span>
+<span class="lineNum">    294 </span>              :  </span>
+<span class="lineNum">    295 </span>              : // Write to port B, check for lightpen interrupt </span>
+<span class="lineNum">    296 </span>              : inline void MOS6526_1::check_lp(void) </span>
+<span class="lineNum">    297 </span>              : { </span>
+<span class="lineNum">    298 </span><span class="linePartCov">    2 / 4     : 	if ( ((prb | ~ddrb) &amp; 0x10) != prev_lp) </span>
+<span class="lineNum">    299 </span><span class="lineNoCov">    0 / 2     : 		the_vic-&gt;TriggerLightpen(); </span>
+<span class="lineNum">    300 </span><span class="linePartCov">    1 / 2     : 	prev_lp = (prb | ~ddrb) &amp; 0x10; </span>
+<span class="lineNum">    301 </span>              : } </span>
+<span class="lineNum">    302 </span>              :  </span>
+<span class="lineNum">    303 </span>              : void MOS6526_1::WriteRegister(uint16 adr, uint8 byte) </span>
+<span class="lineNum">    304 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    305 </span><span class="lineNoCov">    0 / 1     : 	switch (adr) { </span>
+<span class="lineNum">    306 </span><span class="lineCov">    1 / 1     : 		case 0x0: pra = byte; break; </span>
+<span class="lineNum">    307 </span>              : 		case 0x1: </span>
+<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 1     : 			prb = byte; </span>
+<span class="lineNum">    309 </span>              : 			check_lp(); </span>
+<span class="lineNum">    310 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">    311 </span><span class="lineCov">    1 / 1     : 		case 0x2: ddra = byte; break; </span>
+<span class="lineNum">    312 </span>              : 		case 0x3: </span>
+<span class="lineNum">    313 </span><span class="lineCov">    1 / 1     : 			ddrb = byte; </span>
+<span class="lineNum">    314 </span>              : 			check_lp(); </span>
+<span class="lineNum">    315 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    316 </span>              :  </span>
+<span class="lineNum">    317 </span><span class="lineCov">    1 / 1     : 		case 0x4: latcha = (latcha &amp; 0xff00) | byte; break; </span>
+<span class="lineNum">    318 </span>              : 		case 0x5: </span>
+<span class="lineNum">    319 </span><span class="lineCov">    2 / 2     : 			latcha = (latcha &amp; 0xff) | (byte &lt;&lt; 8); </span>
+<span class="lineNum">    320 </span><span class="lineCov">    2 / 2     : 			if (!(cra &amp; 1))	// Reload timer if stopped </span>
+<span class="lineNum">    321 </span><span class="lineCov">    1 / 1     : 				ta = latcha; </span>
+<span class="lineNum">    322 </span>              : 			break; </span>
+<span class="lineNum">    323 </span>              :  </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 1     : 		case 0x6: latchb = (latchb &amp; 0xff00) | byte; break; </span>
+<span class="lineNum">    325 </span>              : 		case 0x7: </span>
+<span class="lineNum">    326 </span><span class="lineNoCov">    0 / 2     : 			latchb = (latchb &amp; 0xff) | (byte &lt;&lt; 8); </span>
+<span class="lineNum">    327 </span><span class="lineNoCov">    0 / 2     : 			if (!(crb &amp; 1))	// Reload timer if stopped </span>
+<span class="lineNum">    328 </span><span class="lineNoCov">    0 / 1     : 				tb = latchb; </span>
+<span class="lineNum">    329 </span>              : 			break; </span>
+<span class="lineNum">    330 </span>              :  </span>
+<span class="lineNum">    331 </span>              : 		case 0x8: </span>
+<span class="lineNum">    332 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    333 </span><span class="lineNoCov">    0 / 1     : 				alm_10ths = byte &amp; 0x0f; </span>
+<span class="lineNum">    334 </span>              : 			else </span>
+<span class="lineNum">    335 </span><span class="lineNoCov">    0 / 1     : 				tod_10ths = byte &amp; 0x0f; </span>
+<span class="lineNum">    336 </span>              : 			break; </span>
+<span class="lineNum">    337 </span>              : 		case 0x9: </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    339 </span><span class="lineNoCov">    0 / 1     : 				alm_sec = byte &amp; 0x7f; </span>
+<span class="lineNum">    340 </span>              : 			else </span>
+<span class="lineNum">    341 </span><span class="lineNoCov">    0 / 1     : 				tod_sec = byte &amp; 0x7f; </span>
+<span class="lineNum">    342 </span>              : 			break; </span>
+<span class="lineNum">    343 </span>              : 		case 0xa: </span>
+<span class="lineNum">    344 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 1     : 				alm_min = byte &amp; 0x7f; </span>
+<span class="lineNum">    346 </span>              : 			else </span>
+<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 1     : 				tod_min = byte &amp; 0x7f; </span>
+<span class="lineNum">    348 </span>              : 			break; </span>
+<span class="lineNum">    349 </span>              : 		case 0xb: </span>
+<span class="lineNum">    350 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    351 </span><span class="lineNoCov">    0 / 2     : 				alm_hr = byte &amp; 0x9f; </span>
+<span class="lineNum">    352 </span>              : 			else </span>
+<span class="lineNum">    353 </span><span class="lineNoCov">    0 / 1     : 				tod_hr = byte &amp; 0x9f; </span>
+<span class="lineNum">    354 </span>              : 			break; </span>
+<span class="lineNum">    355 </span>              :  </span>
+<span class="lineNum">    356 </span>              : 		case 0xc: </span>
+<span class="lineNum">    357 </span><span class="lineNoCov">    0 / 1     : 			sdr = byte; </span>
+<span class="lineNum">    358 </span><span class="lineNoCov">    0 / 4     : 			TriggerInterrupt(8);	// Fake SDR interrupt for programs that need it </span>
+<span class="lineNum">    359 </span>              : 			break; </span>
+<span class="lineNum">    360 </span>              :  </span>
+<span class="lineNum">    361 </span>              : 		case 0xd: </span>
+<span class="lineNum">    362 </span><span class="lineCov">    1 / 1     : 			if (byte &amp; 0x80) </span>
+<span class="lineNum">    363 </span><span class="lineCov">    1 / 1     : 				int_mask |= byte &amp; 0x7f; </span>
+<span class="lineNum">    364 </span>              : 			else </span>
+<span class="lineNum">    365 </span><span class="lineCov">    1 / 1     : 				int_mask &amp;= ~byte; </span>
+<span class="lineNum">    366 </span><span class="lineCov">    1 / 1     : 			if (icr &amp; int_mask &amp; 0x1f) { // Trigger IRQ if pending </span>
+<span class="lineNum">    367 </span><span class="lineCov">    1 / 1     : 				icr |= 0x80; </span>
+<span class="lineNum">    368 </span><span class="lineCov">    1 / 1     : 				the_cpu-&gt;TriggerCIAIRQ(); </span>
+<span class="lineNum">    369 </span>              : 			} </span>
+<span class="lineNum">    370 </span>              : 			break; </span>
+<span class="lineNum">    371 </span>              :  </span>
+<span class="lineNum">    372 </span>              : 		case 0xe: </span>
+<span class="lineNum">    373 </span><span class="lineCov">    1 / 1     : 			has_new_cra = true;		// Delay write by 1 cycle </span>
+<span class="lineNum">    374 </span><span class="lineCov">    1 / 1     : 			new_cra = byte; </span>
+<span class="lineNum">    375 </span><span class="linePartCov">    1 / 2     : 			ta_cnt_phi2 = ((byte &amp; 0x20) == 0x00); </span>
+<span class="lineNum">    376 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    377 </span>              :  </span>
+<span class="lineNum">    378 </span>              : 		case 0xf: </span>
+<span class="lineNum">    379 </span><span class="lineCov">    1 / 1     : 			has_new_crb = true;		// Delay write by 1 cycle </span>
+<span class="lineNum">    380 </span><span class="lineCov">    1 / 1     : 			new_crb = byte; </span>
+<span class="lineNum">    381 </span><span class="lineNoCov">    0 / 1     : 			tb_cnt_phi2 = ((byte &amp; 0x60) == 0x00); </span>
+<span class="lineNum">    382 </span><span class="lineCov">    1 / 1     : 			tb_cnt_ta = ((byte &amp; 0x60) == 0x40); </span>
+<span class="lineNum">    383 </span>              : 			break; </span>
+<span class="lineNum">    384 </span>              : 	} </span>
+<span class="lineNum">    385 </span><span class="linePartCov">    1 / 4     : } </span>
+<span class="lineNum">    386 </span>              :  </span>
+<span class="lineNum">    387 </span>              :  </span>
+<span class="lineNum">    388 </span>              : /* </span>
+<span class="lineNum">    389 </span>              :  *  Write to register (CIA 2) </span>
+<span class="lineNum">    390 </span>              :  */ </span>
+<span class="lineNum">    391 </span>              :  </span>
+<span class="lineNum">    392 </span>              : void MOS6526_2::WriteRegister(uint16 adr, uint8 byte) </span>
+<span class="lineNum">    393 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    394 </span><span class="lineCov">    1 / 1     : 	switch (adr) { </span>
+<span class="lineNum">    395 </span>              : 		case 0x0:{ </span>
+<span class="lineNum">    396 </span><span class="lineCov">    1 / 1     : 			pra = byte; </span>
+<span class="lineNum">    397 </span><span class="lineCov">    2 / 2     : 			the_vic-&gt;ChangedVA(~(pra | ~ddra) &amp; 3); </span>
+<span class="lineNum">    398 </span><span class="lineCov">    1 / 1     : 			uint8 old_lines = IECLines; </span>
+<span class="lineNum">    399 </span>              : 			IECLines = ((~byte &lt;&lt; 2) &amp; 0x80)	// DATA </span>
+<span class="lineNum">    400 </span>              : 				| ((~byte &lt;&lt; 2) &amp; 0x40)		// CLK </span>
+<span class="lineNum">    401 </span><span class="lineCov">    2 / 2     : 				| ((~byte &lt;&lt; 1) &amp; 0x10);		// ATN </span>
+<span class="lineNum">    402 </span><span class="lineCov">    1 / 1     : 			if ((IECLines ^ old_lines) &amp; 0x10) {	// ATN changed </span>
+<span class="lineNum">    403 </span><span class="lineNoCov">    0 / 1     : 				the_cpu_1541-&gt;NewATNState(); </span>
+<span class="lineNum">    404 </span><span class="lineNoCov">    0 / 2     : 				if (old_lines &amp; 0x10)				// ATN 1-&gt;0 </span>
+<span class="lineNum">    405 </span><span class="lineNoCov">    0 / 1     : 					the_cpu_1541-&gt;IECInterrupt(); </span>
+<span class="lineNum">    406 </span>              : 			} </span>
+<span class="lineNum">    407 </span>              : 			break; </span>
+<span class="lineNum">    408 </span>              : 		} </span>
+<span class="lineNum">    409 </span><span class="lineNoCov">    0 / 1     : 		case 0x1: prb = byte; break; </span>
+<span class="lineNum">    410 </span>              :  </span>
+<span class="lineNum">    411 </span>              : 		case 0x2: </span>
+<span class="lineNum">    412 </span><span class="lineCov">    1 / 1     : 			ddra = byte; </span>
+<span class="lineNum">    413 </span><span class="linePartCov">    3 / 4     : 			the_vic-&gt;ChangedVA(~(pra | ~ddra) &amp; 3); </span>
+<span class="lineNum">    414 </span>              : 			break; </span>
+<span class="lineNum">    415 </span><span class="lineCov">    1 / 1     : 		case 0x3: ddrb = byte; break; </span>
+<span class="lineNum">    416 </span>              :  </span>
+<span class="lineNum">    417 </span><span class="lineNoCov">    0 / 1     : 		case 0x4: latcha = (latcha &amp; 0xff00) | byte; break; </span>
+<span class="lineNum">    418 </span>              : 		case 0x5: </span>
+<span class="lineNum">    419 </span><span class="lineNoCov">    0 / 2     : 			latcha = (latcha &amp; 0xff) | (byte &lt;&lt; 8); </span>
+<span class="lineNum">    420 </span><span class="lineNoCov">    0 / 2     : 			if (!(cra &amp; 1))	// Reload timer if stopped </span>
+<span class="lineNum">    421 </span><span class="lineNoCov">    0 / 1     : 				ta = latcha; </span>
+<span class="lineNum">    422 </span>              : 			break; </span>
+<span class="lineNum">    423 </span>              :  </span>
+<span class="lineNum">    424 </span><span class="lineNoCov">    0 / 1     : 		case 0x6: latchb = (latchb &amp; 0xff00) | byte; break; </span>
+<span class="lineNum">    425 </span>              : 		case 0x7: </span>
+<span class="lineNum">    426 </span><span class="lineNoCov">    0 / 2     : 			latchb = (latchb &amp; 0xff) | (byte &lt;&lt; 8); </span>
+<span class="lineNum">    427 </span><span class="lineNoCov">    0 / 2     : 			if (!(crb &amp; 1))	// Reload timer if stopped </span>
+<span class="lineNum">    428 </span><span class="lineNoCov">    0 / 1     : 				tb = latchb; </span>
+<span class="lineNum">    429 </span>              : 			break; </span>
+<span class="lineNum">    430 </span>              :  </span>
+<span class="lineNum">    431 </span>              : 		case 0x8: </span>
+<span class="lineNum">    432 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 1     : 				alm_10ths = byte &amp; 0x0f; </span>
+<span class="lineNum">    434 </span>              : 			else </span>
+<span class="lineNum">    435 </span><span class="lineNoCov">    0 / 1     : 				tod_10ths = byte &amp; 0x0f; </span>
+<span class="lineNum">    436 </span>              : 			break; </span>
+<span class="lineNum">    437 </span>              : 		case 0x9: </span>
+<span class="lineNum">    438 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    439 </span><span class="lineNoCov">    0 / 1     : 				alm_sec = byte &amp; 0x7f; </span>
+<span class="lineNum">    440 </span>              : 			else </span>
+<span class="lineNum">    441 </span><span class="lineNoCov">    0 / 1     : 				tod_sec = byte &amp; 0x7f; </span>
+<span class="lineNum">    442 </span>              : 			break; </span>
+<span class="lineNum">    443 </span>              : 		case 0xa: </span>
+<span class="lineNum">    444 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    445 </span><span class="lineNoCov">    0 / 1     : 				alm_min = byte &amp; 0x7f; </span>
+<span class="lineNum">    446 </span>              : 			else </span>
+<span class="lineNum">    447 </span><span class="lineNoCov">    0 / 1     : 				tod_min = byte &amp; 0x7f; </span>
+<span class="lineNum">    448 </span>              : 			break; </span>
+<span class="lineNum">    449 </span>              : 		case 0xb: </span>
+<span class="lineNum">    450 </span><span class="lineNoCov">    0 / 1     : 			if (crb &amp; 0x80) </span>
+<span class="lineNum">    451 </span><span class="lineNoCov">    0 / 1     : 				alm_hr = byte &amp; 0x9f; </span>
+<span class="lineNum">    452 </span>              : 			else </span>
+<span class="lineNum">    453 </span><span class="lineNoCov">    0 / 1     : 				tod_hr = byte &amp; 0x9f; </span>
+<span class="lineNum">    454 </span>              : 			break; </span>
+<span class="lineNum">    455 </span>              :  </span>
+<span class="lineNum">    456 </span>              : 		case 0xc: </span>
+<span class="lineNum">    457 </span><span class="lineNoCov">    0 / 1     : 			sdr = byte; </span>
+<span class="lineNum">    458 </span><span class="lineNoCov">    0 / 5     : 			TriggerInterrupt(8);	// Fake SDR interrupt for programs that need it </span>
+<span class="lineNum">    459 </span>              : 			break; </span>
+<span class="lineNum">    460 </span>              :  </span>
+<span class="lineNum">    461 </span>              : 		case 0xd: </span>
+<span class="lineNum">    462 </span><span class="lineCov">    1 / 1     : 			if (byte &amp; 0x80) </span>
+<span class="lineNum">    463 </span><span class="lineNoCov">    0 / 1     : 				int_mask |= byte &amp; 0x7f; </span>
+<span class="lineNum">    464 </span>              : 			else </span>
+<span class="lineNum">    465 </span><span class="lineCov">    1 / 1     : 				int_mask &amp;= ~byte; </span>
+<span class="lineNum">    466 </span><span class="lineCov">    1 / 1     : 			if (icr &amp; int_mask &amp; 0x1f) { // Trigger NMI if pending </span>
+<span class="lineNum">    467 </span><span class="lineNoCov">    0 / 1     : 				icr |= 0x80; </span>
+<span class="lineNum">    468 </span><span class="lineNoCov">    0 / 1     : 				the_cpu-&gt;TriggerNMI(); </span>
+<span class="lineNum">    469 </span>              : 			} </span>
+<span class="lineNum">    470 </span>              : 			break; </span>
+<span class="lineNum">    471 </span>              :  </span>
+<span class="lineNum">    472 </span>              : 		case 0xe: </span>
+<span class="lineNum">    473 </span><span class="lineCov">    1 / 1     : 			has_new_cra = true;		// Delay write by 1 cycle </span>
+<span class="lineNum">    474 </span><span class="lineCov">    1 / 1     : 			new_cra = byte; </span>
+<span class="lineNum">    475 </span><span class="linePartCov">    1 / 2     : 			ta_cnt_phi2 = ((byte &amp; 0x20) == 0x00); </span>
+<span class="lineNum">    476 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    477 </span>              :  </span>
+<span class="lineNum">    478 </span>              : 		case 0xf: </span>
+<span class="lineNum">    479 </span><span class="lineCov">    1 / 1     : 			has_new_crb = true;		// Delay write by 1 cycle </span>
+<span class="lineNum">    480 </span><span class="lineCov">    1 / 1     : 			new_crb = byte; </span>
+<span class="lineNum">    481 </span><span class="lineNoCov">    0 / 1     : 			tb_cnt_phi2 = ((byte &amp; 0x60) == 0x00); </span>
+<span class="lineNum">    482 </span><span class="lineCov">    1 / 1     : 			tb_cnt_ta = ((byte &amp; 0x60) == 0x40); </span>
+<span class="lineNum">    483 </span>              : 			break; </span>
+<span class="lineNum">    484 </span>              : 	} </span>
+<span class="lineNum">    485 </span><span class="linePartCov">    3 / 8     : } </span>
+<span class="lineNum">    486 </span>              :  </span>
+<span class="lineNum">    487 </span>              :  </span>
+<span class="lineNum">    488 </span>              : /* </span>
+<span class="lineNum">    489 </span>              :  *  Emulate CIA for one cycle/raster line </span>
+<span class="lineNum">    490 </span>              :  */ </span>
+<span class="lineNum">    491 </span>              :  </span>
+<span class="lineNum">    492 </span>              : void MOS6526::EmulateCycle(void) </span>
+<span class="lineNum">    493 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    494 </span>              : 	bool ta_underflow = false; </span>
+<span class="lineNum">    495 </span>              :  </span>
+<span class="lineNum">    496 </span>              : 	// Timer A state machine </span>
+<span class="lineNum">    497 </span><span class="lineCov">    2 / 2     : 	switch (ta_state) { </span>
+<span class="lineNum">    498 </span>              : 		case T_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    499 </span><span class="lineCov">    1 / 1     : 			ta_state = T_COUNT;		// fall through </span>
+<span class="lineNum">    500 </span>              : 		case T_STOP: </span>
+<span class="lineNum">    501 </span>              : 			goto ta_idle; </span>
+<span class="lineNum">    502 </span>              : 		case T_LOAD_THEN_STOP: </span>
+<span class="lineNum">    503 </span><span class="lineNoCov">    0 / 1     : 			ta_state = T_STOP; </span>
+<span class="lineNum">    504 </span><span class="lineNoCov">    0 / 2     : 			ta = latcha;			// Reload timer </span>
+<span class="lineNum">    505 </span><span class="lineNoCov">    0 / 1     : 			goto ta_idle; </span>
+<span class="lineNum">    506 </span>              : 		case T_LOAD_THEN_COUNT: </span>
+<span class="lineNum">    507 </span><span class="lineCov">    1 / 1     : 			ta_state = T_COUNT; </span>
+<span class="lineNum">    508 </span><span class="lineCov">    2 / 2     : 			ta = latcha;			// Reload timer </span>
+<span class="lineNum">    509 </span><span class="lineCov">    1 / 1     : 			goto ta_idle; </span>
+<span class="lineNum">    510 </span>              : 		case T_LOAD_THEN_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    511 </span><span class="lineCov">    1 / 1     : 			ta_state = T_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    512 </span><span class="lineCov">    2 / 2     : 			if (ta == 1) </span>
+<span class="lineNum">    513 </span>              : 				goto ta_interrupt;	// Interrupt if timer == 1 </span>
+<span class="lineNum">    514 </span>              : 			else { </span>
+<span class="lineNum">    515 </span><span class="lineCov">    1 / 1     : 				ta = latcha;		// Reload timer </span>
+<span class="lineNum">    516 </span><span class="lineCov">    1 / 1     : 				goto ta_idle; </span>
+<span class="lineNum">    517 </span>              : 			} </span>
+<span class="lineNum">    518 </span>              : 		case T_COUNT: </span>
+<span class="lineNum">    519 </span>              : 			goto ta_count; </span>
+<span class="lineNum">    520 </span>              : 		case T_COUNT_THEN_STOP: </span>
+<span class="lineNum">    521 </span><span class="lineNoCov">    0 / 1     : 			ta_state = T_STOP; </span>
+<span class="lineNum">    522 </span>              : 			goto ta_count; </span>
+<span class="lineNum">    523 </span>              : 	} </span>
+<span class="lineNum">    524 </span>              :  </span>
+<span class="lineNum">    525 </span>              : 	// Count timer A </span>
+<span class="lineNum">    526 </span>              : ta_count: </span>
+<span class="lineNum">    527 </span><span class="lineCov">    1 / 1     : 	if (ta_cnt_phi2) </span>
+<span class="lineNum">    528 </span><span class="lineCov">    2 / 2     : 		if (!ta || !--ta) {				// Decrement timer, underflow? </span>
+<span class="lineNum">    529 </span><span class="lineCov">    1 / 1     : 			if (ta_state != T_STOP) { </span>
+<span class="lineNum">    530 </span>              : ta_interrupt: </span>
+<span class="lineNum">    531 </span><span class="lineCov">    2 / 2     : 				ta = latcha;			// Reload timer </span>
+<span class="lineNum">    532 </span><span class="lineCov">    1 / 1     : 				ta_irq_next_cycle = true; // Trigger interrupt in next cycle </span>
+<span class="lineNum">    533 </span><span class="lineCov">    1 / 1     : 				icr |= 1;				// But set ICR bit now </span>
+<span class="lineNum">    534 </span>              :  </span>
+<span class="lineNum">    535 </span><span class="lineCov">    1 / 1     : 				if (cra &amp; 8) {			// One-shot? </span>
+<span class="lineNum">    536 </span><span class="lineNoCov">    0 / 2     : 					cra &amp;= 0xfe;		// Yes, stop timer </span>
+<span class="lineNum">    537 </span><span class="lineNoCov">    0 / 1     : 					new_cra &amp;= 0xfe; </span>
+<span class="lineNum">    538 </span><span class="lineNoCov">    0 / 2     : 					ta_state = T_LOAD_THEN_STOP;	// Reload in next cycle </span>
+<span class="lineNum">    539 </span>              : 				} else </span>
+<span class="lineNum">    540 </span><span class="lineCov">    2 / 2     : 					ta_state = T_LOAD_THEN_COUNT;	// No, delay one cycle (and reload) </span>
+<span class="lineNum">    541 </span>              : 			} </span>
+<span class="lineNum">    542 </span>              : 			ta_underflow = true; </span>
+<span class="lineNum">    543 </span>              : 		} </span>
+<span class="lineNum">    544 </span>              :  </span>
+<span class="lineNum">    545 </span>              : 	// Delayed write to CRA? </span>
+<span class="lineNum">    546 </span>              : ta_idle: </span>
+<span class="lineNum">    547 </span><span class="lineCov">    1 / 1     : 	if (has_new_cra) { </span>
+<span class="lineNum">    548 </span><span class="lineCov">    2 / 2     : 		switch (ta_state) { </span>
+<span class="lineNum">    549 </span>              : 			case T_STOP: </span>
+<span class="lineNum">    550 </span>              : 			case T_LOAD_THEN_STOP: </span>
+<span class="lineNum">    551 </span><span class="lineCov">    1 / 1     : 				if (new_cra &amp; 1) {		// Timer started, wasn't running </span>
+<span class="lineNum">    552 </span><span class="lineCov">    1 / 1     : 					if (new_cra &amp; 0x10)	// Force load </span>
+<span class="lineNum">    553 </span><span class="lineNoCov">    0 / 1     : 						ta_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    554 </span>              : 					else				// No force load </span>
+<span class="lineNum">    555 </span>              : 						ta_state = T_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    556 </span>              : 				} else {				// Timer stopped, was already stopped </span>
+<span class="lineNum">    557 </span><span class="lineCov">    1 / 1     : 					if (new_cra &amp; 0x10)	// Force load </span>
+<span class="lineNum">    558 </span><span class="lineNoCov">    0 / 1     : 						ta_state = T_LOAD_THEN_STOP; </span>
+<span class="lineNum">    559 </span>              : 				} </span>
+<span class="lineNum">    560 </span>              : 				break; </span>
+<span class="lineNum">    561 </span>              : 			case T_COUNT: </span>
+<span class="lineNum">    562 </span><span class="lineCov">    1 / 1     : 				if (new_cra &amp; 1) {		// Timer started, was already running </span>
+<span class="lineNum">    563 </span>              : 					if (new_cra &amp; 0x10)	// Force load </span>
+<span class="lineNum">    564 </span>              : 						ta_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    565 </span>              : 				} else {				// Timer stopped, was running </span>
+<span class="lineNum">    566 </span><span class="lineNoCov">    0 / 1     : 					if (new_cra &amp; 0x10)	// Force load </span>
+<span class="lineNum">    567 </span><span class="lineNoCov">    0 / 1     : 						ta_state = T_LOAD_THEN_STOP; </span>
+<span class="lineNum">    568 </span>              : 					else				// No force load </span>
+<span class="lineNum">    569 </span>              : 						ta_state = T_COUNT_THEN_STOP; </span>
+<span class="lineNum">    570 </span>              : 				} </span>
+<span class="lineNum">    571 </span>              : 				break; </span>
+<span class="lineNum">    572 </span>              : 			case T_LOAD_THEN_COUNT: </span>
+<span class="lineNum">    573 </span>              : 			case T_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    574 </span><span class="lineNoCov">    0 / 1     : 				if (new_cra &amp; 1) { </span>
+<span class="lineNum">    575 </span><span class="lineNoCov">    0 / 1     : 					if (new_cra &amp; 8) {		// One-shot? </span>
+<span class="lineNum">    576 </span><span class="lineNoCov">    0 / 1     : 						new_cra &amp;= 0xfe;	// Yes, stop timer </span>
+<span class="lineNum">    577 </span><span class="lineNoCov">    0 / 1     : 						ta_state = T_STOP; </span>
+<span class="lineNum">    578 </span><span class="lineCov">    1 / 1     : 					} else if (new_cra &amp; 0x10)	// Force load </span>
+<span class="lineNum">    579 </span><span class="lineCov">    1 / 1     : 						ta_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    580 </span>              : 				} else { </span>
+<span class="lineNum">    581 </span><span class="lineNoCov">    0 / 1     : 					ta_state = T_STOP; </span>
+<span class="lineNum">    582 </span>              : 				} </span>
+<span class="lineNum">    583 </span>              : 				break; </span>
+<span class="lineNum">    584 </span>              : 		} </span>
+<span class="lineNum">    585 </span><span class="lineCov">    1 / 1     : 		cra = new_cra &amp; 0xef; </span>
+<span class="lineNum">    586 </span><span class="lineCov">    1 / 1     : 		has_new_cra = false; </span>
+<span class="lineNum">    587 </span>              : 	} </span>
+<span class="lineNum">    588 </span>              :  </span>
+<span class="lineNum">    589 </span>              : 	// Timer B state machine </span>
+<span class="lineNum">    590 </span><span class="lineCov">    2 / 2     : 	switch (tb_state) { </span>
+<span class="lineNum">    591 </span>              : 		case T_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    592 </span><span class="lineNoCov">    0 / 1     : 			tb_state = T_COUNT;		// fall through </span>
+<span class="lineNum">    593 </span>              : 		case T_STOP: </span>
+<span class="lineNum">    594 </span>              : 			goto tb_idle; </span>
+<span class="lineNum">    595 </span>              : 		case T_LOAD_THEN_STOP: </span>
+<span class="lineNum">    596 </span><span class="lineNoCov">    0 / 1     : 			tb_state = T_STOP; </span>
+<span class="lineNum">    597 </span><span class="lineNoCov">    0 / 2     : 			tb = latchb;			// Reload timer </span>
+<span class="lineNum">    598 </span><span class="lineNoCov">    0 / 1     : 			goto tb_idle; </span>
+<span class="lineNum">    599 </span>              : 		case T_LOAD_THEN_COUNT: </span>
+<span class="lineNum">    600 </span><span class="lineNoCov">    0 / 1     : 			tb_state = T_COUNT; </span>
+<span class="lineNum">    601 </span><span class="lineNoCov">    0 / 2     : 			tb = latchb;			// Reload timer </span>
+<span class="lineNum">    602 </span><span class="lineNoCov">    0 / 1     : 			goto tb_idle; </span>
+<span class="lineNum">    603 </span>              : 		case T_LOAD_THEN_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    604 </span><span class="lineNoCov">    0 / 1     : 			tb_state = T_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    605 </span><span class="lineNoCov">    0 / 2     : 			if (tb == 1) </span>
+<span class="lineNum">    606 </span>              : 				goto tb_interrupt;	// Interrupt if timer == 1 </span>
+<span class="lineNum">    607 </span>              : 			else { </span>
+<span class="lineNum">    608 </span><span class="lineNoCov">    0 / 1     : 				tb = latchb;		// Reload timer </span>
+<span class="lineNum">    609 </span><span class="lineNoCov">    0 / 1     : 				goto tb_idle; </span>
+<span class="lineNum">    610 </span>              : 			} </span>
+<span class="lineNum">    611 </span>              : 		case T_COUNT: </span>
+<span class="lineNum">    612 </span>              : 			goto tb_count; </span>
+<span class="lineNum">    613 </span>              : 		case T_COUNT_THEN_STOP: </span>
+<span class="lineNum">    614 </span><span class="lineNoCov">    0 / 1     : 			tb_state = T_STOP; </span>
+<span class="lineNum">    615 </span>              : 			goto tb_count; </span>
+<span class="lineNum">    616 </span>              : 	} </span>
+<span class="lineNum">    617 </span>              :  </span>
+<span class="lineNum">    618 </span>              : 	// Count timer B </span>
+<span class="lineNum">    619 </span>              : tb_count: </span>
+<span class="lineNum">    620 </span><span class="lineNoCov">    0 / 2     : 	if (tb_cnt_phi2 || (tb_cnt_ta &amp;&amp; ta_underflow)) </span>
+<span class="lineNum">    621 </span><span class="lineNoCov">    0 / 2     : 		if (!tb || !--tb) {				// Decrement timer, underflow? </span>
+<span class="lineNum">    622 </span><span class="lineNoCov">    0 / 1     : 			if (tb_state != T_STOP) { </span>
+<span class="lineNum">    623 </span>              : tb_interrupt: </span>
+<span class="lineNum">    624 </span><span class="lineNoCov">    0 / 2     : 				tb = latchb;			// Reload timer </span>
+<span class="lineNum">    625 </span><span class="lineNoCov">    0 / 1     : 				tb_irq_next_cycle = true; // Trigger interrupt in next cycle </span>
+<span class="lineNum">    626 </span><span class="lineNoCov">    0 / 1     : 				icr |= 2;				// But set ICR bit now </span>
+<span class="lineNum">    627 </span>              :  </span>
+<span class="lineNum">    628 </span><span class="lineNoCov">    0 / 1     : 				if (crb &amp; 8) {			// One-shot? </span>
+<span class="lineNum">    629 </span><span class="lineNoCov">    0 / 1     : 					crb &amp;= 0xfe;		// Yes, stop timer </span>
+<span class="lineNum">    630 </span><span class="lineNoCov">    0 / 1     : 					new_crb &amp;= 0xfe; </span>
+<span class="lineNum">    631 </span><span class="lineNoCov">    0 / 1     : 					tb_state = T_LOAD_THEN_STOP;	// Reload in next cycle </span>
+<span class="lineNum">    632 </span>              : 				} else </span>
+<span class="lineNum">    633 </span><span class="lineNoCov">    0 / 1     : 					tb_state = T_LOAD_THEN_COUNT;	// No, delay one cycle (and reload) </span>
+<span class="lineNum">    634 </span>              : 			} </span>
+<span class="lineNum">    635 </span>              : 		} </span>
+<span class="lineNum">    636 </span>              :  </span>
+<span class="lineNum">    637 </span>              : 	// Delayed write to CRB? </span>
+<span class="lineNum">    638 </span>              : tb_idle: </span>
+<span class="lineNum">    639 </span><span class="lineCov">    1 / 1     : 	if (has_new_crb) { </span>
+<span class="lineNum">    640 </span><span class="lineCov">    2 / 2     : 		switch (tb_state) { </span>
+<span class="lineNum">    641 </span>              : 			case T_STOP: </span>
+<span class="lineNum">    642 </span>              : 			case T_LOAD_THEN_STOP: </span>
+<span class="lineNum">    643 </span><span class="lineCov">    1 / 1     : 				if (new_crb &amp; 1) {		// Timer started, wasn't running </span>
+<span class="lineNum">    644 </span><span class="lineNoCov">    0 / 1     : 					if (new_crb &amp; 0x10)	// Force load </span>
+<span class="lineNum">    645 </span><span class="lineNoCov">    0 / 1     : 						tb_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    646 </span>              : 					else				// No force load </span>
+<span class="lineNum">    647 </span>              : 						tb_state = T_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    648 </span>              : 				} else {				// Timer stopped, was already stopped </span>
+<span class="lineNum">    649 </span><span class="lineCov">    1 / 1     : 					if (new_crb &amp; 0x10)	// Force load </span>
+<span class="lineNum">    650 </span><span class="lineNoCov">    0 / 1     : 						tb_state = T_LOAD_THEN_STOP; </span>
+<span class="lineNum">    651 </span>              : 				} </span>
+<span class="lineNum">    652 </span>              : 				break; </span>
+<span class="lineNum">    653 </span>              : 			case T_COUNT: </span>
+<span class="lineNum">    654 </span><span class="lineNoCov">    0 / 1     : 				if (new_crb &amp; 1) {		// Timer started, was already running </span>
+<span class="lineNum">    655 </span>              : 					if (new_crb &amp; 0x10)	// Force load </span>
+<span class="lineNum">    656 </span>              : 						tb_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    657 </span>              : 				} else {				// Timer stopped, was running </span>
+<span class="lineNum">    658 </span><span class="lineNoCov">    0 / 1     : 					if (new_crb &amp; 0x10)	// Force load </span>
+<span class="lineNum">    659 </span><span class="lineNoCov">    0 / 1     : 						tb_state = T_LOAD_THEN_STOP; </span>
+<span class="lineNum">    660 </span>              : 					else				// No force load </span>
+<span class="lineNum">    661 </span>              : 						tb_state = T_COUNT_THEN_STOP; </span>
+<span class="lineNum">    662 </span>              : 				} </span>
+<span class="lineNum">    663 </span>              : 				break; </span>
+<span class="lineNum">    664 </span>              : 			case T_LOAD_THEN_COUNT: </span>
+<span class="lineNum">    665 </span>              : 			case T_WAIT_THEN_COUNT: </span>
+<span class="lineNum">    666 </span><span class="lineNoCov">    0 / 1     : 				if (new_crb &amp; 1) { </span>
+<span class="lineNum">    667 </span><span class="lineNoCov">    0 / 1     : 					if (new_crb &amp; 8) {		// One-shot? </span>
+<span class="lineNum">    668 </span><span class="lineNoCov">    0 / 1     : 						new_crb &amp;= 0xfe;	// Yes, stop timer </span>
+<span class="lineNum">    669 </span><span class="lineNoCov">    0 / 1     : 						tb_state = T_STOP; </span>
+<span class="lineNum">    670 </span><span class="lineNoCov">    0 / 1     : 					} else if (new_crb &amp; 0x10)	// Force load </span>
+<span class="lineNum">    671 </span><span class="lineNoCov">    0 / 1     : 						tb_state = T_LOAD_THEN_WAIT_THEN_COUNT; </span>
+<span class="lineNum">    672 </span>              : 				} else { </span>
+<span class="lineNum">    673 </span><span class="lineNoCov">    0 / 1     : 					tb_state = T_STOP; </span>
+<span class="lineNum">    674 </span>              : 				} </span>
+<span class="lineNum">    675 </span>              : 				break; </span>
+<span class="lineNum">    676 </span>              : 		} </span>
+<span class="lineNum">    677 </span><span class="lineCov">    1 / 1     : 		crb = new_crb &amp; 0xef; </span>
+<span class="lineNum">    678 </span><span class="lineCov">    1 / 1     : 		has_new_crb = false; </span>
+<span class="lineNum">    679 </span>              : 	} </span>
+<span class="lineNum">    680 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    681 </span>              :  </span>
+<span class="lineNum">    682 </span>              :  </span>
+<span class="lineNum">    683 </span>              : /* </span>
+<span class="lineNum">    684 </span>              :  *  Count CIA TOD clock (called during VBlank) </span>
+<span class="lineNum">    685 </span>              :  */ </span>
+<span class="lineNum">    686 </span>              :  </span>
+<span class="lineNum">    687 </span>              : void MOS6526::CountTOD(void) </span>
+<span class="lineNum">    688 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    689 </span>              : 	uint8 lo, hi; </span>
+<span class="lineNum">    690 </span>              :  </span>
+<span class="lineNum">    691 </span>              : 	// Decrement frequency divider </span>
+<span class="lineNum">    692 </span><span class="lineCov">    1 / 1     : 	if (tod_divider) </span>
+<span class="lineNum">    693 </span><span class="lineCov">    1 / 1     : 		tod_divider--; </span>
+<span class="lineNum">    694 </span>              : 	else { </span>
+<span class="lineNum">    695 </span>              :  </span>
+<span class="lineNum">    696 </span>              : 		// Reload divider according to 50/60 Hz flag </span>
+<span class="lineNum">    697 </span>              : 		if (cra &amp; 0x80) </span>
+<span class="lineNum">    698 </span><span class="lineCov">    1 / 1     : 			tod_divider = 4; </span>
+<span class="lineNum">    699 </span>              : 		else </span>
+<span class="lineNum">    700 </span>              : 			tod_divider = 5; </span>
+<span class="lineNum">    701 </span>              :  </span>
+<span class="lineNum">    702 </span>              : 		// 1/10 seconds </span>
+<span class="lineNum">    703 </span><span class="lineCov">    2 / 2     : 		tod_10ths++; </span>
+<span class="lineNum">    704 </span><span class="linePartCov">    1 / 2     : 		if (tod_10ths &gt; 9) { </span>
+<span class="lineNum">    705 </span><span class="lineCov">    1 / 1     : 			tod_10ths = 0; </span>
+<span class="lineNum">    706 </span>              :  </span>
+<span class="lineNum">    707 </span>              : 			// Seconds </span>
+<span class="lineNum">    708 </span><span class="lineCov">    3 / 3     : 			lo = (tod_sec &amp; 0x0f) + 1; </span>
+<span class="lineNum">    709 </span><span class="linePartCov">    1 / 2     : 			hi = tod_sec &gt;&gt; 4; </span>
+<span class="lineNum">    710 </span><span class="lineNoCov">    0 / 1     : 			if (lo &gt; 9) { </span>
+<span class="lineNum">    711 </span>              : 				lo = 0; </span>
+<span class="lineNum">    712 </span><span class="lineNoCov">    0 / 1     : 				hi++; </span>
+<span class="lineNum">    713 </span>              : 			} </span>
+<span class="lineNum">    714 </span><span class="lineCov">    1 / 1     : 			if (hi &gt; 5) { </span>
+<span class="lineNum">    715 </span><span class="lineNoCov">    0 / 1     : 				tod_sec = 0; </span>
+<span class="lineNum">    716 </span>              :  </span>
+<span class="lineNum">    717 </span>              : 				// Minutes </span>
+<span class="lineNum">    718 </span><span class="lineNoCov">    0 / 3     : 				lo = (tod_min &amp; 0x0f) + 1; </span>
+<span class="lineNum">    719 </span><span class="lineNoCov">    0 / 2     : 				hi = tod_min &gt;&gt; 4; </span>
+<span class="lineNum">    720 </span><span class="lineNoCov">    0 / 1     : 				if (lo &gt; 9) { </span>
+<span class="lineNum">    721 </span>              : 					lo = 0; </span>
+<span class="lineNum">    722 </span><span class="lineNoCov">    0 / 1     : 					hi++; </span>
+<span class="lineNum">    723 </span>              : 				} </span>
+<span class="lineNum">    724 </span><span class="lineNoCov">    0 / 1     : 				if (hi &gt; 5) { </span>
+<span class="lineNum">    725 </span><span class="lineNoCov">    0 / 1     : 					tod_min = 0; </span>
+<span class="lineNum">    726 </span>              :  </span>
+<span class="lineNum">    727 </span>              : 					// Hours </span>
+<span class="lineNum">    728 </span><span class="lineNoCov">    0 / 4     : 					lo = (tod_hr &amp; 0x0f) + 1; </span>
+<span class="lineNum">    729 </span><span class="lineNoCov">    0 / 3     : 					hi = (tod_hr &gt;&gt; 4) &amp; 1; </span>
+<span class="lineNum">    730 </span>              : 					tod_hr &amp;= 0x80;		// Keep AM/PM flag </span>
+<span class="lineNum">    731 </span><span class="lineNoCov">    0 / 1     : 					if (lo &gt; 9) { </span>
+<span class="lineNum">    732 </span>              : 						lo = 0; </span>
+<span class="lineNum">    733 </span><span class="lineNoCov">    0 / 1     : 						hi++; </span>
+<span class="lineNum">    734 </span>              : 					} </span>
+<span class="lineNum">    735 </span><span class="lineNoCov">    0 / 2     : 					tod_hr |= (hi &lt;&lt; 4) | lo; </span>
+<span class="lineNum">    736 </span><span class="lineNoCov">    0 / 2     : 					if ((tod_hr &amp; 0x1f) &gt; 0x11) </span>
+<span class="lineNum">    737 </span><span class="lineNoCov">    0 / 1     : 						tod_hr = (tod_hr &amp; 0x80) ^ 0x80; </span>
+<span class="lineNum">    738 </span>              : 				} else </span>
+<span class="lineNum">    739 </span><span class="lineNoCov">    0 / 1     : 					tod_min = (hi &lt;&lt; 4) | lo; </span>
+<span class="lineNum">    740 </span>              : 			} else </span>
+<span class="lineNum">    741 </span><span class="lineCov">    1 / 1     : 				tod_sec = (hi &lt;&lt; 4) | lo; </span>
+<span class="lineNum">    742 </span>              : 		} </span>
+<span class="lineNum">    743 </span>              :  </span>
+<span class="lineNum">    744 </span>              : 		// Alarm time reached? Trigger interrupt if enabled </span>
+<span class="lineNum">    745 </span><span class="lineCov">    2 / 2     : 		if (tod_10ths == alm_10ths &amp;&amp; tod_sec == alm_sec &amp;&amp; </span>
+<span class="lineNum">    746 </span>              : 			tod_min == alm_min &amp;&amp; tod_hr == alm_hr) </span>
+<span class="lineNum">    747 </span><span class="lineNoCov">    0 / 1     : 			TriggerInterrupt(4); </span>
+<span class="lineNum">    748 </span>              : 	} </span>
+<span class="lineNum">    749 </span><span class="linePartCov">    2 / 3     : } </span>
+<span class="lineNum">    750 </span>              :  </span>
+<span class="lineNum">    751 </span>              :  </span>
+<span class="lineNum">    752 </span>              : /* </span>
+<span class="lineNum">    753 </span>              :  *  Trigger IRQ (CIA 1) </span>
+<span class="lineNum">    754 </span>              :  */ </span>
+<span class="lineNum">    755 </span>              :  </span>
+<span class="lineNum">    756 </span>              : void MOS6526_1::TriggerInterrupt(int bit) </span>
+<span class="lineNum">    757 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    758 </span><span class="lineCov">    2 / 2     : 	icr |= bit; </span>
+<span class="lineNum">    759 </span><span class="lineCov">    3 / 3     : 	if (int_mask &amp; bit) { </span>
+<span class="lineNum">    760 </span><span class="lineNoCov">    0 / 1     : 		icr |= 0x80; </span>
+<span class="lineNum">    761 </span><span class="lineCov">    1 / 1     : 		the_cpu-&gt;TriggerCIAIRQ(); </span>
+<span class="lineNum">    762 </span>              : 	} </span>
+<span class="lineNum">    763 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    764 </span>              :  </span>
+<span class="lineNum">    765 </span>              :  </span>
+<span class="lineNum">    766 </span>              : /* </span>
+<span class="lineNum">    767 </span>              :  *  Trigger NMI (CIA 2) </span>
+<span class="lineNum">    768 </span>              :  */ </span>
+<span class="lineNum">    769 </span>              :  </span>
+<span class="lineNum">    770 </span>              : void MOS6526_2::TriggerInterrupt(int bit) </span>
+<span class="lineNum">    771 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    772 </span><span class="lineNoCov">    0 / 2     : 	icr |= bit; </span>
+<span class="lineNum">    773 </span><span class="lineNoCov">    0 / 3     : 	if (int_mask &amp; bit) { </span>
+<span class="lineNum">    774 </span><span class="lineNoCov">    0 / 1     : 		icr |= 0x80; </span>
+<span class="lineNum">    775 </span><span class="lineNoCov">    0 / 1     : 		the_cpu-&gt;TriggerNMI(); </span>
+<span class="lineNum">    776 </span>              : 	} </span>
+<span class="lineNum">    777 </span><span class="lineNoCov">    0 / 1     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

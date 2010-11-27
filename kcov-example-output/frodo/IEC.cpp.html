@@ -1,0 +1,1005 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">354</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">16.7 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">59</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  IEC.cpp - IEC bus routines, 1541 emulation (DOS level) </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Notes: </span>
+<span class="lineNum">     23 </span>              :  * ------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - There are three kinds of devices on the IEC bus: controllers, </span>
+<span class="lineNum">     26 </span>              :  *    listeners and talkers. We are always the controller and we </span>
+<span class="lineNum">     27 </span>              :  *    can additionally be either listener or talker. There can be </span>
+<span class="lineNum">     28 </span>              :  *    only one listener and one talker active at the same time (the </span>
+<span class="lineNum">     29 </span>              :  *    real IEC bus allows multiple listeners, but we don't). </span>
+<span class="lineNum">     30 </span>              :  *  - There is one Drive object for every emulated drive (8..11). </span>
+<span class="lineNum">     31 </span>              :  *    A pointer to one of them is stored in &quot;listener&quot;/&quot;talker&quot; </span>
+<span class="lineNum">     32 </span>              :  *    when talk()/listen() is called and is used by the functions </span>
+<span class="lineNum">     33 </span>              :  *    called afterwards. </span>
+<span class="lineNum">     34 </span>              :  *  - The Drive objects have four virtual functions so that the </span>
+<span class="lineNum">     35 </span>              :  *    interface to them is independent of their implementation: </span>
+<span class="lineNum">     36 </span>              :  *      Open() opens a channel </span>
+<span class="lineNum">     37 </span>              :  *      Close() closes a channel </span>
+<span class="lineNum">     38 </span>              :  *      Read() reads from a channel </span>
+<span class="lineNum">     39 </span>              :  *      Write() writes to a channel </span>
+<span class="lineNum">     40 </span>              :  *  - The EOI/EOF signal is special on the IEC bus in that it is </span>
+<span class="lineNum">     41 </span>              :  *    Sent before the last byte, not after it. </span>
+<span class="lineNum">     42 </span>              :  */ </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : #include &quot;IEC.h&quot; </span>
+<span class="lineNum">     47 </span>              : #include &quot;1541fs.h&quot; </span>
+<span class="lineNum">     48 </span>              : #include &quot;1541d64.h&quot; </span>
+<span class="lineNum">     49 </span>              : #include &quot;1541t64.h&quot; </span>
+<span class="lineNum">     50 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     51 </span>              : #include &quot;Display.h&quot; </span>
+<span class="lineNum">     52 </span>              : #include &quot;main.h&quot; </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span>              :  </span>
+<span class="lineNum">     55 </span>              : // IEC command codes </span>
+<span class="lineNum">     56 </span>              : enum { </span>
+<span class="lineNum">     57 </span>              : 	CMD_DATA = 0x60,	// Data transfer </span>
+<span class="lineNum">     58 </span>              : 	CMD_CLOSE = 0xe0,	// Close channel </span>
+<span class="lineNum">     59 </span>              : 	CMD_OPEN = 0xf0		// Open channel </span>
+<span class="lineNum">     60 </span>              : }; </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              : // IEC ATN codes </span>
+<span class="lineNum">     63 </span>              : enum { </span>
+<span class="lineNum">     64 </span>              : 	ATN_LISTEN = 0x20, </span>
+<span class="lineNum">     65 </span>              : 	ATN_UNLISTEN = 0x30, </span>
+<span class="lineNum">     66 </span>              : 	ATN_TALK = 0x40, </span>
+<span class="lineNum">     67 </span>              : 	ATN_UNTALK = 0x50 </span>
+<span class="lineNum">     68 </span>              : }; </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span>              :  </span>
+<span class="lineNum">     71 </span>              : /* </span>
+<span class="lineNum">     72 </span>              :  *  Constructor: Initialize variables </span>
+<span class="lineNum">     73 </span>              :  */ </span>
+<span class="lineNum">     74 </span>              :  </span>
+<span class="lineNum">     75 </span>              : Drive *IEC::create_drive(const char *path) </span>
+<span class="lineNum">     76 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     77 </span><span class="lineCov">    1 / 1     : 	if (IsDirectory(path)) { </span>
+<span class="lineNum">     78 </span>              : 		// Mount host directory </span>
+<span class="lineNum">     79 </span><span class="lineNoCov">    0 / 1     : 		return new FSDrive(this, path); </span>
+<span class="lineNum">     80 </span>              : 	} else { </span>
+<span class="lineNum">     81 </span>              : 		// Not a directory, check for mountable file type </span>
+<span class="lineNum">     82 </span>              : 		int type; </span>
+<span class="lineNum">     83 </span><span class="lineCov">    1 / 1     : 		if (IsMountableFile(path, type)) { </span>
+<span class="lineNum">     84 </span><span class="lineCov">    1 / 1     : 			if (type == FILE_IMAGE) { </span>
+<span class="lineNum">     85 </span>              : 				// Mount disk image </span>
+<span class="lineNum">     86 </span><span class="lineCov">    1 / 1     : 				return new ImageDrive(this, path); </span>
+<span class="lineNum">     87 </span>              : 			} else { </span>
+<span class="lineNum">     88 </span>              : 				// Mount archive type file </span>
+<span class="lineNum">     89 </span><span class="lineCov">    1 / 1     : 				return new ArchDrive(this, path); </span>
+<span class="lineNum">     90 </span>              : 			} </span>
+<span class="lineNum">     91 </span>              : 		} else { </span>
+<span class="lineNum">     92 </span>              : 			// Unknown file type </span>
+<span class="lineNum">     93 </span>              : 			// print error? </span>
+<span class="lineNum">     94 </span>              : 		} </span>
+<span class="lineNum">     95 </span>              : 	} </span>
+<span class="lineNum">     96 </span>              :  </span>
+<span class="lineNum">     97 </span>              : 	return NULL; </span>
+<span class="lineNum">     98 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     99 </span>              :  </span>
+<span class="lineNum">    100 </span><span class="linePartCov">    3 / 6     : IEC::IEC(C64Display *display) : the_display(display) </span>
+<span class="lineNum">    101 </span>              : { </span>
+<span class="lineNum">    102 </span>              : 	int i; </span>
+<span class="lineNum">    103 </span>              :  </span>
+<span class="lineNum">    104 </span>              : 	// Create drives 8..11 </span>
+<span class="lineNum">    105 </span>              : 	for (i=0; i&lt;4; i++) </span>
+<span class="lineNum">    106 </span><span class="linePartCov">    2 / 4     : 		drive[i] = NULL;	// Important because UpdateLEDs is called from the drive constructors (via set_error) </span>
+<span class="lineNum">    107 </span>              :  </span>
+<span class="lineNum">    108 </span><span class="linePartCov">    2 / 4     : 	if (!ThePrefs.Emul1541Proc) { </span>
+<span class="lineNum">    109 </span><span class="linePartCov">    1 / 2     : 		for (i=0; i&lt;4; i++) </span>
+<span class="lineNum">    110 </span><span class="linePartCov">    1 / 2     : 			drive[i] = create_drive(ThePrefs.DrivePath[i]); </span>
+<span class="lineNum">    111 </span>              : 	} </span>
+<span class="lineNum">    112 </span>              :  </span>
+<span class="lineNum">    113 </span><span class="linePartCov">    1 / 2     : 	listener_active = talker_active = false; </span>
+<span class="lineNum">    114 </span><span class="linePartCov">    1 / 2     : 	listening = false; </span>
+<span class="lineNum">    115 </span><span class="linePartCov">    1 / 3     : } </span>
+<span class="lineNum">    116 </span>              :  </span>
+<span class="lineNum">    117 </span>              :  </span>
+<span class="lineNum">    118 </span>              : /* </span>
+<span class="lineNum">    119 </span>              :  *  Destructor: Delete drives </span>
+<span class="lineNum">    120 </span>              :  */ </span>
+<span class="lineNum">    121 </span>              :  </span>
+<span class="lineNum">    122 </span><span class="linePartCov">    2 / 4     : IEC::~IEC() </span>
+<span class="lineNum">    123 </span>              : { </span>
+<span class="lineNum">    124 </span><span class="linePartCov">    1 / 2     : 	for (int i=0; i&lt;4; i++) </span>
+<span class="lineNum">    125 </span><span class="linePartCov">    1 / 2     : 		delete drive[i]; </span>
+<span class="lineNum">    126 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    127 </span>              :  </span>
+<span class="lineNum">    128 </span>              :  </span>
+<span class="lineNum">    129 </span>              : /* </span>
+<span class="lineNum">    130 </span>              :  *  Reset all drives </span>
+<span class="lineNum">    131 </span>              :  */ </span>
+<span class="lineNum">    132 </span>              :  </span>
+<span class="lineNum">    133 </span>              : void IEC::Reset(void) </span>
+<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 1     : 	for (int i=0; i&lt;4; i++) </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 		if (drive[i] != NULL &amp;&amp; drive[i]-&gt;Ready) </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 			drive[i]-&gt;Reset(); </span>
+<span class="lineNum">    138 </span>              :  </span>
+<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 2     : 	UpdateLEDs(); </span>
+<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    141 </span>              :  </span>
+<span class="lineNum">    142 </span>              :  </span>
+<span class="lineNum">    143 </span>              : /* </span>
+<span class="lineNum">    144 </span>              :  *  Preferences have changed, prefs points to new preferences, </span>
+<span class="lineNum">    145 </span>              :  *  ThePrefs still holds the previous ones. Check if drive settings </span>
+<span class="lineNum">    146 </span>              :  *  have changed. </span>
+<span class="lineNum">    147 </span>              :  */ </span>
+<span class="lineNum">    148 </span>              :  </span>
+<span class="lineNum">    149 </span>              : void IEC::NewPrefs(Prefs *prefs) </span>
+<span class="lineNum">    150 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    151 </span>              : 	// Delete and recreate all changed drives </span>
+<span class="lineNum">    152 </span><span class="lineCov">    1 / 1     : 	for (int i=0; i&lt;4; i++) { </span>
+<span class="lineNum">    153 </span><span class="lineCov">    1 / 1     : 		if (strcmp(ThePrefs.DrivePath[i], prefs-&gt;DrivePath[i]) || ThePrefs.Emul1541Proc != prefs-&gt;Emul1541Proc) { </span>
+<span class="lineNum">    154 </span><span class="lineCov">    1 / 1     : 			delete drive[i]; </span>
+<span class="lineNum">    155 </span><span class="lineCov">    1 / 1     : 			drive[i] = NULL;	// Important because UpdateLEDs is called from drive constructors (via set_error()) </span>
+<span class="lineNum">    156 </span><span class="lineCov">    2 / 2     : 			if (!prefs-&gt;Emul1541Proc) </span>
+<span class="lineNum">    157 </span><span class="lineCov">    1 / 1     : 				drive[i] = create_drive(prefs-&gt;DrivePath[i]); </span>
+<span class="lineNum">    158 </span>              : 		} </span>
+<span class="lineNum">    159 </span>              : 	} </span>
+<span class="lineNum">    160 </span>              :  </span>
+<span class="lineNum">    161 </span><span class="lineCov">    2 / 2     : 	UpdateLEDs(); </span>
+<span class="lineNum">    162 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    163 </span>              :  </span>
+<span class="lineNum">    164 </span>              :  </span>
+<span class="lineNum">    165 </span>              : /* </span>
+<span class="lineNum">    166 </span>              :  *  Update drive LED display </span>
+<span class="lineNum">    167 </span>              :  */ </span>
+<span class="lineNum">    168 </span>              :  </span>
+<span class="lineNum">    169 </span>              : void IEC::UpdateLEDs(void) </span>
+<span class="lineNum">    170 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    171 </span><span class="lineCov">    1 / 1     : 	if (drive[0] != NULL &amp;&amp; drive[1] != NULL &amp;&amp; drive[2] != NULL &amp;&amp; drive[3] != NULL) </span>
+<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 1     : 		the_display-&gt;UpdateLEDs(drive[0]-&gt;LED, drive[1]-&gt;LED, drive[2]-&gt;LED, drive[3]-&gt;LED); </span>
+<span class="lineNum">    173 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    174 </span>              :  </span>
+<span class="lineNum">    175 </span>              :  </span>
+<span class="lineNum">    176 </span>              : /* </span>
+<span class="lineNum">    177 </span>              :  *  Output one byte </span>
+<span class="lineNum">    178 </span>              :  */ </span>
+<span class="lineNum">    179 </span>              :  </span>
+<span class="lineNum">    180 </span>              : uint8 IEC::Out(uint8 byte, bool eoi) </span>
+<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 	if (listener_active) { </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     : 		if (received_cmd == CMD_OPEN) </span>
+<span class="lineNum">    184 </span><span class="lineNoCov">    0 / 2     : 			return open_out(byte, eoi); </span>
+<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     : 		if (received_cmd == CMD_DATA) </span>
+<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 2     : 			return data_out(byte, eoi); </span>
+<span class="lineNum">    187 </span>              : 		return ST_TIMEOUT; </span>
+<span class="lineNum">    188 </span>              : 	} else </span>
+<span class="lineNum">    189 </span>              : 		return ST_TIMEOUT; </span>
+<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    191 </span>              :  </span>
+<span class="lineNum">    192 </span>              :  </span>
+<span class="lineNum">    193 </span>              : /* </span>
+<span class="lineNum">    194 </span>              :  *  Output one byte with ATN (Talk/Listen/Untalk/Unlisten) </span>
+<span class="lineNum">    195 </span>              :  */ </span>
+<span class="lineNum">    196 </span>              :  </span>
+<span class="lineNum">    197 </span>              : uint8 IEC::OutATN(uint8 byte) </span>
+<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    199 </span><span class="lineNoCov">    0 / 1     : 	received_cmd = sec_addr = 0;	// Command is sent with secondary address </span>
+<span class="lineNum">    200 </span><span class="lineNoCov">    0 / 2     : 	switch (byte &amp; 0xf0) { </span>
+<span class="lineNum">    201 </span>              : 		case ATN_LISTEN: </span>
+<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 			listening = true; </span>
+<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 1     : 			return listen(byte &amp; 0x0f); </span>
+<span class="lineNum">    204 </span>              : 		case ATN_UNLISTEN: </span>
+<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 			listening = false; </span>
+<span class="lineNum">    206 </span>              : 			return unlisten(); </span>
+<span class="lineNum">    207 </span>              : 		case ATN_TALK: </span>
+<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 1     : 			listening = false; </span>
+<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 			return talk(byte &amp; 0x0f); </span>
+<span class="lineNum">    210 </span>              : 		case ATN_UNTALK: </span>
+<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 1     : 			listening = false; </span>
+<span class="lineNum">    212 </span>              : 			return untalk(); </span>
+<span class="lineNum">    213 </span>              : 	} </span>
+<span class="lineNum">    214 </span>              : 	return ST_TIMEOUT; </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 7     : } </span>
+<span class="lineNum">    216 </span>              :  </span>
+<span class="lineNum">    217 </span>              :  </span>
+<span class="lineNum">    218 </span>              : /* </span>
+<span class="lineNum">    219 </span>              :  *  Output secondary address </span>
+<span class="lineNum">    220 </span>              :  */ </span>
+<span class="lineNum">    221 </span>              :  </span>
+<span class="lineNum">    222 </span>              : uint8 IEC::OutSec(uint8 byte) </span>
+<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    224 </span><span class="lineNoCov">    0 / 1     : 	if (listening) { </span>
+<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 		if (listener_active) { </span>
+<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 2     : 			sec_addr = byte &amp; 0x0f; </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 2     : 			received_cmd = byte &amp; 0xf0; </span>
+<span class="lineNum">    228 </span><span class="lineNoCov">    0 / 2     : 			return sec_listen(); </span>
+<span class="lineNum">    229 </span>              : 		} </span>
+<span class="lineNum">    230 </span>              : 	} else { </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 1     : 		if (talker_active) { </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 2     : 			sec_addr = byte &amp; 0x0f; </span>
+<span class="lineNum">    233 </span><span class="lineNoCov">    0 / 2     : 			received_cmd = byte &amp; 0xf0; </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : 			return sec_talk(); </span>
+<span class="lineNum">    235 </span>              : 		} </span>
+<span class="lineNum">    236 </span>              : 	} </span>
+<span class="lineNum">    237 </span>              : 	return ST_TIMEOUT; </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    239 </span>              :  </span>
+<span class="lineNum">    240 </span>              :  </span>
+<span class="lineNum">    241 </span>              : /* </span>
+<span class="lineNum">    242 </span>              :  *  Read one byte </span>
+<span class="lineNum">    243 </span>              :  */ </span>
+<span class="lineNum">    244 </span>              :  </span>
+<span class="lineNum">    245 </span>              : uint8 IEC::In(uint8 &amp;byte) </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    247 </span><span class="lineNoCov">    0 / 2     : 	if (talker_active &amp;&amp; (received_cmd == CMD_DATA)) </span>
+<span class="lineNum">    248 </span><span class="lineNoCov">    0 / 1     : 		return data_in(byte); </span>
+<span class="lineNum">    249 </span>              :  </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 1     : 	byte = 0; </span>
+<span class="lineNum">    251 </span>              : 	return ST_TIMEOUT; </span>
+<span class="lineNum">    252 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    253 </span>              :  </span>
+<span class="lineNum">    254 </span>              :  </span>
+<span class="lineNum">    255 </span>              : /* </span>
+<span class="lineNum">    256 </span>              :  *  Assert ATN (for Untalk) </span>
+<span class="lineNum">    257 </span>              :  */ </span>
+<span class="lineNum">    258 </span>              :  </span>
+<span class="lineNum">    259 </span>              : void IEC::SetATN(void) </span>
+<span class="lineNum">    260 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    261 </span>              : 	// Only needed for real IEC </span>
+<span class="lineNum">    262 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    263 </span>              :  </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span>              : /* </span>
+<span class="lineNum">    266 </span>              :  *  Release ATN </span>
+<span class="lineNum">    267 </span>              :  */ </span>
+<span class="lineNum">    268 </span>              :  </span>
+<span class="lineNum">    269 </span>              : void IEC::RelATN(void) </span>
+<span class="lineNum">    270 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    271 </span>              : 	// Only needed for real IEC </span>
+<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    273 </span>              :  </span>
+<span class="lineNum">    274 </span>              :  </span>
+<span class="lineNum">    275 </span>              : /* </span>
+<span class="lineNum">    276 </span>              :  *  Talk-attention turn-around </span>
+<span class="lineNum">    277 </span>              :  */ </span>
+<span class="lineNum">    278 </span>              :  </span>
+<span class="lineNum">    279 </span>              : void IEC::Turnaround(void) </span>
+<span class="lineNum">    280 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    281 </span>              : 	// Only needed for real IEC </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    283 </span>              :  </span>
+<span class="lineNum">    284 </span>              :  </span>
+<span class="lineNum">    285 </span>              : /* </span>
+<span class="lineNum">    286 </span>              :  *  System line release </span>
+<span class="lineNum">    287 </span>              :  */ </span>
+<span class="lineNum">    288 </span>              :  </span>
+<span class="lineNum">    289 </span>              : void IEC::Release(void) </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    291 </span>              : 	// Only needed for real IEC </span>
+<span class="lineNum">    292 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    293 </span>              :  </span>
+<span class="lineNum">    294 </span>              :  </span>
+<span class="lineNum">    295 </span>              : /* </span>
+<span class="lineNum">    296 </span>              :  *  Listen </span>
+<span class="lineNum">    297 </span>              :  */ </span>
+<span class="lineNum">    298 </span>              :  </span>
+<span class="lineNum">    299 </span>              : uint8 IEC::listen(int device) </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    301 </span><span class="lineNoCov">    0 / 3     : 	if ((device &gt;= 8) &amp;&amp; (device &lt;= 11)) { </span>
+<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 2     : 		if ((listener = drive[device-8]) != NULL &amp;&amp; listener-&gt;Ready) { </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 2     : 			listener_active = true; </span>
+<span class="lineNum">    304 </span>              : 			return ST_OK; </span>
+<span class="lineNum">    305 </span>              : 		} </span>
+<span class="lineNum">    306 </span>              : 	} </span>
+<span class="lineNum">    307 </span>              :  </span>
+<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 2     : 	listener_active = false; </span>
+<span class="lineNum">    309 </span>              : 	return ST_NOTPRESENT; </span>
+<span class="lineNum">    310 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    311 </span>              :  </span>
+<span class="lineNum">    312 </span>              :  </span>
+<span class="lineNum">    313 </span>              : /* </span>
+<span class="lineNum">    314 </span>              :  *  Talk </span>
+<span class="lineNum">    315 </span>              :  */ </span>
+<span class="lineNum">    316 </span>              :  </span>
+<span class="lineNum">    317 </span>              : uint8 IEC::talk(int device) </span>
+<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    319 </span><span class="lineNoCov">    0 / 3     : 	if ((device &gt;= 8) &amp;&amp; (device &lt;= 11)) { </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 2     : 		if ((talker = drive[device-8]) != NULL &amp;&amp; talker-&gt;Ready) { </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 2     : 			talker_active = true; </span>
+<span class="lineNum">    322 </span>              : 			return ST_OK; </span>
+<span class="lineNum">    323 </span>              : 		} </span>
+<span class="lineNum">    324 </span>              : 	} </span>
+<span class="lineNum">    325 </span>              :  </span>
+<span class="lineNum">    326 </span><span class="lineNoCov">    0 / 2     : 	talker_active = false; </span>
+<span class="lineNum">    327 </span>              : 	return ST_NOTPRESENT; </span>
+<span class="lineNum">    328 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    329 </span>              :  </span>
+<span class="lineNum">    330 </span>              :  </span>
+<span class="lineNum">    331 </span>              : /* </span>
+<span class="lineNum">    332 </span>              :  *  Unlisten </span>
+<span class="lineNum">    333 </span>              :  */ </span>
+<span class="lineNum">    334 </span>              :  </span>
+<span class="lineNum">    335 </span>              : uint8 IEC::unlisten(void) </span>
+<span class="lineNum">    336 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 2     : 	listener_active = false; </span>
+<span class="lineNum">    338 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    339 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    340 </span>              :  </span>
+<span class="lineNum">    341 </span>              :  </span>
+<span class="lineNum">    342 </span>              : /* </span>
+<span class="lineNum">    343 </span>              :  *  Untalk </span>
+<span class="lineNum">    344 </span>              :  */ </span>
+<span class="lineNum">    345 </span>              :  </span>
+<span class="lineNum">    346 </span>              : uint8 IEC::untalk(void) </span>
+<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    348 </span><span class="lineNoCov">    0 / 2     : 	talker_active = false; </span>
+<span class="lineNum">    349 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    350 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    351 </span>              :  </span>
+<span class="lineNum">    352 </span>              :  </span>
+<span class="lineNum">    353 </span>              : /* </span>
+<span class="lineNum">    354 </span>              :  *  Secondary address after Listen </span>
+<span class="lineNum">    355 </span>              :  */ </span>
+<span class="lineNum">    356 </span>              :  </span>
+<span class="lineNum">    357 </span>              : uint8 IEC::sec_listen(void) </span>
+<span class="lineNum">    358 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    359 </span><span class="lineNoCov">    0 / 1     : 	switch (received_cmd) { </span>
+<span class="lineNum">    360 </span>              :  </span>
+<span class="lineNum">    361 </span>              : 		case CMD_OPEN:	// Prepare for receiving the file name </span>
+<span class="lineNum">    362 </span><span class="lineNoCov">    0 / 1     : 			name_ptr = name_buf; </span>
+<span class="lineNum">    363 </span><span class="lineNoCov">    0 / 1     : 			name_len = 0; </span>
+<span class="lineNum">    364 </span>              : 			return ST_OK; </span>
+<span class="lineNum">    365 </span>              :  </span>
+<span class="lineNum">    366 </span>              : 		case CMD_CLOSE: // Close channel </span>
+<span class="lineNum">    367 </span><span class="lineNoCov">    0 / 1     : 			if (listener-&gt;LED != DRVLED_ERROR) { </span>
+<span class="lineNum">    368 </span><span class="lineNoCov">    0 / 1     : 				listener-&gt;LED = DRVLED_OFF;		// Turn off drive LED </span>
+<span class="lineNum">    369 </span><span class="lineNoCov">    0 / 1     : 				UpdateLEDs(); </span>
+<span class="lineNum">    370 </span>              : 			} </span>
+<span class="lineNum">    371 </span><span class="lineNoCov">    0 / 1     : 			return listener-&gt;Close(sec_addr); </span>
+<span class="lineNum">    372 </span>              : 	} </span>
+<span class="lineNum">    373 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    374 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    375 </span>              :  </span>
+<span class="lineNum">    376 </span>              :  </span>
+<span class="lineNum">    377 </span>              : /* </span>
+<span class="lineNum">    378 </span>              :  *  Secondary address after Talk </span>
+<span class="lineNum">    379 </span>              :  */ </span>
+<span class="lineNum">    380 </span>              :  </span>
+<span class="lineNum">    381 </span>              : uint8 IEC::sec_talk(void) </span>
+<span class="lineNum">    382 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    383 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    384 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    385 </span>              :  </span>
+<span class="lineNum">    386 </span>              :  </span>
+<span class="lineNum">    387 </span>              : /* </span>
+<span class="lineNum">    388 </span>              :  *  Byte after Open command: Store character in file name, open file on EOI </span>
+<span class="lineNum">    389 </span>              :  */ </span>
+<span class="lineNum">    390 </span>              :  </span>
+<span class="lineNum">    391 </span>              : uint8 IEC::open_out(uint8 byte, bool eoi) </span>
+<span class="lineNum">    392 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    393 </span><span class="lineNoCov">    0 / 1     : 	if (name_len &lt; NAMEBUF_LENGTH) { </span>
+<span class="lineNum">    394 </span><span class="lineNoCov">    0 / 2     : 		*name_ptr++ = byte; </span>
+<span class="lineNum">    395 </span><span class="lineNoCov">    0 / 1     : 		name_len++; </span>
+<span class="lineNum">    396 </span>              : 	} </span>
+<span class="lineNum">    397 </span>              :  </span>
+<span class="lineNum">    398 </span><span class="lineNoCov">    0 / 1     : 	if (eoi) { </span>
+<span class="lineNum">    399 </span><span class="lineNoCov">    0 / 1     : 		*name_ptr = 0;				// End string </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 1     : 		listener-&gt;LED = DRVLED_ON;	// Turn on drive LED </span>
+<span class="lineNum">    401 </span><span class="lineNoCov">    0 / 1     : 		UpdateLEDs(); </span>
+<span class="lineNum">    402 </span><span class="lineNoCov">    0 / 1     : 		return listener-&gt;Open(sec_addr, name_buf, name_len); </span>
+<span class="lineNum">    403 </span>              : 	} </span>
+<span class="lineNum">    404 </span>              :  </span>
+<span class="lineNum">    405 </span>              : 	return ST_OK; </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    407 </span>              :  </span>
+<span class="lineNum">    408 </span>              :  </span>
+<span class="lineNum">    409 </span>              : /* </span>
+<span class="lineNum">    410 </span>              :  *  Write byte to channel </span>
+<span class="lineNum">    411 </span>              :  */ </span>
+<span class="lineNum">    412 </span>              :  </span>
+<span class="lineNum">    413 </span>              : uint8 IEC::data_out(uint8 byte, bool eoi) </span>
+<span class="lineNum">    414 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    415 </span><span class="lineNoCov">    0 / 1     : 	return listener-&gt;Write(sec_addr, byte, eoi); </span>
+<span class="lineNum">    416 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    417 </span>              :  </span>
+<span class="lineNum">    418 </span>              :  </span>
+<span class="lineNum">    419 </span>              : /* </span>
+<span class="lineNum">    420 </span>              :  *  Read byte from channel </span>
+<span class="lineNum">    421 </span>              :  */ </span>
+<span class="lineNum">    422 </span>              :  </span>
+<span class="lineNum">    423 </span>              : uint8 IEC::data_in(uint8 &amp;byte) </span>
+<span class="lineNum">    424 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    425 </span><span class="lineNoCov">    0 / 1     : 	return talker-&gt;Read(sec_addr, byte); </span>
+<span class="lineNum">    426 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    427 </span>              :  </span>
+<span class="lineNum">    428 </span>              :  </span>
+<span class="lineNum">    429 </span>              : /* </span>
+<span class="lineNum">    430 </span>              :  *  Drive constructor </span>
+<span class="lineNum">    431 </span>              :  */ </span>
+<span class="lineNum">    432 </span>              :  </span>
+<span class="lineNum">    433 </span><span class="linePartCov">    3 / 6     : Drive::Drive(IEC *iec) </span>
+<span class="lineNum">    434 </span>              : { </span>
+<span class="lineNum">    435 </span><span class="linePartCov">    2 / 4     : 	the_iec = iec; </span>
+<span class="lineNum">    436 </span><span class="linePartCov">    1 / 2     : 	LED = DRVLED_OFF; </span>
+<span class="lineNum">    437 </span><span class="linePartCov">    1 / 2     : 	Ready = false; </span>
+<span class="lineNum">    438 </span><span class="linePartCov">    1 / 2     : 	set_error(ERR_STARTUP); </span>
+<span class="lineNum">    439 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    440 </span>              :  </span>
+<span class="lineNum">    441 </span>              :  </span>
+<span class="lineNum">    442 </span>              : /* </span>
+<span class="lineNum">    443 </span>              :  *  Set error message on drive </span>
+<span class="lineNum">    444 </span>              :  */ </span>
+<span class="lineNum">    445 </span>              :  </span>
+<span class="lineNum">    446 </span>              : // 1541 error messages </span>
+<span class="lineNum">    447 </span>              : static const char *Errors_1541[] = { </span>
+<span class="lineNum">    448 </span>              : 	&quot;00, OK,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    449 </span>              : 	&quot;01, FILES SCRATCHED,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    450 </span>              : 	&quot;03, UNIMPLEMENTED,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    451 </span>              : 	&quot;20, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    452 </span>              : 	&quot;21, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    453 </span>              : 	&quot;22, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    454 </span>              : 	&quot;23, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    455 </span>              : 	&quot;24, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    456 </span>              : 	&quot;25, WRITE ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    457 </span>              : 	&quot;26, WRITE PROTECT ON,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    458 </span>              : 	&quot;27, READ ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    459 </span>              : 	&quot;28, WRITE ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    460 </span>              : 	&quot;29, DISK ID MISMATCH,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    461 </span>              : 	&quot;30, SYNTAX ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    462 </span>              : 	&quot;31, SYNTAX ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    463 </span>              : 	&quot;32, SYNTAX ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    464 </span>              : 	&quot;33, SYNTAX ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    465 </span>              : 	&quot;34, SYNTAX ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    466 </span>              : 	&quot;60, WRITE FILE OPEN,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    467 </span>              : 	&quot;61, FILE NOT OPEN,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    468 </span>              : 	&quot;62, FILE NOT FOUND,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    469 </span>              : 	&quot;63, FILE EXISTS,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    470 </span>              : 	&quot;64, FILE TYPE MISMATCH,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    471 </span>              : 	&quot;65, NO BLOCK,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    472 </span>              : 	&quot;66, ILLEGAL TRACK OR SECTOR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    473 </span>              : 	&quot;70, NO CHANNEL,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    474 </span>              : 	&quot;71, DIR ERROR,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    475 </span>              : 	&quot;72, DISK FULL,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    476 </span>              : 	&quot;73, CBM DOS V2.6 1541,%02d,%02d\x0d&quot;, </span>
+<span class="lineNum">    477 </span>              : 	&quot;74, DRIVE NOT READY,%02d,%02d\x0d&quot; </span>
+<span class="lineNum">    478 </span>              : }; </span>
+<span class="lineNum">    479 </span>              :  </span>
+<span class="lineNum">    480 </span>              : void Drive::set_error(int error, int track, int sector) </span>
+<span class="lineNum">    481 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    482 </span>              : 	// Write error message to buffer </span>
+<span class="lineNum">    483 </span><span class="lineCov">    1 / 1     : 	sprintf(error_buf, Errors_1541[error], track, sector); </span>
+<span class="lineNum">    484 </span><span class="lineCov">    1 / 1     : 	error_ptr = error_buf; </span>
+<span class="lineNum">    485 </span><span class="lineCov">    2 / 2     : 	error_len = strlen(error_buf); </span>
+<span class="lineNum">    486 </span><span class="lineCov">    1 / 1     : 	current_error = error; </span>
+<span class="lineNum">    487 </span>              :  </span>
+<span class="lineNum">    488 </span>              : 	// Set drive condition </span>
+<span class="lineNum">    489 </span><span class="lineCov">    2 / 2     : 	if (error != ERR_OK &amp;&amp; error != ERR_SCRATCHED) </span>
+<span class="lineNum">    490 </span>              : 		if (error == ERR_STARTUP) </span>
+<span class="lineNum">    491 </span><span class="lineCov">    1 / 1     : 			LED = DRVLED_OFF; </span>
+<span class="lineNum">    492 </span>              : 		else </span>
+<span class="lineNum">    493 </span>              : 			LED = DRVLED_ERROR; </span>
+<span class="lineNum">    494 </span><span class="lineNoCov">    0 / 1     : 	else if (LED == DRVLED_ERROR) </span>
+<span class="lineNum">    495 </span><span class="lineNoCov">    0 / 1     : 		LED = DRVLED_OFF; </span>
+<span class="lineNum">    496 </span><span class="lineCov">    3 / 3     : 	the_iec-&gt;UpdateLEDs(); </span>
+<span class="lineNum">    497 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    498 </span>              :  </span>
+<span class="lineNum">    499 </span>              :  </span>
+<span class="lineNum">    500 </span>              : /* </span>
+<span class="lineNum">    501 </span>              :  *  Parse file name, determine access mode and file type </span>
+<span class="lineNum">    502 </span>              :  */ </span>
+<span class="lineNum">    503 </span>              :  </span>
+<span class="lineNum">    504 </span><span class="lineNoCov">    0 / 3     : void Drive::parse_file_name(const uint8 *src, int src_len, uint8 *dest, int &amp;dest_len, int &amp;mode, int &amp;type, int &amp;rec_len, bool convert_charset) </span>
+<span class="lineNum">    505 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    506 </span>              : 	// If the string contains a ':', the file name starts after that </span>
+<span class="lineNum">    507 </span>              : 	const uint8 *p = (const uint8 *)memchr(src, ':', src_len); </span>
+<span class="lineNum">    508 </span><span class="lineNoCov">    0 / 2     : 	if (p) { </span>
+<span class="lineNum">    509 </span><span class="lineNoCov">    0 / 1     : 		p++; </span>
+<span class="lineNum">    510 </span><span class="lineNoCov">    0 / 1     : 		src_len -= p - src; </span>
+<span class="lineNum">    511 </span>              : 	} else </span>
+<span class="lineNum">    512 </span>              : 		p = src; </span>
+<span class="lineNum">    513 </span>              :  </span>
+<span class="lineNum">    514 </span>              : 	// Transfer file name upto ',' </span>
+<span class="lineNum">    515 </span><span class="lineNoCov">    0 / 1     : 	dest_len = 0; </span>
+<span class="lineNum">    516 </span>              : 	uint8 *q = dest; </span>
+<span class="lineNum">    517 </span><span class="lineNoCov">    0 / 6     : 	while (*p != ',' &amp;&amp; src_len-- &gt; 0) { </span>
+<span class="lineNum">    518 </span><span class="lineNoCov">    0 / 1     : 		if (convert_charset) </span>
+<span class="lineNum">    519 </span><span class="lineNoCov">    0 / 2     : 			*q++ = petscii2ascii(*p++); </span>
+<span class="lineNum">    520 </span>              : 		else </span>
+<span class="lineNum">    521 </span><span class="lineNoCov">    0 / 2     : 			*q++ = *p++; </span>
+<span class="lineNum">    522 </span><span class="lineNoCov">    0 / 4     : 		dest_len++; </span>
+<span class="lineNum">    523 </span>              : 	} </span>
+<span class="lineNum">    524 </span><span class="lineNoCov">    0 / 1     : 	*q++ = 0; </span>
+<span class="lineNum">    525 </span>              :  </span>
+<span class="lineNum">    526 </span>              : 	// Strip trailing CRs </span>
+<span class="lineNum">    527 </span><span class="lineNoCov">    0 / 2     : 	while (dest_len &gt; 0 &amp;&amp; dest[dest_len - 1] == 0x0d) </span>
+<span class="lineNum">    528 </span><span class="lineNoCov">    0 / 1     : 		dest[--dest_len] = 0; </span>
+<span class="lineNum">    529 </span>              :  </span>
+<span class="lineNum">    530 </span>              : 	// Look for mode and type parameters separated by ',' </span>
+<span class="lineNum">    531 </span><span class="lineNoCov">    0 / 3     : 	p++; src_len--; </span>
+<span class="lineNum">    532 </span><span class="lineNoCov">    0 / 5     : 	while (src_len &gt; 0) { </span>
+<span class="lineNum">    533 </span><span class="lineNoCov">    0 / 1     : 		switch (*p) { </span>
+<span class="lineNum">    534 </span>              : 			case 'D': </span>
+<span class="lineNum">    535 </span><span class="lineNoCov">    0 / 1     : 				type = FTYPE_DEL; </span>
+<span class="lineNum">    536 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">    537 </span>              : 			case 'S': </span>
+<span class="lineNum">    538 </span><span class="lineNoCov">    0 / 1     : 				type = FTYPE_SEQ; </span>
+<span class="lineNum">    539 </span>              : 				break; </span>
+<span class="lineNum">    540 </span>              : 			case 'P': </span>
+<span class="lineNum">    541 </span><span class="lineNoCov">    0 / 1     : 				type = FTYPE_PRG; </span>
+<span class="lineNum">    542 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">    543 </span>              : 			case 'U': </span>
+<span class="lineNum">    544 </span><span class="lineNoCov">    0 / 1     : 				type = FTYPE_USR; </span>
+<span class="lineNum">    545 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">    546 </span>              : 			case 'L': </span>
+<span class="lineNum">    547 </span><span class="lineNoCov">    0 / 2     : 				type = FTYPE_REL; </span>
+<span class="lineNum">    548 </span><span class="lineNoCov">    0 / 2     : 				while (*p != ',' &amp;&amp; src_len-- &gt; 0) p++; </span>
+<span class="lineNum">    549 </span>              : 				p++; src_len--; </span>
+<span class="lineNum">    550 </span><span class="lineNoCov">    0 / 3     : 				rec_len = *p++; src_len--; </span>
+<span class="lineNum">    551 </span><span class="lineNoCov">    0 / 4     : 				if (src_len &lt; 0) </span>
+<span class="lineNum">    552 </span><span class="lineNoCov">    0 / 1     : 					rec_len = 0; </span>
+<span class="lineNum">    553 </span>              : 				break; </span>
+<span class="lineNum">    554 </span>              : 			case 'R': </span>
+<span class="lineNum">    555 </span><span class="lineNoCov">    0 / 1     : 				mode = FMODE_READ; </span>
+<span class="lineNum">    556 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">    557 </span>              : 			case 'W': </span>
+<span class="lineNum">    558 </span><span class="lineNoCov">    0 / 1     : 				mode = FMODE_WRITE; </span>
+<span class="lineNum">    559 </span>              : 				break; </span>
+<span class="lineNum">    560 </span>              : 			case 'A': </span>
+<span class="lineNum">    561 </span><span class="lineNoCov">    0 / 1     : 				mode = FMODE_APPEND; </span>
+<span class="lineNum">    562 </span><span class="lineNoCov">    0 / 1     : 				break; </span>
+<span class="lineNum">    563 </span>              : 			case 'M': </span>
+<span class="lineNum">    564 </span><span class="lineNoCov">    0 / 1     : 				mode = FMODE_M; </span>
+<span class="lineNum">    565 </span>              : 				break; </span>
+<span class="lineNum">    566 </span>              : 		} </span>
+<span class="lineNum">    567 </span>              :  </span>
+<span class="lineNum">    568 </span>              : 		// Skip to ',' </span>
+<span class="lineNum">    569 </span><span class="lineNoCov">    0 / 3     : 		while (*p != ',' &amp;&amp; src_len-- &gt; 0) p++; </span>
+<span class="lineNum">    570 </span><span class="lineNoCov">    0 / 2     : 		p++; src_len--; </span>
+<span class="lineNum">    571 </span>              : 	} </span>
+<span class="lineNum">    572 </span><span class="lineNoCov">    0 / 4     : } </span>
+<span class="lineNum">    573 </span>              :  </span>
+<span class="lineNum">    574 </span>              :  </span>
+<span class="lineNum">    575 </span>              : /* </span>
+<span class="lineNum">    576 </span>              :  *  Execute DOS command (parse command and call appropriate routine) </span>
+<span class="lineNum">    577 </span>              :  */ </span>
+<span class="lineNum">    578 </span>              :  </span>
+<span class="lineNum">    579 </span>              : static void parse_block_cmd_args(const uint8 *p, int &amp;arg1, int &amp;arg2, int &amp;arg3, int &amp;arg4) </span>
+<span class="lineNum">    580 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    581 </span><span class="lineNoCov">    0 / 1     : 	arg1 = arg2 = arg3 = arg4 = 0; </span>
+<span class="lineNum">    582 </span>              :  </span>
+<span class="lineNum">    583 </span><span class="lineNoCov">    0 / 1     : 	while (*p == ' ' || *p == 0x1d || *p == ',') p++; </span>
+<span class="lineNum">    584 </span><span class="lineNoCov">    0 / 2     : 	while (*p &gt;= '0' &amp;&amp; *p &lt; '@') </span>
+<span class="lineNum">    585 </span><span class="lineNoCov">    0 / 1     : 		arg1 = arg1 * 10 + (*p++ &amp; 0x0f); </span>
+<span class="lineNum">    586 </span>              :  </span>
+<span class="lineNum">    587 </span><span class="lineNoCov">    0 / 1     : 	while (*p == ' ' || *p == 0x1d || *p == ',') p++; </span>
+<span class="lineNum">    588 </span><span class="lineNoCov">    0 / 2     : 	while (*p &gt;= '0' &amp;&amp; *p &lt; '@') </span>
+<span class="lineNum">    589 </span><span class="lineNoCov">    0 / 1     : 		arg2 = arg2 * 10 + (*p++ &amp; 0x0f); </span>
+<span class="lineNum">    590 </span>              :  </span>
+<span class="lineNum">    591 </span><span class="lineNoCov">    0 / 1     : 	while (*p == ' ' || *p == 0x1d || *p == ',') p++; </span>
+<span class="lineNum">    592 </span><span class="lineNoCov">    0 / 2     : 	while (*p &gt;= '0' &amp;&amp; *p &lt; '@') </span>
+<span class="lineNum">    593 </span><span class="lineNoCov">    0 / 1     : 		arg3 = arg3 * 10 + (*p++ &amp; 0x0f); </span>
+<span class="lineNum">    594 </span>              :  </span>
+<span class="lineNum">    595 </span><span class="lineNoCov">    0 / 1     : 	while (*p == ' ' || *p == 0x1d || *p == ',') p++; </span>
+<span class="lineNum">    596 </span><span class="lineNoCov">    0 / 2     : 	while (*p &gt;= '0' &amp;&amp; *p &lt; '@') </span>
+<span class="lineNum">    597 </span><span class="lineNoCov">    0 / 1     : 		arg4 = arg4 * 10 + (*p++ &amp; 0x0f); </span>
+<span class="lineNum">    598 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    599 </span>              :  </span>
+<span class="lineNum">    600 </span>              : void Drive::execute_cmd(const uint8 *cmd, int cmd_len) </span>
+<span class="lineNum">    601 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    602 </span>              : 	// Strip trailing CRs </span>
+<span class="lineNum">    603 </span><span class="lineNoCov">    0 / 2     : 	while (cmd_len &gt; 0 &amp;&amp; cmd[cmd_len - 1] == 0x0d) </span>
+<span class="lineNum">    604 </span>              : 		cmd_len--; </span>
+<span class="lineNum">    605 </span>              :  </span>
+<span class="lineNum">    606 </span>              : 	// Find token delimiters </span>
+<span class="lineNum">    607 </span>              : 	const uint8 *colon = (const uint8 *)memchr(cmd, ':', cmd_len); </span>
+<span class="lineNum">    608 </span><span class="lineNoCov">    0 / 2     : 	const uint8 *equal = colon ? (const uint8 *)memchr(colon, '=', cmd_len - (colon - cmd)) : NULL; </span>
+<span class="lineNum">    609 </span>              : 	const uint8 *comma = (const uint8 *)memchr(cmd, ',', cmd_len); </span>
+<span class="lineNum">    610 </span>              : 	const uint8 *minus = (const uint8 *)memchr(cmd, '-', cmd_len); </span>
+<span class="lineNum">    611 </span>              :  </span>
+<span class="lineNum">    612 </span>              : 	// Parse command name </span>
+<span class="lineNum">    613 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_OK); </span>
+<span class="lineNum">    614 </span><span class="lineNoCov">    0 / 2     : 	switch (cmd[0]) { </span>
+<span class="lineNum">    615 </span>              : 		case 'B':	// Block/buffer </span>
+<span class="lineNum">    616 </span><span class="lineNoCov">    0 / 1     : 			if (!minus) </span>
+<span class="lineNum">    617 </span>              : 				set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    618 </span>              : 			else { </span>
+<span class="lineNum">    619 </span>              : 				// Parse arguments (up to 4 decimal numbers separated by </span>
+<span class="lineNum">    620 </span>              : 				// space, cursor right or comma) </span>
+<span class="lineNum">    621 </span><span class="lineNoCov">    0 / 2     : 				const uint8 *p = colon ? colon + 1 : cmd + 3; </span>
+<span class="lineNum">    622 </span>              : 				int arg1, arg2, arg3, arg4; </span>
+<span class="lineNum">    623 </span><span class="lineNoCov">    0 / 2     : 				parse_block_cmd_args(p, arg1, arg2, arg3, arg4); </span>
+<span class="lineNum">    624 </span>              :  </span>
+<span class="lineNum">    625 </span>              : 				// Switch on command </span>
+<span class="lineNum">    626 </span><span class="lineNoCov">    0 / 1     : 				switch (minus[1]) { </span>
+<span class="lineNum">    627 </span>              : 					case 'R': </span>
+<span class="lineNum">    628 </span><span class="lineNoCov">    0 / 1     : 						block_read_cmd(arg1, arg3, arg4); </span>
+<span class="lineNum">    629 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    630 </span>              : 					case 'W': </span>
+<span class="lineNum">    631 </span><span class="lineNoCov">    0 / 1     : 						block_write_cmd(arg1, arg3, arg4); </span>
+<span class="lineNum">    632 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    633 </span>              : 					case 'E': </span>
+<span class="lineNum">    634 </span><span class="lineNoCov">    0 / 1     : 						block_execute_cmd(arg1, arg3, arg4); </span>
+<span class="lineNum">    635 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    636 </span>              : 					case 'A': </span>
+<span class="lineNum">    637 </span><span class="lineNoCov">    0 / 1     : 						block_allocate_cmd(arg2, arg3); </span>
+<span class="lineNum">    638 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    639 </span>              : 					case 'F': </span>
+<span class="lineNum">    640 </span><span class="lineNoCov">    0 / 1     : 						block_free_cmd(arg2, arg3); </span>
+<span class="lineNum">    641 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    642 </span>              : 					case 'P': </span>
+<span class="lineNum">    643 </span><span class="lineNoCov">    0 / 1     : 						buffer_pointer_cmd(arg1, arg2); </span>
+<span class="lineNum">    644 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    645 </span>              : 					default: </span>
+<span class="lineNum">    646 </span>              : 						set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    647 </span>              : 						break; </span>
+<span class="lineNum">    648 </span>              : 				} </span>
+<span class="lineNum">    649 </span>              : 			} </span>
+<span class="lineNum">    650 </span>              : 			break; </span>
+<span class="lineNum">    651 </span>              :  </span>
+<span class="lineNum">    652 </span>              : 		case 'M':	// Memory </span>
+<span class="lineNum">    653 </span><span class="lineNoCov">    0 / 1     : 			if (cmd[1] != '-') </span>
+<span class="lineNum">    654 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    655 </span>              : 			else { </span>
+<span class="lineNum">    656 </span>              : 				// Read parameters </span>
+<span class="lineNum">    657 </span><span class="lineNoCov">    0 / 2     : 				uint16 adr = uint8(cmd[3]) | (uint8(cmd[4]) &lt;&lt; 8); </span>
+<span class="lineNum">    658 </span><span class="lineNoCov">    0 / 1     : 				uint8 len = uint8(cmd[5]); </span>
+<span class="lineNum">    659 </span>              :  </span>
+<span class="lineNum">    660 </span>              : 				// Switch on command </span>
+<span class="lineNum">    661 </span><span class="lineNoCov">    0 / 1     : 				switch (cmd[2]) { </span>
+<span class="lineNum">    662 </span>              : 					case 'R': </span>
+<span class="lineNum">    663 </span><span class="lineNoCov">    0 / 1     : 						mem_read_cmd(adr, (cmd_len &lt; 6) ? 1 : len); </span>
+<span class="lineNum">    664 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    665 </span>              : 					case 'W': </span>
+<span class="lineNum">    666 </span><span class="lineNoCov">    0 / 1     : 						mem_write_cmd(adr, len, (uint8 *)cmd + 6); </span>
+<span class="lineNum">    667 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    668 </span>              : 					case 'E': </span>
+<span class="lineNum">    669 </span><span class="lineNoCov">    0 / 1     : 						mem_execute_cmd(adr); </span>
+<span class="lineNum">    670 </span><span class="lineNoCov">    0 / 1     : 						break; </span>
+<span class="lineNum">    671 </span>              : 					default: </span>
+<span class="lineNum">    672 </span><span class="lineNoCov">    0 / 1     : 						set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    673 </span>              : 						break; </span>
+<span class="lineNum">    674 </span>              : 				} </span>
+<span class="lineNum">    675 </span>              : 			} </span>
+<span class="lineNum">    676 </span>              : 			break; </span>
+<span class="lineNum">    677 </span>              :  </span>
+<span class="lineNum">    678 </span>              : 		case 'C':	// Copy </span>
+<span class="lineNum">    679 </span><span class="lineNoCov">    0 / 1     : 			if (!colon) </span>
+<span class="lineNum">    680 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    681 </span><span class="lineNoCov">    0 / 4     : 			else if (!equal || memchr(cmd, '*', cmd_len) || memchr(cmd, '?', cmd_len) || (comma &amp;&amp; comma &lt; equal)) </span>
+<span class="lineNum">    682 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX30); </span>
+<span class="lineNum">    683 </span>              : 			else </span>
+<span class="lineNum">    684 </span><span class="lineNoCov">    0 / 1     : 				copy_cmd(colon + 1, equal - colon - 1, equal + 1, cmd_len - (equal + 1 - cmd)); </span>
+<span class="lineNum">    685 </span>              : 			break; </span>
+<span class="lineNum">    686 </span>              :  </span>
+<span class="lineNum">    687 </span>              : 		case 'R':	// Rename </span>
+<span class="lineNum">    688 </span><span class="lineNoCov">    0 / 1     : 			if (!colon) </span>
+<span class="lineNum">    689 </span>              : 				set_error(ERR_SYNTAX34); </span>
+<span class="lineNum">    690 </span><span class="lineNoCov">    0 / 4     : 			else if (!equal || comma || memchr(cmd, '*', cmd_len) || memchr(cmd, '?', cmd_len)) </span>
+<span class="lineNum">    691 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX30); </span>
+<span class="lineNum">    692 </span>              : 			else </span>
+<span class="lineNum">    693 </span><span class="lineNoCov">    0 / 1     : 				rename_cmd(colon + 1, equal - colon - 1, equal + 1, cmd_len - (equal + 1 - cmd)); </span>
+<span class="lineNum">    694 </span>              : 			break; </span>
+<span class="lineNum">    695 </span>              :  </span>
+<span class="lineNum">    696 </span>              : 		case 'S':	// Scratch </span>
+<span class="lineNum">    697 </span><span class="lineNoCov">    0 / 1     : 			if (!colon) </span>
+<span class="lineNum">    698 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX34); </span>
+<span class="lineNum">    699 </span>              : 			else </span>
+<span class="lineNum">    700 </span><span class="lineNoCov">    0 / 1     : 				scratch_cmd(colon + 1, cmd_len - (colon + 1 - cmd)); </span>
+<span class="lineNum">    701 </span>              : 			break; </span>
+<span class="lineNum">    702 </span>              :  </span>
+<span class="lineNum">    703 </span>              : 		case 'P':	// Position </span>
+<span class="lineNum">    704 </span><span class="lineNoCov">    0 / 1     : 			position_cmd(cmd + 1, cmd_len - 1); </span>
+<span class="lineNum">    705 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">    706 </span>              :  </span>
+<span class="lineNum">    707 </span>              : 		case 'I':	// Initialize </span>
+<span class="lineNum">    708 </span><span class="lineNoCov">    0 / 1     : 			initialize_cmd(); </span>
+<span class="lineNum">    709 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">    710 </span>              :  </span>
+<span class="lineNum">    711 </span>              : 		case 'N':	// New (format) </span>
+<span class="lineNum">    712 </span><span class="lineNoCov">    0 / 1     : 			if (!colon) </span>
+<span class="lineNum">    713 </span><span class="lineNoCov">    0 / 1     : 				set_error(ERR_SYNTAX34); </span>
+<span class="lineNum">    714 </span>              : 			else </span>
+<span class="lineNum">    715 </span><span class="lineNoCov">    0 / 2     : 				new_cmd(colon + 1, comma ? (comma - colon - 1) : cmd_len - (colon + 1 - cmd), comma); </span>
+<span class="lineNum">    716 </span>              : 			break; </span>
+<span class="lineNum">    717 </span>              :  </span>
+<span class="lineNum">    718 </span>              : 		case 'V':	// Validate </span>
+<span class="lineNum">    719 </span><span class="lineNoCov">    0 / 1     : 			validate_cmd(); </span>
+<span class="lineNum">    720 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">    721 </span>              :  </span>
+<span class="lineNum">    722 </span>              : 		case 'U':	// User </span>
+<span class="lineNum">    723 </span><span class="lineNoCov">    0 / 1     : 			if (cmd[1] == '0') </span>
+<span class="lineNum">    724 </span>              : 				break; </span>
+<span class="lineNum">    725 </span><span class="lineNoCov">    0 / 2     : 			switch (cmd[1] &amp; 0x0f) { </span>
+<span class="lineNum">    726 </span>              : 				case 1: {	// U1/UA: Read block </span>
+<span class="lineNum">    727 </span><span class="lineNoCov">    0 / 2     : 					const uint8 *p = colon ? colon + 1 : cmd + 2; </span>
+<span class="lineNum">    728 </span>              : 					int arg1, arg2, arg3, arg4; </span>
+<span class="lineNum">    729 </span><span class="lineNoCov">    0 / 2     : 					parse_block_cmd_args(p, arg1, arg2, arg3, arg4); </span>
+<span class="lineNum">    730 </span><span class="lineNoCov">    0 / 1     : 					block_read_cmd(arg1, arg3, arg4, true); </span>
+<span class="lineNum">    731 </span><span class="lineNoCov">    0 / 1     : 					break; </span>
+<span class="lineNum">    732 </span>              : 				} </span>
+<span class="lineNum">    733 </span>              : 				case 2: {	// U2/UB: Write block </span>
+<span class="lineNum">    734 </span><span class="lineNoCov">    0 / 2     : 					const uint8 *p = colon ? colon + 1 : cmd + 2; </span>
+<span class="lineNum">    735 </span>              : 					int arg1, arg2, arg3, arg4; </span>
+<span class="lineNum">    736 </span><span class="lineNoCov">    0 / 2     : 					parse_block_cmd_args(p, arg1, arg2, arg3, arg4); </span>
+<span class="lineNum">    737 </span><span class="lineNoCov">    0 / 1     : 					block_write_cmd(arg1, arg3, arg4, true); </span>
+<span class="lineNum">    738 </span><span class="lineNoCov">    0 / 1     : 					break; </span>
+<span class="lineNum">    739 </span>              : 				} </span>
+<span class="lineNum">    740 </span>              : 				case 9:		// U9/UI: C64/VC20 mode switch </span>
+<span class="lineNum">    741 </span><span class="lineNoCov">    0 / 1     : 					if (cmd[2] != '+' &amp;&amp; cmd[2] != '-') </span>
+<span class="lineNum">    742 </span><span class="lineNoCov">    0 / 1     : 						Reset(); </span>
+<span class="lineNum">    743 </span>              : 					break; </span>
+<span class="lineNum">    744 </span>              : 				case 10:	// U:/UJ: Reset </span>
+<span class="lineNum">    745 </span><span class="lineNoCov">    0 / 1     : 					Reset(); </span>
+<span class="lineNum">    746 </span><span class="lineNoCov">    0 / 1     : 					break; </span>
+<span class="lineNum">    747 </span>              : 				default: </span>
+<span class="lineNum">    748 </span><span class="lineNoCov">    0 / 1     : 					set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    749 </span>              : 					break; </span>
+<span class="lineNum">    750 </span>              : 			} </span>
+<span class="lineNum">    751 </span>              : 			break; </span>
+<span class="lineNum">    752 </span>              :  </span>
+<span class="lineNum">    753 </span>              : 		default: </span>
+<span class="lineNum">    754 </span><span class="lineNoCov">    0 / 1     : 			set_error(ERR_SYNTAX31); </span>
+<span class="lineNum">    755 </span>              : 			break; </span>
+<span class="lineNum">    756 </span>              : 	} </span>
+<span class="lineNum">    757 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    758 </span>              :  </span>
+<span class="lineNum">    759 </span>              : // BLOCK-READ:channel,0,track,sector </span>
+<span class="lineNum">    760 </span>              : void Drive::block_read_cmd(int channel, int track, int sector, bool user_cmd) </span>
+<span class="lineNum">    761 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    762 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    763 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    764 </span>              :  </span>
+<span class="lineNum">    765 </span>              : // BLOCK-WRITE:channel,0,track,sector </span>
+<span class="lineNum">    766 </span>              : void Drive::block_write_cmd(int channel, int track, int sector, bool user_cmd) </span>
+<span class="lineNum">    767 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    768 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    769 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    770 </span>              :  </span>
+<span class="lineNum">    771 </span>              : // BLOCK-EXECUTE:channel,0,track,sector </span>
+<span class="lineNum">    772 </span>              : void Drive::block_execute_cmd(int channel, int track, int sector) </span>
+<span class="lineNum">    773 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    774 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    775 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    776 </span>              :  </span>
+<span class="lineNum">    777 </span>              : // BLOCK-ALLOCATE:0,track,sector </span>
+<span class="lineNum">    778 </span>              : void Drive::block_allocate_cmd(int track, int sector) </span>
+<span class="lineNum">    779 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    780 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    781 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    782 </span>              :  </span>
+<span class="lineNum">    783 </span>              : // BLOCK-FREE:0,track,sector </span>
+<span class="lineNum">    784 </span>              : void Drive::block_free_cmd(int track, int sector) </span>
+<span class="lineNum">    785 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    786 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    787 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    788 </span>              :  </span>
+<span class="lineNum">    789 </span>              : // BUFFER-POINTER:channel,pos </span>
+<span class="lineNum">    790 </span>              : void Drive::buffer_pointer_cmd(int channel, int pos) </span>
+<span class="lineNum">    791 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    792 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    793 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    794 </span>              :  </span>
+<span class="lineNum">    795 </span>              : // M-R&lt;adr low&gt;&lt;adr high&gt;[&lt;number&gt;] </span>
+<span class="lineNum">    796 </span>              : void Drive::mem_read_cmd(uint16 adr, uint8 len) </span>
+<span class="lineNum">    797 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    798 </span>              : 	unsupp_cmd(); </span>
+<span class="lineNum">    799 </span><span class="lineNoCov">    0 / 1     : 	error_ptr = error_buf; </span>
+<span class="lineNum">    800 </span><span class="lineNoCov">    0 / 1     : 	error_buf[0] = 0; </span>
+<span class="lineNum">    801 </span><span class="lineNoCov">    0 / 1     : 	error_len = 0; </span>
+<span class="lineNum">    802 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_OK); </span>
+<span class="lineNum">    803 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    804 </span>              :  </span>
+<span class="lineNum">    805 </span>              : // M-W&lt;adr low&gt;&lt;adr high&gt;&lt;number&gt;&lt;data...&gt; </span>
+<span class="lineNum">    806 </span>              : void Drive::mem_write_cmd(uint16 adr, uint8 len, uint8 *p) </span>
+<span class="lineNum">    807 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    808 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    809 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    810 </span>              :  </span>
+<span class="lineNum">    811 </span>              : // M-E&lt;adr low&gt;&lt;adr high&gt; </span>
+<span class="lineNum">    812 </span>              : void Drive::mem_execute_cmd(uint16 adr) </span>
+<span class="lineNum">    813 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    814 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    815 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    816 </span>              :  </span>
+<span class="lineNum">    817 </span>              : //   COPY:new=file1,file2,... </span>
+<span class="lineNum">    818 </span>              : //        ^   ^ </span>
+<span class="lineNum">    819 </span>              : // new_file   old_files </span>
+<span class="lineNum">    820 </span>              : void Drive::copy_cmd(const uint8 *new_file, int new_file_len, const uint8 *old_files, int old_files_len) </span>
+<span class="lineNum">    821 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    822 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    823 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    824 </span>              :  </span>
+<span class="lineNum">    825 </span>              : // RENAME:new=old </span>
+<span class="lineNum">    826 </span>              : //        ^   ^ </span>
+<span class="lineNum">    827 </span>              : // new_file   old_file </span>
+<span class="lineNum">    828 </span>              : void Drive::rename_cmd(const uint8 *new_file, int new_file_len, const uint8 *old_file, int old_file_len) </span>
+<span class="lineNum">    829 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    830 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    831 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    832 </span>              :  </span>
+<span class="lineNum">    833 </span>              : // SCRATCH:file1,file2,... </span>
+<span class="lineNum">    834 </span>              : //         ^ </span>
+<span class="lineNum">    835 </span>              : //         files </span>
+<span class="lineNum">    836 </span>              : void Drive::scratch_cmd(const uint8 *files, int files_len) </span>
+<span class="lineNum">    837 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    838 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    839 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    840 </span>              :  </span>
+<span class="lineNum">    841 </span>              : // P&lt;channel&gt;&lt;record low&gt;&lt;record high&gt;&lt;byte&gt; </span>
+<span class="lineNum">    842 </span>              : //  ^ </span>
+<span class="lineNum">    843 </span>              : //  cmd </span>
+<span class="lineNum">    844 </span>              : void Drive::position_cmd(const uint8 *cmd, int cmd_len) </span>
+<span class="lineNum">    845 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    846 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    847 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    848 </span>              :  </span>
+<span class="lineNum">    849 </span>              : // INITIALIZE </span>
+<span class="lineNum">    850 </span>              : void Drive::initialize_cmd(void) </span>
+<span class="lineNum">    851 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    852 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    853 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    854 </span>              :  </span>
+<span class="lineNum">    855 </span>              : // NEW:name,id </span>
+<span class="lineNum">    856 </span>              : //     ^   ^ </span>
+<span class="lineNum">    857 </span>              : //  name   comma (or NULL) </span>
+<span class="lineNum">    858 </span>              : void Drive::new_cmd(const uint8 *name, int name_len, const uint8 *comma) </span>
+<span class="lineNum">    859 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    860 </span><span class="lineNoCov">    0 / 2     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    861 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    862 </span>              :  </span>
+<span class="lineNum">    863 </span>              : // VALIDATE </span>
+<span class="lineNum">    864 </span>              : void Drive::validate_cmd(void) </span>
+<span class="lineNum">    865 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    866 </span><span class="lineNoCov">    0 / 1     : 	set_error(ERR_UNIMPLEMENTED); </span>
+<span class="lineNum">    867 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    868 </span>              :  </span>
+<span class="lineNum">    869 </span>              :  </span>
+<span class="lineNum">    870 </span>              : /* </span>
+<span class="lineNum">    871 </span>              :  *  Notice user of unsupported drive command </span>
+<span class="lineNum">    872 </span>              :  */ </span>
+<span class="lineNum">    873 </span>              :  </span>
+<span class="lineNum">    874 </span>              : void Drive::unsupp_cmd(void) </span>
+<span class="lineNum">    875 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    876 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    877 </span>              :  </span>
+<span class="lineNum">    878 </span>              :  </span>
+<span class="lineNum">    879 </span>              : /* </span>
+<span class="lineNum">    880 </span>              :  *  Convert PETSCII&lt;-&gt;ASCII </span>
+<span class="lineNum">    881 </span>              :  */ </span>
+<span class="lineNum">    882 </span>              :  </span>
+<span class="lineNum">    883 </span>              : uint8 ascii2petscii(char c) </span>
+<span class="lineNum">    884 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    885 </span><span class="lineNoCov">    0 / 2     : 	if (((c &gt;= 'A') &amp;&amp; (c &lt;= 'Z')) || ((c &gt;= 'a') &amp;&amp; (c &lt;= 'z'))) </span>
+<span class="lineNum">    886 </span><span class="lineNoCov">    0 / 2     : 		return c ^ 0x20; </span>
+<span class="lineNum">    887 </span>              : 	return c; </span>
+<span class="lineNum">    888 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    889 </span>              :  </span>
+<span class="lineNum">    890 </span>              : void ascii2petscii(uint8 *dest, const char *src, int n) </span>
+<span class="lineNum">    891 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    892 </span><span class="lineNoCov">    0 / 3     : 	while (n-- &amp;&amp; (*dest++ = ascii2petscii(*src++))) ; </span>
+<span class="lineNum">    893 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    894 </span>              :  </span>
+<span class="lineNum">    895 </span>              : char petscii2ascii(uint8 c) </span>
+<span class="lineNum">    896 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    897 </span><span class="lineNoCov">    0 / 3     : 	if (((c &gt;= 'A') &amp;&amp; (c &lt;= 'Z')) || ((c &gt;= 'a') &amp;&amp; (c &lt;= 'z'))) </span>
+<span class="lineNum">    898 </span><span class="lineNoCov">    0 / 3     : 		return c ^ 0x20; </span>
+<span class="lineNum">    899 </span><span class="lineNoCov">    0 / 3     : 	if ((c &gt;= 0xc1) &amp;&amp; (c &lt;= 0xda)) </span>
+<span class="lineNum">    900 </span><span class="lineNoCov">    0 / 3     : 		return c ^ 0x80; </span>
+<span class="lineNum">    901 </span><span class="lineNoCov">    0 / 1     : 	return c; </span>
+<span class="lineNum">    902 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    903 </span>              :  </span>
+<span class="lineNum">    904 </span>              : void petscii2ascii(char *dest, const uint8 *src, int n) </span>
+<span class="lineNum">    905 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    906 </span><span class="lineNoCov">    0 / 3     : 	while (n-- &amp;&amp; (*dest++ = petscii2ascii(*src++))) ; </span>
+<span class="lineNum">    907 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    908 </span>              :  </span>
+<span class="lineNum">    909 </span>              :  </span>
+<span class="lineNum">    910 </span>              : /* </span>
+<span class="lineNum">    911 </span>              :  *  Check whether file is a mountable disk image or archive file, return type </span>
+<span class="lineNum">    912 </span>              :  */ </span>
+<span class="lineNum">    913 </span>              :  </span>
+<span class="lineNum">    914 </span><span class="lineCov">    1 / 1     : bool IsMountableFile(const char *path, int &amp;type) </span>
+<span class="lineNum">    915 </span><span class="lineCov">    5 / 5     : { </span>
+<span class="lineNum">    916 </span>              : 	size_t n; </span>
+<span class="lineNum">    917 </span>              : 	bool out = true; </span>
+<span class="lineNum">    918 </span>              :  </span>
+<span class="lineNum">    919 </span>              : 	// Read header and determine file size </span>
+<span class="lineNum">    920 </span>              : 	uint8 header[64]; </span>
+<span class="lineNum">    921 </span>              : 	memset(header, 0, sizeof(header)); </span>
+<span class="lineNum">    922 </span><span class="linePartCov">    1 / 2     : 	FILE *f = fopen(path, &quot;rb&quot;); </span>
+<span class="lineNum">    923 </span><span class="lineCov">    2 / 2     : 	if (f == NULL) </span>
+<span class="lineNum">    924 </span>              : 		return false; </span>
+<span class="lineNum">    925 </span><span class="lineCov">    1 / 1     : 	fseek(f, 0, SEEK_END); </span>
+<span class="lineNum">    926 </span><span class="lineCov">    2 / 2     : 	long size = ftell(f); </span>
+<span class="lineNum">    927 </span><span class="lineCov">    2 / 2     : 	fseek(f, 0, SEEK_SET); </span>
+<span class="lineNum">    928 </span>              : 	n = fread(header, 1, sizeof(header), f); </span>
+<span class="lineNum">    929 </span>              : 	if (n != sizeof(header)) </span>
+<span class="lineNum">    930 </span>              : 		out = false; </span>
+<span class="lineNum">    931 </span><span class="lineCov">    2 / 2     : 	fclose(f); </span>
+<span class="lineNum">    932 </span>              :  </span>
+<span class="lineNum">    933 </span><span class="lineCov">    1 / 1     : 	if (IsImageFile(path, header, size)) </span>
+<span class="lineNum">    934 </span><span class="lineCov">    1 / 1     : 		type = FILE_IMAGE; </span>
+<span class="lineNum">    935 </span><span class="lineCov">    1 / 1     : 	else if (IsArchFile(path, header, size)) </span>
+<span class="lineNum">    936 </span><span class="lineCov">    1 / 1     : 		type = FILE_ARCH; </span>
+<span class="lineNum">    937 </span>              : 	else </span>
+<span class="lineNum">    938 </span>              : 		out = false; </span>
+<span class="lineNum">    939 </span>              :  </span>
+<span class="lineNum">    940 </span>              : 	return out; </span>
+<span class="lineNum">    941 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    942 </span>              :  </span>
+<span class="lineNum">    943 </span>              :  </span>
+<span class="lineNum">    944 </span>              : /* </span>
+<span class="lineNum">    945 </span>              :  *  Read directory of mountable disk image or archive file into c64_dir_entry vector, </span>
+<span class="lineNum">    946 </span>              :  *  returns false on error </span>
+<span class="lineNum">    947 </span>              :  */ </span>
+<span class="lineNum">    948 </span>              :  </span>
+<span class="lineNum">    949 </span>              : bool ReadDirectory(const char *path, int type, vector&lt;c64_dir_entry&gt; &amp;vec) </span>
+<span class="lineNum">    950 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    951 </span>              : 	vec.clear(); </span>
+<span class="lineNum">    952 </span><span class="lineNoCov">    0 / 3     : 	switch (type) { </span>
+<span class="lineNum">    953 </span>              : 		case FILE_IMAGE: </span>
+<span class="lineNum">    954 </span><span class="lineNoCov">    0 / 2     : 			return ReadImageDirectory(path, vec); </span>
+<span class="lineNum">    955 </span>              : 		case FILE_ARCH: </span>
+<span class="lineNum">    956 </span><span class="lineNoCov">    0 / 2     : 			return ReadArchDirectory(path, vec); </span>
+<span class="lineNum">    957 </span>              : 		default: </span>
+<span class="lineNum">    958 </span>              : 			return false; </span>
+<span class="lineNum">    959 </span>              : 	} </span>
+<span class="lineNum">    960 </span><span class="lineNoCov">    0 / 3     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

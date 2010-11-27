@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">26</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftLo" width="15%">0.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">0</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  CPU1541.h - 6502 (1541) emulation (line based) </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : #ifndef _CPU_1541_H </span>
+<span class="lineNum">     22 </span>              : #define _CPU_1541_H </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span>              : #include &quot;CIA.h&quot; </span>
+<span class="lineNum">     25 </span>              : #include &quot;C64.h&quot; </span>
+<span class="lineNum">     26 </span>              :  </span>
+<span class="lineNum">     27 </span>              :  </span>
+<span class="lineNum">     28 </span>              : // Set this to 1 if the 6502 PC should be represented by a real pointer </span>
+<span class="lineNum">     29 </span>              : #ifndef FRODO_SC </span>
+<span class="lineNum">     30 </span>              : #ifndef PC_IS_POINTER </span>
+<span class="lineNum">     31 </span>              : #define PC_IS_POINTER 1 </span>
+<span class="lineNum">     32 </span>              : #endif </span>
+<span class="lineNum">     33 </span>              : #endif </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : // Set this to 1 for more precise CPU cycle calculation </span>
+<span class="lineNum">     36 </span>              : #ifndef PRECISE_CPU_CYCLES </span>
+<span class="lineNum">     37 </span>              : #define PRECISE_CPU_CYCLES 0 </span>
+<span class="lineNum">     38 </span>              : #endif </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              :  </span>
+<span class="lineNum">     41 </span>              : // Interrupt types </span>
+<span class="lineNum">     42 </span>              : enum { </span>
+<span class="lineNum">     43 </span>              : 	INT_VIA1IRQ, </span>
+<span class="lineNum">     44 </span>              : 	INT_VIA2IRQ, </span>
+<span class="lineNum">     45 </span>              : 	INT_IECIRQ </span>
+<span class="lineNum">     46 </span>              : 	// INT_RESET (private) </span>
+<span class="lineNum">     47 </span>              : }; </span>
+<span class="lineNum">     48 </span>              :  </span>
+<span class="lineNum">     49 </span>              :  </span>
+<span class="lineNum">     50 </span>              : class C64; </span>
+<span class="lineNum">     51 </span>              : class Job1541; </span>
+<span class="lineNum">     52 </span>              : class C64Display; </span>
+<span class="lineNum">     53 </span>              : struct MOS6502State; </span>
+<span class="lineNum">     54 </span>              :  </span>
+<span class="lineNum">     55 </span>              :  </span>
+<span class="lineNum">     56 </span>              : // 6502 emulation (1541) </span>
+<span class="lineNum">     57 </span>              : class MOS6502_1541 { </span>
+<span class="lineNum">     58 </span>              : public: </span>
+<span class="lineNum">     59 </span>              : 	MOS6502_1541(C64 *c64, Job1541 *job, C64Display *disp, uint8 *Ram, uint8 *Rom); </span>
+<span class="lineNum">     60 </span>              :  </span>
+<span class="lineNum">     61 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">     62 </span>              : 	void EmulateCycle(void);			// Emulate one clock cycle </span>
+<span class="lineNum">     63 </span>              : #else </span>
+<span class="lineNum">     64 </span>              : 	int EmulateLine(int cycles_left);	// Emulate until cycles_left underflows </span>
+<span class="lineNum">     65 </span>              : #endif </span>
+<span class="lineNum">     66 </span>              : 	void Reset(void); </span>
+<span class="lineNum">     67 </span>              : 	void AsyncReset(void);				// Reset the CPU asynchronously </span>
+<span class="lineNum">     68 </span>              : 	void GetState(MOS6502State *s); </span>
+<span class="lineNum">     69 </span>              : 	void SetState(MOS6502State *s); </span>
+<span class="lineNum">     70 </span>              : 	uint8 ExtReadByte(uint16 adr); </span>
+<span class="lineNum">     71 </span>              : 	void ExtWriteByte(uint16 adr, uint8 byte); </span>
+<span class="lineNum">     72 </span>              : 	void CountVIATimers(int cycles); </span>
+<span class="lineNum">     73 </span>              : 	void NewATNState(void); </span>
+<span class="lineNum">     74 </span>              : 	void IECInterrupt(void); </span>
+<span class="lineNum">     75 </span>              : 	void TriggerJobIRQ(void); </span>
+<span class="lineNum">     76 </span>              : 	bool InterruptEnabled(void); </span>
+<span class="lineNum">     77 </span>              :  </span>
+<span class="lineNum">     78 </span>              : 	MOS6526_2 *TheCIA2;		// Pointer to C64 CIA 2 </span>
+<span class="lineNum">     79 </span>              :  </span>
+<span class="lineNum">     80 </span>              : 	uint8 IECLines;			// State of IEC lines (bit 7 - DATA, bit 6 - CLK) </span>
+<span class="lineNum">     81 </span>              : 	bool Idle;				// true: 1541 is idle </span>
+<span class="lineNum">     82 </span>              :  </span>
+<span class="lineNum">     83 </span>              : private: </span>
+<span class="lineNum">     84 </span>              : 	uint8 read_byte(uint16 adr); </span>
+<span class="lineNum">     85 </span>              : 	uint8 read_byte_io(uint16 adr); </span>
+<span class="lineNum">     86 </span>              : 	uint16 read_word(uint16 adr); </span>
+<span class="lineNum">     87 </span>              : 	void write_byte(uint16 adr, uint8 byte); </span>
+<span class="lineNum">     88 </span>              : 	void write_byte_io(uint16 adr, uint8 byte); </span>
+<span class="lineNum">     89 </span>              :  </span>
+<span class="lineNum">     90 </span>              : 	uint8 read_zp(uint16 adr); </span>
+<span class="lineNum">     91 </span>              : 	uint16 read_zp_word(uint16 adr); </span>
+<span class="lineNum">     92 </span>              : 	void write_zp(uint16 adr, uint8 byte); </span>
+<span class="lineNum">     93 </span>              :  </span>
+<span class="lineNum">     94 </span>              : 	void jump(uint16 adr); </span>
+<span class="lineNum">     95 </span>              : 	void illegal_op(uint8 op, uint16 at); </span>
+<span class="lineNum">     96 </span>              : 	void illegal_jump(uint16 at, uint16 to); </span>
+<span class="lineNum">     97 </span>              :  </span>
+<span class="lineNum">     98 </span>              : 	void do_adc(uint8 byte); </span>
+<span class="lineNum">     99 </span>              : 	void do_sbc(uint8 byte); </span>
+<span class="lineNum">    100 </span>              :  </span>
+<span class="lineNum">    101 </span>              : 	uint8 *ram;				// Pointer to main RAM </span>
+<span class="lineNum">    102 </span>              : 	uint8 *rom;				// Pointer to ROM </span>
+<span class="lineNum">    103 </span>              : 	C64 *the_c64;			// Pointer to C64 object </span>
+<span class="lineNum">    104 </span>              : 	C64Display *the_display; // Pointer to C64 display object </span>
+<span class="lineNum">    105 </span>              : 	Job1541 *the_job;		// Pointer to 1541 job object </span>
+<span class="lineNum">    106 </span>              :  </span>
+<span class="lineNum">    107 </span>              : 	union {					// Pending interrupts </span>
+<span class="lineNum">    108 </span>              : 		uint8 intr[4];		// Index: See definitions above </span>
+<span class="lineNum">    109 </span>              : 		unsigned long intr_any; </span>
+<span class="lineNum">    110 </span>              : 	} interrupt; </span>
+<span class="lineNum">    111 </span>              :  </span>
+<span class="lineNum">    112 </span>              : 	uint8 n_flag, z_flag; </span>
+<span class="lineNum">    113 </span>              : 	bool v_flag, d_flag, i_flag, c_flag; </span>
+<span class="lineNum">    114 </span>              : 	uint8 a, x, y, sp; </span>
+<span class="lineNum">    115 </span>              : #if PC_IS_POINTER </span>
+<span class="lineNum">    116 </span>              : 	uint8 *pc, *pc_base; </span>
+<span class="lineNum">    117 </span>              : #else </span>
+<span class="lineNum">    118 </span>              : 	uint16 pc; </span>
+<span class="lineNum">    119 </span>              : #endif </span>
+<span class="lineNum">    120 </span>              :  </span>
+<span class="lineNum">    121 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">    122 </span>              : 	uint32 first_irq_cycle; </span>
+<span class="lineNum">    123 </span>              :  </span>
+<span class="lineNum">    124 </span>              : 	uint8 state, op;		// Current state and opcode </span>
+<span class="lineNum">    125 </span>              : 	uint16 ar, ar2;			// Address registers </span>
+<span class="lineNum">    126 </span>              : 	uint8 rdbuf;			// Data buffer for RMW instructions </span>
+<span class="lineNum">    127 </span>              : 	uint8 ddr, pr;			// Processor port </span>
+<span class="lineNum">    128 </span>              : #else </span>
+<span class="lineNum">    129 </span>              : 	int borrowed_cycles;	// Borrowed cycles from next line </span>
+<span class="lineNum">    130 </span>              : #endif </span>
+<span class="lineNum">    131 </span>              :  </span>
+<span class="lineNum">    132 </span>              : 	uint8 via1_pra;		// PRA of VIA 1 </span>
+<span class="lineNum">    133 </span>              : 	uint8 via1_ddra;	// DDRA of VIA 1 </span>
+<span class="lineNum">    134 </span>              : 	uint8 via1_prb;		// PRB of VIA 1 </span>
+<span class="lineNum">    135 </span>              : 	uint8 via1_ddrb;	// DDRB of VIA 1 </span>
+<span class="lineNum">    136 </span>              : 	uint16 via1_t1c;		// T1 Counter of VIA 1 </span>
+<span class="lineNum">    137 </span>              : 	uint16 via1_t1l;		// T1 Latch of VIA 1 </span>
+<span class="lineNum">    138 </span>              : 	uint16 via1_t2c;		// T2 Counter of VIA 1 </span>
+<span class="lineNum">    139 </span>              : 	uint16 via1_t2l;		// T2 Latch of VIA 1 </span>
+<span class="lineNum">    140 </span>              : 	uint8 via1_sr;		// SR of VIA 1 </span>
+<span class="lineNum">    141 </span>              : 	uint8 via1_acr;		// ACR of VIA 1 </span>
+<span class="lineNum">    142 </span>              : 	uint8 via1_pcr;		// PCR of VIA 1 </span>
+<span class="lineNum">    143 </span>              : 	uint8 via1_ifr;		// IFR of VIA 1 </span>
+<span class="lineNum">    144 </span>              : 	uint8 via1_ier;		// IER of VIA 1 </span>
+<span class="lineNum">    145 </span>              :  </span>
+<span class="lineNum">    146 </span>              : 	uint8 via2_pra;		// PRA of VIA 2 </span>
+<span class="lineNum">    147 </span>              : 	uint8 via2_ddra;	// DDRA of VIA 2 </span>
+<span class="lineNum">    148 </span>              : 	uint8 via2_prb;		// PRB of VIA 2 </span>
+<span class="lineNum">    149 </span>              : 	uint8 via2_ddrb;	// DDRB of VIA 2 </span>
+<span class="lineNum">    150 </span>              : 	uint16 via2_t1c;		// T1 Counter of VIA 2 </span>
+<span class="lineNum">    151 </span>              : 	uint16 via2_t1l;		// T1 Latch of VIA 2 </span>
+<span class="lineNum">    152 </span>              : 	uint16 via2_t2c;		// T2 Counter of VIA 2 </span>
+<span class="lineNum">    153 </span>              : 	uint16 via2_t2l;		// T2 Latch of VIA 2 </span>
+<span class="lineNum">    154 </span>              : 	uint8 via2_sr;		// SR of VIA 2 </span>
+<span class="lineNum">    155 </span>              : 	uint8 via2_acr;		// ACR of VIA 2 </span>
+<span class="lineNum">    156 </span>              : 	uint8 via2_pcr;		// PCR of VIA 2 </span>
+<span class="lineNum">    157 </span>              : 	uint8 via2_ifr;		// IFR of VIA 2 </span>
+<span class="lineNum">    158 </span>              : 	uint8 via2_ier;		// IER of VIA 2 </span>
+<span class="lineNum">    159 </span>              : }; </span>
+<span class="lineNum">    160 </span>              :  </span>
+<span class="lineNum">    161 </span>              : // 6502 state </span>
+<span class="lineNum">    162 </span>              : struct MOS6502State { </span>
+<span class="lineNum">    163 </span>              : 	uint8 a, x, y; </span>
+<span class="lineNum">    164 </span>              : 	uint8 p;			// Processor flags </span>
+<span class="lineNum">    165 </span>              : 	uint16 pc, sp; </span>
+<span class="lineNum">    166 </span>              :  </span>
+<span class="lineNum">    167 </span>              : 	uint8 intr[4];		// Interrupt state </span>
+<span class="lineNum">    168 </span>              : 	bool instruction_complete; </span>
+<span class="lineNum">    169 </span>              : 	bool idle; </span>
+<span class="lineNum">    170 </span>              :  </span>
+<span class="lineNum">    171 </span>              : 	uint8 via1_pra;		// VIA 1 </span>
+<span class="lineNum">    172 </span>              : 	uint8 via1_ddra; </span>
+<span class="lineNum">    173 </span>              : 	uint8 via1_prb; </span>
+<span class="lineNum">    174 </span>              : 	uint8 via1_ddrb; </span>
+<span class="lineNum">    175 </span>              : 	uint16 via1_t1c; </span>
+<span class="lineNum">    176 </span>              : 	uint16 via1_t1l; </span>
+<span class="lineNum">    177 </span>              : 	uint16 via1_t2c; </span>
+<span class="lineNum">    178 </span>              : 	uint16 via1_t2l; </span>
+<span class="lineNum">    179 </span>              : 	uint8 via1_sr; </span>
+<span class="lineNum">    180 </span>              : 	uint8 via1_acr; </span>
+<span class="lineNum">    181 </span>              : 	uint8 via1_pcr; </span>
+<span class="lineNum">    182 </span>              : 	uint8 via1_ifr; </span>
+<span class="lineNum">    183 </span>              : 	uint8 via1_ier; </span>
+<span class="lineNum">    184 </span>              :  </span>
+<span class="lineNum">    185 </span>              : 	uint8 via2_pra;		// VIA 2 </span>
+<span class="lineNum">    186 </span>              : 	uint8 via2_ddra; </span>
+<span class="lineNum">    187 </span>              : 	uint8 via2_prb; </span>
+<span class="lineNum">    188 </span>              : 	uint8 via2_ddrb; </span>
+<span class="lineNum">    189 </span>              : 	uint16 via2_t1c; </span>
+<span class="lineNum">    190 </span>              : 	uint16 via2_t1l; </span>
+<span class="lineNum">    191 </span>              : 	uint16 via2_t2c; </span>
+<span class="lineNum">    192 </span>              : 	uint16 via2_t2l; </span>
+<span class="lineNum">    193 </span>              : 	uint8 via2_sr; </span>
+<span class="lineNum">    194 </span>              : 	uint8 via2_acr; </span>
+<span class="lineNum">    195 </span>              : 	uint8 via2_pcr; </span>
+<span class="lineNum">    196 </span>              : 	uint8 via2_ifr; </span>
+<span class="lineNum">    197 </span>              : 	uint8 via2_ier; </span>
+<span class="lineNum">    198 </span>              : }; </span>
+<span class="lineNum">    199 </span>              :  </span>
+<span class="lineNum">    200 </span>              :  </span>
+<span class="lineNum">    201 </span>              :  </span>
+<span class="lineNum">    202 </span>              : /* </span>
+<span class="lineNum">    203 </span>              :  *  Trigger job loop IRQ </span>
+<span class="lineNum">    204 </span>              :  */ </span>
+<span class="lineNum">    205 </span>              :  </span>
+<span class="lineNum">    206 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">    207 </span>              : inline void MOS6502_1541::TriggerJobIRQ(void) </span>
+<span class="lineNum">    208 </span>              : { </span>
+<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 3     : 	if (!(interrupt.intr[INT_VIA2IRQ])) </span>
+<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 3     : 		first_irq_cycle = the_c64-&gt;CycleCounter; </span>
+<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 3     : 	interrupt.intr[INT_VIA2IRQ] = true; </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 3     : 	Idle = false; </span>
+<span class="lineNum">    213 </span>              : } </span>
+<span class="lineNum">    214 </span>              : #else </span>
+<span class="lineNum">    215 </span>              : inline void MOS6502_1541::TriggerJobIRQ(void) </span>
+<span class="lineNum">    216 </span>              : { </span>
+<span class="lineNum">    217 </span>              : 	interrupt.intr[INT_VIA2IRQ] = true; </span>
+<span class="lineNum">    218 </span>              : 	Idle = false; </span>
+<span class="lineNum">    219 </span>              : } </span>
+<span class="lineNum">    220 </span>              : #endif </span>
+<span class="lineNum">    221 </span>              :  </span>
+<span class="lineNum">    222 </span>              :  </span>
+<span class="lineNum">    223 </span>              : /* </span>
+<span class="lineNum">    224 </span>              :  *  Count VIA timers </span>
+<span class="lineNum">    225 </span>              :  */ </span>
+<span class="lineNum">    226 </span>              :  </span>
+<span class="lineNum">    227 </span>              : inline void MOS6502_1541::CountVIATimers(int cycles) </span>
+<span class="lineNum">    228 </span>              : { </span>
+<span class="lineNum">    229 </span>              : 	unsigned long tmp; </span>
+<span class="lineNum">    230 </span>              :  </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 6     : 	via1_t1c = tmp = via1_t1c - cycles; </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 6     : 	if (tmp &gt; 0xffff) { </span>
+<span class="lineNum">    233 </span><span class="lineNoCov">    0 / 3     : 		if (via1_acr &amp; 0x40)	// Reload from latch in free-run mode </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 3     : 			via1_t1c = via1_t1l; </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 3     : 		via1_ifr |= 0x40; </span>
+<span class="lineNum">    236 </span>              : 	} </span>
+<span class="lineNum">    237 </span>              :  </span>
+<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 3     : 	if (!(via1_acr &amp; 0x20)) {	// Only count in one-shot mode </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 6     : 		via1_t2c = tmp = via1_t2c - cycles; </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 6     : 		if (tmp &gt; 0xffff) </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 3     : 			via1_ifr |= 0x20; </span>
+<span class="lineNum">    242 </span>              : 	} </span>
+<span class="lineNum">    243 </span>              :  </span>
+<span class="lineNum">    244 </span><span class="lineNoCov">    0 / 6     : 	via2_t1c = tmp = via2_t1c - cycles; </span>
+<span class="lineNum">    245 </span><span class="lineNoCov">    0 / 6     : 	if (tmp &gt; 0xffff) { </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 3     : 		if (via2_acr &amp; 0x40)	// Reload from latch in free-run mode </span>
+<span class="lineNum">    247 </span><span class="lineNoCov">    0 / 3     : 			via2_t1c = via2_t1l; </span>
+<span class="lineNum">    248 </span><span class="lineNoCov">    0 / 3     : 		via2_ifr |= 0x40; </span>
+<span class="lineNum">    249 </span><span class="lineNoCov">    0 / 3     : 		if (via2_ier &amp; 0x40) </span>
+<span class="lineNum">    250 </span>              : 			TriggerJobIRQ(); </span>
+<span class="lineNum">    251 </span>              : 	} </span>
+<span class="lineNum">    252 </span>              :  </span>
+<span class="lineNum">    253 </span><span class="lineNoCov">    0 / 3     : 	if (!(via2_acr &amp; 0x20)) {	// Only count in one-shot mode </span>
+<span class="lineNum">    254 </span><span class="lineNoCov">    0 / 6     : 		via2_t2c = tmp = via2_t2c - cycles; </span>
+<span class="lineNum">    255 </span><span class="lineNoCov">    0 / 6     : 		if (tmp &gt; 0xffff) </span>
+<span class="lineNum">    256 </span><span class="lineNoCov">    0 / 3     : 			via2_ifr |= 0x20; </span>
+<span class="lineNum">    257 </span>              : 	} </span>
+<span class="lineNum">    258 </span>              : } </span>
+<span class="lineNum">    259 </span>              :  </span>
+<span class="lineNum">    260 </span>              :  </span>
+<span class="lineNum">    261 </span>              : /* </span>
+<span class="lineNum">    262 </span>              :  *  ATN line probably changed state, recalc IECLines </span>
+<span class="lineNum">    263 </span>              :  */ </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span>              : inline void MOS6502_1541::NewATNState(void) </span>
+<span class="lineNum">    266 </span>              : { </span>
+<span class="lineNum">    267 </span>              : 	uint8 byte = ~via1_prb &amp; via1_ddrb; </span>
+<span class="lineNum">    268 </span>              : 	IECLines = ((byte &lt;&lt; 6) &amp; ((~byte ^ TheCIA2-&gt;IECLines) &lt;&lt; 3) &amp; 0x80)	// DATA (incl. ATN acknowledge) </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 2     : 		| ((byte &lt;&lt; 3) &amp; 0x40);						// CLK </span>
+<span class="lineNum">    270 </span>              : } </span>
+<span class="lineNum">    271 </span>              :  </span>
+<span class="lineNum">    272 </span>              :  </span>
+<span class="lineNum">    273 </span>              : /* </span>
+<span class="lineNum">    274 </span>              :  *  Interrupt by negative edge of ATN on IEC bus </span>
+<span class="lineNum">    275 </span>              :  */ </span>
+<span class="lineNum">    276 </span>              :  </span>
+<span class="lineNum">    277 </span>              : inline void MOS6502_1541::IECInterrupt(void) </span>
+<span class="lineNum">    278 </span>              : { </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 	ram[0x7c] = 1; </span>
+<span class="lineNum">    280 </span>              :  </span>
+<span class="lineNum">    281 </span>              : 	// Wake up 1541 </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : 	Idle = false; </span>
+<span class="lineNum">    283 </span>              : } </span>
+<span class="lineNum">    284 </span>              :  </span>
+<span class="lineNum">    285 </span>              :  </span>
+<span class="lineNum">    286 </span>              : /* </span>
+<span class="lineNum">    287 </span>              :  *  Test if interrupts are enabled (for job loop) </span>
+<span class="lineNum">    288 </span>              :  */ </span>
+<span class="lineNum">    289 </span>              :  </span>
+<span class="lineNum">    290 </span>              : inline bool MOS6502_1541::InterruptEnabled(void) </span>
+<span class="lineNum">    291 </span>              : { </span>
+<span class="lineNum">    292 </span>              : 	return !i_flag; </span>
+<span class="lineNum">    293 </span>              : } </span>
+<span class="lineNum">    294 </span>              :  </span>
+<span class="lineNum">    295 </span>              : #endif </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

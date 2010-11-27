@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">63</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">66.7 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">42</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">      2 </span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">      3 </span>              : #include &quot;help_box.hh&quot; </span>
+<span class="lineNum">      4 </span>              : #include &quot;status_bar.hh&quot; </span>
+<span class="lineNum">      5 </span>              :  </span>
+<span class="lineNum">      6 </span>              : #include &lt;Prefs.h&gt; </span>
+<span class="lineNum">      7 </span>              :  </span>
+<span class="lineNum">      8 </span>              : class OptionsView; </span>
+<span class="lineNum">      9 </span>              : class OptionsMenu : public Menu </span>
+<span class="lineNum">     10 </span>              : { </span>
+<span class="lineNum">     11 </span>              : 	friend class OptionsView; </span>
+<span class="lineNum">     12 </span>              :  </span>
+<span class="lineNum">     13 </span>              : public: </span>
+<span class="lineNum">     14 </span><span class="lineCov">    3 / 3     : 	OptionsMenu(Font *font, HelpBox *help) : Menu(font) </span>
+<span class="lineNum">     15 </span>              : 	{ </span>
+<span class="lineNum">     16 </span><span class="lineCov">    2 / 2     : 		this-&gt;help = help; </span>
+<span class="lineNum">     17 </span><span class="lineCov">    1 / 1     : 		this-&gt;setText(options_menu_messages); </span>
+<span class="lineNum">     18 </span>              : 	} </span>
+<span class="lineNum">     19 </span>              :  </span>
+<span class="lineNum">     20 </span>              : 	~OptionsMenu() </span>
+<span class="lineNum">     21 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
+<span class="lineNum">     22 </span><span class="lineNoCov">    0 / 2     : 	} </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 1     : 	virtual void selectCallback(int which) </span>
+<span class="lineNum">     25 </span>              : 	{ </span>
+<span class="lineNum">     26 </span><span class="lineNoCov">    0 / 1     : 		if (which == 0) </span>
+<span class="lineNum">     27 </span>              : 		{ </span>
+<span class="lineNum">     28 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;pushDialogueBox(new DialogueBox(frodo_help)); </span>
+<span class="lineNum">     29 </span>              : 			return; </span>
+<span class="lineNum">     30 </span>              : 		} </span>
+<span class="lineNum">     31 </span><span class="lineNoCov">    0 / 1     : 		else if (which == 10) </span>
+<span class="lineNum">     32 </span>              : 		{ </span>
+<span class="lineNum">     33 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Resetting the C64&quot;); </span>
+<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;exitMenu(); </span>
+<span class="lineNum">     35 </span><span class="lineNoCov">    0 / 4     : 			TheC64-&gt;Reset(); </span>
+<span class="lineNum">     36 </span>              : 			return; </span>
+<span class="lineNum">     37 </span>              : 		} </span>
+<span class="lineNum">     38 </span>              : 		/* Select theme */ </span>
+<span class="lineNum">     39 </span><span class="lineNoCov">    0 / 1     : 		else if (which == 12) </span>
+<span class="lineNum">     40 </span>              : 		{ </span>
+<span class="lineNum">     41 </span><span class="lineNoCov">    0 / 1     : 			Gui::gui-&gt;tv-&gt;setDirectory(Gui::gui-&gt;theme_base_path); </span>
+<span class="lineNum">     42 </span><span class="lineNoCov">    0 / 3     : 			Gui::gui-&gt;pushView(Gui::gui-&gt;tv); </span>
+<span class="lineNum">     43 </span>              : 			return; </span>
+<span class="lineNum">     44 </span>              : 		} </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : 		/* Doesn't matter which otherwise, it's just selection */ </span>
+<span class="lineNum">     47 </span>              : 		this-&gt;updatePrefs(); </span>
+<span class="lineNum">     48 </span><span class="lineNoCov">    0 / 2     : 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">     49 </span><span class="lineNoCov">    0 / 6     : 	} </span>
+<span class="lineNum">     50 </span>              :  </span>
+<span class="lineNum">     51 </span><span class="lineCov">    1 / 1     : 	virtual void hoverCallback(int which) </span>
+<span class="lineNum">     52 </span>              : 	{ </span>
+<span class="lineNum">     53 </span><span class="lineCov">    1 / 1     : 		this-&gt;help-&gt;updateHelpMessage(which); </span>
+<span class="lineNum">     54 </span><span class="linePartCov">    1 / 2     : 	} </span>
+<span class="lineNum">     55 </span>              :  </span>
+<span class="lineNum">     56 </span><span class="lineCov">    1 / 1     : 	virtual void escapeCallback(int which) </span>
+<span class="lineNum">     57 </span>              : 	{ </span>
+<span class="lineNum">     58 </span>              : 		this-&gt;updatePrefs(); </span>
+<span class="lineNum">     59 </span><span class="lineCov">    2 / 2     : 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">     60 </span><span class="lineCov">    1 / 1     : 	} </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              : 	void updatePrefs() </span>
+<span class="lineNum">     63 </span>              : 	{ </span>
+<span class="lineNum">     64 </span><span class="linePartCov">    3 / 6     : 		Gui::gui-&gt;np-&gt;JoystickSwap = !this-&gt;p_submenus[0].sel; </span>
+<span class="lineNum">     65 </span><span class="linePartCov">    2 / 4     : 		Gui::gui-&gt;np-&gt;Emul1541Proc = !this-&gt;p_submenus[1].sel; </span>
+<span class="lineNum">     66 </span><span class="linePartCov">    2 / 4     : 		Gui::gui-&gt;np-&gt;DisplayType = this-&gt;p_submenus[2].sel == 0 ? DISPTYPE_WINDOW : DISPTYPE_SCREEN; </span>
+<span class="lineNum">     67 </span>              :  </span>
+<span class="lineNum">     68 </span><span class="linePartCov">    1 / 2     : 		switch (this-&gt;p_submenus[3].sel) </span>
+<span class="lineNum">     69 </span>              : 		{ </span>
+<span class="lineNum">     70 </span>              : 		case 0: </span>
+<span class="lineNum">     71 </span><span class="lineNoCov">    0 / 2     : 			Gui::gui-&gt;np-&gt;MsPerFrame = SPEED_95; break; </span>
+<span class="lineNum">     72 </span>              : 		case 1: </span>
+<span class="lineNum">     73 </span><span class="linePartCov">    1 / 3     : 			Gui::gui-&gt;np-&gt;MsPerFrame = SPEED_100; break; </span>
+<span class="lineNum">     74 </span>              : 		case 2: </span>
+<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 2     : 			Gui::gui-&gt;np-&gt;MsPerFrame = SPEED_110; break; </span>
+<span class="lineNum">     76 </span>              : 		default: </span>
+<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 2     : 			panic(&quot;Impossible submenu value: %d\n&quot;, this-&gt;p_submenus[4].sel); </span>
+<span class="lineNum">     78 </span>              : 		} </span>
+<span class="lineNum">     79 </span>              : 	} </span>
+<span class="lineNum">     80 </span>              :  </span>
+<span class="lineNum">     81 </span>              : 	void updateSubmenus() </span>
+<span class="lineNum">     82 </span>              : 	{ </span>
+<span class="lineNum">     83 </span>              : 		int submenu_defs[5]; </span>
+<span class="lineNum">     84 </span>              :  </span>
+<span class="lineNum">     85 </span><span class="lineCov">    1 / 1     : 		submenu_defs[0] = Gui::gui-&gt;np-&gt;JoystickSwap == true ? 0 : 1; </span>
+<span class="lineNum">     86 </span><span class="lineCov">    1 / 1     : 		submenu_defs[1] = !Gui::gui-&gt;np-&gt;Emul1541Proc; </span>
+<span class="lineNum">     87 </span><span class="lineCov">    1 / 1     : 		submenu_defs[2] = Gui::gui-&gt;np-&gt;DisplayType == DISPTYPE_SCREEN; </span>
+<span class="lineNum">     88 </span>              :  </span>
+<span class="lineNum">     89 </span><span class="lineCov">    1 / 1     : 		switch (Gui::gui-&gt;np-&gt;MsPerFrame) </span>
+<span class="lineNum">     90 </span>              : 		{ </span>
+<span class="lineNum">     91 </span>              : 	        case SPEED_95: </span>
+<span class="lineNum">     92 </span>              : 	        	submenu_defs[3] = 0; break; </span>
+<span class="lineNum">     93 </span>              : 		case SPEED_110: </span>
+<span class="lineNum">     94 </span><span class="lineNoCov">    0 / 2     : 			submenu_defs[3] = 2; break; </span>
+<span class="lineNum">     95 </span>              : 		default: </span>
+<span class="lineNum">     96 </span>              : 	                /* If it has some other value... */ </span>
+<span class="lineNum">     97 </span><span class="lineCov">    1 / 1     : 		        submenu_defs[3] = 1; break; </span>
+<span class="lineNum">     98 </span>              : 		} </span>
+<span class="lineNum">     99 </span>              :  </span>
+<span class="lineNum">    100 </span><span class="lineCov">    1 / 1     : 		this-&gt;setText(options_menu_messages, submenu_defs); </span>
+<span class="lineNum">    101 </span>              : 	} </span>
+<span class="lineNum">    102 </span>              :  </span>
+<span class="lineNum">    103 </span>              : private: </span>
+<span class="lineNum">    104 </span>              : 	HelpBox *help; </span>
+<span class="lineNum">    105 </span>              : }; </span>
+<span class="lineNum">    106 </span>              :  </span>
+<span class="lineNum">    107 </span>              :  </span>
+<span class="lineNum">    108 </span>              : class OptionsView : public GuiView </span>
+<span class="lineNum">    109 </span>              : { </span>
+<span class="lineNum">    110 </span>              : public: </span>
+<span class="lineNum">    111 </span><span class="lineCov">    1 / 1     : 	OptionsView() : GuiView() </span>
+<span class="lineNum">    112 </span>              : 	{ </span>
+<span class="lineNum">    113 </span><span class="lineCov">    1 / 1     : 		this-&gt;help = new HelpBox(Gui::gui-&gt;small_font, options_menu_help); </span>
+<span class="lineNum">    114 </span><span class="lineCov">    3 / 3     : 		this-&gt;menu = new OptionsMenu(Gui::gui-&gt;default_font, this-&gt;help); </span>
+<span class="lineNum">    115 </span>              : 	} </span>
+<span class="lineNum">    116 </span>              :  </span>
+<span class="lineNum">    117 </span>              : 	~OptionsView() </span>
+<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
+<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 6     : 		delete this-&gt;help; </span>
+<span class="lineNum">    120 </span><span class="lineNoCov">    0 / 4     : 		delete this-&gt;menu; </span>
+<span class="lineNum">    121 </span>              : 	} </span>
+<span class="lineNum">    122 </span>              :  </span>
+<span class="lineNum">    123 </span><span class="lineCov">    1 / 1     : 	void viewPushCallback() </span>
+<span class="lineNum">    124 </span>              : 	{ </span>
+<span class="lineNum">    125 </span><span class="lineCov">    1 / 1     : 		this-&gt;menu-&gt;updateSubmenus(); </span>
+<span class="lineNum">    126 </span><span class="lineCov">    1 / 1     : 	} </span>
+<span class="lineNum">    127 </span>              :  </span>
+<span class="lineNum">    128 </span><span class="lineCov">    1 / 1     : 	void runLogic() </span>
+<span class="lineNum">    129 </span>              : 	{ </span>
+<span class="lineNum">    130 </span><span class="linePartCov">    1 / 3     : 		this-&gt;menu-&gt;runLogic(); </span>
+<span class="lineNum">    131 </span><span class="lineCov">    1 / 1     : 	} </span>
+<span class="lineNum">    132 </span>              :  </span>
+<span class="lineNum">    133 </span><span class="lineCov">    1 / 1     : 	void pushEvent(event_t ev) </span>
+<span class="lineNum">    134 </span>              : 	{ </span>
+<span class="lineNum">    135 </span><span class="linePartCov">    2 / 3     : 		this-&gt;menu-&gt;pushEvent(ev); </span>
+<span class="lineNum">    136 </span><span class="lineCov">    1 / 1     : 	} </span>
+<span class="lineNum">    137 </span>              :  </span>
+<span class="lineNum">    138 </span><span class="lineCov">    3 / 3     : 	void draw(SDL_Surface *where) </span>
+<span class="lineNum">    139 </span>              : 	{ </span>
+<span class="lineNum">    140 </span>              : 		 SDL_Rect dst; </span>
+<span class="lineNum">    141 </span>              :  </span>
+<span class="lineNum">    142 </span>              : 		 /* Blit the backgrounds */ </span>
+<span class="lineNum">    143 </span><span class="lineCov">    1 / 1     : 		 dst = (SDL_Rect){20,45,300,400}; </span>
+<span class="lineNum">    144 </span><span class="linePartCov">    2 / 3     : 		 SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
+<span class="lineNum">    145 </span>              :  </span>
+<span class="lineNum">    146 </span><span class="lineCov">    1 / 1     : 		 dst = (SDL_Rect){350,13,0,0}; </span>
+<span class="lineNum">    147 </span><span class="lineCov">    2 / 2     : 		 SDL_BlitSurface(Gui::gui-&gt;infobox, NULL, where, &amp;dst); </span>
+<span class="lineNum">    148 </span>              :  </span>
+<span class="lineNum">    149 </span><span class="lineCov">    1 / 1     : 		 dst = (SDL_Rect){350,242,0,0}; </span>
+<span class="lineNum">    150 </span><span class="lineCov">    2 / 2     : 		 SDL_BlitSurface(Gui::gui-&gt;network_message_box, NULL, where, &amp;dst); </span>
+<span class="lineNum">    151 </span>              :  </span>
+<span class="lineNum">    152 </span><span class="lineCov">    1 / 1     : 		 this-&gt;menu-&gt;draw(where, 50, 70, 300, 400); </span>
+<span class="lineNum">    153 </span><span class="lineCov">    1 / 1     : 		 this-&gt;help-&gt;draw(where, 354, 24, 264, 210); </span>
+<span class="lineNum">    154 </span><span class="linePartCov">    1 / 2     : 	} </span>
+<span class="lineNum">    155 </span>              :  </span>
+<span class="lineNum">    156 </span>              : protected: </span>
+<span class="lineNum">    157 </span>              : 	OptionsMenu *menu; </span>
+<span class="lineNum">    158 </span>              : 	HelpBox *help; </span>
+<span class="lineNum">    159 </span>              : }; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

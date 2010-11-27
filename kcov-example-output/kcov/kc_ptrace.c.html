@@ -1,0 +1,293 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:08:49</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">112</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">30.4 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">34</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  * See COPYING for license details </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  * Taken from bcov:Debugger.cpp: </span>
+<span class="lineNum">      7 </span>              :  * </span>
+<span class="lineNum">      8 </span>              :  * Copyright (C) 2007 Thomas Neumann </span>
+<span class="lineNum">      9 </span>              :  */ </span>
+<span class="lineNum">     10 </span>              : #include &lt;sys/ptrace.h&gt; </span>
+<span class="lineNum">     11 </span>              : #include &lt;asm/ptrace.h&gt; </span>
+<span class="lineNum">     12 </span>              : #include &lt;sys/user.h&gt; </span>
+<span class="lineNum">     13 </span>              : #include &lt;sys/wait.h&gt; </span>
+<span class="lineNum">     14 </span>              : #include &lt;sys/errno.h&gt; </span>
+<span class="lineNum">     15 </span>              : #include &lt;unistd.h&gt; </span>
+<span class="lineNum">     16 </span>              :  </span>
+<span class="lineNum">     17 </span>              : #include &lt;kc.h&gt; </span>
+<span class="lineNum">     18 </span>              : #include &lt;kc_ptrace_arch.h&gt; </span>
+<span class="lineNum">     19 </span>              : #include &lt;utils.h&gt; </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : static pid_t active_child, child; </span>
+<span class="lineNum">     22 </span>              :  </span>
+<span class="lineNum">     23 </span>              : static unsigned long peek_word(unsigned long addr) </span>
+<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     25 </span><span class="lineNoCov">    0 / 1     : 	unsigned long aligned = get_aligned(addr); </span>
+<span class="lineNum">     26 </span>              :  </span>
+<span class="lineNum">     27 </span><span class="lineNoCov">    0 / 1     : 	return ptrace(PTRACE_PEEKTEXT, active_child, aligned, 0); </span>
+<span class="lineNum">     28 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     29 </span>              :  </span>
+<span class="lineNum">     30 </span>              : static void poke_word(unsigned long addr, unsigned long val) </span>
+<span class="lineNum">     31 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     32 </span><span class="lineCov">    1 / 1     : 	ptrace(PTRACE_POKETEXT, active_child, addr, val); </span>
+<span class="lineNum">     33 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : static unsigned long ptrace_get_ip_before_trap(struct kc *kc) </span>
+<span class="lineNum">     36 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">     37 </span>              : 	uint8_t regs[1024]; </span>
+<span class="lineNum">     38 </span><span class="lineNoCov">    0 / 1     : 	struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc-&gt;e_machine); </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span><span class="lineNoCov">    0 / 1     : 	memset(&amp;regs, 0, sizeof(regs)); </span>
+<span class="lineNum">     41 </span><span class="lineNoCov">    0 / 1     : 	ptrace(PTRACE_GETREGS, active_child, 0, &amp;regs); </span>
+<span class="lineNum">     42 </span>              :  </span>
+<span class="lineNum">     43 </span><span class="lineNoCov">    0 / 1     : 	return arch-&gt;get_pc(kc, &amp;regs); </span>
+<span class="lineNum">     44 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : static void ptrace_setup_breakpoints(struct kc *kc) </span>
+<span class="lineNum">     47 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     48 </span>              : 	GHashTableIter iter; </span>
+<span class="lineNum">     49 </span>              : 	unsigned long key; </span>
+<span class="lineNum">     50 </span>              : 	struct kc_addr *addr; </span>
+<span class="lineNum">     51 </span><span class="lineNoCov">    0 / 1     : 	struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc-&gt;e_machine); </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span><span class="lineNoCov">    0 / 1     : 	if (!arch) </span>
+<span class="lineNum">     54 </span><span class="lineNoCov">    0 / 1     : 		error(&quot;The architecture %d isn't supported by KCOV yet\n&quot;, </span>
+<span class="lineNum">     55 </span>              : 				kc-&gt;e_machine); </span>
+<span class="lineNum">     56 </span>              :  </span>
+<span class="lineNum">     57 </span><span class="lineNoCov">    0 / 1     : 	g_hash_table_iter_init(&amp;iter, kc-&gt;addrs); </span>
+<span class="lineNum">     58 </span><span class="lineNoCov">    0 / 2     : 	while (g_hash_table_iter_next(&amp;iter, </span>
+<span class="lineNum">     59 </span>              : 			(gpointer*)&amp;key, (gpointer*)&amp;addr)) { </span>
+<span class="lineNum">     60 </span><span class="lineNoCov">    0 / 1     : 		unsigned long aligned_addr = get_aligned(addr-&gt;addr); </span>
+<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 1     : 		unsigned long old_word = peek_word(addr-&gt;addr); </span>
+<span class="lineNum">     62 </span>              : 		unsigned long new_word; </span>
+<span class="lineNum">     63 </span>              :  </span>
+<span class="lineNum">     64 </span><span class="lineNoCov">    0 / 1     : 		addr-&gt;saved_code = old_word; </span>
+<span class="lineNum">     65 </span><span class="lineNoCov">    0 / 1     : 		new_word = arch-&gt;setup_breakpoint(kc, addr-&gt;addr, old_word); </span>
+<span class="lineNum">     66 </span>              :  </span>
+<span class="lineNum">     67 </span><span class="lineNoCov">    0 / 1     : 		poke_word(aligned_addr, new_word); </span>
+<span class="lineNum">     68 </span>              : 	} </span>
+<span class="lineNum">     69 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     70 </span>              :  </span>
+<span class="lineNum">     71 </span>              : void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr) </span>
+<span class="lineNum">     72 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">     73 </span>              :    uint8_t regs[1024]; </span>
+<span class="lineNum">     74 </span><span class="lineCov">    1 / 1     :    struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc-&gt;e_machine); </span>
+<span class="lineNum">     75 </span>              :  </span>
+<span class="lineNum">     76 </span>              :    /* arch C't be NULL, or we would have exited when setting up BPs */ </span>
+<span class="lineNum">     77 </span><span class="lineCov">    1 / 1     :    memset(&amp;regs, 0, sizeof(regs)); </span>
+<span class="lineNum">     78 </span><span class="lineCov">    1 / 1     :    ptrace(PTRACE_GETREGS, active_child, 0, &amp;regs); </span>
+<span class="lineNum">     79 </span><span class="lineCov">    1 / 1     :    arch-&gt;adjust_pc_after_breakpoint(kc, &amp;regs); </span>
+<span class="lineNum">     80 </span><span class="lineCov">    1 / 1     :    ptrace(PTRACE_SETREGS, active_child, 0, &amp;regs); </span>
+<span class="lineNum">     81 </span>              :  </span>
+<span class="lineNum">     82 </span><span class="lineCov">    1 / 1     :    poke_word(get_aligned(addr-&gt;addr), addr-&gt;saved_code); </span>
+<span class="lineNum">     83 </span><span class="lineCov">    1 / 1     :    kc_addr_register_hit(addr); </span>
+<span class="lineNum">     84 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     85 </span>              :  </span>
+<span class="lineNum">     86 </span>              : enum { </span>
+<span class="lineNum">     87 </span>              : 	PT_CODE_ERROR, </span>
+<span class="lineNum">     88 </span>              : 	PT_CODE_TRAP, </span>
+<span class="lineNum">     89 </span>              : 	PT_CODE_EXIT, </span>
+<span class="lineNum">     90 </span>              : }; </span>
+<span class="lineNum">     91 </span>              :  </span>
+<span class="lineNum">     92 </span>              : static int do_ptrace_run(struct kc *kc) </span>
+<span class="lineNum">     93 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     94 </span>              : 	// Continue the stopped child </span>
+<span class="lineNum">     95 </span><span class="lineNoCov">    0 / 1     : 	ptrace(PTRACE_CONT, active_child, 0, 0); </span>
+<span class="lineNum">     96 </span>              :  </span>
+<span class="lineNum">     97 </span>              : 	while (1) { </span>
+<span class="lineNum">     98 </span>              : 		// Wait for a child </span>
+<span class="lineNum">     99 </span>              : 		int status; </span>
+<span class="lineNum">    100 </span>              :  </span>
+<span class="lineNum">    101 </span><span class="lineNoCov">    0 / 1     : 		pid_t r = waitpid(-1, &amp;status, __WALL); </span>
+<span class="lineNum">    102 </span>              :  </span>
+<span class="lineNum">    103 </span>              : 		// Got no one? Child probably died </span>
+<span class="lineNum">    104 </span><span class="lineNoCov">    0 / 1     : 		if (r == -1) </span>
+<span class="lineNum">    105 </span><span class="lineNoCov">    0 / 1     : 			return PT_CODE_EXIT; </span>
+<span class="lineNum">    106 </span><span class="lineNoCov">    0 / 1     : 		active_child = r; </span>
+<span class="lineNum">    107 </span>              :  </span>
+<span class="lineNum">    108 </span>              : 		// A signal? </span>
+<span class="lineNum">    109 </span><span class="lineNoCov">    0 / 1     : 		if (WIFSTOPPED(status)) { </span>
+<span class="lineNum">    110 </span>              : 			// A trap? </span>
+<span class="lineNum">    111 </span><span class="lineNoCov">    0 / 1     : 			if (WSTOPSIG(status) == SIGTRAP) </span>
+<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 1     : 				return PT_CODE_TRAP; </span>
+<span class="lineNum">    113 </span>              : 			// No, deliver it directly </span>
+<span class="lineNum">    114 </span><span class="lineNoCov">    0 / 1     : 			ptrace(PTRACE_CONT, active_child, 0, WSTOPSIG(status)); </span>
+<span class="lineNum">    115 </span><span class="lineNoCov">    0 / 1     : 			continue; </span>
+<span class="lineNum">    116 </span>              : 		} </span>
+<span class="lineNum">    117 </span>              : 		// Thread died? </span>
+<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 1     : 		if (WIFSIGNALED(status) || WIFEXITED(status)) { </span>
+<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 1     : 			if (active_child == child) </span>
+<span class="lineNum">    120 </span><span class="lineNoCov">    0 / 1     : 				return PT_CODE_EXIT; </span>
+<span class="lineNum">    121 </span><span class="lineNoCov">    0 / 1     : 			continue; </span>
+<span class="lineNum">    122 </span>              : 		} </span>
+<span class="lineNum">    123 </span>              : 		// Stopped? </span>
+<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 1     : 		if (WIFSTOPPED(status)) { </span>
+<span class="lineNum">    125 </span>              : 			// A new clone? Ignore the stop event </span>
+<span class="lineNum">    126 </span><span class="lineNoCov">    0 / 1     : 			if ((status &gt;&gt; 8) == PTRACE_EVENT_CLONE) { </span>
+<span class="lineNum">    127 </span><span class="lineNoCov">    0 / 1     : 				ptrace(PTRACE_CONT, active_child, 0, 0); </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 				continue; </span>
+<span class="lineNum">    129 </span>              : 			} </span>
+<span class="lineNum">    130 </span>              : 			// Hm, why did we stop? Ignore the event and continue </span>
+<span class="lineNum">    131 </span><span class="lineNoCov">    0 / 1     : 			ptrace(PTRACE_CONT, active_child, 0, 0); </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 1     : 			continue; </span>
+<span class="lineNum">    133 </span>              : 		} </span>
+<span class="lineNum">    134 </span>              :  </span>
+<span class="lineNum">    135 </span>              : 		// Unknown event </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 		return PT_CODE_ERROR; </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 	} </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    139 </span>              :  </span>
+<span class="lineNum">    140 </span>              : static void ptrace_run_debugger(struct kc *kc) </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    142 </span>              : 	while (1) { </span>
+<span class="lineNum">    143 </span><span class="lineNoCov">    0 / 1     : 		int err = do_ptrace_run(kc); </span>
+<span class="lineNum">    144 </span>              :  </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 1     : 		switch (err) { </span>
+<span class="lineNum">    146 </span>              : 		case PT_CODE_ERROR: </span>
+<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 2     : 			fprintf(stderr, &quot;Error while tracing\n&quot;); </span>
+<span class="lineNum">    148 </span>              : 		case PT_CODE_EXIT: </span>
+<span class="lineNum">    149 </span>              : 			return; </span>
+<span class="lineNum">    150 </span>              : 		case PT_CODE_TRAP: </span>
+<span class="lineNum">    151 </span>              : 		{ </span>
+<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 1     : 			unsigned long where = ptrace_get_ip_before_trap(kc); </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 1     : 			struct kc_addr *addr = kc_lookup_addr(kc, where); </span>
+<span class="lineNum">    154 </span>              :  </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     : 			if (addr) </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 				ptrace_eliminate_breakpoint(kc, addr); </span>
+<span class="lineNum">    157 </span>              :  </span>
+<span class="lineNum">    158 </span>              : 		} break; </span>
+<span class="lineNum">    159 </span>              :       } </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 2     :    } </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    162 </span>              :  </span>
+<span class="lineNum">    163 </span>              : static pid_t fork_child(const char *executable, char *const argv[]) </span>
+<span class="lineNum">    164 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    165 </span>              : 	/* Basic check first */ </span>
+<span class="lineNum">    166 </span><span class="lineCov">    1 / 1     : 	if (access(executable, X_OK) != 0) </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     : 		return -1; </span>
+<span class="lineNum">    168 </span>              :  </span>
+<span class="lineNum">    169 </span>              : 	/* Executable exists, try to launch it */ </span>
+<span class="lineNum">    170 </span><span class="lineCov">    1 / 1     : 	if ((child = fork()) == 0) { </span>
+<span class="lineNum">    171 </span>              :  </span>
+<span class="lineNum">    172 </span>              : 		/* And launch the process */ </span>
+<span class="lineNum">    173 </span><span class="lineCov">    1 / 1     : 		ptrace(PTRACE_TRACEME, 0, 0, 0); </span>
+<span class="lineNum">    174 </span><span class="lineCov">    1 / 1     : 		execv(executable, argv); </span>
+<span class="lineNum">    175 </span>              :  </span>
+<span class="lineNum">    176 </span>              : 		/* Exec failed */ </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 		return -1; </span>
+<span class="lineNum">    178 </span>              : 	} </span>
+<span class="lineNum">    179 </span>              :  </span>
+<span class="lineNum">    180 </span>              : 	/* Fork error? */ </span>
+<span class="lineNum">    181 </span><span class="lineCov">    1 / 1     : 	if (child &lt; 0) </span>
+<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 		return -1; </span>
+<span class="lineNum">    183 </span>              :  </span>
+<span class="lineNum">    184 </span>              : 	/* Wait for the initial stop */ </span>
+<span class="lineNum">    185 </span>              : 	int status; </span>
+<span class="lineNum">    186 </span><span class="lineCov">    1 / 1     : 	if ((waitpid(child, &amp;status, 0) == -1) || (!WIFSTOPPED(status))) </span>
+<span class="lineNum">    187 </span><span class="lineCov">    1 / 1     : 		return -1; </span>
+<span class="lineNum">    188 </span><span class="lineNoCov">    0 / 1     : 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK); </span>
+<span class="lineNum">    189 </span>              :  </span>
+<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 1     : 	return child; </span>
+<span class="lineNum">    191 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    192 </span>              :  </span>
+<span class="lineNum">    193 </span>              :  </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              : int ptrace_run(struct kc *kc, char *const argv[]) </span>
+<span class="lineNum">    196 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    197 </span><span class="lineCov">    1 / 1     : 	active_child = fork_child(argv[0], &amp;argv[0]); </span>
+<span class="lineNum">    198 </span>              :  </span>
+<span class="lineNum">    199 </span><span class="lineCov">    1 / 1     : 	if (active_child &lt; 0) { </span>
+<span class="lineNum">    200 </span><span class="lineCov">    1 / 1     : 		fprintf(stderr, &quot;Can't fork child!\n&quot;); </span>
+<span class="lineNum">    201 </span><span class="lineCov">    1 / 1     : 		return -1; </span>
+<span class="lineNum">    202 </span>              : 	} </span>
+<span class="lineNum">    203 </span>              :  </span>
+<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 1     : 	ptrace_setup_breakpoints(kc); </span>
+<span class="lineNum">    205 </span>              :  </span>
+<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 1     : 	ptrace_run_debugger(kc); </span>
+<span class="lineNum">    207 </span>              :  </span>
+<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 1     : 	return 0; </span>
+<span class="lineNum">    209 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    210 </span>              :  </span>
+<span class="lineNum">    211 </span>              : int ptrace_pid_run(struct kc *kc, pid_t pid) </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 	active_child = child = pid; </span>
+<span class="lineNum">    214 </span>              :  </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 1     : 	errno = 0; </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 1     : 	ptrace(PTRACE_ATTACH, active_child, 0, 0); </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 	if (errno) { </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 		const char *err = strerror(errno); </span>
+<span class="lineNum">    219 </span>              :  </span>
+<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 1     : 		fprintf(stderr, &quot;Can't attach to %d. Error %s\n&quot;, pid, err); </span>
+<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 1     : 		return -1; </span>
+<span class="lineNum">    222 </span>              : 	} </span>
+<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK); </span>
+<span class="lineNum">    224 </span>              :  </span>
+<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 	ptrace_setup_breakpoints(kc); </span>
+<span class="lineNum">    226 </span>              :  </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 	ptrace_run_debugger(kc); </span>
+<span class="lineNum">    228 </span>              :  </span>
+<span class="lineNum">    229 </span><span class="lineNoCov">    0 / 1     : 	return 0; </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    231 </span>              :  </span>
+<span class="lineNum">    232 </span>              : int ptrace_detach(struct kc *kc) </span>
+<span class="lineNum">    233 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    234 </span>              : 	GHashTableIter iter; </span>
+<span class="lineNum">    235 </span>              : 	struct kc_addr *val; </span>
+<span class="lineNum">    236 </span>              : 	unsigned long key; </span>
+<span class="lineNum">    237 </span>              :  </span>
+<span class="lineNum">    238 </span>              : 	/* Eliminate all unhit breakpoints */ </span>
+<span class="lineNum">    239 </span><span class="lineCov">    1 / 1     : 	g_hash_table_iter_init(&amp;iter, kc-&gt;addrs); </span>
+<span class="lineNum">    240 </span><span class="lineCov">    2 / 2     : 	while (g_hash_table_iter_next(&amp;iter, (gpointer*)&amp;key, (gpointer*)&amp;val)) { </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 		if (!val-&gt;hits) </span>
+<span class="lineNum">    242 </span><span class="lineCov">    1 / 1     : 			ptrace_eliminate_breakpoint(kc, val); </span>
+<span class="lineNum">    243 </span>              : 	} </span>
+<span class="lineNum">    244 </span>              :  </span>
+<span class="lineNum">    245 </span><span class="lineCov">    1 / 1     : 	ptrace(PTRACE_DETACH, active_child, 0, 0); </span>
+<span class="lineNum">    246 </span>              :  </span>
+<span class="lineNum">    247 </span><span class="lineCov">    1 / 1     : 	return 0; </span>
+<span class="lineNum">    248 </span><span class="linePartCov">    1 / 2     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

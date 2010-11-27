@@ -1,0 +1,674 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">323</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">63.8 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">206</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  Prefs.cpp - Global preferences </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              : #include &lt;string.h&gt; </span>
+<span class="lineNum">     21 </span>              :  </span>
+<span class="lineNum">     22 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     25 </span>              : #include &quot;Display.h&quot; </span>
+<span class="lineNum">     26 </span>              : #include &quot;C64.h&quot; </span>
+<span class="lineNum">     27 </span>              : #include &quot;main.h&quot; </span>
+<span class="lineNum">     28 </span>              : #include &quot;gui/widget.hh&quot; </span>
+<span class="lineNum">     29 </span>              :  </span>
+<span class="lineNum">     30 </span>              :  </span>
+<span class="lineNum">     31 </span>              : // These are the active preferences </span>
+<span class="lineNum">     32 </span><span class="lineCov">    1 / 1     : Prefs ThePrefs; </span>
+<span class="lineNum">     33 </span>              :  </span>
+<span class="lineNum">     34 </span>              : // These are the preferences on disk </span>
+<span class="lineNum">     35 </span><span class="lineCov">    1 / 1     : Prefs ThePrefsOnDisk; </span>
+<span class="lineNum">     36 </span>              :  </span>
+<span class="lineNum">     37 </span>              : // These are the default preferences </span>
+<span class="lineNum">     38 </span><span class="lineCov">    1 / 1     : Prefs TheDefaultPrefs; </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span><span class="lineCov">    1 / 1     : static void maybe_write(FILE *fp, bool do_write, const char *fmt, ...) </span>
+<span class="lineNum">     41 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     42 </span>              :      va_list ap; </span>
+<span class="lineNum">     43 </span>              :      int r; </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span><span class="lineCov">    1 / 1     :      if (!do_write) </span>
+<span class="lineNum">     46 </span>              : 	  return; </span>
+<span class="lineNum">     47 </span>              :  </span>
+<span class="lineNum">     48 </span>              :      va_start(ap, fmt); </span>
+<span class="lineNum">     49 </span>              :      r = vfprintf(fp, fmt, ap); </span>
+<span class="lineNum">     50 </span>              :      va_end(ap); </span>
+<span class="lineNum">     51 </span><span class="lineCov">    2 / 2     : } </span>
+<span class="lineNum">     52 </span>              :  </span>
+<span class="lineNum">     53 </span>              : /* </span>
+<span class="lineNum">     54 </span>              :  *  Constructor: Set up preferences with defaults </span>
+<span class="lineNum">     55 </span>              :  */ </span>
+<span class="lineNum">     56 </span>              :  </span>
+<span class="lineNum">     57 </span><span class="linePartCov">    2 / 4     : Prefs::Prefs() </span>
+<span class="lineNum">     58 </span>              : { </span>
+<span class="lineNum">     59 </span><span class="linePartCov">    1 / 2     : 	NormalCycles = 63; </span>
+<span class="lineNum">     60 </span><span class="linePartCov">    1 / 2     : 	BadLineCycles = 23; </span>
+<span class="lineNum">     61 </span><span class="linePartCov">    1 / 2     : 	CIACycles = 63; </span>
+<span class="lineNum">     62 </span><span class="linePartCov">    1 / 2     : 	FloppyCycles = 64; </span>
+<span class="lineNum">     63 </span><span class="linePartCov">    1 / 2     : 	SkipFrames = 1; </span>
+<span class="lineNum">     64 </span><span class="linePartCov">    1 / 2     : 	LatencyMin = 80; </span>
+<span class="lineNum">     65 </span><span class="linePartCov">    1 / 2     : 	LatencyMax = 120; </span>
+<span class="lineNum">     66 </span><span class="linePartCov">    1 / 2     : 	LatencyAvg = 280; </span>
+<span class="lineNum">     67 </span><span class="linePartCov">    1 / 2     : 	ScalingNumerator = 2; </span>
+<span class="lineNum">     68 </span><span class="linePartCov">    1 / 2     : 	ScalingDenominator = 2; </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span>              : #if defined(GEKKO) </span>
+<span class="lineNum">     71 </span>              : 	strcpy(BasePath, &quot;/frodo/&quot;); </span>
+<span class="lineNum">     72 </span>              : 	strcpy(PrefsPath, &quot;/frodo/frodorc&quot;); </span>
+<span class="lineNum">     73 </span>              : #else </span>
+<span class="lineNum">     74 </span>              : 	strcpy(BasePath, &quot;&quot;); </span>
+<span class="lineNum">     75 </span>              : 	strcpy(PrefsPath, &quot;frodorc&quot;); </span>
+<span class="lineNum">     76 </span>              : #endif </span>
+<span class="lineNum">     77 </span>              :  </span>
+<span class="lineNum">     78 </span>              : 	strcpy(DrivePath[0], &quot;64prgs&quot;); </span>
+<span class="lineNum">     79 </span>              : 	strcpy(DrivePath[1], &quot;&quot;); </span>
+<span class="lineNum">     80 </span>              : 	strcpy(DrivePath[2], &quot;&quot;); </span>
+<span class="lineNum">     81 </span>              : 	strcpy(DrivePath[3], &quot;&quot;); </span>
+<span class="lineNum">     82 </span>              :  </span>
+<span class="lineNum">     83 </span>              : 	strcpy(ViewPort, &quot;Default&quot;); </span>
+<span class="lineNum">     84 </span>              : 	strcpy(DisplayMode, &quot;Default&quot;); </span>
+<span class="lineNum">     85 </span>              :  </span>
+<span class="lineNum">     86 </span><span class="linePartCov">    1 / 2     : 	SIDType = SIDTYPE_DIGITAL; </span>
+<span class="lineNum">     87 </span><span class="linePartCov">    1 / 2     : 	REUSize = REU_NONE; </span>
+<span class="lineNum">     88 </span><span class="linePartCov">    1 / 2     : 	DisplayType = DISPTYPE_WINDOW; </span>
+<span class="lineNum">     89 </span><span class="linePartCov">    1 / 2     : 	Joystick1Port = 0; /* Default to on */ </span>
+<span class="lineNum">     90 </span><span class="linePartCov">    1 / 2     : 	Joystick2Port = 1; </span>
+<span class="lineNum">     91 </span>              :  </span>
+<span class="lineNum">     92 </span><span class="linePartCov">    1 / 2     : 	SpritesOn = true; </span>
+<span class="lineNum">     93 </span><span class="linePartCov">    1 / 2     : 	SpriteCollisions = true; </span>
+<span class="lineNum">     94 </span><span class="linePartCov">    1 / 2     : 	JoystickSwap = false; </span>
+<span class="lineNum">     95 </span><span class="linePartCov">    1 / 2     : 	LimitSpeed = false; </span>
+<span class="lineNum">     96 </span><span class="linePartCov">    1 / 2     : 	FastReset = false; </span>
+<span class="lineNum">     97 </span><span class="linePartCov">    1 / 2     : 	CIAIRQHack = false; </span>
+<span class="lineNum">     98 </span><span class="linePartCov">    1 / 2     : 	MapSlash = true; </span>
+<span class="lineNum">     99 </span><span class="linePartCov">    1 / 2     : 	Emul1541Proc = false; </span>
+<span class="lineNum">    100 </span><span class="linePartCov">    1 / 2     : 	SIDFilters = true; </span>
+<span class="lineNum">    101 </span><span class="linePartCov">    1 / 2     : 	DoubleScan = true; </span>
+<span class="lineNum">    102 </span><span class="linePartCov">    1 / 2     : 	HideCursor = false; </span>
+<span class="lineNum">    103 </span><span class="linePartCov">    1 / 2     : 	DirectSound = true;	 </span>
+<span class="lineNum">    104 </span><span class="linePartCov">    1 / 2     : 	ExclusiveSound = false; </span>
+<span class="lineNum">    105 </span><span class="linePartCov">    1 / 2     : 	AutoPause = false; </span>
+<span class="lineNum">    106 </span><span class="linePartCov">    1 / 2     : 	PrefsAtStartup = false; </span>
+<span class="lineNum">    107 </span><span class="linePartCov">    1 / 2     : 	SystemMemory = false; </span>
+<span class="lineNum">    108 </span><span class="linePartCov">    1 / 2     : 	AlwaysCopy = false; </span>
+<span class="lineNum">    109 </span><span class="linePartCov">    1 / 2     : 	SystemKeys = true; </span>
+<span class="lineNum">    110 </span><span class="linePartCov">    1 / 2     : 	ShowLEDs = true; </span>
+<span class="lineNum">    111 </span>              :  </span>
+<span class="lineNum">    112 </span><span class="linePartCov">    1 / 2     : 	this-&gt;SetupJoystickDefaults(); </span>
+<span class="lineNum">    113 </span>              :  </span>
+<span class="lineNum">    114 </span><span class="linePartCov">    1 / 2     : 	this-&gt;MsPerFrame = SPEED_100; </span>
+<span class="lineNum">    115 </span><span class="linePartCov">    2 / 4     : 	this-&gt;NetworkKey = rand() % 0xffff; </span>
+<span class="lineNum">    116 </span><span class="linePartCov">    1 / 2     : 	this-&gt;NetworkAvatar = 0; </span>
+<span class="lineNum">    117 </span>              : 	snprintf(this-&gt;NetworkName, 32, &quot;Unset name&quot;); </span>
+<span class="lineNum">    118 </span>              : 	snprintf(this-&gt;NetworkServer, 64, &quot;play.c64-network.org&quot;); </span>
+<span class="lineNum">    119 </span><span class="linePartCov">    1 / 2     : 	this-&gt;NetworkPort = 46214; </span>
+<span class="lineNum">    120 </span><span class="linePartCov">    1 / 2     : 	this-&gt;NetworkRegion = REGION_UNKNOWN; </span>
+<span class="lineNum">    121 </span><span class="linePartCov">    1 / 2     : 	this-&gt;CursorKeysForJoystick = true; </span>
+<span class="lineNum">    122 </span>              :  </span>
+<span class="lineNum">    123 </span>              : 	strcpy(this-&gt;Theme, &quot;default&quot;); </span>
+<span class="lineNum">    124 </span><span class="linePartCov">    1 / 3     : } </span>
+<span class="lineNum">    125 </span>              :  </span>
+<span class="lineNum">    126 </span>              :  </span>
+<span class="lineNum">    127 </span>              : void Prefs::SetupJoystickDefaults() </span>
+<span class="lineNum">    128 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    129 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_AXES; i++) </span>
+<span class="lineNum">    130 </span><span class="lineCov">    1 / 1     : 		this-&gt;JoystickAxes[i] = JOY_NONE; </span>
+<span class="lineNum">    131 </span>              :  </span>
+<span class="lineNum">    132 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_HATS; i++) </span>
+<span class="lineNum">    133 </span>              : 	{ </span>
+<span class="lineNum">    134 </span><span class="lineCov">    1 / 1     : 		this-&gt;JoystickHats[i] = HAT_PLAIN; </span>
+<span class="lineNum">    135 </span><span class="lineCov">    1 / 1     : 		this-&gt;MenuJoystickHats[i] = HAT_PLAIN; </span>
+<span class="lineNum">    136 </span>              : 	} </span>
+<span class="lineNum">    137 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_BUTTONS; i++) </span>
+<span class="lineNum">    138 </span>              : 	{ </span>
+<span class="lineNum">    139 </span><span class="lineCov">    1 / 1     : 		this-&gt;JoystickButtons[i] = JOY_NONE; </span>
+<span class="lineNum">    140 </span><span class="lineCov">    1 / 1     : 		this-&gt;MenuJoystickButtons[i] = EVENT_NONE; </span>
+<span class="lineNum">    141 </span>              : 	} </span>
+<span class="lineNum">    142 </span>              :  </span>
+<span class="lineNum">    143 </span><span class="lineCov">    1 / 1     : 	if (SDL_NumJoysticks() &gt; 0) </span>
+<span class="lineNum">    144 </span>              : 	{ </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 2     : 		const char *name = SDL_JoystickName(0); </span>
+<span class="lineNum">    146 </span>              :  </span>
+<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 2     : 		if (strncmp(name, &quot;Wiimote&quot;, 7) == 0) </span>
+<span class="lineNum">    148 </span>              : 		{ </span>
+<span class="lineNum">    149 </span>              : 			/* Wiimote/Classic hat */ </span>
+<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickHats[0] = HAT_PLAIN; </span>
+<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickHats[0] = HAT_PLAIN; </span>
+<span class="lineNum">    152 </span>              :  </span>
+<span class="lineNum">    153 </span>              : 			/* Nunchuk/classic analogue */ </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[0] = JOY_HORIZ; </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[1] = JOY_VERT; </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[2] = JOY_HORIZ; </span>
+<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[3] = JOY_VERT; </span>
+<span class="lineNum">    158 </span>              :  </span>
+<span class="lineNum">    159 </span>              : 			/* Wiimote 2, Nunchuk Z, classic a, b as fire */ </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[3] = 0x50; </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[7] = 0x50; </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[9] = 0x50; </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[10] = 0x50; </span>
+<span class="lineNum">    164 </span>              :  </span>
+<span class="lineNum">    165 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[3] = KEY_SELECT; </span>
+<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[7] = KEY_SELECT; </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[9] = KEY_SELECT; </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[10] = KEY_SELECT; </span>
+<span class="lineNum">    169 </span>              :  </span>
+<span class="lineNum">    170 </span>              : 			/* Wiimote +/- as page up, page down */ </span>
+<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[4] = KEY_PAGEDOWN; </span>
+<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[5] = KEY_PAGEUP; </span>
+<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[17] = KEY_PAGEDOWN; </span>
+<span class="lineNum">    174 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[18] = KEY_PAGEUP; </span>
+<span class="lineNum">    175 </span>              :  </span>
+<span class="lineNum">    176 </span>              : 			/* +/- as 1 and 2 */ </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[4] = (7 &lt;&lt; 3) | 0; </span>
+<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[5] = (7 &lt;&lt; 3) | 3; </span>
+<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[17] = (7 &lt;&lt; 3) | 0; </span>
+<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[18] = (7 &lt;&lt; 3) | 3; </span>
+<span class="lineNum">    181 </span>              :  </span>
+<span class="lineNum">    182 </span>              : 			/* Wiimote B, Nunchuk C, Classic Zr, Zl as space */ </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[1] = (7 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    184 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[8] = (7 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[15] = (7 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    186 </span>              : 			this-&gt;JoystickButtons[16] = (7 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    187 </span>              :  </span>
+<span class="lineNum">    188 </span>              : 			/* Wiimote A and Classic L as F1 */ </span>
+<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[0] = (0 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[13] = (0 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    191 </span>              :  </span>
+<span class="lineNum">    192 </span>              : 			/* Classic R as F3 */ </span>
+<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[16] = (0 &lt;&lt; 3) | 5; </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              : 			/* Wiimote 1 as R/S, classic X/Y */ </span>
+<span class="lineNum">    196 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[2] = (7 &lt;&lt; 3) | 7; </span>
+<span class="lineNum">    197 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[11] = (7 &lt;&lt; 3) | 7; </span>
+<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[12] = (7 &lt;&lt; 3) | 7; </span>
+<span class="lineNum">    199 </span>              :  </span>
+<span class="lineNum">    200 </span>              : 			/* Wiimote 1, classic x, y as menu escape */ </span>
+<span class="lineNum">    201 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[2] = KEY_ESCAPE; </span>
+<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[11] = KEY_ESCAPE; </span>
+<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[12] = KEY_ESCAPE; </span>
+<span class="lineNum">    204 </span>              :  </span>
+<span class="lineNum">    205 </span>              : 			/* Wiimote, classic Home as enter menu */ </span>
+<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[6] = KEY_ENTER_MENU; </span>
+<span class="lineNum">    207 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[19] = KEY_ENTER_MENU; </span>
+<span class="lineNum">    208 </span>              : 		} </span>
+<span class="lineNum">    209 </span>              : 		/* Saitek P380 */ </span>
+<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 1     : 		else if (strcmp(name, &quot;Jess Tech Dual Analog Pad&quot;) == 0) </span>
+<span class="lineNum">    211 </span>              : 		{ </span>
+<span class="lineNum">    212 </span>              : 			/* Pad */ </span>
+<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickHats[0] = HAT_PLAIN; </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickHats[0] = HAT_PLAIN; </span>
+<span class="lineNum">    215 </span>              :  </span>
+<span class="lineNum">    216 </span>              : 			/* Analogue parts */ </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[0] = JOY_HORIZ; </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[1] = JOY_VERT; </span>
+<span class="lineNum">    219 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[2] = JOY_HORIZ; </span>
+<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickAxes[3] = JOY_VERT; </span>
+<span class="lineNum">    221 </span>              :  </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[0] = (0 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[1] = (0 &lt;&lt; 3) | 5; </span>
+<span class="lineNum">    224 </span>              :  </span>
+<span class="lineNum">    225 </span>              : 			/* Button 4 Fire */ </span>
+<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[3] = 0x50; </span>
+<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[3] = KEY_SELECT; </span>
+<span class="lineNum">    228 </span>              :  </span>
+<span class="lineNum">    229 </span>              : 			/* Upper left front button R/S */ </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[4] = (7 &lt;&lt; 3) | 7; </span>
+<span class="lineNum">    231 </span>              : 			/* Lower left front button space */ </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[5] = (7 &lt;&lt; 3) | 4; </span>
+<span class="lineNum">    233 </span>              :  </span>
+<span class="lineNum">    234 </span>              : 			/* Upper right 1, lower right 2 */ </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[6] = (7 &lt;&lt; 3) | 0; </span>
+<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;JoystickButtons[7] = (7 &lt;&lt; 3) | 3; </span>
+<span class="lineNum">    237 </span>              :  </span>
+<span class="lineNum">    238 </span>              : 			/* Start to enter the menu */ </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[0] = KEY_PAGEDOWN; </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[1] = KEY_PAGEUP; </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[8] = KEY_ESCAPE; </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;MenuJoystickButtons[9] = KEY_ENTER_MENU; </span>
+<span class="lineNum">    243 </span>              : 		} </span>
+<span class="lineNum">    244 </span>              :  </span>
+<span class="lineNum">    245 </span>              : 	} </span>
+<span class="lineNum">    246 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    247 </span>              :  </span>
+<span class="lineNum">    248 </span>              : /* </span>
+<span class="lineNum">    249 </span>              :  *  Check if two Prefs structures are equal </span>
+<span class="lineNum">    250 </span>              :  */ </span>
+<span class="lineNum">    251 </span>              :  </span>
+<span class="lineNum">    252 </span><span class="lineCov">    2 / 2     : bool Prefs::operator==(const Prefs &amp;rhs) const </span>
+<span class="lineNum">    253 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    254 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_AXES; i++) </span>
+<span class="lineNum">    255 </span>              : 	{ </span>
+<span class="lineNum">    256 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;JoystickAxes[i] != rhs.JoystickAxes[i]) </span>
+<span class="lineNum">    257 </span>              : 			return false; </span>
+<span class="lineNum">    258 </span>              : 	} </span>
+<span class="lineNum">    259 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_HATS; i++) </span>
+<span class="lineNum">    260 </span>              : 	{ </span>
+<span class="lineNum">    261 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;JoystickHats[i] != rhs.JoystickHats[i]) </span>
+<span class="lineNum">    262 </span>              : 			return false; </span>
+<span class="lineNum">    263 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;MenuJoystickHats[i] != rhs.MenuJoystickHats[i]) </span>
+<span class="lineNum">    264 </span>              : 			return false; </span>
+<span class="lineNum">    265 </span>              : 	} </span>
+<span class="lineNum">    266 </span><span class="lineCov">    1 / 1     : 	for (int i = 0; i &lt; MAX_JOYSTICK_BUTTONS; i++) </span>
+<span class="lineNum">    267 </span>              : 	{ </span>
+<span class="lineNum">    268 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;JoystickButtons[i] != rhs.JoystickButtons[i]) </span>
+<span class="lineNum">    269 </span>              : 			return false; </span>
+<span class="lineNum">    270 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;MenuJoystickButtons[i] != rhs.MenuJoystickButtons[i]) </span>
+<span class="lineNum">    271 </span>              : 			return false; </span>
+<span class="lineNum">    272 </span>              : 	} </span>
+<span class="lineNum">    273 </span>              :  </span>
+<span class="lineNum">    274 </span>              : 	return (1 </span>
+<span class="lineNum">    275 </span>              : 		&amp;&amp; NormalCycles == rhs.NormalCycles </span>
+<span class="lineNum">    276 </span>              : 		&amp;&amp; BadLineCycles == rhs.BadLineCycles </span>
+<span class="lineNum">    277 </span>              : 		&amp;&amp; CIACycles == rhs.CIACycles </span>
+<span class="lineNum">    278 </span>              : 		&amp;&amp; FloppyCycles == rhs.FloppyCycles </span>
+<span class="lineNum">    279 </span>              : 		&amp;&amp; SkipFrames == rhs.SkipFrames </span>
+<span class="lineNum">    280 </span>              : 		&amp;&amp; LatencyMin == rhs.LatencyMin </span>
+<span class="lineNum">    281 </span>              : 		&amp;&amp; LatencyMax == rhs.LatencyMax </span>
+<span class="lineNum">    282 </span>              : 		&amp;&amp; LatencyAvg == rhs.LatencyAvg </span>
+<span class="lineNum">    283 </span>              : 		&amp;&amp; ScalingNumerator == rhs.ScalingNumerator </span>
+<span class="lineNum">    284 </span>              : 		&amp;&amp; ScalingDenominator == rhs.ScalingNumerator </span>
+<span class="lineNum">    285 </span>              : 		&amp;&amp; strcmp(DrivePath[0], rhs.DrivePath[0]) == 0 </span>
+<span class="lineNum">    286 </span>              : 		&amp;&amp; strcmp(DrivePath[1], rhs.DrivePath[1]) == 0 </span>
+<span class="lineNum">    287 </span>              : 		&amp;&amp; strcmp(DrivePath[2], rhs.DrivePath[2]) == 0 </span>
+<span class="lineNum">    288 </span>              : 		&amp;&amp; strcmp(DrivePath[3], rhs.DrivePath[3]) == 0 </span>
+<span class="lineNum">    289 </span>              : 		&amp;&amp; strcmp(ViewPort, rhs.ViewPort) == 0 </span>
+<span class="lineNum">    290 </span>              : 		&amp;&amp; strcmp(DisplayMode, rhs.DisplayMode) == 0 </span>
+<span class="lineNum">    291 </span>              : 		&amp;&amp; SIDType == rhs.SIDType </span>
+<span class="lineNum">    292 </span>              : 		&amp;&amp; REUSize == rhs.REUSize </span>
+<span class="lineNum">    293 </span>              : 		&amp;&amp; DisplayType == rhs.DisplayType </span>
+<span class="lineNum">    294 </span>              : 		&amp;&amp; SpritesOn == rhs.SpritesOn </span>
+<span class="lineNum">    295 </span>              : 		&amp;&amp; SpriteCollisions == rhs.SpriteCollisions </span>
+<span class="lineNum">    296 </span>              : 		&amp;&amp; Joystick1Port == rhs.Joystick1Port </span>
+<span class="lineNum">    297 </span>              : 		&amp;&amp; Joystick2Port == rhs.Joystick2Port </span>
+<span class="lineNum">    298 </span>              : 		&amp;&amp; JoystickSwap == rhs.JoystickSwap </span>
+<span class="lineNum">    299 </span>              : 		&amp;&amp; LimitSpeed == rhs.LimitSpeed </span>
+<span class="lineNum">    300 </span>              : 		&amp;&amp; FastReset == rhs.FastReset </span>
+<span class="lineNum">    301 </span>              : 		&amp;&amp; CIAIRQHack == rhs.CIAIRQHack </span>
+<span class="lineNum">    302 </span>              : 		&amp;&amp; MapSlash == rhs.MapSlash </span>
+<span class="lineNum">    303 </span>              : 		&amp;&amp; Emul1541Proc == rhs.Emul1541Proc </span>
+<span class="lineNum">    304 </span>              : 		&amp;&amp; SIDFilters == rhs.SIDFilters </span>
+<span class="lineNum">    305 </span>              : 		&amp;&amp; DoubleScan == rhs.DoubleScan </span>
+<span class="lineNum">    306 </span>              : 		&amp;&amp; HideCursor == rhs.HideCursor </span>
+<span class="lineNum">    307 </span>              : 		&amp;&amp; DirectSound == rhs.DirectSound </span>
+<span class="lineNum">    308 </span>              : 		&amp;&amp; ExclusiveSound == rhs.ExclusiveSound </span>
+<span class="lineNum">    309 </span>              : 		&amp;&amp; AutoPause == rhs.AutoPause </span>
+<span class="lineNum">    310 </span>              : 		&amp;&amp; PrefsAtStartup == rhs.PrefsAtStartup </span>
+<span class="lineNum">    311 </span>              : 		&amp;&amp; SystemMemory == rhs.SystemMemory </span>
+<span class="lineNum">    312 </span>              : 		&amp;&amp; AlwaysCopy == rhs.AlwaysCopy </span>
+<span class="lineNum">    313 </span>              : 		&amp;&amp; SystemKeys == rhs.SystemKeys </span>
+<span class="lineNum">    314 </span>              : 		&amp;&amp; ShowLEDs == rhs.ShowLEDs </span>
+<span class="lineNum">    315 </span>              : 		&amp;&amp; this-&gt;MsPerFrame == rhs.MsPerFrame </span>
+<span class="lineNum">    316 </span>              : 		&amp;&amp; this-&gt;NetworkKey == rhs.NetworkKey </span>
+<span class="lineNum">    317 </span>              : 		&amp;&amp; this-&gt;NetworkPort == rhs.NetworkPort </span>
+<span class="lineNum">    318 </span>              : 		&amp;&amp; this-&gt;NetworkRegion == rhs.NetworkRegion </span>
+<span class="lineNum">    319 </span>              : 		&amp;&amp; strcmp(this-&gt;NetworkServer, rhs.NetworkServer) == 0 </span>
+<span class="lineNum">    320 </span>              : 		&amp;&amp; strcmp(this-&gt;NetworkName, rhs.NetworkName) == 0 </span>
+<span class="lineNum">    321 </span>              : 		&amp;&amp; strcmp(this-&gt;Theme, rhs.Theme) == 0 </span>
+<span class="lineNum">    322 </span>              : 		&amp;&amp; this-&gt;NetworkAvatar == rhs.NetworkAvatar </span>
+<span class="lineNum">    323 </span>              : 		&amp;&amp; this-&gt;CursorKeysForJoystick == rhs.CursorKeysForJoystick </span>
+<span class="lineNum">    324 </span><span class="lineCov">    2 / 2     : 	); </span>
+<span class="lineNum">    325 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    326 </span>              :  </span>
+<span class="lineNum">    327 </span>              : bool Prefs::operator!=(const Prefs &amp;rhs) const </span>
+<span class="lineNum">    328 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    329 </span><span class="lineCov">    2 / 2     : 	return !operator==(rhs); </span>
+<span class="lineNum">    330 </span><span class="lineCov">    2 / 2     : } </span>
+<span class="lineNum">    331 </span>              :  </span>
+<span class="lineNum">    332 </span>              :  </span>
+<span class="lineNum">    333 </span>              : /* </span>
+<span class="lineNum">    334 </span>              :  *  Check preferences for validity and correct if necessary </span>
+<span class="lineNum">    335 </span>              :  */ </span>
+<span class="lineNum">    336 </span>              :  </span>
+<span class="lineNum">    337 </span>              : void Prefs::Check(void) </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    339 </span><span class="linePartCov">    2 / 6     : 	if (SkipFrames &lt;= 0) SkipFrames = 1; </span>
+<span class="lineNum">    340 </span>              :  </span>
+<span class="lineNum">    341 </span><span class="linePartCov">    2 / 3     : 	if (SIDType &lt; SIDTYPE_NONE || SIDType &gt; SIDTYPE_SIDCARD) </span>
+<span class="lineNum">    342 </span><span class="lineNoCov">    0 / 3     : 		SIDType = SIDTYPE_NONE; </span>
+<span class="lineNum">    343 </span>              :  </span>
+<span class="lineNum">    344 </span><span class="linePartCov">    2 / 3     : 	if (REUSize &lt; REU_NONE || REUSize &gt; REU_512K) </span>
+<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 3     : 		REUSize = REU_NONE; </span>
+<span class="lineNum">    346 </span>              :  </span>
+<span class="lineNum">    347 </span><span class="linePartCov">    2 / 3     : 	if (DisplayType &lt; DISPTYPE_WINDOW || DisplayType &gt; DISPTYPE_SCREEN) </span>
+<span class="lineNum">    348 </span><span class="lineNoCov">    0 / 3     : 		DisplayType = DISPTYPE_WINDOW; </span>
+<span class="lineNum">    349 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    350 </span>              :  </span>
+<span class="lineNum">    351 </span>              :  </span>
+<span class="lineNum">    352 </span>              : /* </span>
+<span class="lineNum">    353 </span>              :  *  Load preferences from file </span>
+<span class="lineNum">    354 </span>              :  */ </span>
+<span class="lineNum">    355 </span>              :  </span>
+<span class="lineNum">    356 </span>              : void Prefs::Load(const char *filename) </span>
+<span class="lineNum">    357 </span><span class="lineCov">    3 / 3     : { </span>
+<span class="lineNum">    358 </span>              : 	FILE *file; </span>
+<span class="lineNum">    359 </span>              : 	char line[256], keyword[256], value[256]; </span>
+<span class="lineNum">    360 </span>              :  </span>
+<span class="lineNum">    361 </span><span class="lineCov">    3 / 3     : 	if ((file = fopen(filename, &quot;r&quot;)) != NULL) { </span>
+<span class="lineNum">    362 </span><span class="lineCov">    1 / 1     : 		while(fgets(line, 255, file)) { </span>
+<span class="lineNum">    363 </span><span class="lineCov">    2 / 2     : 			if (sscanf(line, &quot;%s = %s\n&quot;, keyword, value) == 2) { </span>
+<span class="lineNum">    364 </span><span class="lineCov">    1 / 1     : 				if (!strcmp(keyword, &quot;NormalCycles&quot;)) </span>
+<span class="lineNum">    365 </span><span class="lineNoCov">    0 / 1     : 					NormalCycles = atoi(value); </span>
+<span class="lineNum">    366 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;BadLineCycles&quot;)) </span>
+<span class="lineNum">    367 </span><span class="lineNoCov">    0 / 1     : 					BadLineCycles = atoi(value); </span>
+<span class="lineNum">    368 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;CIACycles&quot;)) </span>
+<span class="lineNum">    369 </span><span class="lineNoCov">    0 / 1     : 					CIACycles = atoi(value); </span>
+<span class="lineNum">    370 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;FloppyCycles&quot;)) </span>
+<span class="lineNum">    371 </span><span class="lineNoCov">    0 / 1     : 					FloppyCycles = atoi(value); </span>
+<span class="lineNum">    372 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SkipFrames&quot;)) </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 1     : 					SkipFrames = atoi(value); </span>
+<span class="lineNum">    374 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;LatencyMin&quot;)) </span>
+<span class="lineNum">    375 </span><span class="lineNoCov">    0 / 1     : 					LatencyMin = atoi(value); </span>
+<span class="lineNum">    376 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;LatencyMax&quot;)) </span>
+<span class="lineNum">    377 </span><span class="lineNoCov">    0 / 1     : 					LatencyMax = atoi(value); </span>
+<span class="lineNum">    378 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;LatencyAvg&quot;)) </span>
+<span class="lineNum">    379 </span><span class="lineNoCov">    0 / 1     : 					LatencyAvg = atoi(value); </span>
+<span class="lineNum">    380 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;ScalingNumerator&quot;)) </span>
+<span class="lineNum">    381 </span><span class="lineNoCov">    0 / 1     : 					ScalingNumerator = atoi(value); </span>
+<span class="lineNum">    382 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;ScalingDenominator&quot;)) </span>
+<span class="lineNum">    383 </span><span class="lineNoCov">    0 / 1     : 					ScalingDenominator = atoi(value); </span>
+<span class="lineNum">    384 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DrivePath8&quot;)) </span>
+<span class="lineNum">    385 </span>              : 					strcpy(DrivePath[0], value); </span>
+<span class="lineNum">    386 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DrivePath9&quot;)) </span>
+<span class="lineNum">    387 </span>              : 					strcpy(DrivePath[1], value); </span>
+<span class="lineNum">    388 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DrivePath10&quot;)) </span>
+<span class="lineNum">    389 </span>              : 					strcpy(DrivePath[2], value); </span>
+<span class="lineNum">    390 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DrivePath11&quot;)) </span>
+<span class="lineNum">    391 </span>              : 					strcpy(DrivePath[3], value); </span>
+<span class="lineNum">    392 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;ViewPort&quot;)) </span>
+<span class="lineNum">    393 </span>              : 					strcpy(ViewPort, value); </span>
+<span class="lineNum">    394 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DisplayMode&quot;)) </span>
+<span class="lineNum">    395 </span>              : 					strcpy(DisplayMode, value); </span>
+<span class="lineNum">    396 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SIDType&quot;)) </span>
+<span class="lineNum">    397 </span><span class="lineNoCov">    0 / 1     : 					if (!strcmp(value, &quot;DIGITAL&quot;)) </span>
+<span class="lineNum">    398 </span><span class="lineNoCov">    0 / 1     : 						SIDType = SIDTYPE_DIGITAL; </span>
+<span class="lineNum">    399 </span><span class="lineNoCov">    0 / 1     : 					else if (!strcmp(value, &quot;SIDCARD&quot;)) </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 1     : 						SIDType = SIDTYPE_SIDCARD; </span>
+<span class="lineNum">    401 </span>              : 					else </span>
+<span class="lineNum">    402 </span>              : 						SIDType = SIDTYPE_NONE; </span>
+<span class="lineNum">    403 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;REUSize&quot;)) { </span>
+<span class="lineNum">    404 </span><span class="lineNoCov">    0 / 1     : 					if (!strcmp(value, &quot;128K&quot;)) </span>
+<span class="lineNum">    405 </span><span class="lineNoCov">    0 / 1     : 						REUSize = REU_128K; </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 					else if (!strcmp(value, &quot;256K&quot;)) </span>
+<span class="lineNum">    407 </span><span class="lineNoCov">    0 / 1     : 						REUSize = REU_256K; </span>
+<span class="lineNum">    408 </span><span class="lineNoCov">    0 / 1     : 					else if (!strcmp(value, &quot;512K&quot;)) </span>
+<span class="lineNum">    409 </span><span class="lineNoCov">    0 / 1     : 						REUSize = REU_512K; </span>
+<span class="lineNum">    410 </span>              : 					else </span>
+<span class="lineNum">    411 </span>              : 						REUSize = REU_NONE; </span>
+<span class="lineNum">    412 </span><span class="lineCov">    1 / 1     : 				} else if (!strcmp(keyword, &quot;DisplayType&quot;)) </span>
+<span class="lineNum">    413 </span><span class="lineNoCov">    0 / 1     : 					DisplayType = strcmp(value, &quot;SCREEN&quot;) ? DISPTYPE_WINDOW : DISPTYPE_SCREEN; </span>
+<span class="lineNum">    414 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;Joystick1Port&quot;)) </span>
+<span class="lineNum">    415 </span><span class="lineNoCov">    0 / 1     : 					Joystick1Port = atoi(value); </span>
+<span class="lineNum">    416 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;Joystick2Port&quot;)) </span>
+<span class="lineNum">    417 </span><span class="lineNoCov">    0 / 1     : 					Joystick2Port = atoi(value); </span>
+<span class="lineNum">    418 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SpritesOn&quot;)) </span>
+<span class="lineNum">    419 </span><span class="lineNoCov">    0 / 1     : 					SpritesOn = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    420 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SpriteCollisions&quot;)) </span>
+<span class="lineNum">    421 </span><span class="lineNoCov">    0 / 1     : 					SpriteCollisions = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    422 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;JoystickSwap&quot;)) </span>
+<span class="lineNum">    423 </span><span class="lineNoCov">    0 / 1     : 					JoystickSwap = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    424 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;LimitSpeed&quot;)) </span>
+<span class="lineNum">    425 </span><span class="lineNoCov">    0 / 1     : 					LimitSpeed = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    426 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;FastReset&quot;)) </span>
+<span class="lineNum">    427 </span><span class="lineNoCov">    0 / 1     : 					FastReset = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    428 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;CIAIRQHack&quot;)) </span>
+<span class="lineNum">    429 </span><span class="lineNoCov">    0 / 1     : 					CIAIRQHack = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    430 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;MapSlash&quot;)) </span>
+<span class="lineNum">    431 </span><span class="lineNoCov">    0 / 1     : 					MapSlash = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    432 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;Emul1541Proc&quot;)) </span>
+<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 1     : 					Emul1541Proc = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    434 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SIDFilters&quot;)) </span>
+<span class="lineNum">    435 </span><span class="lineNoCov">    0 / 1     : 					SIDFilters = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    436 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DoubleScan&quot;)) </span>
+<span class="lineNum">    437 </span><span class="lineNoCov">    0 / 1     : 					DoubleScan = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    438 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;HideCursor&quot;)) </span>
+<span class="lineNum">    439 </span><span class="lineNoCov">    0 / 1     : 					HideCursor = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    440 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;DirectSound&quot;)) </span>
+<span class="lineNum">    441 </span><span class="lineNoCov">    0 / 1     : 					DirectSound = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    442 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;ExclusiveSound&quot;)) </span>
+<span class="lineNum">    443 </span><span class="lineNoCov">    0 / 1     : 					ExclusiveSound = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    444 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;AutoPause&quot;)) </span>
+<span class="lineNum">    445 </span><span class="lineNoCov">    0 / 1     : 					AutoPause = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    446 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;PrefsAtStartup&quot;)) </span>
+<span class="lineNum">    447 </span><span class="lineNoCov">    0 / 1     : 					PrefsAtStartup = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    448 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SystemMemory&quot;)) </span>
+<span class="lineNum">    449 </span><span class="lineNoCov">    0 / 1     : 					SystemMemory = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    450 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;AlwaysCopy&quot;)) </span>
+<span class="lineNum">    451 </span><span class="lineNoCov">    0 / 1     : 					AlwaysCopy = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    452 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;SystemKeys&quot;)) </span>
+<span class="lineNum">    453 </span><span class="lineNoCov">    0 / 1     : 					SystemKeys = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    454 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;ShowLEDs&quot;)) </span>
+<span class="lineNum">    455 </span><span class="lineNoCov">    0 / 1     : 					ShowLEDs = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    456 </span><span class="lineCov">    1 / 1     : 				else if (!strncmp(keyword, &quot;JoystickAxes&quot;, strlen(&quot;JoystickAxes&quot;))) </span>
+<span class="lineNum">    457 </span>              : 				{ </span>
+<span class="lineNum">    458 </span>              : 					int n = atoi(keyword + strlen(&quot;JoystickAxes&quot;)); </span>
+<span class="lineNum">    459 </span>              :  </span>
+<span class="lineNum">    460 </span><span class="lineNoCov">    0 / 2     : 					if (n &gt;= 0 &amp;&amp; n &lt; MAX_JOYSTICK_AXES) </span>
+<span class="lineNum">    461 </span><span class="lineNoCov">    0 / 1     : 						this-&gt;JoystickAxes[n] = atoi(value); </span>
+<span class="lineNum">    462 </span>              : 				} </span>
+<span class="lineNum">    463 </span><span class="lineCov">    1 / 1     : 				else if (!strncmp(keyword, &quot;JoystickHats&quot;, strlen(&quot;JoystickHats&quot;))) </span>
+<span class="lineNum">    464 </span>              : 				{ </span>
+<span class="lineNum">    465 </span>              : 					int n = atoi(keyword + strlen(&quot;JoystickHats&quot;)); </span>
+<span class="lineNum">    466 </span>              :  </span>
+<span class="lineNum">    467 </span><span class="lineNoCov">    0 / 2     : 					if (n &gt;= 0 &amp;&amp; n &lt; MAX_JOYSTICK_HATS) </span>
+<span class="lineNum">    468 </span><span class="lineNoCov">    0 / 1     : 						this-&gt;JoystickHats[n] = atoi(value); </span>
+<span class="lineNum">    469 </span>              : 				} </span>
+<span class="lineNum">    470 </span><span class="lineCov">    1 / 1     : 				else if (!strncmp(keyword, &quot;JoystickButtons&quot;, strlen(&quot;JoystickButtons&quot;))) </span>
+<span class="lineNum">    471 </span>              : 				{ </span>
+<span class="lineNum">    472 </span>              : 					int n = atoi(keyword + strlen(&quot;JoystickButtons&quot;)); </span>
+<span class="lineNum">    473 </span>              :  </span>
+<span class="lineNum">    474 </span><span class="lineCov">    2 / 2     : 					if (n &gt;= 0 &amp;&amp; n &lt; MAX_JOYSTICK_BUTTONS) </span>
+<span class="lineNum">    475 </span><span class="lineCov">    1 / 1     : 						this-&gt;JoystickButtons[n] = atoi(value); </span>
+<span class="lineNum">    476 </span>              : 				} </span>
+<span class="lineNum">    477 </span><span class="lineCov">    1 / 1     : 				else if (!strncmp(keyword, &quot;MenuJoystickHats&quot;, strlen(&quot;MenuJoystickHats&quot;))) </span>
+<span class="lineNum">    478 </span>              : 				{ </span>
+<span class="lineNum">    479 </span>              : 					int n = atoi(keyword + strlen(&quot;MenuJoystickHats&quot;)); </span>
+<span class="lineNum">    480 </span>              :  </span>
+<span class="lineNum">    481 </span><span class="lineNoCov">    0 / 2     : 					if (n &gt;= 0 &amp;&amp; n &lt; MAX_JOYSTICK_HATS) </span>
+<span class="lineNum">    482 </span><span class="lineNoCov">    0 / 1     : 						this-&gt;MenuJoystickHats[n] = atoi(value); </span>
+<span class="lineNum">    483 </span>              : 				} </span>
+<span class="lineNum">    484 </span><span class="lineCov">    1 / 1     : 				else if (!strncmp(keyword, &quot;MenuJoystickButtons&quot;, strlen(&quot;MenuJoystickButtons&quot;))) </span>
+<span class="lineNum">    485 </span>              : 				{ </span>
+<span class="lineNum">    486 </span>              : 					int n = atoi(keyword + strlen(&quot;MenuJoystickButtons&quot;)); </span>
+<span class="lineNum">    487 </span>              :  </span>
+<span class="lineNum">    488 </span><span class="lineNoCov">    0 / 2     : 					if (n &gt;= 0 &amp;&amp; n &lt; MAX_JOYSTICK_BUTTONS) </span>
+<span class="lineNum">    489 </span><span class="lineNoCov">    0 / 1     : 						this-&gt;MenuJoystickButtons[n] = atoi(value); </span>
+<span class="lineNum">    490 </span>              : 				} </span>
+<span class="lineNum">    491 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;MsPerFrame&quot;)) </span>
+<span class="lineNum">    492 </span><span class="lineNoCov">    0 / 1     : 					MsPerFrame = atoi(value); </span>
+<span class="lineNum">    493 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkKey&quot;)) </span>
+<span class="lineNum">    494 </span><span class="lineCov">    1 / 1     : 					NetworkKey = atoi(value); </span>
+<span class="lineNum">    495 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkName&quot;)) </span>
+<span class="lineNum">    496 </span>              : 					strcpy(NetworkName, value); </span>
+<span class="lineNum">    497 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkServer&quot;)) </span>
+<span class="lineNum">    498 </span>              : 					strcpy(NetworkServer, value); </span>
+<span class="lineNum">    499 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkPort&quot;)) </span>
+<span class="lineNum">    500 </span><span class="lineNoCov">    0 / 1     : 					NetworkPort = atoi(value); </span>
+<span class="lineNum">    501 </span>              : 				else if (!strcmp(keyword, &quot;NetworkName&quot;)) </span>
+<span class="lineNum">    502 </span>              : 					strcpy(NetworkName, value); </span>
+<span class="lineNum">    503 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkRegion&quot;)) </span>
+<span class="lineNum">    504 </span><span class="lineCov">    1 / 1     : 					NetworkRegion = atoi(value); </span>
+<span class="lineNum">    505 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;NetworkAvatar&quot;)) </span>
+<span class="lineNum">    506 </span><span class="lineNoCov">    0 / 1     : 					NetworkAvatar = atoi(value); </span>
+<span class="lineNum">    507 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;Theme&quot;)) </span>
+<span class="lineNum">    508 </span>              : 					strcpy(Theme, value); </span>
+<span class="lineNum">    509 </span><span class="lineCov">    1 / 1     : 				else if (!strcmp(keyword, &quot;CursorKeysForJoystick&quot;)) </span>
+<span class="lineNum">    510 </span><span class="lineCov">    1 / 1     : 					CursorKeysForJoystick = !strcmp(value, &quot;TRUE&quot;); </span>
+<span class="lineNum">    511 </span>              : 			} </span>
+<span class="lineNum">    512 </span>              : 		} </span>
+<span class="lineNum">    513 </span><span class="lineCov">    1 / 1     : 		fclose(file); </span>
+<span class="lineNum">    514 </span>              : 	} </span>
+<span class="lineNum">    515 </span>              : 	Check(); </span>
+<span class="lineNum">    516 </span><span class="lineCov">    1 / 1     : 	ThePrefsOnDisk = *this; </span>
+<span class="lineNum">    517 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    518 </span>              :  </span>
+<span class="lineNum">    519 </span>              :  </span>
+<span class="lineNum">    520 </span>              : /* </span>
+<span class="lineNum">    521 </span>              :  *  Save preferences to file </span>
+<span class="lineNum">    522 </span>              :  *  true: success, false: error </span>
+<span class="lineNum">    523 </span>              :  */ </span>
+<span class="lineNum">    524 </span>              :  </span>
+<span class="lineNum">    525 </span>              : bool Prefs::Save(const char *filename) </span>
+<span class="lineNum">    526 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    527 </span>              : 	FILE *file; </span>
+<span class="lineNum">    528 </span>              :  </span>
+<span class="lineNum">    529 </span>              : 	Check(); </span>
+<span class="lineNum">    530 </span><span class="lineCov">    1 / 1     : 	if ((file = fopen(filename, &quot;w&quot;)) != NULL) { </span>
+<span class="lineNum">    531 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, NormalCycles != TheDefaultPrefs.NormalCycles, &quot;NormalCycles = %d\n&quot;, NormalCycles); </span>
+<span class="lineNum">    532 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, BadLineCycles != TheDefaultPrefs.BadLineCycles, &quot;BadLineCycles = %d\n&quot;, BadLineCycles); </span>
+<span class="lineNum">    533 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, CIACycles != TheDefaultPrefs.CIACycles, &quot;CIACycles = %d\n&quot;, CIACycles); </span>
+<span class="lineNum">    534 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, FloppyCycles != TheDefaultPrefs.FloppyCycles, &quot;FloppyCycles = %d\n&quot;, FloppyCycles); </span>
+<span class="lineNum">    535 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, SkipFrames != TheDefaultPrefs.SkipFrames, &quot;SkipFrames = %d\n&quot;, SkipFrames); </span>
+<span class="lineNum">    536 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, LatencyMin != TheDefaultPrefs.LatencyMin, &quot;LatencyMin = %d\n&quot;, LatencyMin); </span>
+<span class="lineNum">    537 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, LatencyMax != TheDefaultPrefs.LatencyMax, &quot;LatencyMax = %d\n&quot;, LatencyMax); </span>
+<span class="lineNum">    538 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, LatencyAvg != TheDefaultPrefs.LatencyAvg, &quot;LatencyAvg = %d\n&quot;, LatencyAvg); </span>
+<span class="lineNum">    539 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, ScalingNumerator != TheDefaultPrefs.ScalingNumerator, &quot;ScalingNumerator = %d\n&quot;, ScalingNumerator); </span>
+<span class="lineNum">    540 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, ScalingDenominator != TheDefaultPrefs.ScalingDenominator, &quot;ScalingDenominator = %d\n&quot;, ScalingDenominator); </span>
+<span class="lineNum">    541 </span><span class="lineCov">    2 / 2     : 		for (int i=0; i&lt;4; i++) { </span>
+<span class="lineNum">    542 </span><span class="linePartCov">    1 / 2     : 			maybe_write(file, strcmp(DrivePath[i], TheDefaultPrefs.DrivePath[i]) != 0, &quot;DrivePath%d = %s\n&quot;, i+8, DrivePath[i]); </span>
+<span class="lineNum">    543 </span>              : 		} </span>
+<span class="lineNum">    544 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, strcmp(ViewPort, TheDefaultPrefs.ViewPort) != 0, &quot;ViewPort = %s\n&quot;, ViewPort); </span>
+<span class="lineNum">    545 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, strcmp(DisplayMode, TheDefaultPrefs.DisplayMode) != 0, &quot;DisplayMode = %s\n&quot;, DisplayMode); </span>
+<span class="lineNum">    546 </span><span class="lineCov">    1 / 1     : 		if (SIDType != TheDefaultPrefs.SIDType) </span>
+<span class="lineNum">    547 </span>              : 		{ </span>
+<span class="lineNum">    548 </span>              : 			fprintf(file, &quot;SIDType = &quot;); </span>
+<span class="lineNum">    549 </span><span class="lineNoCov">    0 / 1     : 			switch (SIDType) { </span>
+<span class="lineNum">    550 </span>              : 				case SIDTYPE_NONE: </span>
+<span class="lineNum">    551 </span>              : 					fprintf(file, &quot;NONE\n&quot;); </span>
+<span class="lineNum">    552 </span>              : 					break; </span>
+<span class="lineNum">    553 </span>              : 				case SIDTYPE_DIGITAL: </span>
+<span class="lineNum">    554 </span>              : 					fprintf(file, &quot;DIGITAL\n&quot;); </span>
+<span class="lineNum">    555 </span>              : 					break; </span>
+<span class="lineNum">    556 </span>              : 				case SIDTYPE_SIDCARD: </span>
+<span class="lineNum">    557 </span>              : 					fprintf(file, &quot;SIDCARD\n&quot;); </span>
+<span class="lineNum">    558 </span>              : 					break; </span>
+<span class="lineNum">    559 </span>              : 			} </span>
+<span class="lineNum">    560 </span>              : 		} </span>
+<span class="lineNum">    561 </span><span class="linePartCov">    1 / 3     : 		if (REUSize != TheDefaultPrefs.REUSize) </span>
+<span class="lineNum">    562 </span>              : 		{ </span>
+<span class="lineNum">    563 </span>              : 			fprintf(file, &quot;REUSize = &quot;); </span>
+<span class="lineNum">    564 </span><span class="lineNoCov">    0 / 2     : 			switch (REUSize) { </span>
+<span class="lineNum">    565 </span>              : 				case REU_NONE: </span>
+<span class="lineNum">    566 </span>              : 					fprintf(file, &quot;NONE\n&quot;); </span>
+<span class="lineNum">    567 </span>              : 					break; </span>
+<span class="lineNum">    568 </span>              : 				case REU_128K: </span>
+<span class="lineNum">    569 </span>              : 					fprintf(file, &quot;128K\n&quot;); </span>
+<span class="lineNum">    570 </span>              : 					break; </span>
+<span class="lineNum">    571 </span>              : 				case REU_256K: </span>
+<span class="lineNum">    572 </span>              : 					fprintf(file, &quot;256K\n&quot;); </span>
+<span class="lineNum">    573 </span>              : 					break; </span>
+<span class="lineNum">    574 </span>              : 				case REU_512K: </span>
+<span class="lineNum">    575 </span>              : 					fprintf(file, &quot;512K\n&quot;); </span>
+<span class="lineNum">    576 </span>              : 					break; </span>
+<span class="lineNum">    577 </span>              : 			}; </span>
+<span class="lineNum">    578 </span>              : 		} </span>
+<span class="lineNum">    579 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, DisplayType != TheDefaultPrefs.DisplayType, &quot;DisplayType = %s\n&quot;, DisplayType == DISPTYPE_WINDOW ? &quot;WINDOW&quot; : &quot;SCREEN&quot;); </span>
+<span class="lineNum">    580 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, Joystick1Port != TheDefaultPrefs.Joystick1Port, &quot;Joystick1Port = %d\n&quot;, Joystick1Port); </span>
+<span class="lineNum">    581 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, Joystick2Port != TheDefaultPrefs.Joystick2Port, &quot;Joystick1Port = %d\n&quot;, Joystick2Port); </span>
+<span class="lineNum">    582 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, SpritesOn != TheDefaultPrefs.SpritesOn, &quot;SpritesOn = %s\n&quot;, SpritesOn ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    583 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, SpriteCollisions != TheDefaultPrefs.SpriteCollisions, &quot;SpriteCollisions = %s\n&quot;, SpriteCollisions ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    584 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, JoystickSwap != TheDefaultPrefs.JoystickSwap, &quot;JoystickSwap = %s\n&quot;, JoystickSwap ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    585 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, LimitSpeed != TheDefaultPrefs.LimitSpeed, &quot;LimitSpeed = %s\n&quot;, LimitSpeed ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    586 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, FastReset != TheDefaultPrefs.FastReset, &quot;FastReset = %s\n&quot;, FastReset ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    587 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, CIAIRQHack != TheDefaultPrefs.CIAIRQHack, &quot;CIAIRQHack = %s\n&quot;, CIAIRQHack ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    588 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, MapSlash != TheDefaultPrefs.MapSlash, &quot;MapSlash = %s\n&quot;, MapSlash ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    589 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, Emul1541Proc != TheDefaultPrefs.Emul1541Proc, &quot;Emul1541Proc = %s\n&quot;, Emul1541Proc ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    590 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, SIDFilters != TheDefaultPrefs.SIDFilters, &quot;SIDFilters = %s\n&quot;, SIDFilters ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    591 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, DoubleScan != TheDefaultPrefs.DoubleScan, &quot;DoubleScan = %s\n&quot;, DoubleScan ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    592 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, HideCursor != TheDefaultPrefs.HideCursor, &quot;HideCursor = %s\n&quot;, HideCursor ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    593 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, DirectSound != TheDefaultPrefs.DirectSound, &quot;DirectSound = %s\n&quot;, DirectSound ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    594 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, ExclusiveSound != TheDefaultPrefs.ExclusiveSound, &quot;ExclusiveSound = %s\n&quot;, ExclusiveSound ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    595 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, AutoPause != TheDefaultPrefs.AutoPause, &quot;AutoPause = %s\n&quot;, AutoPause ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    596 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, PrefsAtStartup != TheDefaultPrefs.PrefsAtStartup, &quot;PrefsAtStartup = %s\n&quot;, PrefsAtStartup ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    597 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, SystemMemory != TheDefaultPrefs.SystemMemory, &quot;SystemMemory = %s\n&quot;, SystemMemory ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    598 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, AlwaysCopy != TheDefaultPrefs.AlwaysCopy, &quot;AlwaysCopy = %s\n&quot;, AlwaysCopy ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    599 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, SystemKeys != TheDefaultPrefs.SystemKeys, &quot;SystemKeys = %s\n&quot;, SystemKeys ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    600 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, ShowLEDs != TheDefaultPrefs.ShowLEDs, &quot;ShowLEDs = %s\n&quot;, ShowLEDs ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    601 </span>              :  </span>
+<span class="lineNum">    602 </span><span class="lineCov">    2 / 2     : 		for (int i = 0; i &lt; MAX_JOYSTICK_AXES; i++) </span>
+<span class="lineNum">    603 </span><span class="lineCov">    2 / 2     : 			maybe_write(file, JoystickAxes[i] != TheDefaultPrefs.JoystickAxes[i], &quot;JoystickAxes%d = %d\n&quot;, i, JoystickAxes[i]); </span>
+<span class="lineNum">    604 </span><span class="lineCov">    2 / 2     : 		for (int i = 0; i &lt; MAX_JOYSTICK_HATS; i++) </span>
+<span class="lineNum">    605 </span>              : 		{ </span>
+<span class="lineNum">    606 </span><span class="lineCov">    1 / 1     : 			maybe_write(file, JoystickHats[i] != TheDefaultPrefs.JoystickHats[i], &quot;JoystickHats%d = %d\n&quot;, i, JoystickHats[i]); </span>
+<span class="lineNum">    607 </span><span class="lineCov">    2 / 2     : 			maybe_write(file, MenuJoystickHats[i] != TheDefaultPrefs.MenuJoystickHats[i], &quot;MenuJoystickHats%d = %d\n&quot;, i, MenuJoystickHats[i]); </span>
+<span class="lineNum">    608 </span>              : 		} </span>
+<span class="lineNum">    609 </span><span class="lineCov">    2 / 2     : 		for (int i = 0; i &lt; MAX_JOYSTICK_BUTTONS; i++) </span>
+<span class="lineNum">    610 </span>              : 		{ </span>
+<span class="lineNum">    611 </span><span class="lineCov">    1 / 1     : 			maybe_write(file, JoystickButtons[i] != TheDefaultPrefs.JoystickButtons[i], &quot;JoystickButtons%d = %d\n&quot;, i, JoystickButtons[i]); </span>
+<span class="lineNum">    612 </span><span class="lineCov">    2 / 2     : 			maybe_write(file, MenuJoystickButtons[i] != TheDefaultPrefs.MenuJoystickButtons[i], &quot;MenuJoystickButtons%d = %d\n&quot;, i, MenuJoystickButtons[i]); </span>
+<span class="lineNum">    613 </span>              : 		} </span>
+<span class="lineNum">    614 </span>              :  </span>
+<span class="lineNum">    615 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, MsPerFrame != TheDefaultPrefs.MsPerFrame, &quot;MsPerFrame = %d\n&quot;, MsPerFrame); </span>
+<span class="lineNum">    616 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, NetworkKey != TheDefaultPrefs.NetworkKey, &quot;NetworkKey = %d\n&quot;, NetworkKey); </span>
+<span class="lineNum">    617 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, NetworkAvatar != TheDefaultPrefs.NetworkAvatar, &quot;NetworkAvatar = %d\n&quot;, NetworkAvatar); </span>
+<span class="lineNum">    618 </span><span class="lineCov">    3 / 3     : 		maybe_write(file, strcmp(NetworkName, TheDefaultPrefs.NetworkName) != 0, &quot;NetworkName = %s\n&quot;, NetworkName); </span>
+<span class="lineNum">    619 </span><span class="lineCov">    3 / 3     : 		maybe_write(file, strcmp(NetworkServer, TheDefaultPrefs.NetworkServer) != 0, &quot;NetworkServer = %s\n&quot;, NetworkServer); </span>
+<span class="lineNum">    620 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, NetworkPort != TheDefaultPrefs.NetworkPort, &quot;NetworkPort = %d\n&quot;, NetworkPort); </span>
+<span class="lineNum">    621 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, NetworkRegion != TheDefaultPrefs.NetworkRegion, &quot;NetworkRegion = %d\n&quot;, NetworkRegion); </span>
+<span class="lineNum">    622 </span><span class="lineCov">    2 / 2     : 		maybe_write(file, strcmp(Theme, TheDefaultPrefs.Theme) != 0, &quot;Theme = %s\n&quot;, Theme); </span>
+<span class="lineNum">    623 </span><span class="lineCov">    1 / 1     : 		maybe_write(file, CursorKeysForJoystick != TheDefaultPrefs.CursorKeysForJoystick, &quot;CursorKeysForJoystick = %s\n&quot;, CursorKeysForJoystick ? &quot;TRUE&quot; : &quot;FALSE&quot;); </span>
+<span class="lineNum">    624 </span><span class="lineCov">    1 / 1     : 		fclose(file); </span>
+<span class="lineNum">    625 </span><span class="lineCov">    1 / 1     : 		ThePrefsOnDisk = *this; </span>
+<span class="lineNum">    626 </span>              : 		return true; </span>
+<span class="lineNum">    627 </span>              : 	} </span>
+<span class="lineNum">    628 </span>              : 	return false; </span>
+<span class="lineNum">    629 </span><span class="lineCov">    3 / 3     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

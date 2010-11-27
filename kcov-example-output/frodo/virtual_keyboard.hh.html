@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">5</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">20.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /********************************************************************* </span>
+<span class="lineNum">      2 </span>              :  * </span>
+<span class="lineNum">      3 </span>              :  * Copyright (C) 2009,  Simon Kagstrom </span>
+<span class="lineNum">      4 </span>              :  * </span>
+<span class="lineNum">      5 </span>              :  * Filename:      VirtualKeyboard.c </span>
+<span class="lineNum">      6 </span>              :  * Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">      7 </span>              :  * Description:   A virtual keyboard </span>
+<span class="lineNum">      8 </span>              :  * </span>
+<span class="lineNum">      9 </span>              :  * $Id$ </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  ********************************************************************/ </span>
+<span class="lineNum">     12 </span>              : #ifndef __VIRTUAL_KEYBORD_HH__ </span>
+<span class="lineNum">     13 </span>              : #define __VIRTUAL_KEYBORD_HH__ </span>
+<span class="lineNum">     14 </span>              :  </span>
+<span class="lineNum">     15 </span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">     16 </span>              :  </span>
+<span class="lineNum">     17 </span>              : #include &quot;widget.hh&quot; </span>
+<span class="lineNum">     18 </span>              : #include &quot;gui_view.hh&quot; </span>
+<span class="lineNum">     19 </span>              : #include &quot;font.hh&quot; </span>
+<span class="lineNum">     20 </span>              : #include &quot;listener.hh&quot; </span>
+<span class="lineNum">     21 </span>              :  </span>
+<span class="lineNum">     22 </span>              : struct virtkey;  </span>
+<span class="lineNum">     23 </span>              :  </span>
+<span class="lineNum">     24 </span>              : class KeyboardListener : public Listener </span>
+<span class="lineNum">     25 </span>              : { </span>
+<span class="lineNum">     26 </span>              : public: </span>
+<span class="lineNum">     27 </span>              : 	~KeyboardListener(); </span>
+<span class="lineNum">     28 </span>              :  </span>
+<span class="lineNum">     29 </span>              : 	/* Each key is a string */ </span>
+<span class="lineNum">     30 </span><span class="lineNoCov">    0 / 3     : 	virtual void keyCallback(bool shift, const char *str) </span>
+<span class="lineNum">     31 </span>              : 	{ </span>
+<span class="lineNum">     32 </span><span class="lineNoCov">    0 / 6     : 	} </span>
+<span class="lineNum">     33 </span>              :  </span>
+<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 3     : 	virtual void stringCallback(const char *str) </span>
+<span class="lineNum">     35 </span>              : 	{ </span>
+<span class="lineNum">     36 </span><span class="lineNoCov">    0 / 6     : 	} </span>
+<span class="lineNum">     37 </span>              : }; </span>
+<span class="lineNum">     38 </span>              :  </span>
+<span class="lineNum">     39 </span>              : class VirtualKeyboard : public GuiView, public ListenerManager </span>
+<span class="lineNum">     40 </span>              : { </span>
+<span class="lineNum">     41 </span>              : public: </span>
+<span class="lineNum">     42 </span>              : 	VirtualKeyboard(Font *font); </span>
+<span class="lineNum">     43 </span>              : 	~VirtualKeyboard(); </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              : 	/* Conversions */ </span>
+<span class="lineNum">     46 </span>              : 	const char *keycodeToString(int kc); </span>
+<span class="lineNum">     47 </span>              : 	const char keycodeToChar(int kc); </span>
+<span class="lineNum">     48 </span>              : 	int charToKeycode(char c); </span>
+<span class="lineNum">     49 </span>              : 	int stringToKeycode(const char *str); </span>
+<span class="lineNum">     50 </span>              : 	struct virtkey eventToVirtkey(event_t ev); </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span>              : 	void activate(bool default_shifted = true); </span>
+<span class="lineNum">     53 </span>              :  </span>
+<span class="lineNum">     54 </span>              : 	void setFont(Font *font) </span>
+<span class="lineNum">     55 </span>              : 	{ </span>
+<span class="lineNum">     56 </span><span class="lineCov">    2 / 2     : 		this-&gt;font = font; </span>
+<span class="lineNum">     57 </span>              : 	} </span>
+<span class="lineNum">     58 </span>              :  </span>
+<span class="lineNum">     59 </span>              : 	void deactivate(); </span>
+<span class="lineNum">     60 </span>              :  </span>
+<span class="lineNum">     61 </span>              : 	bool isActive() </span>
+<span class="lineNum">     62 </span>              : 	{ </span>
+<span class="lineNum">     63 </span>              : 		return this-&gt;is_active; </span>
+<span class="lineNum">     64 </span>              : 	} </span>
+<span class="lineNum">     65 </span>              :  </span>
+<span class="lineNum">     66 </span>              : 	virtual void updateTheme(); </span>
+<span class="lineNum">     67 </span>              :  </span>
+<span class="lineNum">     68 </span>              : 	void draw(SDL_Surface *where); </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span>              : 	void runLogic(); </span>
+<span class="lineNum">     71 </span>              :  </span>
+<span class="lineNum">     72 </span>              : 	void draw(SDL_Surface *where, int x, int y, int w, int h); </span>
+<span class="lineNum">     73 </span>              :  </span>
+<span class="lineNum">     74 </span>              : 	void pushEvent(event_t ev); </span>
+<span class="lineNum">     75 </span>              :  </span>
+<span class="lineNum">     76 </span>              : 	void pushEvent(SDL_Event *ev); </span>
+<span class="lineNum">     77 </span>              :  </span>
+<span class="lineNum">     78 </span>              : 	const char *getString(); </span>
+<span class="lineNum">     79 </span>              :  </span>
+<span class="lineNum">     80 </span>              : 	/* Singleton object */ </span>
+<span class="lineNum">     81 </span>              : 	static VirtualKeyboard *kbd; </span>
+<span class="lineNum">     82 </span>              : private: </span>
+<span class="lineNum">     83 </span>              : 	void selectNext(int dx, int dy); </span>
+<span class="lineNum">     84 </span>              :  </span>
+<span class="lineNum">     85 </span>              : 	void toggleShift(); </span>
+<span class="lineNum">     86 </span>              :  </span>
+<span class="lineNum">     87 </span>              : 	void pushKey(struct virtkey *vk); </span>
+<span class="lineNum">     88 </span>              :  </span>
+<span class="lineNum">     89 </span>              : 	void done(); </span>
+<span class="lineNum">     90 </span>              :  </span>
+<span class="lineNum">     91 </span>              : 	Font *font; </span>
+<span class="lineNum">     92 </span>              : 	int sel_x; </span>
+<span class="lineNum">     93 </span>              : 	int sel_y; </span>
+<span class="lineNum">     94 </span>              : 	bool shift_on; </span>
+<span class="lineNum">     95 </span>              :  </span>
+<span class="lineNum">     96 </span>              : 	bool kbd_only_input; </span>
+<span class="lineNum">     97 </span>              : 	bool default_shifted; </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span>              : 	bool is_active; </span>
+<span class="lineNum">    100 </span>              : 	struct virtkey *buf; </span>
+<span class="lineNum">    101 </span>              : 	unsigned buf_head; </span>
+<span class="lineNum">    102 </span>              : 	size_t buf_len; </span>
+<span class="lineNum">    103 </span>              : }; </span>
+<span class="lineNum">    104 </span>              :  </span>
+<span class="lineNum">    105 </span>              : #endif /* __VIRTUAL_KEYBORD_HH__ */ </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

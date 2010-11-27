@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">5</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">5</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : #ifndef __TIMER_HH__ </span>
+<span class="lineNum">      2 </span>              : #define __TIMER_HH__ </span>
+<span class="lineNum">      3 </span>              :  </span>
+<span class="lineNum">      4 </span>              : class TimeoutHandler; </span>
+<span class="lineNum">      5 </span>              :  </span>
+<span class="lineNum">      6 </span>              : class TimerController </span>
+<span class="lineNum">      7 </span>              : { </span>
+<span class="lineNum">      8 </span>              : public: </span>
+<span class="lineNum">      9 </span>              : 	TimerController(); </span>
+<span class="lineNum">     10 </span>              :  </span>
+<span class="lineNum">     11 </span>              : 	int arm(TimeoutHandler *which, int ms); </span>
+<span class="lineNum">     12 </span>              :  </span>
+<span class="lineNum">     13 </span>              : 	void disarm(TimeoutHandler *which); </span>
+<span class="lineNum">     14 </span>              :  </span>
+<span class="lineNum">     15 </span>              : 	void tick(); </span>
+<span class="lineNum">     16 </span>              :  </span>
+<span class="lineNum">     17 </span>              : 	/* Singleton */ </span>
+<span class="lineNum">     18 </span>              : 	static TimerController *controller; </span>
+<span class="lineNum">     19 </span>              : 	static void init(); </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : private: </span>
+<span class="lineNum">     22 </span>              : 	int n_handlers; </span>
+<span class="lineNum">     23 </span>              : 	TimeoutHandler **handlers; </span>
+<span class="lineNum">     24 </span>              : }; </span>
+<span class="lineNum">     25 </span>              :  </span>
+<span class="lineNum">     26 </span>              : class TimeoutHandler </span>
+<span class="lineNum">     27 </span>              : { </span>
+<span class="lineNum">     28 </span>              : 	friend class TimerController; </span>
+<span class="lineNum">     29 </span>              : public: </span>
+<span class="lineNum">     30 </span>              : 	TimeoutHandler() </span>
+<span class="lineNum">     31 </span>              : 	{ </span>
+<span class="lineNum">     32 </span><span class="linePartCov">    3 / 9     : 		this-&gt;timeout = 0; </span>
+<span class="lineNum">     33 </span><span class="linePartCov">    4 / 9     : 		this-&gt;timer_id = -1; </span>
+<span class="lineNum">     34 </span>              : 	} </span>
+<span class="lineNum">     35 </span>              :  </span>
+<span class="lineNum">     36 </span>              : 	~TimeoutHandler(); </span>
+<span class="lineNum">     37 </span>              :  </span>
+<span class="lineNum">     38 </span>              : 	void tick() </span>
+<span class="lineNum">     39 </span>              : 	{ </span>
+<span class="lineNum">     40 </span><span class="linePartCov">    3 / 4     : 		this-&gt;timeout--; </span>
+<span class="lineNum">     41 </span><span class="linePartCov">    3 / 4     : 		if (this-&gt;timeout == 0) </span>
+<span class="lineNum">     42 </span><span class="lineCov">    2 / 2     : 			this-&gt;timeoutCallback(); </span>
+<span class="lineNum">     43 </span>              : 	} </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              : 	virtual void timeoutCallback() = 0; </span>
+<span class="lineNum">     46 </span>              :  </span>
+<span class="lineNum">     47 </span>              : protected: </span>
+<span class="lineNum">     48 </span>              : 	int timeout; </span>
+<span class="lineNum">     49 </span>              : 	int timer_id; </span>
+<span class="lineNum">     50 </span>              : }; </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span>              : #endif /* __TIMER_HH__ */ </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

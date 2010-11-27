@@ -1,0 +1,533 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">190</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftLo" width="15%">7.4 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">14</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /********************************************************************* </span>
+<span class="lineNum">      2 </span>              :  * </span>
+<span class="lineNum">      3 </span>              :  * Copyright (C) 2009,  Simon Kagstrom </span>
+<span class="lineNum">      4 </span>              :  * </span>
+<span class="lineNum">      5 </span>              :  * Filename:      VirtualKeyboard.c </span>
+<span class="lineNum">      6 </span>              :  * Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">      7 </span>              :  * Description:   A virtual keyboard </span>
+<span class="lineNum">      8 </span>              :  * </span>
+<span class="lineNum">      9 </span>              :  * $Id$ </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  ********************************************************************/ </span>
+<span class="lineNum">     12 </span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">     13 </span>              :  </span>
+<span class="lineNum">     14 </span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">     15 </span>              :  </span>
+<span class="lineNum">     16 </span>              : #include &quot;virtual_keyboard.hh&quot; </span>
+<span class="lineNum">     17 </span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">     18 </span>              :  </span>
+<span class="lineNum">     19 </span>              : typedef struct virtkey </span>
+<span class="lineNum">     20 </span>              : { </span>
+<span class="lineNum">     21 </span>              : 	const char *name; </span>
+<span class="lineNum">     22 </span>              : 	int kc; </span>
+<span class="lineNum">     23 </span>              : 	int flags; </span>
+<span class="lineNum">     24 </span>              : } virtkey_t; </span>
+<span class="lineNum">     25 </span>              :  </span>
+<span class="lineNum">     26 </span>              : #define F_IS_SHIFT 1 </span>
+<span class="lineNum">     27 </span>              : #define F_IS_DONE  2 </span>
+<span class="lineNum">     28 </span>              : #define F_SHIFT_ON 4 </span>
+<span class="lineNum">     29 </span>              :  </span>
+<span class="lineNum">     30 </span>              : #define INVALID_VIRTKEY ((struct virtkey){NULL, -1, 0}) </span>
+<span class="lineNum">     31 </span>              :  </span>
+<span class="lineNum">     32 </span>              : static inline bool IS_INVALID_VIRTKEY(virtkey_t *k) </span>
+<span class="lineNum">     33 </span>              : { </span>
+<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 3     : 	return k-&gt;name == NULL &amp;&amp; k-&gt;kc == -1 &amp;&amp; k-&gt;flags == 0; </span>
+<span class="lineNum">     35 </span>              : } </span>
+<span class="lineNum">     36 </span>              : /* </span>
+<span class="lineNum">     37 </span>              :   C64 keyboard matrix: </span>
+<span class="lineNum">     38 </span>              :  </span>
+<span class="lineNum">     39 </span>              :                                                                        Bit 7   6   5   4   3   2   1   0 </span>
+<span class="lineNum">     40 </span>              :                                                                      0    CUD  F5  F3  F1  F7 CLR RET DEL </span>
+<span class="lineNum">     41 </span>              :                                                                      1    SHL  E   S   Z   4   A   W   3 </span>
+<span class="lineNum">     42 </span>              :                                                                      2     X   T   F   C   6   D   R   5 </span>
+<span class="lineNum">     43 </span>              :                                                                      3     V   U   H   B   8   G   Y   7 </span>
+<span class="lineNum">     44 </span>              :                                                                      4     N   O   K   M   0   J   I   9 </span>
+<span class="lineNum">     45 </span>              :                                                                      5     ,   @   :   .   -   L   P   + </span>
+<span class="lineNum">     46 </span>              :                                                                      6     /   ^   =  SHR HOM  ;   *   &#ef;&#bf;&#bd; </span>
+<span class="lineNum">     47 </span>              :                                                                      7    R/S  Q   C= SPC  2  CTL  &lt;-  1 </span>
+<span class="lineNum">     48 </span>              : */ </span>
+<span class="lineNum">     49 </span>              : #define MATRIX(a,b) (((a) &lt;&lt; 3) | (b)) </span>
+<span class="lineNum">     50 </span>              :  </span>
+<span class="lineNum">     51 </span>              : #define K(name, a,b) \ </span>
+<span class="lineNum">     52 </span>              : 	{ name, MATRIX(a,b), 0 } </span>
+<span class="lineNum">     53 </span>              : #define S(name, a,b) \ </span>
+<span class="lineNum">     54 </span>              : 	{ name, MATRIX(a,b), F_IS_SHIFT } </span>
+<span class="lineNum">     55 </span>              : #define N(name) \ </span>
+<span class="lineNum">     56 </span>              : 	{ name, -1, 0 } </span>
+<span class="lineNum">     57 </span>              : #define D(name) \ </span>
+<span class="lineNum">     58 </span>              : 	{ name, -1, F_IS_DONE} </span>
+<span class="lineNum">     59 </span>              : #define J(name, v) \ </span>
+<span class="lineNum">     60 </span>              : 	{ name, 0x40 | (v), 0} </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              : #define KEY_COLS 15 </span>
+<span class="lineNum">     63 </span>              : #define KEY_ROWS 8 </span>
+<span class="lineNum">     64 </span>              :  </span>
+<span class="lineNum">     65 </span>              : static virtkey_t keys[KEY_COLS * KEY_ROWS] = { </span>
+<span class="lineNum">     66 </span>              : 	K(&quot;&lt;-&quot;,7,1),       K(&quot;1&quot;, 7,0), K(&quot;2&quot;, 7,3), K(&quot;3&quot;, 1,0), K(&quot;4&quot;, 1,3), K(&quot;5&quot;, 2,0), K(&quot;6&quot;, 2,3), K(&quot;7&quot;, 3,0), K(&quot;8&quot;, 3,3), K(&quot;9&quot;, 4,0), K(&quot;0&quot;, 4,3), K(&quot;+&quot;, 5,0), K(&quot;-&quot;, 5,3), K(&quot;&#c2;&#a3;&quot;, 6,0), K(&quot;Hom&quot;, 6,3), </span>
+<span class="lineNum">     67 </span>              : 	K(&quot;Cr&quot;, 7,2),      K(&quot;Q&quot;, 7,6), K(&quot;W&quot;, 1,1), K(&quot;E&quot;, 1,6), K(&quot;R&quot;, 2,1), K(&quot;T&quot;, 2,6), K(&quot;Y&quot;, 3,1), K(&quot;U&quot;, 3,6), K(&quot;I&quot;, 4,1), K(&quot;O&quot;, 4,6), K(&quot;P&quot;, 5,1), K(&quot;@&quot;, 5,6), K(&quot;*&quot;, 6,1), K(&quot;Au&quot;, 6,6),K(&quot;Rstr&quot;,4,0), </span>
+<span class="lineNum">     68 </span>              : 	K(&quot;R/Stp&quot;, 7,7),   K(NULL,0,0), K(&quot;A&quot;, 1,2), K(&quot;S&quot;, 1,5), K(&quot;D&quot;, 2,2), K(&quot;F&quot;, 2,5), K(&quot;G&quot;, 3,2), K(&quot;H&quot;, 3,5), K(&quot;J&quot;, 4,2), K(&quot;K&quot;, 4,5), K(&quot;L&quot;, 5,2), K(&quot;:&quot;, 5,5), K(&quot;;&quot;, 6,2), K(&quot;=&quot;, 6,5), K(&quot;Ret&quot;, 0,1), </span>
+<span class="lineNum">     69 </span>              : 	K(&quot;C=&quot;, 7,5),      S(&quot;Shft&quot;,1,7),K(NULL,0,0),K(&quot;Z&quot;, 1,4), K(&quot;X&quot;, 2,7), K(&quot;C&quot;, 2,4), K(&quot;V&quot;, 3,7), K(&quot;B&quot;, 3,4), K(&quot;N&quot;, 4,7), K(&quot;M&quot;, 4,4), K(&quot;,&quot;, 5,7), K(&quot;.&quot;, 5,4), K(&quot;/&quot;, 6,7), K(&quot;Dwn&quot;,0,7),K(&quot;Rgt&quot;, 0,2), </span>
+<span class="lineNum">     70 </span>              : 	N(&quot;None&quot;),         K(NULL,0,0), K(NULL,0,0), K(&quot;space&quot;, 7,4),K(0, 0,0),K(NULL,0,0), K(&quot;f1&quot;,0,4), K(&quot;f3&quot;,0,5), K(&quot;f5&quot;,0,6), K(&quot;f7&quot;,0,3), K(&quot;Del&quot;,0,0),K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), D(&quot;DONE&quot;), </span>
+<span class="lineNum">     71 </span>              : 	K(NULL,0,0),       K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), K(0, 0,0),K(0, 0,0),J(&quot;Joy up&quot;,1),K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), K(NULL, 0,0),K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), K(NULL, 0,0), </span>
+<span class="lineNum">     72 </span>              : 	K(0, 0,0), K(NULL,0,0), K(NULL,0,0), J(&quot;Joy left&quot;,4), K(0,0,0),K(0,0,0),J(&quot;Joy fire&quot;,0x10),K(0,0,0), K(NULL,0,0),J(&quot;Joy right&quot;,8),K(0,0,0),K(0, 0,0),K(0, 0,0), K(NULL,0,0), K(NULL,0,0), </span>
+<span class="lineNum">     73 </span>              : 	K(NULL,0,0),       K(0, 0,0),   K(NULL,0,0), K(NULL,0,0), K(0,0,0),K(0,0,0),J(&quot;Joy down&quot;,2),K(NULL,0,0),K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), K(NULL,0,0), K(NULL, 0,0),K(NULL,0,0), K(NULL, 0,0), </span>
+<span class="lineNum">     74 </span>              : }; </span>
+<span class="lineNum">     75 </span>              :  </span>
+<span class="lineNum">     76 </span>              : static const char *shifted_names[KEY_COLS * KEY_ROWS] = { </span>
+<span class="lineNum">     77 </span>              : 	NULL,              &quot;!&quot;,         &quot;\&quot;&quot;,        &quot;#&quot;,         &quot;$&quot;,         &quot;%&quot;,         &quot;&amp;&quot;,         &quot;'&quot;,         &quot;(&quot;,         &quot;)&quot;,         NULL,        NULL,        NULL,        NULL,        &quot;Clr&quot;, </span>
+<span class="lineNum">     78 </span>              : 	NULL,              &quot;q&quot;,         &quot;w&quot;,         &quot;e&quot;,         &quot;r&quot;,         &quot;t&quot;,         &quot;y&quot;,         &quot;u&quot;,         &quot;i&quot;,         &quot;o&quot;,         &quot;p&quot;,        NULL,        NULL,        NULL,        NULL, </span>
+<span class="lineNum">     79 </span>              : 	NULL,              NULL,        &quot;a&quot;,         &quot;s&quot;,         &quot;d&quot;,         &quot;f&quot;,         &quot;g&quot;,         &quot;h&quot;,         &quot;j&quot;,         &quot;k&quot;,         &quot;l&quot;,        &quot;[&quot;,         &quot;]&quot;,         NULL,        NULL, </span>
+<span class="lineNum">     80 </span>              : 	NULL,              NULL,        NULL,        &quot;z&quot;,         &quot;x&quot;,         &quot;c&quot;,         &quot;v&quot;,         &quot;b&quot;,         &quot;n&quot;,         &quot;m&quot;,         &quot;&lt;&quot;,         &quot;&gt;&quot;,        &quot;?&quot;,         &quot;Up&quot;,        &quot;Lft&quot;, </span>
+<span class="lineNum">     81 </span>              : 	NULL,              NULL,        NULL,        NULL,        NULL,        NULL,        &quot;f2&quot;,        &quot;f4&quot;,        &quot;f6&quot;,        &quot;f8&quot;,        &quot;Ins&quot;,       NULL,        NULL,        NULL,        NULL, </span>
+<span class="lineNum">     82 </span>              : }; </span>
+<span class="lineNum">     83 </span>              :  </span>
+<span class="lineNum">     84 </span><span class="linePartCov">    3 / 6     : VirtualKeyboard::VirtualKeyboard(Font *font) : GuiView(), ListenerManager() </span>
+<span class="lineNum">     85 </span>              : { </span>
+<span class="lineNum">     86 </span><span class="linePartCov">    2 / 4     : 	this-&gt;font = font; </span>
+<span class="lineNum">     87 </span><span class="linePartCov">    1 / 2     : 	this-&gt;sel_x = 0; </span>
+<span class="lineNum">     88 </span><span class="linePartCov">    1 / 2     : 	this-&gt;sel_y = 0; </span>
+<span class="lineNum">     89 </span><span class="linePartCov">    1 / 2     : 	this-&gt;shift_on = false; </span>
+<span class="lineNum">     90 </span><span class="linePartCov">    1 / 2     : 	this-&gt;kbd_only_input = false; </span>
+<span class="lineNum">     91 </span><span class="linePartCov">    1 / 2     : 	this-&gt;default_shifted = false; </span>
+<span class="lineNum">     92 </span>              :  </span>
+<span class="lineNum">     93 </span><span class="linePartCov">    1 / 2     : 	this-&gt;is_active = false; </span>
+<span class="lineNum">     94 </span><span class="linePartCov">    1 / 2     : 	this-&gt;buf_head = 0; </span>
+<span class="lineNum">     95 </span><span class="linePartCov">    1 / 2     : 	this-&gt;buf_len = 255; </span>
+<span class="lineNum">     96 </span><span class="linePartCov">    1 / 2     : 	this-&gt;buf = (struct virtkey*)xmalloc(sizeof(struct virtkey) * this-&gt;buf_len); </span>
+<span class="lineNum">     97 </span>              : 	memset(this-&gt;buf, 0, sizeof(struct virtkey) * this-&gt;buf_len); </span>
+<span class="lineNum">     98 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">     99 </span>              :  </span>
+<span class="lineNum">    100 </span><span class="lineNoCov">    0 / 4     : VirtualKeyboard::~VirtualKeyboard() </span>
+<span class="lineNum">    101 </span>              : { </span>
+<span class="lineNum">    102 </span><span class="lineNoCov">    0 / 4     : 	free(this-&gt;buf); </span>
+<span class="lineNum">    103 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    104 </span>              :  </span>
+<span class="lineNum">    105 </span><span class="lineNoCov">    0 / 6     : void VirtualKeyboard::draw(SDL_Surface *where, int x_base, int y_base, int w, int h) </span>
+<span class="lineNum">    106 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 5     : 	int key_w = w / KEY_COLS; </span>
+<span class="lineNum">    108 </span>              : 	int key_h = h / KEY_ROWS; </span>
+<span class="lineNum">    109 </span>              :  </span>
+<span class="lineNum">    110 </span><span class="lineNoCov">    0 / 3     : 	for (int y = 0; y &lt; KEY_ROWS; y++ ) </span>
+<span class="lineNum">    111 </span>              : 	{ </span>
+<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 1     : 		for (int x = 0; x &lt; KEY_COLS; x++ ) </span>
+<span class="lineNum">    113 </span>              : 		{ </span>
+<span class="lineNum">    114 </span>              : 			int which = y * KEY_COLS + x; </span>
+<span class="lineNum">    115 </span><span class="lineNoCov">    0 / 1     : 			virtkey_t key = keys[which]; </span>
+<span class="lineNum">    116 </span>              : 			const char *what = key.name; </span>
+<span class="lineNum">    117 </span>              :  </span>
+<span class="lineNum">    118 </span>              : 			/* Skip empty positions */ </span>
+<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 1     : 			if (key.name == NULL) </span>
+<span class="lineNum">    120 </span>              : 				continue; </span>
+<span class="lineNum">    121 </span><span class="lineNoCov">    0 / 3     : 			if (this-&gt;shift_on &amp;&amp; shifted_names[which]) </span>
+<span class="lineNum">    122 </span>              : 				what = shifted_names[which]; </span>
+<span class="lineNum">    123 </span>              :  </span>
+<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 3     : 			if (this-&gt;sel_x == x &amp;&amp; this-&gt;sel_y == y) </span>
+<span class="lineNum">    125 </span>              : 				highlight_background(where, Gui::gui-&gt;small_font, </span>
+<span class="lineNum">    126 </span>              : 						Gui::gui-&gt;bg_left, Gui::gui-&gt;bg_middle, Gui::gui-&gt;bg_right, </span>
+<span class="lineNum">    127 </span>              : 						x * key_w + x_base, y * key_h + y_base, </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 						this-&gt;font-&gt;getWidth(what), h); </span>
+<span class="lineNum">    129 </span>              : 			this-&gt;font-&gt;draw(where, what, </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 					x * key_w + x_base, y * key_h + y_base, w, h); </span>
+<span class="lineNum">    131 </span>              : 		} </span>
+<span class="lineNum">    132 </span>              : 	} </span>
+<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    134 </span>              :  </span>
+<span class="lineNum">    135 </span>              : void VirtualKeyboard::selectNext(int dx, int dy) </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 2     : 	int next_x = (this-&gt;sel_x + dx) % KEY_COLS; </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 3     : 	int next_y = (this-&gt;sel_y + dy) % KEY_ROWS; </span>
+<span class="lineNum">    139 </span>              : 	virtkey_t key; </span>
+<span class="lineNum">    140 </span>              :  </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 2     : 	if (next_x &lt; 0) </span>
+<span class="lineNum">    142 </span><span class="lineNoCov">    0 / 1     : 		next_x = KEY_COLS + next_x; </span>
+<span class="lineNum">    143 </span><span class="lineNoCov">    0 / 2     : 	if (next_y &lt; 0) </span>
+<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 1     : 		next_y = KEY_ROWS + next_y; </span>
+<span class="lineNum">    145 </span>              : 	this-&gt;sel_x = next_x; </span>
+<span class="lineNum">    146 </span>              : 	this-&gt;sel_y = next_y; </span>
+<span class="lineNum">    147 </span>              :  </span>
+<span class="lineNum">    148 </span>              : 	key = keys[ next_y * KEY_COLS + next_x ]; </span>
+<span class="lineNum">    149 </span>              :  </span>
+<span class="lineNum">    150 </span>              : 	/* Skip the empty spots */ </span>
+<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 1     : 	if (key.name == NULL) </span>
+<span class="lineNum">    152 </span>              : 	{ </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 2     : 		if (dy != 0) /* Look left */ </span>
+<span class="lineNum">    154 </span>              : 			this-&gt;selectNext(-1, 0); </span>
+<span class="lineNum">    155 </span>              : 		else </span>
+<span class="lineNum">    156 </span>              : 			this-&gt;selectNext(dx, dy); </span>
+<span class="lineNum">    157 </span>              : 	} </span>
+<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    159 </span>              :  </span>
+<span class="lineNum">    160 </span>              : void VirtualKeyboard::toggleShift() </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;shift_on = !this-&gt;shift_on; </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    164 </span>              :  </span>
+<span class="lineNum">    165 </span>              : const char *VirtualKeyboard::keycodeToString(int kc) </span>
+<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 5     : { </span>
+<span class="lineNum">    167 </span>              : 	bool shifted = kc &amp; 0x80; </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 	int kc_raw = kc &amp; ~0x80; </span>
+<span class="lineNum">    169 </span>              : 	const char *out = &quot;Unknown&quot;; </span>
+<span class="lineNum">    170 </span>              :  </span>
+<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 4     : 	if (kc &lt; 0) </span>
+<span class="lineNum">    172 </span>              : 		return &quot;None&quot;; </span>
+<span class="lineNum">    173 </span>              :  </span>
+<span class="lineNum">    174 </span>              : 	/* Just loop through all of them */ </span>
+<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 3     : 	for (int i = 0; i &lt; KEY_COLS * KEY_ROWS; i++) </span>
+<span class="lineNum">    176 </span>              : 	{ </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 		virtkey_t key = keys[i]; </span>
+<span class="lineNum">    178 </span>              :  </span>
+<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 2     : 		if (key.kc == kc_raw &amp;&amp; key.name != NULL) </span>
+<span class="lineNum">    180 </span>              : 		{ </span>
+<span class="lineNum">    181 </span>              : 			out = key.name; </span>
+<span class="lineNum">    182 </span>              :  </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     : 			if (shifted &amp;&amp; shifted_names[i]) </span>
+<span class="lineNum">    184 </span>              : 				out = shifted_names[i]; </span>
+<span class="lineNum">    185 </span>              : 			break; </span>
+<span class="lineNum">    186 </span>              : 		} </span>
+<span class="lineNum">    187 </span>              : 	} </span>
+<span class="lineNum">    188 </span>              :  </span>
+<span class="lineNum">    189 </span>              : 	return out; </span>
+<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    191 </span>              :  </span>
+<span class="lineNum">    192 </span>              : int VirtualKeyboard::charToKeycode(char c) </span>
+<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 2     : 	for (int i = 0; i &lt; KEY_COLS * KEY_ROWS; i++) </span>
+<span class="lineNum">    195 </span>              : 	{ </span>
+<span class="lineNum">    196 </span><span class="lineNoCov">    0 / 2     : 		virtkey_t key = keys[i]; </span>
+<span class="lineNum">    197 </span>              :  </span>
+<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 2     : 		if (key.name != NULL) </span>
+<span class="lineNum">    199 </span>              : 		{ </span>
+<span class="lineNum">    200 </span><span class="lineNoCov">    0 / 1     : 			if (strlen(key.name) == 1) </span>
+<span class="lineNum">    201 </span>              : 			{ </span>
+<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 				if (key.name[0] == c) </span>
+<span class="lineNum">    203 </span>              : 					return key.kc; </span>
+<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 1     : 				if (shifted_names[i] &amp;&amp; strlen(shifted_names[i]) == 1 &amp;&amp; </span>
+<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 						shifted_names[i][0] == c) </span>
+<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 1     : 					return key.kc | 0x80; </span>
+<span class="lineNum">    207 </span>              : 			} </span>
+<span class="lineNum">    208 </span>              :  </span>
+<span class="lineNum">    209 </span>              : 			/* OK, ugly special cases, but these are pretty important */ </span>
+<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 1     : 			if (c == ' ' &amp;&amp; strcmp(key.name, &quot;space&quot;) == 0) </span>
+<span class="lineNum">    211 </span>              : 				return key.kc; </span>
+<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 			if (c == '\n' &amp;&amp; strcmp(key.name, &quot;Ret&quot;) == 0) </span>
+<span class="lineNum">    213 </span>              : 				return key.kc; </span>
+<span class="lineNum">    214 </span>              : 		} </span>
+<span class="lineNum">    215 </span>              : 	} </span>
+<span class="lineNum">    216 </span>              :  </span>
+<span class="lineNum">    217 </span>              : 	return -1; </span>
+<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    219 </span>              :  </span>
+<span class="lineNum">    220 </span>              : virtkey_t VirtualKeyboard::eventToVirtkey(event_t ev) </span>
+<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 2     : 	char c = (char)ev; </span>
+<span class="lineNum">    223 </span>              :  </span>
+<span class="lineNum">    224 </span><span class="lineNoCov">    0 / 2     : 	for (int i = 0; i &lt; KEY_COLS * KEY_ROWS; i++) </span>
+<span class="lineNum">    225 </span>              : 	{ </span>
+<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 2     : 		virtkey_t key = keys[i]; </span>
+<span class="lineNum">    227 </span>              :  </span>
+<span class="lineNum">    228 </span><span class="lineNoCov">    0 / 2     : 		if (key.name != NULL) </span>
+<span class="lineNum">    229 </span>              : 		{ </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 1     : 			if (strlen(key.name) == 1) </span>
+<span class="lineNum">    231 </span>              : 			{ </span>
+<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 1     : 				if (key.name[0] == c) </span>
+<span class="lineNum">    233 </span>              : 					return key; </span>
+<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : 				if (shifted_names[i] &amp;&amp; strlen(shifted_names[i]) == 1 &amp;&amp; </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 						shifted_names[i][0] == c) </span>
+<span class="lineNum">    236 </span>              : 					return key; </span>
+<span class="lineNum">    237 </span>              : 			} </span>
+<span class="lineNum">    238 </span>              :  </span>
+<span class="lineNum">    239 </span>              : 			/* OK, ugly special cases, but these are pretty important */ </span>
+<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 3     : 			if ( (c == ' ' &amp;&amp; strcmp(key.name, &quot;space&quot;) == 0) || </span>
+<span class="lineNum">    241 </span>              : 					(c == '\n' &amp;&amp; strcmp(key.name, &quot;Ret&quot;) == 0) ) </span>
+<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 1     : 				return key; </span>
+<span class="lineNum">    243 </span>              : 		} </span>
+<span class="lineNum">    244 </span>              : 	} </span>
+<span class="lineNum">    245 </span>              :  </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 1     : 	return INVALID_VIRTKEY; </span>
+<span class="lineNum">    247 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    248 </span>              :  </span>
+<span class="lineNum">    249 </span>              : int VirtualKeyboard::stringToKeycode(const char *str) </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    251 </span><span class="lineNoCov">    0 / 2     : 	for (int i = 0; i &lt; KEY_COLS * KEY_ROWS; i++) </span>
+<span class="lineNum">    252 </span>              : 	{ </span>
+<span class="lineNum">    253 </span><span class="lineNoCov">    0 / 1     : 		virtkey_t key = keys[i]; </span>
+<span class="lineNum">    254 </span>              :  </span>
+<span class="lineNum">    255 </span><span class="lineNoCov">    0 / 1     : 		if (key.name != NULL) </span>
+<span class="lineNum">    256 </span>              : 		{ </span>
+<span class="lineNum">    257 </span><span class="lineNoCov">    0 / 2     : 			if (strcmp(key.name, str) == 0) </span>
+<span class="lineNum">    258 </span>              : 				return key.kc; </span>
+<span class="lineNum">    259 </span>              : 		} </span>
+<span class="lineNum">    260 </span>              : 	} </span>
+<span class="lineNum">    261 </span>              :  </span>
+<span class="lineNum">    262 </span>              : 	return 0; </span>
+<span class="lineNum">    263 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span>              : const char VirtualKeyboard::keycodeToChar(int kc) </span>
+<span class="lineNum">    266 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    267 </span><span class="lineNoCov">    0 / 2     : 	const char *s = this-&gt;keycodeToString(kc); </span>
+<span class="lineNum">    268 </span>              :  </span>
+<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 2     : 	if (strcmp(s, &quot;space&quot;) == 0) </span>
+<span class="lineNum">    270 </span>              : 		return ' '; </span>
+<span class="lineNum">    271 </span><span class="lineNoCov">    0 / 1     : 	if (strcmp(s, &quot;Ret&quot;) == 0) </span>
+<span class="lineNum">    272 </span>              : 		return '\n'; </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 	if (strcmp(s, &quot;Del&quot;) == 0) </span>
+<span class="lineNum">    274 </span>              : 		return '\b'; </span>
+<span class="lineNum">    275 </span>              :  </span>
+<span class="lineNum">    276 </span>              : 	/* NULL is never, ever returned */ </span>
+<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 	return s[0]; </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    279 </span>              :  </span>
+<span class="lineNum">    280 </span>              : void VirtualKeyboard::activate(bool default_shifted) </span>
+<span class="lineNum">    281 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;default_shifted = default_shifted; </span>
+<span class="lineNum">    283 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;shift_on = this-&gt;default_shifted; </span>
+<span class="lineNum">    284 </span>              :  </span>
+<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 1     : 	Gui::gui-&gt;kbd = this; </span>
+<span class="lineNum">    286 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;is_active = true; </span>
+<span class="lineNum">    287 </span>              : 	memset(this-&gt;buf, 0, sizeof(struct virtkey) * this-&gt;buf_len); </span>
+<span class="lineNum">    288 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;buf_head = 0; </span>
+<span class="lineNum">    289 </span>              :  </span>
+<span class="lineNum">    290 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;kbd_only_input = false; </span>
+<span class="lineNum">    291 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    292 </span>              :  </span>
+<span class="lineNum">    293 </span>              :  </span>
+<span class="lineNum">    294 </span>              : void VirtualKeyboard::runLogic() </span>
+<span class="lineNum">    295 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    296 </span>              : 	event_t ev; </span>
+<span class="lineNum">    297 </span>              : 	virtkey_t ev_key; </span>
+<span class="lineNum">    298 </span>              :  </span>
+<span class="lineNum">    299 </span><span class="lineNoCov">    0 / 1     : 	if (!this-&gt;is_active) </span>
+<span class="lineNum">    300 </span>              : 		return; </span>
+<span class="lineNum">    301 </span>              :  </span>
+<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 2     : 	ev = this-&gt;popEvent(); </span>
+<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 2     : 	if (ev == EVENT_NONE) </span>
+<span class="lineNum">    304 </span>              : 		return; </span>
+<span class="lineNum">    305 </span>              :  </span>
+<span class="lineNum">    306 </span>              : 	/* Something was typed on the keyboard */ </span>
+<span class="lineNum">    307 </span><span class="lineNoCov">    0 / 2     : 	ev_key = this-&gt;eventToVirtkey(ev); </span>
+<span class="lineNum">    308 </span>              : 	if ( !IS_INVALID_VIRTKEY(&amp;ev_key) ) { </span>
+<span class="lineNum">    309 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pushKey(&amp;ev_key); </span>
+<span class="lineNum">    310 </span>              : 	} </span>
+<span class="lineNum">    311 </span>              :  </span>
+<span class="lineNum">    312 </span><span class="lineNoCov">    0 / 1     : 	if (ev &amp; KEY_UP) </span>
+<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;selectNext(0, -1); </span>
+<span class="lineNum">    314 </span><span class="lineNoCov">    0 / 1     : 	else if (ev &amp; KEY_DOWN) </span>
+<span class="lineNum">    315 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;selectNext(0, 1); </span>
+<span class="lineNum">    316 </span><span class="lineNoCov">    0 / 1     : 	else if (ev &amp; KEY_LEFT) </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;selectNext(-1, 0); </span>
+<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 1     : 	else if (ev &amp; KEY_RIGHT) </span>
+<span class="lineNum">    319 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;selectNext(1, 0); </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 1     : 	else if (ev &amp; KEY_ESCAPE) </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;deactivate(); </span>
+<span class="lineNum">    322 </span><span class="lineNoCov">    0 / 1     : 	else if (ev &amp; KEY_SELECT) </span>
+<span class="lineNum">    323 </span>              : 	{ </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 1     : 		virtkey_t *key = &amp;keys[ this-&gt;sel_y * KEY_COLS + this-&gt;sel_x ]; </span>
+<span class="lineNum">    325 </span>              :  </span>
+<span class="lineNum">    326 </span>              : 		if (!key) </span>
+<span class="lineNum">    327 </span>              : 			return; </span>
+<span class="lineNum">    328 </span>              :  </span>
+<span class="lineNum">    329 </span><span class="lineNoCov">    0 / 1     : 		if (key-&gt;flags &amp; F_IS_SHIFT) </span>
+<span class="lineNum">    330 </span>              : 			this-&gt;toggleShift(); </span>
+<span class="lineNum">    331 </span><span class="lineNoCov">    0 / 1     : 		else if (key-&gt;flags &amp; F_IS_DONE) /* We're done! */ </span>
+<span class="lineNum">    332 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;done(); </span>
+<span class="lineNum">    333 </span><span class="lineNoCov">    0 / 1     : 		else if (strcmp(key-&gt;name, &quot;Del&quot;) == 0) </span>
+<span class="lineNum">    334 </span>              : 		{ </span>
+<span class="lineNum">    335 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;buf_head &gt; 1) </span>
+<span class="lineNum">    336 </span>              : 			{ </span>
+<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;buf[this-&gt;buf_head - 1] = INVALID_VIRTKEY; </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;buf_head--; </span>
+<span class="lineNum">    339 </span>              : 			} </span>
+<span class="lineNum">    340 </span>              : 		} </span>
+<span class="lineNum">    341 </span>              : 		else </span>
+<span class="lineNum">    342 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;pushKey(key); </span>
+<span class="lineNum">    343 </span>              : 	} </span>
+<span class="lineNum">    344 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    345 </span>              :  </span>
+<span class="lineNum">    346 </span>              : void VirtualKeyboard::pushKey(struct virtkey *vk) </span>
+<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    348 </span>              : 	int n_listeners = sizeof(this-&gt;listeners) / sizeof(*this-&gt;listeners); </span>
+<span class="lineNum">    349 </span><span class="lineNoCov">    0 / 1     : 	struct virtkey key = *vk; </span>
+<span class="lineNum">    350 </span>              :  </span>
+<span class="lineNum">    351 </span>              : 	if (this-&gt;shift_on) </span>
+<span class="lineNum">    352 </span><span class="lineNoCov">    0 / 1     : 		key.flags |= F_SHIFT_ON; </span>
+<span class="lineNum">    353 </span>              :  </span>
+<span class="lineNum">    354 </span>              : 	/* Add to buf */ </span>
+<span class="lineNum">    355 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;buf[this-&gt;buf_head] = key; </span>
+<span class="lineNum">    356 </span>              :  </span>
+<span class="lineNum">    357 </span><span class="lineNoCov">    0 / 3     : 	this-&gt;buf_head++; </span>
+<span class="lineNum">    358 </span><span class="lineNoCov">    0 / 4     : 	if (this-&gt;buf_head &gt;= this-&gt;buf_len - 1) </span>
+<span class="lineNum">    359 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;buf_head = 0; /* OK, not good, but well... */ </span>
+<span class="lineNum">    360 </span><span class="lineNoCov">    0 / 1     : 	for (int i = 0; i &lt; n_listeners; i++) </span>
+<span class="lineNum">    361 </span>              : 	{ </span>
+<span class="lineNum">    362 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;listeners[i]) </span>
+<span class="lineNum">    363 </span>              : 			((KeyboardListener*)this-&gt;listeners[i])-&gt;keyCallback(this-&gt;shift_on, </span>
+<span class="lineNum">    364 </span><span class="lineNoCov">    0 / 1     : 					vk-&gt;name); </span>
+<span class="lineNum">    365 </span>              : 	} </span>
+<span class="lineNum">    366 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    367 </span>              :  </span>
+<span class="lineNum">    368 </span>              : void VirtualKeyboard::deactivate() </span>
+<span class="lineNum">    369 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    370 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;is_active = false; </span>
+<span class="lineNum">    371 </span>              : 	this-&gt;flushListeners(); </span>
+<span class="lineNum">    372 </span><span class="lineNoCov">    0 / 1     : 	Gui::gui-&gt;kbd = NULL; </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    374 </span>              :  </span>
+<span class="lineNum">    375 </span>              : const char *VirtualKeyboard::getString() </span>
+<span class="lineNum">    376 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    377 </span><span class="lineNoCov">    0 / 1     : 	char *out = (char *)xmalloc(this-&gt;buf_head + 1); </span>
+<span class="lineNum">    378 </span>              :  </span>
+<span class="lineNum">    379 </span><span class="lineNoCov">    0 / 3     : 	for (unsigned i = 0; i &lt; this-&gt;buf_head; i++) </span>
+<span class="lineNum">    380 </span>              : 	{ </span>
+<span class="lineNum">    381 </span><span class="lineNoCov">    0 / 1     : 		virtkey_t *k = &amp;this-&gt;buf[i]; </span>
+<span class="lineNum">    382 </span><span class="lineNoCov">    0 / 2     : 		int kc = k-&gt;kc | ((k-&gt;flags &amp; F_SHIFT_ON) ? 0x80 : 0); </span>
+<span class="lineNum">    383 </span>              :  </span>
+<span class="lineNum">    384 </span><span class="lineNoCov">    0 / 1     : 		out[i] = this-&gt;keycodeToChar(kc); </span>
+<span class="lineNum">    385 </span>              : 	} </span>
+<span class="lineNum">    386 </span>              :  </span>
+<span class="lineNum">    387 </span>              : 	return out; </span>
+<span class="lineNum">    388 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    389 </span>              :  </span>
+<span class="lineNum">    390 </span>              : void VirtualKeyboard::done() </span>
+<span class="lineNum">    391 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    392 </span>              : 	int n_listeners = sizeof(this-&gt;listeners) / sizeof(*this-&gt;listeners); </span>
+<span class="lineNum">    393 </span><span class="lineNoCov">    0 / 2     : 	const char *str = this-&gt;getString(); </span>
+<span class="lineNum">    394 </span>              :  </span>
+<span class="lineNum">    395 </span><span class="lineNoCov">    0 / 1     : 	for (int i = 0; i &lt; n_listeners; i++) </span>
+<span class="lineNum">    396 </span>              : 	{ </span>
+<span class="lineNum">    397 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;listeners[i]) </span>
+<span class="lineNum">    398 </span><span class="lineNoCov">    0 / 1     : 			((KeyboardListener*)this-&gt;listeners[i])-&gt;stringCallback(str); </span>
+<span class="lineNum">    399 </span>              : 	} </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 1     : 	free((void*)str); </span>
+<span class="lineNum">    401 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;deactivate(); </span>
+<span class="lineNum">    402 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    403 </span>              :  </span>
+<span class="lineNum">    404 </span>              : void VirtualKeyboard::draw(SDL_Surface *where) </span>
+<span class="lineNum">    405 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 	SDL_Rect r = (SDL_Rect){10, 210, 0, 0}; </span>
+<span class="lineNum">    407 </span>              :  </span>
+<span class="lineNum">    408 </span><span class="lineNoCov">    0 / 4     : 	SDL_BlitSurface(Gui::gui-&gt;keyboard, NULL, where, &amp;r); </span>
+<span class="lineNum">    409 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;draw(where, 20, 240, 600, 240); </span>
+<span class="lineNum">    410 </span>              :  </span>
+<span class="lineNum">    411 </span><span class="lineNoCov">    0 / 2     : 	const char *str = this-&gt;getString(); </span>
+<span class="lineNum">    412 </span><span class="lineNoCov">    0 / 2     : 	if (strlen(str) &gt; 0) </span>
+<span class="lineNum">    413 </span>              : 		this-&gt;font-&gt;draw(where, str, </span>
+<span class="lineNum">    414 </span><span class="lineNoCov">    0 / 1     : 				15, 212, 600, 240); </span>
+<span class="lineNum">    415 </span><span class="lineNoCov">    0 / 1     : 	free((void*)str); </span>
+<span class="lineNum">    416 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    417 </span>              :  </span>
+<span class="lineNum">    418 </span>              : void VirtualKeyboard::updateTheme() </span>
+<span class="lineNum">    419 </span><span class="linePartCov">    1 / 2     : { </span>
+<span class="lineNum">    420 </span>              : 	this-&gt;setFont(Gui::gui-&gt;small_font); </span>
+<span class="lineNum">    421 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    422 </span>              :  </span>
+<span class="lineNum">    423 </span>              : void VirtualKeyboard::pushEvent(event_t ev) </span>
+<span class="lineNum">    424 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    425 </span><span class="lineNoCov">    0 / 1     : 	Widget::pushEvent(ev); </span>
+<span class="lineNum">    426 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    427 </span>              :  </span>
+<span class="lineNum">    428 </span>              : void VirtualKeyboard::pushEvent(SDL_Event *ev) </span>
+<span class="lineNum">    429 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    430 </span><span class="lineNoCov">    0 / 1     : 	switch(ev-&gt;type) </span>
+<span class="lineNum">    431 </span>              : 	{ </span>
+<span class="lineNum">    432 </span>              : 	case SDL_KEYDOWN: </span>
+<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 4     : 		switch (ev-&gt;key.keysym.sym) </span>
+<span class="lineNum">    434 </span>              : 		{ </span>
+<span class="lineNum">    435 </span>              : 		case SDLK_RSHIFT: </span>
+<span class="lineNum">    436 </span>              : 		case SDLK_LSHIFT: </span>
+<span class="lineNum">    437 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;shift_on = !this-&gt;default_shifted; break; </span>
+<span class="lineNum">    438 </span>              : 		case SDLK_BACKSPACE: </span>
+<span class="lineNum">    439 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;buf_head &gt; 0) </span>
+<span class="lineNum">    440 </span><span class="lineNoCov">    0 / 1     : 				this-&gt;buf_head--; </span>
+<span class="lineNum">    441 </span>              : 			break; </span>
+<span class="lineNum">    442 </span>              : 		/* Handle via the standard widget implementation (except for space) */ </span>
+<span class="lineNum">    443 </span>              : 		case SDLK_UP: </span>
+<span class="lineNum">    444 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_UP); return; </span>
+<span class="lineNum">    445 </span>              : 		case SDLK_DOWN: </span>
+<span class="lineNum">    446 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_DOWN); return; </span>
+<span class="lineNum">    447 </span>              : 		case SDLK_LEFT: </span>
+<span class="lineNum">    448 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_LEFT); return; </span>
+<span class="lineNum">    449 </span>              : 		case SDLK_RIGHT: </span>
+<span class="lineNum">    450 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_RIGHT); return; </span>
+<span class="lineNum">    451 </span>              : 		case SDLK_PAGEDOWN: </span>
+<span class="lineNum">    452 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_PAGEDOWN); return; </span>
+<span class="lineNum">    453 </span>              : 		case SDLK_PAGEUP: </span>
+<span class="lineNum">    454 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_PAGEUP); return; </span>
+<span class="lineNum">    455 </span>              : 		case SDLK_ESCAPE: </span>
+<span class="lineNum">    456 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = false; Widget::pushEvent(KEY_ESCAPE); return; </span>
+<span class="lineNum">    457 </span>              : 		case SDLK_RETURN: </span>
+<span class="lineNum">    458 </span><span class="lineNoCov">    0 / 1     : 			if (this-&gt;kbd_only_input) </span>
+<span class="lineNum">    459 </span><span class="lineNoCov">    0 / 2     : 				this-&gt;done(); </span>
+<span class="lineNum">    460 </span>              : 			else </span>
+<span class="lineNum">    461 </span><span class="lineNoCov">    0 / 3     : 				Widget::pushEvent(KEY_SELECT); </span>
+<span class="lineNum">    462 </span>              : 			return; </span>
+<span class="lineNum">    463 </span>              : 		case SDLK_SPACE ... SDLK_z: </span>
+<span class="lineNum">    464 </span><span class="lineNoCov">    0 / 1     : 			Widget::pushEvent((event_t)(ev-&gt;key.keysym.sym)); </span>
+<span class="lineNum">    465 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;kbd_only_input = true; </span>
+<span class="lineNum">    466 </span>              : 		default: </span>
+<span class="lineNum">    467 </span>              : 			break; </span>
+<span class="lineNum">    468 </span>              : 		} break; </span>
+<span class="lineNum">    469 </span>              : 	case SDL_KEYUP: </span>
+<span class="lineNum">    470 </span><span class="lineNoCov">    0 / 1     : 		switch (ev-&gt;key.keysym.sym) </span>
+<span class="lineNum">    471 </span>              : 		{ </span>
+<span class="lineNum">    472 </span>              : 		case SDLK_RSHIFT: </span>
+<span class="lineNum">    473 </span>              : 		case SDLK_LSHIFT: </span>
+<span class="lineNum">    474 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;shift_on = this-&gt;default_shifted; break; </span>
+<span class="lineNum">    475 </span>              : 		default: break; </span>
+<span class="lineNum">    476 </span>              : 		} </span>
+<span class="lineNum">    477 </span>              : 	default: break; </span>
+<span class="lineNum">    478 </span>              : 	} </span>
+<span class="lineNum">    479 </span><span class="lineNoCov">    0 / 4     : } </span>
+<span class="lineNum">    480 </span>              :  </span>
+<span class="lineNum">    481 </span>              : /* The singleton */ </span>
+<span class="lineNum">    482 </span>              : VirtualKeyboard *VirtualKeyboard::kbd; </span>
+<span class="lineNum">    483 </span>              :  </span>
+<span class="lineNum">    484 </span>              :  </span>
+<span class="lineNum">    485 </span><span class="lineNoCov">    0 / 4     : KeyboardListener::~KeyboardListener() </span>
+<span class="lineNum">    486 </span>              : { </span>
+<span class="lineNum">    487 </span><span class="lineNoCov">    0 / 2     : 	VirtualKeyboard::kbd-&gt;unregisterListener(this); </span>
+<span class="lineNum">    488 </span><span class="lineNoCov">    0 / 2     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

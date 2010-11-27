@@ -1,0 +1,1318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">287</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">61.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">175</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  SID.cpp - 6581 emulation </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Incompatibilities: </span>
+<span class="lineNum">     23 </span>              :  * ------------------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - Lots of empirically determined constants in the filter calculations </span>
+<span class="lineNum">     26 </span>              :  */ </span>
+<span class="lineNum">     27 </span>              :  </span>
+<span class="lineNum">     28 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     29 </span>              : #include &lt;math.h&gt; </span>
+<span class="lineNum">     30 </span>              :  </span>
+<span class="lineNum">     31 </span>              : #include &quot;SID.h&quot; </span>
+<span class="lineNum">     32 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     33 </span>              : #include &quot;Network.h&quot; </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">     36 </span>              : #include &quot;FixPoint.h&quot; </span>
+<span class="lineNum">     37 </span>              : #endif </span>
+<span class="lineNum">     38 </span>              :  </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              : /* </span>
+<span class="lineNum">     41 </span>              :  *  Resonance frequency polynomials </span>
+<span class="lineNum">     42 </span>              :  */ </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              : #define CALC_RESONANCE_LP(f) (227.755\ </span>
+<span class="lineNum">     45 </span>              : 				- 1.7635 * f\ </span>
+<span class="lineNum">     46 </span>              : 				- 0.0176385 * f * f\ </span>
+<span class="lineNum">     47 </span>              : 				+ 0.00333484 * f * f * f\ </span>
+<span class="lineNum">     48 </span>              : 				- 9.05683E-6 * f * f * f * f) </span>
+<span class="lineNum">     49 </span>              :  </span>
+<span class="lineNum">     50 </span>              : #define CALC_RESONANCE_HP(f) (366.374\ </span>
+<span class="lineNum">     51 </span>              : 				- 14.0052 * f\ </span>
+<span class="lineNum">     52 </span>              : 				+ 0.603212 * f * f\ </span>
+<span class="lineNum">     53 </span>              : 				- 0.000880196 * f * f * f) </span>
+<span class="lineNum">     54 </span>              :  </span>
+<span class="lineNum">     55 </span>              :  </span>
+<span class="lineNum">     56 </span>              : /* </span>
+<span class="lineNum">     57 </span>              :  *  Random number generator for noise waveform </span>
+<span class="lineNum">     58 </span>              :  */ </span>
+<span class="lineNum">     59 </span>              :  </span>
+<span class="lineNum">     60 </span>              : static uint8 sid_random(void); </span>
+<span class="lineNum">     61 </span>              : static uint8 sid_random(void) </span>
+<span class="lineNum">     62 </span>              : { </span>
+<span class="lineNum">     63 </span>              : 	static uint32 seed = 1; </span>
+<span class="lineNum">     64 </span><span class="lineNoCov">    0 / 3     : 	seed = seed * 1103515245 + 12345; </span>
+<span class="lineNum">     65 </span>              : 	return seed &gt;&gt; 16; </span>
+<span class="lineNum">     66 </span>              : } </span>
+<span class="lineNum">     67 </span>              :  </span>
+<span class="lineNum">     68 </span>              :  </span>
+<span class="lineNum">     69 </span>              : /* </span>
+<span class="lineNum">     70 </span>              :  *  Constructor </span>
+<span class="lineNum">     71 </span>              :  */ </span>
+<span class="lineNum">     72 </span>              :  </span>
+<span class="lineNum">     73 </span><span class="linePartCov">    3 / 6     : MOS6581::MOS6581(C64 *c64) : the_c64(c64) </span>
+<span class="lineNum">     74 </span>              : { </span>
+<span class="lineNum">     75 </span><span class="linePartCov">    2 / 4     : 	the_renderer = NULL; </span>
+<span class="lineNum">     76 </span><span class="linePartCov">    1 / 2     : 	for (int i=0; i&lt;32; i++) </span>
+<span class="lineNum">     77 </span><span class="linePartCov">    1 / 2     : 		regs[i] = 0; </span>
+<span class="lineNum">     78 </span>              :  </span>
+<span class="lineNum">     79 </span>              : 	// Open the renderer </span>
+<span class="lineNum">     80 </span><span class="linePartCov">    1 / 2     : 	open_close_renderer(SIDTYPE_NONE, ThePrefs.SIDType); </span>
+<span class="lineNum">     81 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">     82 </span>              :  </span>
+<span class="lineNum">     83 </span>              :  </span>
+<span class="lineNum">     84 </span>              : /* </span>
+<span class="lineNum">     85 </span>              :  *  Destructor </span>
+<span class="lineNum">     86 </span>              :  */ </span>
+<span class="lineNum">     87 </span>              :  </span>
+<span class="lineNum">     88 </span><span class="linePartCov">    1 / 2     : MOS6581::~MOS6581() </span>
+<span class="lineNum">     89 </span>              : { </span>
+<span class="lineNum">     90 </span>              : 	// Close the renderer </span>
+<span class="lineNum">     91 </span><span class="linePartCov">    1 / 2     : 	open_close_renderer(ThePrefs.SIDType, SIDTYPE_NONE); </span>
+<span class="lineNum">     92 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">     93 </span>              :  </span>
+<span class="lineNum">     94 </span>              :  </span>
+<span class="lineNum">     95 </span>              : /* </span>
+<span class="lineNum">     96 </span>              :  *  Reset the SID </span>
+<span class="lineNum">     97 </span>              :  */ </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span>              : void MOS6581::Reset(void) </span>
+<span class="lineNum">    100 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    101 </span><span class="lineCov">    1 / 1     : 	for (int i=0; i&lt;32; i++) </span>
+<span class="lineNum">    102 </span><span class="lineCov">    1 / 1     : 		regs[i] = 0; </span>
+<span class="lineNum">    103 </span><span class="lineCov">    1 / 1     : 	last_sid_byte = 0; </span>
+<span class="lineNum">    104 </span>              :  </span>
+<span class="lineNum">    105 </span>              : 	// Reset the renderer </span>
+<span class="lineNum">    106 </span><span class="lineCov">    2 / 2     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    107 </span><span class="linePartCov">    1 / 2     : 		the_renderer-&gt;Reset(); </span>
+<span class="lineNum">    108 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    109 </span>              :  </span>
+<span class="lineNum">    110 </span>              :  </span>
+<span class="lineNum">    111 </span>              : /* </span>
+<span class="lineNum">    112 </span>              :  *  Preferences may have changed </span>
+<span class="lineNum">    113 </span>              :  */ </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span>              : void MOS6581::NewPrefs(Prefs *prefs) </span>
+<span class="lineNum">    116 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    117 </span><span class="lineCov">    1 / 1     : 	open_close_renderer(ThePrefs.SIDType, prefs-&gt;SIDType); </span>
+<span class="lineNum">    118 </span><span class="lineCov">    1 / 1     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    119 </span><span class="lineCov">    4 / 4     : 		the_renderer-&gt;NewPrefs(prefs); </span>
+<span class="lineNum">    120 </span><span class="linePartCov">    2 / 4     : } </span>
+<span class="lineNum">    121 </span>              :  </span>
+<span class="lineNum">    122 </span>              :  </span>
+<span class="lineNum">    123 </span>              : /* </span>
+<span class="lineNum">    124 </span>              :  *  Pause sound output </span>
+<span class="lineNum">    125 </span>              :  */ </span>
+<span class="lineNum">    126 </span>              :  </span>
+<span class="lineNum">    127 </span>              : void MOS6581::PauseSound(void) </span>
+<span class="lineNum">    128 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    129 </span><span class="lineCov">    1 / 1     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    130 </span><span class="linePartCov">    1 / 2     : 		the_renderer-&gt;Pause(); </span>
+<span class="lineNum">    131 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    132 </span>              :  </span>
+<span class="lineNum">    133 </span>              :  </span>
+<span class="lineNum">    134 </span>              : /* </span>
+<span class="lineNum">    135 </span>              :  *  Resume sound output </span>
+<span class="lineNum">    136 </span>              :  */ </span>
+<span class="lineNum">    137 </span>              :  </span>
+<span class="lineNum">    138 </span>              : void MOS6581::ResumeSound(void) </span>
+<span class="lineNum">    139 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    140 </span><span class="lineCov">    1 / 1     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    141 </span><span class="linePartCov">    1 / 2     : 		the_renderer-&gt;Resume(); </span>
+<span class="lineNum">    142 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    143 </span>              :  </span>
+<span class="lineNum">    144 </span>              :  </span>
+<span class="lineNum">    145 </span>              : /* </span>
+<span class="lineNum">    146 </span>              :  *  Get SID state </span>
+<span class="lineNum">    147 </span>              :  */ </span>
+<span class="lineNum">    148 </span>              :  </span>
+<span class="lineNum">    149 </span>              : void MOS6581::GetState(MOS6581State *ss) </span>
+<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_lo_1 = regs[0]; </span>
+<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_hi_1 = regs[1]; </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_lo_1 = regs[2]; </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_hi_1 = regs[3]; </span>
+<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;ctrl_1 = regs[4]; </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;AD_1 = regs[5]; </span>
+<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;SR_1 = regs[6]; </span>
+<span class="lineNum">    158 </span>              :  </span>
+<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_lo_2 = regs[7]; </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_hi_2 = regs[8]; </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_lo_2 = regs[9]; </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_hi_2 = regs[10]; </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;ctrl_2 = regs[11]; </span>
+<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;AD_2 = regs[12]; </span>
+<span class="lineNum">    165 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;SR_2 = regs[13]; </span>
+<span class="lineNum">    166 </span>              :  </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_lo_3 = regs[14]; </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;freq_hi_3 = regs[15]; </span>
+<span class="lineNum">    169 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_lo_3 = regs[16]; </span>
+<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pw_hi_3 = regs[17]; </span>
+<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;ctrl_3 = regs[18]; </span>
+<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;AD_3 = regs[19]; </span>
+<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;SR_3 = regs[20]; </span>
+<span class="lineNum">    174 </span>              :  </span>
+<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;fc_lo = regs[21]; </span>
+<span class="lineNum">    176 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;fc_hi = regs[22]; </span>
+<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;res_filt = regs[23]; </span>
+<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 2     : 	ss-&gt;mode_vol = regs[24]; </span>
+<span class="lineNum">    179 </span>              :  </span>
+<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pot_x = 0xff; </span>
+<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;pot_y = 0xff; </span>
+<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;osc_3 = 0; </span>
+<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     : 	ss-&gt;env_3 = 0; </span>
+<span class="lineNum">    184 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    185 </span>              :  </span>
+<span class="lineNum">    186 </span>              :  </span>
+<span class="lineNum">    187 </span>              : /* </span>
+<span class="lineNum">    188 </span>              :  *  Restore SID state </span>
+<span class="lineNum">    189 </span>              :  */ </span>
+<span class="lineNum">    190 </span>              :  </span>
+<span class="lineNum">    191 </span>              : void MOS6581::SetState(MOS6581State *ss) </span>
+<span class="lineNum">    192 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    193 </span><span class="lineCov">    1 / 1     : 	regs[0] = ss-&gt;freq_lo_1; </span>
+<span class="lineNum">    194 </span><span class="lineCov">    1 / 1     : 	regs[1] = ss-&gt;freq_hi_1; </span>
+<span class="lineNum">    195 </span><span class="lineCov">    1 / 1     : 	regs[2] = ss-&gt;pw_lo_1; </span>
+<span class="lineNum">    196 </span><span class="lineCov">    1 / 1     : 	regs[3] = ss-&gt;pw_hi_1; </span>
+<span class="lineNum">    197 </span><span class="lineCov">    1 / 1     : 	regs[4] = ss-&gt;ctrl_1; </span>
+<span class="lineNum">    198 </span><span class="lineCov">    1 / 1     : 	regs[5] = ss-&gt;AD_1; </span>
+<span class="lineNum">    199 </span><span class="lineCov">    1 / 1     : 	regs[6] = ss-&gt;SR_1; </span>
+<span class="lineNum">    200 </span>              :  </span>
+<span class="lineNum">    201 </span><span class="lineCov">    1 / 1     : 	regs[7] = ss-&gt;freq_lo_2; </span>
+<span class="lineNum">    202 </span><span class="lineCov">    1 / 1     : 	regs[8] = ss-&gt;freq_hi_2; </span>
+<span class="lineNum">    203 </span><span class="lineCov">    1 / 1     : 	regs[9] = ss-&gt;pw_lo_2; </span>
+<span class="lineNum">    204 </span><span class="lineCov">    1 / 1     : 	regs[10] = ss-&gt;pw_hi_2; </span>
+<span class="lineNum">    205 </span><span class="lineCov">    1 / 1     : 	regs[11] = ss-&gt;ctrl_2; </span>
+<span class="lineNum">    206 </span><span class="lineCov">    1 / 1     : 	regs[12] = ss-&gt;AD_2; </span>
+<span class="lineNum">    207 </span><span class="lineCov">    1 / 1     : 	regs[13] = ss-&gt;SR_2; </span>
+<span class="lineNum">    208 </span>              :  </span>
+<span class="lineNum">    209 </span><span class="lineCov">    1 / 1     : 	regs[14] = ss-&gt;freq_lo_3; </span>
+<span class="lineNum">    210 </span><span class="lineCov">    1 / 1     : 	regs[15] = ss-&gt;freq_hi_3; </span>
+<span class="lineNum">    211 </span><span class="lineCov">    1 / 1     : 	regs[16] = ss-&gt;pw_lo_3; </span>
+<span class="lineNum">    212 </span><span class="lineCov">    1 / 1     : 	regs[17] = ss-&gt;pw_hi_3; </span>
+<span class="lineNum">    213 </span><span class="lineCov">    1 / 1     : 	regs[18] = ss-&gt;ctrl_3; </span>
+<span class="lineNum">    214 </span><span class="lineCov">    1 / 1     : 	regs[19] = ss-&gt;AD_3; </span>
+<span class="lineNum">    215 </span><span class="lineCov">    1 / 1     : 	regs[20] = ss-&gt;SR_3; </span>
+<span class="lineNum">    216 </span>              :  </span>
+<span class="lineNum">    217 </span><span class="lineCov">    1 / 1     : 	regs[21] = ss-&gt;fc_lo; </span>
+<span class="lineNum">    218 </span><span class="lineCov">    1 / 1     : 	regs[22] = ss-&gt;fc_hi; </span>
+<span class="lineNum">    219 </span><span class="lineCov">    1 / 1     : 	regs[23] = ss-&gt;res_filt; </span>
+<span class="lineNum">    220 </span><span class="lineCov">    1 / 1     : 	regs[24] = ss-&gt;mode_vol; </span>
+<span class="lineNum">    221 </span>              :  </span>
+<span class="lineNum">    222 </span>              : 	// Stuff the new register values into the renderer </span>
+<span class="lineNum">    223 </span><span class="lineCov">    1 / 1     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    224 </span><span class="lineCov">    3 / 3     : 		for (int i=0; i&lt;25; i++) </span>
+<span class="lineNum">    225 </span><span class="lineCov">    2 / 2     : 			the_renderer-&gt;WriteRegister(i, regs[i]); </span>
+<span class="lineNum">    226 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    227 </span>              :  </span>
+<span class="lineNum">    228 </span>              :  </span>
+<span class="lineNum">    229 </span>              : /** </span>
+<span class="lineNum">    230 </span>              :  **  Renderer for digital SID emulation (SIDTYPE_DIGITAL) </span>
+<span class="lineNum">    231 </span>              :  **/ </span>
+<span class="lineNum">    232 </span>              :  </span>
+<span class="lineNum">    233 </span>              : const uint32 SAMPLE_FREQ = 32000;	// Sample output frequency in Hz </span>
+<span class="lineNum">    234 </span>              : const uint32 SID_FREQ = 985248;		// SID frequency in Hz </span>
+<span class="lineNum">    235 </span>              : const uint32 CALC_FREQ = 50;			// Frequency at which calc_buffer is called in Hz (should be 50Hz) </span>
+<span class="lineNum">    236 </span>              : const uint32 SID_CYCLES = SID_FREQ/SAMPLE_FREQ;	// # of SID clocks per sample frame </span>
+<span class="lineNum">    237 </span>              : const int SAMPLE_BUF_SIZE = 0x138*2;// Size of buffer for sampled voice (double buffered) </span>
+<span class="lineNum">    238 </span>              :  </span>
+<span class="lineNum">    239 </span>              : // SID waveforms (some of them :-) </span>
+<span class="lineNum">    240 </span>              : enum { </span>
+<span class="lineNum">    241 </span>              : 	WAVE_NONE, </span>
+<span class="lineNum">    242 </span>              : 	WAVE_TRI, </span>
+<span class="lineNum">    243 </span>              : 	WAVE_SAW, </span>
+<span class="lineNum">    244 </span>              : 	WAVE_TRISAW, </span>
+<span class="lineNum">    245 </span>              : 	WAVE_RECT, </span>
+<span class="lineNum">    246 </span>              : 	WAVE_TRIRECT, </span>
+<span class="lineNum">    247 </span>              : 	WAVE_SAWRECT, </span>
+<span class="lineNum">    248 </span>              : 	WAVE_TRISAWRECT, </span>
+<span class="lineNum">    249 </span>              : 	WAVE_NOISE </span>
+<span class="lineNum">    250 </span>              : }; </span>
+<span class="lineNum">    251 </span>              :  </span>
+<span class="lineNum">    252 </span>              : // EG states </span>
+<span class="lineNum">    253 </span>              : enum { </span>
+<span class="lineNum">    254 </span>              : 	EG_IDLE, </span>
+<span class="lineNum">    255 </span>              : 	EG_ATTACK, </span>
+<span class="lineNum">    256 </span>              : 	EG_DECAY, </span>
+<span class="lineNum">    257 </span>              : 	EG_RELEASE </span>
+<span class="lineNum">    258 </span>              : }; </span>
+<span class="lineNum">    259 </span>              :  </span>
+<span class="lineNum">    260 </span>              : // Filter types </span>
+<span class="lineNum">    261 </span>              : enum { </span>
+<span class="lineNum">    262 </span>              : 	FILT_NONE, </span>
+<span class="lineNum">    263 </span>              : 	FILT_LP, </span>
+<span class="lineNum">    264 </span>              : 	FILT_BP, </span>
+<span class="lineNum">    265 </span>              : 	FILT_LPBP, </span>
+<span class="lineNum">    266 </span>              : 	FILT_HP, </span>
+<span class="lineNum">    267 </span>              : 	FILT_NOTCH, </span>
+<span class="lineNum">    268 </span>              : 	FILT_HPBP, </span>
+<span class="lineNum">    269 </span>              : 	FILT_ALL </span>
+<span class="lineNum">    270 </span>              : }; </span>
+<span class="lineNum">    271 </span>              :  </span>
+<span class="lineNum">    272 </span>              : // Structure for one voice </span>
+<span class="lineNum">    273 </span>              : struct DRVoice { </span>
+<span class="lineNum">    274 </span>              : 	int wave;		// Selected waveform </span>
+<span class="lineNum">    275 </span>              : 	int eg_state;	// Current state of EG </span>
+<span class="lineNum">    276 </span>              : 	DRVoice *mod_by;	// Voice that modulates this one </span>
+<span class="lineNum">    277 </span>              : 	DRVoice *mod_to;	// Voice that is modulated by this one </span>
+<span class="lineNum">    278 </span>              :  </span>
+<span class="lineNum">    279 </span>              : 	uint32 count;	// Counter for waveform generator, 8.16 fixed </span>
+<span class="lineNum">    280 </span>              : 	uint32 add;		// Added to counter in every frame </span>
+<span class="lineNum">    281 </span>              :  </span>
+<span class="lineNum">    282 </span>              : 	uint16 freq;		// SID frequency value </span>
+<span class="lineNum">    283 </span>              : 	uint16 pw;		// SID pulse-width value </span>
+<span class="lineNum">    284 </span>              :  </span>
+<span class="lineNum">    285 </span>              : 	uint32 a_add;	// EG parameters </span>
+<span class="lineNum">    286 </span>              : 	uint32 d_sub; </span>
+<span class="lineNum">    287 </span>              : 	uint32 s_level; </span>
+<span class="lineNum">    288 </span>              : 	uint32 r_sub; </span>
+<span class="lineNum">    289 </span>              : 	uint32 eg_level;	// Current EG level, 8.16 fixed </span>
+<span class="lineNum">    290 </span>              :  </span>
+<span class="lineNum">    291 </span>              : 	uint32 noise;	// Last noise generator output value </span>
+<span class="lineNum">    292 </span>              :  </span>
+<span class="lineNum">    293 </span>              : 	bool gate;		// EG gate bit </span>
+<span class="lineNum">    294 </span>              : 	bool ring;		// Ring modulation bit </span>
+<span class="lineNum">    295 </span>              : 	bool test;		// Test bit </span>
+<span class="lineNum">    296 </span>              : 	bool filter;	// Flag: Voice filtered </span>
+<span class="lineNum">    297 </span>              :  </span>
+<span class="lineNum">    298 </span>              : 					// The following bit is set for the modulating </span>
+<span class="lineNum">    299 </span>              : 					// voice, not for the modulated one (as the SID bits) </span>
+<span class="lineNum">    300 </span>              : 	bool sync;		// Sync modulation bit </span>
+<span class="lineNum">    301 </span>              : 	bool mute;		// Voice muted (voice 3 only) </span>
+<span class="lineNum">    302 </span>              : }; </span>
+<span class="lineNum">    303 </span>              :  </span>
+<span class="lineNum">    304 </span>              : // Renderer class </span>
+<span class="lineNum">    305 </span>              : class DigitalRenderer : public SIDRenderer { </span>
+<span class="lineNum">    306 </span>              : public: </span>
+<span class="lineNum">    307 </span>              : 	DigitalRenderer(); </span>
+<span class="lineNum">    308 </span>              : 	virtual ~DigitalRenderer(); </span>
+<span class="lineNum">    309 </span>              :  </span>
+<span class="lineNum">    310 </span>              : 	virtual void Reset(void); </span>
+<span class="lineNum">    311 </span>              : 	virtual void PushVolume(uint8 volume); </span>
+<span class="lineNum">    312 </span>              : 	virtual void EmulateLine(void); </span>
+<span class="lineNum">    313 </span>              : 	virtual void WriteRegister(uint16 adr, uint8 byte); </span>
+<span class="lineNum">    314 </span>              : 	virtual void NewPrefs(Prefs *prefs); </span>
+<span class="lineNum">    315 </span>              : 	virtual void Pause(void); </span>
+<span class="lineNum">    316 </span>              : 	virtual void Resume(void); </span>
+<span class="lineNum">    317 </span>              :  </span>
+<span class="lineNum">    318 </span>              : private: </span>
+<span class="lineNum">    319 </span>              : 	void init_sound(void); </span>
+<span class="lineNum">    320 </span>              : 	void calc_filter(void); </span>
+<span class="lineNum">    321 </span>              : 	void calc_buffer(int16 *buf, long count); </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span>              : 	bool ready;						// Flag: Renderer has initialized and is ready </span>
+<span class="lineNum">    324 </span>              : 	uint8 volume;					// Master volume </span>
+<span class="lineNum">    325 </span>              :  </span>
+<span class="lineNum">    326 </span>              : 	static uint16 TriTable[0x1000*2];	// Tables for certain waveforms </span>
+<span class="lineNum">    327 </span>              : 	static const uint16 TriSawTable[0x100]; </span>
+<span class="lineNum">    328 </span>              : 	static const uint16 TriRectTable[0x100]; </span>
+<span class="lineNum">    329 </span>              : 	static const uint16 SawRectTable[0x100]; </span>
+<span class="lineNum">    330 </span>              : 	static const uint16 TriSawRectTable[0x100]; </span>
+<span class="lineNum">    331 </span>              : 	static const uint32 EGTable[16];	// Increment/decrement values for all A/D/R settings </span>
+<span class="lineNum">    332 </span>              : 	static const uint8 EGDRShift[256]; // For exponential approximation of D/R </span>
+<span class="lineNum">    333 </span>              : 	static const int16 SampleTab[16]; // Table for sampled voice </span>
+<span class="lineNum">    334 </span>              :  </span>
+<span class="lineNum">    335 </span>              : 	DRVoice voice[3];				// Data for 3 voices </span>
+<span class="lineNum">    336 </span>              :  </span>
+<span class="lineNum">    337 </span>              : 	uint8 f_type;					// Filter type </span>
+<span class="lineNum">    338 </span>              : 	uint8 f_freq;					// SID filter frequency (upper 8 bits) </span>
+<span class="lineNum">    339 </span>              : 	uint8 f_res;					// Filter resonance (0..15) </span>
+<span class="lineNum">    340 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    341 </span>              : 	FixPoint f_ampl; </span>
+<span class="lineNum">    342 </span>              : 	FixPoint d1, d2, g1, g2; </span>
+<span class="lineNum">    343 </span>              : 	int32 xn1, xn2, yn1, yn2;		// can become very large </span>
+<span class="lineNum">    344 </span>              : 	FixPoint sidquot; </span>
+<span class="lineNum">    345 </span>              : #ifdef PRECOMPUTE_RESONANCE </span>
+<span class="lineNum">    346 </span>              : 	FixPoint resonanceLP[256]; </span>
+<span class="lineNum">    347 </span>              : 	FixPoint resonanceHP[256]; </span>
+<span class="lineNum">    348 </span>              : #endif </span>
+<span class="lineNum">    349 </span>              : #else </span>
+<span class="lineNum">    350 </span>              : 	float f_ampl;					// IIR filter input attenuation </span>
+<span class="lineNum">    351 </span>              : 	float d1, d2, g1, g2;			// IIR filter coefficients </span>
+<span class="lineNum">    352 </span>              : 	float xn1, xn2, yn1, yn2;		// IIR filter previous input/output signal </span>
+<span class="lineNum">    353 </span>              : #ifdef PRECOMPUTE_RESONANCE </span>
+<span class="lineNum">    354 </span>              : 	float resonanceLP[256];			// shortcut for calc_filter </span>
+<span class="lineNum">    355 </span>              : 	float resonanceHP[256]; </span>
+<span class="lineNum">    356 </span>              : #endif </span>
+<span class="lineNum">    357 </span>              : #endif </span>
+<span class="lineNum">    358 </span>              :  </span>
+<span class="lineNum">    359 </span>              : 	uint8 sample_buf[SAMPLE_BUF_SIZE]; // Buffer for sampled voice </span>
+<span class="lineNum">    360 </span>              : 	int sample_in_ptr;				// Index in sample_buf for writing </span>
+<span class="lineNum">    361 </span>              :  </span>
+<span class="lineNum">    362 </span>              : #if defined(__linux__) || defined(GEKKO) </span>
+<span class="lineNum">    363 </span>              : 	int devfd, sndbufsize, buffer_rate; </span>
+<span class="lineNum">    364 </span>              : 	int16 *sound_buffer; </span>
+<span class="lineNum">    365 </span>              : #endif </span>
+<span class="lineNum">    366 </span>              : }; </span>
+<span class="lineNum">    367 </span>              :  </span>
+<span class="lineNum">    368 </span>              : // Static data members </span>
+<span class="lineNum">    369 </span>              : uint16 DigitalRenderer::TriTable[0x1000*2]; </span>
+<span class="lineNum">    370 </span>              :  </span>
+<span class="lineNum">    371 </span>              : #ifndef EMUL_MOS8580 </span>
+<span class="lineNum">    372 </span>              : // Sampled from a 6581R4 </span>
+<span class="lineNum">    373 </span>              : const uint16 DigitalRenderer::TriSawTable[0x100] = { </span>
+<span class="lineNum">    374 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    375 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    376 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    377 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    378 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    379 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    380 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    381 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0808, </span>
+<span class="lineNum">    382 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    383 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    384 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    385 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    386 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    387 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    388 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    389 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1010, 0x3C3C, </span>
+<span class="lineNum">    390 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    391 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    392 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    393 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    394 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    395 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    396 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    397 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0808, </span>
+<span class="lineNum">    398 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    399 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    400 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    401 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    402 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    403 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    404 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    405 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1010, 0x3C3C </span>
+<span class="lineNum">    406 </span>              : }; </span>
+<span class="lineNum">    407 </span>              :  </span>
+<span class="lineNum">    408 </span>              : const uint16 DigitalRenderer::TriRectTable[0x100] = { </span>
+<span class="lineNum">    409 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    410 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    411 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    412 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    413 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    414 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    415 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    416 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    417 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    418 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    419 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    420 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, </span>
+<span class="lineNum">    421 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    422 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, </span>
+<span class="lineNum">    423 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, 0xC0C0, </span>
+<span class="lineNum">    424 </span>              : 	0x0000, 0x8080, 0x8080, 0xE0E0, 0x8080, 0xE0E0, 0xF0F0, 0xFCFC, </span>
+<span class="lineNum">    425 </span>              : 	0xFFFF, 0xFCFC, 0xFAFA, 0xF0F0, 0xF6F6, 0xE0E0, 0xE0E0, 0x8080, </span>
+<span class="lineNum">    426 </span>              : 	0xEEEE, 0xE0E0, 0xE0E0, 0x8080, 0xC0C0, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    427 </span>              : 	0xDEDE, 0xC0C0, 0xC0C0, 0x0000, 0x8080, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    428 </span>              : 	0x8080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    429 </span>              : 	0xBEBE, 0x8080, 0x8080, 0x0000, 0x8080, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    430 </span>              : 	0x8080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    431 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    432 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    433 </span>              : 	0x7E7E, 0x4040, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    434 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    435 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    436 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    437 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    438 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    439 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    440 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 </span>
+<span class="lineNum">    441 </span>              : }; </span>
+<span class="lineNum">    442 </span>              :  </span>
+<span class="lineNum">    443 </span>              : const uint16 DigitalRenderer::SawRectTable[0x100] = { </span>
+<span class="lineNum">    444 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    445 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    446 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    447 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    448 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    449 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    450 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    451 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    452 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    453 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    454 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    455 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    456 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    457 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    458 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    459 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x7878, </span>
+<span class="lineNum">    460 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    461 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    462 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    463 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    464 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    465 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    466 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    467 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    468 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    469 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    470 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    471 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    472 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    473 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    474 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    475 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x7878 </span>
+<span class="lineNum">    476 </span>              : }; </span>
+<span class="lineNum">    477 </span>              :  </span>
+<span class="lineNum">    478 </span>              : const uint16 DigitalRenderer::TriSawRectTable[0x100] = { </span>
+<span class="lineNum">    479 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    480 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    481 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    482 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    483 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    484 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    485 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    486 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    487 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    488 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    489 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    490 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    491 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    492 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    493 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    494 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    495 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    496 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    497 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    498 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    499 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    500 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    501 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    502 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    503 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    504 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    505 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    506 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    507 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    508 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    509 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    510 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 </span>
+<span class="lineNum">    511 </span>              : }; </span>
+<span class="lineNum">    512 </span>              : #else </span>
+<span class="lineNum">    513 </span>              : // Sampled from an 8580R5 </span>
+<span class="lineNum">    514 </span>              : const uint16 DigitalRenderer::TriSawTable[0x100] = { </span>
+<span class="lineNum">    515 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    516 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    517 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    518 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    519 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    520 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    521 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    522 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0808, </span>
+<span class="lineNum">    523 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    524 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    525 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    526 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    527 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    528 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    529 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    530 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1818, 0x3C3C, </span>
+<span class="lineNum">    531 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    532 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    533 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    534 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    535 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    536 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    537 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    538 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1C1C, </span>
+<span class="lineNum">    539 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    540 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    541 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    542 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    543 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    544 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x8080, 0x0000, 0x8080, 0x8080, </span>
+<span class="lineNum">    545 </span>              : 	0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xE0E0, </span>
+<span class="lineNum">    546 </span>              : 	0xF0F0, 0xF0F0, 0xF0F0, 0xF0F0, 0xF8F8, 0xF8F8, 0xFCFC, 0xFEFE </span>
+<span class="lineNum">    547 </span>              : }; </span>
+<span class="lineNum">    548 </span>              :  </span>
+<span class="lineNum">    549 </span>              : const uint16 DigitalRenderer::TriRectTable[0x100] = { </span>
+<span class="lineNum">    550 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    551 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    552 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    553 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    554 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    555 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    556 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    557 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    558 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    559 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    560 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    561 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    562 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    563 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    564 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    565 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    566 </span>              : 	0xFFFF, 0xFCFC, 0xF8F8, 0xF0F0, 0xF4F4, 0xF0F0, 0xF0F0, 0xE0E0, </span>
+<span class="lineNum">    567 </span>              : 	0xECEC, 0xE0E0, 0xE0E0, 0xC0C0, 0xE0E0, 0xC0C0, 0xC0C0, 0xC0C0, </span>
+<span class="lineNum">    568 </span>              : 	0xDCDC, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0x8080, 0x8080, </span>
+<span class="lineNum">    569 </span>              : 	0xC0C0, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x0000, 0x0000, </span>
+<span class="lineNum">    570 </span>              : 	0xBEBE, 0xA0A0, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x0000, </span>
+<span class="lineNum">    571 </span>              : 	0x8080, 0x8080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    572 </span>              : 	0x8080, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    573 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    574 </span>              : 	0x7E7E, 0x7070, 0x6060, 0x0000, 0x4040, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    575 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    576 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    577 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    578 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    579 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    580 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    581 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 </span>
+<span class="lineNum">    582 </span>              : }; </span>
+<span class="lineNum">    583 </span>              :  </span>
+<span class="lineNum">    584 </span>              : const uint16 DigitalRenderer::SawRectTable[0x100] = { </span>
+<span class="lineNum">    585 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    586 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    587 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    588 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    589 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    590 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    591 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    592 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    593 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    594 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    595 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    596 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    597 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    598 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    599 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    600 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    601 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    602 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    603 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    604 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    605 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    606 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, </span>
+<span class="lineNum">    607 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, 0x8080, </span>
+<span class="lineNum">    608 </span>              : 	0x0000, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0xB0B0, 0xBEBE, </span>
+<span class="lineNum">    609 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, </span>
+<span class="lineNum">    610 </span>              : 	0x0000, 0x0000, 0x0000, 0x8080, 0x8080, 0x8080, 0x8080, 0xC0C0, </span>
+<span class="lineNum">    611 </span>              : 	0x0000, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0xC0C0, </span>
+<span class="lineNum">    612 </span>              : 	0x8080, 0x8080, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xDCDC, </span>
+<span class="lineNum">    613 </span>              : 	0x8080, 0x8080, 0x8080, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, 0xC0C0, </span>
+<span class="lineNum">    614 </span>              : 	0xC0C0, 0xC0C0, 0xC0C0, 0xE0E0, 0xE0E0, 0xE0E0, 0xE0E0, 0xECEC, </span>
+<span class="lineNum">    615 </span>              : 	0xC0C0, 0xE0E0, 0xE0E0, 0xE0E0, 0xE0E0, 0xF0F0, 0xF0F0, 0xF4F4, </span>
+<span class="lineNum">    616 </span>              : 	0xF0F0, 0xF0F0, 0xF8F8, 0xF8F8, 0xF8F8, 0xFCFC, 0xFEFE, 0xFFFF </span>
+<span class="lineNum">    617 </span>              : }; </span>
+<span class="lineNum">    618 </span>              :  </span>
+<span class="lineNum">    619 </span>              : const uint16 DigitalRenderer::TriSawRectTable[0x100] = { </span>
+<span class="lineNum">    620 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    621 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    622 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    623 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    624 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    625 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    626 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    627 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    628 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    629 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    630 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    631 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    632 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    633 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    634 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    635 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    636 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    637 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    638 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    639 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    640 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    641 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    642 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    643 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    644 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    645 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    646 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    647 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    648 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, </span>
+<span class="lineNum">    649 </span>              : 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8080, 0x8080, </span>
+<span class="lineNum">    650 </span>              : 	0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0xC0C0, 0xC0C0, </span>
+<span class="lineNum">    651 </span>              : 	0xC0C0, 0xC0C0, 0xE0E0, 0xE0E0, 0xE0E0, 0xF0F0, 0xF8F8, 0xFCFC </span>
+<span class="lineNum">    652 </span>              : }; </span>
+<span class="lineNum">    653 </span>              : #endif </span>
+<span class="lineNum">    654 </span>              :  </span>
+<span class="lineNum">    655 </span>              : const uint32 DigitalRenderer::EGTable[16] = { </span>
+<span class="lineNum">    656 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 9, (SID_CYCLES &lt;&lt; 16) / 32, </span>
+<span class="lineNum">    657 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 63, (SID_CYCLES &lt;&lt; 16) / 95, </span>
+<span class="lineNum">    658 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 149, (SID_CYCLES &lt;&lt; 16) / 220, </span>
+<span class="lineNum">    659 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 267, (SID_CYCLES &lt;&lt; 16) / 313, </span>
+<span class="lineNum">    660 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 392, (SID_CYCLES &lt;&lt; 16) / 977, </span>
+<span class="lineNum">    661 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 1954, (SID_CYCLES &lt;&lt; 16) / 3126, </span>
+<span class="lineNum">    662 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 3906, (SID_CYCLES &lt;&lt; 16) / 11720, </span>
+<span class="lineNum">    663 </span>              : 	(SID_CYCLES &lt;&lt; 16) / 19531, (SID_CYCLES &lt;&lt; 16) / 31251 </span>
+<span class="lineNum">    664 </span>              : }; </span>
+<span class="lineNum">    665 </span>              :  </span>
+<span class="lineNum">    666 </span>              : const uint8 DigitalRenderer::EGDRShift[256] = { </span>
+<span class="lineNum">    667 </span>              : 	5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4, </span>
+<span class="lineNum">    668 </span>              : 	3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2, </span>
+<span class="lineNum">    669 </span>              : 	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, </span>
+<span class="lineNum">    670 </span>              : 	2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1, </span>
+<span class="lineNum">    671 </span>              : 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, </span>
+<span class="lineNum">    672 </span>              : 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, </span>
+<span class="lineNum">    673 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    674 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    675 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    676 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    677 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    678 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    679 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    680 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    681 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, </span>
+<span class="lineNum">    682 </span>              : 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 </span>
+<span class="lineNum">    683 </span>              : }; </span>
+<span class="lineNum">    684 </span>              :  </span>
+<span class="lineNum">    685 </span>              : const int16 DigitalRenderer::SampleTab[16] = { </span>
+<span class="lineNum">    686 </span>              : 	0x8000, 0x9111, 0xa222, 0xb333, 0xc444, 0xd555, 0xe666, 0xf777, </span>
+<span class="lineNum">    687 </span>              : 	0x0888, 0x1999, 0x2aaa, 0x3bbb, 0x4ccc, 0x5ddd, 0x6eee, 0x7fff, </span>
+<span class="lineNum">    688 </span>              : }; </span>
+<span class="lineNum">    689 </span>              :  </span>
+<span class="lineNum">    690 </span>              :  </span>
+<span class="lineNum">    691 </span>              : /* </span>
+<span class="lineNum">    692 </span>              :  *  Constructor </span>
+<span class="lineNum">    693 </span>              :  */ </span>
+<span class="lineNum">    694 </span>              :  </span>
+<span class="lineNum">    695 </span>              : #if defined(__BEOS__) || defined(__riscos__) </span>
+<span class="lineNum">    696 </span>              : DigitalRenderer::DigitalRenderer(C64 *c64) : the_c64(c64) </span>
+<span class="lineNum">    697 </span>              : #else </span>
+<span class="lineNum">    698 </span><span class="linePartCov">    3 / 6     : DigitalRenderer::DigitalRenderer() </span>
+<span class="lineNum">    699 </span>              : #endif </span>
+<span class="lineNum">    700 </span>              : { </span>
+<span class="lineNum">    701 </span>              : 	// Link voices together </span>
+<span class="lineNum">    702 </span><span class="lineNoCov">    0 / 4     : 	voice[0].mod_by = &amp;voice[2]; </span>
+<span class="lineNum">    703 </span><span class="linePartCov">    2 / 4     : 	voice[1].mod_by = &amp;voice[0]; </span>
+<span class="lineNum">    704 </span><span class="linePartCov">    2 / 4     : 	voice[2].mod_by = &amp;voice[1]; </span>
+<span class="lineNum">    705 </span><span class="linePartCov">    1 / 2     : 	voice[0].mod_to = &amp;voice[1]; </span>
+<span class="lineNum">    706 </span><span class="linePartCov">    1 / 2     : 	voice[1].mod_to = &amp;voice[2]; </span>
+<span class="lineNum">    707 </span><span class="linePartCov">    1 / 2     : 	voice[2].mod_to = &amp;voice[0]; </span>
+<span class="lineNum">    708 </span>              :  </span>
+<span class="lineNum">    709 </span>              : 	// Calculate triangle table </span>
+<span class="lineNum">    710 </span><span class="linePartCov">    2 / 4     : 	for (int i=0; i&lt;0x1000; i++) { </span>
+<span class="lineNum">    711 </span><span class="linePartCov">    1 / 2     : 		TriTable[i] = (i &lt;&lt; 4) | (i &gt;&gt; 8); </span>
+<span class="lineNum">    712 </span><span class="lineNoCov">    0 / 2     : 		TriTable[0x1fff-i] = (i &lt;&lt; 4) | (i &gt;&gt; 8); </span>
+<span class="lineNum">    713 </span>              : 	} </span>
+<span class="lineNum">    714 </span>              :  </span>
+<span class="lineNum">    715 </span>              : #ifdef PRECOMPUTE_RESONANCE </span>
+<span class="lineNum">    716 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    717 </span>              : 	// slow floating point doesn't matter much on startup! </span>
+<span class="lineNum">    718 </span>              : 	for (int i=0; i&lt;256; i++) { </span>
+<span class="lineNum">    719 </span>              : 	  resonanceLP[i] = FixNo(CALC_RESONANCE_LP(i)); </span>
+<span class="lineNum">    720 </span>              : 	  resonanceHP[i] = FixNo(CALC_RESONANCE_HP(i)); </span>
+<span class="lineNum">    721 </span>              : 	} </span>
+<span class="lineNum">    722 </span>              : 	// Pre-compute the quotient. No problem since int-part is small enough </span>
+<span class="lineNum">    723 </span>              : 	sidquot = (int32)((((double)SID_FREQ)*65536) / SAMPLE_FREQ); </span>
+<span class="lineNum">    724 </span>              : 	// compute lookup table for sin and cos </span>
+<span class="lineNum">    725 </span>              : 	InitFixSinTab(); </span>
+<span class="lineNum">    726 </span>              : #else </span>
+<span class="lineNum">    727 </span>              : 	for (int i=0; i&lt;256; i++) { </span>
+<span class="lineNum">    728 </span>              : 	  resonanceLP[i] = CALC_RESONANCE_LP(i); </span>
+<span class="lineNum">    729 </span>              : 	  resonanceHP[i] = CALC_RESONANCE_HP(i); </span>
+<span class="lineNum">    730 </span>              : 	} </span>
+<span class="lineNum">    731 </span>              : #endif </span>
+<span class="lineNum">    732 </span>              : #endif </span>
+<span class="lineNum">    733 </span>              :  </span>
+<span class="lineNum">    734 </span><span class="linePartCov">    1 / 2     : 	Reset(); </span>
+<span class="lineNum">    735 </span>              :  </span>
+<span class="lineNum">    736 </span>              : 	// System specific initialization </span>
+<span class="lineNum">    737 </span><span class="linePartCov">    2 / 4     : 	init_sound(); </span>
+<span class="lineNum">    738 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    739 </span>              :  </span>
+<span class="lineNum">    740 </span>              :  </span>
+<span class="lineNum">    741 </span>              : /* </span>
+<span class="lineNum">    742 </span>              :  *  Reset emulation </span>
+<span class="lineNum">    743 </span>              :  */ </span>
+<span class="lineNum">    744 </span>              :  </span>
+<span class="lineNum">    745 </span>              : void DigitalRenderer::Reset(void) </span>
+<span class="lineNum">    746 </span><span class="linePartCov">    1 / 2     : { </span>
+<span class="lineNum">    747 </span><span class="linePartCov">    1 / 2     : 	volume = 0; </span>
+<span class="lineNum">    748 </span>              :  </span>
+<span class="lineNum">    749 </span><span class="lineCov">    2 / 2     : 	for (int v=0; v&lt;3; v++) { </span>
+<span class="lineNum">    750 </span><span class="lineCov">    1 / 1     : 		voice[v].wave = WAVE_NONE; </span>
+<span class="lineNum">    751 </span><span class="lineCov">    1 / 1     : 		voice[v].eg_state = EG_IDLE; </span>
+<span class="lineNum">    752 </span><span class="lineCov">    1 / 1     : 		voice[v].count = voice[v].add = 0; </span>
+<span class="lineNum">    753 </span><span class="lineCov">    1 / 1     : 		voice[v].freq = voice[v].pw = 0; </span>
+<span class="lineNum">    754 </span><span class="lineCov">    1 / 1     : 		voice[v].eg_level = voice[v].s_level = 0; </span>
+<span class="lineNum">    755 </span><span class="lineCov">    1 / 1     : 		voice[v].a_add = voice[v].d_sub = voice[v].r_sub = EGTable[0]; </span>
+<span class="lineNum">    756 </span><span class="lineCov">    1 / 1     : 		voice[v].gate = voice[v].ring = voice[v].test = false; </span>
+<span class="lineNum">    757 </span><span class="lineCov">    1 / 1     : 		voice[v].filter = voice[v].sync = voice[v].mute = false; </span>
+<span class="lineNum">    758 </span>              : 	} </span>
+<span class="lineNum">    759 </span>              :  </span>
+<span class="lineNum">    760 </span><span class="lineCov">    1 / 1     : 	f_type = FILT_NONE; </span>
+<span class="lineNum">    761 </span><span class="lineCov">    1 / 1     : 	f_freq = f_res = 0; </span>
+<span class="lineNum">    762 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    763 </span>              : 	f_ampl = FixNo(1); </span>
+<span class="lineNum">    764 </span>              : 	d1 = d2 = g1 = g2 = 0; </span>
+<span class="lineNum">    765 </span>              : 	xn1 = xn2 = yn1 = yn2 = 0; </span>
+<span class="lineNum">    766 </span>              : #else </span>
+<span class="lineNum">    767 </span><span class="lineCov">    1 / 1     : 	f_ampl = 1.0; </span>
+<span class="lineNum">    768 </span><span class="lineCov">    1 / 1     : 	d1 = d2 = g1 = g2 = 0.0; </span>
+<span class="lineNum">    769 </span><span class="lineCov">    1 / 1     : 	xn1 = xn2 = yn1 = yn2 = 0.0; </span>
+<span class="lineNum">    770 </span>              : #endif </span>
+<span class="lineNum">    771 </span>              :  </span>
+<span class="lineNum">    772 </span><span class="lineCov">    1 / 1     : 	sample_in_ptr = 0; </span>
+<span class="lineNum">    773 </span>              : 	memset(sample_buf, 0, SAMPLE_BUF_SIZE); </span>
+<span class="lineNum">    774 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    775 </span>              :  </span>
+<span class="lineNum">    776 </span>              :  </span>
+<span class="lineNum">    777 </span>              : /* </span>
+<span class="lineNum">    778 </span>              :  *  Write to register </span>
+<span class="lineNum">    779 </span>              :  */ </span>
+<span class="lineNum">    780 </span>              :  </span>
+<span class="lineNum">    781 </span>              : #include &quot;C64.h&quot; </span>
+<span class="lineNum">    782 </span>              : extern C64 *TheC64; </span>
+<span class="lineNum">    783 </span>              : /* </span>
+<span class="lineNum">    784 </span>              :  * Fill buffer (for Unix sound routines), sample volume (for sampled voice) </span>
+<span class="lineNum">    785 </span>              :  */ </span>
+<span class="lineNum">    786 </span>              :  </span>
+<span class="lineNum">    787 </span>              : void MOS6581::EmulateLine(void) </span>
+<span class="lineNum">    788 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    789 </span><span class="lineNoCov">    0 / 1     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">    790 </span><span class="lineCov">    1 / 1     : 		the_renderer-&gt;EmulateLine(); </span>
+<span class="lineNum">    791 </span>              : 	/* Flush network sound every ~100ms */ </span>
+<span class="lineNum">    792 </span><span class="lineCov">    1 / 1     : 	if (TheC64-&gt;network_connection_type == CLIENT) </span>
+<span class="lineNum">    793 </span>              : 	{ </span>
+<span class="lineNum">    794 </span>              : 		static NetworkUpdateSoundInfo *cur = NULL; </span>
+<span class="lineNum">    795 </span>              :  </span>
+<span class="lineNum">    796 </span><span class="lineNoCov">    0 / 1     : 		if (!cur) { </span>
+<span class="lineNum">    797 </span><span class="lineNoCov">    0 / 2     : 			cur = TheC64-&gt;network-&gt;DequeueSound(); </span>
+<span class="lineNum">    798 </span>              : 		} </span>
+<span class="lineNum">    799 </span>              :  </span>
+<span class="lineNum">    800 </span><span class="lineNoCov">    0 / 6     : 		while (cur) { </span>
+<span class="lineNum">    801 </span><span class="lineNoCov">    0 / 1     : 			if (cur-&gt;delay_cycles &gt; 0) </span>
+<span class="lineNum">    802 </span><span class="lineNoCov">    0 / 2     : 				cur-&gt;delay_cycles--; </span>
+<span class="lineNum">    803 </span><span class="lineNoCov">    0 / 2     : 			if (cur-&gt;delay_cycles != 0) </span>
+<span class="lineNum">    804 </span>              : 				break; </span>
+<span class="lineNum">    805 </span>              : 			/* Delayed long enough - write to the SID! */ </span>
+<span class="lineNum">    806 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;WriteRegister(cur-&gt;adr, cur-&gt;val); </span>
+<span class="lineNum">    807 </span><span class="lineNoCov">    0 / 2     : 			cur = TheC64-&gt;network-&gt;DequeueSound(); </span>
+<span class="lineNum">    808 </span>              : 		} </span>
+<span class="lineNum">    809 </span>              : 	} </span>
+<span class="lineNum">    810 </span><span class="lineCov">    1 / 1     : 	if (TheC64-&gt;network_connection_type == MASTER || </span>
+<span class="lineNum">    811 </span>              : 			TheC64-&gt;network_connection_type == CLIENT) </span>
+<span class="lineNum">    812 </span><span class="lineNoCov">    0 / 1     : 		TheC64-&gt;linecnt++; </span>
+<span class="lineNum">    813 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    814 </span>              :  </span>
+<span class="lineNum">    815 </span>              : void DigitalRenderer::WriteRegister(uint16 adr, uint8 byte) </span>
+<span class="lineNum">    816 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    817 </span><span class="lineCov">    1 / 1     : 	if (!ready) </span>
+<span class="lineNum">    818 </span>              : 		return; </span>
+<span class="lineNum">    819 </span>              :  </span>
+<span class="lineNum">    820 </span><span class="lineCov">    1 / 1     : 	if (TheC64) { </span>
+<span class="lineNum">    821 </span><span class="lineCov">    1 / 1     : 		if (TheC64-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">    822 </span><span class="lineNoCov">    0 / 1     : 			TheC64-&gt;network-&gt;RegisterSidWrite(TheC64-&gt;linecnt, adr, byte); </span>
+<span class="lineNum">    823 </span>              : 	} </span>
+<span class="lineNum">    824 </span>              :  </span>
+<span class="lineNum">    825 </span><span class="lineCov">    2 / 2     : 	int v = adr/7;	// Voice number </span>
+<span class="lineNum">    826 </span>              :  </span>
+<span class="lineNum">    827 </span><span class="lineCov">    3 / 3     : 	switch (adr) { </span>
+<span class="lineNum">    828 </span>              : 		case 0: </span>
+<span class="lineNum">    829 </span>              : 		case 7: </span>
+<span class="lineNum">    830 </span>              : 		case 14: </span>
+<span class="lineNum">    831 </span><span class="lineCov">    1 / 1     : 			voice[v].freq = (voice[v].freq &amp; 0xff00) | byte; </span>
+<span class="lineNum">    832 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    833 </span>              : 			voice[v].add = sidquot.imul((int)voice[v].freq); </span>
+<span class="lineNum">    834 </span>              : #else </span>
+<span class="lineNum">    835 </span>              : 			voice[v].add = (uint32)((float)voice[v].freq * SID_FREQ / SAMPLE_FREQ); </span>
+<span class="lineNum">    836 </span>              : #endif </span>
+<span class="lineNum">    837 </span>              : 			break; </span>
+<span class="lineNum">    838 </span>              :  </span>
+<span class="lineNum">    839 </span>              : 		case 1: </span>
+<span class="lineNum">    840 </span>              : 		case 8: </span>
+<span class="lineNum">    841 </span>              : 		case 15: </span>
+<span class="lineNum">    842 </span><span class="lineCov">    1 / 1     : 			voice[v].freq = (voice[v].freq &amp; 0xff) | (byte &lt;&lt; 8); </span>
+<span class="lineNum">    843 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    844 </span>              : 			voice[v].add = sidquot.imul((int)voice[v].freq); </span>
+<span class="lineNum">    845 </span>              : #else </span>
+<span class="lineNum">    846 </span><span class="lineCov">    1 / 1     : 			voice[v].add = (uint32)((float)voice[v].freq * SID_FREQ / SAMPLE_FREQ); </span>
+<span class="lineNum">    847 </span>              : #endif </span>
+<span class="lineNum">    848 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    849 </span>              :  </span>
+<span class="lineNum">    850 </span>              : 		case 2: </span>
+<span class="lineNum">    851 </span>              : 		case 9: </span>
+<span class="lineNum">    852 </span>              : 		case 16: </span>
+<span class="lineNum">    853 </span><span class="lineCov">    1 / 1     : 			voice[v].pw = (voice[v].pw &amp; 0x0f00) | byte; </span>
+<span class="lineNum">    854 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    855 </span>              :  </span>
+<span class="lineNum">    856 </span>              : 		case 3: </span>
+<span class="lineNum">    857 </span>              : 		case 10: </span>
+<span class="lineNum">    858 </span>              : 		case 17: </span>
+<span class="lineNum">    859 </span><span class="lineCov">    1 / 1     : 			voice[v].pw = (voice[v].pw &amp; 0xff) | ((byte &amp; 0xf) &lt;&lt; 8); </span>
+<span class="lineNum">    860 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    861 </span>              :  </span>
+<span class="lineNum">    862 </span>              : 		case 4: </span>
+<span class="lineNum">    863 </span>              : 		case 11: </span>
+<span class="lineNum">    864 </span>              : 		case 18: </span>
+<span class="lineNum">    865 </span><span class="lineCov">    3 / 3     : 			voice[v].wave = (byte &gt;&gt; 4) &amp; 0xf; </span>
+<span class="lineNum">    866 </span><span class="lineCov">    3 / 3     : 			if ((byte &amp; 1) != voice[v].gate) </span>
+<span class="lineNum">    867 </span>              : 			{ </span>
+<span class="lineNum">    868 </span><span class="lineNoCov">    0 / 1     : 				if (byte &amp; 1)	// Gate turned on </span>
+<span class="lineNum">    869 </span><span class="lineNoCov">    0 / 1     : 					voice[v].eg_state = EG_ATTACK; </span>
+<span class="lineNum">    870 </span>              : 				else			// Gate turned off </span>
+<span class="lineNum">    871 </span>              : 				{ </span>
+<span class="lineNum">    872 </span><span class="lineNoCov">    0 / 1     : 					if (voice[v].eg_state != EG_IDLE) </span>
+<span class="lineNum">    873 </span><span class="lineNoCov">    0 / 1     : 						voice[v].eg_state = EG_RELEASE; </span>
+<span class="lineNum">    874 </span>              : 				} </span>
+<span class="lineNum">    875 </span>              : 			} </span>
+<span class="lineNum">    876 </span><span class="linePartCov">    2 / 3     : 			voice[v].gate = byte &amp; 1; </span>
+<span class="lineNum">    877 </span><span class="lineCov">    3 / 3     : 			voice[v].mod_by-&gt;sync = byte &amp; 2; </span>
+<span class="lineNum">    878 </span><span class="linePartCov">    3 / 4     : 			voice[v].ring = byte &amp; 4; </span>
+<span class="lineNum">    879 </span><span class="linePartCov">    3 / 4     : 			if ((voice[v].test = byte &amp; 8) != 0) </span>
+<span class="lineNum">    880 </span><span class="lineNoCov">    0 / 1     : 				voice[v].count = 0; </span>
+<span class="lineNum">    881 </span>              : 			break; </span>
+<span class="lineNum">    882 </span>              :  </span>
+<span class="lineNum">    883 </span>              : 		case 5: </span>
+<span class="lineNum">    884 </span>              : 		case 12: </span>
+<span class="lineNum">    885 </span>              : 		case 19: </span>
+<span class="lineNum">    886 </span><span class="lineCov">    2 / 2     : 			voice[v].a_add = EGTable[byte &gt;&gt; 4]; </span>
+<span class="lineNum">    887 </span><span class="lineCov">    2 / 2     : 			voice[v].d_sub = EGTable[byte &amp; 0xf]; </span>
+<span class="lineNum">    888 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    889 </span>              :  </span>
+<span class="lineNum">    890 </span>              : 		case 6: </span>
+<span class="lineNum">    891 </span>              : 		case 13: </span>
+<span class="lineNum">    892 </span>              : 		case 20: </span>
+<span class="lineNum">    893 </span><span class="lineCov">    2 / 2     : 			voice[v].s_level = (byte &gt;&gt; 4) * 0x111111; </span>
+<span class="lineNum">    894 </span><span class="lineCov">    2 / 2     : 			voice[v].r_sub = EGTable[byte &amp; 0xf]; </span>
+<span class="lineNum">    895 </span><span class="lineCov">    1 / 1     : 			break; </span>
+<span class="lineNum">    896 </span>              :  </span>
+<span class="lineNum">    897 </span>              : 		case 22: </span>
+<span class="lineNum">    898 </span><span class="lineCov">    1 / 1     : 			if (byte != f_freq) { </span>
+<span class="lineNum">    899 </span><span class="lineNoCov">    0 / 1     : 				f_freq = byte; </span>
+<span class="lineNum">    900 </span><span class="lineNoCov">    0 / 1     : 				if (ThePrefs.SIDFilters) </span>
+<span class="lineNum">    901 </span>              : 					calc_filter(); </span>
+<span class="lineNum">    902 </span>              : 			} </span>
+<span class="lineNum">    903 </span>              : 			break; </span>
+<span class="lineNum">    904 </span>              :  </span>
+<span class="lineNum">    905 </span>              : 		case 23: </span>
+<span class="lineNum">    906 </span><span class="lineCov">    1 / 1     : 			voice[0].filter = byte &amp; 1; </span>
+<span class="lineNum">    907 </span><span class="lineCov">    1 / 1     : 			voice[1].filter = byte &amp; 2; </span>
+<span class="lineNum">    908 </span><span class="lineCov">    1 / 1     : 			voice[2].filter = byte &amp; 4; </span>
+<span class="lineNum">    909 </span><span class="lineCov">    1 / 1     : 			if ((byte &gt;&gt; 4) != f_res) { </span>
+<span class="lineNum">    910 </span><span class="lineNoCov">    0 / 1     : 				f_res = byte &gt;&gt; 4; </span>
+<span class="lineNum">    911 </span><span class="lineNoCov">    0 / 1     : 				if (ThePrefs.SIDFilters) </span>
+<span class="lineNum">    912 </span>              : 					calc_filter(); </span>
+<span class="lineNum">    913 </span>              : 			} </span>
+<span class="lineNum">    914 </span>              : 			break; </span>
+<span class="lineNum">    915 </span>              :  </span>
+<span class="lineNum">    916 </span>              : 		case 24: </span>
+<span class="lineNum">    917 </span><span class="lineCov">    1 / 1     : 			volume = byte &amp; 0xf; </span>
+<span class="lineNum">    918 </span><span class="lineCov">    1 / 1     : 			voice[2].mute = byte &amp; 0x80; </span>
+<span class="lineNum">    919 </span><span class="lineCov">    1 / 1     : 			if (((byte &gt;&gt; 4) &amp; 7) != f_type) { </span>
+<span class="lineNum">    920 </span><span class="lineNoCov">    0 / 1     : 				f_type = (byte &gt;&gt; 4) &amp; 7; </span>
+<span class="lineNum">    921 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    922 </span>              : 				xn1 = xn2 = yn1 = yn2 = 0; </span>
+<span class="lineNum">    923 </span>              : #else </span>
+<span class="lineNum">    924 </span><span class="lineNoCov">    0 / 1     : 				xn1 = xn2 = yn1 = yn2 = 0.0; </span>
+<span class="lineNum">    925 </span>              : #endif </span>
+<span class="lineNum">    926 </span><span class="lineNoCov">    0 / 2     : 				if (ThePrefs.SIDFilters) </span>
+<span class="lineNum">    927 </span><span class="lineNoCov">    0 / 2     : 					calc_filter(); </span>
+<span class="lineNum">    928 </span>              : 			} </span>
+<span class="lineNum">    929 </span>              : 			break; </span>
+<span class="lineNum">    930 </span>              : 	} </span>
+<span class="lineNum">    931 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    932 </span>              :  </span>
+<span class="lineNum">    933 </span>              :  </span>
+<span class="lineNum">    934 </span>              : /* </span>
+<span class="lineNum">    935 </span>              :  *  Preferences may have changed </span>
+<span class="lineNum">    936 </span>              :  */ </span>
+<span class="lineNum">    937 </span>              :  </span>
+<span class="lineNum">    938 </span>              : void DigitalRenderer::NewPrefs(Prefs *prefs) </span>
+<span class="lineNum">    939 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    940 </span><span class="lineNoCov">    0 / 1     : 	calc_filter(); </span>
+<span class="lineNum">    941 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    942 </span>              :  </span>
+<span class="lineNum">    943 </span>              :  </span>
+<span class="lineNum">    944 </span>              : /* </span>
+<span class="lineNum">    945 </span>              :  *  Calculate IIR filter coefficients </span>
+<span class="lineNum">    946 </span>              :  */ </span>
+<span class="lineNum">    947 </span>              :  </span>
+<span class="lineNum">    948 </span><span class="lineNoCov">    0 / 1     : void DigitalRenderer::calc_filter(void) </span>
+<span class="lineNum">    949 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    950 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    951 </span>              : 	FixPoint fr, arg; </span>
+<span class="lineNum">    952 </span>              :  </span>
+<span class="lineNum">    953 </span>              : 	if (f_type == FILT_ALL) </span>
+<span class="lineNum">    954 </span>              : 	{ </span>
+<span class="lineNum">    955 </span>              : 		d1 = 0; d2 = 0; g1 = 0; g2 = 0; f_ampl = FixNo(1); return; </span>
+<span class="lineNum">    956 </span>              : 	} </span>
+<span class="lineNum">    957 </span>              : 	else if (f_type == FILT_NONE) </span>
+<span class="lineNum">    958 </span>              : 	{ </span>
+<span class="lineNum">    959 </span>              : 		d1 = 0; d2 = 0; g1 = 0; g2 = 0; f_ampl = 0; return; </span>
+<span class="lineNum">    960 </span>              :         } </span>
+<span class="lineNum">    961 </span>              : #else </span>
+<span class="lineNum">    962 </span>              : 	float fr, arg; </span>
+<span class="lineNum">    963 </span>              :  </span>
+<span class="lineNum">    964 </span>              : 	// Check for some trivial cases </span>
+<span class="lineNum">    965 </span><span class="lineCov">    1 / 1     : 	if (f_type == FILT_ALL) { </span>
+<span class="lineNum">    966 </span><span class="lineNoCov">    0 / 1     : 		d1 = 0.0; d2 = 0.0; </span>
+<span class="lineNum">    967 </span><span class="lineNoCov">    0 / 1     : 		g1 = 0.0; g2 = 0.0; </span>
+<span class="lineNum">    968 </span><span class="lineNoCov">    0 / 1     : 		f_ampl = 1.0; </span>
+<span class="lineNum">    969 </span>              : 		return; </span>
+<span class="lineNum">    970 </span><span class="lineCov">    1 / 1     : 	} else if (f_type == FILT_NONE) { </span>
+<span class="lineNum">    971 </span><span class="lineCov">    1 / 1     : 		d1 = 0.0; d2 = 0.0; </span>
+<span class="lineNum">    972 </span><span class="lineCov">    1 / 1     : 		g1 = 0.0; g2 = 0.0; </span>
+<span class="lineNum">    973 </span><span class="lineCov">    1 / 1     : 		f_ampl = 0.0; </span>
+<span class="lineNum">    974 </span><span class="lineCov">    1 / 1     : 		return; </span>
+<span class="lineNum">    975 </span>              : 	} </span>
+<span class="lineNum">    976 </span>              : #endif </span>
+<span class="lineNum">    977 </span>              :  </span>
+<span class="lineNum">    978 </span>              : 	// Calculate resonance frequency </span>
+<span class="lineNum">    979 </span><span class="lineNoCov">    0 / 1     : 	if (f_type == FILT_LP || f_type == FILT_LPBP) </span>
+<span class="lineNum">    980 </span>              : #ifdef PRECOMPUTE_RESONANCE </span>
+<span class="lineNum">    981 </span>              : 		fr = resonanceLP[f_freq]; </span>
+<span class="lineNum">    982 </span>              : #else </span>
+<span class="lineNum">    983 </span><span class="lineNoCov">    0 / 1     : 		fr = CALC_RESONANCE_LP(f_freq); </span>
+<span class="lineNum">    984 </span>              : #endif </span>
+<span class="lineNum">    985 </span>              : 	else </span>
+<span class="lineNum">    986 </span>              : #ifdef PRECOMPUTE_RESONANCE </span>
+<span class="lineNum">    987 </span>              : 		fr = resonanceHP[f_freq]; </span>
+<span class="lineNum">    988 </span>              : #else </span>
+<span class="lineNum">    989 </span><span class="lineNoCov">    0 / 1     : 		fr = CALC_RESONANCE_HP(f_freq); </span>
+<span class="lineNum">    990 </span>              : #endif </span>
+<span class="lineNum">    991 </span>              :  </span>
+<span class="lineNum">    992 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">    993 </span>              : 	// explanations see below. </span>
+<span class="lineNum">    994 </span>              : 	arg = fr / (SAMPLE_FREQ &gt;&gt; 1); </span>
+<span class="lineNum">    995 </span>              : 	if (arg &gt; FixNo(0.99)) {arg = FixNo(0.99);} </span>
+<span class="lineNum">    996 </span>              : 	if (arg &lt; FixNo(0.01)) {arg = FixNo(0.01);} </span>
+<span class="lineNum">    997 </span>              :  </span>
+<span class="lineNum">    998 </span>              : 	g2 = FixNo(0.55) + FixNo(1.2) * arg * (arg - 1) + FixNo(0.0133333333) * f_res; </span>
+<span class="lineNum">    999 </span>              : 	g1 = FixNo(-2) * g2.sqrt() * fixcos(arg); </span>
+<span class="lineNum">   1000 </span>              :  </span>
+<span class="lineNum">   1001 </span>              : 	if (f_type == FILT_LPBP || f_type == FILT_HPBP) {g2 += FixNo(0.1);} </span>
+<span class="lineNum">   1002 </span>              :  </span>
+<span class="lineNum">   1003 </span>              : 	if (g1.abs() &gt;= g2 + 1) </span>
+<span class="lineNum">   1004 </span>              : 	{ </span>
+<span class="lineNum">   1005 </span>              : 	  if (g1 &gt; 0) {g1 = g2 + FixNo(0.99);} </span>
+<span class="lineNum">   1006 </span>              : 	  else {g1 = -(g2 + FixNo(0.99));} </span>
+<span class="lineNum">   1007 </span>              : 	} </span>
+<span class="lineNum">   1008 </span>              :  </span>
+<span class="lineNum">   1009 </span>              : 	switch (f_type) </span>
+<span class="lineNum">   1010 </span>              : 	{ </span>
+<span class="lineNum">   1011 </span>              : 	  case FILT_LPBP: </span>
+<span class="lineNum">   1012 </span>              : 	  case FILT_LP: </span>
+<span class="lineNum">   1013 </span>              : 		d1 = FixNo(2); d2 = FixNo(1); f_ampl = FixNo(0.25) * (1 + g1 + g2); break; </span>
+<span class="lineNum">   1014 </span>              : 	  case FILT_HPBP: </span>
+<span class="lineNum">   1015 </span>              : 	  case FILT_HP: </span>
+<span class="lineNum">   1016 </span>              : 		d1 = FixNo(-2); d2 = FixNo(1); f_ampl = FixNo(0.25) * (1 - g1 + g2); break; </span>
+<span class="lineNum">   1017 </span>              : 	  case FILT_BP: </span>
+<span class="lineNum">   1018 </span>              : 		d1 = 0; d2 = FixNo(-1); </span>
+<span class="lineNum">   1019 </span>              : 		f_ampl = FixNo(0.25) * (1 + g1 + g2) * (1 + fixcos(arg)) / fixsin(arg); </span>
+<span class="lineNum">   1020 </span>              : 		break; </span>
+<span class="lineNum">   1021 </span>              : 	  case FILT_NOTCH: </span>
+<span class="lineNum">   1022 </span>              : 		d1 = FixNo(-2) * fixcos(arg); d2 = FixNo(1); </span>
+<span class="lineNum">   1023 </span>              : 		f_ampl = FixNo(0.25) * (1 + g1 + g2) * (1 + fixcos(arg)) / fixsin(arg); </span>
+<span class="lineNum">   1024 </span>              : 		break; </span>
+<span class="lineNum">   1025 </span>              : 	  default: break; </span>
+<span class="lineNum">   1026 </span>              : 	} </span>
+<span class="lineNum">   1027 </span>              :  </span>
+<span class="lineNum">   1028 </span>              : #else </span>
+<span class="lineNum">   1029 </span>              :  </span>
+<span class="lineNum">   1030 </span>              : 	// Limit to &lt;1/2 sample frequency, avoid div by 0 in case FILT_BP below </span>
+<span class="lineNum">   1031 </span>              : 	arg = fr / (float)(SAMPLE_FREQ &gt;&gt; 1); </span>
+<span class="lineNum">   1032 </span><span class="lineNoCov">    0 / 1     : 	if (arg &gt; 0.99) </span>
+<span class="lineNum">   1033 </span>              : 		arg = 0.99; </span>
+<span class="lineNum">   1034 </span><span class="lineNoCov">    0 / 1     : 	if (arg &lt; 0.01) </span>
+<span class="lineNum">   1035 </span>              : 		arg = 0.01; </span>
+<span class="lineNum">   1036 </span>              :  </span>
+<span class="lineNum">   1037 </span>              : 	// Calculate poles (resonance frequency and resonance) </span>
+<span class="lineNum">   1038 </span><span class="lineNoCov">    0 / 1     : 	g2 = 0.55 + 1.2 * arg * arg - 1.2 * arg + (float)f_res * 0.0133333333; </span>
+<span class="lineNum">   1039 </span><span class="lineNoCov">    0 / 2     : 	g1 = -2.0 * sqrt(g2) * cos(M_PI * arg); </span>
+<span class="lineNum">   1040 </span>              :  </span>
+<span class="lineNum">   1041 </span>              : 	// Increase resonance if LP/HP combined with BP </span>
+<span class="lineNum">   1042 </span><span class="lineNoCov">    0 / 2     : 	if (f_type == FILT_LPBP || f_type == FILT_HPBP) </span>
+<span class="lineNum">   1043 </span><span class="lineNoCov">    0 / 1     : 		g2 += 0.1; </span>
+<span class="lineNum">   1044 </span>              :  </span>
+<span class="lineNum">   1045 </span>              : 	// Stabilize filter </span>
+<span class="lineNum">   1046 </span><span class="lineNoCov">    0 / 1     : 	if (fabs(g1) &gt;= g2 + 1.0) </span>
+<span class="lineNum">   1047 </span>              : 	{ </span>
+<span class="lineNum">   1048 </span><span class="lineNoCov">    0 / 1     : 		if (g1 &gt; 0.0) </span>
+<span class="lineNum">   1049 </span><span class="lineNoCov">    0 / 1     : 			g1 = g2 + 0.99; </span>
+<span class="lineNum">   1050 </span>              : 		else </span>
+<span class="lineNum">   1051 </span><span class="lineNoCov">    0 / 1     : 			g1 = -(g2 + 0.99); </span>
+<span class="lineNum">   1052 </span>              : 	} </span>
+<span class="lineNum">   1053 </span>              :  </span>
+<span class="lineNum">   1054 </span>              : 	// Calculate roots (filter characteristic) and input attenuation </span>
+<span class="lineNum">   1055 </span><span class="lineNoCov">    0 / 1     : 	switch (f_type) { </span>
+<span class="lineNum">   1056 </span>              :  </span>
+<span class="lineNum">   1057 </span>              : 		case FILT_LPBP: </span>
+<span class="lineNum">   1058 </span>              : 		case FILT_LP: </span>
+<span class="lineNum">   1059 </span><span class="lineNoCov">    0 / 2     : 			d1 = 2.0; d2 = 1.0; </span>
+<span class="lineNum">   1060 </span><span class="lineNoCov">    0 / 2     : 			f_ampl = 0.25 * (1.0 + g1 + g2); </span>
+<span class="lineNum">   1061 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">   1062 </span>              :  </span>
+<span class="lineNum">   1063 </span>              : 		case FILT_HPBP: </span>
+<span class="lineNum">   1064 </span>              : 		case FILT_HP: </span>
+<span class="lineNum">   1065 </span><span class="lineNoCov">    0 / 2     : 			d1 = -2.0; d2 = 1.0; </span>
+<span class="lineNum">   1066 </span><span class="lineNoCov">    0 / 2     : 			f_ampl = 0.25 * (1.0 - g1 + g2); </span>
+<span class="lineNum">   1067 </span><span class="lineNoCov">    0 / 1     : 			break; </span>
+<span class="lineNum">   1068 </span>              :  </span>
+<span class="lineNum">   1069 </span>              : 		case FILT_BP: </span>
+<span class="lineNum">   1070 </span><span class="lineNoCov">    0 / 2     : 			d1 = 0.0; d2 = -1.0; </span>
+<span class="lineNum">   1071 </span><span class="lineNoCov">    0 / 1     : 			f_ampl = 0.25 * (1.0 + g1 + g2) * (1 + cos(M_PI * arg)) / sin(M_PI * arg); </span>
+<span class="lineNum">   1072 </span>              : 			break; </span>
+<span class="lineNum">   1073 </span>              :  </span>
+<span class="lineNum">   1074 </span>              : 		case FILT_NOTCH: </span>
+<span class="lineNum">   1075 </span><span class="lineNoCov">    0 / 1     : 			d1 = -2.0 * cos(M_PI * arg); d2 = 1.0; </span>
+<span class="lineNum">   1076 </span><span class="lineNoCov">    0 / 1     : 			f_ampl = 0.25 * (1.0 + g1 + g2) * (1 + cos(M_PI * arg)) / (sin(M_PI * arg)); </span>
+<span class="lineNum">   1077 </span>              : 			break; </span>
+<span class="lineNum">   1078 </span>              :  </span>
+<span class="lineNum">   1079 </span>              : 		default: </span>
+<span class="lineNum">   1080 </span>              : 			break; </span>
+<span class="lineNum">   1081 </span>              : 	} </span>
+<span class="lineNum">   1082 </span>              : #endif </span>
+<span class="lineNum">   1083 </span><span class="linePartCov">    1 / 3     : } </span>
+<span class="lineNum">   1084 </span>              :  </span>
+<span class="lineNum">   1085 </span>              :  </span>
+<span class="lineNum">   1086 </span>              : /* </span>
+<span class="lineNum">   1087 </span>              :  *  Fill one audio buffer with calculated SID sound </span>
+<span class="lineNum">   1088 </span>              :  */ </span>
+<span class="lineNum">   1089 </span>              :  </span>
+<span class="lineNum">   1090 </span><span class="lineCov">    1 / 1     : void DigitalRenderer::calc_buffer(int16 *buf, long count) </span>
+<span class="lineNum">   1091 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">   1092 </span>              : 	// Get filter coefficients, so the emulator won't change </span>
+<span class="lineNum">   1093 </span>              : 	// them in the middle of our calculations </span>
+<span class="lineNum">   1094 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">   1095 </span>              : 	FixPoint cf_ampl = f_ampl; </span>
+<span class="lineNum">   1096 </span>              : 	FixPoint cd1 = d1, cd2 = d2, cg1 = g1, cg2 = g2; </span>
+<span class="lineNum">   1097 </span>              : #else </span>
+<span class="lineNum">   1098 </span><span class="lineCov">    1 / 1     : 	float cf_ampl = f_ampl; </span>
+<span class="lineNum">   1099 </span><span class="lineCov">    3 / 3     : 	float cd1 = d1, cd2 = d2, cg1 = g1, cg2 = g2; </span>
+<span class="lineNum">   1100 </span>              : #endif </span>
+<span class="lineNum">   1101 </span>              :  </span>
+<span class="lineNum">   1102 </span>              : 	// Index in sample_buf for reading, 16.16 fixed </span>
+<span class="lineNum">   1103 </span><span class="lineCov">    3 / 3     : 	uint32 sample_count = (sample_in_ptr + SAMPLE_BUF_SIZE/2) &lt;&lt; 16; </span>
+<span class="lineNum">   1104 </span>              :  </span>
+<span class="lineNum">   1105 </span>              : 	count &gt;&gt;= 1;	// 16 bit mono output, count is in bytes </span>
+<span class="lineNum">   1106 </span><span class="linePartCov">    4 / 5     : 	while (count--) { </span>
+<span class="lineNum">   1107 </span>              : 		// Get current master volume from sample buffer, </span>
+<span class="lineNum">   1108 </span>              : 		// calculate sampled voice </span>
+<span class="lineNum">   1109 </span><span class="lineCov">    3 / 3     : 		uint8 master_volume = sample_buf[(sample_count &gt;&gt; 16) % SAMPLE_BUF_SIZE]; </span>
+<span class="lineNum">   1110 </span><span class="lineCov">    1 / 1     : 		sample_count += ((0x138 * 50) &lt;&lt; 16) / SAMPLE_FREQ; </span>
+<span class="lineNum">   1111 </span><span class="linePartCov">    3 / 4     : 		int32 sum_output = SampleTab[master_volume] &lt;&lt; 8; </span>
+<span class="lineNum">   1112 </span>              : 		int32 sum_output_filter = 0; </span>
+<span class="lineNum">   1113 </span>              :  </span>
+<span class="lineNum">   1114 </span>              : 		// Loop for all three voices </span>
+<span class="lineNum">   1115 </span><span class="lineCov">    1 / 1     : 		for (int j=0; j&lt;3; j++) { </span>
+<span class="lineNum">   1116 </span>              : 			DRVoice *v = &amp;voice[j]; </span>
+<span class="lineNum">   1117 </span>              :  </span>
+<span class="lineNum">   1118 </span>              : 			// Envelope generators </span>
+<span class="lineNum">   1119 </span>              : 			uint16 envelope; </span>
+<span class="lineNum">   1120 </span>              :  </span>
+<span class="lineNum">   1121 </span><span class="lineCov">    2 / 2     : 			switch (v-&gt;eg_state) { </span>
+<span class="lineNum">   1122 </span>              : 				case EG_ATTACK: </span>
+<span class="lineNum">   1123 </span><span class="lineNoCov">    0 / 2     : 					v-&gt;eg_level += v-&gt;a_add; </span>
+<span class="lineNum">   1124 </span><span class="lineNoCov">    0 / 2     : 					if (v-&gt;eg_level &gt; 0xffffff) { </span>
+<span class="lineNum">   1125 </span><span class="lineNoCov">    0 / 1     : 						v-&gt;eg_level = 0xffffff; </span>
+<span class="lineNum">   1126 </span><span class="linePartCov">    2 / 4     : 						v-&gt;eg_state = EG_DECAY; </span>
+<span class="lineNum">   1127 </span>              : 					} </span>
+<span class="lineNum">   1128 </span>              : 					break; </span>
+<span class="lineNum">   1129 </span>              : 				case EG_DECAY: </span>
+<span class="lineNum">   1130 </span><span class="lineNoCov">    0 / 2     : 					if (v-&gt;eg_level &lt;= v-&gt;s_level || v-&gt;eg_level &gt; 0xffffff) </span>
+<span class="lineNum">   1131 </span><span class="lineNoCov">    0 / 1     : 						v-&gt;eg_level = v-&gt;s_level; </span>
+<span class="lineNum">   1132 </span>              : 					else { </span>
+<span class="lineNum">   1133 </span><span class="lineNoCov">    0 / 2     : 						v-&gt;eg_level -= v-&gt;d_sub &gt;&gt; EGDRShift[v-&gt;eg_level &gt;&gt; 16]; </span>
+<span class="lineNum">   1134 </span><span class="lineNoCov">    0 / 2     : 						if (v-&gt;eg_level &lt;= v-&gt;s_level || v-&gt;eg_level &gt; 0xffffff) </span>
+<span class="lineNum">   1135 </span><span class="lineNoCov">    0 / 1     : 							v-&gt;eg_level = v-&gt;s_level; </span>
+<span class="lineNum">   1136 </span>              : 					} </span>
+<span class="lineNum">   1137 </span>              : 					break; </span>
+<span class="lineNum">   1138 </span>              : 				case EG_RELEASE: </span>
+<span class="lineNum">   1139 </span><span class="lineNoCov">    0 / 2     : 					v-&gt;eg_level -= v-&gt;r_sub &gt;&gt; EGDRShift[v-&gt;eg_level &gt;&gt; 16]; </span>
+<span class="lineNum">   1140 </span><span class="lineNoCov">    0 / 3     : 					if (v-&gt;eg_level &gt; 0xffffff) { </span>
+<span class="lineNum">   1141 </span><span class="lineNoCov">    0 / 1     : 						v-&gt;eg_level = 0; </span>
+<span class="lineNum">   1142 </span><span class="lineNoCov">    0 / 1     : 						v-&gt;eg_state = EG_IDLE; </span>
+<span class="lineNum">   1143 </span>              : 					} </span>
+<span class="lineNum">   1144 </span>              : 					break; </span>
+<span class="lineNum">   1145 </span>              : 				case EG_IDLE: </span>
+<span class="lineNum">   1146 </span><span class="lineCov">    1 / 1     : 					v-&gt;eg_level = 0; </span>
+<span class="lineNum">   1147 </span>              : 					break; </span>
+<span class="lineNum">   1148 </span>              : 			} </span>
+<span class="lineNum">   1149 </span>              : 			envelope = (v-&gt;eg_level * master_volume) &gt;&gt; 20; </span>
+<span class="lineNum">   1150 </span>              :  </span>
+<span class="lineNum">   1151 </span>              : 			// Waveform generator </span>
+<span class="lineNum">   1152 </span><span class="lineCov">    1 / 1     : 			if (v-&gt;mute) </span>
+<span class="lineNum">   1153 </span>              : 				continue; </span>
+<span class="lineNum">   1154 </span>              : 			uint16 output; </span>
+<span class="lineNum">   1155 </span>              :  </span>
+<span class="lineNum">   1156 </span><span class="lineCov">    1 / 1     : 			if (!v-&gt;test) </span>
+<span class="lineNum">   1157 </span><span class="lineCov">    1 / 1     : 				v-&gt;count += v-&gt;add; </span>
+<span class="lineNum">   1158 </span>              :  </span>
+<span class="lineNum">   1159 </span><span class="lineCov">    1 / 1     : 			if (v-&gt;sync &amp;&amp; (v-&gt;count &gt; 0x1000000)) </span>
+<span class="lineNum">   1160 </span><span class="lineNoCov">    0 / 1     : 				v-&gt;mod_to-&gt;count = 0; </span>
+<span class="lineNum">   1161 </span>              :  </span>
+<span class="lineNum">   1162 </span><span class="lineCov">    2 / 2     : 			v-&gt;count &amp;= 0xffffff; </span>
+<span class="lineNum">   1163 </span>              :  </span>
+<span class="lineNum">   1164 </span><span class="lineCov">    3 / 3     : 			switch (v-&gt;wave) { </span>
+<span class="lineNum">   1165 </span>              : 				case WAVE_TRI: </span>
+<span class="lineNum">   1166 </span><span class="linePartCov">    1 / 3     : 					if (v-&gt;ring) </span>
+<span class="lineNum">   1167 </span>              : 						output = TriTable[(v-&gt;count ^ (v-&gt;mod_by-&gt;count &amp; 0x800000)) &gt;&gt; 11]; </span>
+<span class="lineNum">   1168 </span>              : 					else </span>
+<span class="lineNum">   1169 </span>              : 						output = TriTable[v-&gt;count &gt;&gt; 11]; </span>
+<span class="lineNum">   1170 </span>              : 					break; </span>
+<span class="lineNum">   1171 </span>              : 				case WAVE_SAW: </span>
+<span class="lineNum">   1172 </span>              : 					output = v-&gt;count &gt;&gt; 8; </span>
+<span class="lineNum">   1173 </span><span class="lineCov">    1 / 1     : 					break; </span>
+<span class="lineNum">   1174 </span>              : 				case WAVE_RECT: </span>
+<span class="lineNum">   1175 </span><span class="lineNoCov">    0 / 2     : 					if (v-&gt;count &gt; (uint32)(v-&gt;pw &lt;&lt; 12)) </span>
+<span class="lineNum">   1176 </span>              : 						output = 0xffff; </span>
+<span class="lineNum">   1177 </span>              : 					else </span>
+<span class="lineNum">   1178 </span>              : 						output = 0; </span>
+<span class="lineNum">   1179 </span>              : 					break; </span>
+<span class="lineNum">   1180 </span>              : 				case WAVE_TRISAW: </span>
+<span class="lineNum">   1181 </span>              : 					output = TriSawTable[v-&gt;count &gt;&gt; 16]; </span>
+<span class="lineNum">   1182 </span><span class="lineNoCov">    0 / 1     : 					break; </span>
+<span class="lineNum">   1183 </span>              : 				case WAVE_TRIRECT: </span>
+<span class="lineNum">   1184 </span><span class="lineNoCov">    0 / 1     : 					if (v-&gt;count &gt; (uint32)(v-&gt;pw &lt;&lt; 12)) </span>
+<span class="lineNum">   1185 </span>              : 						output = TriRectTable[v-&gt;count &gt;&gt; 16]; </span>
+<span class="lineNum">   1186 </span>              : 					else </span>
+<span class="lineNum">   1187 </span>              : 						output = 0; </span>
+<span class="lineNum">   1188 </span>              : 					break; </span>
+<span class="lineNum">   1189 </span>              : 				case WAVE_SAWRECT: </span>
+<span class="lineNum">   1190 </span><span class="lineNoCov">    0 / 1     : 					if (v-&gt;count &gt; (uint32)(v-&gt;pw &lt;&lt; 12)) </span>
+<span class="lineNum">   1191 </span>              : 						output = SawRectTable[v-&gt;count &gt;&gt; 16]; </span>
+<span class="lineNum">   1192 </span>              : 					else </span>
+<span class="lineNum">   1193 </span>              : 						output = 0; </span>
+<span class="lineNum">   1194 </span>              : 					break; </span>
+<span class="lineNum">   1195 </span>              : 				case WAVE_TRISAWRECT: </span>
+<span class="lineNum">   1196 </span><span class="lineNoCov">    0 / 2     : 					if (v-&gt;count &gt; (uint32)(v-&gt;pw &lt;&lt; 12)) </span>
+<span class="lineNum">   1197 </span>              : 						output = TriSawRectTable[v-&gt;count &gt;&gt; 16]; </span>
+<span class="lineNum">   1198 </span>              : 					else </span>
+<span class="lineNum">   1199 </span>              : 						output = 0; </span>
+<span class="lineNum">   1200 </span>              : 					break; </span>
+<span class="lineNum">   1201 </span>              : 				case WAVE_NOISE: </span>
+<span class="lineNum">   1202 </span><span class="lineNoCov">    0 / 1     : 					if (v-&gt;count &gt; 0x100000) { </span>
+<span class="lineNum">   1203 </span><span class="lineNoCov">    0 / 1     : 						output = v-&gt;noise = sid_random() &lt;&lt; 8; </span>
+<span class="lineNum">   1204 </span><span class="lineNoCov">    0 / 4     : 						v-&gt;count &amp;= 0xfffff; </span>
+<span class="lineNum">   1205 </span>              : 					} else </span>
+<span class="lineNum">   1206 </span>              : 						output = v-&gt;noise; </span>
+<span class="lineNum">   1207 </span>              : 					break; </span>
+<span class="lineNum">   1208 </span>              : 				default: </span>
+<span class="lineNum">   1209 </span>              : 					output = 0x8000; </span>
+<span class="lineNum">   1210 </span>              : 					break; </span>
+<span class="lineNum">   1211 </span>              : 			} </span>
+<span class="lineNum">   1212 </span><span class="linePartCov">    1 / 2     : 			if (v-&gt;filter) </span>
+<span class="lineNum">   1213 </span><span class="lineNoCov">    0 / 1     : 				sum_output_filter += (int16)(output ^ 0x8000) * envelope; </span>
+<span class="lineNum">   1214 </span>              : 			else </span>
+<span class="lineNum">   1215 </span><span class="lineCov">    1 / 1     : 				sum_output += (int16)(output ^ 0x8000) * envelope; </span>
+<span class="lineNum">   1216 </span>              : 		} </span>
+<span class="lineNum">   1217 </span>              :  </span>
+<span class="lineNum">   1218 </span>              : 		// Filter </span>
+<span class="lineNum">   1219 </span><span class="lineCov">    3 / 3     : 		if (ThePrefs.SIDFilters) { </span>
+<span class="lineNum">   1220 </span>              : #ifdef USE_FIXPOINT_MATHS </span>
+<span class="lineNum">   1221 </span>              : 			int32 xn = cf_ampl.imul(sum_output_filter); </span>
+<span class="lineNum">   1222 </span>              : 			int32 yn = xn+cd1.imul(xn1)+cd2.imul(xn2)-cg1.imul(yn1)-cg2.imul(yn2); </span>
+<span class="lineNum">   1223 </span>              : 			yn2 = yn1; yn1 = yn; xn2 = xn1; xn1 = xn; </span>
+<span class="lineNum">   1224 </span>              : 			sum_output_filter = yn; </span>
+<span class="lineNum">   1225 </span>              : #else </span>
+<span class="lineNum">   1226 </span><span class="lineCov">    1 / 1     : 			float xn = (float)sum_output_filter * cf_ampl; </span>
+<span class="lineNum">   1227 </span><span class="lineCov">    2 / 2     : 			float yn = xn + cd1 * xn1 + cd2 * xn2 - cg1 * yn1 - cg2 * yn2; </span>
+<span class="lineNum">   1228 </span><span class="lineCov">    3 / 3     : 			yn2 = yn1; yn1 = yn; xn2 = xn1; xn1 = xn; </span>
+<span class="lineNum">   1229 </span><span class="lineCov">    1 / 1     : 			sum_output_filter = (int32)yn; </span>
+<span class="lineNum">   1230 </span>              : #endif </span>
+<span class="lineNum">   1231 </span>              : 		} </span>
+<span class="lineNum">   1232 </span>              :  </span>
+<span class="lineNum">   1233 </span>              : 		// Write to buffer </span>
+<span class="lineNum">   1234 </span>              : #if defined(__riscos__)	// lookup in 8k (13bit) translation table </span>
+<span class="lineNum">   1235 </span>              : 		*buf++ = LinToLog[((sum_output + sum_output_filter) &gt;&gt; 13) &amp; 0x1fff]; </span>
+<span class="lineNum">   1236 </span>              : #else </span>
+<span class="lineNum">   1237 </span><span class="lineCov">    5 / 5     : 		*buf++ = (sum_output + sum_output_filter) &gt;&gt; 10; </span>
+<span class="lineNum">   1238 </span>              : #endif </span>
+<span class="lineNum">   1239 </span>              : 	} </span>
+<span class="lineNum">   1240 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">   1241 </span>              :  </span>
+<span class="lineNum">   1242 </span>              :  </span>
+<span class="lineNum">   1243 </span>              : // Manufacturer independent sound is still just a dream... </span>
+<span class="lineNum">   1244 </span>              : #if defined(GEKKO) </span>
+<span class="lineNum">   1245 </span>              : #include &quot;SID_wii.h&quot; </span>
+<span class="lineNum">   1246 </span>              : #else </span>
+<span class="lineNum">   1247 </span>              : #include &quot;SID_SDL.h&quot; </span>
+<span class="lineNum">   1248 </span>              : #endif </span>
+<span class="lineNum">   1249 </span>              :  </span>
+<span class="lineNum">   1250 </span>              :  </span>
+<span class="lineNum">   1251 </span>              : /* </span>
+<span class="lineNum">   1252 </span>              :  *  Open/close the renderer, according to old and new prefs </span>
+<span class="lineNum">   1253 </span>              :  */ </span>
+<span class="lineNum">   1254 </span>              :  </span>
+<span class="lineNum">   1255 </span>              : void MOS6581::open_close_renderer(int old_type, int new_type) </span>
+<span class="lineNum">   1256 </span><span class="lineCov">    3 / 3     : { </span>
+<span class="lineNum">   1257 </span><span class="linePartCov">    1 / 2     : 	if (old_type == new_type) </span>
+<span class="lineNum">   1258 </span>              : 		return; </span>
+<span class="lineNum">   1259 </span>              :  </span>
+<span class="lineNum">   1260 </span>              : 	// Delete the old renderer </span>
+<span class="lineNum">   1261 </span><span class="lineNoCov">    0 / 1     : 	delete the_renderer; </span>
+<span class="lineNum">   1262 </span>              :  </span>
+<span class="lineNum">   1263 </span>              : 	// Create new renderer </span>
+<span class="lineNum">   1264 </span><span class="lineCov">    1 / 1     : 	if (new_type == SIDTYPE_DIGITAL) </span>
+<span class="lineNum">   1265 </span><span class="lineCov">    2 / 2     : 		the_renderer = new DigitalRenderer; </span>
+<span class="lineNum">   1266 </span>              : 	else </span>
+<span class="lineNum">   1267 </span><span class="lineCov">    2 / 2     : 		the_renderer = NULL; </span>
+<span class="lineNum">   1268 </span>              :  </span>
+<span class="lineNum">   1269 </span>              : 	// Stuff the current register values into the new renderer </span>
+<span class="lineNum">   1270 </span><span class="lineCov">    2 / 2     : 	if (the_renderer != NULL) </span>
+<span class="lineNum">   1271 </span><span class="lineCov">    3 / 3     : 		for (int i=0; i&lt;25; i++) </span>
+<span class="lineNum">   1272 </span><span class="lineCov">    2 / 2     : 			the_renderer-&gt;WriteRegister(i, regs[i]); </span>
+<span class="lineNum">   1273 </span><span class="lineCov">    2 / 2     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

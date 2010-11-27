@@ -1,0 +1,525 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">170</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftLo" width="15%">10.6 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">18</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  1541job.cpp - Emulation of 1541 GCR disk reading/writing </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              :  </span>
+<span class="lineNum">     21 </span>              : /* </span>
+<span class="lineNum">     22 </span>              :  * Notes: </span>
+<span class="lineNum">     23 </span>              :  * ------ </span>
+<span class="lineNum">     24 </span>              :  * </span>
+<span class="lineNum">     25 </span>              :  *  - This is only used for processor-level 1541 emulation. </span>
+<span class="lineNum">     26 </span>              :  *    It simulates the 1541 disk controller hardware (R/W head, </span>
+<span class="lineNum">     27 </span>              :  *    GCR reading/writing). </span>
+<span class="lineNum">     28 </span>              :  *  - The preferences settings for drive 8 are used to </span>
+<span class="lineNum">     29 </span>              :  *    specify the .d64 file </span>
+<span class="lineNum">     30 </span>              :  * </span>
+<span class="lineNum">     31 </span>              :  * Incompatibilities: </span>
+<span class="lineNum">     32 </span>              :  * ------------------ </span>
+<span class="lineNum">     33 </span>              :  * </span>
+<span class="lineNum">     34 </span>              :  *  - No GCR writing possible (WriteSector is a ROM patch) </span>
+<span class="lineNum">     35 </span>              :  *  - Programs depending on the exact timing of head movement/disk </span>
+<span class="lineNum">     36 </span>              :  *    rotation don't work </span>
+<span class="lineNum">     37 </span>              :  *  - The .d64 error info is unused </span>
+<span class="lineNum">     38 </span>              :  */ </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span>              : #include &quot;sysdeps.h&quot; </span>
+<span class="lineNum">     41 </span>              :  </span>
+<span class="lineNum">     42 </span>              : #include &quot;1541job.h&quot; </span>
+<span class="lineNum">     43 </span>              : #include &quot;CPU1541.h&quot; </span>
+<span class="lineNum">     44 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     45 </span>              :  </span>
+<span class="lineNum">     46 </span>              : #include &quot;utils.hh&quot; </span>
+<span class="lineNum">     47 </span>              :  </span>
+<span class="lineNum">     48 </span>              : // Number of tracks/sectors </span>
+<span class="lineNum">     49 </span>              : const int NUM_TRACKS = 35; </span>
+<span class="lineNum">     50 </span>              : const int NUM_SECTORS = 683; </span>
+<span class="lineNum">     51 </span>              :  </span>
+<span class="lineNum">     52 </span>              : // Size of GCR encoded data </span>
+<span class="lineNum">     53 </span>              : const int GCR_SECTOR_SIZE = 1+10+9+1+325+8;			// SYNC Header Gap SYNC Data Gap (should be 5 SYNC bytes each) </span>
+<span class="lineNum">     54 </span>              : const int GCR_TRACK_SIZE = GCR_SECTOR_SIZE * 21;	// Each track in gcr_data has 21 sectors </span>
+<span class="lineNum">     55 </span>              : const int GCR_DISK_SIZE = GCR_TRACK_SIZE * NUM_TRACKS; </span>
+<span class="lineNum">     56 </span>              :  </span>
+<span class="lineNum">     57 </span>              : // Job return codes </span>
+<span class="lineNum">     58 </span>              : const int RET_OK = 1;				// No error </span>
+<span class="lineNum">     59 </span>              : const int RET_NOT_FOUND = 2;		// Block not found </span>
+<span class="lineNum">     60 </span>              : const int RET_NOT_READY = 15;		// Drive not ready </span>
+<span class="lineNum">     61 </span>              :  </span>
+<span class="lineNum">     62 </span>              :  </span>
+<span class="lineNum">     63 </span>              : // Number of sectors of each track </span>
+<span class="lineNum">     64 </span>              : const int num_sectors[36] = { </span>
+<span class="lineNum">     65 </span>              : 	0, </span>
+<span class="lineNum">     66 </span>              : 	21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21, </span>
+<span class="lineNum">     67 </span>              : 	19,19,19,19,19,19,19, </span>
+<span class="lineNum">     68 </span>              : 	18,18,18,18,18,18, </span>
+<span class="lineNum">     69 </span>              : 	17,17,17,17,17 </span>
+<span class="lineNum">     70 </span>              : }; </span>
+<span class="lineNum">     71 </span>              :  </span>
+<span class="lineNum">     72 </span>              : // Sector offset of start of track in .d64 file </span>
+<span class="lineNum">     73 </span>              : const int sector_offset[36] = { </span>
+<span class="lineNum">     74 </span>              : 	0, </span>
+<span class="lineNum">     75 </span>              : 	0,21,42,63,84,105,126,147,168,189,210,231,252,273,294,315,336, </span>
+<span class="lineNum">     76 </span>              : 	357,376,395,414,433,452,471, </span>
+<span class="lineNum">     77 </span>              : 	490,508,526,544,562,580, </span>
+<span class="lineNum">     78 </span>              : 	598,615,632,649,666 </span>
+<span class="lineNum">     79 </span>              : }; </span>
+<span class="lineNum">     80 </span>              :  </span>
+<span class="lineNum">     81 </span>              :  </span>
+<span class="lineNum">     82 </span>              : /* </span>
+<span class="lineNum">     83 </span>              :  *  Constructor: Open .d64 file if processor-level 1541 </span>
+<span class="lineNum">     84 </span>              :  *   emulation is enabled </span>
+<span class="lineNum">     85 </span>              :  */ </span>
+<span class="lineNum">     86 </span>              :  </span>
+<span class="lineNum">     87 </span><span class="linePartCov">    3 / 6     : Job1541::Job1541(uint8 *ram1541) : ram(ram1541) </span>
+<span class="lineNum">     88 </span>              : { </span>
+<span class="lineNum">     89 </span><span class="linePartCov">    1 / 2     : 	the_file = NULL; </span>
+<span class="lineNum">     90 </span>              :  </span>
+<span class="lineNum">     91 </span><span class="linePartCov">    2 / 4     : 	gcr_data = gcr_ptr = gcr_track_start = new uint8[GCR_DISK_SIZE]; </span>
+<span class="lineNum">     92 </span><span class="linePartCov">    2 / 4     : 	gcr_track_end = gcr_track_start + GCR_TRACK_SIZE; </span>
+<span class="lineNum">     93 </span><span class="linePartCov">    1 / 2     : 	current_halftrack = 2; </span>
+<span class="lineNum">     94 </span>              :  </span>
+<span class="lineNum">     95 </span><span class="linePartCov">    1 / 2     : 	disk_changed = true; </span>
+<span class="lineNum">     96 </span>              :  </span>
+<span class="lineNum">     97 </span><span class="linePartCov">    2 / 4     : 	if (ThePrefs.Emul1541Proc) </span>
+<span class="lineNum">     98 </span><span class="lineNoCov">    0 / 4     : 		open_d64_file(ThePrefs.DrivePath[0]); </span>
+<span class="lineNum">     99 </span><span class="linePartCov">    1 / 4     : } </span>
+<span class="lineNum">    100 </span>              :  </span>
+<span class="lineNum">    101 </span>              :  </span>
+<span class="lineNum">    102 </span>              : /* </span>
+<span class="lineNum">    103 </span>              :  *  Destructor: Close .d64 file </span>
+<span class="lineNum">    104 </span>              :  */ </span>
+<span class="lineNum">    105 </span>              :  </span>
+<span class="lineNum">    106 </span><span class="linePartCov">    2 / 4     : Job1541::~Job1541() </span>
+<span class="lineNum">    107 </span>              : { </span>
+<span class="lineNum">    108 </span><span class="linePartCov">    1 / 2     : 	close_d64_file(); </span>
+<span class="lineNum">    109 </span><span class="linePartCov">    2 / 4     : 	delete[] gcr_data; </span>
+<span class="lineNum">    110 </span><span class="linePartCov">    1 / 4     : } </span>
+<span class="lineNum">    111 </span>              :  </span>
+<span class="lineNum">    112 </span>              :  </span>
+<span class="lineNum">    113 </span>              : /* </span>
+<span class="lineNum">    114 </span>              :  *  Preferences may have changed </span>
+<span class="lineNum">    115 </span>              :  */ </span>
+<span class="lineNum">    116 </span>              :  </span>
+<span class="lineNum">    117 </span>              : void Job1541::NewPrefs(Prefs *prefs) </span>
+<span class="lineNum">    118 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    119 </span>              : 	// 1541 emulation turned off? </span>
+<span class="lineNum">    120 </span><span class="lineCov">    1 / 1     : 	if (!prefs-&gt;Emul1541Proc) </span>
+<span class="lineNum">    121 </span><span class="lineCov">    1 / 1     : 		close_d64_file(); </span>
+<span class="lineNum">    122 </span>              :  </span>
+<span class="lineNum">    123 </span>              : 	// 1541 emulation turned on? </span>
+<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 1     : 	else if (!ThePrefs.Emul1541Proc &amp;&amp; prefs-&gt;Emul1541Proc) </span>
+<span class="lineNum">    125 </span><span class="lineNoCov">    0 / 3     : 		open_d64_file(prefs-&gt;DrivePath[0]); </span>
+<span class="lineNum">    126 </span>              :  </span>
+<span class="lineNum">    127 </span>              : 	// .d64 file name changed? </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 	else if (strcmp(ThePrefs.DrivePath[0], prefs-&gt;DrivePath[0])) { </span>
+<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 1     : 		close_d64_file(); </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 		open_d64_file(prefs-&gt;DrivePath[0]); </span>
+<span class="lineNum">    131 </span><span class="lineNoCov">    0 / 1     : 		disk_changed = true; </span>
+<span class="lineNum">    132 </span>              : 	} </span>
+<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 4     : } </span>
+<span class="lineNum">    134 </span>              :  </span>
+<span class="lineNum">    135 </span>              :  </span>
+<span class="lineNum">    136 </span>              : /* </span>
+<span class="lineNum">    137 </span>              :  *  Open .d64 file </span>
+<span class="lineNum">    138 </span>              :  */ </span>
+<span class="lineNum">    139 </span>              :  </span>
+<span class="lineNum">    140 </span>              : void Job1541::open_d64_file(char *filepath) </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    142 </span>              : 	long size; </span>
+<span class="lineNum">    143 </span>              : 	uint8 magic[4]; </span>
+<span class="lineNum">    144 </span>              : 	uint8 bam[256]; </span>
+<span class="lineNum">    145 </span>              :  </span>
+<span class="lineNum">    146 </span>              : 	// Clear GCR buffer </span>
+<span class="lineNum">    147 </span>              : 	memset(gcr_data, 0x55, GCR_DISK_SIZE); </span>
+<span class="lineNum">    148 </span>              :  </span>
+<span class="lineNum">    149 </span>              : 	// Try opening the file for reading/writing first, then for reading only </span>
+<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 1     : 	write_protected = false; </span>
+<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 2     : 	the_file = fopen(filepath, &quot;rb+&quot;); </span>
+<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 2     : 	if (the_file == NULL) { </span>
+<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 1     : 		write_protected = true; </span>
+<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 2     : 		the_file = fopen(filepath, &quot;rb&quot;); </span>
+<span class="lineNum">    155 </span>              : 	} </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 2     : 	if (the_file != NULL) { </span>
+<span class="lineNum">    157 </span>              :  </span>
+<span class="lineNum">    158 </span>              : 		// Check length </span>
+<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : 		fseek(the_file, 0, SEEK_END); </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : 		if ((size = ftell(the_file)) &lt; NUM_SECTORS * 256) { </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : 			fclose(the_file); </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 			the_file = NULL; </span>
+<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
+<span class="lineNum">    164 </span>              : 		} </span>
+<span class="lineNum">    165 </span>              :  </span>
+<span class="lineNum">    166 </span>              : 		// x64 image? </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     : 		fseek(the_file, 0, SEEK_SET); </span>
+<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 		if (fread(&amp;magic, 4, 1, the_file) != 1) </span>
+<span class="lineNum">    169 </span>              : 			warning(&quot;Can't read all bytes\n&quot;); </span>
+<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 3     : 		if (magic[0] == 0x43 &amp;&amp; magic[1] == 0x15 &amp;&amp; magic[2] == 0x41 &amp;&amp; magic[3] == 0x64) </span>
+<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 1     : 			image_header = 64; </span>
+<span class="lineNum">    172 </span>              : 		else </span>
+<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 			image_header = 0; </span>
+<span class="lineNum">    174 </span>              :  </span>
+<span class="lineNum">    175 </span>              : 		// Preset error info (all sectors no error) </span>
+<span class="lineNum">    176 </span>              : 		memset(error_info, 1, NUM_SECTORS); </span>
+<span class="lineNum">    177 </span>              :  </span>
+<span class="lineNum">    178 </span>              : 		// Load sector error info from .d64 file, if present </span>
+<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 3     : 		if (!image_header &amp;&amp; size == NUM_SECTORS * 257) { </span>
+<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 1     : 			fseek(the_file, NUM_SECTORS * 256, SEEK_SET); </span>
+<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 1     : 			if (fread(&amp;error_info, NUM_SECTORS, 1, the_file) != 1) </span>
+<span class="lineNum">    182 </span>              : 				warning(&quot;Can't read all bytes\n&quot;); </span>
+<span class="lineNum">    183 </span>              : 		}; </span>
+<span class="lineNum">    184 </span>              :  </span>
+<span class="lineNum">    185 </span>              : 		// Read BAM and get ID </span>
+<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 1     : 		read_sector(18, 0, bam); </span>
+<span class="lineNum">    187 </span><span class="lineNoCov">    0 / 1     : 		id1 = bam[162]; </span>
+<span class="lineNum">    188 </span><span class="lineNoCov">    0 / 1     : 		id2 = bam[163]; </span>
+<span class="lineNum">    189 </span>              :  </span>
+<span class="lineNum">    190 </span>              : 		// Create GCR encoded disk data from image </span>
+<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 1     : 		disk2gcr(); </span>
+<span class="lineNum">    192 </span>              : 	} </span>
+<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    194 </span>              :  </span>
+<span class="lineNum">    195 </span>              :  </span>
+<span class="lineNum">    196 </span>              : /* </span>
+<span class="lineNum">    197 </span>              :  *  Close .d64 file </span>
+<span class="lineNum">    198 </span>              :  */ </span>
+<span class="lineNum">    199 </span>              :  </span>
+<span class="lineNum">    200 </span>              : void Job1541::close_d64_file(void) </span>
+<span class="lineNum">    201 </span><span class="lineCov">    2 / 2     : { </span>
+<span class="lineNum">    202 </span><span class="lineCov">    1 / 1     : 	if (the_file != NULL) { </span>
+<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 1     : 		fclose(the_file); </span>
+<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 1     : 		the_file = NULL; </span>
+<span class="lineNum">    205 </span>              : 	} </span>
+<span class="lineNum">    206 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    207 </span>              :  </span>
+<span class="lineNum">    208 </span>              :  </span>
+<span class="lineNum">    209 </span>              : /* </span>
+<span class="lineNum">    210 </span>              :  *  Write sector to disk (1541 ROM patch) </span>
+<span class="lineNum">    211 </span>              :  */ </span>
+<span class="lineNum">    212 </span>              :  </span>
+<span class="lineNum">    213 </span>              : void Job1541::WriteSector(void) </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 3     : 	int track = ram[0x18]; </span>
+<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 2     : 	int sector = ram[0x19]; </span>
+<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 2     : 	uint16 buf = ram[0x30] | (ram[0x31] &lt;&lt; 8); </span>
+<span class="lineNum">    218 </span>              :  </span>
+<span class="lineNum">    219 </span><span class="lineNoCov">    0 / 1     : 	if (buf &lt;= 0x0700) </span>
+<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 3     : 		if (write_sector(track, sector, ram + buf)) </span>
+<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 1     : 			sector2gcr(track, sector); </span>
+<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    223 </span>              :  </span>
+<span class="lineNum">    224 </span>              :  </span>
+<span class="lineNum">    225 </span>              : /* </span>
+<span class="lineNum">    226 </span>              :  *  Format one track (1541 ROM patch) </span>
+<span class="lineNum">    227 </span>              :  */ </span>
+<span class="lineNum">    228 </span>              :  </span>
+<span class="lineNum">    229 </span>              : void Job1541::FormatTrack(void) </span>
+<span class="lineNum">    230 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    231 </span><span class="lineNoCov">    0 / 2     : 	int track = ram[0x51]; </span>
+<span class="lineNum">    232 </span>              :  </span>
+<span class="lineNum">    233 </span>              : 	// Get new ID </span>
+<span class="lineNum">    234 </span>              : 	uint8 bufnum = ram[0x3d]; </span>
+<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 2     : 	id1 = ram[0x12 + bufnum]; </span>
+<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 2     : 	id2 = ram[0x13 + bufnum]; </span>
+<span class="lineNum">    237 </span>              :  </span>
+<span class="lineNum">    238 </span>              : 	// Create empty block </span>
+<span class="lineNum">    239 </span>              : 	uint8 buf[256]; </span>
+<span class="lineNum">    240 </span>              : 	memset(buf, 1, 256); </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 	buf[0] = 0x4b; </span>
+<span class="lineNum">    242 </span>              :  </span>
+<span class="lineNum">    243 </span>              : 	// Write block to all sectors on track </span>
+<span class="lineNum">    244 </span><span class="lineNoCov">    0 / 4     : 	for(int sector=0; sector&lt;num_sectors[track]; sector++) { </span>
+<span class="lineNum">    245 </span><span class="lineNoCov">    0 / 1     : 		write_sector(track, sector, buf); </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 2     : 		sector2gcr(track, sector); </span>
+<span class="lineNum">    247 </span>              : 	} </span>
+<span class="lineNum">    248 </span>              :  </span>
+<span class="lineNum">    249 </span>              : 	// Clear error info (all sectors no error) </span>
+<span class="lineNum">    250 </span><span class="lineNoCov">    0 / 1     : 	if (track == 35) </span>
+<span class="lineNum">    251 </span>              : 		memset(error_info, 1, NUM_SECTORS); </span>
+<span class="lineNum">    252 </span>              : 		// Write error_info to disk? </span>
+<span class="lineNum">    253 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    254 </span>              :  </span>
+<span class="lineNum">    255 </span>              :  </span>
+<span class="lineNum">    256 </span>              : /* </span>
+<span class="lineNum">    257 </span>              :  *  Read sector (256 bytes) </span>
+<span class="lineNum">    258 </span>              :  *  true: success, false: error </span>
+<span class="lineNum">    259 </span>              :  */ </span>
+<span class="lineNum">    260 </span>              :  </span>
+<span class="lineNum">    261 </span>              : bool Job1541::read_sector(int track, int sector, uint8 *buffer) </span>
+<span class="lineNum">    262 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    263 </span>              : 	int offset; </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span>              : 	// Convert track/sector to byte offset in file </span>
+<span class="lineNum">    266 </span><span class="lineNoCov">    0 / 1     : 	if ((offset = offset_from_ts(track, sector)) &lt; 0) </span>
+<span class="lineNum">    267 </span>              : 		return false; </span>
+<span class="lineNum">    268 </span>              :  </span>
+<span class="lineNum">    269 </span>              : #ifdef AMIGA </span>
+<span class="lineNum">    270 </span>              : 	if (offset != ftell(the_file)) </span>
+<span class="lineNum">    271 </span>              : 		fseek(the_file, offset + image_header, SEEK_SET); </span>
+<span class="lineNum">    272 </span>              : #else </span>
+<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 	fseek(the_file, offset + image_header, SEEK_SET); </span>
+<span class="lineNum">    274 </span>              : #endif </span>
+<span class="lineNum">    275 </span><span class="lineNoCov">    0 / 1     : 	if (fread(buffer, 256, 1, the_file) != 1) </span>
+<span class="lineNum">    276 </span>              : 		warning(&quot;Can't read all bytes\n&quot;); </span>
+<span class="lineNum">    277 </span>              : 	return true; </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    279 </span>              :  </span>
+<span class="lineNum">    280 </span>              :  </span>
+<span class="lineNum">    281 </span>              : /* </span>
+<span class="lineNum">    282 </span>              :  *  Write sector (256 bytes) !! -&gt; GCR </span>
+<span class="lineNum">    283 </span>              :  *  true: success, false: error </span>
+<span class="lineNum">    284 </span>              :  */ </span>
+<span class="lineNum">    285 </span>              :  </span>
+<span class="lineNum">    286 </span>              : bool Job1541::write_sector(int track, int sector, uint8 *buffer) </span>
+<span class="lineNum">    287 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    288 </span>              : 	int offset; </span>
+<span class="lineNum">    289 </span>              :  </span>
+<span class="lineNum">    290 </span>              : 	// Convert track/sector to byte offset in file </span>
+<span class="lineNum">    291 </span><span class="lineNoCov">    0 / 1     : 	if ((offset = offset_from_ts(track, sector)) &lt; 0) </span>
+<span class="lineNum">    292 </span>              : 		return false; </span>
+<span class="lineNum">    293 </span>              :  </span>
+<span class="lineNum">    294 </span>              : #ifdef AMIGA </span>
+<span class="lineNum">    295 </span>              : 	if (offset != ftell(the_file)) </span>
+<span class="lineNum">    296 </span>              : 		fseek(the_file, offset + image_header, SEEK_SET); </span>
+<span class="lineNum">    297 </span>              : #else </span>
+<span class="lineNum">    298 </span><span class="lineNoCov">    0 / 1     : 	fseek(the_file, offset + image_header, SEEK_SET); </span>
+<span class="lineNum">    299 </span>              : #endif </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 2     : 	fwrite(buffer, 256, 1, the_file); </span>
+<span class="lineNum">    301 </span><span class="lineNoCov">    0 / 1     : 	return true; </span>
+<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 4     : } </span>
+<span class="lineNum">    303 </span>              :  </span>
+<span class="lineNum">    304 </span>              :  </span>
+<span class="lineNum">    305 </span>              : /* </span>
+<span class="lineNum">    306 </span>              :  *  Convert track/sector to offset </span>
+<span class="lineNum">    307 </span>              :  */ </span>
+<span class="lineNum">    308 </span>              :  </span>
+<span class="lineNum">    309 </span>              : int Job1541::secnum_from_ts(int track, int sector) </span>
+<span class="lineNum">    310 </span><span class="lineNoCov">    0 / 3     : { </span>
+<span class="lineNum">    311 </span>              : 	return sector_offset[track] + sector; </span>
+<span class="lineNum">    312 </span><span class="lineNoCov">    0 / 2     : } </span>
+<span class="lineNum">    313 </span>              :  </span>
+<span class="lineNum">    314 </span>              : int Job1541::offset_from_ts(int track, int sector) </span>
+<span class="lineNum">    315 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    316 </span><span class="lineNoCov">    0 / 6     : 	if ((track &lt; 1) || (track &gt; NUM_TRACKS) || </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 3     : 		(sector &lt; 0) || (sector &gt;= num_sectors[track])) </span>
+<span class="lineNum">    318 </span>              : 		return -1; </span>
+<span class="lineNum">    319 </span>              :  </span>
+<span class="lineNum">    320 </span><span class="lineNoCov">    0 / 5     : 	return (sector_offset[track] + sector) &lt;&lt; 8; </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span>              :  </span>
+<span class="lineNum">    324 </span>              : /* </span>
+<span class="lineNum">    325 </span>              :  *  Convert 4 bytes to 5 GCR encoded bytes </span>
+<span class="lineNum">    326 </span>              :  */ </span>
+<span class="lineNum">    327 </span>              :  </span>
+<span class="lineNum">    328 </span>              : const uint16 gcr_table[16] = { </span>
+<span class="lineNum">    329 </span>              : 	0x0a, 0x0b, 0x12, 0x13, 0x0e, 0x0f, 0x16, 0x17, </span>
+<span class="lineNum">    330 </span>              : 	0x09, 0x19, 0x1a, 0x1b, 0x0d, 0x1d, 0x1e, 0x15 </span>
+<span class="lineNum">    331 </span>              : }; </span>
+<span class="lineNum">    332 </span>              :  </span>
+<span class="lineNum">    333 </span>              : void Job1541::gcr_conv4(uint8 *from, uint8 *to) </span>
+<span class="lineNum">    334 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    335 </span>              : 	uint16 g; </span>
+<span class="lineNum">    336 </span>              :  </span>
+<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 1     : 	g = (gcr_table[*from &gt;&gt; 4] &lt;&lt; 5) | gcr_table[*from &amp; 15]; </span>
+<span class="lineNum">    338 </span><span class="lineNoCov">    0 / 2     : 	*to++ = g &gt;&gt; 2; </span>
+<span class="lineNum">    339 </span><span class="lineNoCov">    0 / 2     : 	*to = (g &lt;&lt; 6) &amp; 0xc0; </span>
+<span class="lineNum">    340 </span>              : 	from++; </span>
+<span class="lineNum">    341 </span>              :  </span>
+<span class="lineNum">    342 </span><span class="lineNoCov">    0 / 1     : 	g = (gcr_table[*from &gt;&gt; 4] &lt;&lt; 5) | gcr_table[*from &amp; 15]; </span>
+<span class="lineNum">    343 </span><span class="lineNoCov">    0 / 2     : 	*to++ |= (g &gt;&gt; 4) &amp; 0x3f; </span>
+<span class="lineNum">    344 </span><span class="lineNoCov">    0 / 2     : 	*to = (g &lt;&lt; 4) &amp; 0xf0; </span>
+<span class="lineNum">    345 </span>              : 	from++; </span>
+<span class="lineNum">    346 </span>              :  </span>
+<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 1     : 	g = (gcr_table[*from &gt;&gt; 4] &lt;&lt; 5) | gcr_table[*from &amp; 15]; </span>
+<span class="lineNum">    348 </span><span class="lineNoCov">    0 / 1     : 	*to++ |= (g &gt;&gt; 6) &amp; 0x0f; </span>
+<span class="lineNum">    349 </span><span class="lineNoCov">    0 / 1     : 	*to = (g &lt;&lt; 2) &amp; 0xfc; </span>
+<span class="lineNum">    350 </span>              : 	from++; </span>
+<span class="lineNum">    351 </span>              :  </span>
+<span class="lineNum">    352 </span><span class="lineNoCov">    0 / 1     : 	g = (gcr_table[*from &gt;&gt; 4] &lt;&lt; 5) | gcr_table[*from &amp; 15]; </span>
+<span class="lineNum">    353 </span><span class="lineNoCov">    0 / 1     : 	*to++ |= (g &gt;&gt; 8) &amp; 0x03; </span>
+<span class="lineNum">    354 </span><span class="lineNoCov">    0 / 1     : 	*to = g; </span>
+<span class="lineNum">    355 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    356 </span>              :  </span>
+<span class="lineNum">    357 </span>              :  </span>
+<span class="lineNum">    358 </span>              : /* </span>
+<span class="lineNum">    359 </span>              :  *  Create GCR encoded disk data from image </span>
+<span class="lineNum">    360 </span>              :  */ </span>
+<span class="lineNum">    361 </span>              :  </span>
+<span class="lineNum">    362 </span><span class="lineNoCov">    0 / 1     : void Job1541::sector2gcr(int track, int sector) </span>
+<span class="lineNum">    363 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    364 </span>              : 	uint8 block[256]; </span>
+<span class="lineNum">    365 </span>              : 	uint8 buf[4]; </span>
+<span class="lineNum">    366 </span><span class="lineNoCov">    0 / 1     : 	uint8 *p = gcr_data + (track-1) * GCR_TRACK_SIZE + sector * GCR_SECTOR_SIZE; </span>
+<span class="lineNum">    367 </span>              :  </span>
+<span class="lineNum">    368 </span><span class="lineNoCov">    0 / 1     : 	read_sector(track, sector, block); </span>
+<span class="lineNum">    369 </span>              :  </span>
+<span class="lineNum">    370 </span>              : 	// Create GCR header </span>
+<span class="lineNum">    371 </span><span class="lineNoCov">    0 / 1     : 	*p++ = 0xff;							// SYNC </span>
+<span class="lineNum">    372 </span><span class="lineNoCov">    0 / 1     : 	buf[0] = 0x08;							// Header mark </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 3     : 	buf[1] = sector ^ track ^ id2 ^ id1;	// Checksum </span>
+<span class="lineNum">    374 </span><span class="lineNoCov">    0 / 1     : 	buf[2] = sector; </span>
+<span class="lineNum">    375 </span><span class="lineNoCov">    0 / 1     : 	buf[3] = track; </span>
+<span class="lineNum">    376 </span><span class="lineNoCov">    0 / 2     : 	gcr_conv4(buf, p); </span>
+<span class="lineNum">    377 </span><span class="lineNoCov">    0 / 1     : 	buf[0] = id2; </span>
+<span class="lineNum">    378 </span><span class="lineNoCov">    0 / 2     : 	buf[1] = id1; </span>
+<span class="lineNum">    379 </span><span class="lineNoCov">    0 / 1     : 	buf[2] = 0x0f; </span>
+<span class="lineNum">    380 </span><span class="lineNoCov">    0 / 1     : 	buf[3] = 0x0f; </span>
+<span class="lineNum">    381 </span><span class="lineNoCov">    0 / 2     : 	gcr_conv4(buf, p+5); </span>
+<span class="lineNum">    382 </span><span class="lineNoCov">    0 / 1     : 	p += 10; </span>
+<span class="lineNum">    383 </span>              : 	memset(p, 0x55, 9);						// Gap </span>
+<span class="lineNum">    384 </span>              : 	p += 9; </span>
+<span class="lineNum">    385 </span>              :  </span>
+<span class="lineNum">    386 </span>              : 	// Create GCR data </span>
+<span class="lineNum">    387 </span>              : 	uint8 sum; </span>
+<span class="lineNum">    388 </span><span class="lineNoCov">    0 / 2     : 	*p++ = 0xff;							// SYNC </span>
+<span class="lineNum">    389 </span><span class="lineNoCov">    0 / 1     : 	buf[0] = 0x07;							// Data mark </span>
+<span class="lineNum">    390 </span><span class="lineNoCov">    0 / 2     : 	sum = buf[1] = block[0]; </span>
+<span class="lineNum">    391 </span><span class="lineNoCov">    0 / 3     : 	sum ^= buf[2] = block[1]; </span>
+<span class="lineNum">    392 </span><span class="lineNoCov">    0 / 2     : 	sum ^= buf[3] = block[2]; </span>
+<span class="lineNum">    393 </span><span class="lineNoCov">    0 / 3     : 	gcr_conv4(buf, p); </span>
+<span class="lineNum">    394 </span><span class="lineNoCov">    0 / 3     : 	p += 5; </span>
+<span class="lineNum">    395 </span><span class="lineNoCov">    0 / 2     : 	for (int i=3; i&lt;255; i+=4) { </span>
+<span class="lineNum">    396 </span><span class="lineNoCov">    0 / 3     : 		sum ^= buf[0] = block[i]; </span>
+<span class="lineNum">    397 </span><span class="lineNoCov">    0 / 3     : 		sum ^= buf[1] = block[i+1]; </span>
+<span class="lineNum">    398 </span><span class="lineNoCov">    0 / 3     : 		sum ^= buf[2] = block[i+2]; </span>
+<span class="lineNum">    399 </span><span class="lineNoCov">    0 / 3     : 		sum ^= buf[3] = block[i+3]; </span>
+<span class="lineNum">    400 </span><span class="lineNoCov">    0 / 3     : 		gcr_conv4(buf, p); </span>
+<span class="lineNum">    401 </span><span class="lineNoCov">    0 / 2     : 		p += 5; </span>
+<span class="lineNum">    402 </span>              : 	} </span>
+<span class="lineNum">    403 </span><span class="lineNoCov">    0 / 2     : 	sum ^= buf[0] = block[255]; </span>
+<span class="lineNum">    404 </span><span class="lineNoCov">    0 / 2     : 	buf[1] = sum;							// Checksum </span>
+<span class="lineNum">    405 </span><span class="lineNoCov">    0 / 1     : 	buf[2] = 0; </span>
+<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 	buf[3] = 0; </span>
+<span class="lineNum">    407 </span><span class="lineNoCov">    0 / 4     : 	gcr_conv4(buf, p); </span>
+<span class="lineNum">    408 </span>              : 	p += 5; </span>
+<span class="lineNum">    409 </span>              : 	memset(p, 0x55, 8);						// Gap </span>
+<span class="lineNum">    410 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    411 </span>              :  </span>
+<span class="lineNum">    412 </span>              : void Job1541::disk2gcr(void) </span>
+<span class="lineNum">    413 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    414 </span>              : 	// Convert all tracks and sectors </span>
+<span class="lineNum">    415 </span><span class="lineNoCov">    0 / 1     : 	for (int track=1; track&lt;=NUM_TRACKS; track++) </span>
+<span class="lineNum">    416 </span><span class="lineNoCov">    0 / 4     : 		for(int sector=0; sector&lt;num_sectors[track]; sector++) </span>
+<span class="lineNum">    417 </span><span class="lineNoCov">    0 / 2     : 			sector2gcr(track, sector); </span>
+<span class="lineNum">    418 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    419 </span>              :  </span>
+<span class="lineNum">    420 </span>              :  </span>
+<span class="lineNum">    421 </span>              : /* </span>
+<span class="lineNum">    422 </span>              :  *  Move R/W head out (lower track numbers) </span>
+<span class="lineNum">    423 </span>              :  */ </span>
+<span class="lineNum">    424 </span>              :  </span>
+<span class="lineNum">    425 </span>              : void Job1541::MoveHeadOut(void) </span>
+<span class="lineNum">    426 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    427 </span><span class="lineNoCov">    0 / 1     : 	if (current_halftrack == 2) </span>
+<span class="lineNum">    428 </span>              : 		return; </span>
+<span class="lineNum">    429 </span><span class="lineNoCov">    0 / 1     : 	current_halftrack--; </span>
+<span class="lineNum">    430 </span>              : #if !defined(__riscos__) &amp;&amp; !defined(GEKKO) </span>
+<span class="lineNum">    431 </span>              : 	printf(&quot;Head move %d\n&quot;, current_halftrack); </span>
+<span class="lineNum">    432 </span>              : #endif </span>
+<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 2     : 	gcr_ptr = gcr_track_start = gcr_data + ((current_halftrack &gt;&gt; 1) - 1) * GCR_TRACK_SIZE; </span>
+<span class="lineNum">    434 </span><span class="lineNoCov">    0 / 2     : 	gcr_track_end = gcr_track_start + num_sectors[current_halftrack &gt;&gt; 1] * GCR_SECTOR_SIZE; </span>
+<span class="lineNum">    435 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    436 </span>              :  </span>
+<span class="lineNum">    437 </span>              :  </span>
+<span class="lineNum">    438 </span>              : /* </span>
+<span class="lineNum">    439 </span>              :  *  Move R/W head in (higher track numbers) </span>
+<span class="lineNum">    440 </span>              :  */ </span>
+<span class="lineNum">    441 </span>              :  </span>
+<span class="lineNum">    442 </span>              : void Job1541::MoveHeadIn(void) </span>
+<span class="lineNum">    443 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    444 </span><span class="lineNoCov">    0 / 1     : 	if (current_halftrack == NUM_TRACKS*2) </span>
+<span class="lineNum">    445 </span>              : 		return; </span>
+<span class="lineNum">    446 </span><span class="lineNoCov">    0 / 1     : 	current_halftrack++; </span>
+<span class="lineNum">    447 </span>              : #if !defined(__riscos__) &amp;&amp; !defined(GEKKO) </span>
+<span class="lineNum">    448 </span>              : 	printf(&quot;Head move %d\n&quot;, current_halftrack); </span>
+<span class="lineNum">    449 </span>              : #endif </span>
+<span class="lineNum">    450 </span><span class="lineNoCov">    0 / 2     : 	gcr_ptr = gcr_track_start = gcr_data + ((current_halftrack &gt;&gt; 1) - 1) * GCR_TRACK_SIZE; </span>
+<span class="lineNum">    451 </span><span class="lineNoCov">    0 / 2     : 	gcr_track_end = gcr_track_start + num_sectors[current_halftrack &gt;&gt; 1] * GCR_SECTOR_SIZE; </span>
+<span class="lineNum">    452 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    453 </span>              :  </span>
+<span class="lineNum">    454 </span>              :  </span>
+<span class="lineNum">    455 </span>              : /* </span>
+<span class="lineNum">    456 </span>              :  *  Get state </span>
+<span class="lineNum">    457 </span>              :  */ </span>
+<span class="lineNum">    458 </span>              :  </span>
+<span class="lineNum">    459 </span>              : void Job1541::GetState(Job1541State *state) </span>
+<span class="lineNum">    460 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    461 </span><span class="lineNoCov">    0 / 1     : 	state-&gt;current_halftrack = current_halftrack; </span>
+<span class="lineNum">    462 </span><span class="lineNoCov">    0 / 1     : 	state-&gt;gcr_ptr = gcr_ptr - gcr_data; </span>
+<span class="lineNum">    463 </span><span class="lineNoCov">    0 / 1     : 	state-&gt;write_protected = write_protected; </span>
+<span class="lineNum">    464 </span><span class="lineNoCov">    0 / 1     : 	state-&gt;disk_changed = disk_changed; </span>
+<span class="lineNum">    465 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    466 </span>              :  </span>
+<span class="lineNum">    467 </span>              :  </span>
+<span class="lineNum">    468 </span>              : /* </span>
+<span class="lineNum">    469 </span>              :  *  Set state </span>
+<span class="lineNum">    470 </span>              :  */ </span>
+<span class="lineNum">    471 </span>              :  </span>
+<span class="lineNum">    472 </span>              : void Job1541::SetState(Job1541State *state) </span>
+<span class="lineNum">    473 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    474 </span><span class="lineNoCov">    0 / 2     : 	current_halftrack = state-&gt;current_halftrack; </span>
+<span class="lineNum">    475 </span><span class="lineNoCov">    0 / 2     : 	gcr_ptr = gcr_data + state-&gt;gcr_ptr; </span>
+<span class="lineNum">    476 </span><span class="lineNoCov">    0 / 3     : 	gcr_track_start = gcr_data + ((current_halftrack &gt;&gt; 1) - 1) * GCR_TRACK_SIZE; </span>
+<span class="lineNum">    477 </span><span class="lineNoCov">    0 / 2     : 	gcr_track_end = gcr_track_start + num_sectors[current_halftrack &gt;&gt; 1] * GCR_SECTOR_SIZE; </span>
+<span class="lineNum">    478 </span><span class="lineNoCov">    0 / 1     : 	write_protected = state-&gt;write_protected; </span>
+<span class="lineNum">    479 </span><span class="lineNoCov">    0 / 1     : 	disk_changed = state-&gt;disk_changed; </span>
+<span class="lineNum">    480 </span><span class="lineNoCov">    0 / 1     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

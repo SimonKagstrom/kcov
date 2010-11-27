@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./frodo</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  *  C64.h - Put the pieces together </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">      5 </span>              :  * </span>
+<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
+<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">     10 </span>              :  * </span>
+<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">     15 </span>              :  * </span>
+<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">     19 </span>              :  */ </span>
+<span class="lineNum">     20 </span>              : #ifndef _C64_H </span>
+<span class="lineNum">     21 </span>              : #define _C64_H </span>
+<span class="lineNum">     22 </span>              :  </span>
+<span class="lineNum">     23 </span>              : #include &quot;Network.h&quot; </span>
+<span class="lineNum">     24 </span>              : #include &quot;Prefs.h&quot; </span>
+<span class="lineNum">     25 </span>              :  </span>
+<span class="lineNum">     26 </span>              : /* Network connection type */ </span>
+<span class="lineNum">     27 </span>              : enum </span>
+<span class="lineNum">     28 </span>              : { </span>
+<span class="lineNum">     29 </span>              : 	NONE, </span>
+<span class="lineNum">     30 </span>              : 	CONNECT, </span>
+<span class="lineNum">     31 </span>              : 	MASTER, </span>
+<span class="lineNum">     32 </span>              : 	CLIENT </span>
+<span class="lineNum">     33 </span>              : }; </span>
+<span class="lineNum">     34 </span>              :  </span>
+<span class="lineNum">     35 </span>              : // Sizes of memory areas </span>
+<span class="lineNum">     36 </span>              : const size_t C64_RAM_SIZE = 0x10000; </span>
+<span class="lineNum">     37 </span>              : const size_t COLOR_RAM_SIZE = 0x400; </span>
+<span class="lineNum">     38 </span>              : const size_t BASIC_ROM_SIZE = 0x2000; </span>
+<span class="lineNum">     39 </span>              : const size_t KERNAL_ROM_SIZE = 0x2000; </span>
+<span class="lineNum">     40 </span>              : const size_t CHAR_ROM_SIZE = 0x1000; </span>
+<span class="lineNum">     41 </span>              : const size_t DRIVE_RAM_SIZE = 0x800; </span>
+<span class="lineNum">     42 </span>              : const size_t DRIVE_ROM_SIZE = 0x4000; </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              :  </span>
+<span class="lineNum">     45 </span>              : // false: Frodo, true: FrodoSC </span>
+<span class="lineNum">     46 </span>              : extern bool IsFrodoSC; </span>
+<span class="lineNum">     47 </span>              :  </span>
+<span class="lineNum">     48 </span>              : class Prefs; </span>
+<span class="lineNum">     49 </span>              : class C64Display; </span>
+<span class="lineNum">     50 </span>              : class MOS6510; </span>
+<span class="lineNum">     51 </span>              : class MOS6569; </span>
+<span class="lineNum">     52 </span>              : class MOS6581; </span>
+<span class="lineNum">     53 </span>              : class MOS6526_1; </span>
+<span class="lineNum">     54 </span>              : class MOS6526_2; </span>
+<span class="lineNum">     55 </span>              : class IEC; </span>
+<span class="lineNum">     56 </span>              : class REU; </span>
+<span class="lineNum">     57 </span>              : class MOS6502_1541; </span>
+<span class="lineNum">     58 </span>              : class Job1541; </span>
+<span class="lineNum">     59 </span>              : class CmdPipe; </span>
+<span class="lineNum">     60 </span>              :  </span>
+<span class="lineNum">     61 </span>              : class C64 { </span>
+<span class="lineNum">     62 </span>              : public: </span>
+<span class="lineNum">     63 </span>              : 	C64(); </span>
+<span class="lineNum">     64 </span>              : 	~C64(); </span>
+<span class="lineNum">     65 </span>              :  </span>
+<span class="lineNum">     66 </span>              : 	void Run(void); </span>
+<span class="lineNum">     67 </span>              : 	void Quit(void); </span>
+<span class="lineNum">     68 </span>              : 	void Pause(void); </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span>              : 	void Resume(void); </span>
+<span class="lineNum">     71 </span>              :  </span>
+<span class="lineNum">     72 </span>              : 	void Reset(void); </span>
+<span class="lineNum">     73 </span>              : 	void NMI(void); </span>
+<span class="lineNum">     74 </span>              : 	void VBlank(bool draw_frame); </span>
+<span class="lineNum">     75 </span>              : 	void NewPrefs(Prefs *prefs); </span>
+<span class="lineNum">     76 </span>              : 	void PatchKernal(bool fast_reset, bool emul_1541_proc); </span>
+<span class="lineNum">     77 </span>              : 	void SaveRAM(char *filename); </span>
+<span class="lineNum">     78 </span>              : 	void SaveSnapshot(const char *filename); </span>
+<span class="lineNum">     79 </span>              : 	bool LoadSnapshot(const char *filename); </span>
+<span class="lineNum">     80 </span>              : 	int SaveCPUState(FILE *f); </span>
+<span class="lineNum">     81 </span>              : 	int Save1541State(FILE *f); </span>
+<span class="lineNum">     82 </span>              : 	bool Save1541JobState(FILE *f); </span>
+<span class="lineNum">     83 </span>              : 	bool SaveVICState(FILE *f); </span>
+<span class="lineNum">     84 </span>              : 	bool SaveSIDState(FILE *f); </span>
+<span class="lineNum">     85 </span>              : 	bool SaveCIAState(FILE *f); </span>
+<span class="lineNum">     86 </span>              : 	bool LoadCPUState(FILE *f); </span>
+<span class="lineNum">     87 </span>              : 	bool Load1541State(FILE *f); </span>
+<span class="lineNum">     88 </span>              : 	bool Load1541JobState(FILE *f); </span>
+<span class="lineNum">     89 </span>              : 	bool LoadVICState(FILE *f); </span>
+<span class="lineNum">     90 </span>              : 	bool LoadSIDState(FILE *f); </span>
+<span class="lineNum">     91 </span>              : 	bool LoadCIAState(FILE *f); </span>
+<span class="lineNum">     92 </span>              :  </span>
+<span class="lineNum">     93 </span>              : 	uint8 *RAM, *Basic, *Kernal, </span>
+<span class="lineNum">     94 </span>              : 		  *Char, *Color;		// C64 </span>
+<span class="lineNum">     95 </span>              : 	uint8 *RAM1541, *ROM1541;	// 1541 </span>
+<span class="lineNum">     96 </span>              :  </span>
+<span class="lineNum">     97 </span>              : 	C64Display *TheDisplay; </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span>              : 	MOS6510 *TheCPU;			// C64 </span>
+<span class="lineNum">    100 </span>              : 	MOS6569 *TheVIC; </span>
+<span class="lineNum">    101 </span>              : 	MOS6581 *TheSID; </span>
+<span class="lineNum">    102 </span>              : 	MOS6526_1 *TheCIA1; </span>
+<span class="lineNum">    103 </span>              : 	MOS6526_2 *TheCIA2; </span>
+<span class="lineNum">    104 </span>              : 	IEC *TheIEC; </span>
+<span class="lineNum">    105 </span>              : 	REU *TheREU; </span>
+<span class="lineNum">    106 </span>              :  </span>
+<span class="lineNum">    107 </span>              : 	MOS6502_1541 *TheCPU1541;	// 1541 </span>
+<span class="lineNum">    108 </span>              : 	Job1541 *TheJob1541; </span>
+<span class="lineNum">    109 </span>              :  </span>
+<span class="lineNum">    110 </span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">    111 </span>              : 	uint32 CycleCounter; </span>
+<span class="lineNum">    112 </span>              : #endif </span>
+<span class="lineNum">    113 </span>              : 	bool IsPaused(); </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span>              : 	void quit() </span>
+<span class="lineNum">    116 </span>              : 	{ </span>
+<span class="lineNum">    117 </span><span class="lineCov">    1 / 1     : 		this-&gt;quit_thyself = true; </span>
+<span class="lineNum">    118 </span>              : 	} </span>
+<span class="lineNum">    119 </span>              : private: </span>
+<span class="lineNum">    120 </span>              : 	void c64_ctor1(void); </span>
+<span class="lineNum">    121 </span>              : 	void c64_ctor2(void); </span>
+<span class="lineNum">    122 </span>              : 	void c64_dtor(void); </span>
+<span class="lineNum">    123 </span>              : 	void open_joystick(int port); </span>
+<span class="lineNum">    124 </span>              : 	void close_joystick(int port); </span>
+<span class="lineNum">    125 </span>              : 	uint8 poll_joystick(int port); </span>
+<span class="lineNum">    126 </span>              : 	uint8 poll_joystick_axes(int port, bool *has_event); </span>
+<span class="lineNum">    127 </span>              : 	uint8 poll_joystick_hats(int port, bool *has_event); </span>
+<span class="lineNum">    128 </span>              : 	uint8 poll_joystick_buttons(int port, uint8 *table, bool *has_event); </span>
+<span class="lineNum">    129 </span>              : 	void thread_func(void); </span>
+<span class="lineNum">    130 </span>              :  </span>
+<span class="lineNum">    131 </span>              : 	bool thread_running;	// Emulation thread is running </span>
+<span class="lineNum">    132 </span>              : 	bool quit_thyself;		// Emulation thread shall quit </span>
+<span class="lineNum">    133 </span>              : 	bool have_a_break;		// Emulation thread shall pause </span>
+<span class="lineNum">    134 </span>              :  </span>
+<span class="lineNum">    135 </span>              : 	int joy_minx[2], joy_maxx[2], joy_miny[2], joy_maxy[2]; // For dynamic joystick calibration </span>
+<span class="lineNum">    136 </span>              : 	uint8 joykey;			// Joystick keyboard emulation mask value </span>
+<span class="lineNum">    137 </span>              :  </span>
+<span class="lineNum">    138 </span>              : 	uint8 orig_kernal_1d84,	// Original contents of kernal locations $1d84 and $1d85 </span>
+<span class="lineNum">    139 </span>              : 		  orig_kernal_1d85;	// (for undoing the Fast Reset patch) </span>
+<span class="lineNum">    140 </span>              :  </span>
+<span class="lineNum">    141 </span>              : public: </span>
+<span class="lineNum">    142 </span>              : 	char server_hostname[255]; </span>
+<span class="lineNum">    143 </span>              : 	int server_port; </span>
+<span class="lineNum">    144 </span>              : 	int network_connection_type; </span>
+<span class="lineNum">    145 </span>              : 	Network *network; </span>
+<span class="lineNum">    146 </span>              : 	int linecnt; </span>
+<span class="lineNum">    147 </span>              :  </span>
+<span class="lineNum">    148 </span>              : 	bool fake_key_sequence; </span>
+<span class="lineNum">    149 </span>              : 	const char *fake_key_str; </span>
+<span class="lineNum">    150 </span>              : 	int fake_key_index; </span>
+<span class="lineNum">    151 </span>              : 	int fake_key_keytime; </span>
+<span class="lineNum">    152 </span>              :  </span>
+<span class="lineNum">    153 </span>              : 	bool prefs_changed; </span>
+<span class="lineNum">    154 </span>              : 	char save_game_name[256]; </span>
+<span class="lineNum">    155 </span>              :  </span>
+<span class="lineNum">    156 </span>              : 	void network_vblank(); </span>
+<span class="lineNum">    157 </span>              :  </span>
+<span class="lineNum">    158 </span>              : 	void startFakeKeySequence(const char *str); </span>
+<span class="lineNum">    159 </span>              : 	void run_fake_key_sequence(); </span>
+<span class="lineNum">    160 </span>              : 	void pushKeyCode(int kc, bool up); </span>
+<span class="lineNum">    161 </span>              : }; </span>
+<span class="lineNum">    162 </span>              :  </span>
+<span class="lineNum">    163 </span>              :  </span>
+<span class="lineNum">    164 </span>              : #endif </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

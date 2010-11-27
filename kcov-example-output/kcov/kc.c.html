@@ -1,0 +1,448 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ./kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>./kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2010-11-27 09:08:49</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">201</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">61.2 %</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">123</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">      1 </span>              : /* </span>
+<span class="lineNum">      2 </span>              :  * Copyright (C) 2010 Simon Kagstrom, Thomas Neumann </span>
+<span class="lineNum">      3 </span>              :  * </span>
+<span class="lineNum">      4 </span>              :  * See COPYING for license details </span>
+<span class="lineNum">      5 </span>              :  */ </span>
+<span class="lineNum">      6 </span>              : #include &lt;sys/types.h&gt; </span>
+<span class="lineNum">      7 </span>              : #include &lt;sys/time.h&gt; </span>
+<span class="lineNum">      8 </span>              : #include &lt;sys/types.h&gt; </span>
+<span class="lineNum">      9 </span>              : #include &lt;sys/stat.h&gt; </span>
+<span class="lineNum">     10 </span>              : #include &lt;unistd.h&gt; </span>
+<span class="lineNum">     11 </span>              : #include &lt;sys/fcntl.h&gt; </span>
+<span class="lineNum">     12 </span>              : #include &lt;stdlib.h&gt; </span>
+<span class="lineNum">     13 </span>              : #include &lt;stdio.h&gt; </span>
+<span class="lineNum">     14 </span>              : #include &lt;string.h&gt; </span>
+<span class="lineNum">     15 </span>              : #include &lt;libgen.h&gt;    /* POSIX basename */ </span>
+<span class="lineNum">     16 </span>              : #include &lt;libelf.h&gt; </span>
+<span class="lineNum">     17 </span>              : #include &lt;libdwarf.h&gt; </span>
+<span class="lineNum">     18 </span>              :  </span>
+<span class="lineNum">     19 </span>              : #include &lt;kc.h&gt; </span>
+<span class="lineNum">     20 </span>              : #include &lt;utils.h&gt; </span>
+<span class="lineNum">     21 </span>              : #include &lt;report.h&gt; </span>
+<span class="lineNum">     22 </span>              :  </span>
+<span class="lineNum">     23 </span>              : static gint cmp_line(gconstpointer _a, gconstpointer _b) </span>
+<span class="lineNum">     24 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     25 </span><span class="lineCov">    1 / 1     : 	const struct kc_line *a = _a; </span>
+<span class="lineNum">     26 </span><span class="lineCov">    1 / 1     : 	const struct kc_line *b = _b; </span>
+<span class="lineNum">     27 </span>              : 	int ret; </span>
+<span class="lineNum">     28 </span>              :  </span>
+<span class="lineNum">     29 </span><span class="lineCov">    1 / 1     : 	ret = strcmp(a-&gt;file-&gt;filename, b-&gt;file-&gt;filename) == 0; </span>
+<span class="lineNum">     30 </span><span class="lineCov">    1 / 1     : 	if (ret) </span>
+<span class="lineNum">     31 </span><span class="lineCov">    1 / 1     : 		ret = (a-&gt;lineno - b-&gt;lineno) == 0; </span>
+<span class="lineNum">     32 </span>              :  </span>
+<span class="lineNum">     33 </span><span class="lineCov">    1 / 1     : 	return ret; </span>
+<span class="lineNum">     34 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     35 </span>              :  </span>
+<span class="lineNum">     36 </span>              : static guint hash_line(gconstpointer _a) </span>
+<span class="lineNum">     37 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     38 </span><span class="lineCov">    1 / 1     : 	const struct kc_line *a = _a; </span>
+<span class="lineNum">     39 </span>              :  </span>
+<span class="lineNum">     40 </span><span class="lineCov">    1 / 1     : 	return g_str_hash(a-&gt;file-&gt;filename) + g_int_hash(&amp;a-&gt;lineno); </span>
+<span class="lineNum">     41 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     42 </span>              :  </span>
+<span class="lineNum">     43 </span>              :  </span>
+<span class="lineNum">     44 </span>              : void kc_add_addr(struct kc *kc, unsigned long addr_in, int line_nr, const char *filename) </span>
+<span class="lineNum">     45 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     46 </span>              : 	struct kc_line *table_line; </span>
+<span class="lineNum">     47 </span>              : 	struct kc_addr *addr; </span>
+<span class="lineNum">     48 </span>              : 	struct kc_line *line; </span>
+<span class="lineNum">     49 </span>              : 	struct kc_file *file; </span>
+<span class="lineNum">     50 </span>              :  </span>
+<span class="lineNum">     51 </span><span class="lineCov">    1 / 1     : 	file = g_hash_table_lookup(kc-&gt;files, filename); </span>
+<span class="lineNum">     52 </span><span class="lineCov">    1 / 1     : 	if (!file) { </span>
+<span class="lineNum">     53 </span><span class="lineCov">    1 / 1     : 		file = kc_file_new(filename); </span>
+<span class="lineNum">     54 </span><span class="lineCov">    1 / 1     : 		g_hash_table_insert(kc-&gt;files, (gpointer*)file-&gt;filename, file); </span>
+<span class="lineNum">     55 </span>              : 	} </span>
+<span class="lineNum">     56 </span>              :  </span>
+<span class="lineNum">     57 </span><span class="lineCov">    1 / 1     : 	line = kc_line_new(file, line_nr); </span>
+<span class="lineNum">     58 </span><span class="lineCov">    1 / 1     : 	table_line = g_hash_table_lookup(kc-&gt;lines, line); </span>
+<span class="lineNum">     59 </span>              :  </span>
+<span class="lineNum">     60 </span><span class="lineCov">    1 / 1     : 	if (table_line) { </span>
+<span class="lineNum">     61 </span><span class="lineCov">    1 / 1     : 		kc_line_free(line); </span>
+<span class="lineNum">     62 </span><span class="lineCov">    1 / 1     : 		line = table_line; </span>
+<span class="lineNum">     63 </span>              : 	} </span>
+<span class="lineNum">     64 </span>              :  </span>
+<span class="lineNum">     65 </span><span class="lineCov">    1 / 1     : 	addr = kc_addr_new(addr_in); </span>
+<span class="lineNum">     66 </span><span class="lineCov">    1 / 1     : 	if (!table_line) </span>
+<span class="lineNum">     67 </span><span class="lineCov">    1 / 1     : 		g_hash_table_insert(kc-&gt;lines, line, line); </span>
+<span class="lineNum">     68 </span><span class="lineCov">    1 / 1     : 	g_hash_table_insert(kc-&gt;addrs, (gpointer*)&amp;addr-&gt;addr, addr); </span>
+<span class="lineNum">     69 </span>              :  </span>
+<span class="lineNum">     70 </span><span class="lineCov">    1 / 1     : 	kc_line_add_addr(line, addr); </span>
+<span class="lineNum">     71 </span><span class="lineCov">    1 / 1     : 	kc_file_add_line(file, line); </span>
+<span class="lineNum">     72 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">     73 </span>              :  </span>
+<span class="lineNum">     74 </span>              : struct kc_addr *kc_lookup_addr(struct kc *kc, unsigned long addr) </span>
+<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     76 </span><span class="lineNoCov">    0 / 1     : 	return g_hash_table_lookup(kc-&gt;addrs, (gpointer *)&amp;addr); </span>
+<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     78 </span>              :  </span>
+<span class="lineNum">     79 </span>              :  </span>
+<span class="lineNum">     80 </span>              : static void dwarf_error_handler(Dwarf_Error error, Dwarf_Ptr userData) </span>
+<span class="lineNum">     81 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">     82 </span><span class="lineNoCov">    0 / 1     : 	char *msg = dwarf_errmsg(error); </span>
+<span class="lineNum">     83 </span>              :  </span>
+<span class="lineNum">     84 </span><span class="lineNoCov">    0 / 1     : 	printf(&quot;Dwarf: %s\n&quot;, msg); </span>
+<span class="lineNum">     85 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">     86 </span>              :  </span>
+<span class="lineNum">     87 </span>              : static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf) </span>
+<span class="lineNum">     88 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">     89 </span><span class="lineCov">    1 / 1     : 	Elf_Scn *scn = NULL; </span>
+<span class="lineNum">     90 </span><span class="lineCov">    1 / 1     : 	Elf32_Ehdr *hdr = elf32_getehdr(elf); </span>
+<span class="lineNum">     91 </span>              : 	size_t shstrndx; </span>
+<span class="lineNum">     92 </span>              : 	int is_32; </span>
+<span class="lineNum">     93 </span>              :  </span>
+<span class="lineNum">     94 </span><span class="lineCov">    1 / 1     : 	kc-&gt;type = PTRACE_FILE; </span>
+<span class="lineNum">     95 </span><span class="lineCov">    1 / 1     : 	if (!hdr || elf_getshdrstrndx(elf, &amp;shstrndx) &lt; 0) </span>
+<span class="lineNum">     96 </span><span class="lineNoCov">    0 / 1     : 		return; </span>
+<span class="lineNum">     97 </span><span class="lineCov">    1 / 1     : 	kc-&gt;e_machine = (unsigned int)hdr-&gt;e_machine; </span>
+<span class="lineNum">     98 </span>              :  </span>
+<span class="lineNum">     99 </span><span class="lineCov">    1 / 1     : 	is_32 = hdr-&gt;e_ident[EI_CLASS] == ELFCLASS32; </span>
+<span class="lineNum">    100 </span>              :  </span>
+<span class="lineNum">    101 </span><span class="lineCov">    2 / 2     : 	while ( (scn = elf_nextscn(elf, scn)) != NULL ) { </span>
+<span class="lineNum">    102 </span>              : 		const char *name; </span>
+<span class="lineNum">    103 </span>              :  </span>
+<span class="lineNum">    104 </span><span class="lineCov">    1 / 1     : 		if (is_32) { </span>
+<span class="lineNum">    105 </span><span class="lineCov">    1 / 1     : 			Elf32_Shdr *shdr = elf32_getshdr(scn); </span>
+<span class="lineNum">    106 </span>              :  </span>
+<span class="lineNum">    107 </span><span class="lineCov">    1 / 1     : 			if (!shdr) </span>
+<span class="lineNum">    108 </span><span class="lineNoCov">    0 / 1     : 				continue; </span>
+<span class="lineNum">    109 </span>              :  </span>
+<span class="lineNum">    110 </span><span class="lineCov">    1 / 1     : 			name = elf_strptr(elf, shstrndx, shdr-&gt;sh_name); </span>
+<span class="lineNum">    111 </span>              : 		} </span>
+<span class="lineNum">    112 </span>              : 		else { </span>
+<span class="lineNum">    113 </span><span class="lineNoCov">    0 / 1     : 			Elf64_Shdr *shdr = elf64_getshdr(scn); </span>
+<span class="lineNum">    114 </span>              :  </span>
+<span class="lineNum">    115 </span><span class="lineNoCov">    0 / 1     : 			if (!shdr) </span>
+<span class="lineNum">    116 </span><span class="lineNoCov">    0 / 1     : 				continue; </span>
+<span class="lineNum">    117 </span>              :  </span>
+<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 1     : 			name = elf_strptr(elf, shstrndx, shdr-&gt;sh_name); </span>
+<span class="lineNum">    119 </span>              : 		} </span>
+<span class="lineNum">    120 </span>              :  </span>
+<span class="lineNum">    121 </span>              : 		/* Linux kernel module? */ </span>
+<span class="lineNum">    122 </span><span class="lineCov">    1 / 1     : 		if (strcmp(name, &quot;.modinfo&quot;) == 0) { </span>
+<span class="lineNum">    123 </span><span class="lineNoCov">    0 / 1     : 			char *cpy = xstrdup(filename); </span>
+<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 1     : 			char *bn = xstrdup(basename(cpy)); </span>
+<span class="lineNum">    125 </span>              : 			char *p; </span>
+<span class="lineNum">    126 </span>              :  </span>
+<span class="lineNum">    127 </span>              : 			/* Remove .ko and fixup module names */ </span>
+<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 			p = strrchr(bn, '.'); </span>
+<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 1     : 			if (p) </span>
+<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 				*p = '\0'; </span>
+<span class="lineNum">    131 </span><span class="lineNoCov">    0 / 2     : 			for (p = bn; *p; p++) { </span>
+<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 1     : 				if (*p == '-') </span>
+<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 1     : 					*p = '_'; </span>
+<span class="lineNum">    134 </span>              : 			} </span>
+<span class="lineNum">    135 </span>              :  </span>
+<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 			free((void *)kc-&gt;module_name); </span>
+<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 			kc-&gt;type = KPROBE_COVERAGE; </span>
+<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 1     : 			kc-&gt;module_name = bn; </span>
+<span class="lineNum">    139 </span>              :  </span>
+<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 1     : 			free(cpy); </span>
+<span class="lineNum">    141 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
+<span class="lineNum">    142 </span>              : 		} </span>
+<span class="lineNum">    143 </span><span class="lineCov">    1 / 1     : 		else if (strcmp(name, &quot;__ksymtab&quot;) == 0) { </span>
+<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 1     : 			kc-&gt;type = KPROBE_COVERAGE; </span>
+<span class="lineNum">    145 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
+<span class="lineNum">    146 </span>              : 		} </span>
+<span class="lineNum">    147 </span>              : 	} </span>
+<span class="lineNum">    148 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    149 </span>              :  </span>
+<span class="lineNum">    150 </span>              : static const char *lookup_filename_by_pid(pid_t pid) </span>
+<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 2     : { </span>
+<span class="lineNum">    152 </span>              : 	char linkpath[80 + 1]; </span>
+<span class="lineNum">    153 </span>              : 	char path[1024]; </span>
+<span class="lineNum">    154 </span>              : 	ssize_t err; </span>
+<span class="lineNum">    155 </span>              :  </span>
+<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 	memset(path, 0, sizeof(path)); </span>
+<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 1     : 	snprintf(linkpath, sizeof(linkpath) - 1, &quot;/proc/%d/exe&quot;, pid); </span>
+<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 1     : 	linkpath[sizeof(linkpath) - 1 ] = '\0'; </span>
+<span class="lineNum">    159 </span>              :  </span>
+<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : 	err = readlink(linkpath, path, sizeof(path)); </span>
+<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 1     : 	if (err &lt; 0) </span>
+<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 		return NULL; </span>
+<span class="lineNum">    163 </span>              :  </span>
+<span class="lineNum">    164 </span>              : 	/* This allocation will be lost, but that's OK - this function </span>
+<span class="lineNum">    165 </span>              : 	 * is only called once at startup anyway. */ </span>
+<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 1     : 	return xstrdup(path); </span>
+<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    168 </span>              :  </span>
+<span class="lineNum">    169 </span>              : struct kc *kc_open_elf(const char *filename, pid_t pid) </span>
+<span class="lineNum">    170 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    171 </span>              : 	Dwarf_Unsigned header; </span>
+<span class="lineNum">    172 </span>              : 	struct Elf *elf; </span>
+<span class="lineNum">    173 </span>              : 	Dwarf_Debug dbg; </span>
+<span class="lineNum">    174 </span>              : 	struct kc *kc; </span>
+<span class="lineNum">    175 </span>              : 	int err; </span>
+<span class="lineNum">    176 </span>              : 	int fd; </span>
+<span class="lineNum">    177 </span>              :  </span>
+<span class="lineNum">    178 </span><span class="lineCov">    1 / 1     : 	if (pid != 0 &amp;&amp; filename == NULL) { </span>
+<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 1     : 		filename = lookup_filename_by_pid(pid); </span>
+<span class="lineNum">    180 </span>              :  </span>
+<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 1     : 		if (!filename) { </span>
+<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 			error(&quot;Can't lookup filename of PID %d\n&quot;, pid); </span>
+<span class="lineNum">    183 </span>              : 			return NULL; </span>
+<span class="lineNum">    184 </span>              : 		} </span>
+<span class="lineNum">    185 </span>              : 	} </span>
+<span class="lineNum">    186 </span>              :  </span>
+<span class="lineNum">    187 </span><span class="lineCov">    1 / 1     : 	fd = open(filename, O_RDONLY); </span>
+<span class="lineNum">    188 </span><span class="lineCov">    1 / 1     : 	if (fd &lt; 0) </span>
+<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 1     : 		return NULL; </span>
+<span class="lineNum">    190 </span>              :  </span>
+<span class="lineNum">    191 </span>              : 	/* Initialize libdwarf */ </span>
+<span class="lineNum">    192 </span><span class="lineCov">    1 / 1     : 	err = dwarf_init(fd, DW_DLC_READ, dwarf_error_handler, 0, &amp;dbg,0); </span>
+<span class="lineNum">    193 </span><span class="lineCov">    1 / 1     : 	if (err == DW_DLV_ERROR) { </span>
+<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 1     : 		close(fd); </span>
+<span class="lineNum">    195 </span><span class="lineNoCov">    0 / 1     : 		return NULL; </span>
+<span class="lineNum">    196 </span>              : 	} </span>
+<span class="lineNum">    197 </span>              :  </span>
+<span class="lineNum">    198 </span>              : 	/* Zeroes everything */ </span>
+<span class="lineNum">    199 </span><span class="lineCov">    1 / 1     : 	kc = xmalloc(sizeof(struct kc)); </span>
+<span class="lineNum">    200 </span><span class="lineCov">    1 / 1     : 	kc-&gt;module_name = xstrdup(&quot;&quot;); </span>
+<span class="lineNum">    201 </span><span class="lineCov">    1 / 1     : 	kc-&gt;in_file = filename; </span>
+<span class="lineNum">    202 </span>              :  </span>
+<span class="lineNum">    203 </span><span class="lineCov">    1 / 1     : 	kc-&gt;addrs = g_hash_table_new(g_int_hash, g_int_equal); </span>
+<span class="lineNum">    204 </span><span class="lineCov">    1 / 1     : 	kc-&gt;lines = g_hash_table_new(hash_line, cmp_line); </span>
+<span class="lineNum">    205 </span><span class="lineCov">    1 / 1     : 	kc-&gt;files = g_hash_table_new(g_str_hash, g_str_equal); </span>
+<span class="lineNum">    206 </span><span class="lineCov">    1 / 1     : 	kc-&gt;sort_type = FILENAME; </span>
+<span class="lineNum">    207 </span>              :  </span>
+<span class="lineNum">    208 </span><span class="lineCov">    1 / 1     : 	if (err == DW_DLV_NO_ENTRY) </span>
+<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 		goto out_ok; </span>
+<span class="lineNum">    210 </span>              :  </span>
+<span class="lineNum">    211 </span><span class="lineCov">    1 / 1     : 	err = dwarf_get_elf(dbg, &amp;elf, NULL); </span>
+<span class="lineNum">    212 </span><span class="lineCov">    1 / 1     : 	lookup_elf_type(kc, filename, elf); </span>
+<span class="lineNum">    213 </span><span class="lineCov">    1 / 1     : 	if (pid != 0) </span>
+<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : 		kc-&gt;type = PTRACE_PID; </span>
+<span class="lineNum">    215 </span>              :  </span>
+<span class="lineNum">    216 </span>              : 	/* Iterate over the headers */ </span>
+<span class="lineNum">    217 </span><span class="linePartCov">    2 / 3     : 	while (dwarf_next_cu_header(dbg, 0, 0, 0, 0, </span>
+<span class="lineNum">    218 </span>              : 			&amp;header, 0) == DW_DLV_OK) { </span>
+<span class="lineNum">    219 </span>              : 		Dwarf_Line* line_buffer; </span>
+<span class="lineNum">    220 </span>              : 		Dwarf_Signed line_count; </span>
+<span class="lineNum">    221 </span>              : 		Dwarf_Die die; </span>
+<span class="lineNum">    222 </span>              : 		int i; </span>
+<span class="lineNum">    223 </span>              :  </span>
+<span class="lineNum">    224 </span><span class="lineCov">    1 / 1     : 		if (dwarf_siblingof(dbg, 0, &amp;die, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 			goto out_err; </span>
+<span class="lineNum">    226 </span>              :  </span>
+<span class="lineNum">    227 </span>              : 		/* Get the source lines */ </span>
+<span class="lineNum">    228 </span><span class="lineCov">    1 / 1     : 		if (dwarf_srclines(die, &amp;line_buffer, &amp;line_count, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    229 </span><span class="lineNoCov">    0 / 1     : 			continue; </span>
+<span class="lineNum">    230 </span>              :  </span>
+<span class="lineNum">    231 </span>              : 		/* Store them */ </span>
+<span class="lineNum">    232 </span><span class="lineCov">    2 / 2     : 		for (i = 0; i &lt; line_count; i++) { </span>
+<span class="lineNum">    233 </span>              : 			Dwarf_Unsigned line_nr; </span>
+<span class="lineNum">    234 </span>              : 			char* line_source; </span>
+<span class="lineNum">    235 </span>              : 			Dwarf_Bool is_code; </span>
+<span class="lineNum">    236 </span>              : 			Dwarf_Addr addr; </span>
+<span class="lineNum">    237 </span>              :  </span>
+<span class="lineNum">    238 </span><span class="lineCov">    1 / 1     : 			if (dwarf_lineno(line_buffer[i], &amp;line_nr, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : 				goto out_err; </span>
+<span class="lineNum">    240 </span><span class="lineCov">    1 / 1     : 			if (dwarf_linesrc(line_buffer[i], &amp;line_source, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 				goto out_err; </span>
+<span class="lineNum">    242 </span><span class="lineCov">    1 / 1     : 			if (dwarf_linebeginstatement(line_buffer[i], &amp;is_code, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    243 </span><span class="lineNoCov">    0 / 1     : 				goto out_err; </span>
+<span class="lineNum">    244 </span>              :  </span>
+<span class="lineNum">    245 </span><span class="lineCov">    1 / 1     : 			if (dwarf_lineaddr(line_buffer[i], &amp;addr, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    246 </span><span class="lineNoCov">    0 / 1     : 				goto out_err; </span>
+<span class="lineNum">    247 </span>              :  </span>
+<span class="lineNum">    248 </span><span class="lineCov">    1 / 1     : 			if (line_nr &amp;&amp; is_code) { </span>
+<span class="lineNum">    249 </span><span class="lineCov">    1 / 1     : 				kc_add_addr(kc, addr, line_nr, line_source); </span>
+<span class="lineNum">    250 </span>              : 			} </span>
+<span class="lineNum">    251 </span>              :  </span>
+<span class="lineNum">    252 </span><span class="lineCov">    1 / 1     : 			dwarf_dealloc(dbg, line_source, DW_DLA_STRING); </span>
+<span class="lineNum">    253 </span>              : 		} </span>
+<span class="lineNum">    254 </span>              :  </span>
+<span class="lineNum">    255 </span>              : 		/* Release the memory */ </span>
+<span class="lineNum">    256 </span><span class="lineCov">    2 / 2     : 		for (i = 0; i &lt; line_count; i++) </span>
+<span class="lineNum">    257 </span><span class="lineCov">    1 / 1     : 			dwarf_dealloc(dbg,line_buffer[i], DW_DLA_LINE); </span>
+<span class="lineNum">    258 </span><span class="lineCov">    1 / 1     : 		dwarf_dealloc(dbg,line_buffer, DW_DLA_LIST); </span>
+<span class="lineNum">    259 </span>              : 	} </span>
+<span class="lineNum">    260 </span>              :  </span>
+<span class="lineNum">    261 </span>              : 	/* Shutdown libdwarf */ </span>
+<span class="lineNum">    262 </span><span class="lineCov">    1 / 1     : 	if (dwarf_finish(dbg, 0) != DW_DLV_OK) </span>
+<span class="lineNum">    263 </span><span class="lineNoCov">    0 / 1     : 		goto out_err; </span>
+<span class="lineNum">    264 </span>              :  </span>
+<span class="lineNum">    265 </span>              : out_ok: </span>
+<span class="lineNum">    266 </span><span class="lineCov">    1 / 1     : 	close(fd); </span>
+<span class="lineNum">    267 </span>              :  </span>
+<span class="lineNum">    268 </span><span class="lineCov">    1 / 1     : 	return kc; </span>
+<span class="lineNum">    269 </span>              :  </span>
+<span class="lineNum">    270 </span>              : out_err: </span>
+<span class="lineNum">    271 </span><span class="lineNoCov">    0 / 1     : 	close(fd); </span>
+<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : 	free(kc); </span>
+<span class="lineNum">    273 </span>              :  </span>
+<span class="lineNum">    274 </span><span class="lineNoCov">    0 / 1     : 	return NULL; </span>
+<span class="lineNum">    275 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    276 </span>              :  </span>
+<span class="lineNum">    277 </span>              : void kc_close(struct kc *kc) </span>
+<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 	free(kc); </span>
+<span class="lineNum">    280 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    281 </span>              :  </span>
+<span class="lineNum">    282 </span>              :  </span>
+<span class="lineNum">    283 </span>              :  </span>
+<span class="lineNum">    284 </span>              : static uint64_t get_file_checksum(struct kc *kc) </span>
+<span class="lineNum">    285 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    286 </span>              : 	struct stat st; </span>
+<span class="lineNum">    287 </span>              :  </span>
+<span class="lineNum">    288 </span><span class="lineCov">    1 / 1     : 	if (lstat(kc-&gt;in_file, &amp;st) &lt; 0) </span>
+<span class="lineNum">    289 </span><span class="lineNoCov">    0 / 1     : 		return 0; </span>
+<span class="lineNum">    290 </span>              :  </span>
+<span class="lineNum">    291 </span><span class="lineCov">    1 / 1     : 	return ((uint64_t)st.st_mtim.tv_sec &lt;&lt; 32) | ((uint64_t)st.st_mtim.tv_nsec); </span>
+<span class="lineNum">    292 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    293 </span>              :  </span>
+<span class="lineNum">    294 </span>              : void kc_db_marshal(struct kc_data_db *db) </span>
+<span class="lineNum">    295 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    296 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    297 </span>              :  </span>
+<span class="lineNum">    298 </span>              : void kc_db_unmarshal(struct kc_data_db *db) </span>
+<span class="lineNum">    299 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    301 </span>              :  </span>
+<span class="lineNum">    302 </span>              : void kc_read_db(struct kc *kc) </span>
+<span class="lineNum">    303 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    304 </span>              : 	struct kc_data_db *db; </span>
+<span class="lineNum">    305 </span>              : 	uint64_t checksum; </span>
+<span class="lineNum">    306 </span>              : 	size_t sz; </span>
+<span class="lineNum">    307 </span>              : 	int i; </span>
+<span class="lineNum">    308 </span>              :  </span>
+<span class="lineNum">    309 </span><span class="lineCov">    1 / 1     : 	db = read_file(&amp;sz, &quot;%s/%s/kcov.db&quot;, kc-&gt;out_dir, kc-&gt;binary_filename); </span>
+<span class="lineNum">    310 </span><span class="lineCov">    1 / 1     : 	if (!db) </span>
+<span class="lineNum">    311 </span><span class="lineCov">    1 / 1     : 		return; </span>
+<span class="lineNum">    312 </span><span class="lineNoCov">    0 / 1     : 	kc_db_unmarshal(db); </span>
+<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 1     : 	checksum = get_file_checksum(kc); </span>
+<span class="lineNum">    314 </span><span class="lineNoCov">    0 / 1     : 	if (db-&gt;elf_checksum != checksum) </span>
+<span class="lineNum">    315 </span><span class="lineNoCov">    0 / 1     : 		goto out; </span>
+<span class="lineNum">    316 </span>              :  </span>
+<span class="lineNum">    317 </span><span class="lineNoCov">    0 / 2     : 	for (i = 0; i &lt; db-&gt;n_addrs; i++) { </span>
+<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 1     : 		struct kc_addr *db_addr = &amp;db-&gt;addrs[i]; </span>
+<span class="lineNum">    319 </span>              : 		struct kc_addr *tgt; </span>
+<span class="lineNum">    320 </span>              :  </span>
+<span class="lineNum">    321 </span><span class="lineNoCov">    0 / 1     : 		kc_addr_unmarshall(db_addr); </span>
+<span class="lineNum">    322 </span>              :  </span>
+<span class="lineNum">    323 </span><span class="lineNoCov">    0 / 1     : 		tgt = kc_lookup_addr(kc, db_addr-&gt;addr); </span>
+<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 1     : 		if (!tgt) </span>
+<span class="lineNum">    325 </span><span class="lineNoCov">    0 / 1     : 			continue; </span>
+<span class="lineNum">    326 </span>              :  </span>
+<span class="lineNum">    327 </span><span class="lineNoCov">    0 / 1     : 		tgt-&gt;hits += db_addr-&gt;hits; </span>
+<span class="lineNum">    328 </span>              : 	} </span>
+<span class="lineNum">    329 </span>              :  </span>
+<span class="lineNum">    330 </span>              : out: </span>
+<span class="lineNum">    331 </span><span class="lineNoCov">    0 / 1     : 	free(db); </span>
+<span class="lineNum">    332 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    333 </span>              :  </span>
+<span class="lineNum">    334 </span>              : void kc_write_db(struct kc *kc) </span>
+<span class="lineNum">    335 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    336 </span>              : 	struct kc_data_db *db; </span>
+<span class="lineNum">    337 </span>              : 	struct kc_addr *val; </span>
+<span class="lineNum">    338 </span>              : 	GHashTableIter iter; </span>
+<span class="lineNum">    339 </span>              : 	unsigned long key; </span>
+<span class="lineNum">    340 </span>              : 	guint sz; </span>
+<span class="lineNum">    341 </span><span class="lineCov">    1 / 1     : 	int cnt = 0; </span>
+<span class="lineNum">    342 </span>              :  </span>
+<span class="lineNum">    343 </span><span class="lineCov">    1 / 1     : 	sz = g_hash_table_size(kc-&gt;addrs); </span>
+<span class="lineNum">    344 </span><span class="lineCov">    1 / 1     : 	db = xmalloc(sizeof(struct kc_data_db) + sizeof(struct kc_addr) * sz); </span>
+<span class="lineNum">    345 </span><span class="lineCov">    1 / 1     : 	db-&gt;n_addrs = sz; </span>
+<span class="lineNum">    346 </span><span class="lineCov">    1 / 1     : 	db-&gt;elf_checksum = get_file_checksum(kc); </span>
+<span class="lineNum">    347 </span>              :  </span>
+<span class="lineNum">    348 </span><span class="lineCov">    1 / 1     : 	g_hash_table_iter_init(&amp;iter, kc-&gt;addrs); </span>
+<span class="lineNum">    349 </span><span class="lineCov">    2 / 2     : 	while (g_hash_table_iter_next(&amp;iter, (gpointer*)&amp;key, (gpointer*)&amp;val)) { </span>
+<span class="lineNum">    350 </span><span class="lineNoCov">    0 / 1     : 		struct kc_addr *db_addr = &amp;db-&gt;addrs[cnt]; </span>
+<span class="lineNum">    351 </span>              :  </span>
+<span class="lineNum">    352 </span><span class="lineCov">    1 / 1     : 		memcpy(db_addr, val, sizeof(struct kc_addr)); </span>
+<span class="lineNum">    353 </span><span class="lineCov">    1 / 1     : 		kc_addr_marshall(db_addr); </span>
+<span class="lineNum">    354 </span>              :  </span>
+<span class="lineNum">    355 </span><span class="lineCov">    1 / 1     : 		cnt++; </span>
+<span class="lineNum">    356 </span>              : 	} </span>
+<span class="lineNum">    357 </span><span class="lineCov">    1 / 1     : 	kc_db_marshal(db); </span>
+<span class="lineNum">    358 </span><span class="lineCov">    1 / 1     : 	write_file(db, sizeof(struct kc_data_db) + sz * sizeof(struct kc_addr), </span>
+<span class="lineNum">    359 </span>              : 			&quot;%s/%s/kcov.db&quot;, kc-&gt;out_dir, kc-&gt;binary_filename); </span>
+<span class="lineNum">    360 </span>              :  </span>
+<span class="lineNum">    361 </span><span class="lineCov">    1 / 1     : 	free(db); </span>
+<span class="lineNum">    362 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    363 </span>              :  </span>
+<span class="lineNum">    364 </span>              : int kc_coverage_db_read(const char *dir, struct kc_coverage_db *dst) </span>
+<span class="lineNum">    365 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    366 </span>              : 	struct kc_coverage_db *db; </span>
+<span class="lineNum">    367 </span>              : 	size_t sz; </span>
+<span class="lineNum">    368 </span>              :  </span>
+<span class="lineNum">    369 </span><span class="lineCov">    1 / 1     : 	db = read_file(&amp;sz, &quot;%s/kcov_coverage.db&quot;, dir); </span>
+<span class="lineNum">    370 </span><span class="lineCov">    1 / 1     : 	if (!db) </span>
+<span class="lineNum">    371 </span><span class="lineCov">    1 / 1     : 		return -1; </span>
+<span class="lineNum">    372 </span><span class="lineCov">    1 / 1     : 	if (sz != sizeof(struct kc_coverage_db)) { </span>
+<span class="lineNum">    373 </span><span class="lineNoCov">    0 / 1     : 		warning(&quot;Coverage db size wrong: %u vs %u\n&quot;, </span>
+<span class="lineNum">    374 </span>              : 				sz, sizeof(struct kc_coverage_db)); </span>
+<span class="lineNum">    375 </span><span class="lineNoCov">    0 / 1     : 		free(db); </span>
+<span class="lineNum">    376 </span><span class="lineNoCov">    0 / 1     : 		return -1; </span>
+<span class="lineNum">    377 </span>              : 	} </span>
+<span class="lineNum">    378 </span>              :  </span>
+<span class="lineNum">    379 </span><span class="lineCov">    1 / 1     : 	*dst = *db; </span>
+<span class="lineNum">    380 </span><span class="lineCov">    1 / 1     : 	kc_coverage_db_unmarshal(dst); </span>
+<span class="lineNum">    381 </span><span class="lineCov">    1 / 1     : 	free(db); </span>
+<span class="lineNum">    382 </span>              :  </span>
+<span class="lineNum">    383 </span><span class="lineCov">    1 / 1     : 	return 0; </span>
+<span class="lineNum">    384 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    385 </span>              :  </span>
+<span class="lineNum">    386 </span>              : void kc_coverage_db_write(const char *dir, struct kc_coverage_db *src) </span>
+<span class="lineNum">    387 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    388 </span>              : 	struct kc_coverage_db db; </span>
+<span class="lineNum">    389 </span>              :  </span>
+<span class="lineNum">    390 </span><span class="lineCov">    1 / 1     : 	db = *src; </span>
+<span class="lineNum">    391 </span><span class="lineCov">    1 / 1     : 	kc_coverage_db_marshal(&amp;db); </span>
+<span class="lineNum">    392 </span>              :  </span>
+<span class="lineNum">    393 </span><span class="lineCov">    1 / 1     : 	write_file(&amp;db, sizeof(struct kc_coverage_db), </span>
+<span class="lineNum">    394 </span>              : 			&quot;%s/kcov_coverage.db&quot;, dir); </span>
+<span class="lineNum">    395 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    396 </span>              :  </span>
+<span class="lineNum">    397 </span>              : void kc_coverage_db_marshal(struct kc_coverage_db *db) </span>
+<span class="lineNum">    398 </span><span class="lineCov">    1 / 1     : { </span>
+<span class="lineNum">    399 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    400 </span>              :  </span>
+<span class="lineNum">    401 </span>              : void kc_coverage_db_unmarshal(struct kc_coverage_db *db) </span>
+<span class="lineNum">    402 </span><span class="lineNoCov">    0 / 1     : { </span>
+<span class="lineNum">    403 </span><span class="linePartCov">    1 / 2     : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>
