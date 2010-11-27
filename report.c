@@ -92,6 +92,9 @@ const char css_text[] = "/* Based upon the lcov CSS style, style files can be re
 		"td.coverBar { padding-left: 10px; padding-right: 10px; background-color: #DAE7FE; }\n"
 		"td.coverBarOutline { background-color: #000000; }\n"
 		"td.coverPerHi { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #A7FC9D; font-weight: bold; }\n"
+		"td.coverPerLeftMed { text-align: left; padding-left: 10px; padding-right: 10px; background-color: #FFEA20; font-weight: bold; }\n"
+		"td.coverPerLeftLo { text-align: left; padding-left: 10px; padding-right: 10px; background-color: #FF0000; font-weight: bold; }\n"
+		"td.coverPerLeftHi { text-align: left; padding-left: 10px; padding-right: 10px; background-color: #A7FC9D; font-weight: bold; }\n"
 		"td.coverNumHi { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #A7FC9D; }\n"
 		"td.coverPerMed { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FFEA20; font-weight: bold; }\n"
 		"td.coverNumMed { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FFEA20; }\n"
@@ -257,9 +260,18 @@ static const char *escape_html(const char *s)
 static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
 		int lines, int active_lines)
 {
+	const char *percentage_text = "Lo";
+	double percentage;
 	char date_buf[80];
 	time_t t;
 	struct tm *tm;
+
+	percentage = lines == 0 ? 0 : ((float)active_lines / (float)lines) * 100;
+
+	if (percentage > kc->low_limit && percentage < kc->high_limit)
+		percentage_text = "Med";
+	else if (percentage >= kc->high_limit)
+		percentage_text = "Hi";
 
 	t = time(NULL);
 	tm = localtime(&t);
@@ -291,7 +303,7 @@ static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
 			"        </tr>\n"
 			"        <tr>\n"
 			"          <td class=\"headerItem\" width=\"20%%\">Code&nbsp;covered:</td>\n"
-			"          <td class=\"headerValue\" width=\"15%%\">%.1f %%</td>\n"
+			"          <td class=\"coverPerLeft%s\" width=\"15%%\">%.1f %%</td>\n"
 			"          <td width=\"5%%\"></td>\n"
 			"          <td class=\"headerItem\" width=\"20%%\">Executed&nbsp;lines:</td>\n"
 			"          <td class=\"headerValue\" width=\"10%%\">%d</td>\n"
@@ -305,7 +317,8 @@ static void write_header(FILE *fp, struct kc *kc, struct kc_file *file,
 			escape_html(kc->module_name), /* Command */
 			date_buf,
 			lines,
-			lines == 0 ? 0 : ((float)active_lines / (float)lines) * 100,
+			percentage_text,
+			percentage,
 			active_lines
 	);
 }
