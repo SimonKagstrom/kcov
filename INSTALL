@@ -1,0 +1,47 @@
+Installing Kcov
+----------------
+
+You need development headers and libraries for libglib, libdwarf and libelf
+to build kcov.
+
+Create an empty build dir and do the following steps:
+# cmake <path/to/kcov/source/directory> <options>
+# make
+# make install
+
+Useful options include -DCMAKE_INSTALL_PREFIX=<path> (installation prefix),
+-DCMAKE_BUILD_TYPE=<type> and -DCMAKE_C_FLAGS=<CFLAGS>.
+
+Here is an example:
+-----------------------
+cd kcov
+mkdir build
+cd build
+cmake \
+  -DCMAKE_C_FLAGS:STRING="-O3 -march=i686" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr \
+  ..
+make -j2 || exit 1
+make install DESTDIR=/tmp/kcov-build || exit 1
+-----------------------
+
+For further information look for cmake documentation:
+http://www.cmake.org/cmake/help/cmake-2-8-docs.html.
+
+
+Troubleshooting
+----------------
+
+If you have libelf and libdwarf installed, but cmake fails to find them.
+Add path to the header files to the CPATH variable and path to libraries to
+LIBRARY_PATH variable and then run cmake again.
+
+Here is an example:
+-----------------------
+export CPATH=$CPATH:/opt/libelf-dir/include/:/opt/libdwarf-dir/include/
+export LIBRARY_PATH=$LIBRARY_PATH:/opt/libelf-dir/lib/:/opt/libdwarf-dir/lib/
+cd kcov
+cmake .
+make
+-----------------------

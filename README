@@ -10,9 +10,6 @@ Simple usage:
 /path/to/outdir will contain lcov-style HTML output generated
 continously while the application runs.
 
-You need libglib, libdwarf and libelf to build it.
-
-
 kcov is written by Simon Kagstrom <simon.kagstrom@gmail.com> and more
 information can be found at the web page,
 
