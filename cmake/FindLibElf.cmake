@@ -15,12 +15,12 @@
 
 
 if (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
-  # in cache already
-  set(LIBELF_FOUND TRUE)
-else (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
-  find_path(LIBELF_INCLUDE_DIR
+  set (LibElf_FIND_QUIETLY TRUE)
+endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
+
+find_path (LIBELF_INCLUDE_DIRS
     NAMES
-      gelf.h
+      libelf.h
     PATHS
       /usr/include
       /usr/include/libelf
@@ -29,51 +29,35 @@ else (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
       /opt/local/include
       /opt/local/include/libelf
       /sw/include
-      /sw/include/libelf
-  )
+      /sw/include/libelf)
 
-  find_library(LIBELF_LIBRARY
+find_library (LIBELF_LIBRARIES
     NAMES
       elf
     PATHS
       /usr/lib
       /usr/local/lib
       /opt/local/lib
-      /sw/lib
-  )
+      /sw/lib)
 
-  if (LIBELF_LIBRARY)
-    set(LIBELF_FOUND TRUE)
-  endif (LIBELF_LIBRARY)
+include (FindPackageHandleStandardArgs)
 
-  set(LIBELF_INCLUDE_DIRS
-    ${LIBELF_INCLUDE_DIR}
-  )
+if (LIBELF_INCLUDE_DIRS AND LIBELF_LIBRARIES)
+    try_compile (LIBELF_WORKS
+        ${CMAKE_CURRENT_BINARY_DIR}/cmake/libelf/
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libelf/
+        test_elf
+        CMAKE_FLAGS
+        -DLIBELF_INCLUDE_DIRS=${LIBELF_INCLUDE_DIRS}
+        -DLIBELF_LIBRARIES=${LIBELF_LIBRARIES})
+endif (LIBELF_INCLUDE_DIRS AND LIBELF_LIBRARIES)
 
-  if (LIBELF_FOUND)
-    set(LIBELF_LIBRARIES
-      ${LIBELF_LIBRARIES}
-      ${LIBELF_LIBRARY}
-    )
-  endif (LIBELF_FOUND)
 
-  if (LIBELF_INCLUDE_DIRS AND LIBELF_LIBRARIES)
-     set(LIBELF_FOUND TRUE)
-  endif (LIBELF_INCLUDE_DIRS AND LIBELF_LIBRARIES)
+# handle the QUIETLY and REQUIRED arguments and set LIBELF_FOUND to TRUE if all listed variables are TRUE
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
+    LIBELF_LIBRARIES
+    LIBELF_INCLUDE_DIRS
+    LIBELF_WORKS)
 
-  if (LIBELF_FOUND)
-    if (NOT libelf_FIND_QUIETLY)
-      message(STATUS "Found libelf: ${LIBELF_LIBRARIES}")
-    endif (NOT libelf_FIND_QUIETLY)
-  else (LIBELF_FOUND)
-    if (libelf_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find libelf")
-    endif (libelf_FIND_REQUIRED)
-  endif (LIBELF_FOUND)
 
-  # show the LIBELF_INCLUDE_DIRS and LIBELF_LIBRARIES variables only in the advanced view
-  mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES)
-  mark_as_advanced(LIBELF_INCLUDE_DIR LIBELF_LIBRARY)
-
-endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
-
+mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES)

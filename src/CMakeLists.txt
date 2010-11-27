@@ -14,15 +14,13 @@ set (kcov_SRCS
     report
     utils)
 include_directories (include/)
+include_directories (${GLIB2_INCLUDE_DIRS})
+include_directories (${LIBELF_INCLUDE_DIRS})
 
 add_executable (${PROJECT_NAME} ${kcov_SRCS})
 
 target_link_libraries (${PROJECT_NAME} ${GLIB2_LIBRARIES})
-if (ELF_FOUND)
-    target_link_libraries (${PROJECT_NAME} ${ELF_LIBRARIES})
-else (ELF_FOUND)
-    target_link_libraries (${PROJECT_NAME} elf)
-endif (ELF_FOUND)
+target_link_libraries (${PROJECT_NAME} ${LIBELF_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} dwarf pthread)
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
