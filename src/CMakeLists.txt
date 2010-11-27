@@ -16,11 +16,13 @@ set (kcov_SRCS
 include_directories (include/)
 include_directories (${GLIB2_INCLUDE_DIRS})
 include_directories (${LIBELF_INCLUDE_DIRS})
+include_directories (${LIBDWARF_INCLUDE_DIRS})
 
 add_executable (${PROJECT_NAME} ${kcov_SRCS})
 
 target_link_libraries (${PROJECT_NAME} ${GLIB2_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} ${LIBELF_LIBRARIES})
-target_link_libraries (${PROJECT_NAME} dwarf pthread)
+target_link_libraries (${PROJECT_NAME} ${LIBDWARF_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} pthread)
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})

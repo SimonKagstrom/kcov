@@ -21,24 +21,10 @@ pkg_check_modules (LIBELF libelf)
 if (NOT LIBELF_FOUND)
     find_package (LibElf REQUIRED)
 endif (NOT LIBELF_FOUND)
-pkg_check_modules (DWARF libdwarf)
-if (DWARF_FOUND)
-    include_directories (${DWARF_INCLUDE_DIRS})
-else (DWARF_FOUND)
-    message (STATUS "checking for 'libdwarf'")
-    try_compile (TEST_DWARF
-        ${CMAKE_CURRENT_BINARY_DIR}/cmake/libdwarf/
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libdwarf/
-        test_dwarf
-        CMAKE_FLAGS
-        -DLIBELF_INCLUDE_DIRS=${LIBELF_INCLUDE_DIRS}
-        -DLIBELF_LIBRARIES=${LIBELF_LIBRARIES})
-    if (NOT TEST_DWARF)
-        message (FATAL_ERROR "*** Failed to find working libdwarf!")
-    else (NOT TEST_DWARF)
-        message (STATUS "  found libdwarf")
-    endif (NOT TEST_DWARF)
-endif (DWARF_FOUND)
+pkg_check_modules (LIBDWARF libdwarf)
+if (NOT LIBDWARF_FOUND)
+    find_package (LibDwarf REQUIRED)
+endif (NOT LIBDWARF_FOUND)
 
 
 # ====================================
