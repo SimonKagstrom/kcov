@@ -27,7 +27,8 @@ find_path (LIBDWARF_INCLUDE_DIRS
       /opt/local/include
       /opt/local/include/libdwarf
       /sw/include
-      /sw/include/libdwarf)
+      /sw/include/libdwarf
+      ENV CPATH)
 
 find_library (LIBDWARF_LIBRARIES
     NAMES
@@ -36,7 +37,9 @@ find_library (LIBDWARF_LIBRARIES
       /usr/lib
       /usr/local/lib
       /opt/local/lib
-      /sw/lib)
+      /sw/lib
+      ENV LIBRARY_PATH
+      ENV LD_LIBRARY_PATH)
 
 include (FindPackageHandleStandardArgs)
 

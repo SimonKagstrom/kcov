@@ -29,7 +29,8 @@ find_path (LIBELF_INCLUDE_DIRS
       /opt/local/include
       /opt/local/include/libelf
       /sw/include
-      /sw/include/libelf)
+      /sw/include/libelf
+      ENV CPATH)
 
 find_library (LIBELF_LIBRARIES
     NAMES
@@ -38,7 +39,9 @@ find_library (LIBELF_LIBRARIES
       /usr/lib
       /usr/local/lib
       /opt/local/lib
-      /sw/lib)
+      /sw/lib
+      ENV LIBRARY_PATH
+      ENV LD_LIBRARY_PATH)
 
 include (FindPackageHandleStandardArgs)
 
