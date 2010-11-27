@@ -1,3 +1,16 @@
+Kcov (4):
+	* Refactored the architecture support to allow running i386 programs
+	  on x86_64 machines, and easier add other architectures
+
+	* Make it possible to collect coverage from multiple programs in a single
+	  directory, useful for example when running a test suite
+
+    * Add coverage color to the header as well
+
+	* Misc refactoring  
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (3):
 	* Various bug fixes
 
