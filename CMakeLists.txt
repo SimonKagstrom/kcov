@@ -9,6 +9,9 @@ set (PACKAGE_VERSION_MAJOR  4)
 set (PACKAGE_VERSION_MINOR  0)
 set (PACKAGE_VERSION_PATCH  0)
 
+if(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE debug)
+endif(NOT CMAKE_BUILD_TYPE)
 
 # ====================================
 # configuring
