@@ -1,8 +1,5 @@
 set (kcov_SRCS
     arch/arch.c
-    arch/i386.c
-    arch/mips32.c
-    arch/x86_64.c
     kc.c
     kc_addr.c
     kc_elf.c
