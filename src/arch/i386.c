@@ -1,5 +1,3 @@
-#include <sys/ptrace.h>
-#include <asm/ptrace.h>
 #include <stdint.h>
 #include <elf.h> /* EM_386 */
 

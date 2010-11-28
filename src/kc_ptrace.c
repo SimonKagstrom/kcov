@@ -8,8 +8,6 @@
  * Copyright (C) 2007 Thomas Neumann
  */
 #include <sys/ptrace.h>
-#include <asm/ptrace.h>
-#include <sys/user.h>
 #include <sys/wait.h>
 #include <sys/errno.h>
 #include <unistd.h>
