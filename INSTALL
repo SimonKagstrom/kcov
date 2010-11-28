@@ -1,5 +1,5 @@
-Installing Kcov
-----------------
+Building Kcov
+-------------
 
 You need development headers and libraries for libglib, libdwarf and libelf
 to build kcov.
@@ -12,9 +12,18 @@ Create an empty build dir and do the following steps:
 Useful options include -DCMAKE_INSTALL_PREFIX=<path> (installation prefix),
 -DCMAKE_BUILD_TYPE=<type> and -DCMAKE_C_FLAGS=<CFLAGS>.
 
-Here is an example:
------------------------
-cd kcov
+Basic example:
+--------------
+cd /path/to/kcov-source
+mkdir build
+cd build
+cmake ..
+make
+make install
+
+More advanced an example:
+-------------------------
+cd /path/to/kcov-source
 mkdir build
 cd build
 cmake \
