@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.8)
 # project name and version
 # ====================================
 project (kcov)
-set (PACKAGE_VERSION_MAJOR  3)
+set (PACKAGE_VERSION_MAJOR  4)
 set (PACKAGE_VERSION_MINOR  0)
 set (PACKAGE_VERSION_PATCH  0)
 
