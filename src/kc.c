@@ -84,7 +84,7 @@ static void dwarf_error_handler(Dwarf_Error error, Dwarf_Ptr userData)
 	printf("Dwarf: %s\n", msg);
 }
 
-static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf)
+static int lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf)
 {
 	Elf_Scn *scn = NULL;
 	Elf32_Ehdr *hdr32;
@@ -94,17 +94,17 @@ static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf
 
 	kc->type = PTRACE_FILE;
 	if (!elf_getshdrstrndx(elf, &shstrndx) < 0)
-		return;
+		return -1;
 
 	hdr32 = elf32_getehdr(elf);
 	hdr64 = elf64_getehdr(elf);
 	if (hdr32 == NULL && hdr64 == NULL) {
 		error("Can't get elf header\n");
-		return;
+		return -1;
 	}
 	if (hdr32 != NULL && hdr64 != NULL) {
 		error("Both 32- and 64-bit???\n");
-		return;
+		return -1;
 	}
 
 	is_32 = hdr32 != NULL;
@@ -153,13 +153,15 @@ static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf
 			kc->module_name = bn;
 
 			free(cpy);
-			return;
+			return 0;
 		}
 		else if (strcmp(name, "__ksymtab") == 0) {
 			kc->type = KPROBE_COVERAGE;
-			return;
+			return 0;
 		}
 	}
+
+	return 0;
 }
 
 static const char *lookup_filename_by_pid(pid_t pid)
@@ -224,7 +226,9 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 		goto out_ok;
 
 	err = dwarf_get_elf(dbg, &elf, NULL);
-	lookup_elf_type(kc, filename, elf);
+	err = lookup_elf_type(kc, filename, elf);
+	if (err < 0)
+		goto out_err;
 	if (pid != 0)
 		kc->type = PTRACE_PID;
 
