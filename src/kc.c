@@ -87,16 +87,31 @@ static void dwarf_error_handler(Dwarf_Error error, Dwarf_Ptr userData)
 static void lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf)
 {
 	Elf_Scn *scn = NULL;
-	Elf32_Ehdr *hdr = elf32_getehdr(elf);
+	Elf32_Ehdr *hdr32;
+	Elf64_Ehdr *hdr64;
 	size_t shstrndx;
 	int is_32;
 
 	kc->type = PTRACE_FILE;
-	if (!hdr || elf_getshdrstrndx(elf, &shstrndx) < 0)
+	if (!elf_getshdrstrndx(elf, &shstrndx) < 0)
 		return;
-	kc->e_machine = (unsigned int)hdr->e_machine;
 
-	is_32 = hdr->e_ident[EI_CLASS] == ELFCLASS32;
+	hdr32 = elf32_getehdr(elf);
+	hdr64 = elf64_getehdr(elf);
+	if (hdr32 == NULL && hdr64 == NULL) {
+		error("Can't get elf header\n");
+		return;
+	}
+	if (hdr32 != NULL && hdr64 != NULL) {
+		error("Both 32- and 64-bit???\n");
+		return;
+	}
+
+	is_32 = hdr32 != NULL;
+	if (is_32)
+		kc->e_machine = (unsigned int)hdr32->e_machine;
+	else
+		kc->e_machine = (unsigned int)hdr64->e_machine;
 
 	while ( (scn = elf_nextscn(elf, scn)) != NULL ) {
 		const char *name;
