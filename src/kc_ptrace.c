@@ -35,7 +35,7 @@ static unsigned long ptrace_get_ip_before_trap(struct kc *kc)
 	uint8_t regs[1024];
 	struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
 
-	memset(&regs, 0, sizeof(regs));
+	memset(regs, 0, sizeof(regs));
 	ptrace(PTRACE_GETREGS, active_child, 0, &regs);
 
 	return arch->get_pc(kc, &regs);
@@ -72,7 +72,7 @@ void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr)
    struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
 
    /* arch C't be NULL, or we would have exited when setting up BPs */
-   memset(&regs, 0, sizeof(regs));
+   memset(regs, 0, sizeof(regs));
    ptrace(PTRACE_GETREGS, active_child, 0, &regs);
    arch->adjust_pc_after_breakpoint(kc, &regs);
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
