@@ -132,3 +132,8 @@ unsigned long get_aligned(unsigned long addr)
 {
 	return (addr / sizeof(long)) * sizeof(long);
 }
+
+unsigned long get_aligned_4b(unsigned long addr)
+{
+	return addr & ~3;
+}

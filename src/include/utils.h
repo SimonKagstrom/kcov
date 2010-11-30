@@ -91,4 +91,6 @@ extern int concat_files(const char *dst, const char *file_a, const char *file_b)
 
 unsigned long get_aligned(unsigned long addr);
 
+unsigned long get_aligned_4b(unsigned long addr);
+
 #endif /* __UTILS_H__ */
