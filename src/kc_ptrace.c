@@ -27,7 +27,7 @@ static unsigned long peek_word(unsigned long addr)
 
 static void poke_word(unsigned long addr, unsigned long val)
 {
-	ptrace(PTRACE_POKETEXT, active_child, addr, val);
+	ptrace(PTRACE_POKETEXT, active_child, get_aligned(addr), val);
 }
 
 static unsigned long ptrace_get_ip_before_trap(struct kc *kc)
@@ -55,14 +55,13 @@ static void ptrace_setup_breakpoints(struct kc *kc)
 	g_hash_table_iter_init(&iter, kc->addrs);
 	while (g_hash_table_iter_next(&iter,
 			(gpointer*)&key, (gpointer*)&addr)) {
-		unsigned long aligned_addr = get_aligned(addr->addr);
 		unsigned long old_word = peek_word(addr->addr);
 		unsigned long new_word;
 
 		addr->saved_code = old_word;
 		new_word = arch->setup_breakpoint(kc, addr->addr, old_word);
 
-		poke_word(aligned_addr, new_word);
+		poke_word(addr->addr, new_word);
 	}
 }
 
@@ -77,7 +76,7 @@ void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr)
    arch->adjust_pc_after_breakpoint(kc, &regs);
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
-   poke_word(get_aligned(addr->addr), addr->saved_code);
+   poke_word(addr->addr, addr->saved_code);
    kc_addr_register_hit(addr);
 }
 
