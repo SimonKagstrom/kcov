@@ -52,16 +52,20 @@ static void ptrace_setup_breakpoints(struct kc *kc)
 		error("The architecture %d isn't supported by KCOV yet\n",
 				kc->e_machine);
 
+	/* First lookup the current instruction encoding (without breakpoints) */
+	g_hash_table_iter_init(&iter, kc->addrs);
+	while (g_hash_table_iter_next(&iter,
+			(gpointer*)&key, (gpointer*)&addr))
+		addr->saved_code = peek_word(addr->addr);
+
+	/* Then setup the breakpoints */
 	g_hash_table_iter_init(&iter, kc->addrs);
 	while (g_hash_table_iter_next(&iter,
 			(gpointer*)&key, (gpointer*)&addr)) {
-		unsigned long old_word = peek_word(addr->addr);
-		unsigned long new_word;
+		unsigned long cur_data = peek_word(addr->addr);
 
-		addr->saved_code = old_word;
-		new_word = arch->setup_breakpoint(kc, addr->addr, old_word);
-
-		poke_word(addr->addr, new_word);
+		poke_word(addr->addr,
+				arch->setup_breakpoint(kc, addr->addr, cur_data));
 	}
 }
 
@@ -69,6 +73,7 @@ void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr)
 {
    uint8_t regs[1024];
    struct kc_ptrace_arch *arch = kc_ptrace_arch_get(kc->e_machine);
+   unsigned long val;
 
    /* arch C't be NULL, or we would have exited when setting up BPs */
    memset(regs, 0, sizeof(regs));
@@ -76,7 +81,12 @@ void ptrace_eliminate_breakpoint(struct kc *kc, struct kc_addr *addr)
    arch->adjust_pc_after_breakpoint(kc, &regs);
    ptrace(PTRACE_SETREGS, active_child, 0, &regs);
 
-   poke_word(addr->addr, addr->saved_code);
+   val = addr->saved_code;
+   if (arch->clear_breakpoint)
+	   val = arch->clear_breakpoint(kc, addr->addr,
+			   addr->saved_code, peek_word(addr->addr));
+
+   poke_word(addr->addr, val);
    kc_addr_register_hit(addr);
 }
 

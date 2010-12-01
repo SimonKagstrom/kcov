@@ -32,6 +32,21 @@ struct kc_ptrace_arch
 	 */
 	unsigned long (*setup_breakpoint)(struct kc *kc, unsigned long addr, unsigned long old_data);
 
+	/**
+	 * Clear a breakpoint.
+	 *
+	 * Might be NULL for architectures, in which case it will do nothing.
+	 * Basically, it needs to be defined for architectures which have
+	 * variable-sized instruction sets
+	 *
+	 * @param kc the KCOV context
+	 * @param addr the address to clear
+	 * @param old_data the original data at memory address @a addr (but aligned!)
+	 * @param cur_data the data at memory address @a addr
+	 */
+	unsigned long (*clear_breakpoint)(struct kc *kc, unsigned long addr,
+			unsigned long old_data, unsigned long cur_data);
+
 	void (*adjust_pc_after_breakpoint)(struct kc *kc, void *regs_cooked);
 };
 

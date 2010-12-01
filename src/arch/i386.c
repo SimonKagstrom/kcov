@@ -26,6 +26,18 @@ static unsigned long i386_setup_breakpoint(struct kc *kc,
 	return val;
 }
 
+static unsigned long i386_clear_breakpoint(struct kc *kc,
+		unsigned long addr, unsigned long old_data, unsigned long cur_data)
+{
+	unsigned long aligned_addr = get_aligned_4b(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+	unsigned long old_byte = (old_data >> shift) & 0xff;
+	unsigned long val = (cur_data & ~(0xff << shift)) | (old_byte << shift);
+
+	return val;
+}
+
 static void i386_adjust_pc_after_breakpoint(struct kc *kc,
 		void *regs_cooked)
 {
@@ -40,4 +52,5 @@ static struct kc_ptrace_arch i386_arch =
 	.get_pc = i386_get_pc,
 	.setup_breakpoint = i386_setup_breakpoint,
 	.adjust_pc_after_breakpoint = i386_adjust_pc_after_breakpoint,
+	.clear_breakpoint = i386_clear_breakpoint,
 };
