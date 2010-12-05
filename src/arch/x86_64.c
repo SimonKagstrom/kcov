@@ -23,7 +23,7 @@ static unsigned long x86_64_setup_breakpoint(struct kc *kc,
 	unsigned long aligned_addr = get_aligned(addr);
 	unsigned long offs = addr - aligned_addr;
 	unsigned long shift = 8 * offs;
-	unsigned long val = (old_data & ~(0xff << shift)) | (0xcc << shift);
+	unsigned long val = (old_data & ~(0xffLL << shift)) | (0xccLL << shift);
 
 	return val;
 }
