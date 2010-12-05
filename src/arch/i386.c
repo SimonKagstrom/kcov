@@ -18,10 +18,11 @@ static unsigned long i386_get_pc(struct kc *kc, void *regs_cooked)
 static unsigned long i386_setup_breakpoint(struct kc *kc,
 		unsigned long addr, unsigned long old_data)
 {
-	unsigned long aligned_addr = get_aligned_4b(addr);
+	unsigned long aligned_addr = get_aligned(addr);
 	unsigned long offs = addr - aligned_addr;
 	unsigned long shift = 8 * offs;
-	unsigned long val = (old_data & ~(0xff << shift)) | (0xcc << shift);
+	unsigned long val = (old_data & ~((unsigned long)0xff << shift)) |
+			((unsigned long)0xcc << shift);
 
 	return val;
 }
@@ -29,11 +30,12 @@ static unsigned long i386_setup_breakpoint(struct kc *kc,
 static unsigned long i386_clear_breakpoint(struct kc *kc,
 		unsigned long addr, unsigned long old_data, unsigned long cur_data)
 {
-	unsigned long aligned_addr = get_aligned_4b(addr);
+	unsigned long aligned_addr = get_aligned(addr);
 	unsigned long offs = addr - aligned_addr;
 	unsigned long shift = 8 * offs;
-	unsigned long old_byte = (old_data >> shift) & 0xff;
-	unsigned long val = (cur_data & ~(0xff << shift)) | (old_byte << shift);
+	unsigned long old_byte = (old_data >> shift) & (unsigned long)0xff;
+	unsigned long val = (cur_data & ~((unsigned long)0xff << shift)) |
+			(old_byte << shift);
 
 	return val;
 }
