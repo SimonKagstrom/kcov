@@ -1,11 +1,16 @@
 #include <stdint.h>
 #include <elf.h> /* EM_386 */
+#include <sys/user.h>
 
 #include <kc_ptrace_arch.h>
 
 enum
 {
+#if defined(__WORDSIZE) && __WORDSIZE == 64
+	I386_R_PC = 32, /* i386 compatibility mode on x86_64 */
+#else
 	I386_R_PC = 12,
+#endif
 };
 
 static unsigned long i386_get_pc(struct kc *kc, void *regs_cooked)
