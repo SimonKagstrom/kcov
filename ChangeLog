@@ -1,11 +1,17 @@
 Kcov (4):
+	* Add MIPS32, ARM and PowerPC architecture support. This is untested though
+	  and might very well not work at all. 
+	  
+	* Add -t option to set the title of the program to test (otherwise it
+	  will be the filename) 
+
 	* Refactored the architecture support to allow running i386 programs
 	  on x86_64 machines, and easier add other architectures
 
-	* Make it possible to collect coverage from multiple programs in a single
-	  directory, useful for example when running a test suite
+	* Make it possible to collect coverage from multiple programs in a
+	  single directory, useful for example when running a test suite
 
-    * Add coverage color to the header as well
+	* Add coverage color to the header as well
 
 	* Misc refactoring  
 
