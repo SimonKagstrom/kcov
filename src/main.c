@@ -27,6 +27,7 @@ static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
 static const char **exclude_paths = (const char *[]){NULL};
 static char *const *program_args;
+static const char *title = NULL;
 static unsigned long low_limit = 16;
 static unsigned long high_limit = 50;
 static pid_t ptrace_pid;
@@ -41,6 +42,7 @@ static void usage(void)
 			"  -l low,high            setup limits for low/high coverage (default %lu,%lu)\n"
 			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
 			"  -x exclude-paths       comma-separated list of paths to exclude in the report\n"
+			"  -t title               title for the coverage (default filename)\n"
 			"  -w write-file          file to write breakpoints to for kernel usage\n"
 			"  -r read-file           file to read hit breakpoints from for kernel usage\n\n"
 			"Examples:\n"
@@ -104,6 +106,13 @@ static void parse_arguments(int argc, char *const argv[])
 		}
 		if (strcmp(cur, "-s") == 0 && i < argc - 1) {
 			sort_type = argv[i + 1];
+
+			i++;
+			after_opts = i + 1;
+			continue;
+		}
+		if (strcmp(cur, "-t") == 0 && i < argc - 1) {
+			title = argv[i + 1];
 
 			i++;
 			after_opts = i + 1;
@@ -211,7 +220,10 @@ int main(int argc, char *argv[])
 
 	switch(kc->type) {
 	case PTRACE_FILE:
-		kc->module_name = xstrdup(kc->in_file);
+		if (title)
+			kc->module_name = xstrdup(title);
+		else
+			kc->module_name = xstrdup(kc->in_file);
 		ptrace_run(kc, program_args);
 		break;
 	case PTRACE_PID:
