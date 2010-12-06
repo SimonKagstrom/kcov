@@ -5,6 +5,7 @@
 #include "i386.c"
 #include "x86_64.c"
 #include "mips32.c"
+#include "arm.c"
 
 /* Allow for lots of architectures! */
 static struct kc_ptrace_arch *archs[EM_NUM];
@@ -36,4 +37,5 @@ void kc_ptrace_arch_setup(void)
 	kc_ptrace_arch_register(&i386_arch);
 	kc_ptrace_arch_register(&x86_64_arch);
 	kc_ptrace_arch_register(&mips32_arch);
+	kc_ptrace_arch_register(&arm_arch);
 }
