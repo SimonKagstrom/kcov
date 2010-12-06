@@ -34,6 +34,7 @@ struct kc_coverage_db
 {
 	uint32_t n_lines;
 	uint32_t n_covered_lines;
+	char name[256];
 };
 
 struct kc

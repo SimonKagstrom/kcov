@@ -678,7 +678,7 @@ static int write_global_index(struct kc *kc, const char *dir_name)
 				"      <td class=\"coverNum%s\">%d&nbsp;/&nbsp;%d&nbsp;lines</td>\n"
 				"    </tr>\n",
 				de->d_name,
-				de->d_name,
+				db.name,
 				construct_bar(percentage),
 				percentage_text, percentage,
 				percentage_text, db.n_covered_lines, db.n_lines);
@@ -716,6 +716,7 @@ static void write_report(const char *dir, struct kc *kc)
 	struct kc_file *val;
 
 	memset(&kc->total_coverage, 0, sizeof(kc->total_coverage));
+	strncpy(kc->total_coverage.name, kc->module_name, sizeof(kc->total_coverage.name) - 1);
 	/* Write an index first */
 	write_index(dir, kc);
 
