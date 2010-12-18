@@ -1,4 +1,10 @@
+Kcov (5):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (4):
+	* Build system is now based on cmake (Igor Murzov)
+
 	* Add MIPS32, ARM and PowerPC architecture support. This is untested though
 	  and might very well not work at all. 
 	  
