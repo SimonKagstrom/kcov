@@ -2,7 +2,6 @@
 #define KC_PTRACE_ARCH_H
 
 #include <sys/ptrace.h>
-#include <asm/ptrace.h>
 #include <sys/types.h>
 #include <unistd.h>
 
