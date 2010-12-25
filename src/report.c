@@ -224,33 +224,35 @@ static const char *escape_html(const char *s)
 	for (i = 0; i < len; i++) {
 		char c = s[i];
 
-		if ((c & 0xff) > 127) {
-			char tmp_val[16];
-
-			xsnprintf(tmp_val, sizeof(tmp_val), "&#%x;", c & 0xff);
-			dst = escape_helper(dst, tmp_val);
-		} else {
-			switch (c) {
-			case '<':
-				dst = escape_helper(dst, "&lt;");
-				break;
-			case '>':
-				dst = escape_helper(dst, "&gt;");
-				break;
-			case '&':
-				dst = escape_helper(dst, "&amp;");
-				break;
-			case '\"':
-				dst = escape_helper(dst, "&quot;");
-				break;
-			case '\n': case '\r':
-				dst = escape_helper(dst, " ");
-				break;
-			default:
-				*dst = c;
-				dst++;
-				break;
-			}
+		switch (c) {
+		case '<':
+			dst = escape_helper(dst, "&lt;");
+			break;
+		case '>':
+			dst = escape_helper(dst, "&gt;");
+			break;
+		case '&':
+			dst = escape_helper(dst, "&amp;");
+			break;
+		case '\"':
+			dst = escape_helper(dst, "&quot;");
+			break;
+		case '\'':
+			dst = escape_helper(dst, "&#039;");
+			break;
+		case '/':
+			dst = escape_helper(dst, "&#047;");
+			break;
+		case '\\':
+			dst = escape_helper(dst, "&#092;");
+			break;
+		case '\n': case '\r':
+			dst = escape_helper(dst, " ");
+			break;
+		default:
+			*dst = c;
+			dst++;
+			break;
 		}
 	}
 
