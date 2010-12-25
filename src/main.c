@@ -25,7 +25,7 @@ static const char *out_dir = NULL;
 static const char *sort_type = NULL;
 static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
-static const char **exclude_paths = (const char *[]){NULL};
+static const char **exclude_paths = NULL;
 static char *const *program_args;
 static const char *title = NULL;
 static unsigned long low_limit = 16;
@@ -76,6 +76,30 @@ static const char **get_comma_separated_strvec(const char *src)
 	return (const char **)strvec;
 }
 
+static const char **get_comma_separated_pathvec(const char *src)
+{
+	char *cpy = xstrdup(src);
+	char **pathvec = NULL;
+	char *path;
+	int n = 0;
+
+	path = strtok(cpy, ",");
+	do
+	{
+		pathvec = xrealloc(pathvec, sizeof(const char *) * (n + 2));
+		pathvec[n] = realpath(path, NULL);
+		if(pathvec[n] != NULL) {
+			pathvec[n + 1] = NULL;
+			n++;
+		}
+		path = strtok(NULL, ",");
+	} while(path);
+
+	free(cpy);
+
+	return (const char **)pathvec;
+}
+
 static void parse_arguments(int argc, char *const argv[])
 {
 	int i;
@@ -98,7 +122,7 @@ static void parse_arguments(int argc, char *const argv[])
 			continue;
 		}
 		if (strcmp(cur, "-i") == 0 && i < argc - 1) {
-			only_report_paths = get_comma_separated_strvec(argv[i + 1]);
+			only_report_paths = get_comma_separated_pathvec(argv[i + 1]);
 
 			i++;
 			after_opts = i + 1;
@@ -143,7 +167,7 @@ static void parse_arguments(int argc, char *const argv[])
 			continue;
 		}
 		if (strcmp(cur, "-x") == 0 && i < argc - 1) {
-			exclude_paths = get_comma_separated_strvec(argv[i + 1]);
+			exclude_paths = get_comma_separated_pathvec(argv[i + 1]);
 
 			i++;
 			after_opts = i + 1;
@@ -184,11 +208,6 @@ int main(int argc, char *argv[])
 	kc_ptrace_arch_setup();
 
 	parse_arguments(argc - 1, &argv[1]);
-	if (!only_report_paths) {
-		only_report_paths = xmalloc(sizeof(const char *) * 2);
-		only_report_paths[0] = "";
-		only_report_paths[1] = NULL;
-	}
 
 	kc = kc_open_elf(in_file, ptrace_pid);
 	if (!kc)
