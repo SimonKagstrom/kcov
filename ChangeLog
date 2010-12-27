@@ -1,4 +1,13 @@
 Kcov (5):
+	* Rename path-matching to pattern matching (which is what it does)
+	  and set it up using long options.
+
+	* Parse options with getopt
+
+	* Don't escape all multibyte characters in the report. That will
+	  break display of UTF-8 etc (Igor Murzov)
+
+	* Improve cmake packaging support (Igor Murzov)
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
