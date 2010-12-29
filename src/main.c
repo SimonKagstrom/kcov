@@ -35,22 +35,24 @@ static pid_t ptrace_pid;
 
 static void usage(void)
 {
-	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
-			"Where [OPTIONS] are\n"
-			"  -p, --pid=PID          trace PID instead of executing in-file,\n"
-			"                         in-file is optional in this case\n"
-			"  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
-			"  -l, --limits=low,high  setup limits for low/high coverage (default %lu,%lu)\n"
-			"  -t, --title=title      title for the coverage (default: filename)\n"
-			"  --include-pattern=pat  comma-separated path patterns to include in the report\n"
-			"  --exclude-pattern=pat  comma-separated path patterns to exclude in the report\n\n"
-			"Examples:\n"
-			"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
-			"  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
-			"  kcov -include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
-			"                                                        # including /src/frodo\n"
-			"",
-			low_limit, high_limit);
+	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
+	       "\n"
+	       "Where [OPTIONS] are\n"
+	       "  -p, --pid=PID          trace PID instead of executing in-file,\n"
+	       "                         in-file is optional in this case\n"
+	       "  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
+	       "  -l, --limits=low,high  setup limits for low/high coverage (default %lu,%lu)\n"
+	       "  -t, --title=title      title for the coverage (default: filename)\n"
+	       "  --include-pattern=pat  comma-separated path patterns to include in the report\n"
+	       "  --exclude-pattern=pat  comma-separated path patterns to exclude in the report\n"
+	       "\n"
+	       "Examples:\n"
+	       "  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
+	       "  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
+	       "  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
+	       "                                                         # including /src/frodo\n"
+	       "",
+	       low_limit, high_limit);
 	exit(1);
 }
 
@@ -89,7 +91,6 @@ static void parse_arguments(int argc, char *const argv[])
 			/*{"read-file", required_argument, 0, 'r'}, Ditto */
 			{0,0,0,0}
 	};
-	int i;
 	int after_opts = 0;
 	int extra_needed = 2;
 
@@ -126,8 +127,6 @@ static void parse_arguments(int argc, char *const argv[])
 			break;
 		case 'l': {
 			const char **limits = get_comma_separated_strvec(optarg);
-			char *endp;
-			const char **p = limits;
 
 			if (limits[0] == NULL || limits[1] == NULL)
 				usage();
@@ -139,10 +138,10 @@ static void parse_arguments(int argc, char *const argv[])
 			if (endp == limits[1])
 				usage();
 
-			while (*p)
+			while (*limits)
 			{
-				free((void*)*p);
-				p++;
+				free((void *)*limits);
+				limits++;
 			}
 			break;
 		}
@@ -152,9 +151,8 @@ static void parse_arguments(int argc, char *const argv[])
 		case 'w':
 			write_path = optarg;
 			break;
-
 		default:
-			error("Unknown / unhandled argument!\n");
+			error("Unrecognized option: -%c\n", optopt);
 		}
 	}
 
