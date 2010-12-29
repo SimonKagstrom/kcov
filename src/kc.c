@@ -14,7 +14,8 @@
 #include <string.h>
 #include <libgen.h>    /* POSIX basename */
 #include <libelf.h>
-#include <libdwarf.h>
+#include <dwarf.h>
+#include <elfutils/libdw.h>
 
 #include <kc.h>
 #include <utils.h>
@@ -76,13 +77,6 @@ struct kc_addr *kc_lookup_addr(struct kc *kc, unsigned long addr)
 	return g_hash_table_lookup(kc->addrs, (gpointer *)&addr);
 }
 
-
-static void dwarf_error_handler(Dwarf_Error error, Dwarf_Ptr userData)
-{
-	char *msg = dwarf_errmsg(error);
-
-	printf("Dwarf: %s\n", msg);
-}
 
 static int lookup_elf_type(struct kc *kc, const char *filename, struct Elf *elf)
 {
@@ -185,9 +179,11 @@ static const char *lookup_filename_by_pid(pid_t pid)
 
 struct kc *kc_open_elf(const char *filename, pid_t pid)
 {
-	Dwarf_Unsigned header;
+	Dwarf_Off offset = 0;
+	Dwarf_Off last_offset = 0;
+	size_t hdr_size;
 	struct Elf *elf;
-	Dwarf_Debug dbg;
+	Dwarf *dbg;
 	struct kc *kc;
 	int err;
 	int fd;
@@ -206,8 +202,8 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 		return NULL;
 
 	/* Initialize libdwarf */
-	err = dwarf_init(fd, DW_DLC_READ, dwarf_error_handler, 0, &dbg,0);
-	if (err == DW_DLV_ERROR) {
+	dbg = dwarf_begin(fd, DWARF_C_READ);
+	if (!dbg) {
 		close(fd);
 		return NULL;
 	}
@@ -222,10 +218,12 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 	kc->files = g_hash_table_new(g_str_hash, g_str_equal);
 	kc->sort_type = FILENAME;
 
-	if (err == DW_DLV_NO_ENTRY)
-		goto out_ok;
+	elf = dwarf_getelf(dbg);
+	if (!elf) {
+		error("Can't get ELF\n");
+		goto out_err;
+	}
 
-	err = dwarf_get_elf(dbg, &elf, NULL);
 	err = lookup_elf_type(kc, filename, elf);
 	if (err < 0)
 		goto out_err;
@@ -233,52 +231,50 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 		kc->type = PTRACE_PID;
 
 	/* Iterate over the headers */
-	while (dwarf_next_cu_header(dbg, 0, 0, 0, 0,
-			&header, 0) == DW_DLV_OK) {
-		Dwarf_Line* line_buffer;
-		Dwarf_Signed line_count;
+	while (dwarf_nextcu(dbg, offset, &offset, &hdr_size, 0, 0, 0) == 0) {
+		Dwarf_Lines* line_buffer;
+		size_t line_count;
 		Dwarf_Die die;
 		int i;
 
-		if (dwarf_siblingof(dbg, 0, &die, 0) != DW_DLV_OK)
+		if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == NULL)
 			goto out_err;
 
+		last_offset = offset;
+
 		/* Get the source lines */
-		if (dwarf_srclines(die, &line_buffer, &line_count, 0) != DW_DLV_OK)
+		if (dwarf_getsrclines(&die, &line_buffer, &line_count) != 0)
 			continue;
 
 		/* Store them */
 		for (i = 0; i < line_count; i++) {
-			Dwarf_Unsigned line_nr;
-			char* line_source;
-			Dwarf_Bool is_code;
+			Dwarf_Line *line;
+			int line_nr;
+			const char* line_source;
+			Dwarf_Word mtime, len;
+			bool is_code;
 			Dwarf_Addr addr;
 
-			if (dwarf_lineno(line_buffer[i], &line_nr, 0) != DW_DLV_OK)
+			if ( !(line = dwarf_onesrcline(line_buffer, i)) )
 				goto out_err;
-			if (dwarf_linesrc(line_buffer[i], &line_source, 0) != DW_DLV_OK)
+			if (dwarf_lineno(line, &line_nr) != 0)
 				goto out_err;
-			if (dwarf_linebeginstatement(line_buffer[i], &is_code, 0) != DW_DLV_OK)
+			if (!(line_source = dwarf_linesrc(line, &mtime, &len)) )
+				goto out_err;
+			if (dwarf_linebeginstatement(line, &is_code) != 0)
 				goto out_err;
 
-			if (dwarf_lineaddr(line_buffer[i], &addr, 0) != DW_DLV_OK)
+			if (dwarf_lineaddr(line, &addr) != 0)
 				goto out_err;
 
 			if (line_nr && is_code) {
 				kc_add_addr(kc, addr, line_nr, line_source);
 			}
-
-			dwarf_dealloc(dbg, line_source, DW_DLA_STRING);
 		}
-
-		/* Release the memory */
-		for (i = 0; i < line_count; i++)
-			dwarf_dealloc(dbg,line_buffer[i], DW_DLA_LINE);
-		dwarf_dealloc(dbg,line_buffer, DW_DLA_LIST);
 	}
 
 	/* Shutdown libdwarf */
-	if (dwarf_finish(dbg, 0) != DW_DLV_OK)
+	if (dwarf_end(dbg) != 0)
 		goto out_err;
 
 out_ok:

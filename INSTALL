@@ -1,8 +1,8 @@
 Building Kcov
 -------------
 
-You need development headers and libraries for libglib, libdwarf and libelf
-to build kcov.
+You need development headers and libraries for libglib, libdw (elfutils)
+and libelf to build kcov.
 
 Create an empty build dir and do the following steps:
 # cmake <path/to/kcov/source/directory> <options>
