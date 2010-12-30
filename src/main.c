@@ -26,7 +26,9 @@ static const char *out_dir = NULL;
 static const char *sort_type = NULL;
 static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
-static const char **exclude_paths = (const char *[]){NULL};
+static const char **exclude_paths = NULL;
+static const char **only_report_patterns = NULL;
+static const char **exclude_patterns = NULL;
 static char *const *program_args;
 static const char *title = NULL;
 static unsigned long low_limit = 16;
@@ -43,6 +45,8 @@ static void usage(void)
 	       "  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
 	       "  -l, --limits=low,high  setup limits for low/high coverage (default %lu,%lu)\n"
 	       "  -t, --title=title      title for the coverage (default: filename)\n"
+	       "  --include-path=path    comma-separated list of paths to include in the report\n"
+	       "  --exclude-path=path    comma-separated list of paths to exclude in the report\n"
 	       "  --include-pattern=pat  comma-separated path patterns to include in the report\n"
 	       "  --exclude-pattern=pat  comma-separated path patterns to exclude in the report\n"
 	       "\n"
@@ -78,6 +82,30 @@ static const char **get_comma_separated_strvec(const char *src)
 	return (const char **)strvec;
 }
 
+static const char **get_comma_separated_pathvec(const char *src)
+{
+	char *cpy = xstrdup(src);
+	char **pathvec = NULL;
+	char *path;
+	int n = 0;
+
+	path = strtok(cpy, ",");
+	do
+	{
+		pathvec = xrealloc(pathvec, sizeof(const char *) * (n + 2));
+		pathvec[n] = realpath(path, NULL);
+		if(pathvec[n] != NULL) {
+			pathvec[n + 1] = NULL;
+			n++;
+		}
+		path = strtok(NULL, ",");
+	} while(path);
+
+	free(cpy);
+
+	return (const char **)pathvec;
+}
+
 static void parse_arguments(int argc, char *const argv[])
 {
 	static const struct option long_options[] = {
@@ -87,6 +115,8 @@ static void parse_arguments(int argc, char *const argv[])
 			{"title", required_argument, 0, 't'},
 			{"exclude-pattern", required_argument, 0, 'x'},
 			{"include-pattern", required_argument, 0, 'i'},
+			{"exclude-path", required_argument, 0, 'X'},
+			{"include-path", required_argument, 0, 'I'},
 			/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 			/*{"read-file", required_argument, 0, 'r'}, Ditto */
 			{0,0,0,0}
@@ -120,10 +150,16 @@ static void parse_arguments(int argc, char *const argv[])
 			title = optarg;
 			break;
 		case 'i':
-			only_report_paths = get_comma_separated_strvec(optarg);
+			only_report_patterns = get_comma_separated_strvec(optarg);
 			break;
 		case 'x':
-			exclude_paths = get_comma_separated_strvec(optarg);
+			exclude_patterns = get_comma_separated_strvec(optarg);
+			break;
+		case 'I':
+			only_report_paths = get_comma_separated_pathvec(optarg);
+			break;
+		case 'X':
+			exclude_paths = get_comma_separated_pathvec(optarg);
 			break;
 		case 'l': {
 			const char **limits = get_comma_separated_strvec(optarg);
@@ -179,11 +215,6 @@ int main(int argc, char *argv[])
 	kc_ptrace_arch_setup();
 
 	parse_arguments(argc, argv);
-	if (!only_report_paths) {
-		only_report_paths = xmalloc(sizeof(const char *) * 2);
-		only_report_paths[0] = "";
-		only_report_paths[1] = NULL;
-	}
 
 	kc = kc_open_elf(in_file, ptrace_pid);
 	if (!kc)
@@ -194,6 +225,8 @@ int main(int argc, char *argv[])
 	kc->binary_filename = basename(bn);
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
+	kc->only_report_patterns = only_report_patterns;
+	kc->exclude_patterns = exclude_patterns;
 	kc->low_limit = low_limit;
 	kc->high_limit = high_limit;
 

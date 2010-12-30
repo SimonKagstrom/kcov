@@ -218,7 +218,7 @@ static const char *escape_html(const char *s)
 	char buf[4096];
 	char *dst = buf;
 	size_t len = strlen(s);
-	int i;
+	size_t i;
 
 	memset(buf, 0, sizeof(buf));
 	for (i = 0; i < len; i++) {
@@ -452,18 +452,46 @@ static int kc_percentage_cmp(const void *pa, const void *pb)
 }
 
 
-
 static int report_path(const char *path, struct kc *kc)
 {
-	const char **p = kc->only_report_paths;
-	int i = 0;
+	if (!kc->only_report_paths && !kc->only_report_patterns)
+		return 1;
 
-	while (p[i])
+	const char **p;
+	size_t i;
+
+	if (kc->only_report_paths)
 	{
-		if (strstr(path, p[i]))
-			return 1;
+		struct stat sb;
+		p = kc->only_report_paths;
+		for (i = 0; p[i] != NULL; i++)
+		{
+			if (stat(p[i], &sb))
+				continue;
+			if (S_ISDIR(sb.st_mode)) {
+				size_t plen = strlen(p[i]);
+				if (strstr(path, p[i]) == path &&
+				    (path[plen] == '\0' || path[plen] == '/' ))
+					return 1;
+			}
+			else {
+				if (!strcmp(path, p[i]))
+					return 1;
+			}
+		}
+	}
 
-		i++;
+	if (kc->only_report_patterns)
+	{
+		p = kc->only_report_patterns;
+		i = 0;
+		while (p[i])
+		{
+			if (strstr(path, p[i]))
+				return 1;
+
+			i++;
+		}
 	}
 
 	return 0;
@@ -471,15 +499,44 @@ static int report_path(const char *path, struct kc *kc)
 
 static int exclude_path(const char *path, struct kc *kc)
 {
-	const char **p = kc->exclude_paths;
-	int i = 0;
+	if (!kc->exclude_paths && !kc->exclude_patterns)
+		return 0;
 
-	while (p[i])
+	const char **p;
+	size_t i;
+
+	if (kc->exclude_paths)
 	{
-		if (strstr(path, p[i]))
-			return 1;
+		struct stat sb;
+		p = kc->exclude_paths;
+		for (i = 0; p[i] != NULL; i++)
+		{
+			if (stat(p[i], &sb))
+				continue;
+			if (S_ISDIR(sb.st_mode)) {
+				size_t plen = strlen(p[i]);
+				if (strstr(path, p[i]) == path &&
+				    (path[plen] == '\0' || path[plen] == '/' ))
+					return 1;
+			}
+			else {
+				if (!strcmp(path, p[i]))
+					return 1;
+			}
+		}
+	}
 
-		i++;
+	if (kc->exclude_patterns)
+	{
+		p = kc->exclude_patterns;
+		i = 0;
+		while (p[i])
+		{
+			if (strstr(path, p[i]))
+				return 1;
+
+			i++;
+		}
 	}
 
 	return 0;
