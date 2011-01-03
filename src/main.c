@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <libgen.h>
+#include <getopt.h>
 
 #include <kc.h>
 #include <utils.h>
@@ -25,7 +26,9 @@ static const char *out_dir = NULL;
 static const char *sort_type = NULL;
 static const char *in_file = NULL;
 static const char **only_report_paths = NULL;
-static const char **exclude_paths = (const char *[]){NULL};
+static const char **exclude_paths = NULL;
+static const char **only_report_patterns = NULL;
+static const char **exclude_patterns = NULL;
 static char *const *program_args;
 static const char *title = NULL;
 static unsigned long low_limit = 16;
@@ -34,23 +37,26 @@ static pid_t ptrace_pid;
 
 static void usage(void)
 {
-	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n\n"
-			"Where [OPTIONS] are\n"
-			"  -p PID                 trace PID instead of executing in-file,\n"
-			"                         in-file is optional in this case\n"
-			"  -s sort-type           how to sort files: f[ilename] (default), p[ercent]\n"
-			"  -l low,high            setup limits for low/high coverage (default %lu,%lu)\n"
-			"  -i only-include-paths  comma-separated list of paths to include in the report\n"
-			"  -x exclude-paths       comma-separated list of paths to exclude in the report\n"
-			"  -t title               title for the coverage (default filename)\n"
-			"  -w write-file          file to write breakpoints to for kernel usage\n"
-			"  -r read-file           file to read hit breakpoints from for kernel usage\n\n"
-			"Examples:\n"
-			"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
-			"  kcov -p 1000 /tmp/frodo          # Check coverage for PID 1000\n"
-			"  kcov -i /src/frodo/ /tmp/frodo ./frodo  # Only include files from /src/frodo\n"
-			"",
-			low_limit, high_limit);
+	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
+	       "\n"
+	       "Where [OPTIONS] are\n"
+	       "  -p, --pid=PID          trace PID instead of executing in-file,\n"
+	       "                         in-file is optional in this case\n"
+	       "  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
+	       "  -l, --limits=low,high  setup limits for low/high coverage (default %lu,%lu)\n"
+	       "  -t, --title=title      title for the coverage (default: filename)\n"
+	       "  --include-path=path    comma-separated list of paths to include in the report\n"
+	       "  --exclude-path=path    comma-separated list of paths to exclude in the report\n"
+	       "  --include-pattern=pat  comma-separated path patterns to include in the report\n"
+	       "  --exclude-pattern=pat  comma-separated path patterns to exclude in the report\n"
+	       "\n"
+	       "Examples:\n"
+	       "  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
+	       "  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
+	       "  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
+	       "                                                         # including /src/frodo\n"
+	       "",
+	       low_limit, high_limit);
 	exit(1);
 }
 
@@ -76,52 +82,87 @@ static const char **get_comma_separated_strvec(const char *src)
 	return (const char **)strvec;
 }
 
+static const char **get_comma_separated_pathvec(const char *src)
+{
+	char *cpy = xstrdup(src);
+	char **pathvec = NULL;
+	char *path;
+	int n = 0;
+
+	path = strtok(cpy, ",");
+	do
+	{
+		pathvec = xrealloc(pathvec, sizeof(const char *) * (n + 2));
+		pathvec[n] = realpath(path, NULL);
+		if(pathvec[n] != NULL) {
+			pathvec[n + 1] = NULL;
+			n++;
+		}
+		path = strtok(NULL, ",");
+	} while(path);
+
+	free(cpy);
+
+	return (const char **)pathvec;
+}
+
 static void parse_arguments(int argc, char *const argv[])
 {
-	int i;
+	static const struct option long_options[] = {
+			{"pid", required_argument, 0, 'p'},
+			{"sort-type", required_argument, 0, 's'},
+			{"limits", required_argument, 0, 'l'},
+			{"title", required_argument, 0, 't'},
+			{"exclude-pattern", required_argument, 0, 'x'},
+			{"include-pattern", required_argument, 0, 'i'},
+			{"exclude-path", required_argument, 0, 'X'},
+			{"include-path", required_argument, 0, 'I'},
+			/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
+			/*{"read-file", required_argument, 0, 'r'}, Ditto */
+			{0,0,0,0}
+	};
 	int after_opts = 0;
 	int extra_needed = 2;
 
-	for (i = 0; i < argc; i++) {
-		const char *cur = argv[i];
+	while (1) {
+		char *endp;
+		int option_index = 0;
+		int c;
 
-		if (strcmp(cur, "-p") == 0 && i < argc - 1) {
-			char *endp;
+		c = getopt_long (argc, argv, "p:s:l:t:",
+				long_options, &option_index);
 
-			ptrace_pid = strtoul(argv[i + 1], &endp, 0);
-			if (endp == argv[i + 1])
-				usage();
+		/* No more options */
+		if (c == -1)
+			break;
 
-			i++;
-			after_opts = i + 1;
+		switch (c) {
+		case 0:
+			break;
+		case 'p':
+			ptrace_pid = strtoul(optarg, &endp, 0);
 			extra_needed = 1;
-			continue;
-		}
-		if (strcmp(cur, "-i") == 0 && i < argc - 1) {
-			only_report_paths = get_comma_separated_strvec(argv[i + 1]);
-
-			i++;
-			after_opts = i + 1;
-			continue;
-		}
-		if (strcmp(cur, "-s") == 0 && i < argc - 1) {
-			sort_type = argv[i + 1];
-
-			i++;
-			after_opts = i + 1;
-			continue;
-		}
-		if (strcmp(cur, "-t") == 0 && i < argc - 1) {
-			title = argv[i + 1];
-
-			i++;
-			after_opts = i + 1;
-			continue;
-		}
-		if (strcmp(cur, "-l") == 0 && i < argc - 1) {
-			const char **limits = get_comma_separated_strvec(argv[i + 1]);
-			char *endp;
-			const char **p = limits;
+			break;
+		case 's':
+			sort_type = optarg;
+			break;
+		case 't':
+			title = optarg;
+			break;
+		case 'i':
+			only_report_patterns = get_comma_separated_strvec(optarg);
+			break;
+		case 'x':
+			exclude_patterns = get_comma_separated_strvec(optarg);
+			break;
+		case 'I':
+			only_report_paths = get_comma_separated_pathvec(optarg);
+			break;
+		case 'X':
+			exclude_paths = get_comma_separated_pathvec(optarg);
+			break;
+		case 'l': {
+			const char **limits = get_comma_separated_strvec(optarg);
 
 			if (limits[0] == NULL || limits[1] == NULL)
 				usage();
@@ -133,35 +174,25 @@ static void parse_arguments(int argc, char *const argv[])
 			if (endp == limits[1])
 				usage();
 
-			i++;
-			after_opts = i + 1;
-			while (*p)
+			while (*limits)
 			{
-				free((void*)*p);
-				p++;
+				free((void *)*limits);
+				limits++;
 			}
-			continue;
+			break;
 		}
-		if (strcmp(cur, "-x") == 0 && i < argc - 1) {
-			exclude_paths = get_comma_separated_strvec(argv[i + 1]);
-
-			i++;
-			after_opts = i + 1;
-			continue;
-		}
-		if (strcmp(cur, "-r") == 0 && i < argc - 1) {
-			read_path = argv[i + 1];
-			i++;
-			after_opts = i + 1;
-			continue;
-		}
-		if (strcmp(cur, "-w") == 0 && i < argc - 1) {
-			write_path = argv[i + 1];
-			i++;
-			after_opts = i + 1;
-			continue;
+		case 'r':
+			read_path = optarg;
+			break;
+		case 'w':
+			write_path = optarg;
+			break;
+		default:
+			error("Unrecognized option: -%c\n", optopt);
 		}
 	}
+
+	after_opts = optind;
 
 	/* When tracing by PID, the filename is optional */
 	if (argc < after_opts + extra_needed)
@@ -183,12 +214,7 @@ int main(int argc, char *argv[])
 
 	kc_ptrace_arch_setup();
 
-	parse_arguments(argc - 1, &argv[1]);
-	if (!only_report_paths) {
-		only_report_paths = xmalloc(sizeof(const char *) * 2);
-		only_report_paths[0] = "";
-		only_report_paths[1] = NULL;
-	}
+	parse_arguments(argc, argv);
 
 	kc = kc_open_elf(in_file, ptrace_pid);
 	if (!kc)
@@ -199,6 +225,8 @@ int main(int argc, char *argv[])
 	kc->binary_filename = basename(bn);
 	kc->only_report_paths = only_report_paths;
 	kc->exclude_paths = exclude_paths;
+	kc->only_report_patterns = only_report_patterns;
+	kc->exclude_patterns = exclude_patterns;
 	kc->low_limit = low_limit;
 	kc->high_limit = high_limit;
 

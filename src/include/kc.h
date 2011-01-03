@@ -48,6 +48,8 @@ struct kc
 
 	const char **only_report_paths;
 	const char **exclude_paths;
+	const char **only_report_patterns;
+	const char **exclude_patterns;
 	const char *module_name;
 	enum report_sort_type sort_type;
 	unsigned int e_machine;
