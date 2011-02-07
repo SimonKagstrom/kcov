@@ -177,6 +177,26 @@ static const char *lookup_filename_by_pid(pid_t pid)
 	return xstrdup(path);
 }
 
+int kc_is_elf(const char *filename)
+{
+	Dwarf *dbg;
+	int ret = 0;
+	int fd;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return ret;
+	dbg = dwarf_begin(fd, DWARF_C_READ);
+	if (dbg) {
+		ret = 1;
+		dwarf_end(dbg);
+	}
+
+	close(fd);
+
+	return ret;
+}
+
 struct kc *kc_open_elf(const char *filename, pid_t pid)
 {
 	Dwarf_Off offset = 0;

@@ -123,13 +123,24 @@ static void parse_arguments(int argc, char *const argv[])
 	};
 	int after_opts = 0;
 	int extra_needed = 2;
+	int last_arg;
+
+	/* Scan through the parameters for an ELF file: That will be the
+	 * second last argument in the list.
+	 *
+	 * After that it's arguments to the external program.
+	 */
+	for (last_arg = 1; last_arg < argc; last_arg++) {
+		if (kc_is_elf(argv[last_arg]))
+			break;
+	}
 
 	while (1) {
 		char *endp;
 		int option_index = 0;
 		int c;
 
-		c = getopt_long (argc, argv, "p:s:l:t:",
+		c = getopt_long (last_arg, argv, "p:s:l:t:",
 				long_options, &option_index);
 
 		/* No more options */

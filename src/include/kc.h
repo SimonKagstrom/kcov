@@ -81,6 +81,15 @@ struct kc_debug_backend
 
 };
 
+/**
+ * Return true if a filename is an ELF file.
+ *
+ * @param filename the filename to lookup
+ *
+ * @return 0 if the filename isn't an ELF, !0 otherwise
+ */
+extern int kc_is_elf(const char *filename);
+
 extern struct kc *kc_open_elf(const char *filename, pid_t pid);
 
 extern void kc_close(struct kc *kc);
