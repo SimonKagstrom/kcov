@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #include <utils.h>
 #include <kc.h>
@@ -451,6 +453,21 @@ static int kc_percentage_cmp(const void *pa, const void *pb)
 	return (int)(a->percentage - b->percentage);
 }
 
+static int cmp_path(const char *src_path, const char *cmp_realpath)
+{
+	struct stat sb;
+	char *src_realpath = realpath(src_path, NULL);
+	int ret;
+
+	if (!src_realpath)
+		return 0;
+
+	/* If the paths are equal, return true */
+	ret = (strstr(src_realpath, cmp_realpath) == src_realpath);
+	free(src_realpath);
+
+	return ret;
+}
 
 static int report_path(const char *path, struct kc *kc)
 {
@@ -462,22 +479,11 @@ static int report_path(const char *path, struct kc *kc)
 
 	if (kc->only_report_paths)
 	{
-		struct stat sb;
 		p = kc->only_report_paths;
 		for (i = 0; p[i] != NULL; i++)
 		{
-			if (stat(p[i], &sb))
-				continue;
-			if (S_ISDIR(sb.st_mode)) {
-				size_t plen = strlen(p[i]);
-				if (strstr(path, p[i]) == path &&
-				    (path[plen] == '\0' || path[plen] == '/' ))
-					return 1;
-			}
-			else {
-				if (!strcmp(path, p[i]))
-					return 1;
-			}
+			if (cmp_path(path, p[i]))
+				return 1;
 		}
 	}
 
@@ -511,18 +517,8 @@ static int exclude_path(const char *path, struct kc *kc)
 		p = kc->exclude_paths;
 		for (i = 0; p[i] != NULL; i++)
 		{
-			if (stat(p[i], &sb))
-				continue;
-			if (S_ISDIR(sb.st_mode)) {
-				size_t plen = strlen(p[i]);
-				if (strstr(path, p[i]) == path &&
-				    (path[plen] == '\0' || path[plen] == '/' ))
-					return 1;
-			}
-			else {
-				if (!strcmp(path, p[i]))
-					return 1;
-			}
+			if (cmp_path(path, p[i]))
+				return 1;
 		}
 	}
 
