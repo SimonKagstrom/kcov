@@ -82,6 +82,24 @@ const char *dir_concat(const char *dir, const char *filename)
 	return out;
 }
 
+const char *expand_path(const char *path)
+{
+	size_t p_len = strlen(path);
+	const char *home = getenv("HOME");
+	size_t home_len;
+	char *out;
+
+	if (!home || p_len < 2 || path[0] != '~')
+		return xstrdup(path);
+
+	home_len = strlen(home);
+	out = xmalloc(home_len + p_len + 8);
+	snprintf(out, home_len + p_len + 8, "%s/%s", home, path + 1);
+
+	return out;
+}
+
+
 int file_exists(const char *path)
 {
 	struct stat st;
