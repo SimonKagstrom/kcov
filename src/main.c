@@ -92,13 +92,16 @@ static const char **get_comma_separated_pathvec(const char *src)
 	path = strtok(cpy, ",");
 	do
 	{
+		const char *p = expand_path(path);
+
 		pathvec = xrealloc(pathvec, sizeof(const char *) * (n + 2));
-		pathvec[n] = realpath(path, NULL);
+		pathvec[n] = realpath(p, NULL);
 		if(pathvec[n] != NULL) {
 			pathvec[n + 1] = NULL;
 			n++;
 		}
 		path = strtok(NULL, ",");
+		free((void *)p);
 	} while(path);
 
 	free(cpy);
