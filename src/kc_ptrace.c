@@ -169,6 +169,9 @@ static void ptrace_run_debugger(struct kc *kc)
 
 static pid_t fork_child(const char *executable, char *const argv[])
 {
+	int status;
+	pid_t who;
+
 	/* Basic check first */
 	if (access(executable, X_OK) != 0)
 		return -1;
@@ -185,13 +188,21 @@ static pid_t fork_child(const char *executable, char *const argv[])
 	}
 
 	/* Fork error? */
-	if (child < 0)
+	if (child < 0) {
+		perror("fork");
 		return -1;
+	}
 
 	/* Wait for the initial stop */
-	int status;
-	if ((waitpid(child, &status, 0) == -1) || (!WIFSTOPPED(status)))
+	who = waitpid(child, &status, 0);
+	if (who < 0) {
+		perror("waitpid");
 		return -1;
+	}
+	if (!WIFSTOPPED(status)) {
+		fprintf(stderr, "Child hasn't stopped: %x\n", status);
+		return -1;
+	}
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
 
 	return child;
@@ -204,7 +215,7 @@ int ptrace_run(struct kc *kc, char *const argv[])
 	active_child = fork_child(argv[0], &argv[0]);
 
 	if (active_child < 0) {
-		fprintf(stderr, "Can't fork child!\n");
+		perror("Can't fork child");
 		return -1;
 	}
 
