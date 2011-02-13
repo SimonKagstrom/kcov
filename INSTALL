@@ -1,8 +1,8 @@
 Building Kcov
 -------------
 
-You need development headers and libraries for libglib, libdw (elfutils)
-and libelf to build kcov.
+You need development headers and libraries for libglib and elfutils to build
+kcov.
 
 Create an empty build dir and do the following steps:
 # cmake <path/to/kcov/source/directory> <options>
@@ -21,7 +21,7 @@ cmake ..
 make
 make install
 
-More advanced an example:
+More advanced example:
 -------------------------
 cd /path/to/kcov-source
 mkdir build
@@ -42,15 +42,13 @@ http://www.cmake.org/cmake/help/cmake-2-8-docs.html.
 Troubleshooting
 ----------------
 
-If you have libelf and libdwarf installed, but cmake fails to find them.
-Add path to the header files to the CPATH variable and path to libraries to
-LIBRARY_PATH variable and then run cmake again.
+If you have elfutils installed, but cmake fails to find it, specify elfutils
+install prefix explicitly to cmake.
 
 Here is an example:
 -----------------------
-export CPATH=$CPATH:/opt/libelf-dir/include/:/opt/libdwarf-dir/include/
-export LIBRARY_PATH=$LIBRARY_PATH:/opt/libelf-dir/lib/:/opt/libdwarf-dir/lib/
 cd kcov
+CMAKE_PREFIX_PATH=/opt/elfutils-dir/ \
 cmake .
 make
 -----------------------
