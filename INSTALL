@@ -1,54 +1,52 @@
 Building Kcov
--------------
+=============
 
 You need development headers and libraries for libglib and elfutils to build
 kcov.
 
 Create an empty build dir and do the following steps:
-# cmake <path/to/kcov/source/directory> <options>
-# make
-# make install
+
+    cmake [options] <path/to/kcov/source/dir>
+    make
+    make install
 
 Useful options include -DCMAKE_INSTALL_PREFIX=<path> (installation prefix),
 -DCMAKE_BUILD_TYPE=<type> and -DCMAKE_C_FLAGS=<CFLAGS>.
 
 Basic example:
---------------
-cd /path/to/kcov-source
-mkdir build
-cd build
-cmake ..
-make
-make install
+
+    cd /path/to/kcov/source/dir
+    mkdir build
+    cd build
+    cmake ..
+    make
+    make install
 
 More advanced example:
--------------------------
-cd /path/to/kcov-source
-mkdir build
-cd build
-cmake \
-  -DCMAKE_C_FLAGS:STRING="-O3 -march=i686" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=/usr \
-  ..
-make -j2 || exit 1
-make install DESTDIR=/tmp/kcov-build || exit 1
------------------------
 
-For further information look for cmake documentation:
-http://www.cmake.org/cmake/help/cmake-2-8-docs.html.
+    cd /path/to/kcov/source/dir
+    mkdir build
+    cd build
+    cmake \
+      -DCMAKE_C_FLAGS:STRING="-O3 -march=i686" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      ..
+    make -j2 || exit 1
+    make install DESTDIR=/tmp/kcov-build || exit 1
+
+For further information refer to cmake documentation:
+    http://www.cmake.org/cmake/help/cmake-2-8-docs.html.
 
 
 Troubleshooting
-----------------
+===============
 
 If you have elfutils installed, but cmake fails to find it, specify elfutils
-install prefix explicitly to cmake.
+install prefix explicitly to cmake. Here is an example:
 
-Here is an example:
------------------------
-cd kcov
-CMAKE_PREFIX_PATH=/opt/elfutils-dir/ \
-cmake .
-make
------------------------
+    cd kcov
+    CMAKE_PREFIX_PATH=/opt/elfutils-dir/ \
+    cmake .
+    make
+    make install
