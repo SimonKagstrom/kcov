@@ -89,7 +89,7 @@ const char *expand_path(const char *path)
 	size_t home_len;
 	char *out;
 
-	if (!home || p_len < 2 || path[0] != '~')
+	if (!home || p_len < 1 || path[0] != '~')
 		return xstrdup(path);
 
 	home_len = strlen(home);
