@@ -96,6 +96,11 @@ static const char **get_comma_separated_pathvec(const char *src)
 
 		pathvec = xrealloc(pathvec, sizeof(const char *) * (n + 2));
 		pathvec[n] = realpath(p, NULL);
+		if (pathvec[n] == NULL) {
+			fprintf(stderr, "Can't resolve path %s\n", p);
+			usage();
+		}
+
 		if(pathvec[n] != NULL) {
 			pathvec[n + 1] = NULL;
 			n++;
