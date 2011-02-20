@@ -101,10 +101,8 @@ static const char **get_comma_separated_pathvec(const char *src)
 			usage();
 		}
 
-		if(pathvec[n] != NULL) {
-			pathvec[n + 1] = NULL;
-			n++;
-		}
+		pathvec[n + 1] = NULL;
+		n++;
 		path = strtok(NULL, ",");
 		free((void *)p);
 	} while(path);
