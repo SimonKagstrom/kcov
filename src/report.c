@@ -453,18 +453,18 @@ static int kc_percentage_cmp(const void *pa, const void *pb)
 	return (int)(a->percentage - b->percentage);
 }
 
-static int cmp_path(const char *src_path, const char *cmp_realpath)
+static int cmp_path(const char *src_file_path, const char *cmp_realpath)
 {
 	struct stat sb;
-	char *src_realpath = realpath(src_path, NULL);
+	char *src_file_realpath = realpath(src_file_path, NULL);
 	int ret;
 
-	if (!src_realpath)
+	if (!src_file_realpath)
 		return 0;
 
 	/* If the paths are equal, return true */
-	ret = (strstr(src_realpath, cmp_realpath) == src_realpath);
-	free(src_realpath);
+	ret = (strstr(src_file_realpath, cmp_realpath) == src_file_realpath);
+	free(src_file_realpath);
 
 	return ret;
 }
