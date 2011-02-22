@@ -40,6 +40,7 @@ static void usage(void)
 	printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
 	       "\n"
 	       "Where [OPTIONS] are\n"
+	       "  -h, --help             this text\n"
 	       "  -p, --pid=PID          trace PID instead of executing in-file,\n"
 	       "                         in-file is optional in this case\n"
 	       "  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
@@ -115,6 +116,7 @@ static const char **get_comma_separated_pathvec(const char *src)
 static void parse_arguments(int argc, char *const argv[])
 {
 	static const struct option long_options[] = {
+			{"help", no_argument, 0, 'h'},
 			{"pid", required_argument, 0, 'p'},
 			{"sort-type", required_argument, 0, 's'},
 			{"limits", required_argument, 0, 'l'},
@@ -146,7 +148,7 @@ static void parse_arguments(int argc, char *const argv[])
 		int option_index = 0;
 		int c;
 
-		c = getopt_long (last_arg, argv, "p:s:l:t:",
+		c = getopt_long (last_arg, argv, "hp:s:l:t:",
 				long_options, &option_index);
 
 		/* No more options */
@@ -155,6 +157,9 @@ static void parse_arguments(int argc, char *const argv[])
 
 		switch (c) {
 		case 0:
+			break;
+		case 'h':
+			usage();
 			break;
 		case 'p':
 			ptrace_pid = strtoul(optarg, &endp, 0);
