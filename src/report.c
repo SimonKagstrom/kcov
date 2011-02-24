@@ -457,13 +457,25 @@ static int cmp_path(const char *src_file_path, const char *cmp_realpath)
 {
 	struct stat sb;
 	char *src_file_realpath = realpath(src_file_path, NULL);
-	int ret;
+	int ret = 0;
 
 	if (!src_file_realpath)
 		return 0;
 
-	/* If the paths are equal, return true */
-	ret = (strstr(src_file_realpath, cmp_realpath) == src_file_realpath);
+	if (stat(cmp_realpath, &sb))
+		return 0;
+
+	if (S_ISDIR(sb.st_mode)) {
+		size_t plen = strlen(cmp_realpath);
+
+		/* If the paths are equal, return true */
+		if (strstr(src_file_realpath, cmp_realpath) == src_file_realpath &&
+				(src_file_realpath[plen] == '\0' || src_file_realpath[plen] == '/'))
+			ret = 1;
+	} else {
+		if (strcmp(src_file_realpath, cmp_realpath) == 0)
+			ret = 1;
+	}
 	free(src_file_realpath);
 
 	return ret;
