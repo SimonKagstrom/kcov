@@ -1,3 +1,16 @@
+Kcov (6):
+	* Add test program to detect regressions
+
+	* Detect stripped binaries and report that you'll need to build
+	  with -g
+
+	* Correct --include/exclude-path behavior. The previous version
+	  will match PATH*/* instead of just PATH/* (Igor Murzov)
+	  
+	* Various small fixes 
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (5):
 	* Switch from libdwarf to libdw (from elfutils) for building
 	  kcov. libdw is a bit more logical than libdwarf.
