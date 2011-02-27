@@ -179,18 +179,17 @@ static const char *lookup_filename_by_pid(pid_t pid)
 
 int kc_is_elf(const char *filename)
 {
-	Dwarf *dbg;
+	Elf32_Ehdr hdr;
 	int ret = 0;
 	int fd;
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0)
 		return ret;
-	dbg = dwarf_begin(fd, DWARF_C_READ);
-	if (dbg) {
-		ret = 1;
-		dwarf_end(dbg);
-	}
+
+	/* Compare the header with the ELF magic */
+	if (read(fd, &hdr, sizeof(hdr)) == sizeof(hdr))
+		ret = memcmp(hdr.e_ident, ELFMAG, strlen(ELFMAG)) == 0;
 
 	close(fd);
 
