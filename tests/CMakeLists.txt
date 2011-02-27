@@ -12,3 +12,8 @@ set(CMAKE_BUILD_TYPE distribution)
 set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "-g")
 add_executable(tests ${tests_SRCS})
+
+
+
+add_custom_target(tests-stripped ALL
+	COMMAND strip -o tests-stripped tests)
