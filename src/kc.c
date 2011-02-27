@@ -223,6 +223,8 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 	/* Initialize libdwarf */
 	dbg = dwarf_begin(fd, DWARF_C_READ);
 	if (!dbg) {
+		error("No debug symbols in %s.\n"
+				"Kcov needs programs built with debugging information (-g)\n", filename);
 		close(fd);
 		return NULL;
 	}
