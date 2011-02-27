@@ -17,3 +17,6 @@ add_executable(tests ${tests_SRCS})
 
 add_custom_target(tests-stripped ALL
 	COMMAND strip -o tests-stripped tests)
+
+add_custom_target(run-all.sh ALL
+	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/run-all.sh ${CMAKE_CURRENT_BINARY_DIR})
