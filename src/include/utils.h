@@ -21,7 +21,6 @@
     fprintf(stderr, "=============ERROR ERROR ERROR===========\n"); \
     fprintf(stderr, "%s:%d: ", __FILE__, __LINE__); fprintf(stderr, x); \
     fprintf(stderr, "=========================================\n"); \
-    assert(0); \
     exit(1); \
   } while(0)
 
