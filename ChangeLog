@@ -1,4 +1,8 @@
 Kcov (6):
+	* Handle files with relative directory paths (lookup the absolute
+	  path via DWARF source files). Otherwise, some files are not reported
+	  in the output.
+
 	* Add test program to detect regressions
 
 	* Detect stripped binaries and report that you'll need to build

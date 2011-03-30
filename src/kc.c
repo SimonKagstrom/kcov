@@ -254,7 +254,9 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 	/* Iterate over the headers */
 	while (dwarf_nextcu(dbg, offset, &offset, &hdr_size, 0, 0, 0) == 0) {
 		Dwarf_Lines* line_buffer;
+		Dwarf_Files *file_buffer;
 		size_t line_count;
+		size_t file_count;
 		Dwarf_Die die;
 		int i;
 
@@ -265,6 +267,10 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 
 		/* Get the source lines */
 		if (dwarf_getsrclines(&die, &line_buffer, &line_count) != 0)
+			continue;
+
+		/* And the files */
+		if (dwarf_getsrcfiles(&die, &file_buffer, &file_count) != 0)
 			continue;
 
 		/* Store them */
@@ -289,7 +295,27 @@ struct kc *kc_open_elf(const char *filename, pid_t pid)
 				goto out_err;
 
 			if (line_nr && is_code) {
-				kc_add_addr(kc, addr, line_nr, line_source);
+				const char *const *src_dirs;
+				const char *full_file_path;
+				const char *file_path = line_source;
+				size_t ndirs = 0;
+
+				/* Lookup the compilation path */
+				if (dwarf_getsrcdirs(file_buffer, &src_dirs, &ndirs) != 0)
+					continue;
+
+				if (ndirs == 0)
+					continue;
+
+				/* Use the full compilation path unless the source already
+				 * has an absolute path */
+				full_file_path = dir_concat(src_dirs[0], line_source);
+				if (line_source[0] != '/')
+					file_path = full_file_path;
+
+				kc_add_addr(kc, addr, line_nr, file_path);
+
+				free((void *)full_file_path);
 			}
 		}
 	}
