@@ -74,8 +74,14 @@ int write_file(const void *data, size_t len, const char *fmt, ...)
 
 const char *dir_concat(const char *dir, const char *filename)
 {
-	size_t len = strlen(dir) + strlen(filename) + 4;
-	char *out = xmalloc(len);
+	size_t len;
+	char *out;
+
+	if (dir == NULL)
+		return xstrdup(filename);
+
+	len = strlen(dir) + strlen(filename) + 4;
+	out = xmalloc(len);
 
 	xsnprintf(out, len, "%s/%s", dir, filename);
 
