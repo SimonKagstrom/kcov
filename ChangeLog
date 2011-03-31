@@ -1,4 +1,7 @@
 Kcov (6):
+	* Better error reporting when stripped or otherwise broken binaries
+	  are passed to kcov
+
 	* Handle files with relative directory paths (lookup the absolute
 	  path via DWARF source files). Otherwise, some files are not reported
 	  in the output.
