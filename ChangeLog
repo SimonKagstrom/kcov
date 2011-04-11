@@ -1,4 +1,7 @@
 Kcov (6):
+	* Correct hit count. The hit count is no longer over the number of
+	  possible hits
+
 	* Better error reporting when stripped or otherwise broken binaries
 	  are passed to kcov
 
