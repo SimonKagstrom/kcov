@@ -20,7 +20,7 @@ struct kc_addr *kc_addr_new(unsigned long addr)
 
 void kc_addr_register_hit(struct kc_addr *addr)
 {
-	addr->hits++;
+	addr->hits = 1;
 }
 
 void kc_addr_marshall(struct kc_addr *addr)
