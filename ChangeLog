@@ -19,7 +19,7 @@ Kcov (6):
 	  
 	* Various small fixes 
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Apr 16 08:28:27 CEST 2011
 
 Kcov (5):
 	* Switch from libdwarf to libdw (from elfutils) for building
