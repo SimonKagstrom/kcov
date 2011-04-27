@@ -1,3 +1,8 @@
+Kcov (7):
+	* Handle hit count a bit better
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (6):
 	* Correct hit count. The hit count is no longer over the number of
 	  possible hits
