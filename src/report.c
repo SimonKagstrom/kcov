@@ -391,7 +391,7 @@ static int write_file_report(const char *dir, struct kc *kc, struct kc_file *kc_
 			for (i = 0; i < kc_line->n_addrs; i++) {
 				struct kc_addr *addr = kc_line->addrs[i];
 
-				hits += addr->hits;
+				hits += !!addr->hits;
 			}
 			/* Full, partial or no coverage? */
 			if (hits >= kc_line->possible_hits)
