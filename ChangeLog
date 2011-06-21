@@ -1,4 +1,9 @@
 Kcov (7):
+	* Weed out common parts of source paths from the report, display
+	  the full path as the HTML title= tag
+
+	* Fix crash bug in argument passing
+
 	* Handle hit count a bit better
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
