@@ -52,6 +52,7 @@ struct kc
 	const char **exclude_patterns;
 	const char *module_name;
 	enum report_sort_type sort_type;
+	unsigned int path_strip_level;
 	unsigned int e_machine;
 	int type;
 

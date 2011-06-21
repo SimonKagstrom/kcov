@@ -194,6 +194,47 @@ static const char *outfile_name_from_kc_file(struct kc_file *kc_file)
 	return out;
 }
 
+static const char *file_name_from_kc_file_strip_common(struct kc_file *kc_file,
+		const char *common_path, unsigned int strip_level)
+{
+	char *out;
+	const char *name = strrchr(kc_file->filename, '/');
+	char *cp = add_allocation(xstrdup(common_path));
+	off_t offset = 0;
+	size_t len;
+	unsigned int i;
+	char *p;
+
+	if (!name)
+		name = "";
+
+	for (i = 0; i < strip_level; i++) {
+		char *slash = strrchr(cp, '/');
+
+		if (!slash)
+			break;
+		*slash = '\0';
+	}
+
+	p = strstr(kc_file->filename, cp);
+	if (p)
+		offset = strlen(cp) + 1;
+
+	p = xstrdup(&kc_file->filename[offset]);
+
+	len = strlen(p) + 8;
+	out = xmalloc(len);
+	xsnprintf(out, len, "%s%s",
+			strcmp(cp, "") == 0 ? "/" : "[..]/",
+			p);
+	free(p);
+
+	add_allocation(out);
+
+	return out;
+}
+
+
 static const char *tmp_outfile_name_from_kc_file(struct kc_file *kc_file)
 {
 	char *p = strrchr(kc_file->filename, '/');
@@ -556,6 +597,7 @@ static int write_index(const char *dir, struct kc *kc)
 	const char *key;
 	struct kc_file *kc_file;
 	struct kc_file **files;
+	char *common_path = NULL;
 	int total_lines = 0;
 	int total_active_lines = 0;
 	int n_files = 0;
@@ -589,6 +631,39 @@ static int write_index(const char *dir, struct kc *kc)
 	}
 	qsort(files, g_hash_table_size(kc->files), sizeof(struct kc_file *),
 			kc->sort_type == COVERAGE_PERCENT ? kc_percentage_cmp : kc_file_cmp);
+
+	/* Find out the common path */
+	for (file_idx = 0; file_idx < n_files; file_idx++) {
+		char *endp;
+
+		kc_file = files[file_idx];
+
+		if (!report_path(kc_file->filename, kc))
+			continue;
+
+		if (exclude_path(kc_file->filename, kc))
+			continue;
+
+		if (!file_exists(kc_file->filename))
+			continue;
+
+		if (!common_path)
+			common_path = add_allocation(xstrdup(kc_file->filename));
+
+		/* Already matching? */
+		if (strncmp(kc_file->filename, common_path, strlen(common_path)) == 0)
+			continue;
+
+		do {
+			endp = strrchr(common_path, '/');
+			if (!endp)
+				break;
+			*endp = '\0';
+			if (strncmp(kc_file->filename, common_path, strlen(common_path)) == 0)
+				break;
+		} while (endp);
+	}
+
 	for (file_idx = 0; file_idx < n_files; file_idx++) {
 		double percentage = 0;
 		const char *percentage_text = "Lo";
@@ -639,7 +714,7 @@ static int write_index(const char *dir, struct kc *kc)
 
 		fprintf(fp,
 				"    <tr>\n"
-				"      <td class=\"coverFile\"><a href=\"%s\">%s</a></td>\n"
+				"      <td class=\"coverFile\"><a href=\"%s\" title=\"%s\">%s</a></td>\n"
 				"      <td class=\"coverBar\" align=\"center\">\n"
 				"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">%s</td></tr></table>\n"
 				"      </td>\n"
@@ -648,6 +723,7 @@ static int write_index(const char *dir, struct kc *kc)
 				"    </tr>\n",
 				outfile_name_from_kc_file(kc_file),
 				kc_file->filename,
+				file_name_from_kc_file_strip_common(kc_file, common_path, kc->path_strip_level),
 				construct_bar(percentage),
 				percentage_text, percentage,
 				percentage_text, active_lines, n_lines);

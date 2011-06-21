@@ -33,6 +33,7 @@ static char *const *program_args;
 static const char *title = NULL;
 static unsigned long low_limit = 16;
 static unsigned long high_limit = 50;
+static unsigned long path_strip_level = 2;
 static pid_t ptrace_pid;
 
 static void usage(void)
@@ -46,6 +47,7 @@ static void usage(void)
 	       "  -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
 	       "  -l, --limits=low,high  setup limits for low/high coverage (default %lu,%lu)\n"
 	       "  -t, --title=title      title for the coverage (default: filename)\n"
+	       "  --path-strip-level=num number of path levels to show for common paths (default: %lu)\n"
 	       "  --include-path=path    comma-separated list of paths to include in the report\n"
 	       "  --exclude-path=path    comma-separated list of paths to exclude in the report\n"
 	       "  --include-pattern=pat  comma-separated path patterns to include in the report\n"
@@ -57,7 +59,7 @@ static void usage(void)
 	       "  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
 	       "                                                         # including /src/frodo\n"
 	       "",
-	       low_limit, high_limit);
+	       low_limit, high_limit, path_strip_level);
 	exit(1);
 }
 
@@ -121,6 +123,7 @@ static void parse_arguments(int argc, char *const argv[])
 			{"sort-type", required_argument, 0, 's'},
 			{"limits", required_argument, 0, 'l'},
 			{"title", required_argument, 0, 't'},
+			{"path-strip-level", required_argument, 0, 'S'},
 			{"exclude-pattern", required_argument, 0, 'x'},
 			{"include-pattern", required_argument, 0, 'i'},
 			{"exclude-path", required_argument, 0, 'X'},
@@ -173,6 +176,13 @@ static void parse_arguments(int argc, char *const argv[])
 			break;
 		case 'i':
 			only_report_patterns = get_comma_separated_strvec(optarg);
+			break;
+		case 'S':
+			path_strip_level = strtoul(optarg, &endp, 0);
+			if (endp == optarg || *endp != '\0')
+				usage();
+			if (path_strip_level == 0)
+				path_strip_level = INT_MAX;
 			break;
 		case 'x':
 			exclude_patterns = get_comma_separated_strvec(optarg);
@@ -251,6 +261,7 @@ int main(int argc, char *argv[])
 	kc->exclude_patterns = exclude_patterns;
 	kc->low_limit = low_limit;
 	kc->high_limit = high_limit;
+	kc->path_strip_level = path_strip_level;
 
 	panic_if(!kc->binary_filename, "basename failed\n");
 
