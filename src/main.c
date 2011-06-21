@@ -71,14 +71,14 @@ static const char **get_comma_separated_strvec(const char *src)
 	int n = 0;
 
 	p = strtok(cpy, ",");
-	do
+	while (p)
 	{
 		strvec = xrealloc(strvec, sizeof(const char *) * (n + 2));
 		strvec[n] = xstrdup(p);
 		strvec[n + 1] = NULL;
 		n++;
 		p = strtok(NULL, ",");
-	} while (p);
+	}
 
 	free(cpy);
 
@@ -93,7 +93,7 @@ static const char **get_comma_separated_pathvec(const char *src)
 	int n = 0;
 
 	path = strtok(cpy, ",");
-	do
+	while (path)
 	{
 		const char *p = expand_path(path);
 
@@ -108,7 +108,7 @@ static const char **get_comma_separated_pathvec(const char *src)
 		n++;
 		path = strtok(NULL, ",");
 		free((void *)p);
-	} while(path);
+	}
 
 	free(cpy);
 
