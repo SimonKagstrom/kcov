@@ -178,9 +178,14 @@ static pid_t fork_child(const char *executable, char *const argv[])
 
 	/* Executable exists, try to launch it */
 	if ((child = fork()) == 0) {
+		int res;
 
 		/* And launch the process */
-		ptrace(PTRACE_TRACEME, 0, 0, 0);
+		res = ptrace(PTRACE_TRACEME, 0, 0, 0);
+		if (res < 0) {
+			perror("Can't set me as ptraced");
+			return -1;
+		}
 		execv(executable, argv);
 
 		/* Exec failed */
@@ -215,7 +220,7 @@ int ptrace_run(struct kc *kc, char *const argv[])
 	active_child = fork_child(argv[0], &argv[0]);
 
 	if (active_child < 0) {
-		perror("Can't fork child");
+		fprintf(stderr, "Can't fork child\n");
 		return -1;
 	}
 
