@@ -2,7 +2,17 @@
 <BODY>
 <H1>Kcov - code coverage</H1>
 
-Kcov is a code coverage tester based on <A HREF="http://bcov.sf.net">bcov</A> by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications. Using kcov is as simple as
+Kcov is a code coverage tester based on <A HREF="http://bcov.sf.net">bcov</A> by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications. If you use and like kcov, feel free to make a small donation:
+<P>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHNwYJKoZIhvcNAQcEoIIHKDCCByQCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYCstpZJCrRaXGI6Zk2LZwFc3+uS20qFvjiR5gku9Ri2ZJYqfjm7glwg27sj29NVKOkfKLLCL792Ujeza3slo8SgBmINyGhHfC/Pp0cVMRAfia+U/OO+sMGgz8hI7tK/wwgalOSEjdm+fe36BZV2l2kwdNgCb32IhsTJhy9lHR6xfDELMAkGBSsOAwIaBQAwgbQGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIVckPFTozf0GAgZAhOmSNB497EmD9e9XeKWy1/g5mYH8qgSgzirnJFQb7rjrYyQfsl1r2M/uZa4ar59cdpGGSl8NykBH0qZckAsEJczsaPJbjqyQ7BEYJ6ZmnJ3VSMPdxQroar2beZSQJ7wbLKk9TWhUA45wpgOIGmILktykWcMt8SUEE/zM3rpbL+Tp1jZCDop7l2D5rAscW2rmgggOHMIIDgzCCAuygAwIBAgIBADANBgkqhkiG9w0BAQUFADCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wHhcNMDQwMjEzMTAxMzE1WhcNMzUwMjEzMTAxMzE1WjCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMFHTt38RMxLXJyO2SmS+Ndl72T7oKJ4u4uw+6awntALWh03PewmIJuzbALScsTS4sZoS1fKciBGoh11gIfHzylvkdNe/hJl66/RGqrj5rFb08sAABNTzDTiqqNpJeBsYs/c2aiGozptX2RlnBktH+SUNpAajW724Nv2Wvhif6sFAgMBAAGjge4wgeswHQYDVR0OBBYEFJaffLvGbxe9WT9S1wob7BDWZJRrMIG7BgNVHSMEgbMwgbCAFJaffLvGbxe9WT9S1wob7BDWZJRroYGUpIGRMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNvbYIBADAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4GBAIFfOlaagFrl71+jq6OKidbWFSE+Q4FqROvdgIONth+8kSK//Y/4ihuE4Ymvzn5ceE3S/iBSQQMjyvb+s2TWbQYDwcp129OPIbD9epdr4tJOUNiSojw7BHwYRiPh58S1xGlFgHFXwrEBb3dgNbMUa+u4qectsMAXpVHnD9wIyfmHMYIBmjCCAZYCAQEwgZQwgY4xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJDQTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLUGF5UGFsIEluYy4xEzARBgNVBAsUCmxpdmVfY2VydHMxETAPBgNVBAMUCGxpdmVfYXBpMRwwGgYJKoZIhvcNAQkBFg1yZUBwYXlwYWwuY29tAgEAMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xMTA3MTMwOTI5NDNaMCMGCSqGSIb3DQEJBDEWBBTybqSYT7yqiqnmPre2l/9p+T6DoTANBgkqhkiG9w0BAQEFAASBgKbR5A4mHtIq3MObTwBNPqs1uq9pry+3YELwIhsZDTIE1cxwAm+WUJ1282AoNDvw77zp2nymCk1yJZzRtp0jXc7RYp7nv4Hnlffm4CCq3AOxpPGktf0SsnOpbAhd8Kq1J3PspQfDxlEJijZTEecJzKgMOvF7Zy0Asoje24z+AgUN-----END PKCS7-----
+">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+<P>
+Using kcov is as simple as
 
 <P>
 <PRE>
