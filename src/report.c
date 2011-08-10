@@ -145,15 +145,15 @@ static void write_pngs(const char *dir)
 	xwrite_file(icon_glass, sizeof(icon_glass), "%s/glass.png", dir);
 }
 
-static const char *construct_bar(double percent)
+static const char *construct_bar(struct kc *kc, double percent)
 {
    const char* color = "ruby.png";
    char buf[255];
    int width = (int)(percent+0.5);
 
-   if (percent >= 50)
+   if (percent >= kc->high_limit)
 	   color = "emerald.png";
-   else if (percent>=15)
+   else if (percent > kc->low_limit)
 	   color = "amber.png";
    else if (percent <= 1)
 	   color = "snow.png";
@@ -724,7 +724,7 @@ static int write_index(const char *dir, struct kc *kc)
 				outfile_name_from_kc_file(kc_file),
 				kc_file->filename,
 				file_name_from_kc_file_strip_common(kc_file, common_path, kc->path_strip_level),
-				construct_bar(percentage),
+				construct_bar(kc, percentage),
 				percentage_text, percentage,
 				percentage_text, active_lines, n_lines);
 	}
@@ -822,7 +822,7 @@ static int write_global_index(struct kc *kc, const char *dir_name)
 				"    </tr>\n",
 				de->d_name,
 				db.name,
-				construct_bar(percentage),
+				construct_bar(kc, percentage),
 				percentage_text, percentage,
 				percentage_text, db.n_covered_lines, db.n_lines);
 
