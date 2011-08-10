@@ -1,3 +1,9 @@
+Kcov (8):
+	* Correct the percentage-bar color according to the configured
+	  limits in the report.
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (7):
 	* Weed out common parts of source paths from the report, display
 	  the full path as the HTML title= tag
@@ -6,7 +12,7 @@ Kcov (7):
 
 	* Handle hit count a bit better
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, 2011-07-10
 
 Kcov (6):
 	* Correct hit count. The hit count is no longer over the number of
