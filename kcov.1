@@ -23,34 +23,52 @@ kcov \- Code coverage analysis using DWARF debugging information
 .SH DESCRIPTION
 This manual page documents briefly the
 .B kcov
-command.
+command. \fBkcov\fP is a code coverage tester based on bcov by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
-\fBkcov\fP is a code coverage analysis tool using DWARF debugging information.
 .SH OPTIONS
-.B \-p PID
+.B \-p PID, \-\-pid=PID
 trace PID instead of executing executable, executable is optional in this case
 .TP
-.B \-s sort-type
+.B \-s sort-type, \-\-sort-type=type
 How to sort files: f[ilename] (default), p[ercent].
 .TP
-.B \-l low,high
+.B \-l low,high, \-\-limits=low,high
 Setup limits for low/high coverage (default 16,50).
 .TP
-.B \-p only-include-paths  
+.B \-t title \-\-title=title
+Set the web page title to title
+.TP
+.B \-\-path-strip-level=N
+number of path levels to show for common paths (default: 2)
+.TP
+.B \-\-inlude-path=P1[,P2...]
 Comma-separated list of paths to include in the report.
 .TP
-.B \-x exclude-paths
-Comma-separated list of paths to exclude in the report.
+.B \-\-exclude-path=P1[,P2...]
+Comma-separated list of paths to exclude from the report.
 .TP
-.B \-w write-file
-File to write breakpoints to for kernel usage.
+.B \-\-inlude-pattern=P1[,P2...]
+Comma-separated list of pattern to include in the report.
 .TP
-.B \-r read-file
-File to read hit breakpoints from for kernel usage.
+.B \-\-exclude-exclude=P1[,P2...]
+Comma-separated list of pattern to exclude from the report.
 .PP
+.SH EXAMPLES
+Check coverage for ./frodo and generate HTML output in /tmp/kcov
+.TP
+.B kcov /tmp/kcov ./frodo
+.TP
+Check coverage for ./frodo but only include source files names with the string src/frodo
+.TP
+.B kcov --include-pattern=src/frodo /tmp/kcov ./frodo
+.PP
+.SH HTML OUTPUT
+.TP
+The HTML output shows executed and non-executed lines of the source code. Some lines can map to multiple instrumentation points, for example for inlined functions (where every inlining of them will generate a separate instrumentation point). This is shown in the left column as 1/3 for example, which means that one of the three instrumentation points has been executed.
+
 .SH AUTHOR
 Kcov was written by Simon Kagstrom, building upon bcov by Thomas Neumann.
 .PP
