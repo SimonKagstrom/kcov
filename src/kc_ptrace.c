@@ -114,28 +114,23 @@ static int do_ptrace_run(struct kc *kc)
 
 		// A signal?
 		if (WIFSTOPPED(status)) {
+			int sig = WSTOPSIG(status);
+
 			// A trap?
-			if (WSTOPSIG(status) == SIGTRAP)
+			if (sig == SIGTRAP)
 				return PT_CODE_TRAP;
+			// A new clone? Ignore the stop event
+			else if ((status >> 8) == PTRACE_EVENT_CLONE)
+				sig = 0;
+
 			// No, deliver it directly
-			ptrace(PTRACE_CONT, active_child, 0, WSTOPSIG(status));
+			ptrace(PTRACE_CONT, active_child, 0, sig);
 			continue;
 		}
 		// Thread died?
 		if (WIFSIGNALED(status) || WIFEXITED(status)) {
 			if (active_child == child)
 				return PT_CODE_EXIT;
-			continue;
-		}
-		// Stopped?
-		if (WIFSTOPPED(status)) {
-			// A new clone? Ignore the stop event
-			if ((status >> 8) == PTRACE_EVENT_CLONE) {
-				ptrace(PTRACE_CONT, active_child, 0, 0);
-				continue;
-			}
-			// Hm, why did we stop? Ignore the event and continue
-			ptrace(PTRACE_CONT, active_child, 0, 0);
 			continue;
 		}
 
