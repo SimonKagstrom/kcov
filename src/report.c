@@ -491,7 +491,13 @@ static int kc_percentage_cmp(const void *pa, const void *pb)
 	struct kc_file *a = *(struct kc_file **)pa;
 	struct kc_file *b = *(struct kc_file **)pb;
 
-	return (int)(a->percentage - b->percentage);
+	if (a->percentage > b->percentage)
+	    return 1;
+
+	if  (a->percentage < b->percentage)
+	    return -1;
+
+	return 0;
 }
 
 static int cmp_path(const char *src_file_path, const char *cmp_realpath)
