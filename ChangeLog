@@ -1,4 +1,11 @@
 Kcov (8):
+	* Import the man-page from Debian and update it.
+
+	* Simplify parts of the ptrace code
+
+	* Correct the sorting of files-by-percentage when the difference
+	  is less than 0.5% (thanks Martin!).
+
 	* Correct the percentage-bar color according to the configured
 	  limits in the report.
 
