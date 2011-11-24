@@ -33,9 +33,14 @@ include (CPack.local.cmake OPTIONAL)
 set (INSTALL_TARGETS_PATH RUNTIME DESTINATION bin
                           LIBRARY DESTINATION lib${LIB_SUFFIX}
                           ARCHIVE DESTINATION lib${LIB_SUFFIX})
+if (NOT MAN_DIR)
+  set (MAN_DIR share/man)
+endif (NOT MAN_DIR)
+set (INSTALL_MAN_PATH  DESTINATION ${MAN_DIR})
 
 
 # ====================================
 # build all
 # ====================================
 add_subdirectory (src)
+add_subdirectory (doc)
