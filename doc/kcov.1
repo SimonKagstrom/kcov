@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH KCOV 1 "October  31, 2010"
+.TH KCOV 1 "November  24, 2011"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -23,10 +23,10 @@ kcov \- Code coverage analysis using DWARF debugging information
 .SH DESCRIPTION
 This manual page documents briefly the
 .B kcov
-command. \fBkcov\fP is a code coverage tester based on bcov by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications.
+command. \fBkcov\fP is a code coverage tester based on bcov by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuously produces output from long-running applications.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
-.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" \fI<whatever>\fP escape sequences to invoke bold face and italics,
 .\" respectively.
 .SH OPTIONS
 .B \-p PID, \-\-pid=PID
@@ -44,17 +44,17 @@ Set the web page title to title
 .B \-\-path-strip-level=N
 number of path levels to show for common paths (default: 2)
 .TP
-.B \-\-inlude-path=P1[,P2...]
+.B \-\-include-path=P1[,P2...]
 Comma-separated list of paths to include in the report.
 .TP
 .B \-\-exclude-path=P1[,P2...]
 Comma-separated list of paths to exclude from the report.
 .TP
-.B \-\-inlude-pattern=P1[,P2...]
-Comma-separated list of pattern to include in the report.
+.B \-\-include-pattern=P1[,P2...]
+Comma-separated list of patterns to include in the report.
 .TP
-.B \-\-exclude-exclude=P1[,P2...]
-Comma-separated list of pattern to exclude from the report.
+.B \-\-exclude-pattern=P1[,P2...]
+Comma-separated list of patterns to exclude from the report.
 .PP
 .SH EXAMPLES
 Check coverage for ./frodo and generate HTML output in /tmp/kcov
