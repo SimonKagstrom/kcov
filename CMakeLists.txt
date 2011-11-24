@@ -30,9 +30,9 @@ find_package (LibDwarf REQUIRED)
 # default install paths for targets
 # ====================================
 include (CPack.local.cmake OPTIONAL)
-set (INSTALL_TARGETS_DEFAULT_ARGS RUNTIME DESTINATION bin
-                                  LIBRARY DESTINATION lib
-                                  ARCHIVE DESTINATION lib)
+set (INSTALL_TARGETS_PATH RUNTIME DESTINATION bin
+                          LIBRARY DESTINATION lib${LIB_SUFFIX}
+                          ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 
 # ====================================

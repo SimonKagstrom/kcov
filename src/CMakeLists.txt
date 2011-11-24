@@ -22,4 +22,4 @@ target_link_libraries (${PROJECT_NAME} ${LIBDWARF_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} ${LIBELF_LIBRARIES})
 target_link_libraries (${PROJECT_NAME} pthread)
 
-install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
+install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
