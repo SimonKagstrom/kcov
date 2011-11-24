@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 # project name and version
 # ====================================
 project (kcov)
-set (PROJECT_VERSION_MAJOR  4)
+set (PROJECT_VERSION_MAJOR  8)
 set (PROJECT_VERSION_MINOR  0)
 set (PROJECT_VERSION_PATCH  0)
 set (PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
@@ -30,12 +30,17 @@ find_package (LibDwarf REQUIRED)
 # default install paths for targets
 # ====================================
 include (CPack.local.cmake OPTIONAL)
-set (INSTALL_TARGETS_DEFAULT_ARGS RUNTIME DESTINATION bin
-                                  LIBRARY DESTINATION lib
-                                  ARCHIVE DESTINATION lib)
+set (INSTALL_TARGETS_PATH RUNTIME DESTINATION bin
+                          LIBRARY DESTINATION lib${LIB_SUFFIX}
+                          ARCHIVE DESTINATION lib${LIB_SUFFIX})
+if (NOT MAN_DIR)
+  set (MAN_DIR share/man)
+endif (NOT MAN_DIR)
+set (INSTALL_MAN_PATH  DESTINATION ${MAN_DIR})
 
 
 # ====================================
 # build all
 # ====================================
 add_subdirectory (src)
+add_subdirectory (doc)
