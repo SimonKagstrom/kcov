@@ -9,7 +9,7 @@ Kcov (8):
 	* Correct the percentage-bar color according to the configured
 	  limits in the report.
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Dec  4 14:13:47 CET 2011
 
 Kcov (7):
 	* Weed out common parts of source paths from the report, display

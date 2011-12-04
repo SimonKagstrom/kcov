@@ -16,3 +16,7 @@ do_check $? 1
 # Old regression
 kcov --exclude-path=../tests/subdir /tmp/kcov ./tests > /dev/null
 do_check $? 0
+
+# Recursive ptrace
+kcov /tmp/kcov ./recursive-ptrace > /dev/null
+do_check $? 0
