@@ -432,7 +432,7 @@ int kc_coverage_db_read(const char *dir, struct kc_coverage_db *dst)
 	if (!db)
 		return -1;
 	if (sz != sizeof(struct kc_coverage_db)) {
-		warning("Coverage db size wrong: %u vs %u\n",
+		warning("Coverage db size wrong: %zu vs %zu\n",
 				sz, sizeof(struct kc_coverage_db));
 		free(db);
 		return -1;
