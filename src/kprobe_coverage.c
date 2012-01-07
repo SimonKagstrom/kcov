@@ -19,8 +19,6 @@ static const char *kprobe_coverage_read_path;
 /* From lttng */
 static int lookup_debugfs(void)
 {
-	char mnt_dir[PATH_MAX];
-	char mnt_type[PATH_MAX];
 	int ret = -ENOENT;
 
 	FILE *fp = fopen("/proc/mounts", "r");
@@ -28,17 +26,33 @@ static int lookup_debugfs(void)
 		return -EINVAL;
 
 	while (1) {
-		if (fscanf(fp, "%*s %s %s %*s %*s %*s", mnt_dir, mnt_type) <= 0)
-			panic("Debugfs does not seem to be mounted anywhere\n");
+		char *lineptr = NULL;
+		size_t n;
 
-		if (!strcmp(mnt_type, "debugfs")) {
-			strcpy(debugfs_path, mnt_dir);
+		if (getline(&lineptr, &n, fp) < 0)
 			break;
+
+		if (strncmp(lineptr, "debugfs", strlen("debugfs")) == 0) {
+			char *before;
+			char *after;
+
+			before = strchr(lineptr, ' ');
+			if (!before)
+				panic("Wrong mounts format");
+			before++;
+
+			after = strchr(before, ' ');
+			if (!after)
+				panic("wrong mounts format");
+
+			memcpy(debugfs_path, before, after - before);
 		}
+
+		free(lineptr);
 	}
 
 	kprobe_coverage_write_path = dir_concat(debugfs_path, "kprobe-coverage/control");
-	kprobe_coverage_read_path = dir_concat(debugfs_path, "kprobe-coverage/control");
+	kprobe_coverage_read_path = dir_concat(debugfs_path, "kprobe-coverage/show");
 	panic_if (!file_exists(kprobe_coverage_write_path),
 			"kprobe-coverage/control not found in debugfs\n"
 			"please load the kprobe_coverage module.\n");
@@ -85,7 +99,7 @@ void kprobe_coverage_run(struct kc *kc, const char *write_path,
 
 	fp = fopen(kprobe_coverage_read_path, "r");
 	panic_if (!fp, "Can't open %s for reading\n",
-			kprobe_coverage_write_path);
+			kprobe_coverage_read_path);
 
 	while (!feof(fp)) {
 		char *line = NULL;
