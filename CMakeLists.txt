@@ -21,9 +21,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package (PkgConfig REQUIRED)
-pkg_check_modules (GLIB2 REQUIRED glib-2.0)
-find_package (LibElf REQUIRED)
-find_package (LibDwarf REQUIRED)
 
 
 # ====================================

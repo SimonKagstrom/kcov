@@ -1,13 +1,37 @@
-/*
- * Copyright (C) 2010 Simon Kagstrom
- *
- * See COPYING for license details
- */
+#include <sched.h>
+#include <sys/types.h>
+#include <string.h>
 #include <stdio.h>
-#include <utils.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <stdarg.h>
+#include <unistd.h>
+#include <libelf.h>
+
+#include "utils.hh"
+
+int g_kcov_debug_mask;
+
+extern int file_is_elf(const char *filename)
+{
+	Elf32_Ehdr hdr;
+	int ret = 0;
+	int fd;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return ret;
+
+	/* Compare the header with the ELF magic */
+	if (read(fd, &hdr, sizeof(hdr)) == sizeof(hdr))
+		ret = memcmp(hdr.e_ident, ELFMAG, strlen(ELFMAG)) == 0;
+
+	close(fd);
+
+	return ret;
+}
 
 void *read_file(size_t *out_size, const char *fmt, ...)
 {
@@ -20,10 +44,12 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 	int r;
 
 	/* Create the filename */
-	assert ( fmt != NULL );
 	va_start(ap, fmt);
 	r = vsnprintf(path, 2048, fmt, ap);
 	va_end(ap);
+
+	panic_if (r >= 2048,
+			"Too long string!");
 
 	if (lstat(path, &buf) < 0)
 		return NULL;
@@ -56,7 +82,6 @@ int write_file(const void *data, size_t len, const char *fmt, ...)
 	int ret = 0;
 
 	/* Create the filename */
-	assert ( fmt != NULL );
 	va_start(ap, fmt);
 	vsnprintf(path, 2048, fmt, ap);
 	va_end(ap);
@@ -81,7 +106,7 @@ const char *dir_concat(const char *dir, const char *filename)
 		return xstrdup(filename);
 
 	len = strlen(dir) + strlen(filename) + 4;
-	out = xmalloc(len);
+	out = (char *)xmalloc(len);
 
 	xsnprintf(out, len, "%s/%s", dir, filename);
 
@@ -99,7 +124,7 @@ const char *expand_path(const char *path)
 		return xstrdup(path);
 
 	home_len = strlen(home);
-	out = xmalloc(home_len + p_len + 8);
+	out = (char *)xmalloc(home_len + p_len + 8);
 	snprintf(out, home_len + p_len + 8, "%s/%s", home, path + 1);
 
 	return out;

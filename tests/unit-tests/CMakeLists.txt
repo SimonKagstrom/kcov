@@ -1,27 +1,33 @@
 cmake_minimum_required (VERSION 2.6)
 
-project (kcov)
+project (kcov-ut)
 set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
+find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (LibDwarf REQUIRED)
+find_package (GTest REQUIRED)
+find_package (GMock REQUIRED)
 
 # ====================================
 # project name and version
 # ====================================
 project (unit-test)
-set (TGT kcov)
+set (TGT ut)
 
 set (${TGT}_SRCS
-    collector.cc
-    configuration.cc
-    elf.cc
-    filter.cc
-    html-writer.cc
+    ../../src/collector.cc
+    ../../src/elf.cc
+    ../../src/reporter.cc
+    ../../src/utils.cc
+    ../../src/html-writer.cc
     main.cc
-    ptrace.cc
-    reporter.cc
-    utils.cc
+    tests-collector.cc
+    tests-elf.cc
+    tests-filter.cc
+    tests-reporter.cc
+    tests-writer.cc
+    tests-configuration.cc
     )
 set (CMAKE_BUILD_TYPE debug)
 
@@ -29,7 +35,9 @@ set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP")
 
 
 include_directories(
-	include/
+	../../src/include/
+	${GMOCK_INCLUDE_DIRS}
+	${GTEST_INCLUDE_DIRS}
 	${LIBCRPCUT_INCLUDE_DIRS}
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDWARF_INCLUDE_DIRS}
@@ -40,7 +48,14 @@ link_directories (/home/ska/local/lib)
 add_executable (${TGT} ${${TGT}_SRCS})
 
 target_link_libraries(${TGT}
+	${LIBCRPCUT_LIBRARIES}
+	${GTEST_BOTH_LIBRARIES}
+	${GMOCK_BOTH_LIBRARIES}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
 	pthread)
+  
+add_executable (test-binary test-source.c second-source.c)
+SET_TARGET_PROPERTIES(test-binary PROPERTIES COMPILE_FLAGS "-nostdinc")
+SET_TARGET_PROPERTIES(test-binary PROPERTIES LINK_FLAGS "-nostdlib")
