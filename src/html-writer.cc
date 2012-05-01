@@ -413,7 +413,7 @@ private:
 					"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">" + constructBar(percent) + "</td></tr></table>\n"
 					"      </td>\n"
 					"      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
-					"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", nTotalExecutedLines) + "&nbsp;/&nbsp;" + fmt("%u", nTotalCodeLines) + "&nbsp;lines</td>\n"
+					"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", summary.m_executedLines) + "&nbsp;/&nbsp;" + fmt("%u", summary.m_lines) + "&nbsp;lines</td>\n"
 					"    </tr>\n";
 
 		}
