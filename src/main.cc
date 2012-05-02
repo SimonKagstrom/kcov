@@ -32,6 +32,7 @@ int main(int argc, const char *argv[])
 
 	// Register writers
 	IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
+	output.registerWriter(htmlWriter);
 
 	// This will setup all
 	elf->parse();
