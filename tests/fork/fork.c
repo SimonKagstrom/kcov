@@ -6,6 +6,11 @@
 #include <sys/wait.h>
 #include <sched.h>
 
+static void mibb(void)
+{
+	printf("Mibb\n");
+}
+
 int main(int argc, const char *argv[])
 {
 	pid_t child;
@@ -25,12 +30,15 @@ int main(int argc, const char *argv[])
 
 		if (grand_child < 0)
 			fprintf(stderr, "fork gc failed\n");
-		else if (grand_child == 0)
+		else if (grand_child == 0) {
 			printf("Grand child %d\n", getpid());
-		else
+			mibb();
+		} else
 			printf("Child %d\n", getpid());
 		wait(&status);
 	}
+
+	mibb();
 
 	printf("Waiting in %d\n", getpid());
 	wait(&status);
