@@ -14,7 +14,7 @@ class Reporter : public IReporter, public IElf::IListener, public ICollector::IL
 public:
 	Reporter(IElf &elf, ICollector &collector) :
 		m_elf(elf), m_collector(collector),
-		m_nrLines(0), m_nrExecutedLines(0)
+		m_nrLines(0)
 	{
 		m_elf.registerListener(*this);
 		m_collector.registerListener(*this);
@@ -40,7 +40,17 @@ public:
 
 	ExecutionSummary getExecutionSummary()
 	{
-		return ExecutionSummary(m_nrLines, m_nrExecutedLines);
+		unsigned int executedLines = 0;
+
+		for (LineMap_t::iterator it = m_lines.begin();
+				it != m_lines.end();
+				it++) {
+			Line *cur = it->second;
+
+			executedLines += !!cur->hits();
+		}
+
+		return ExecutionSummary(m_nrLines, executedLines);
 	}
 
 	void *marshal(size_t *szOut)
@@ -81,7 +91,6 @@ public:
 				it != m_addrToLine.end();
 				it++)
 			it->second->clearHits();
-		m_nrExecutedLines = 0;
 
 		for (size_t i = 0; i < n; i++) {
 			unsigned long addr;
@@ -100,7 +109,6 @@ public:
 			if (hits > line->possibleHits())
 				hits = line->possibleHits();
 
-			m_nrExecutedLines++;
 			// Register all hits for this address
 			while (hits--)
 				line->registerHit(addr);
@@ -173,7 +181,7 @@ private:
 			return;
 		Line *line = it->second;
 
-		m_nrExecutedLines += line->registerHit(addr);
+		line->registerHit(addr);
 	}
 
 
@@ -282,7 +290,6 @@ private:
 		std::string m_file;
 		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
-		unsigned int m_hits;
 	};
 
 	typedef std::unordered_map<LineId, Line *, LineIdHash> LineMap_t;
@@ -295,7 +302,6 @@ private:
 	ICollector &m_collector;
 
 	unsigned int m_nrLines;
-	unsigned int m_nrExecutedLines;
 };
 
 IReporter &IReporter::create(IElf &elf, ICollector &collector)
