@@ -22,6 +22,7 @@ set (${TGT}_SRCS
     ../../src/reporter.cc
     ../../src/utils.cc
     ../../src/html-writer.cc
+    ../../src/writer-base.cc
     main.cc
     tests-collector.cc
     tests-elf.cc

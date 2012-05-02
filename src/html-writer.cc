@@ -14,15 +14,10 @@
 #include <list>
 #include <unordered_map>
 
+#include "writer-base.hh"
+
 using namespace kcov;
 
-
-struct summaryStruct
-{
-	uint32_t nLines;
-	uint32_t nExecutedLines;
-	char name[256];
-};
 
 static const uint8_t icon_ruby[] =
   { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
@@ -111,19 +106,18 @@ static const char css_text[] = "/* Based upon the lcov CSS style, style files ca
 		"td.coverNumLo { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FF0000; }\n";
 
 
-class HtmlWriter : public IWriter, public IElf::IListener
+class HtmlWriter : public IWriter, public WriterBase
 {
 public:
 	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
-		m_elf(elf), m_reporter(reporter), m_filter(IFilter::getInstance()),
+		WriterBase(elf, reporter, output),
+		m_filter(IFilter::getInstance()),
 		m_stop(false)
 	{
 		m_indexDirectory = output.getBaseDirectory();
 		m_outDirectory = output.getOutDirectory();
 		m_summaryDbFileName = m_outDirectory + "summary.db";
 		m_commonPath = "not set";
-
-		m_elf.registerListener(*this);
 	}
 
 	void onStop()
@@ -131,76 +125,6 @@ public:
 	}
 
 private:
-	class File
-	{
-	public:
-		typedef std::unordered_map<unsigned int, std::string> LineMap_t;
-
-		File(const char *filename) :
-			m_name(filename), m_codeLines(0), m_executedLines(0), m_lastLineNr(0)
-		{
-			size_t pos = m_name.rfind('/');
-
-			if (pos != std::string::npos)
-				m_fileName = m_name.substr(pos + 1, std::string::npos);
-			else
-				m_fileName = m_name;
-			m_outFileName = m_fileName + ".html";
-
-			readFile(filename);
-		}
-
-		std::string m_name;
-		std::string m_fileName;
-		std::string m_outFileName;
-		LineMap_t m_lineMap;
-		unsigned int m_codeLines;
-		unsigned int m_executedLines;
-		unsigned int m_lastLineNr;
-
-	private:
-		void readFile(const char *filename)
-		{
-			FILE *fp = fopen(filename, "r");
-			unsigned int lineNr = 1;
-
-			panic_if(!fp, "Can't open %s", filename);
-
-			while (1)
-			{
-				char *lineptr = NULL;
-				ssize_t res;
-				size_t n;
-
-				res = getline(&lineptr, &n, fp);
-				if (res < 0)
-					break;
-				m_lineMap[lineNr] = std::string(lineptr);
-
-				free((void *)lineptr);
-				lineNr++;
-			}
-
-			m_lastLineNr = lineNr;
-
-			fclose(fp);
-		}
-	};
-
-	typedef std::unordered_map<std::string, File *> FileMap_t;
-
-
-	/* Called when the ELF is parsed */
-	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
-	{
-		if (m_files.find(std::string(file)) != m_files.end())
-			return;
-
-		if (!file_exists(file))
-			return;
-
-		m_files[std::string(file)] = new File(file);
-	}
 
 	void writeOne(File *file)
 	{
@@ -381,39 +305,6 @@ private:
 		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(NULL);
 
 		write_file((void *)s.c_str(), s.size(), (m_indexDirectory + "index.html").c_str());
-	}
-
-	void *marshalSummary(IReporter::ExecutionSummary &summary,
-			std::string &name, size_t *sz)
-	{
-		struct summaryStruct *p;
-
-		p = (struct summaryStruct *)xmalloc(sizeof(struct summaryStruct));
-		memset(p, 0, sizeof(*p));
-
-		p->nLines = summary.m_lines;
-		p->nExecutedLines = summary.m_executedLines;
-		strncpy(p->name, name.c_str(), sizeof(p->name) - 1);
-
-		*sz = sizeof(*p);
-
-		return (void *)p;
-	}
-
-	bool unMarshalSummary(void *data, size_t sz,
-			IReporter::ExecutionSummary &summary,
-			std::string &name)
-	{
-		struct summaryStruct *p = (struct summaryStruct *)data;
-
-		if (sz != sizeof(*p))
-			return false;
-
-		summary.m_lines = p->nLines;
-		summary.m_executedLines = p->nExecutedLines;
-		name = std::string(p->name);
-
-		return true;
 	}
 
 
@@ -681,10 +572,7 @@ private:
 	}
 
 
-	IElf &m_elf;
-	IReporter &m_reporter;
 	IFilter &m_filter;
-	FileMap_t m_files;
 
 	bool m_stop;
 	std::string m_outDirectory;

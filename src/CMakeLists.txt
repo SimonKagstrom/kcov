@@ -23,6 +23,7 @@ set (${TGT}_SRCS
     ptrace.cc
     reporter.cc
     utils.cc
+    writer-base.cc
     )
 set (CMAKE_BUILD_TYPE debug)
 
