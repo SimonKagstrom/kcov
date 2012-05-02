@@ -19,7 +19,7 @@ public:
 		m_binaryName = "";
 		m_lowLimit = 25;
 		m_highLimit = 75;
-		m_pathStripLevel = ~0;
+		m_pathStripLevel = 2;
 		m_ptracePid = 0;
 		m_sortType = FILENAME;
 	}
