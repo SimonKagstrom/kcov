@@ -4,6 +4,7 @@
 #include <writer.hh>
 #include <filter.hh>
 #include <utils.hh>
+#include <output-handler.hh>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -12,7 +13,6 @@
 #include <string>
 #include <list>
 #include <unordered_map>
-#include <thread>
 
 using namespace kcov;
 
@@ -114,59 +114,20 @@ static const char css_text[] = "/* Based upon the lcov CSS style, style files ca
 class HtmlWriter : public IWriter, public IElf::IListener
 {
 public:
-	HtmlWriter(IElf &elf, IReporter &reporter) :
+	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
 		m_elf(elf), m_reporter(reporter), m_filter(IFilter::getInstance()),
-		m_stop(false), m_thread(NULL)
+		m_stop(false)
 	{
-		IConfiguration &conf = IConfiguration::getInstance();
-		m_indexDirectory = conf.getOutDirectory();
-		m_outDirectory = m_indexDirectory + conf.getBinaryName() + "/";
-		m_dbFileName = m_outDirectory + "coverage.db";
+		m_indexDirectory = output.getBaseDirectory();
+		m_outDirectory = output.getOutDirectory();
 		m_summaryDbFileName = m_outDirectory + "summary.db";
 		m_commonPath = "not set";
 
 		m_elf.registerListener(*this);
-
 	}
 
-	virtual ~HtmlWriter()
+	void onStop()
 	{
-		stop();
-		if (m_thread)
-			delete m_thread;
-	}
-
-	void start()
-	{
-		size_t sz;
-		void *data = read_file(&sz, m_dbFileName.c_str());
-
-		if (data) {
-			m_reporter.unMarshal(data, sz);
-
-			free(data);
-		}
-
-		m_thread = new std::thread(threadMainStatic, this);
-		m_cv.notify_all();
-	}
-
-	void stop()
-	{
-		m_stop = true;
-		m_cv.notify_all();
-
-		if (m_thread)
-			m_thread->join();
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-		size_t sz;
-		void *data = m_reporter.marshal(&sz);
-
-		if (data)
-			write_file(data, sz, m_dbFileName.c_str());
-
-		free(data);
 	}
 
 private:
@@ -687,11 +648,8 @@ private:
 		write_file(css_text, sizeof(css_text), "%s/bcov.css", dir.c_str());
 	}
 
-	void threadMain()
+	void onStartup()
 	{
-		mkdir(m_indexDirectory.c_str(), 0755);
-		mkdir(m_outDirectory.c_str(), 0755);
-
 		writeHelperFiles(m_indexDirectory);
 		writeHelperFiles(m_outDirectory);
 
@@ -720,20 +678,8 @@ private:
 					break;
 			}
 		}
-
-		while (!m_stop) {
-			std::unique_lock<std::mutex> lk(m_mutex);
-
-			m_cv.wait_for(lk, std::chrono::milliseconds(1003));
-
-			write();
-		}
 	}
 
-	static void threadMainStatic(HtmlWriter *writer)
-	{
-		writer->threadMain();
-	}
 
 	IElf &m_elf;
 	IReporter &m_reporter;
@@ -743,15 +689,14 @@ private:
 	bool m_stop;
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
-	std::string m_dbFileName;
 	std::string m_summaryDbFileName;
-	std::thread *m_thread;
-	std::condition_variable m_cv;
-	std::mutex m_mutex;
 	std::string m_commonPath;
 };
 
-IWriter &IWriter::create(IElf &elf, IReporter &reporter)
+namespace kcov
 {
-	return *new HtmlWriter(elf, reporter);
+	IWriter &createHtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output)
+	{
+		return *new HtmlWriter(elf, reporter, output);
+	}
 }

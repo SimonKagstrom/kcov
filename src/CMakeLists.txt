@@ -19,6 +19,7 @@ set (${TGT}_SRCS
     filter.cc
     html-writer.cc
     main.cc
+    output-handler.cc
     ptrace.cc
     reporter.cc
     utils.cc

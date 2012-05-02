@@ -4,11 +4,14 @@
 #include <collector.hh>
 #include <configuration.hh>
 #include <reporter.hh>
+#include <output-handler.hh>
 #include <writer.hh>
 #include <utils.hh>
 
 #include <chrono>
 #include <thread>
+
+#include "../../src/html-writer.hh"
 
 using namespace kcov;
 
@@ -84,11 +87,14 @@ TEST(writer)
 		.WillRepeatedly(Return(summary))
 		;
 
-	IWriter &writer = IWriter::create(*elf, reporter);
+	IOutputHandler &output = IOutputHandler::create(reporter);
+	IWriter &writer = createHtmlWriter(*elf, reporter, output);
+
+	output.registerWriter(writer);
 
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
-	writer.start();
+	output.start();
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -97,14 +103,14 @@ TEST(writer)
 		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
-	writer.stop();
+	output.stop();
 
 
 	EXPECT_CALL(reporter, unMarshal(_,_))
 		.Times(Exactly(1))
 		.WillOnce(Return(true))
 		;
-	writer.start();
+	output.start();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	writer.stop();
+	output.stop();
 }

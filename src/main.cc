@@ -3,9 +3,12 @@
 #include <reporter.hh>
 #include <writer.hh>
 #include <collector.hh>
+#include <output-handler.hh>
 #include <elf.hh>
 
 #include <string.h>
+
+#include "html-writer.hh"
 
 using namespace kcov;
 
@@ -25,14 +28,17 @@ int main(int argc, const char *argv[])
 
 	ICollector &collector = ICollector::create(elf);
 	IReporter &reporter = IReporter::create(*elf, collector);
-	IWriter &writer = IWriter::create(*elf, reporter);
+	IOutputHandler &output = IOutputHandler::create(reporter);
+
+	// Register writers
+	IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
 
 	// This will setup all
 	elf->parse();
 
-	writer.start();
+	output.start();
 	int ret = collector.run();
-	writer.stop();
+	output.stop();
 
 	return ret;
 }

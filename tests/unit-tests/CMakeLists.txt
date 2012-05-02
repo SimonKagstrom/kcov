@@ -18,6 +18,7 @@ set (TGT ut)
 set (${TGT}_SRCS
     ../../src/collector.cc
     ../../src/elf.cc
+    ../../src/output-handler.cc
     ../../src/reporter.cc
     ../../src/utils.cc
     ../../src/html-writer.cc

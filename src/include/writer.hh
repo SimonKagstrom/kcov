@@ -8,10 +8,10 @@ namespace kcov
 	class IWriter
 	{
 	public:
-		virtual void start() = 0;
+		virtual void onStartup() = 0;
 
-		virtual void stop() = 0;
+		virtual void onStop() = 0;
 
-		static IWriter &create(IElf &elf, IReporter &reporter);
+		virtual void write() = 0;
 	};
 }
