@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "html-writer.hh"
+#include "cobertura-writer.hh"
 
 using namespace kcov;
 
@@ -32,7 +33,9 @@ int main(int argc, const char *argv[])
 
 	// Register writers
 	IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
+	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
 	output.registerWriter(htmlWriter);
+	output.registerWriter(coberturaWriter);
 
 	// This will setup all
 	elf->parse();

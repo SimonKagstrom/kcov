@@ -16,6 +16,7 @@ project (unit-test)
 set (TGT ut)
 
 set (${TGT}_SRCS
+    ../../src/cobertura-writer.cc
     ../../src/collector.cc
     ../../src/elf.cc
     ../../src/output-handler.cc

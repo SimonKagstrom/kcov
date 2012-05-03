@@ -13,6 +13,7 @@ project (unit-test)
 set (TGT kcov)
 
 set (${TGT}_SRCS
+    cobertura-writer.cc
     collector.cc
     configuration.cc
     elf.cc
