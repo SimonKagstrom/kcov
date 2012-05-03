@@ -321,7 +321,7 @@ private:
 					"    </tr>\n";
 
 		}
-		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(NULL);
+		s = getHeader(nTotalCodeLines, nTotalExecutedLines, false) + getIndexHeader() + s + getFooter(NULL);
 
 		write_file((void *)s.c_str(), s.size(), (m_indexDirectory + "index.html").c_str());
 	}
@@ -389,7 +389,8 @@ private:
 				);
 	}
 
-	std::string getHeader(unsigned int nCodeLines, unsigned int nExecutedLines)
+	std::string getHeader(unsigned int nCodeLines, unsigned int nExecutedLines,
+			bool includeCommand = true)
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
 		std::string percentage_text = "Lo";
@@ -415,6 +416,11 @@ private:
 		std::string lines = fmt("%u", nExecutedLines);
 		std::string covered = fmt("%.1f", percentage);
 
+		std::string commandStr = "";
+		if (includeCommand)
+			commandStr = "          <td class=\"headerItem\" width=\"20%\">Command:</td>\n"
+					"          <td class=\"headerValue\" width=\"80%\" colspan=6>" + escapeHtml(conf.getBinaryName()) + "</td>\n";
+
 		return std::string(
 				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 				"<html>\n"
@@ -429,9 +435,8 @@ private:
 				"  <tr>\n"
 				"    <td width=\"100%\">\n"
 				"      <table cellpadding=\"1\" border=\"0\" width=\"100%\">\n"
-				"        <tr>\n"
-				"          <td class=\"headerItem\" width=\"20%\">Command:</td>\n"
-				"          <td class=\"headerValue\" width=\"80%\" colspan=6>" + escapeHtml(conf.getBinaryName()) + "</td>\n"
+				"        <tr>\n" +
+				commandStr +
 				"        </tr>\n"
 				"        <tr>\n"
 				"          <td class=\"headerItem\" width=\"20%\">Date:</td>\n"
