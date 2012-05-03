@@ -10,6 +10,16 @@
 
 using namespace kcov;
 
+#define KCOV_MAGIC      0x6b636f76 /* "kcov" */
+#define KCOV_DB_VERSION 1
+
+struct marshalHeaderStruct
+{
+	uint32_t magic;
+	uint32_t db_version;
+	uint64_t checksum;
+};
+
 class MockCollector : public ICollector
 {
 public:
@@ -136,6 +146,21 @@ TEST(reporter)
 	lc = reporter.getLineExecutionCount(elfListener.m_file.c_str(), 16);
 	ASSERT_TRUE(lc.m_hits == 1U);
 	ASSERT_TRUE(lc.m_possibleHits == 1U);
+
+	struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)data;
+	hdr->checksum++;
+	res = reporter.unMarshal(data, sz);
+	ASSERT_FALSE(res);
+	hdr->checksum--;
+
+	hdr->db_version++;
+	res = reporter.unMarshal(data, sz);
+	ASSERT_FALSE(res);
+	hdr->db_version--;
+
+	hdr->magic++;
+	res = reporter.unMarshal(data, sz);
+	ASSERT_FALSE(res);
 
 	// Unmarshal resets this
 	summary = reporter.getExecutionSummary();

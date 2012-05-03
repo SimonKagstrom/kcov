@@ -9,6 +9,16 @@
 
 using namespace kcov;
 
+#define KCOV_MAGIC      0x6b636f76 /* "kcov" */
+#define KCOV_DB_VERSION 1
+
+struct marshalHeaderStruct
+{
+	uint32_t magic;
+	uint32_t db_version;
+	uint64_t checksum;
+};
+
 class Reporter : public IReporter, public IElf::IListener, public ICollector::IListener
 {
 public:
@@ -84,6 +94,10 @@ public:
 		size_t n;
 
 		p = unMarshalHeader(p);
+
+		if (!p)
+			return false;
+
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
 		// Should already be 0, but anyway
@@ -136,17 +150,34 @@ private:
 		}
 
 
-		return out * getMarshalEntrySize();
+		return out * getMarshalEntrySize() + sizeof(struct marshalHeaderStruct);
 	}
 
 	uint8_t *marshalHeader(uint8_t *p)
 	{
-		return p;
+		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p;
+
+		hdr->magic = KCOV_MAGIC;
+		hdr->db_version = KCOV_DB_VERSION;
+		hdr->checksum = m_elf.getChecksum();
+
+		return p + sizeof(struct marshalHeaderStruct);
 	}
 
 	uint8_t *unMarshalHeader(uint8_t *p)
 	{
-		return p;
+		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p;
+
+		if (hdr->magic != KCOV_MAGIC)
+			return NULL;
+
+		if (hdr->db_version != KCOV_DB_VERSION)
+			return NULL;
+
+		if (hdr->checksum != m_elf.getChecksum())
+			return NULL;
+
+		return p + sizeof(struct marshalHeaderStruct);
 	}
 
 	/* Called when the ELF is parsed */
