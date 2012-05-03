@@ -2,6 +2,7 @@
 #include <elf.hh>
 #include <collector.hh>
 #include <utils.hh>
+#include <filter.hh>
 
 #include <string>
 #include <list>
@@ -23,8 +24,7 @@ class Reporter : public IReporter, public IElf::IListener, public ICollector::IL
 {
 public:
 	Reporter(IElf &elf, ICollector &collector) :
-		m_elf(elf), m_collector(collector),
-		m_nrLines(0)
+		m_elf(elf), m_collector(collector), m_filter(IFilter::getInstance())
 	{
 		m_elf.registerListener(*this);
 		m_collector.registerListener(*this);
@@ -51,16 +51,21 @@ public:
 	ExecutionSummary getExecutionSummary()
 	{
 		unsigned int executedLines = 0;
+		unsigned int nrLines = 0;
 
 		for (LineMap_t::iterator it = m_lines.begin();
 				it != m_lines.end();
 				it++) {
 			Line *cur = it->second;
 
+			if (!m_filter.runFilters(cur->m_file))
+				continue;
+
 			executedLines += !!cur->hits();
+			nrLines++;
 		}
 
-		return ExecutionSummary(m_nrLines, executedLines);
+		return ExecutionSummary(nrLines, executedLines);
 	}
 
 	void *marshal(size_t *szOut)
@@ -194,7 +199,6 @@ private:
 
 			line = new Line(key);
 			m_lines[key] = line;
-			m_nrLines++;
 		} else {
 			line = it->second;
 		}
@@ -331,8 +335,7 @@ private:
 
 	IElf &m_elf;
 	ICollector &m_collector;
-
-	unsigned int m_nrLines;
+	IFilter &m_filter;
 };
 
 IReporter &IReporter::create(IElf &elf, ICollector &collector)
