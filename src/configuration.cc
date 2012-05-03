@@ -34,7 +34,7 @@ public:
 				"                        in-file is optional in this case\n"
 				" -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent]\n"
 				" -l, --limits=low,high  setup limits for low/high coverage (default %u,%u)\n"
-				" -t, --m_title=title      m_title for the coverage (default: filename)\n"
+				" -t, --title=title      title for the coverage (default: filename)\n"
 				" --path-strip-level=num path levels to show for common paths (default: %u)\n"
 				" --include-path=path    comma-separated paths to include in the report\n"
 				" --exclude-path=path    comma-separated paths to exclude from the report\n"
@@ -63,7 +63,7 @@ public:
 				{"pid", required_argument, 0, 'p'},
 				{"sort-type", required_argument, 0, 's'},
 				{"limits", required_argument, 0, 'l'},
-				{"m_title", required_argument, 0, 't'},
+				{"title", required_argument, 0, 't'},
 				{"path-strip-level", required_argument, 0, 'S'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
