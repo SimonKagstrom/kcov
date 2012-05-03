@@ -179,6 +179,9 @@ private:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
+		std::multimap<double, std::string> fileListByPercent;
+		std::map<std::string, std::string> fileListByName;
+
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -221,7 +224,7 @@ private:
 				listName = prefix + listName.substr(pathToRemove.size());
 			}
 
-			s +=
+			std::string cur =
 				"    <tr>\n"
 				"      <td class=\"coverFile\"><a href=\"" + file->m_outFileName + "\" title=\"" + file->m_fileName + "\">" + listName + "</a></td>\n"
 				"      <td class=\"coverBar\" align=\"center\">\n"
@@ -230,6 +233,22 @@ private:
 				"      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
 				"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", nExecutedLines) + "&nbsp;/&nbsp;" + fmt("%u", nCodeLines) + "&nbsp;lines</td>\n"
 				"    </tr>\n";
+
+			fileListByName[file->m_name] = cur;
+			fileListByPercent.insert(std::pair<double, std::string>(percent, cur));
+		}
+
+		if (IConfiguration::getInstance().getSortType() == IConfiguration::PERCENTAGE) {
+			for (std::multimap<double, std::string>::iterator it = fileListByPercent.begin();
+					it != fileListByPercent.end();
+					it++)
+				s = s + it->second;
+		}
+		else {
+			for (std::map<std::string, std::string>::iterator it = fileListByName.begin();
+					it != fileListByName.end();
+					it++)
+				s = s + it->second;
 		}
 
 		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(NULL);
