@@ -7,11 +7,22 @@
 #include <elf.hh>
 
 #include <string.h>
+#include <signal.h>
 
 #include "html-writer.hh"
 #include "cobertura-writer.hh"
 
 using namespace kcov;
+
+static IOutputHandler *g_output;
+
+static void ctrlc(int sig)
+{
+	g_output->stop();
+	IEngine::getInstance().kill();
+	exit(0);
+}
+
 
 int main(int argc, const char *argv[])
 {
@@ -40,9 +51,14 @@ int main(int argc, const char *argv[])
 	// This will setup all
 	elf->parse();
 
+	g_output = &output;
+	signal(SIGINT, ctrlc);
+	signal(SIGTERM, ctrlc);
+
 	output.start();
 	int ret = collector.run();
 	output.stop();
+	IEngine::getInstance().kill();
 
 	return ret;
 }
