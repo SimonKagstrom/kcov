@@ -67,7 +67,8 @@ private:
 				pos < name.size();
 				pos++)
 		{
-			if (out[pos] == '.')
+			if (out[pos] == '.' ||
+					out[pos] == '-')
 				out[pos] = '_';
 		}
 
