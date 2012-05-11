@@ -11,7 +11,9 @@ namespace kcov
 		enum SortType
 		{
 			PERCENTAGE,
-			FILENAME
+			FILENAME,
+			FILE_LENGTH,
+			UNCOVERED_LINES
 		};
 
 		virtual void printUsage() = 0;

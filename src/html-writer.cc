@@ -180,6 +180,8 @@ private:
 		unsigned int nTotalCodeLines = 0;
 
 		std::multimap<double, std::string> fileListByPercent;
+		std::multimap<double, std::string> fileListByUncoveredLines;
+		std::multimap<double, std::string> fileListByFileLength;
 		std::map<std::string, std::string> fileListByName;
 
 		for (FileMap_t::iterator it = m_files.begin();
@@ -236,6 +238,8 @@ private:
 
 			fileListByName[file->m_name] = cur;
 			fileListByPercent.insert(std::pair<double, std::string>(percent, cur));
+			fileListByUncoveredLines.insert(std::pair<double, std::string>(nCodeLines - nExecutedLines, cur));
+			fileListByFileLength.insert(std::pair<double, std::string>(nCodeLines, cur));
 		}
 
 		if (IConfiguration::getInstance().getSortType() == IConfiguration::PERCENTAGE) {
@@ -243,6 +247,18 @@ private:
 					it != fileListByPercent.end();
 					it++)
 				s = s + it->second;
+		}
+		else if (IConfiguration::getInstance().getSortType() == IConfiguration::UNCOVERED_LINES) {
+			for (std::multimap<double, std::string>::iterator it = fileListByUncoveredLines.begin();
+					it != fileListByUncoveredLines.end();
+					it++)
+				s = it->second + s; // Sort backwards
+		}
+		else if (IConfiguration::getInstance().getSortType() == IConfiguration::FILE_LENGTH) {
+			for (std::multimap<double, std::string>::iterator it = fileListByFileLength.begin();
+					it != fileListByFileLength.end();
+					it++)
+				s = it->second + s; // Ditto
 		}
 		else {
 			for (std::map<std::string, std::string>::iterator it = fileListByName.begin();
