@@ -41,7 +41,7 @@ public:
 	}
 };
 
-TEST(writer)
+TEST(writer, DEADLINE_REALTIME_MS(5000))
 {
 	IElf *elf;
 	bool res;
