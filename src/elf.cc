@@ -222,6 +222,14 @@ out_open:
 					if (line_source[0] != '/')
 						file_path = full_file_path;
 
+					char *rp = ::realpath(file_path, NULL);
+
+					if (rp)
+					{
+						free((void *)full_file_path);
+						file_path = full_file_path = rp;
+					}
+
 					for (ListenerList_t::iterator it = m_listeners.begin();
 							it != m_listeners.end();
 							it++)
