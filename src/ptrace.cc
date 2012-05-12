@@ -215,7 +215,16 @@ public:
 						singleStep();
 					return out;
 				}
-				else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
+				else if (sig == SIGSEGV ||
+						sig == SIGTERM ||
+						sig == SIGFPE ||
+						sig == SIGBUS ||
+						sig == SIGILL) {
+					out.type = ev_crash;
+					out.data = sig;
+
+					return out;
+				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
 					sig = 0;
 				}
 
@@ -243,6 +252,37 @@ public:
 		}
 	}
 
+	std::string eventToName(Event ev)
+	{
+		switch (ev.type)
+		{
+		case ev_breakpoint:
+			return std::string("breakpoint");
+		case ev_exit:
+			return std::string("exit");
+		case ev_crash:
+		{
+			if (ev.data == SIGSEGV)
+				return std::string("SIGSEGV");
+			if (ev.data == SIGILL)
+				return std::string("SIGILL");
+			if (ev.data == SIGTERM)
+				return std::string("SIGTERM");
+			if (ev.data == SIGBUS)
+				return std::string("SIGBUS");
+			if (ev.data == SIGFPE)
+				return std::string("SIGFPE");
+
+			return std::string("unknown signal");
+		}
+		case ev_error:
+			return std::string("error");
+		default:
+			break;
+		}
+
+		return std::string("unknown");
+	}
 
 	void kill()
 	{

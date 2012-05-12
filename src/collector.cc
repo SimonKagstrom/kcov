@@ -41,6 +41,8 @@ public:
 			case ev_error:
 			case ev_syscall:
 			case ev_crash:
+				fprintf(stderr, "Process exited with %s\n", m_engine.eventToName(ev).c_str());
+
 				return -1;
 
 			case ev_exit:

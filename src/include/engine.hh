@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <string>
+
 namespace kcov
 {
 	enum event_type
@@ -56,6 +58,8 @@ namespace kcov
 		 * @return the event the execution stopped at.
 		 */
 		virtual const Event continueExecution() = 0;
+
+		virtual std::string eventToName(Event ev) = 0;
 
 		virtual void kill() = 0;
 	};
