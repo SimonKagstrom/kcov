@@ -257,9 +257,9 @@ public:
 		switch (ev.type)
 		{
 		case ev_breakpoint:
-			return std::string("breakpoint");
+			return std::string("breakpoint at 0x%lx", ev.addr);
 		case ev_exit:
-			return std::string("exit");
+			return fmt("exit code %d", ev.data);
 		case ev_crash:
 		{
 			if (ev.data == SIGSEGV)
@@ -273,7 +273,7 @@ public:
 			if (ev.data == SIGFPE)
 				return std::string("SIGFPE");
 
-			return std::string("unknown signal");
+			return fmt("unknown signal %d", ev.data);
 		}
 		case ev_error:
 			return std::string("error");
