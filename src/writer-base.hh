@@ -51,8 +51,6 @@ namespace kcov
 				IReporter::ExecutionSummary &summary,
 				std::string &name);
 
-		std::string fmt(const char *fmt, ...);
-
 		IElf &m_elf;
 		IReporter &m_reporter;
 		FileMap_t m_files;

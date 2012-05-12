@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <string>
+
 #define error(x...) do \
 { \
 	fprintf(stderr, "Error: "); \
@@ -99,3 +101,6 @@ extern const char *expand_path(const char *path);
 unsigned long get_aligned(unsigned long addr);
 
 unsigned long get_aligned_4b(unsigned long addr);
+
+
+std::string fmt(const char *fmt, ...);
