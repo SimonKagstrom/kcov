@@ -73,6 +73,8 @@ TEST(filter)
 
 	res = filter.runFilters(crpcut::get_start_dir());
 	ASSERT_FALSE(res);
+	res = filter.runFilters(std::string(crpcut::get_start_dir()) + "/svenne");
+	ASSERT_FALSE(res);
 	res = filter.runFilters("/tmp");
 	ASSERT_TRUE(res);
 }

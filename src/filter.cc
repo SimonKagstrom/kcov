@@ -139,7 +139,7 @@ private:
 					it++) {
 				std::string &pathPattern = it->second;
 
-				if (pathStr.compare(pathPattern) == 0)
+				if (pathStr.find(pathPattern) == 0)
 					out = false;
 			}
 
