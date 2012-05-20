@@ -48,9 +48,6 @@ int main(int argc, const char *argv[])
 	output.registerWriter(htmlWriter);
 	output.registerWriter(coberturaWriter);
 
-	// This will setup all
-	elf->parse();
-
 	g_output = &output;
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);

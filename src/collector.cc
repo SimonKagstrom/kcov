@@ -29,8 +29,8 @@ public:
 			return -1;
 		}
 
-		if (prepare() < 0)
-			return -1;
+		// This will set all breakpoints
+		m_elf.parse();
 
 		while (1) {
 			IEngine::Event ev;
@@ -73,22 +73,12 @@ public:
 
 
 private:
-	int prepare()
-	{
-		for (AddrMap_t::iterator it = m_addrs.begin();
-				it != m_addrs.end();
-				it++) {
-			if (it->first == 0)
-				continue;
-			m_engine.setBreakpoint(it->first);
-		}
-
-		return 0;
-	}
-
-
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
 	{
+		if (addr == 0)
+			return;
+
+		m_engine.setBreakpoint(addr);
 		m_addrs[addr]++;
 	}
 
