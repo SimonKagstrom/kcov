@@ -50,5 +50,12 @@ void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz)
 
 struct phdr_data *phdr_data_unmarshal(void *p)
 {
-	return (struct phdr_data *)p;
+	struct phdr_data *out = (struct phdr_data *)p;
+
+	if (out->magic != KCOV_MAGIC)
+		return NULL;
+	if (out->version != KCOV_SOLIB_VERSION)
+		return NULL;
+
+	return out;
 }
