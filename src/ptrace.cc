@@ -1,12 +1,16 @@
 #include <engine.hh>
 #include <utils.hh>
 #include <configuration.hh>
+#include <output-handler.hh>
+#include <phdr_data.h>
 
 #include <unistd.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <map>
 #include <list>
@@ -16,7 +20,7 @@ using namespace kcov;
 class Ptrace : public IEngine
 {
 public:
-	Ptrace()
+	Ptrace() : m_solibValid(false), m_solibFd(-1)
 	{
 		m_breakpointId = 0;
 	}
@@ -65,6 +69,19 @@ public:
 		if (access(executable, X_OK) != 0)
 			return -1;
 
+		std::string kcov_solib_path =
+				IOutputHandler::getInstance().getOutDirectory() +
+				"kcov-solib.pipe";
+		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
+				kcov_solib_path;
+		unlink(kcov_solib_path.c_str());
+		mkfifo(kcov_solib_path.c_str(), 0644);
+
+		if (file_exists("/tmp/libkcov_sowrapper.so"))
+			putenv("LD_PRELOAD=/tmp/libkcov_sowrapper.so");
+		putenv((char *)kcov_solib_env.c_str());
+
+		m_solibFd = open(kcov_solib_path.c_str(), O_RDONLY | O_NONBLOCK);
 		/* Executable exists, try to launch it */
 		if ((child = fork()) == 0) {
 			int res;
@@ -90,7 +107,7 @@ public:
 
 		kcov_debug(PTRACE_MSG, "PT forked %d\n", child);
 
-				/* Wait for the initial stop */
+		/* Wait for the initial stop */
 		who = waitpid(child, &status, 0);
 		if (who < 0) {
 			perror("waitpid");
@@ -172,6 +189,29 @@ public:
 		ptrace(PTRACE_SETREGS, m_activeChild, 0, &regs);
 	}
 
+	void checkSolibData()
+	{
+		if (m_solibValid)
+			return;
+
+		int r = read(m_solibFd, m_solibData, sizeof(m_solibData));
+
+		if (r <= 0)
+			return;
+		panic_if (r >= sizeof(m_solibData),
+				"Too much solib data read");
+
+		struct phdr_data *p = phdr_data_unmarshal(m_solibData);
+
+		for (unsigned int i = 0; i < p->n_entries; i++)
+		{
+			struct phdr_data_entry *cur = &p->entries[i];
+			printf("0x%08x:0x%08x:0x%08x  %s\n", cur->paddr, cur->vaddr, cur->size, cur->name);
+		}
+
+		m_solibValid = true;
+	}
+
 	const Event continueExecution()
 	{
 		Event out;
@@ -182,6 +222,8 @@ public:
 		// Assume error
 		out.type = ev_exit;
 		out.data = -1;
+
+		checkSolibData();
 
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, 0);
 		if (res < 0)
@@ -338,6 +380,10 @@ private:
 
 	pid_t m_activeChild;
 	pid_t m_child;
+
+	bool m_solibValid;
+	int m_solibFd;
+	uint8_t m_solibData[128 * 1024];
 };
 
 IEngine &IEngine::getInstance()

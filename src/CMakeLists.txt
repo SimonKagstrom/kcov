@@ -12,6 +12,13 @@ find_package (LibDwarf REQUIRED)
 project (unit-test)
 set (TGT kcov)
 
+set (SOLIB kcov_sowrapper)
+
+set (${SOLIB}_SRCS
+	solib-parser/phdr_data.c
+	solib-parser/lib.c
+	)
+
 set (${TGT}_SRCS
     cobertura-writer.cc
     collector.cc
@@ -23,6 +30,7 @@ set (${TGT}_SRCS
     output-handler.cc
     ptrace.cc
     reporter.cc
+    solib-parser/phdr_data.c
     utils.cc
     writer-base.cc
     )
@@ -39,6 +47,7 @@ include_directories(
 
 link_directories (/home/ska/local/lib)
 
+add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 add_executable (${TGT} ${${TGT}_SRCS})
 
 target_link_libraries(${TGT}
