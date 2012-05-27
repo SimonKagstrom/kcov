@@ -17,6 +17,9 @@ namespace kcov
 
 		static IElf *open(const char *filename);
 
+
+		virtual bool addFile(const char *filename) = 0;
+
 		virtual const char *getFilename() = 0;
 
 		virtual void registerListener(IListener &listener) = 0;

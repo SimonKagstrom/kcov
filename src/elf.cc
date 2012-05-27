@@ -28,10 +28,10 @@ enum SymbolType
 class Elf : public IElf
 {
 public:
-	Elf(const char *filename)
+	Elf()
 	{
 		m_elf = NULL;
-		m_filename = strdup(filename);
+		m_filename = NULL;
 		m_checksum = 0;
 	}
 	virtual ~Elf()
@@ -47,6 +47,14 @@ public:
 	uint64_t getChecksum()
 	{
 		return m_checksum;
+	}
+
+	bool addFile(const char *filename)
+	{
+		free((void *)m_filename);
+		m_filename = strdup(filename);
+
+		return checkFile();
 	}
 
 	bool checkFile()
@@ -451,9 +459,9 @@ IElf *IElf::open(const char *filename)
 		initialized = true;
 	}
 
-	p = new Elf(filename);
+	p = new Elf();
 
-	if (p->checkFile() == false) {
+	if (p->addFile(filename) == false) {
 		delete p;
 
 		return NULL;
