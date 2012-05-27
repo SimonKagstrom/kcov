@@ -24,6 +24,9 @@ namespace kcov
 			m_outDirectory = m_baseDirectory + conf.getBinaryName() + "/";
 			m_dbFileName = m_outDirectory + "coverage.db";
 			m_summaryDbFileName = m_outDirectory + "summary.db";
+
+			mkdir(m_baseDirectory.c_str(), 0755);
+			mkdir(m_outDirectory.c_str(), 0755);
 		}
 
 		std::string getBaseDirectory()
@@ -45,9 +48,6 @@ namespace kcov
 		void start()
 		{
 			size_t sz;
-
-			mkdir(m_baseDirectory.c_str(), 0755);
-			mkdir(m_outDirectory.c_str(), 0755);
 
 			void *data = read_file(&sz, m_dbFileName.c_str());
 
