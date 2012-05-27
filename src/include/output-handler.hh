@@ -22,5 +22,7 @@ namespace kcov
 		virtual std::string getOutDirectory() = 0;
 
 		static IOutputHandler &create(IReporter &reporter);
+
+		static IOutputHandler &getInstance();
 	};
 }

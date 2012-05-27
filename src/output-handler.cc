@@ -127,13 +127,17 @@ namespace kcov
 		bool m_stop;
 	};
 
+	static OutputHandler *instance;
 	IOutputHandler &IOutputHandler::create(IReporter &reporter)
 	{
-		static OutputHandler *instance;
-
 		if (!instance)
 			instance = new OutputHandler(reporter);
 
+		return *instance;
+	}
+
+	IOutputHandler &IOutputHandler::getInstance()
+	{
 		return *instance;
 	}
 }
