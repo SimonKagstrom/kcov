@@ -28,7 +28,7 @@ static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 		if (cur->p_type != PT_LOAD)
 			continue;
 
-		phdr_data_add(phdr_data, cur->p_paddr, info->dlpi_addr + cur->p_vaddr,
+		phdr_data_add(&phdr_data, cur->p_paddr, info->dlpi_addr + cur->p_vaddr,
 				cur->p_memsz, info->dlpi_name);
 		return 0;
 	}

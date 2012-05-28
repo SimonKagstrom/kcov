@@ -27,7 +27,7 @@ struct phdr_data
 
 struct phdr_data *phdr_data_new(void);
 
-void phdr_data_add(struct phdr_data *p,
+void phdr_data_add(struct phdr_data **p,
 		unsigned long paddr, unsigned long vaddr, unsigned long size,
 		const char *name);
 

@@ -18,12 +18,13 @@ struct phdr_data *phdr_data_new(void)
 	return p;
 }
 
-void phdr_data_add(struct phdr_data *p,
+void phdr_data_add(struct phdr_data **p_in,
 		unsigned long paddr, unsigned long vaddr, unsigned long size,
 		const char *name)
 {
+	struct phdr_data *p = *p_in;
 	uint32_t n = p->n_entries + 1;
-	struct phdr_data_entry *cur = &p->entries[p->n_entries];
+	uint32_t curEntry = p->n_entries;
 
 	p = realloc(p, sizeof(struct phdr_data) + n * sizeof(struct phdr_data_entry));
 	if (!p) {
@@ -32,6 +33,8 @@ void phdr_data_add(struct phdr_data *p,
 		return;
 	}
 
+	struct phdr_data_entry *cur = &p->entries[curEntry];
+
 	memset(cur, 0, sizeof(*cur));
 	strncpy(cur->name, name, sizeof(cur->name) - 1);
 	cur->paddr = paddr;
@@ -39,6 +42,8 @@ void phdr_data_add(struct phdr_data *p,
 	cur->size = size;
 
 	p->n_entries = n;
+
+	*p_in = p;
 }
 
 void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz)
