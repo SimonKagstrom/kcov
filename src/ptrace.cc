@@ -198,15 +198,20 @@ public:
 
 		if (r <= 0)
 			return;
-		panic_if (r >= sizeof(m_solibData),
+		panic_if ((unsigned)r >= sizeof(m_solibData),
 				"Too much solib data read");
 
 		struct phdr_data *p = phdr_data_unmarshal(m_solibData);
 
+		if (!p)
+			return;
+
 		for (unsigned int i = 0; i < p->n_entries; i++)
 		{
 			struct phdr_data_entry *cur = &p->entries[i];
-			printf("0x%08x:0x%08x:0x%08x  %s\n", cur->paddr, cur->vaddr, cur->size, cur->name);
+
+			printf("%u  0x%08lx:0x%08lx:0x%08lx  %s\n", cur->n_segments,
+					cur->segments[0].paddr, cur->segments[0].vaddr, cur->segments[0].size, cur->name);
 		}
 
 		m_solibValid = true;

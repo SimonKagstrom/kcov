@@ -20,18 +20,7 @@ static struct phdr_data *phdr_data;
 
 static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 {
-	int phdr;
-
-	for (phdr = 0; phdr < info->dlpi_phnum; phdr++) {
-		const ElfW(Phdr) *cur = &info->dlpi_phdr[phdr];
-
-		if (cur->p_type != PT_LOAD)
-			continue;
-
-		phdr_data_add(&phdr_data, cur->p_paddr, info->dlpi_addr + cur->p_vaddr,
-				cur->p_memsz, info->dlpi_name);
-		return 0;
-	}
+	phdr_data_add(&phdr_data, info);
 
 	return 0;
 }

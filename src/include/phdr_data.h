@@ -7,13 +7,20 @@
 extern "C" {
 #endif
 
-struct phdr_data_entry
+struct phdr_data_segment
 {
-	char name[1024];
-
 	unsigned long paddr;
 	unsigned long vaddr;
 	unsigned long size;
+};
+
+struct phdr_data_entry
+{
+	char name[1024];
+	uint32_t n_segments;
+
+	// "Reasonable" max
+	struct phdr_data_segment segments[8];
 };
 
 struct phdr_data
@@ -25,11 +32,11 @@ struct phdr_data
 	struct phdr_data_entry entries[];
 };
 
+struct dl_phdr_info;
+
 struct phdr_data *phdr_data_new(void);
 
-void phdr_data_add(struct phdr_data **p,
-		unsigned long paddr, unsigned long vaddr, unsigned long size,
-		const char *name);
+void phdr_data_add(struct phdr_data **p, struct dl_phdr_info *info);
 
 void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz);
 
