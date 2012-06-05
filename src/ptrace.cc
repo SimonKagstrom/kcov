@@ -73,13 +73,16 @@ public:
 		std::string kcov_solib_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() +
 				"kcov-solib.pipe";
+		std::string kcov_solib_path =
+				IOutputHandler::getInstance().getBaseDirectory() +
+				"libkcov_sowrapper.so";
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;
 		unlink(kcov_solib_pipe_path.c_str());
 		mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 
-		if (file_exists("/tmp/libkcov_sowrapper.so"))
-			putenv((char *)"LD_PRELOAD=/tmp/libkcov_sowrapper.so");
+		if (file_exists(kcov_solib_path.c_str()))
+			putenv((char *)std::string("LD_PRELOAD=" + kcov_solib_path).c_str());
 		putenv((char *)kcov_solib_env.c_str());
 
 		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);
@@ -212,6 +215,10 @@ public:
 			struct phdr_data_entry *cur = &p->entries[i];
 
 			if (strlen(cur->name) == 0)
+				continue;
+
+			// Skip this very special library
+			if (strstr(cur->name, "libkcov_sowrapper.so"))
 				continue;
 
 			IElf &elf = IElf::getInstance();
