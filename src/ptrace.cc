@@ -2,6 +2,7 @@
 #include <utils.hh>
 #include <configuration.hh>
 #include <output-handler.hh>
+#include <elf.hh>
 #include <phdr_data.h>
 
 #include <unistd.h>
@@ -210,8 +211,13 @@ public:
 		{
 			struct phdr_data_entry *cur = &p->entries[i];
 
-			printf("%u  0x%08lx:0x%08lx:0x%08lx  %s\n", cur->n_segments,
-					cur->segments[0].paddr, cur->segments[0].vaddr, cur->segments[0].size, cur->name);
+			if (strlen(cur->name) == 0)
+				continue;
+
+			IElf &elf = IElf::getInstance();
+
+			elf.addFile(cur->name, cur);
+			elf.parse();
 		}
 
 		m_solibValid = true;
