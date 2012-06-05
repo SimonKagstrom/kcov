@@ -63,13 +63,18 @@ void WriterBase::File::readFile(const char *filename)
 
 void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long addr)
 {
+	m_fileMutex.lock();
+
 	if (m_files.find(std::string(file)) != m_files.end())
-		return;
+		goto out;
 
 	if (!file_exists(file))
-		return;
+		goto out;
 
 	m_files[std::string(file)] = new File(file);
+
+out:
+	m_fileMutex.unlock();
 }
 
 

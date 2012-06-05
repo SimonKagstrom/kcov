@@ -6,6 +6,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <mutex>
 
 namespace kcov
 {
@@ -54,5 +55,6 @@ namespace kcov
 		IElf &m_elf;
 		IReporter &m_reporter;
 		FileMap_t m_files;
+		std::mutex m_fileMutex;
 	};
 }

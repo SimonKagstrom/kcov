@@ -184,6 +184,7 @@ private:
 		std::multimap<double, std::string> fileListByFileLength;
 		std::map<std::string, std::string> fileListByName;
 
+		m_fileMutex.lock();
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -241,6 +242,7 @@ private:
 			fileListByUncoveredLines.insert(std::pair<double, std::string>(nCodeLines - nExecutedLines, cur));
 			fileListByFileLength.insert(std::pair<double, std::string>(nCodeLines, cur));
 		}
+		m_fileMutex.unlock();
 
 		if (IConfiguration::getInstance().getSortType() == IConfiguration::PERCENTAGE) {
 			for (std::multimap<double, std::string>::iterator it = fileListByPercent.begin();
@@ -345,6 +347,7 @@ private:
 
 	void write()
 	{
+		m_fileMutex.lock();
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -355,6 +358,7 @@ private:
 
 			writeOne(file);
 		}
+		m_fileMutex.unlock();
 
 		writeIndex();
 
@@ -568,6 +572,7 @@ private:
 		writeHelperFiles(m_indexDirectory);
 		writeHelperFiles(m_outDirectory);
 
+		m_fileMutex.lock();
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -593,6 +598,7 @@ private:
 					break;
 			}
 		}
+		m_fileMutex.unlock();
 	}
 
 

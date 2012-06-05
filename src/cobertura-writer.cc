@@ -39,6 +39,7 @@ public:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
+		m_fileMutex.lock();
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -51,6 +52,7 @@ public:
 			nTotalCodeLines += file->m_codeLines;
 			nTotalExecutedLines += file->m_executedLines;
 		}
+		m_fileMutex.unlock();
 
 		str = getHeader(nTotalCodeLines, nTotalExecutedLines) + str + getFooter();
 
