@@ -448,10 +448,10 @@ private:
 	uint64_t m_checksum;
 };
 
+static Elf *g_instance;
 IElf *IElf::open(const char *filename)
 {
 	static bool initialized = false;
-	Elf *p;
 
 	if (!initialized) {
 		panic_if(elf_version(EV_CURRENT) == EV_NONE,
@@ -459,13 +459,21 @@ IElf *IElf::open(const char *filename)
 		initialized = true;
 	}
 
-	p = new Elf();
+	g_instance = new Elf();
 
-	if (p->addFile(filename) == false) {
-		delete p;
+	if (g_instance->addFile(filename) == false) {
+		delete g_instance;
 
 		return NULL;
 	}
 
-	return p;
+	return g_instance;
+}
+
+IElf &IElf::getInstance()
+{
+	panic_if (!g_instance,
+			"ELF object not yet created");
+
+	return *g_instance;
 }
