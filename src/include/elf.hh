@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+struct phdr_data_entry;
+
 namespace kcov
 {
 	class IElf
@@ -20,7 +22,7 @@ namespace kcov
 		static IElf &getInstance();
 
 
-		virtual bool addFile(const char *filename) = 0;
+		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
 		virtual const char *getFilename() = 0;
 

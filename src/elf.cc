@@ -1,6 +1,7 @@
 #include <elf.hh>
 #include <engine.hh>
 #include <utils.hh>
+#include <phdr_data.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,10 +50,17 @@ public:
 		return m_checksum;
 	}
 
-	bool addFile(const char *filename)
+	bool addFile(const char *filename, struct phdr_data_entry *data = 0)
 	{
 		free((void *)m_filename);
 		m_filename = strdup(filename);
+
+		m_curSegments.clear();
+		for (uint32_t i = 0; data && i < data->n_segments; i++) {
+			struct phdr_data_segment *seg = &data->segments[i];
+
+			m_curSegments.push_back(Segment(seg->paddr, seg->vaddr, seg->size));
+		}
 
 		return checkFile();
 	}
@@ -86,47 +94,8 @@ out_open:
 		return out;
 	}
 
-	static int phdrCallback(struct dl_phdr_info *info, size_t size,
-			void *data)
-	{
-		Elf *p = (Elf *)data;
-
-		p->handlePhdr(info, size);
-
-		return 0;
-	}
-
-	void handlePhdr(struct dl_phdr_info *info, size_t size)
-	{
-		int phdr;
-
-		if (strlen(info->dlpi_name) != 0) {
-			free( (void *)m_filename );
-			m_filename = strdup(info->dlpi_name);
-		}
-		kcov_debug(ELF_MSG, "ELF parsing %s\n", m_filename);
-
-		m_curSegments.clear();
-		for (phdr = 0; phdr < info->dlpi_phnum; phdr++) {
-			const ElfW(Phdr) *cur = &info->dlpi_phdr[phdr];
-
-			if (cur->p_type != PT_LOAD)
-				continue;
-
-			kcov_debug(ELF_MSG, "ELF seg 0x%08x -> 0x%08x...0x%08x\n",
-					cur->p_paddr, info->dlpi_addr + cur->p_vaddr,
-					info->dlpi_addr + cur->p_vaddr + cur->p_memsz);
-			m_curSegments.push_back(Segment(cur->p_paddr, info->dlpi_addr + cur->p_vaddr,
-					cur->p_memsz, cur->p_align));
-		}
-
-		parseOneElf();
-		parseOneDwarf();
-	}
-
 	bool parse()
 	{
-//		dl_iterate_phdr(phdrCallback, (void *)this);
 		struct stat st;
 
 		if (lstat(m_filename, &st) < 0)
@@ -218,11 +187,8 @@ out_open:
 					if (ndirs == 0)
 						continue;
 
-					if (addr < 0x1000)
-					{
-						// FIXME! This is not a correct check
+					if (!addressIsValid(addr))
 						continue;
-					}
 
 					/* Use the full compilation path unless the source already
 					 * has an absolute path */
@@ -241,7 +207,7 @@ out_open:
 					for (ListenerList_t::iterator it = m_listeners.begin();
 							it != m_listeners.end();
 							it++)
-						(*it)->onLine(file_path, line_nr, (unsigned long)addr);
+						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
 
 					free((void *)full_file_path);
 				}
@@ -264,6 +230,7 @@ out_err:
 		Elf32_Ehdr *ehdr;
 		size_t shstrndx;
 		bool ret = false;
+		bool setupSegments = false;
 		int fd;
 
 		fd = ::open(m_filename, O_RDONLY, 0);
@@ -288,6 +255,7 @@ out_err:
 				goto out_elf_begin;
 		}
 
+		setupSegments = m_curSegments.size() == 0;
 		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
 		{
 			Elf32_Shdr *shdr = elf32_getshdr(scn);
@@ -301,25 +269,19 @@ out_err:
 					goto out_elf_begin;
 			}
 
-			/* Handle symbols */
-			if (shdr->sh_type == SHT_SYMTAB)
-				handleSymtab(scn);
-			if (shdr->sh_type == SHT_DYNSYM)
-				handleDynsym(scn);
+			// If we have segments already, we can safely skip this
+			if (!setupSegments)
+				continue;
+
+			if ((shdr->sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) == 0)
+				continue;
+
+			m_curSegments.push_back(Segment((uint64_t)shdr->sh_addr, shdr->sh_addr, shdr->sh_size));
 		}
 		elf_end(m_elf);
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
 			error("elf_begin failed on %s\n", m_filename);
 			goto out_open;
-		}
-		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
-		{
-			Elf32_Shdr *shdr = elf32_getshdr(scn);
-			char *name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
-
-			// .rel.plt
-			if (shdr->sh_type == SHT_REL && strcmp(name, ".rel.plt") == 0)
-				handleRelPlt(scn);
 		}
 
 		ret = true;
@@ -341,14 +303,13 @@ private:
 	class Segment
 	{
 	public:
-		Segment(ElfW(Addr) paddr, ElfW(Addr) vaddr, size_t size, ElfW(Word) align) :
-			m_paddr(paddr), m_vaddr(vaddr), m_align(align), m_size(size)
+		Segment(uint64_t paddr, uint64_t vaddr, uint64_t size) :
+			m_paddr(paddr), m_vaddr(vaddr), m_size(size)
 		{
 		}
 
 		ElfW(Addr) m_paddr;
 		ElfW(Addr) m_vaddr;
-		ElfW(Word) m_align;
 		size_t m_size;
 	};
 
@@ -371,7 +332,21 @@ private:
 		return (void *)(addr - 6);
 	}
 
-	ElfW(Addr) adjustAddressBySegment(ElfW(Addr) addr)
+	bool addressIsValid(uint64_t addr)
+	{
+		for (SegmentList_t::iterator it = m_curSegments.begin();
+				it != m_curSegments.end(); it++) {
+			Segment cur = *it;
+
+			if (addr >= cur.m_paddr && addr < cur.m_paddr + cur.m_size) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	uint64_t adjustAddressBySegment(uint64_t addr)
 	{
 		for (SegmentList_t::iterator it = m_curSegments.begin();
 				it != m_curSegments.end(); it++) {
@@ -384,59 +359,6 @@ private:
 		}
 
 		return addr;
-	}
-
-	void handleRelPlt(Elf_Scn *scn)
-	{
-		Elf_Data *data = elf_getdata(scn, NULL);
-		Elf32_Rel *r = (Elf32_Rel *)data->d_buf;
-		int n = data->d_size / sizeof(Elf32_Rel);
-
-		panic_if(n <= 0,
-				"Section data too small (%zd) - no symbols\n",
-				data->d_size);
-
-		for (int i = 0; i < n; i++, r++) {
-			adjustAddressBySegment(r->r_offset);
-
-			// FIXME! Do something here
-		}
-	}
-
-	void handleDynsym(Elf_Scn *scn)
-	{
-		handleSymtabGeneric(scn, SYM_DYNAMIC);
-	}
-
-	void handleSymtab(Elf_Scn *scn)
-	{
-		handleSymtabGeneric(scn, SYM_NORMAL);
-	}
-
-	void handleSymtabGeneric(Elf_Scn *scn, enum SymbolType symType)
-	{
-		Elf_Data *data = elf_getdata(scn, NULL);
-		Elf32_Sym *s = (Elf32_Sym *)data->d_buf;
-		int n = data->d_size / sizeof(Elf32_Sym);
-
-		panic_if(n <= 0,
-				"Section data too small (%zd) - no symbols\n",
-				data->d_size);
-
-		/* Iterate through all symbols */
-		for (int i = 0; i < n; i++)
-		{
-			//const char *sym_name = elf_strptr(m_elf, shdr->sh_link, s->st_name);
-			int type = ELF32_ST_TYPE(s->st_info);
-
-			/* Ohh... This is an interesting symbol, add it! */
-			if ( type == STT_FUNC) {
-				adjustAddressBySegment(s->st_value);
-				// s->st_size;
-			}
-
-			s++;
-		}
 	}
 
 	SegmentList_t m_curSegments;
