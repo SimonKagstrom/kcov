@@ -34,6 +34,7 @@ public:
 		m_elf = NULL;
 		m_filename = NULL;
 		m_checksum = 0;
+		m_elfIs32Bit = true;
 	}
 	virtual ~Elf()
 	{
@@ -81,10 +82,6 @@ public:
 				error("elf_begin failed on %s\n", m_filename);
 				out = false;
 				goto out_open;
-		}
-		if (!elf32_getehdr(elf)) {
-				error("elf32_getehdr failed on %s\n", m_filename);
-				out = false;
 		}
 		elf_end(elf);
 
@@ -227,10 +224,11 @@ out_err:
 	bool parseOneElf()
 	{
 		Elf_Scn *scn = NULL;
-		Elf32_Ehdr *ehdr;
 		size_t shstrndx;
 		bool ret = false;
 		bool setupSegments = false;
+		size_t sz;
+		char *raw;
 		int fd;
 
 		fd = ::open(m_filename, O_RDONLY, 0);
@@ -244,11 +242,10 @@ out_err:
 				goto out_open;
 		}
 
+		raw = elf_getident(m_elf, &sz);
 
-		if (!(ehdr = elf32_getehdr(m_elf))) {
-				error("elf32_getehdr failed on %s\n", m_filename);
-				goto out_elf_begin;
-		}
+		if (raw && sz > EI_CLASS)
+			m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
 
 		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
 				error("elf_getshstrndx failed on %s\n", m_filename);
@@ -258,11 +255,31 @@ out_err:
 		setupSegments = m_curSegments.size() == 0;
 		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
 		{
-			Elf32_Shdr *shdr = elf32_getshdr(scn);
-			Elf_Data *data = elf_getdata(scn, NULL);
+			uint64_t sh_addr;
+			uint64_t sh_size;
+			uint64_t sh_flags;
+			uint64_t sh_name;
 			char *name;
 
-			name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
+			if (m_elfIs32Bit) {
+				Elf32_Shdr *shdr32 = elf32_getshdr(scn);
+
+				sh_addr = shdr32->sh_addr;
+				sh_size = shdr32->sh_size;
+				sh_flags = shdr32->sh_flags;
+				sh_name = shdr32->sh_name;
+			} else {
+				Elf64_Shdr *shdr64 = elf64_getshdr(scn);
+
+				sh_addr = shdr64->sh_addr;
+				sh_size = shdr64->sh_size;
+				sh_flags = shdr64->sh_flags;
+				sh_name = shdr64->sh_name;
+			}
+
+			Elf_Data *data = elf_getdata(scn, NULL);
+
+			name = elf_strptr(m_elf, shstrndx, sh_name);
 			if(!data) {
 					error("elf_getdata failed on section %s in %s\n",
 							name, m_filename);
@@ -273,10 +290,10 @@ out_err:
 			if (!setupSegments)
 				continue;
 
-			if ((shdr->sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) == 0)
+			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) == 0)
 				continue;
 
-			m_curSegments.push_back(Segment((uint64_t)shdr->sh_addr, shdr->sh_addr, shdr->sh_size));
+			m_curSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 		}
 		elf_end(m_elf);
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
@@ -308,8 +325,8 @@ private:
 		{
 		}
 
-		ElfW(Addr) m_paddr;
-		ElfW(Addr) m_vaddr;
+		uint64_t m_paddr;
+		uint64_t m_vaddr;
 		size_t m_size;
 	};
 
@@ -348,6 +365,7 @@ private:
 	SegmentList_t m_curSegments;
 
 	Elf *m_elf;
+	bool m_elfIs32Bit;
 	ListenerList_t m_listeners;
 	IListener *m_listener;
 	const char *m_filename;
