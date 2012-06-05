@@ -70,19 +70,19 @@ public:
 		if (access(executable, X_OK) != 0)
 			return -1;
 
-		std::string kcov_solib_path =
+		std::string kcov_solib_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() +
 				"kcov-solib.pipe";
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
-				kcov_solib_path;
-		unlink(kcov_solib_path.c_str());
-		mkfifo(kcov_solib_path.c_str(), 0644);
+				kcov_solib_pipe_path;
+		unlink(kcov_solib_pipe_path.c_str());
+		mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 
 		if (file_exists("/tmp/libkcov_sowrapper.so"))
-			putenv("LD_PRELOAD=/tmp/libkcov_sowrapper.so");
+			putenv((char *)"LD_PRELOAD=/tmp/libkcov_sowrapper.so");
 		putenv((char *)kcov_solib_env.c_str());
 
-		m_solibFd = open(kcov_solib_path.c_str(), O_RDONLY | O_NONBLOCK);
+		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);
 		/* Executable exists, try to launch it */
 		if ((child = fork()) == 0) {
 			int res;
