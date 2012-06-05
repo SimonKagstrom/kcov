@@ -316,22 +316,6 @@ private:
 	typedef std::list<Segment> SegmentList_t;
 	typedef std::list<IListener *> ListenerList_t;
 
-	void *offsetTableToAddress(Elf32_Addr addr)
-	{
-		/*
-		 * The .got.plt table contains a pointer to the push instruction
-		 * below:
-		 *
-		 *  08070f10 <pthread_self@plt>:
-		 *   8070f10:       ff 25 58 93 0b 08       jmp    *0x80b9358
-		 *   8070f16:       68 b0 06 00 00          push   $0x6b0
-		 *
-		 * so to get the entry point, we rewind the pointer to the start
-		 * of the jmp.
-		 */
-		return (void *)(addr - 6);
-	}
-
 	bool addressIsValid(uint64_t addr)
 	{
 		for (SegmentList_t::iterator it = m_curSegments.begin();
