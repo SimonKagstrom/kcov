@@ -9,7 +9,7 @@ find_package (LibDwarf REQUIRED)
 # ====================================
 # project name and version
 # ====================================
-project (unit-test)
+project (kcov)
 set (TGT kcov)
 
 set (SOLIB kcov_sowrapper)
@@ -55,3 +55,5 @@ target_link_libraries(${TGT}
 	${LIBELF_LIBRARIES}
 	dl
 	pthread)
+
+install (TARGETS ${PROJECT_NAME} ${SOLIB} ${INSTALL_TARGETS_PATH})
