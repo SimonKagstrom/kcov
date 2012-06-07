@@ -103,7 +103,7 @@ private:
 			out = out +
 					"						<line number=\"" + fmt("%u", n) +
 					"\" hits=\"" + fmt("%u", cnt.m_hits) +
-					"\" branch=\"false\"/>\n";
+					"\"/>\n";
 
 			// Update the execution count
 			file->m_executedLines = nExecutedLines;
@@ -122,7 +122,7 @@ private:
 		out = "				<class name=\"" + mangledName + "\" filename=\"" +
 				filename + "\" line-rate=\"" +
 				fmt("%.3f", nExecutedLines / (float)nCodeLines) +
-				"\" branch-rate=\"1.0\" complexity=\"1.0\">\n" +
+				"\">\n" +
 				"					<lines>\n" +
 				out +
 				"					</lines>\n"
