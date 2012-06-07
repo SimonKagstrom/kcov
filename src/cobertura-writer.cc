@@ -39,6 +39,8 @@ public:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
+		setupCommonPaths();
+
 		m_fileMutex.lock();
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
@@ -111,8 +113,14 @@ private:
 		if (nCodeLines == 0)
 			nCodeLines = 1;
 
+		std::string filename = file->m_name;
+		size_t pos = filename.find(m_commonPath);
+
+		if (pos != std::string::npos)
+			filename = filename.substr(m_commonPath.size() + 1);
+
 		out = "				<class name=\"" + mangledName + "\" filename=\"" +
-				file->m_name + "\" line-rate=\"" +
+				filename + "\" line-rate=\"" +
 				fmt("%.3f", nExecutedLines / (float)nCodeLines) +
 				"\" branch-rate=\"1.0\" complexity=\"1.0\">\n" +
 				"					<lines>\n" +
@@ -143,7 +151,7 @@ private:
 				"<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-03.dtd'>\n"
 				"<coverage line-rate=\"" + lineRate + "\" version=\"1.9\" timestamp=\"" + std::string(date_buf) + "\">\n"
 				"	<sources>\n"
-				"		<source>.</source>\n"
+				"		<source>" + m_commonPath + "/</source>\n"
 				"	</sources>\n"
 				"	<packages>\n"
 				"		<package name=\"\" line-rate=\"" + lineRate + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
