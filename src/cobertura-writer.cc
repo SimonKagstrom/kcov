@@ -98,9 +98,6 @@ private:
 			nExecutedLines += !!cnt.m_hits;
 			nCodeLines++;
 
-			if (cnt.m_hits == 0)
-				continue;
-
 			out = out +
 					"						<line number=\"" + fmt("%u", n) +
 					"\" hits=\"" + fmt("%u", cnt.m_hits) +
