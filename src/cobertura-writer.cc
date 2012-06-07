@@ -154,7 +154,9 @@ private:
 				"		<source>" + m_commonPath + "/</source>\n"
 				"	</sources>\n"
 				"	<packages>\n"
-				"		<package name=\"\" line-rate=\"" + lineRate + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
+				"		<package name=\"" +
+				mangleFileName(IConfiguration::getInstance().getBinaryName()) +
+				"\" line-rate=\"" + lineRate + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
 				"			<classes>\n"
 				;
 	}
