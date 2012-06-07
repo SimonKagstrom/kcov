@@ -14,8 +14,9 @@ struct summaryStruct
 };
 
 WriterBase::WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output) :
-		m_elf(elf), m_reporter(reporter)
+		m_elf(elf), m_reporter(reporter), m_filter(IFilter::getInstance())
 {
+		m_commonPath = "not set";
 		m_elf.registerListener(*this);
 }
 
@@ -109,4 +110,35 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 	name = std::string(p->name);
 
 	return true;
+}
+
+void WriterBase::setupCommonPaths()
+{
+	m_fileMutex.lock();
+	for (FileMap_t::iterator it = m_files.begin();
+			it != m_files.end();
+			it++) {
+		File *file = it->second;
+
+		if (m_filter.runFilters(file->m_name) == false)
+			continue;
+
+		if (m_commonPath == "not set")
+			m_commonPath = file->m_name;
+
+		/* Already matching? */
+		if (file->m_name.find(m_commonPath) == 0)
+			continue;
+
+		while (1) {
+			size_t pos = m_commonPath.rfind('/');
+			if (pos == std::string::npos)
+				break;
+
+			m_commonPath = m_commonPath.substr(0, pos);
+			if (file->m_name.find(m_commonPath) == 0)
+				break;
+		}
+	}
+	m_fileMutex.unlock();
 }

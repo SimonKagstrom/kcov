@@ -111,13 +111,11 @@ class HtmlWriter : public IWriter, public WriterBase
 public:
 	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
 		WriterBase(elf, reporter, output),
-		m_filter(IFilter::getInstance()),
 		m_stop(false)
 	{
 		m_indexDirectory = output.getBaseDirectory();
 		m_outDirectory = output.getOutDirectory();
 		m_summaryDbFileName = m_outDirectory + "summary.db";
-		m_commonPath = "not set";
 	}
 
 	void onStop()
@@ -294,6 +292,8 @@ private:
 		std::string s;
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
+
+		setupCommonPaths();
 
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
@@ -571,44 +571,13 @@ private:
 	{
 		writeHelperFiles(m_indexDirectory);
 		writeHelperFiles(m_outDirectory);
-
-		m_fileMutex.lock();
-		for (FileMap_t::iterator it = m_files.begin();
-				it != m_files.end();
-				it++) {
-			File *file = it->second;
-
-			if (m_filter.runFilters(file->m_name) == false)
-				continue;
-
-			if (m_commonPath == "not set")
-				m_commonPath = file->m_name;
-
-			/* Already matching? */
-			if (file->m_name.find(m_commonPath) == 0)
-				continue;
-
-			while (1) {
-				size_t pos = m_commonPath.rfind('/');
-				if (pos == std::string::npos)
-					break;
-
-				m_commonPath = m_commonPath.substr(0, pos);
-				if (file->m_name.find(m_commonPath) == 0)
-					break;
-			}
-		}
-		m_fileMutex.unlock();
 	}
 
-
-	IFilter &m_filter;
 
 	bool m_stop;
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
 	std::string m_summaryDbFileName;
-	std::string m_commonPath;
 };
 
 namespace kcov
