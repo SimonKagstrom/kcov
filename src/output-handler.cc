@@ -74,7 +74,7 @@ namespace kcov
 		{
 			m_stop = true;
 
-			while (m_threadStopped)
+			while (!m_threadStopped)
 			{
 				struct timespec ts;
 				ts.tv_sec = 0;
