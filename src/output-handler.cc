@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <pthread.h>
 
 namespace kcov
 {
@@ -62,18 +63,20 @@ namespace kcov
 					it++)
 				(*it)->onStartup();
 
-			m_thread = new std::thread(threadMainStatic, this);
-			m_cv.notify_all();
+			panic_if (pthread_create(&m_thread, NULL, threadMainStatic, this) < 0,
+					"Can't create thread");
 		}
 
 		void stop()
 		{
 			m_stop = true;
-			m_cv.notify_all();
 
-			if (m_thread)
-				m_thread->join();
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			struct timespec ts;
+			ts.tv_sec = 0;
+			ts.tv_nsec = 100 * 1000 * 1000;
+			nanosleep(&ts, NULL);
+
+			pthread_join(m_thread, NULL);
 
 			size_t sz;
 			void *data = m_reporter.marshal(&sz);
@@ -94,20 +97,22 @@ namespace kcov
 		void threadMain()
 		{
 			while (!m_stop) {
-				std::unique_lock<std::mutex> lk(m_mutex);
-
-				m_cv.wait_for(lk, std::chrono::milliseconds(1003));
-
 				for (WriterList_t::iterator it = m_writers.begin();
 						it != m_writers.end();
 						it++)
 					(*it)->write();
+
+				sleep(1);
 			}
 		}
 
-		static void threadMainStatic(OutputHandler *pThis)
+		static void *threadMainStatic(void *pThis)
 		{
-			pThis->threadMain();
+			OutputHandler *p = (OutputHandler *)pThis;
+
+			p->threadMain();
+
+			return NULL;
 		}
 
 
@@ -121,9 +126,7 @@ namespace kcov
 		std::string m_summaryDbFileName;
 
 		WriterList_t m_writers;
-		std::thread *m_thread;
-		std::condition_variable m_cv;
-		std::mutex m_mutex;
+		pthread_t m_thread;
 		bool m_stop;
 	};
 
