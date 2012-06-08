@@ -26,6 +26,9 @@ namespace kcov
 			m_dbFileName = m_outDirectory + "coverage.db";
 			m_summaryDbFileName = m_outDirectory + "summary.db";
 
+			m_threadStopped = false;
+			m_stop = false;
+
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
 		}
@@ -71,12 +74,19 @@ namespace kcov
 		{
 			m_stop = true;
 
-			struct timespec ts;
-			ts.tv_sec = 0;
-			ts.tv_nsec = 100 * 1000 * 1000;
-			nanosleep(&ts, NULL);
+			while (m_threadStopped)
+			{
+				struct timespec ts;
+				ts.tv_sec = 0;
+				ts.tv_nsec = 100 * 1000 * 1000;
 
-			pthread_join(m_thread, NULL);
+				nanosleep(&ts, NULL);
+			}
+
+			for (WriterList_t::iterator it = m_writers.begin();
+					it != m_writers.end();
+					it++)
+				(*it)->write();
 
 			size_t sz;
 			void *data = m_reporter.marshal(&sz);
@@ -104,6 +114,8 @@ namespace kcov
 
 				sleep(1);
 			}
+
+			m_threadStopped = true;
 		}
 
 		static void *threadMainStatic(void *pThis)
@@ -128,6 +140,7 @@ namespace kcov
 		WriterList_t m_writers;
 		pthread_t m_thread;
 		bool m_stop;
+		bool m_threadStopped;
 	};
 
 	static OutputHandler *instance;
