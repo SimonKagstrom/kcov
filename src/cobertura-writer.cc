@@ -116,7 +116,7 @@ private:
 		std::string filename = file->m_name;
 		size_t pos = filename.find(m_commonPath);
 
-		if (pos != std::string::npos)
+		if (pos != std::string::npos && filename.size() > m_commonPath.size())
 			filename = filename.substr(m_commonPath.size() + 1);
 
 		out = "				<class name=\"" + mangledName + "\" filename=\"" +
