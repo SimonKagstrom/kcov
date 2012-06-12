@@ -24,7 +24,7 @@ static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
 
 #if defined(__i386__)
 	out = regs->eip - 1;
-#elif defined(__X86_64__)
+#elif defined(__x86_64__)
 	out = regs->rip - 1;
 #else
 # error Unsupported architecture
@@ -37,7 +37,7 @@ static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
 {
 #if defined(__i386__)
 	regs->eip--;
-#elif defined(__X86_64__)
+#elif defined(__x86_64__)
 	regs->rip--;
 #else
 # error Unsupported architecture
