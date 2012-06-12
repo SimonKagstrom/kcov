@@ -18,6 +18,32 @@
 
 using namespace kcov;
 
+static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
+{
+	unsigned long out;
+
+#if defined(__i386__)
+	out = regs->eip - 1;
+#elif defined(__X86_64__)
+	out = regs->rip - 1;
+#else
+# error Unsupported architecture
+#endif
+
+	return out;
+}
+
+static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
+{
+#if defined(__i386__)
+	regs->eip--;
+#elif defined(__X86_64__)
+	regs->rip--;
+#else
+# error Unsupported architecture
+#endif
+}
+
 class Ptrace : public IEngine
 {
 public:
@@ -189,7 +215,7 @@ public:
 		ptrace(PTRACE_GETREGS, m_activeChild, 0, &regs);
 
 		// Step back one instruction
-		regs.eip--;
+		arch_adjustPcAfterBreakpoint(&regs);
 		ptrace(PTRACE_SETREGS, m_activeChild, 0, &regs);
 	}
 
@@ -353,7 +379,7 @@ public:
 private:
 	unsigned long getPcFromRegs(struct user_regs_struct *regs)
 	{
-		return (regs->eip - 1);
+		return arch_getPcFromRegs(regs);
 	}
 
 	unsigned long getPc(int pid)
