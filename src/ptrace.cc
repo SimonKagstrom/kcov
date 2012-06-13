@@ -18,6 +18,19 @@
 
 using namespace kcov;
 
+#define str(s) #s
+#define xstr(s) str(s)
+
+const char *solibPaths[] =
+{
+		xstr(KCOV_LIBRARY_PREFIX),
+		"/usr/local/lib",
+		"/opt/lib",
+		"/usr/lib",
+		"/lib",
+		NULL
+};
+
 static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
 {
 	unsigned long out;
@@ -100,8 +113,17 @@ public:
 				IOutputHandler::getInstance().getOutDirectory() +
 				"kcov-solib.pipe";
 		std::string kcov_solib_path =
-				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
+
+		for (const char **path = &solibPaths[0]; *path != NULL; path++)
+		{
+			std::string cur = (std::string(*path) + "/" + kcov_solib_path);
+
+			if (file_exists(cur.c_str())) {
+				kcov_solib_path = cur;
+				break;
+			}
+		}
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;
 		unlink(kcov_solib_pipe_path.c_str());

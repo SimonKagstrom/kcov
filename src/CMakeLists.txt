@@ -36,7 +36,10 @@ set (${TGT}_SRCS
     )
 set (CMAKE_BUILD_TYPE debug)
 
-set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP")
+
+set (KCOV_LIBRARY_PREFIX "/tmp")
+
+set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
 
 include_directories(
