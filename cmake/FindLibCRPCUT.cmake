@@ -38,8 +38,11 @@ find_library (LIBCRPCUT_LIBRARIES
       crpcut
     PATHS
       /usr/lib
+      /usr/lib64
       /usr/local/lib
+      /usr/local/lib64
       /opt/local/lib
+      /opt/usr/lib64
       /home/ska/local/lib
       ENV LIBRARY_PATH
       ENV LD_LIBRARY_PATH)
