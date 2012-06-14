@@ -2,7 +2,6 @@
 #include <elf.hh>
 #include <configuration.hh>
 #include <writer.hh>
-#include <filter.hh>
 #include <utils.hh>
 #include <output-handler.hh>
 
@@ -191,9 +190,6 @@ private:
 			unsigned int nCodeLines = file->m_codeLines;
 			double percent = 0;
 
-			if (m_filter.runFilters(file->m_name) == false)
-				continue;
-
 			if (nCodeLines != 0)
 				percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
 
@@ -352,9 +348,6 @@ private:
 				it != m_files.end();
 				it++) {
 			File *file = it->second;
-
-			if (m_filter.runFilters(file->m_name) == false)
-				continue;
 
 			writeOne(file);
 		}

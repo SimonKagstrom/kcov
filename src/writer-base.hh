@@ -13,7 +13,6 @@ namespace kcov
 	class IElf;
 	class IReporter;
 	class IOutputHandler;
-	class IFilter;
 
 	class WriterBase : public IElf::IListener
 	{
@@ -60,6 +59,5 @@ namespace kcov
 		FileMap_t m_files;
 		std::mutex m_fileMutex;
 		std::string m_commonPath;
-		IFilter &m_filter;
 	};
 }

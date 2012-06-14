@@ -1,6 +1,5 @@
 #include "writer-base.hh"
 #include <utils.hh>
-#include <filter.hh>
 
 #include <stdio.h>
 
@@ -14,7 +13,7 @@ struct summaryStruct
 };
 
 WriterBase::WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output) :
-		m_elf(elf), m_reporter(reporter), m_filter(IFilter::getInstance())
+		m_elf(elf), m_reporter(reporter)
 {
 		m_commonPath = "not set";
 		m_elf.registerListener(*this);
@@ -119,9 +118,6 @@ void WriterBase::setupCommonPaths()
 			it != m_files.end();
 			it++) {
 		File *file = it->second;
-
-		if (m_filter.runFilters(file->m_name) == false)
-			continue;
 
 		if (m_commonPath == "not set")
 			m_commonPath = file->m_name;

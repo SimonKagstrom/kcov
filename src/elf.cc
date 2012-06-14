@@ -1,6 +1,7 @@
 #include <elf.hh>
 #include <engine.hh>
 #include <utils.hh>
+#include <filter.hh>
 #include <phdr_data.h>
 
 #include <sys/types.h>
@@ -29,7 +30,7 @@ enum SymbolType
 class Elf : public IElf
 {
 public:
-	Elf()
+	Elf() : m_filter(IFilter::getInstance())
 	{
 		m_elf = NULL;
 		m_filename = NULL;
@@ -201,10 +202,13 @@ out_open:
 						file_path = full_file_path = rp;
 					}
 
-					for (ListenerList_t::iterator it = m_listeners.begin();
-							it != m_listeners.end();
-							it++)
-						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
+					if (m_filter.runFilters(file_path) == true)
+					{
+						for (ListenerList_t::iterator it = m_listeners.begin();
+								it != m_listeners.end();
+								it++)
+							(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
+					}
 
 					free((void *)full_file_path);
 				}
@@ -363,6 +367,7 @@ private:
 	}
 
 	SegmentList_t m_curSegments;
+	IFilter &m_filter;
 
 	Elf *m_elf;
 	bool m_elfIs32Bit;

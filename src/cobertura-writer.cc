@@ -2,7 +2,6 @@
 #include <elf.hh>
 #include <configuration.hh>
 #include <writer.hh>
-#include <filter.hh>
 #include <utils.hh>
 #include <output-handler.hh>
 
@@ -19,7 +18,6 @@ class CoberturaWriter : public WriterBase, public IWriter
 public:
 	CoberturaWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
 		WriterBase(elf, reporter, output),
-		m_filter(IFilter::getInstance()),
 		m_output(output)
 	{
 	}
@@ -46,9 +44,6 @@ public:
 				it != m_files.end();
 				it++) {
 			File *file = it->second;
-
-			if (m_filter.runFilters(file->m_name) == false)
-				continue;
 
 			str = str + writeOne(file);
 			nTotalCodeLines += file->m_codeLines;
@@ -171,7 +166,6 @@ private:
 	}
 
 
-	IFilter &m_filter;
 	IOutputHandler &m_output;
 };
 
