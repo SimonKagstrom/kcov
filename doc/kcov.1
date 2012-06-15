@@ -35,7 +35,7 @@ arguments, and continuously produces output from long-running applications.
 Trace PID instead of executing executable, executable is optional in this case.
 .TP
 \fB\-s\fP, \fB\-\-sort\-type\fP=\fItype\fP
-How to sort files: f[ilename] (default), p[ercent].
+How to sort files: f[ilename] (default), p[ercent], u[ncovered lines], l[ines]
 .TP
 \fB\-l\fP, \fB\-\-limits\fP=\fIlow,high\fP
 Setup limits for low/high coverage (default: 16,50).
@@ -59,7 +59,7 @@ Comma-separated list of patterns to include in the report.
 Comma-separated list of patterns to exclude from the report.
 .SH EXAMPLES
 .PP
-Check coverage for ./frodo and generate HTML output in /tmp/kcov
+Check coverage for ./frodo and generate HTML output in /tmp/kcov and cobertura output in /tmp/kcov/frodo/cobertura.xml
 .PP
 .RS
 kcov /tmp/kcov ./frodo
@@ -73,6 +73,11 @@ kcov \-\-include\-pattern=src/frodo /tmp/kcov ./frodo
 .SH HTML OUTPUT
 .PP
 The HTML output shows executed and non-executed lines of the source code. Some lines can map to multiple instrumentation points, for example for inlined functions (where every inlining of them will generate a separate instrumentation point). This is shown in the left column as 1/3 for example, which means that one of the three instrumentation points has been executed.
+.SH COBERTURA OUTPUT
+.PP
+Kcov also outputs data in the Cobertura XML format, which allows integrating kcov output in Jenkins (see http://cobertura.sf.net and http://jenkins-ci.org).
+.PP
+The Cobertura output is placed in a file named out-path/exec-filename/cobertura.xml.
 .SH AUTHOR
 .PP
 Kcov was written by Simon Kagstrom, building upon bcov by Thomas Neumann.
