@@ -60,7 +60,7 @@ static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
 class Ptrace : public IEngine
 {
 public:
-	Ptrace() : m_solibValid(false), m_solibFd(-1)
+	Ptrace() : m_solibValid(false), m_solibFd(-1), m_ldPreloadString(NULL), m_envString(NULL)
 	{
 		m_breakpointId = 0;
 	}
@@ -129,9 +129,19 @@ public:
 		unlink(kcov_solib_pipe_path.c_str());
 		mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 
+		free(m_envString);
+		m_envString = (char *)xmalloc(kcov_solib_env.size() + 1);
+		strcpy(m_envString, kcov_solib_env.c_str());
+
+		std::string preloadEnv = std::string("LD_PRELOAD=" + kcov_solib_path).c_str();
+		free(m_ldPreloadString);
+		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
+		strcpy(m_ldPreloadString, preloadEnv.c_str());
+
+
 		if (file_exists(kcov_solib_path.c_str()))
-			putenv((char *)std::string("LD_PRELOAD=" + kcov_solib_path).c_str());
-		putenv((char *)kcov_solib_env.c_str());
+			putenv(m_ldPreloadString);
+		putenv(m_envString);
 
 		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);
 		/* Executable exists, try to launch it */
@@ -450,6 +460,8 @@ private:
 	bool m_solibValid;
 	int m_solibFd;
 	uint8_t m_solibData[128 * 1024];
+	char *m_ldPreloadString;
+	char *m_envString;
 };
 
 IEngine &IEngine::getInstance()
