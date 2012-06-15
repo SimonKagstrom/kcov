@@ -34,7 +34,6 @@ set (${TGT}_SRCS
     utils.cc
     writer-base.cc
     )
-set (CMAKE_BUILD_TYPE debug)
 
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
