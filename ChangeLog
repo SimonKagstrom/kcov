@@ -1,3 +1,20 @@
+Kcov (9):
+	* Completely refactor the source code (yes, everything!), and add
+	  unit tests to verify kcov itself. The code is now in C++.
+	  
+	* Implement transparent coverage instrumentation for shared libraries
+	  (done automatically)
+	  
+	* Implement a Cobertura-compatible XML backend. This allows integrating
+	  kcov coverage information in Jenkins.
+	  
+	* Improve performance a lot by filtering out files already at the
+	  instrumentation step (and not only during HTML generation). This
+	  means that --include-pattern/--include-path can improve kcov performance
+	  by quite a bit.
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Jun 15 17:39:17 CEST 2012
+
 Kcov (8):
 	* Import the man-page from Debian and update it.
 
