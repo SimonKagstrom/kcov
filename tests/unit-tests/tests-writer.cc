@@ -66,7 +66,7 @@ TEST(writer, DEADLINE_REALTIME_MS(5000))
 		.WillRepeatedly(Return(true))
 		;
 	EXPECT_CALL(reporter, lineIsCode(_,7))
-		.Times(Exactly(2)) // Both files
+		.Times(AtLeast(4)) // Both files
 		.WillRepeatedly(Return(false))
 		;
 
@@ -75,15 +75,15 @@ TEST(writer, DEADLINE_REALTIME_MS(5000))
 		.WillRepeatedly(Return(def))
 		;
 	EXPECT_CALL(reporter, getLineExecutionCount(_,8))
-		.Times(Exactly(2))
+		.Times(AtLeast(3))
 		.WillRepeatedly(Return(partial))
 		;
 	EXPECT_CALL(reporter, getLineExecutionCount(_,11))
-		.Times(Exactly(1))
-		.WillOnce(Return(full))
+		.Times(AtLeast(2))
+		.WillRepeatedly(Return(full))
 		;
 	EXPECT_CALL(reporter, getExecutionSummary())
-		.Times(AtLeast(1))
+		.Times(AtLeast(3))
 		.WillRepeatedly(Return(summary))
 		;
 
