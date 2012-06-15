@@ -393,6 +393,8 @@ IElf *IElf::open(const char *filename)
 	if (g_instance->addFile(filename) == false) {
 		delete g_instance;
 
+		g_instance = NULL;
+
 		return NULL;
 	}
 
