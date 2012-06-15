@@ -84,6 +84,9 @@ public:
 				out = false;
 				goto out_open;
 		}
+		if (elf_kind(elf) == ELF_K_NONE)
+			out = false;
+
 		elf_end(elf);
 
 out_open:
