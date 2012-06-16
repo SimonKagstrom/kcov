@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">101</td>
+          <td class="headerValue" width="10%">102</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftLo" width="15%">10.9 %</td>
+          <td class="coverPerLeftLo" width="15%">10.8%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">11</td>
@@ -35,265 +35,265 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #include &quot;gui.hh&quot; </span>
-<span class="lineNum">      2 </span>              : #include &quot;menu.hh&quot; </span>
-<span class="lineNum">      3 </span>              : #include &quot;help_box.hh&quot; </span>
-<span class="lineNum">      4 </span>              : #include &quot;status_bar.hh&quot; </span>
-<span class="lineNum">      5 </span>              : #include &quot;data_store.hh&quot; </span>
-<span class="lineNum">      6 </span>              : #include &quot;network_user_menu.hh&quot; </span>
-<span class="lineNum">      7 </span>              :  </span>
-<span class="lineNum">      8 </span>              : #include &lt;Network.h&gt; </span>
-<span class="lineNum">      9 </span>              : #include &lt;C64.h&gt; </span>
-<span class="lineNum">     10 </span>              :  </span>
-<span class="lineNum">     11 </span>              : class NetworkUserView; </span>
-<span class="lineNum">     12 </span>              :  </span>
-<span class="lineNum">     13 </span>              : class PeerInfo </span>
-<span class="lineNum">     14 </span>              : { </span>
-<span class="lineNum">     15 </span>              : public: </span>
-<span class="lineNum">     16 </span>              : 	PeerInfo(NetworkUpdatePeerInfo *pi) </span>
-<span class="lineNum">     17 </span>              : 	{ </span>
-<span class="lineNum">     18 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;name = (const char*)xstrdup((char*)pi-&gt;name); </span>
-<span class="lineNum">     19 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;scr = NULL; </span>
-<span class="lineNum">     20 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;region = pi-&gt;region; </span>
-<span class="lineNum">     21 </span>              : 		if (this-&gt;region &gt; REGION_ANTARTICA) </span>
-<span class="lineNum">     22 </span><span class="lineNoCov">    0 / 4     : 			this-&gt;region = REGION_UNKNOWN; </span>
-<span class="lineNum">     23 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;scr_key = pi-&gt;screenshot_key; </span>
-<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;public_port = pi-&gt;public_port; </span>
-<span class="lineNum">     25 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;private_port = pi-&gt;private_port; </span>
-<span class="lineNum">     26 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;server_id = pi-&gt;server_id; </span>
-<span class="lineNum">     27 </span>              :  </span>
-<span class="lineNum">     28 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;hostname = ip_to_str(pi-&gt;public_ip); </span>
-<span class="lineNum">     29 </span>              : 	} </span>
-<span class="lineNum">     30 </span>              :  </span>
-<span class="lineNum">     31 </span>              : 	~PeerInfo() </span>
-<span class="lineNum">     32 </span>              : 	{ </span>
-<span class="lineNum">     33 </span><span class="lineNoCov">    0 / 3     : 		SDL_FreeSurface(this-&gt;scr); </span>
-<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 3     : 		free((void*)this-&gt;name); </span>
-<span class="lineNum">     35 </span><span class="lineNoCov">    0 / 3     : 		free((void*)this-&gt;hostname); </span>
-<span class="lineNum">     36 </span>              : 	} </span>
-<span class="lineNum">     37 </span>              :  </span>
-<span class="lineNum">     38 </span>              : 	SDL_Surface *getScreenshot() </span>
-<span class="lineNum">     39 </span>              : 	{ </span>
-<span class="lineNum">     40 </span>              : 		struct ds_data *data; </span>
-<span class="lineNum">     41 </span>              :  </span>
-<span class="lineNum">     42 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;scr) </span>
-<span class="lineNum">     43 </span>              : 			return this-&gt;scr; </span>
-<span class="lineNum">     44 </span>              : 		/* Look it up and store it when done */ </span>
-<span class="lineNum">     45 </span><span class="lineNoCov">    0 / 1     : 		data = DataStore::ds-&gt;getData(this-&gt;scr_key); </span>
-<span class="lineNum">     46 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;scr = sdl_surface_from_data(data-&gt;data, data-&gt;sz); </span>
-<span class="lineNum">     47 </span>              :  </span>
-<span class="lineNum">     48 </span>              : 		return this-&gt;scr; </span>
-<span class="lineNum">     49 </span>              : 	} </span>
-<span class="lineNum">     50 </span>              :  </span>
-<span class="lineNum">     51 </span>              : 	const char *getRegion() </span>
-<span class="lineNum">     52 </span>              : 	{ </span>
-<span class="lineNum">     53 </span><span class="lineNoCov">    0 / 2     : 		return region_to_str(this-&gt;region); </span>
-<span class="lineNum">     54 </span>              : 	} </span>
-<span class="lineNum">     55 </span>              :  </span>
-<span class="lineNum">     56 </span>              : 	SDL_Surface *scr; </span>
-<span class="lineNum">     57 </span>              : 	const char *name; </span>
-<span class="lineNum">     58 </span>              : 	const char *hostname; </span>
-<span class="lineNum">     59 </span>              : 	uint16_t public_port, private_port; </span>
-<span class="lineNum">     60 </span>              : 	uint32_t server_id; </span>
-<span class="lineNum">     61 </span>              : 	int region; </span>
-<span class="lineNum">     62 </span>              : 	int scr_key; </span>
-<span class="lineNum">     63 </span>              : }; </span>
-<span class="lineNum">     64 </span>              :  </span>
-<span class="lineNum">     65 </span>              : class PeerInfoBox : public Menu </span>
-<span class="lineNum">     66 </span>              : { </span>
-<span class="lineNum">     67 </span>              : public: </span>
-<span class="lineNum">     68 </span><span class="linePartCov">    2 / 4     : 	PeerInfoBox(Font *font) : Menu(font) </span>
-<span class="lineNum">     69 </span>              : 	{ </span>
-<span class="lineNum">     70 </span><span class="linePartCov">    1 / 2     : 		this-&gt;pi = NULL; </span>
-<span class="lineNum">     71 </span>              : 		memset(this-&gt;pi_messages, 0, sizeof(this-&gt;pi_messages)); </span>
-<span class="lineNum">     72 </span>              : 		this-&gt;setSelectedBackground(NULL, NULL, NULL, NULL, NULL, NULL); </span>
-<span class="lineNum">     73 </span>              : 	} </span>
-<span class="lineNum">     74 </span>              :  </span>
-<span class="lineNum">     75 </span>              : 	void setPeerInfo(PeerInfo *pi) </span>
-<span class="lineNum">     76 </span>              : 	{ </span>
-<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;pi = pi; </span>
-<span class="lineNum">     78 </span>              : 		this-&gt;updateMessages(); </span>
-<span class="lineNum">     79 </span>              : 	} </span>
-<span class="lineNum">     80 </span>              :  </span>
-<span class="lineNum">     81 </span>              :  </span>
-<span class="lineNum">     82 </span><span class="lineNoCov">    0 / 3     : 	virtual void selectCallback(int which) { } </span>
-<span class="lineNum">     83 </span><span class="lineNoCov">    0 / 3     : 	virtual void hoverCallback(int which) { } </span>
-<span class="lineNum">     84 </span><span class="lineNoCov">    0 / 3     : 	virtual void escapeCallback(int which) { } </span>
-<span class="lineNum">     85 </span>              :  </span>
-<span class="lineNum">     86 </span><span class="lineNoCov">    0 / 1     : 	void draw(SDL_Surface *where, int x, int y, int w, int h) </span>
-<span class="lineNum">     87 </span>              : 	{ </span>
-<span class="lineNum">     88 </span>              : 		SDL_Surface *screenshot; </span>
-<span class="lineNum">     89 </span>              : 		SDL_Rect dst; </span>
-<span class="lineNum">     90 </span>              :  </span>
-<span class="lineNum">     91 </span><span class="lineNoCov">    0 / 1     : 		if (!this-&gt;pi) </span>
-<span class="lineNum">     92 </span>              : 			return; </span>
-<span class="lineNum">     93 </span>              :  </span>
-<span class="lineNum">     94 </span>              : 		screenshot = this-&gt;pi-&gt;getScreenshot(); </span>
-<span class="lineNum">     95 </span><span class="lineNoCov">    0 / 2     : 		if (!screenshot) </span>
-<span class="lineNum">     96 </span>              : 		{ </span>
-<span class="lineNum">     97 </span><span class="lineNoCov">    0 / 1     : 			Menu::draw(where, x, y + 10, w, h - 10); </span>
-<span class="lineNum">     98 </span><span class="lineNoCov">    0 / 2     : 			return; </span>
-<span class="lineNum">     99 </span>              : 		} </span>
-<span class="lineNum">    100 </span>              :  </span>
-<span class="lineNum">    101 </span>              : 		/* Blit the screenshot */ </span>
-<span class="lineNum">    102 </span><span class="lineNoCov">    0 / 5     : 		dst = (SDL_Rect){x + w / 2 - screenshot-&gt;w / 2, y, w, h}; </span>
-<span class="lineNum">    103 </span><span class="lineNoCov">    0 / 4     : 		SDL_BlitSurface(screenshot, NULL, where, &amp;dst); </span>
-<span class="lineNum">    104 </span>              :  </span>
-<span class="lineNum">    105 </span><span class="lineNoCov">    0 / 2     : 		Menu::draw(where, x + 20, y + screenshot-&gt;h + 10, w - 20, h - screenshot-&gt;h - 10); </span>
-<span class="lineNum">    106 </span>              :  </span>
-<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    108 </span>              :  </span>
-<span class="lineNum">    109 </span>              : 	void updateMessages() </span>
-<span class="lineNum">    110 </span>              : 	{ </span>
-<span class="lineNum">    111 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;setText(NULL); </span>
-<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 1     : 		memset(this-&gt;pi_messages, 0, sizeof(this-&gt;pi_messages)); </span>
-<span class="lineNum">    113 </span>              :  </span>
-<span class="lineNum">    114 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[0] = &quot; &quot;; </span>
-<span class="lineNum">    115 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[1] = &quot;Name:&quot;; </span>
-<span class="lineNum">    116 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[2] = &quot; &quot;; </span>
-<span class="lineNum">    117 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[3] = &quot;Region:&quot;; </span>
-<span class="lineNum">    118 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[4] = &quot; &quot;; </span>
-<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;pi_messages[5] = &quot; &quot;; /* Maybe add something here later */ </span>
-<span class="lineNum">    120 </span>              :  </span>
-<span class="lineNum">    121 </span><span class="lineNoCov">    0 / 3     : 		if (this-&gt;pi) </span>
-<span class="lineNum">    122 </span>              : 		{ </span>
-<span class="lineNum">    123 </span><span class="lineNoCov">    0 / 2     : 			this-&gt;pi_messages[1] = this-&gt;pi-&gt;name; </span>
-<span class="lineNum">    124 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;pi_messages[3] = this-&gt;pi-&gt;getRegion(); </span>
-<span class="lineNum">    125 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;pi_messages[5] = &quot; &quot;; </span>
-<span class="lineNum">    126 </span>              : 		} </span>
-<span class="lineNum">    127 </span>              :  </span>
-<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;setText(this-&gt;pi_messages); </span>
-<span class="lineNum">    129 </span>              : 	} </span>
-<span class="lineNum">    130 </span>              :  </span>
-<span class="lineNum">    131 </span>              : 	const char *pi_messages[8]; </span>
-<span class="lineNum">    132 </span>              : 	PeerInfo *pi; </span>
-<span class="lineNum">    133 </span>              : }; </span>
-<span class="lineNum">    134 </span>              :  </span>
-<span class="lineNum">    135 </span>              : class NetworkUserMenu : public Menu </span>
-<span class="lineNum">    136 </span>              : { </span>
-<span class="lineNum">    137 </span>              : 	friend class NetworkUserView; </span>
-<span class="lineNum">    138 </span>              :  </span>
-<span class="lineNum">    139 </span>              : public: </span>
-<span class="lineNum">    140 </span><span class="linePartCov">    1 / 2     : 	NetworkUserMenu(Font *font, PeerInfoBox *infoBox) : Menu(font) </span>
-<span class="lineNum">    141 </span>              : 	{ </span>
-<span class="lineNum">    142 </span><span class="linePartCov">    1 / 2     : 		this-&gt;setText(NULL); </span>
-<span class="lineNum">    143 </span><span class="linePartCov">    1 / 2     : 		this-&gt;peers = NULL; </span>
-<span class="lineNum">    144 </span><span class="linePartCov">    1 / 2     : 		this-&gt;n_peers = 0; </span>
-<span class="lineNum">    145 </span><span class="linePartCov">    1 / 2     : 		this-&gt;infoBox = infoBox; </span>
-<span class="lineNum">    146 </span>              : 	} </span>
-<span class="lineNum">    147 </span>              :  </span>
-<span class="lineNum">    148 </span>              : 	~NetworkUserMenu() </span>
-<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
-<span class="lineNum">    150 </span>              : 		this-&gt;freePeers(); </span>
-<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 2     : 	} </span>
-<span class="lineNum">    152 </span>              :  </span>
-<span class="lineNum">    153 </span>              : 	void setPeers(NetworkUpdateListPeers *peerList) </span>
-<span class="lineNum">    154 </span>              : 	{ </span>
-<span class="lineNum">    155 </span>              : 		NetworkUpdatePeerInfo *ps = peerList-&gt;peers; </span>
-<span class="lineNum">    156 </span>              : 		const char **messages; </span>
-<span class="lineNum">    157 </span>              :  </span>
-<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 2     : 		if (ps == NULL || peerList-&gt;n_peers == 0) </span>
-<span class="lineNum">    159 </span>              : 			return; </span>
-<span class="lineNum">    160 </span>              :  </span>
-<span class="lineNum">    161 </span>              : 		this-&gt;freePeers(); </span>
-<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;n_peers = peerList-&gt;n_peers; </span>
-<span class="lineNum">    163 </span>              : 		messages = (const char **)xmalloc( (peerList-&gt;n_peers + 2) * </span>
-<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 1     : 				sizeof(const char*)); </span>
-<span class="lineNum">    165 </span>              : 		this-&gt;peers = (PeerInfo**)xrealloc((void*)this-&gt;peers, </span>
-<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 1     : 				peerList-&gt;n_peers * sizeof(PeerInfo*)); </span>
-<span class="lineNum">    167 </span>              :  </span>
-<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 2     : 		messages[0] = (const char *)xstrdup(&quot;None&quot;); </span>
-<span class="lineNum">    169 </span><span class="lineNoCov">    0 / 6     : 		for (unsigned i = 0; i &lt; peerList-&gt;n_peers; i++) </span>
-<span class="lineNum">    170 </span>              : 		{ </span>
-<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 2     : 			messages[i + 1] = (const char*)xstrdup((char*)ps-&gt;name); </span>
-<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 6     : 			this-&gt;peers[i] = new PeerInfo(&amp;peerList-&gt;peers[i]); </span>
-<span class="lineNum">    173 </span>              : 		} </span>
-<span class="lineNum">    174 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;setText(messages); </span>
-<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 2     : 		free((void*)messages); </span>
-<span class="lineNum">    176 </span>              : 	} </span>
-<span class="lineNum">    177 </span>              :  </span>
-<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 2     : 	virtual void selectCallback(int which) </span>
-<span class="lineNum">    179 </span>              : 	{ </span>
-<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 1     : 		if (which &gt; 0) </span>
-<span class="lineNum">    181 </span>              : 		{ </span>
-<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 			PeerInfo *peer = this-&gt;peers[which - 1]; </span>
-<span class="lineNum">    183 </span>              :  </span>
-<span class="lineNum">    184 </span>              : 			TheC64-&gt;network-&gt;SelectPeer(peer-&gt;hostname, </span>
-<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     : 					peer-&gt;public_port, peer-&gt;server_id); </span>
-<span class="lineNum">    186 </span>              : 		} </span>
-<span class="lineNum">    187 </span>              : 		else </span>
-<span class="lineNum">    188 </span>              : 			TheC64-&gt;network-&gt;CancelPeerSelection(); </span>
-<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 5     : 		Gui::gui-&gt;exitMenu(); </span>
-<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 2     : 	} </span>
-<span class="lineNum">    191 </span>              :  </span>
-<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 1     : 	virtual void hoverCallback(int which) </span>
-<span class="lineNum">    193 </span>              : 	{ </span>
-<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 1     : 		if (which &lt;= 0 || which &gt; (int)this-&gt;n_peers) </span>
-<span class="lineNum">    195 </span>              : 			return; </span>
-<span class="lineNum">    196 </span>              :  </span>
-<span class="lineNum">    197 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;infoBox-&gt;setPeerInfo(this-&gt;peers[which - 1]); </span>
-<span class="lineNum">    198 </span><span class="lineNoCov">    0 / 3     : 	} </span>
-<span class="lineNum">    199 </span>              :  </span>
-<span class="lineNum">    200 </span><span class="lineNoCov">    0 / 1     : 	virtual void escapeCallback(int which) </span>
-<span class="lineNum">    201 </span>              : 	{ </span>
-<span class="lineNum">    202 </span>              : 		TheC64-&gt;network-&gt;CancelPeerSelection(); </span>
-<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 3     : 		Gui::gui-&gt;popView(); </span>
-<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    205 </span>              :  </span>
-<span class="lineNum">    206 </span>              : private: </span>
-<span class="lineNum">    207 </span>              : 	void freePeers() </span>
-<span class="lineNum">    208 </span>              : 	{ </span>
-<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 11    : 		for (unsigned i = 0; i &lt; this-&gt;n_peers; i++) </span>
-<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 6     : 			delete this-&gt;peers[i]; </span>
-<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 3     : 		free(this-&gt;peers); </span>
-<span class="lineNum">    212 </span>              : 	} </span>
-<span class="lineNum">    213 </span>              :  </span>
-<span class="lineNum">    214 </span>              : 	PeerInfo **peers; </span>
-<span class="lineNum">    215 </span>              : 	PeerInfoBox *infoBox; </span>
-<span class="lineNum">    216 </span>              : 	unsigned int n_peers; </span>
-<span class="lineNum">    217 </span>              : }; </span>
-<span class="lineNum">    218 </span>              :  </span>
-<span class="lineNum">    219 </span>              :  </span>
-<span class="lineNum">    220 </span><span class="linePartCov">    2 / 4     : NetworkUserView::NetworkUserView() : GuiView() </span>
-<span class="lineNum">    221 </span>              : 			{ </span>
-<span class="lineNum">    222 </span><span class="linePartCov">    2 / 4     : 	this-&gt;peerInfo = new PeerInfoBox(Gui::gui-&gt;default_font); </span>
-<span class="lineNum">    223 </span><span class="linePartCov">    1 / 4     : 	this-&gt;menu = new NetworkUserMenu(Gui::gui-&gt;default_font, this-&gt;peerInfo); </span>
-<span class="lineNum">    224 </span><span class="linePartCov">    1 / 2     : 			} </span>
-<span class="lineNum">    225 </span>              :  </span>
-<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 6     : NetworkUserView::~NetworkUserView() </span>
-<span class="lineNum">    227 </span>              : { </span>
-<span class="lineNum">    228 </span><span class="lineNoCov">    0 / 8     : 	delete this-&gt;menu; </span>
-<span class="lineNum">    229 </span><span class="lineNoCov">    0 / 4     : } </span>
-<span class="lineNum">    230 </span>              :  </span>
-<span class="lineNum">    231 </span>              : void NetworkUserView::runLogic() </span>
-<span class="lineNum">    232 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    233 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;menu-&gt;runLogic(); </span>
-<span class="lineNum">    234 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    235 </span>              :  </span>
-<span class="lineNum">    236 </span>              : void NetworkUserView::pushEvent(event_t ev) </span>
-<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;menu-&gt;pushEvent(ev); </span>
-<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    240 </span>              :  </span>
-<span class="lineNum">    241 </span>              : void NetworkUserView::setPeers(NetworkUpdateListPeers *peerList) </span>
-<span class="lineNum">    242 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    243 </span><span class="lineNoCov">    0 / 3     : 	this-&gt;menu-&gt;setPeers(peerList); </span>
-<span class="lineNum">    244 </span><span class="lineNoCov">    0 / 2     : } </span>
-<span class="lineNum">    245 </span>              :  </span>
-<span class="lineNum">    246 </span>              : void NetworkUserView::draw(SDL_Surface *where) </span>
-<span class="lineNum">    247 </span><span class="lineNoCov">    0 / 3     : { </span>
-<span class="lineNum">    248 </span>              : 	SDL_Rect dst; </span>
-<span class="lineNum">    249 </span>              :  </span>
-<span class="lineNum">    250 </span>              : 	/* Blit the backgrounds */ </span>
-<span class="lineNum">    251 </span><span class="lineNoCov">    0 / 1     : 	dst = (SDL_Rect){20,45,300,400}; </span>
-<span class="lineNum">    252 </span><span class="lineNoCov">    0 / 3     : 	SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
-<span class="lineNum">    253 </span>              :  </span>
-<span class="lineNum">    254 </span><span class="lineNoCov">    0 / 1     : 	dst = (SDL_Rect){350,13,0,0}; </span>
-<span class="lineNum">    255 </span><span class="lineNoCov">    0 / 2     : 	SDL_BlitSurface(Gui::gui-&gt;network_info, NULL, where, &amp;dst); </span>
-<span class="lineNum">    256 </span>              :  </span>
-<span class="lineNum">    257 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;menu-&gt;draw(where, 50, 70, 280, 375); </span>
-<span class="lineNum">    258 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;peerInfo-&gt;draw(where, 390, 55, 242, 447); </span>
-<span class="lineNum">    259 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    1</span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">    2</span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">    3</span>              : #include &quot;help_box.hh&quot; </span>
+<span class="lineNum">    4</span>              : #include &quot;status_bar.hh&quot; </span>
+<span class="lineNum">    5</span>              : #include &quot;data_store.hh&quot; </span>
+<span class="lineNum">    6</span>              : #include &quot;network_user_menu.hh&quot; </span>
+<span class="lineNum">    7</span>              :  </span>
+<span class="lineNum">    8</span>              : #include &lt;Network.h&gt; </span>
+<span class="lineNum">    9</span>              : #include &lt;C64.h&gt; </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : class NetworkUserView; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : class PeerInfo </span>
+<span class="lineNum">   14</span>              : { </span>
+<span class="lineNum">   15</span>              : public: </span>
+<span class="lineNum">   16</span>              : 	PeerInfo(NetworkUpdatePeerInfo *pi) </span>
+<span class="lineNum">   17</span>              : 	{ </span>
+<span class="lineNum">   18</span><span class="lineNoCov">      0  /   3: 		this-&gt;name = (const char*)xstrdup((char*)pi-&gt;name); </span>
+<span class="lineNum">   19</span><span class="lineNoCov">      0  /   1: 		this-&gt;scr = NULL; </span>
+<span class="lineNum">   20</span><span class="lineNoCov">      0  /   1: 		this-&gt;region = pi-&gt;region; </span>
+<span class="lineNum">   21</span>              : 		if (this-&gt;region &gt; REGION_ANTARTICA) </span>
+<span class="lineNum">   22</span><span class="lineNoCov">      0  /   3: 			this-&gt;region = REGION_UNKNOWN; </span>
+<span class="lineNum">   23</span><span class="lineNoCov">      0  /   1: 		this-&gt;scr_key = pi-&gt;screenshot_key; </span>
+<span class="lineNum">   24</span><span class="lineNoCov">      0  /   1: 		this-&gt;public_port = pi-&gt;public_port; </span>
+<span class="lineNum">   25</span><span class="lineNoCov">      0  /   1: 		this-&gt;private_port = pi-&gt;private_port; </span>
+<span class="lineNum">   26</span><span class="lineNoCov">      0  /   2: 		this-&gt;server_id = pi-&gt;server_id; </span>
+<span class="lineNum">   27</span>              :  </span>
+<span class="lineNum">   28</span><span class="lineNoCov">      0  /   3: 		this-&gt;hostname = ip_to_str(pi-&gt;public_ip); </span>
+<span class="lineNum">   29</span>              : 	} </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span>              : 	~PeerInfo() </span>
+<span class="lineNum">   32</span>              : 	{ </span>
+<span class="lineNum">   33</span><span class="lineNoCov">      0  /   2: 		SDL_FreeSurface(this-&gt;scr); </span>
+<span class="lineNum">   34</span><span class="lineNoCov">      0  /   2: 		free((void*)this-&gt;name); </span>
+<span class="lineNum">   35</span><span class="lineNoCov">      0  /   2: 		free((void*)this-&gt;hostname); </span>
+<span class="lineNum">   36</span>              : 	} </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span>              : 	SDL_Surface *getScreenshot() </span>
+<span class="lineNum">   39</span>              : 	{ </span>
+<span class="lineNum">   40</span>              : 		struct ds_data *data; </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span><span class="lineNoCov">      0  /   1: 		if (this-&gt;scr) </span>
+<span class="lineNum">   43</span>              : 			return this-&gt;scr; </span>
+<span class="lineNum">   44</span>              : 		&#047;* Look it up and store it when done *&#047; </span>
+<span class="lineNum">   45</span><span class="lineNoCov">      0  /   1: 		data = DataStore::ds-&gt;getData(this-&gt;scr_key); </span>
+<span class="lineNum">   46</span><span class="lineNoCov">      0  /   2: 		this-&gt;scr = sdl_surface_from_data(data-&gt;data, data-&gt;sz); </span>
+<span class="lineNum">   47</span>              :  </span>
+<span class="lineNum">   48</span>              : 		return this-&gt;scr; </span>
+<span class="lineNum">   49</span>              : 	} </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span>              : 	const char *getRegion() </span>
+<span class="lineNum">   52</span>              : 	{ </span>
+<span class="lineNum">   53</span><span class="lineNoCov">      0  /   2: 		return region_to_str(this-&gt;region); </span>
+<span class="lineNum">   54</span>              : 	} </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span>              : 	SDL_Surface *scr; </span>
+<span class="lineNum">   57</span>              : 	const char *name; </span>
+<span class="lineNum">   58</span>              : 	const char *hostname; </span>
+<span class="lineNum">   59</span>              : 	uint16_t public_port, private_port; </span>
+<span class="lineNum">   60</span>              : 	uint32_t server_id; </span>
+<span class="lineNum">   61</span>              : 	int region; </span>
+<span class="lineNum">   62</span>              : 	int scr_key; </span>
+<span class="lineNum">   63</span>              : }; </span>
+<span class="lineNum">   64</span>              :  </span>
+<span class="lineNum">   65</span>              : class PeerInfoBox : public Menu </span>
+<span class="lineNum">   66</span>              : { </span>
+<span class="lineNum">   67</span>              : public: </span>
+<span class="lineNum">   68</span><span class="lineCov">      2  /   2: 	PeerInfoBox(Font *font) : Menu(font) </span>
+<span class="lineNum">   69</span>              : 	{ </span>
+<span class="lineNum">   70</span><span class="lineCov">      1  /   1: 		this-&gt;pi = NULL; </span>
+<span class="lineNum">   71</span>              : 		memset(this-&gt;pi_messages, 0, sizeof(this-&gt;pi_messages)); </span>
+<span class="lineNum">   72</span>              : 		this-&gt;setSelectedBackground(NULL, NULL, NULL, NULL, NULL, NULL); </span>
+<span class="lineNum">   73</span>              : 	} </span>
+<span class="lineNum">   74</span>              :  </span>
+<span class="lineNum">   75</span>              : 	void setPeerInfo(PeerInfo *pi) </span>
+<span class="lineNum">   76</span>              : 	{ </span>
+<span class="lineNum">   77</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi = pi; </span>
+<span class="lineNum">   78</span>              : 		this-&gt;updateMessages(); </span>
+<span class="lineNum">   79</span>              : 	} </span>
+<span class="lineNum">   80</span>              :  </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span><span class="lineNoCov">      0  /   3: 	virtual void selectCallback(int which) { } </span>
+<span class="lineNum">   83</span><span class="lineNoCov">      0  /   3: 	virtual void hoverCallback(int which) { } </span>
+<span class="lineNum">   84</span><span class="lineNoCov">      0  /   3: 	virtual void escapeCallback(int which) { } </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span><span class="lineNoCov">      0  /   1: 	void draw(SDL_Surface *where, int x, int y, int w, int h) </span>
+<span class="lineNum">   87</span>              : 	{ </span>
+<span class="lineNum">   88</span>              : 		SDL_Surface *screenshot; </span>
+<span class="lineNum">   89</span>              : 		SDL_Rect dst; </span>
+<span class="lineNum">   90</span>              :  </span>
+<span class="lineNum">   91</span><span class="lineNoCov">      0  /   1: 		if (!this-&gt;pi) </span>
+<span class="lineNum">   92</span>              : 			return; </span>
+<span class="lineNum">   93</span>              :  </span>
+<span class="lineNum">   94</span>              : 		screenshot = this-&gt;pi-&gt;getScreenshot(); </span>
+<span class="lineNum">   95</span><span class="lineNoCov">      0  /   2: 		if (!screenshot) </span>
+<span class="lineNum">   96</span>              : 		{ </span>
+<span class="lineNum">   97</span><span class="lineNoCov">      0  /   1: 			Menu::draw(where, x, y + 10, w, h - 10); </span>
+<span class="lineNum">   98</span><span class="lineNoCov">      0  /   2: 			return; </span>
+<span class="lineNum">   99</span>              : 		} </span>
+<span class="lineNum">  100</span>              :  </span>
+<span class="lineNum">  101</span>              : 		&#047;* Blit the screenshot *&#047; </span>
+<span class="lineNum">  102</span><span class="lineNoCov">      0  /   4: 		dst = (SDL_Rect){x + w &#047; 2 - screenshot-&gt;w &#047; 2, y, w, h}; </span>
+<span class="lineNum">  103</span><span class="lineNoCov">      0  /   3: 		SDL_BlitSurface(screenshot, NULL, where, &amp;dst); </span>
+<span class="lineNum">  104</span>              :  </span>
+<span class="lineNum">  105</span><span class="lineNoCov">      0  /   2: 		Menu::draw(where, x + 20, y + screenshot-&gt;h + 10, w - 20, h - screenshot-&gt;h - 10); </span>
+<span class="lineNum">  106</span>              :  </span>
+<span class="lineNum">  107</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span>              : 	void updateMessages() </span>
+<span class="lineNum">  110</span>              : 	{ </span>
+<span class="lineNum">  111</span><span class="lineNoCov">      0  /   1: 		this-&gt;setText(NULL); </span>
+<span class="lineNum">  112</span><span class="lineNoCov">      0  /   1: 		memset(this-&gt;pi_messages, 0, sizeof(this-&gt;pi_messages)); </span>
+<span class="lineNum">  113</span>              :  </span>
+<span class="lineNum">  114</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[0] = &quot; &quot;; </span>
+<span class="lineNum">  115</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[1] = &quot;Name:&quot;; </span>
+<span class="lineNum">  116</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[2] = &quot; &quot;; </span>
+<span class="lineNum">  117</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[3] = &quot;Region:&quot;; </span>
+<span class="lineNum">  118</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[4] = &quot; &quot;; </span>
+<span class="lineNum">  119</span><span class="lineNoCov">      0  /   1: 		this-&gt;pi_messages[5] = &quot; &quot;; &#047;* Maybe add something here later *&#047; </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span><span class="lineNoCov">      0  /   3: 		if (this-&gt;pi) </span>
+<span class="lineNum">  122</span>              : 		{ </span>
+<span class="lineNum">  123</span><span class="lineNoCov">      0  /   2: 			this-&gt;pi_messages[1] = this-&gt;pi-&gt;name; </span>
+<span class="lineNum">  124</span><span class="lineNoCov">      0  /   1: 			this-&gt;pi_messages[3] = this-&gt;pi-&gt;getRegion(); </span>
+<span class="lineNum">  125</span><span class="lineNoCov">      0  /   1: 			this-&gt;pi_messages[5] = &quot; &quot;; </span>
+<span class="lineNum">  126</span>              : 		} </span>
+<span class="lineNum">  127</span>              :  </span>
+<span class="lineNum">  128</span><span class="lineNoCov">      0  /   1: 		this-&gt;setText(this-&gt;pi_messages); </span>
+<span class="lineNum">  129</span>              : 	} </span>
+<span class="lineNum">  130</span>              :  </span>
+<span class="lineNum">  131</span>              : 	const char *pi_messages[8]; </span>
+<span class="lineNum">  132</span>              : 	PeerInfo *pi; </span>
+<span class="lineNum">  133</span>              : }; </span>
+<span class="lineNum">  134</span>              :  </span>
+<span class="lineNum">  135</span>              : class NetworkUserMenu : public Menu </span>
+<span class="lineNum">  136</span>              : { </span>
+<span class="lineNum">  137</span>              : 	friend class NetworkUserView; </span>
+<span class="lineNum">  138</span>              :  </span>
+<span class="lineNum">  139</span>              : public: </span>
+<span class="lineNum">  140</span><span class="lineCov">      1  /   1: 	NetworkUserMenu(Font *font, PeerInfoBox *infoBox) : Menu(font) </span>
+<span class="lineNum">  141</span>              : 	{ </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: 		this-&gt;setText(NULL); </span>
+<span class="lineNum">  143</span><span class="lineCov">      1  /   1: 		this-&gt;peers = NULL; </span>
+<span class="lineNum">  144</span><span class="lineCov">      1  /   1: 		this-&gt;n_peers = 0; </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: 		this-&gt;infoBox = infoBox; </span>
+<span class="lineNum">  146</span>              : 	} </span>
+<span class="lineNum">  147</span>              :  </span>
+<span class="lineNum">  148</span>              : 	~NetworkUserMenu() </span>
+<span class="lineNum">  149</span><span class="lineNoCov">      0  /   2: 	{ </span>
+<span class="lineNum">  150</span>              : 		this-&gt;freePeers(); </span>
+<span class="lineNum">  151</span>              : 	} </span>
+<span class="lineNum">  152</span>              :  </span>
+<span class="lineNum">  153</span>              : 	void setPeers(NetworkUpdateListPeers *peerList) </span>
+<span class="lineNum">  154</span>              : 	{ </span>
+<span class="lineNum">  155</span>              : 		NetworkUpdatePeerInfo *ps = peerList-&gt;peers; </span>
+<span class="lineNum">  156</span>              : 		const char **messages; </span>
+<span class="lineNum">  157</span>              :  </span>
+<span class="lineNum">  158</span><span class="lineNoCov">      0  /   2: 		if (ps == NULL || peerList-&gt;n_peers == 0) </span>
+<span class="lineNum">  159</span>              : 			return; </span>
+<span class="lineNum">  160</span>              :  </span>
+<span class="lineNum">  161</span>              : 		this-&gt;freePeers(); </span>
+<span class="lineNum">  162</span><span class="lineNoCov">      0  /   2: 		this-&gt;n_peers = peerList-&gt;n_peers; </span>
+<span class="lineNum">  163</span>              : 		messages = (const char **)xmalloc( (peerList-&gt;n_peers + 2) * </span>
+<span class="lineNum">  164</span><span class="lineNoCov">      0  /   1: 				sizeof(const char*)); </span>
+<span class="lineNum">  165</span>              : 		this-&gt;peers = (PeerInfo**)xrealloc((void*)this-&gt;peers, </span>
+<span class="lineNum">  166</span><span class="lineNoCov">      0  /   3: 				peerList-&gt;n_peers * sizeof(PeerInfo*)); </span>
+<span class="lineNum">  167</span>              :  </span>
+<span class="lineNum">  168</span><span class="lineNoCov">      0  /   2: 		messages[0] = (const char *)xstrdup(&quot;None&quot;); </span>
+<span class="lineNum">  169</span><span class="lineNoCov">      0  /   5: 		for (unsigned i = 0; i &lt; peerList-&gt;n_peers; i++) </span>
+<span class="lineNum">  170</span>              : 		{ </span>
+<span class="lineNum">  171</span><span class="lineNoCov">      0  /   2: 			messages[i + 1] = (const char*)xstrdup((char*)ps-&gt;name); </span>
+<span class="lineNum">  172</span><span class="lineNoCov">      0  /   5: 			this-&gt;peers[i] = new PeerInfo(&amp;peerList-&gt;peers[i]); </span>
+<span class="lineNum">  173</span>              : 		} </span>
+<span class="lineNum">  174</span><span class="lineNoCov">      0  /   1: 		this-&gt;setText(messages); </span>
+<span class="lineNum">  175</span><span class="lineNoCov">      0  /   2: 		free((void*)messages); </span>
+<span class="lineNum">  176</span>              : 	} </span>
+<span class="lineNum">  177</span>              :  </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   2: 	virtual void selectCallback(int which) </span>
+<span class="lineNum">  179</span>              : 	{ </span>
+<span class="lineNum">  180</span><span class="lineNoCov">      0  /   1: 		if (which &gt; 0) </span>
+<span class="lineNum">  181</span>              : 		{ </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1: 			PeerInfo *peer = this-&gt;peers[which - 1]; </span>
+<span class="lineNum">  183</span>              :  </span>
+<span class="lineNum">  184</span>              : 			TheC64-&gt;network-&gt;SelectPeer(peer-&gt;hostname, </span>
+<span class="lineNum">  185</span><span class="lineNoCov">      0  /   1: 					peer-&gt;public_port, peer-&gt;server_id); </span>
+<span class="lineNum">  186</span>              : 		} </span>
+<span class="lineNum">  187</span>              : 		else </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   1: 			TheC64-&gt;network-&gt;CancelPeerSelection(); </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   5: 		Gui::gui-&gt;exitMenu(); </span>
+<span class="lineNum">  190</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  191</span>              :  </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1: 	virtual void hoverCallback(int which) </span>
+<span class="lineNum">  193</span>              : 	{ </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   1: 		if (which &lt;= 0 || which &gt; (int)this-&gt;n_peers) </span>
+<span class="lineNum">  195</span>              : 			return; </span>
+<span class="lineNum">  196</span>              :  </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   1: 		this-&gt;infoBox-&gt;setPeerInfo(this-&gt;peers[which - 1]); </span>
+<span class="lineNum">  198</span><span class="lineNoCov">      0  /   3: 	} </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="lineNoCov">      0  /   1: 	virtual void escapeCallback(int which) </span>
+<span class="lineNum">  201</span>              : 	{ </span>
+<span class="lineNum">  202</span><span class="lineNoCov">      0  /   1: 		TheC64-&gt;network-&gt;CancelPeerSelection(); </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   3: 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">  204</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  205</span>              :  </span>
+<span class="lineNum">  206</span>              : private: </span>
+<span class="lineNum">  207</span>              : 	void freePeers() </span>
+<span class="lineNum">  208</span>              : 	{ </span>
+<span class="lineNum">  209</span><span class="lineNoCov">      0  /   5: 		for (unsigned i = 0; i &lt; this-&gt;n_peers; i++) </span>
+<span class="lineNum">  210</span><span class="lineNoCov">      0  /   4: 			delete this-&gt;peers[i]; </span>
+<span class="lineNum">  211</span><span class="lineNoCov">      0  /   2: 		free(this-&gt;peers); </span>
+<span class="lineNum">  212</span>              : 	} </span>
+<span class="lineNum">  213</span>              :  </span>
+<span class="lineNum">  214</span>              : 	PeerInfo **peers; </span>
+<span class="lineNum">  215</span>              : 	PeerInfoBox *infoBox; </span>
+<span class="lineNum">  216</span>              : 	unsigned int n_peers; </span>
+<span class="lineNum">  217</span>              : }; </span>
+<span class="lineNum">  218</span>              :  </span>
+<span class="lineNum">  219</span>              :  </span>
+<span class="lineNum">  220</span><span class="lineCov">      2  /   2: NetworkUserView::NetworkUserView() : GuiView() </span>
+<span class="lineNum">  221</span>              : 			{ </span>
+<span class="lineNum">  222</span><span class="lineCov">      2  /   2: 	this-&gt;peerInfo = new PeerInfoBox(Gui::gui-&gt;default_font); </span>
+<span class="lineNum">  223</span><span class="lineCov">      2  /   2: 	this-&gt;menu = new NetworkUserMenu(Gui::gui-&gt;default_font, this-&gt;peerInfo); </span>
+<span class="lineNum">  224</span><span class="lineCov">      1  /   1: 			} </span>
+<span class="lineNum">  225</span>              :  </span>
+<span class="lineNum">  226</span><span class="lineNoCov">      0  /   2: NetworkUserView::~NetworkUserView() </span>
+<span class="lineNum">  227</span>              : { </span>
+<span class="lineNum">  228</span><span class="lineNoCov">      0  /   3: 	delete this-&gt;menu; </span>
+<span class="lineNum">  229</span><span class="lineNoCov">      0  /   2: } </span>
+<span class="lineNum">  230</span>              :  </span>
+<span class="lineNum">  231</span>              : void NetworkUserView::runLogic() </span>
+<span class="lineNum">  232</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">  233</span><span class="lineNoCov">      0  /   2: 	this-&gt;menu-&gt;runLogic(); </span>
+<span class="lineNum">  234</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">  235</span>              :  </span>
+<span class="lineNum">  236</span>              : void NetworkUserView::pushEvent(event_t ev) </span>
+<span class="lineNum">  237</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">  238</span><span class="lineNoCov">      0  /   2: 	this-&gt;menu-&gt;pushEvent(ev); </span>
+<span class="lineNum">  239</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">  240</span>              :  </span>
+<span class="lineNum">  241</span>              : void NetworkUserView::setPeers(NetworkUpdateListPeers *peerList) </span>
+<span class="lineNum">  242</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">  243</span><span class="lineNoCov">      0  /   3: 	this-&gt;menu-&gt;setPeers(peerList); </span>
+<span class="lineNum">  244</span><span class="lineNoCov">      0  /   2: } </span>
+<span class="lineNum">  245</span>              :  </span>
+<span class="lineNum">  246</span>              : void NetworkUserView::draw(SDL_Surface *where) </span>
+<span class="lineNum">  247</span><span class="lineNoCov">      0  /   3: { </span>
+<span class="lineNum">  248</span>              : 	SDL_Rect dst; </span>
+<span class="lineNum">  249</span>              :  </span>
+<span class="lineNum">  250</span>              : 	&#047;* Blit the backgrounds *&#047; </span>
+<span class="lineNum">  251</span><span class="lineNoCov">      0  /   1: 	dst = (SDL_Rect){20,45,300,400}; </span>
+<span class="lineNum">  252</span><span class="lineNoCov">      0  /   3: 	SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
+<span class="lineNum">  253</span>              :  </span>
+<span class="lineNum">  254</span><span class="lineNoCov">      0  /   1: 	dst = (SDL_Rect){350,13,0,0}; </span>
+<span class="lineNum">  255</span><span class="lineNoCov">      0  /   2: 	SDL_BlitSurface(Gui::gui-&gt;network_info, NULL, where, &amp;dst); </span>
+<span class="lineNum">  256</span>              :  </span>
+<span class="lineNum">  257</span><span class="lineNoCov">      0  /   1: 	this-&gt;menu-&gt;draw(where, 50, 70, 280, 375); </span>
+<span class="lineNum">  258</span><span class="lineNoCov">      0  /   1: 	this-&gt;peerInfo-&gt;draw(where, 390, 55, 242, 447); </span>
+<span class="lineNum">  259</span><span class="lineNoCov">      0  /   1: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

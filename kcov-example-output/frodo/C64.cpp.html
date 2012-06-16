@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,21 +13,21 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">291</td>
+          <td class="headerValue" width="10%">309</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftHi" width="15%">54.0 %</td>
+          <td class="coverPerLeftMed" width="15%">55.7%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
-          <td class="headerValue" width="10%">157</td>
+          <td class="headerValue" width="10%">172</td>
         </tr>
       </table>
     </td>
@@ -35,713 +35,714 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : /* </span>
-<span class="lineNum">      2 </span>              :  *  C64.cpp - Put the pieces together </span>
-<span class="lineNum">      3 </span>              :  * </span>
-<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
-<span class="lineNum">      5 </span>              :  * </span>
-<span class="lineNum">      6 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
-<span class="lineNum">      7 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
-<span class="lineNum">      8 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
-<span class="lineNum">      9 </span>              :  *  (at your option) any later version. </span>
-<span class="lineNum">     10 </span>              :  * </span>
-<span class="lineNum">     11 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
-<span class="lineNum">     12 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
-<span class="lineNum">     13 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
-<span class="lineNum">     14 </span>              :  *  GNU General Public License for more details. </span>
-<span class="lineNum">     15 </span>              :  * </span>
-<span class="lineNum">     16 </span>              :  *  You should have received a copy of the GNU General Public License </span>
-<span class="lineNum">     17 </span>              :  *  along with this program; if not, write to the Free Software </span>
-<span class="lineNum">     18 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
-<span class="lineNum">     19 </span>              :  */ </span>
-<span class="lineNum">     20 </span>              :  </span>
-<span class="lineNum">     21 </span>              : #include &quot;sysdeps.h&quot; </span>
-<span class="lineNum">     22 </span>              :  </span>
-<span class="lineNum">     23 </span>              : #include &quot;C64.h&quot; </span>
-<span class="lineNum">     24 </span>              : #include &quot;CPUC64.h&quot; </span>
-<span class="lineNum">     25 </span>              : #include &quot;CPU1541.h&quot; </span>
-<span class="lineNum">     26 </span>              : #include &quot;VIC.h&quot; </span>
-<span class="lineNum">     27 </span>              : #include &quot;SID.h&quot; </span>
-<span class="lineNum">     28 </span>              : #include &quot;CIA.h&quot; </span>
-<span class="lineNum">     29 </span>              : #include &quot;REU.h&quot; </span>
-<span class="lineNum">     30 </span>              : #include &quot;IEC.h&quot; </span>
-<span class="lineNum">     31 </span>              : #include &quot;1541job.h&quot; </span>
-<span class="lineNum">     32 </span>              : #include &quot;Display.h&quot; </span>
-<span class="lineNum">     33 </span>              : #include &quot;Prefs.h&quot; </span>
-<span class="lineNum">     34 </span>              :  </span>
-<span class="lineNum">     35 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">     36 </span>              : bool IsFrodoSC = true; </span>
-<span class="lineNum">     37 </span>              : #else </span>
-<span class="lineNum">     38 </span>              : bool IsFrodoSC = false; </span>
-<span class="lineNum">     39 </span>              : #endif </span>
-<span class="lineNum">     40 </span>              :  </span>
-<span class="lineNum">     41 </span>              :  </span>
-<span class="lineNum">     42 </span>              : /* </span>
-<span class="lineNum">     43 </span>              :  *  Constructor: Allocate objects and memory </span>
-<span class="lineNum">     44 </span>              :  */ </span>
-<span class="lineNum">     45 </span>              :  </span>
-<span class="lineNum">     46 </span><span class="linePartCov">    3 / 6     : C64::C64() </span>
-<span class="lineNum">     47 </span>              : { </span>
-<span class="lineNum">     48 </span>              : 	uint8 *p; </span>
-<span class="lineNum">     49 </span>              :  </span>
-<span class="lineNum">     50 </span>              : 	// The thread is not yet running </span>
-<span class="lineNum">     51 </span><span class="linePartCov">    1 / 2     : 	thread_running = false; </span>
-<span class="lineNum">     52 </span><span class="linePartCov">    1 / 2     : 	quit_thyself = false; </span>
-<span class="lineNum">     53 </span><span class="linePartCov">    1 / 2     : 	have_a_break = false; </span>
-<span class="lineNum">     54 </span>              :  </span>
-<span class="lineNum">     55 </span>              : 	// System-dependent things </span>
-<span class="lineNum">     56 </span><span class="linePartCov">    1 / 2     : 	c64_ctor1(); </span>
-<span class="lineNum">     57 </span>              :  </span>
-<span class="lineNum">     58 </span>              : 	// Open display </span>
-<span class="lineNum">     59 </span>              : 	printf(&quot;ssof1 %d:%d\n&quot;, </span>
-<span class="lineNum">     60 </span>              : 			sizeof(C64Display), sizeof(C64)); </span>
-<span class="lineNum">     61 </span><span class="linePartCov">    1 / 2     : 	TheDisplay = new C64Display(this); </span>
-<span class="lineNum">     62 </span>              :  </span>
-<span class="lineNum">     63 </span>              : 	// Allocate RAM/ROM memory </span>
-<span class="lineNum">     64 </span><span class="linePartCov">    1 / 2     : 	RAM = new uint8[C64_RAM_SIZE]; </span>
-<span class="lineNum">     65 </span><span class="linePartCov">    1 / 2     : 	Basic = new uint8[BASIC_ROM_SIZE]; </span>
-<span class="lineNum">     66 </span><span class="linePartCov">    1 / 2     : 	Kernal = new uint8[KERNAL_ROM_SIZE]; </span>
-<span class="lineNum">     67 </span><span class="linePartCov">    1 / 2     : 	Char = new uint8[CHAR_ROM_SIZE]; </span>
-<span class="lineNum">     68 </span><span class="linePartCov">    1 / 2     : 	Color = new uint8[COLOR_RAM_SIZE]; </span>
-<span class="lineNum">     69 </span><span class="linePartCov">    1 / 2     : 	RAM1541 = new uint8[DRIVE_RAM_SIZE]; </span>
-<span class="lineNum">     70 </span><span class="linePartCov">    1 / 2     : 	ROM1541 = new uint8[DRIVE_ROM_SIZE]; </span>
-<span class="lineNum">     71 </span>              :  </span>
-<span class="lineNum">     72 </span>              : 	// Create the chips </span>
-<span class="lineNum">     73 </span><span class="linePartCov">    1 / 2     : 	TheCPU = new MOS6510(this, RAM, Basic, Kernal, Char, Color); </span>
-<span class="lineNum">     74 </span>              :  </span>
-<span class="lineNum">     75 </span><span class="linePartCov">    1 / 2     : 	TheJob1541 = new Job1541(RAM1541); </span>
-<span class="lineNum">     76 </span><span class="linePartCov">    1 / 2     : 	TheCPU1541 = new MOS6502_1541(this, TheJob1541, TheDisplay, RAM1541, ROM1541); </span>
-<span class="lineNum">     77 </span>              :  </span>
-<span class="lineNum">     78 </span><span class="linePartCov">    1 / 2     : 	TheVIC = TheCPU-&gt;TheVIC = new MOS6569(this, TheDisplay, TheCPU, RAM, Char, Color); </span>
-<span class="lineNum">     79 </span><span class="linePartCov">    1 / 2     : 	TheSID = TheCPU-&gt;TheSID = new MOS6581(this); </span>
-<span class="lineNum">     80 </span><span class="linePartCov">    1 / 2     : 	TheCIA1 = TheCPU-&gt;TheCIA1 = new MOS6526_1(TheCPU, TheVIC); </span>
-<span class="lineNum">     81 </span><span class="linePartCov">    1 / 2     : 	TheCIA2 = TheCPU-&gt;TheCIA2 = TheCPU1541-&gt;TheCIA2 = new MOS6526_2(TheCPU, TheVIC, TheCPU1541); </span>
-<span class="lineNum">     82 </span><span class="linePartCov">    1 / 2     : 	TheIEC = TheCPU-&gt;TheIEC = new IEC(TheDisplay); </span>
-<span class="lineNum">     83 </span><span class="linePartCov">    2 / 4     : 	TheREU = TheCPU-&gt;TheREU = new REU(TheCPU); </span>
-<span class="lineNum">     84 </span>              :  </span>
-<span class="lineNum">     85 </span>              : 	// Initialize RAM with powerup pattern </span>
-<span class="lineNum">     86 </span><span class="linePartCov">    1 / 2     : 	p = RAM; </span>
-<span class="lineNum">     87 </span><span class="linePartCov">    2 / 6     : 	for (unsigned i=0; i&lt;512; i++) { </span>
-<span class="lineNum">     88 </span><span class="linePartCov">    1 / 2     : 		for (unsigned j=0; j&lt;64; j++) </span>
-<span class="lineNum">     89 </span><span class="linePartCov">    1 / 2     : 			*p++ = 0; </span>
-<span class="lineNum">     90 </span><span class="linePartCov">    1 / 2     : 		for (unsigned j=0; j&lt;64; j++) </span>
-<span class="lineNum">     91 </span><span class="linePartCov">    1 / 2     : 			*p++ = 0xff; </span>
-<span class="lineNum">     92 </span>              : 	} </span>
-<span class="lineNum">     93 </span>              :  </span>
-<span class="lineNum">     94 </span>              : 	// Initialize color RAM with random values </span>
-<span class="lineNum">     95 </span><span class="linePartCov">    1 / 2     : 	p = Color; </span>
-<span class="lineNum">     96 </span><span class="linePartCov">    1 / 2     : 	for (unsigned i=0; i&lt;COLOR_RAM_SIZE; i++) </span>
-<span class="lineNum">     97 </span><span class="linePartCov">    1 / 2     : 		*p++ = rand() &amp; 0x0f; </span>
-<span class="lineNum">     98 </span>              :  </span>
-<span class="lineNum">     99 </span>              : 	// Clear 1541 RAM </span>
-<span class="lineNum">    100 </span>              : 	memset(RAM1541, 0, DRIVE_RAM_SIZE); </span>
-<span class="lineNum">    101 </span>              :  </span>
-<span class="lineNum">    102 </span>              : 	// Open joystick drivers if required </span>
-<span class="lineNum">    103 </span><span class="linePartCov">    1 / 2     : 	open_joystick(0); </span>
-<span class="lineNum">    104 </span><span class="linePartCov">    1 / 2     : 	open_joystick(1); </span>
-<span class="lineNum">    105 </span><span class="linePartCov">    1 / 2     : 	joykey = 0xff; </span>
-<span class="lineNum">    106 </span>              :  </span>
-<span class="lineNum">    107 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    108 </span><span class="linePartCov">    1 / 2     : 	CycleCounter = 0; </span>
-<span class="lineNum">    109 </span>              : #endif </span>
-<span class="lineNum">    110 </span>              :  </span>
-<span class="lineNum">    111 </span>              : 	// System-dependent things </span>
-<span class="lineNum">    112 </span><span class="linePartCov">    2 / 4     : 	c64_ctor2(); </span>
-<span class="lineNum">    113 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">    114 </span>              :  </span>
-<span class="lineNum">    115 </span>              :  </span>
-<span class="lineNum">    116 </span>              : /* </span>
-<span class="lineNum">    117 </span>              :  *  Destructor: Delete all objects </span>
-<span class="lineNum">    118 </span>              :  */ </span>
-<span class="lineNum">    119 </span>              :  </span>
-<span class="lineNum">    120 </span><span class="linePartCov">    2 / 4     : C64::~C64() </span>
-<span class="lineNum">    121 </span>              : { </span>
-<span class="lineNum">    122 </span><span class="lineNoCov">    0 / 2     : 	close_joystick(0); </span>
-<span class="lineNum">    123 </span><span class="linePartCov">    1 / 2     : 	close_joystick(1); </span>
-<span class="lineNum">    124 </span>              :  </span>
-<span class="lineNum">    125 </span><span class="linePartCov">    1 / 2     : 	delete TheJob1541; </span>
-<span class="lineNum">    126 </span><span class="linePartCov">    1 / 2     : 	delete TheREU; </span>
-<span class="lineNum">    127 </span><span class="linePartCov">    1 / 2     : 	delete TheIEC; </span>
-<span class="lineNum">    128 </span><span class="linePartCov">    1 / 2     : 	delete TheCIA2; </span>
-<span class="lineNum">    129 </span><span class="linePartCov">    1 / 2     : 	delete TheCIA1; </span>
-<span class="lineNum">    130 </span><span class="linePartCov">    1 / 2     : 	delete TheSID; </span>
-<span class="lineNum">    131 </span><span class="linePartCov">    1 / 2     : 	delete TheVIC; </span>
-<span class="lineNum">    132 </span><span class="linePartCov">    1 / 2     : 	delete TheCPU1541; </span>
-<span class="lineNum">    133 </span><span class="linePartCov">    1 / 2     : 	delete TheCPU; </span>
-<span class="lineNum">    134 </span><span class="linePartCov">    1 / 2     : 	delete TheDisplay; </span>
-<span class="lineNum">    135 </span>              :  </span>
-<span class="lineNum">    136 </span><span class="linePartCov">    1 / 2     : 	delete[] RAM; </span>
-<span class="lineNum">    137 </span><span class="linePartCov">    1 / 2     : 	delete[] Basic; </span>
-<span class="lineNum">    138 </span><span class="linePartCov">    1 / 2     : 	delete[] Kernal; </span>
-<span class="lineNum">    139 </span><span class="linePartCov">    1 / 2     : 	delete[] Char; </span>
-<span class="lineNum">    140 </span><span class="linePartCov">    1 / 2     : 	delete[] Color; </span>
-<span class="lineNum">    141 </span><span class="linePartCov">    1 / 2     : 	delete[] RAM1541; </span>
-<span class="lineNum">    142 </span><span class="linePartCov">    2 / 4     : 	delete[] ROM1541; </span>
-<span class="lineNum">    143 </span>              :  </span>
-<span class="lineNum">    144 </span>              : 	c64_dtor(); </span>
-<span class="lineNum">    145 </span><span class="linePartCov">    1 / 4     : } </span>
-<span class="lineNum">    146 </span>              :  </span>
-<span class="lineNum">    147 </span>              :  </span>
-<span class="lineNum">    148 </span>              : /* </span>
-<span class="lineNum">    149 </span>              :  *  Reset C64 </span>
-<span class="lineNum">    150 </span>              :  */ </span>
-<span class="lineNum">    151 </span>              :  </span>
-<span class="lineNum">    152 </span>              : void C64::Reset(void) </span>
-<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 	TheCPU-&gt;AsyncReset(); </span>
-<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     : 	TheCPU1541-&gt;AsyncReset(); </span>
-<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 	TheSID-&gt;Reset(); </span>
-<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 1     : 	TheCIA1-&gt;Reset(); </span>
-<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 1     : 	TheCIA2-&gt;Reset(); </span>
-<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 2     : 	TheIEC-&gt;Reset(); </span>
-<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    161 </span>              :  </span>
-<span class="lineNum">    162 </span>              :  </span>
-<span class="lineNum">    163 </span>              : /* </span>
-<span class="lineNum">    164 </span>              :  *  NMI C64 </span>
-<span class="lineNum">    165 </span>              :  */ </span>
-<span class="lineNum">    166 </span>              :  </span>
-<span class="lineNum">    167 </span>              : void C64::NMI(void) </span>
-<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    169 </span><span class="lineNoCov">    0 / 2     : 	TheCPU-&gt;AsyncNMI(); </span>
-<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    171 </span>              :  </span>
-<span class="lineNum">    172 </span>              :  </span>
-<span class="lineNum">    173 </span>              : /* </span>
-<span class="lineNum">    174 </span>              :  *  The preferences have changed. prefs is a pointer to the new </span>
-<span class="lineNum">    175 </span>              :  *   preferences, ThePrefs still holds the previous ones. </span>
-<span class="lineNum">    176 </span>              :  *   The emulation must be in the paused state! </span>
-<span class="lineNum">    177 </span>              :  */ </span>
-<span class="lineNum">    178 </span>              :  </span>
-<span class="lineNum">    179 </span>              : void C64::NewPrefs(Prefs *prefs) </span>
-<span class="lineNum">    180 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    181 </span><span class="lineCov">    1 / 1     : 	PatchKernal(prefs-&gt;FastReset, prefs-&gt;Emul1541Proc); </span>
-<span class="lineNum">    182 </span>              :  </span>
-<span class="lineNum">    183 </span><span class="lineCov">    1 / 1     : 	TheDisplay-&gt;NewPrefs(prefs); </span>
-<span class="lineNum">    184 </span>              :  </span>
-<span class="lineNum">    185 </span><span class="lineCov">    1 / 1     : 	TheIEC-&gt;NewPrefs(prefs); </span>
-<span class="lineNum">    186 </span><span class="lineCov">    1 / 1     : 	TheJob1541-&gt;NewPrefs(prefs); </span>
-<span class="lineNum">    187 </span>              :  </span>
-<span class="lineNum">    188 </span><span class="lineCov">    1 / 1     : 	TheREU-&gt;NewPrefs(prefs); </span>
-<span class="lineNum">    189 </span><span class="lineCov">    1 / 1     : 	TheSID-&gt;NewPrefs(prefs); </span>
-<span class="lineNum">    190 </span>              :  </span>
-<span class="lineNum">    191 </span>              : 	// Reset 1541 processor if turned on </span>
-<span class="lineNum">    192 </span><span class="lineCov">    1 / 1     : 	if (!ThePrefs.Emul1541Proc &amp;&amp; prefs-&gt;Emul1541Proc) </span>
-<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 2     : 		TheCPU1541-&gt;AsyncReset(); </span>
-<span class="lineNum">    194 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">    195 </span>              :  </span>
-<span class="lineNum">    196 </span>              :  </span>
-<span class="lineNum">    197 </span>              : /* </span>
-<span class="lineNum">    198 </span>              :  *  Patch kernal IEC routines </span>
-<span class="lineNum">    199 </span>              :  */ </span>
-<span class="lineNum">    200 </span>              :  </span>
-<span class="lineNum">    201 </span>              : void C64::PatchKernal(bool fast_reset, bool emul_1541_proc) </span>
-<span class="lineNum">    202 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">    203 </span><span class="linePartCov">    1 / 2     : 	if (fast_reset) { </span>
-<span class="lineNum">    204 </span><span class="lineNoCov">    0 / 2     : 		Kernal[0x1d84] = 0xa0; </span>
-<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x1d85] = 0x00; </span>
-<span class="lineNum">    206 </span>              : 	} else { </span>
-<span class="lineNum">    207 </span><span class="lineCov">    2 / 2     : 		Kernal[0x1d84] = orig_kernal_1d84; </span>
-<span class="lineNum">    208 </span><span class="lineCov">    1 / 1     : 		Kernal[0x1d85] = orig_kernal_1d85; </span>
-<span class="lineNum">    209 </span>              : 	} </span>
-<span class="lineNum">    210 </span>              :  </span>
-<span class="lineNum">    211 </span><span class="linePartCov">    1 / 4     : 	if (emul_1541_proc) { </span>
-<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d40] = 0x78; </span>
-<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d41] = 0x20; </span>
-<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d23] = 0x78; </span>
-<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d24] = 0x20; </span>
-<span class="lineNum">    216 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d36] = 0x78; </span>
-<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0d37] = 0x20; </span>
-<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0e13] = 0x78; </span>
-<span class="lineNum">    219 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0e14] = 0xa9; </span>
-<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0def] = 0x78; </span>
-<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0df0] = 0x20; </span>
-<span class="lineNum">    222 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0dbe] = 0xad; </span>
-<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0dbf] = 0x00; </span>
-<span class="lineNum">    224 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0dcc] = 0x78; </span>
-<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0dcd] = 0x20; </span>
-<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0e03] = 0x20; </span>
-<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 		Kernal[0x0e04] = 0xbe; </span>
-<span class="lineNum">    228 </span>              : 	} else { </span>
-<span class="lineNum">    229 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d40] = 0xf2;	// IECOut </span>
-<span class="lineNum">    230 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d41] = 0x00; </span>
-<span class="lineNum">    231 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d23] = 0xf2;	// IECOutATN </span>
-<span class="lineNum">    232 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d24] = 0x01; </span>
-<span class="lineNum">    233 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d36] = 0xf2;	// IECOutSec </span>
-<span class="lineNum">    234 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0d37] = 0x02; </span>
-<span class="lineNum">    235 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0e13] = 0xf2;	// IECIn </span>
-<span class="lineNum">    236 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0e14] = 0x03; </span>
-<span class="lineNum">    237 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0def] = 0xf2;	// IECSetATN </span>
-<span class="lineNum">    238 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0df0] = 0x04; </span>
-<span class="lineNum">    239 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0dbe] = 0xf2;	// IECRelATN </span>
-<span class="lineNum">    240 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0dbf] = 0x05; </span>
-<span class="lineNum">    241 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0dcc] = 0xf2;	// IECTurnaround </span>
-<span class="lineNum">    242 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0dcd] = 0x06; </span>
-<span class="lineNum">    243 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0e03] = 0xf2;	// IECRelease </span>
-<span class="lineNum">    244 </span><span class="lineCov">    1 / 1     : 		Kernal[0x0e04] = 0x07; </span>
-<span class="lineNum">    245 </span>              : 	} </span>
-<span class="lineNum">    246 </span>              :  </span>
-<span class="lineNum">    247 </span>              : 	// 1541 </span>
-<span class="lineNum">    248 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2ae4] = 0xea;		// Don't check ROM checksum </span>
-<span class="lineNum">    249 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2ae5] = 0xea; </span>
-<span class="lineNum">    250 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2ae8] = 0xea; </span>
-<span class="lineNum">    251 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2ae9] = 0xea; </span>
-<span class="lineNum">    252 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2c9b] = 0xf2;		// DOS idle loop </span>
-<span class="lineNum">    253 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x2c9c] = 0x00; </span>
-<span class="lineNum">    254 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3594] = 0x20;		// Write sector </span>
-<span class="lineNum">    255 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3595] = 0xf2; </span>
-<span class="lineNum">    256 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3596] = 0xf5; </span>
-<span class="lineNum">    257 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3597] = 0xf2; </span>
-<span class="lineNum">    258 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3598] = 0x01; </span>
-<span class="lineNum">    259 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3b0c] = 0xf2;		// Format track </span>
-<span class="lineNum">    260 </span><span class="lineCov">    1 / 1     : 	ROM1541[0x3b0d] = 0x02; </span>
-<span class="lineNum">    261 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    262 </span>              :  </span>
-<span class="lineNum">    263 </span>              :  </span>
-<span class="lineNum">    264 </span>              : /* </span>
-<span class="lineNum">    265 </span>              :  *  Save RAM contents </span>
-<span class="lineNum">    266 </span>              :  */ </span>
-<span class="lineNum">    267 </span>              :  </span>
-<span class="lineNum">    268 </span>              : void C64::SaveRAM(char *filename) </span>
-<span class="lineNum">    269 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    270 </span>              : 	FILE *f; </span>
-<span class="lineNum">    271 </span>              :  </span>
-<span class="lineNum">    272 </span><span class="lineNoCov">    0 / 1     : 	if ((f = fopen(filename, &quot;wb&quot;)) == NULL) </span>
-<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 1     : 		ShowRequester(&quot;RAM save failed.&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    274 </span>              : 	else { </span>
-<span class="lineNum">    275 </span><span class="lineNoCov">    0 / 1     : 		fwrite((void*)RAM, 1, 0x10000, f); </span>
-<span class="lineNum">    276 </span><span class="lineNoCov">    0 / 1     : 		fwrite((void*)Color, 1, 0x400, f); </span>
-<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 		if (ThePrefs.Emul1541Proc) </span>
-<span class="lineNum">    278 </span><span class="lineNoCov">    0 / 1     : 			fwrite((void*)RAM1541, 1, 0x800, f); </span>
-<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 4     : 		fclose(f); </span>
-<span class="lineNum">    280 </span>              : 	} </span>
-<span class="lineNum">    281 </span><span class="lineNoCov">    0 / 3     : } </span>
-<span class="lineNum">    282 </span>              :  </span>
-<span class="lineNum">    283 </span>              :  </span>
-<span class="lineNum">    284 </span>              : /* </span>
-<span class="lineNum">    285 </span>              :  *  Save CPU state to snapshot </span>
-<span class="lineNum">    286 </span>              :  * </span>
-<span class="lineNum">    287 </span>              :  *  0: Error </span>
-<span class="lineNum">    288 </span>              :  *  1: OK </span>
-<span class="lineNum">    289 </span>              :  *  -1: Instruction not completed </span>
-<span class="lineNum">    290 </span>              :  */ </span>
-<span class="lineNum">    291 </span>              :  </span>
-<span class="lineNum">    292 </span>              : int C64::SaveCPUState(FILE *f) </span>
-<span class="lineNum">    293 </span><span class="lineNoCov">    0 / 3     : { </span>
-<span class="lineNum">    294 </span>              : 	MOS6510State state; </span>
-<span class="lineNum">    295 </span><span class="lineNoCov">    0 / 2     : 	TheCPU-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    296 </span>              :  </span>
-<span class="lineNum">    297 </span><span class="lineNoCov">    0 / 1     : 	if (!state.instruction_complete) </span>
-<span class="lineNum">    298 </span>              : 		return -1; </span>
-<span class="lineNum">    299 </span>              :  </span>
-<span class="lineNum">    300 </span><span class="lineNoCov">    0 / 2     : 	int i = fwrite(RAM, 0x10000, 1, f); </span>
-<span class="lineNum">    301 </span><span class="lineNoCov">    0 / 3     : 	i += fwrite(Color, 0x400, 1, f); </span>
-<span class="lineNum">    302 </span><span class="lineNoCov">    0 / 2     : 	i += fwrite((void*)&amp;state, sizeof(state), 1, f); </span>
-<span class="lineNum">    303 </span>              :  </span>
-<span class="lineNum">    304 </span><span class="lineNoCov">    0 / 1     : 	return i == 3; </span>
-<span class="lineNum">    305 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    306 </span>              :  </span>
-<span class="lineNum">    307 </span>              :  </span>
-<span class="lineNum">    308 </span>              : /* </span>
-<span class="lineNum">    309 </span>              :  *  Load CPU state from snapshot </span>
-<span class="lineNum">    310 </span>              :  */ </span>
-<span class="lineNum">    311 </span>              :  </span>
-<span class="lineNum">    312 </span>              : bool C64::LoadCPUState(FILE *f) </span>
-<span class="lineNum">    313 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    314 </span>              : 	MOS6510State state; </span>
-<span class="lineNum">    315 </span>              :  </span>
-<span class="lineNum">    316 </span>              : 	int i = fread(RAM, 0x10000, 1, f); </span>
-<span class="lineNum">    317 </span>              : 	i += fread(Color, 0x400, 1, f); </span>
-<span class="lineNum">    318 </span>              : 	i += fread((void*)&amp;state, sizeof(state), 1, f); </span>
-<span class="lineNum">    319 </span>              :  </span>
-<span class="lineNum">    320 </span><span class="lineCov">    1 / 1     : 	if (i == 3) { </span>
-<span class="lineNum">    321 </span><span class="lineCov">    1 / 1     : 		TheCPU-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    322 </span><span class="lineCov">    1 / 1     : 		return true; </span>
-<span class="lineNum">    323 </span>              : 	} else </span>
-<span class="lineNum">    324 </span>              : 		return false; </span>
-<span class="lineNum">    325 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    326 </span>              :  </span>
-<span class="lineNum">    327 </span>              :  </span>
-<span class="lineNum">    328 </span>              : /* </span>
-<span class="lineNum">    329 </span>              :  *  Save 1541 state to snapshot </span>
-<span class="lineNum">    330 </span>              :  * </span>
-<span class="lineNum">    331 </span>              :  *  0: Error </span>
-<span class="lineNum">    332 </span>              :  *  1: OK </span>
-<span class="lineNum">    333 </span>              :  *  -1: Instruction not completed </span>
-<span class="lineNum">    334 </span>              :  */ </span>
-<span class="lineNum">    335 </span>              :  </span>
-<span class="lineNum">    336 </span>              : int C64::Save1541State(FILE *f) </span>
-<span class="lineNum">    337 </span><span class="lineNoCov">    0 / 3     : { </span>
-<span class="lineNum">    338 </span>              : 	MOS6502State state; </span>
-<span class="lineNum">    339 </span><span class="lineNoCov">    0 / 2     : 	TheCPU1541-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    340 </span>              :  </span>
-<span class="lineNum">    341 </span><span class="lineNoCov">    0 / 2     : 	if (!state.idle &amp;&amp; !state.instruction_complete) </span>
-<span class="lineNum">    342 </span>              : 		return -1; </span>
-<span class="lineNum">    343 </span>              :  </span>
-<span class="lineNum">    344 </span><span class="lineNoCov">    0 / 2     : 	int i = fwrite(RAM1541, 0x800, 1, f); </span>
-<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 2     : 	i += fwrite((void*)&amp;state, sizeof(state), 1, f); </span>
-<span class="lineNum">    346 </span>              :  </span>
-<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 1     : 	return i == 2; </span>
-<span class="lineNum">    348 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    349 </span>              :  </span>
-<span class="lineNum">    350 </span>              :  </span>
-<span class="lineNum">    351 </span>              : /* </span>
-<span class="lineNum">    352 </span>              :  *  Load 1541 state from snapshot </span>
-<span class="lineNum">    353 </span>              :  */ </span>
-<span class="lineNum">    354 </span>              :  </span>
-<span class="lineNum">    355 </span>              : bool C64::Load1541State(FILE *f) </span>
-<span class="lineNum">    356 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    357 </span>              : 	MOS6502State state; </span>
-<span class="lineNum">    358 </span>              :  </span>
-<span class="lineNum">    359 </span>              : 	int i = fread(RAM1541, 0x800, 1, f); </span>
-<span class="lineNum">    360 </span>              : 	i += fread((void*)&amp;state, sizeof(state), 1, f); </span>
-<span class="lineNum">    361 </span>              :  </span>
-<span class="lineNum">    362 </span><span class="lineNoCov">    0 / 1     : 	if (i == 2) { </span>
-<span class="lineNum">    363 </span><span class="lineNoCov">    0 / 1     : 		TheCPU1541-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    364 </span><span class="lineNoCov">    0 / 1     : 		return true; </span>
-<span class="lineNum">    365 </span>              : 	} else </span>
-<span class="lineNum">    366 </span>              : 		return false; </span>
-<span class="lineNum">    367 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    368 </span>              :  </span>
-<span class="lineNum">    369 </span>              :  </span>
-<span class="lineNum">    370 </span>              : /* </span>
-<span class="lineNum">    371 </span>              :  *  Save VIC state to snapshot </span>
-<span class="lineNum">    372 </span>              :  */ </span>
-<span class="lineNum">    373 </span>              :  </span>
-<span class="lineNum">    374 </span>              : bool C64::SaveVICState(FILE *f) </span>
-<span class="lineNum">    375 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    376 </span>              : 	MOS6569State state; </span>
-<span class="lineNum">    377 </span><span class="lineNoCov">    0 / 1     : 	TheVIC-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    378 </span><span class="lineNoCov">    0 / 1     : 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1; </span>
-<span class="lineNum">    379 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    380 </span>              :  </span>
-<span class="lineNum">    381 </span>              :  </span>
-<span class="lineNum">    382 </span>              : /* </span>
-<span class="lineNum">    383 </span>              :  *  Load VIC state from snapshot </span>
-<span class="lineNum">    384 </span>              :  */ </span>
-<span class="lineNum">    385 </span>              :  </span>
-<span class="lineNum">    386 </span>              : bool C64::LoadVICState(FILE *f) </span>
-<span class="lineNum">    387 </span><span class="linePartCov">    2 / 4     : { </span>
-<span class="lineNum">    388 </span>              : 	MOS6569State state; </span>
-<span class="lineNum">    389 </span>              :  </span>
-<span class="lineNum">    390 </span><span class="lineCov">    1 / 1     : 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    391 </span><span class="lineCov">    1 / 1     : 		TheVIC-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    392 </span><span class="lineCov">    1 / 1     : 		return true; </span>
-<span class="lineNum">    393 </span>              : 	} else </span>
-<span class="lineNum">    394 </span>              : 		return false; </span>
-<span class="lineNum">    395 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">    396 </span>              :  </span>
-<span class="lineNum">    397 </span>              :  </span>
-<span class="lineNum">    398 </span>              : /* </span>
-<span class="lineNum">    399 </span>              :  *  Save SID state to snapshot </span>
-<span class="lineNum">    400 </span>              :  */ </span>
-<span class="lineNum">    401 </span>              :  </span>
-<span class="lineNum">    402 </span>              : bool C64::SaveSIDState(FILE *f) </span>
-<span class="lineNum">    403 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    404 </span>              : 	MOS6581State state; </span>
-<span class="lineNum">    405 </span><span class="lineNoCov">    0 / 1     : 	TheSID-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    406 </span><span class="lineNoCov">    0 / 1     : 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1; </span>
-<span class="lineNum">    407 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    408 </span>              :  </span>
-<span class="lineNum">    409 </span>              :  </span>
-<span class="lineNum">    410 </span>              : /* </span>
-<span class="lineNum">    411 </span>              :  *  Load SID state from snapshot </span>
-<span class="lineNum">    412 </span>              :  */ </span>
-<span class="lineNum">    413 </span>              :  </span>
-<span class="lineNum">    414 </span>              : bool C64::LoadSIDState(FILE *f) </span>
-<span class="lineNum">    415 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    416 </span>              : 	MOS6581State state; </span>
-<span class="lineNum">    417 </span>              :  </span>
-<span class="lineNum">    418 </span><span class="lineCov">    1 / 1     : 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    419 </span><span class="lineCov">    2 / 2     : 		TheSID-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    420 </span>              : 		return true; </span>
-<span class="lineNum">    421 </span>              : 	} else </span>
-<span class="lineNum">    422 </span>              : 		return false; </span>
-<span class="lineNum">    423 </span><span class="linePartCov">    2 / 3     : } </span>
-<span class="lineNum">    424 </span>              :  </span>
-<span class="lineNum">    425 </span>              :  </span>
-<span class="lineNum">    426 </span>              : /* </span>
-<span class="lineNum">    427 </span>              :  *  Save CIA states to snapshot </span>
-<span class="lineNum">    428 </span>              :  */ </span>
-<span class="lineNum">    429 </span>              :  </span>
-<span class="lineNum">    430 </span>              : bool C64::SaveCIAState(FILE *f) </span>
-<span class="lineNum">    431 </span><span class="lineNoCov">    0 / 3     : { </span>
-<span class="lineNum">    432 </span>              : 	MOS6526State state; </span>
-<span class="lineNum">    433 </span><span class="lineNoCov">    0 / 2     : 	TheCIA1-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    434 </span>              :  </span>
-<span class="lineNum">    435 </span><span class="lineNoCov">    0 / 1     : 	if (fwrite((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    436 </span><span class="lineNoCov">    0 / 1     : 		TheCIA2-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    437 </span><span class="lineNoCov">    0 / 1     : 		return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1; </span>
-<span class="lineNum">    438 </span>              : 	} else </span>
-<span class="lineNum">    439 </span>              : 		return false; </span>
-<span class="lineNum">    440 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    441 </span>              :  </span>
-<span class="lineNum">    442 </span>              :  </span>
-<span class="lineNum">    443 </span>              : /* </span>
-<span class="lineNum">    444 </span>              :  *  Load CIA states from snapshot </span>
-<span class="lineNum">    445 </span>              :  */ </span>
-<span class="lineNum">    446 </span>              :  </span>
-<span class="lineNum">    447 </span>              : bool C64::LoadCIAState(FILE *f) </span>
-<span class="lineNum">    448 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">    449 </span>              : 	MOS6526State state; </span>
-<span class="lineNum">    450 </span>              :  </span>
-<span class="lineNum">    451 </span><span class="lineCov">    1 / 1     : 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    452 </span><span class="lineCov">    1 / 1     : 		TheCIA1-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    453 </span><span class="lineCov">    1 / 1     : 		if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    454 </span><span class="lineCov">    1 / 1     : 			TheCIA2-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    455 </span><span class="linePartCov">    1 / 2     : 			return true; </span>
-<span class="lineNum">    456 </span>              : 		} else </span>
-<span class="lineNum">    457 </span>              : 			return false; </span>
-<span class="lineNum">    458 </span>              : 	} else </span>
-<span class="lineNum">    459 </span>              : 		return false; </span>
-<span class="lineNum">    460 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    461 </span>              :  </span>
-<span class="lineNum">    462 </span>              :  </span>
-<span class="lineNum">    463 </span>              : /* </span>
-<span class="lineNum">    464 </span>              :  *  Save 1541 GCR state to snapshot </span>
-<span class="lineNum">    465 </span>              :  */ </span>
-<span class="lineNum">    466 </span>              :  </span>
-<span class="lineNum">    467 </span>              : bool C64::Save1541JobState(FILE *f) </span>
-<span class="lineNum">    468 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    469 </span>              : 	Job1541State state; </span>
-<span class="lineNum">    470 </span><span class="lineNoCov">    0 / 1     : 	TheJob1541-&gt;GetState(&amp;state); </span>
-<span class="lineNum">    471 </span><span class="lineNoCov">    0 / 1     : 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1; </span>
-<span class="lineNum">    472 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    473 </span>              :  </span>
-<span class="lineNum">    474 </span>              :  </span>
-<span class="lineNum">    475 </span>              : /* </span>
-<span class="lineNum">    476 </span>              :  *  Load 1541 GCR state from snapshot </span>
-<span class="lineNum">    477 </span>              :  */ </span>
-<span class="lineNum">    478 </span>              :  </span>
-<span class="lineNum">    479 </span>              : bool C64::Load1541JobState(FILE *f) </span>
-<span class="lineNum">    480 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    481 </span>              : 	Job1541State state; </span>
-<span class="lineNum">    482 </span>              :  </span>
-<span class="lineNum">    483 </span><span class="lineNoCov">    0 / 1     : 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) { </span>
-<span class="lineNum">    484 </span><span class="lineNoCov">    0 / 2     : 		TheJob1541-&gt;SetState(&amp;state); </span>
-<span class="lineNum">    485 </span>              : 		return true; </span>
-<span class="lineNum">    486 </span>              : 	} else </span>
-<span class="lineNum">    487 </span>              : 		return false; </span>
-<span class="lineNum">    488 </span><span class="lineNoCov">    0 / 3     : } </span>
-<span class="lineNum">    489 </span>              :  </span>
-<span class="lineNum">    490 </span>              :  </span>
-<span class="lineNum">    491 </span>              : #define SNAPSHOT_HEADER &quot;FrodoSnapshot&quot; </span>
-<span class="lineNum">    492 </span>              : #define SNAPSHOT_1541 1 </span>
-<span class="lineNum">    493 </span>              :  </span>
-<span class="lineNum">    494 </span>              : #define ADVANCE_CYCLES	\ </span>
-<span class="lineNum">    495 </span>              : 	TheVIC-&gt;EmulateCycle(); \ </span>
-<span class="lineNum">    496 </span>              : 	TheCIA1-&gt;EmulateCycle(); \ </span>
-<span class="lineNum">    497 </span>              : 	TheCIA2-&gt;EmulateCycle(); \ </span>
-<span class="lineNum">    498 </span>              : 	TheCPU-&gt;EmulateCycle(); \ </span>
-<span class="lineNum">    499 </span>              : 	if (ThePrefs.Emul1541Proc) { \ </span>
-<span class="lineNum">    500 </span>              : 		TheCPU1541-&gt;CountVIATimers(1); \ </span>
-<span class="lineNum">    501 </span>              : 		if (!TheCPU1541-&gt;Idle) \ </span>
-<span class="lineNum">    502 </span>              : 			TheCPU1541-&gt;EmulateCycle(); \ </span>
-<span class="lineNum">    503 </span>              : 	} </span>
-<span class="lineNum">    504 </span>              :  </span>
-<span class="lineNum">    505 </span>              :  </span>
-<span class="lineNum">    506 </span>              : /* </span>
-<span class="lineNum">    507 </span>              :  *  Save snapshot (emulation must be paused and in VBlank) </span>
-<span class="lineNum">    508 </span>              :  * </span>
-<span class="lineNum">    509 </span>              :  *  To be able to use SC snapshots with SL, SC snapshots are made thus that no </span>
-<span class="lineNum">    510 </span>              :  *  partially dealt with instructions are saved. Instead all devices are advanced </span>
-<span class="lineNum">    511 </span>              :  *  cycle by cycle until the current instruction has been finished. The number of </span>
-<span class="lineNum">    512 </span>              :  *  cycles this takes is saved in the snapshot and will be reconstructed if the </span>
-<span class="lineNum">    513 </span>              :  *  snapshot is loaded into FrodoSC again. </span>
-<span class="lineNum">    514 </span>              :  */ </span>
-<span class="lineNum">    515 </span>              :  </span>
-<span class="lineNum">    516 </span>              : void C64::SaveSnapshot(const char *filename) </span>
-<span class="lineNum">    517 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    518 </span>              : 	FILE *f; </span>
-<span class="lineNum">    519 </span>              : 	uint8 flags; </span>
-<span class="lineNum">    520 </span>              : 	uint8 delay; </span>
-<span class="lineNum">    521 </span>              : 	int stat; </span>
-<span class="lineNum">    522 </span>              :  </span>
-<span class="lineNum">    523 </span><span class="lineNoCov">    0 / 1     : 	if ((f = fopen(filename, &quot;wb&quot;)) == NULL) { </span>
-<span class="lineNum">    524 </span><span class="lineNoCov">    0 / 1     : 		ShowRequester(&quot;Unable to open snapshot file&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    525 </span>              : 		return; </span>
-<span class="lineNum">    526 </span>              : 	} </span>
-<span class="lineNum">    527 </span>              :  </span>
-<span class="lineNum">    528 </span>              : 	fprintf(f, &quot;%s%c&quot;, SNAPSHOT_HEADER, 10); </span>
-<span class="lineNum">    529 </span><span class="lineNoCov">    0 / 1     : 	fputc(0, f);	// Version number 0 </span>
-<span class="lineNum">    530 </span>              : 	flags = 0; </span>
-<span class="lineNum">    531 </span>              : 	if (ThePrefs.Emul1541Proc) </span>
-<span class="lineNum">    532 </span>              : 		flags |= SNAPSHOT_1541; </span>
-<span class="lineNum">    533 </span><span class="lineNoCov">    0 / 1     : 	fputc(flags, f); </span>
-<span class="lineNum">    534 </span><span class="lineNoCov">    0 / 1     : 	SaveVICState(f); </span>
-<span class="lineNum">    535 </span><span class="lineNoCov">    0 / 1     : 	SaveSIDState(f); </span>
-<span class="lineNum">    536 </span><span class="lineNoCov">    0 / 2     : 	SaveCIAState(f); </span>
-<span class="lineNum">    537 </span>              :  </span>
-<span class="lineNum">    538 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    539 </span>              : 	delay = 0; </span>
-<span class="lineNum">    540 </span>              : 	do { </span>
-<span class="lineNum">    541 </span><span class="lineNoCov">    0 / 1     : 		if ((stat = SaveCPUState(f)) == -1) {	// -1 -&gt; Instruction not finished yet </span>
-<span class="lineNum">    542 </span><span class="lineNoCov">    0 / 3     : 			ADVANCE_CYCLES;	// Advance everything by one cycle </span>
-<span class="lineNum">    543 </span><span class="lineNoCov">    0 / 1     : 			delay++; </span>
-<span class="lineNum">    544 </span>              : 		} </span>
-<span class="lineNum">    545 </span>              : 	} while (stat == -1); </span>
-<span class="lineNum">    546 </span><span class="lineNoCov">    0 / 1     : 	fputc(delay, f);	// Number of cycles the saved CPUC64 lags behind the previous chips </span>
-<span class="lineNum">    547 </span>              : #else </span>
-<span class="lineNum">    548 </span>              : 	SaveCPUState(f); </span>
-<span class="lineNum">    549 </span>              : 	fputc(0, f);		// No delay </span>
-<span class="lineNum">    550 </span>              : #endif </span>
-<span class="lineNum">    551 </span>              :  </span>
-<span class="lineNum">    552 </span><span class="lineNoCov">    0 / 1     : 	if (ThePrefs.Emul1541Proc) { </span>
-<span class="lineNum">    553 </span><span class="lineNoCov">    0 / 1     : 		fwrite(ThePrefs.DrivePath[0], 256, 1, f); </span>
-<span class="lineNum">    554 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    555 </span>              : 		delay = 0; </span>
-<span class="lineNum">    556 </span>              : 		do { </span>
-<span class="lineNum">    557 </span><span class="lineNoCov">    0 / 1     : 			if ((stat = Save1541State(f)) == -1) { </span>
-<span class="lineNum">    558 </span><span class="lineNoCov">    0 / 3     : 				ADVANCE_CYCLES; </span>
-<span class="lineNum">    559 </span><span class="lineNoCov">    0 / 1     : 				delay++; </span>
-<span class="lineNum">    560 </span>              : 			} </span>
-<span class="lineNum">    561 </span>              : 		} while (stat == -1); </span>
-<span class="lineNum">    562 </span><span class="lineNoCov">    0 / 1     : 		fputc(delay, f); </span>
-<span class="lineNum">    563 </span>              : #else </span>
-<span class="lineNum">    564 </span>              : 		Save1541State(f); </span>
-<span class="lineNum">    565 </span>              : 		fputc(0, f);	// No delay </span>
-<span class="lineNum">    566 </span>              : #endif </span>
-<span class="lineNum">    567 </span><span class="lineNoCov">    0 / 1     : 		Save1541JobState(f); </span>
-<span class="lineNum">    568 </span>              : 	} </span>
-<span class="lineNum">    569 </span><span class="lineNoCov">    0 / 4     : 	fclose(f); </span>
-<span class="lineNum">    570 </span>              :  </span>
-<span class="lineNum">    571 </span><span class="lineNoCov">    0 / 4     : } </span>
-<span class="lineNum">    572 </span>              :  </span>
-<span class="lineNum">    573 </span>              :  </span>
-<span class="lineNum">    574 </span>              : /* </span>
-<span class="lineNum">    575 </span>              :  *  Load snapshot (emulation must be paused and in VBlank) </span>
-<span class="lineNum">    576 </span>              :  */ </span>
-<span class="lineNum">    577 </span>              :  </span>
-<span class="lineNum">    578 </span>              : bool C64::LoadSnapshot(const char *filename) </span>
-<span class="lineNum">    579 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    580 </span>              : 	FILE *f; </span>
-<span class="lineNum">    581 </span>              :  </span>
-<span class="lineNum">    582 </span><span class="lineCov">    1 / 1     : 	if ((f = fopen(filename, &quot;rb&quot;)) != NULL) { </span>
-<span class="lineNum">    583 </span><span class="lineCov">    1 / 1     : 		char Header[] = SNAPSHOT_HEADER; </span>
-<span class="lineNum">    584 </span>              : 		char *b = Header, c = 0; </span>
-<span class="lineNum">    585 </span>              : 		uint8 delay, i; </span>
-<span class="lineNum">    586 </span>              :  </span>
-<span class="lineNum">    587 </span>              : 		// For some reason memcmp()/strcmp() and so forth utterly fail here. </span>
-<span class="lineNum">    588 </span><span class="lineCov">    2 / 2     : 		while (*b &gt; 32) { </span>
-<span class="lineNum">    589 </span><span class="lineCov">    2 / 2     : 			if ((c = fgetc(f)) != *b++) { </span>
-<span class="lineNum">    590 </span>              : 				b = NULL; </span>
-<span class="lineNum">    591 </span>              : 				break; </span>
-<span class="lineNum">    592 </span>              : 			} </span>
-<span class="lineNum">    593 </span>              : 		} </span>
-<span class="lineNum">    594 </span><span class="lineCov">    1 / 1     : 		if (b != NULL) { </span>
-<span class="lineNum">    595 </span>              : 			uint8 flags; </span>
-<span class="lineNum">    596 </span>              : 			bool error = false; </span>
-<span class="lineNum">    597 </span>              : #ifndef FRODO_SC </span>
-<span class="lineNum">    598 </span>              : 			long vicptr;	// File offset of VIC data </span>
-<span class="lineNum">    599 </span>              : #endif </span>
-<span class="lineNum">    600 </span>              :  </span>
-<span class="lineNum">    601 </span><span class="lineCov">    2 / 2     : 			while (c != 10) </span>
-<span class="lineNum">    602 </span><span class="lineCov">    1 / 1     : 				c = fgetc(f);	// Shouldn't be necessary </span>
-<span class="lineNum">    603 </span><span class="lineCov">    1 / 1     : 			if (fgetc(f) != 0) { </span>
-<span class="lineNum">    604 </span><span class="lineNoCov">    0 / 1     : 				ShowRequester(&quot;Unknown snapshot format&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    605 </span><span class="lineNoCov">    0 / 1     : 				fclose(f); </span>
-<span class="lineNum">    606 </span><span class="lineNoCov">    0 / 1     : 				return false; </span>
-<span class="lineNum">    607 </span>              : 			} </span>
-<span class="lineNum">    608 </span><span class="lineCov">    2 / 2     : 			flags = fgetc(f); </span>
-<span class="lineNum">    609 </span>              : #ifndef FRODO_SC </span>
-<span class="lineNum">    610 </span>              : 			vicptr = ftell(f); </span>
-<span class="lineNum">    611 </span>              : #endif </span>
-<span class="lineNum">    612 </span>              :  </span>
-<span class="lineNum">    613 </span><span class="lineCov">    3 / 3     : 			error |= !LoadVICState(f); </span>
-<span class="lineNum">    614 </span><span class="lineCov">    3 / 3     : 			error |= !LoadSIDState(f); </span>
-<span class="lineNum">    615 </span><span class="lineCov">    3 / 3     : 			error |= !LoadCIAState(f); </span>
-<span class="lineNum">    616 </span><span class="linePartCov">    3 / 4     : 			error |= !LoadCPUState(f); </span>
-<span class="lineNum">    617 </span>              :  </span>
-<span class="lineNum">    618 </span><span class="linePartCov">    2 / 4     : 			delay = fgetc(f);	// Number of cycles the 6510 is ahead of the previous chips </span>
-<span class="lineNum">    619 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    620 </span>              : 			// Make the other chips &quot;catch up&quot; with the 6510 </span>
-<span class="lineNum">    621 </span><span class="linePartCov">    3 / 4     : 			for (i=0; i&lt;delay; i++) { </span>
-<span class="lineNum">    622 </span><span class="lineCov">    2 / 2     : 				TheVIC-&gt;EmulateCycle(); </span>
-<span class="lineNum">    623 </span><span class="lineCov">    1 / 1     : 				TheCIA1-&gt;EmulateCycle(); </span>
-<span class="lineNum">    624 </span><span class="lineCov">    1 / 1     : 				TheCIA2-&gt;EmulateCycle(); </span>
-<span class="lineNum">    625 </span>              : 			} </span>
-<span class="lineNum">    626 </span>              : #endif </span>
-<span class="lineNum">    627 </span><span class="lineCov">    1 / 1     : 			if ((flags &amp; SNAPSHOT_1541) != 0) { </span>
-<span class="lineNum">    628 </span><span class="lineNoCov">    0 / 1     : 				Prefs *prefs = new Prefs(ThePrefs); </span>
-<span class="lineNum">    629 </span>              : 	 </span>
-<span class="lineNum">    630 </span>              : 				// First switch on emulation </span>
-<span class="lineNum">    631 </span><span class="lineNoCov">    0 / 1     : 				error |= (fread(prefs-&gt;DrivePath[0], 256, 1, f) != 1); </span>
-<span class="lineNum">    632 </span><span class="lineNoCov">    0 / 1     : 				prefs-&gt;Emul1541Proc = true; </span>
-<span class="lineNum">    633 </span><span class="lineNoCov">    0 / 2     : 				NewPrefs(prefs); </span>
-<span class="lineNum">    634 </span><span class="lineNoCov">    0 / 3     : 				ThePrefs = *prefs; </span>
-<span class="lineNum">    635 </span><span class="lineNoCov">    0 / 3     : 				delete prefs; </span>
-<span class="lineNum">    636 </span>              : 	 </span>
-<span class="lineNum">    637 </span>              : 				// Then read the context </span>
-<span class="lineNum">    638 </span><span class="lineNoCov">    0 / 6     : 				error |= !Load1541State(f); </span>
-<span class="lineNum">    639 </span>              : 	 </span>
-<span class="lineNum">    640 </span><span class="lineNoCov">    0 / 3     : 				delay = fgetc(f);	// Number of cycles the 6502 is ahead of the previous chips </span>
-<span class="lineNum">    641 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    642 </span>              : 				// Make the other chips &quot;catch up&quot; with the 6502 </span>
-<span class="lineNum">    643 </span><span class="lineNoCov">    0 / 4     : 				for (i=0; i&lt;delay; i++) { </span>
-<span class="lineNum">    644 </span><span class="lineNoCov">    0 / 2     : 					TheVIC-&gt;EmulateCycle(); </span>
-<span class="lineNum">    645 </span><span class="lineNoCov">    0 / 1     : 					TheCIA1-&gt;EmulateCycle(); </span>
-<span class="lineNum">    646 </span><span class="lineNoCov">    0 / 1     : 					TheCIA2-&gt;EmulateCycle(); </span>
-<span class="lineNum">    647 </span><span class="lineNoCov">    0 / 1     : 					TheCPU-&gt;EmulateCycle(); </span>
-<span class="lineNum">    648 </span>              : 				} </span>
-<span class="lineNum">    649 </span>              : #endif </span>
-<span class="lineNum">    650 </span><span class="lineNoCov">    0 / 3     : 				Load1541JobState(f); </span>
-<span class="lineNum">    651 </span><span class="lineCov">    1 / 1     : 			} else if (ThePrefs.Emul1541Proc) {	// No emulation in snapshot, but currently active? </span>
-<span class="lineNum">    652 </span><span class="lineNoCov">    0 / 2     : 				Prefs *prefs = new Prefs(ThePrefs); </span>
-<span class="lineNum">    653 </span><span class="lineNoCov">    0 / 2     : 				prefs-&gt;Emul1541Proc = false; </span>
-<span class="lineNum">    654 </span><span class="lineNoCov">    0 / 2     : 				NewPrefs(prefs); </span>
-<span class="lineNum">    655 </span><span class="lineNoCov">    0 / 4     : 				ThePrefs = *prefs; </span>
-<span class="lineNum">    656 </span><span class="lineNoCov">    0 / 3     : 				delete prefs; </span>
-<span class="lineNum">    657 </span>              : 			} </span>
-<span class="lineNum">    658 </span>              :  </span>
-<span class="lineNum">    659 </span>              : #ifndef FRODO_SC </span>
-<span class="lineNum">    660 </span>              : 			fseek(f, vicptr, SEEK_SET); </span>
-<span class="lineNum">    661 </span>              : 			LoadVICState(f);	// Load VIC data twice in SL (is REALLY necessary sometimes!) </span>
-<span class="lineNum">    662 </span>              : #endif </span>
-<span class="lineNum">    663 </span><span class="lineCov">    1 / 1     : 			fclose(f); </span>
-<span class="lineNum">    664 </span>              : 	 </span>
-<span class="lineNum">    665 </span><span class="lineCov">    1 / 1     : 			if (error) { </span>
-<span class="lineNum">    666 </span><span class="lineNoCov">    0 / 1     : 				ShowRequester(&quot;Error reading snapshot file&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    667 </span><span class="lineNoCov">    0 / 1     : 				Reset(); </span>
-<span class="lineNum">    668 </span><span class="lineNoCov">    0 / 1     : 				return false; </span>
-<span class="lineNum">    669 </span>              : 			} else </span>
-<span class="lineNum">    670 </span>              : 				return true; </span>
-<span class="lineNum">    671 </span>              : 		} else { </span>
-<span class="lineNum">    672 </span><span class="lineNoCov">    0 / 1     : 			fclose(f); </span>
-<span class="lineNum">    673 </span><span class="lineNoCov">    0 / 1     : 			ShowRequester(&quot;Not a Frodo snapshot file&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    674 </span><span class="lineNoCov">    0 / 1     : 			return false; </span>
-<span class="lineNum">    675 </span>              : 		} </span>
-<span class="lineNum">    676 </span>              : 	} else { </span>
-<span class="lineNum">    677 </span><span class="lineNoCov">    0 / 1     : 		ShowRequester(&quot;Can't open snapshot file&quot;, &quot;OK&quot;, NULL); </span>
-<span class="lineNum">    678 </span><span class="lineNoCov">    0 / 1     : 		return false; </span>
-<span class="lineNum">    679 </span>              : 	} </span>
-<span class="lineNum">    680 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">    681 </span>              :  </span>
-<span class="lineNum">    682 </span>              : void C64::Pause(void) </span>
-<span class="lineNum">    683 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    684 </span>              : 	/* No pause when the network is running */ </span>
-<span class="lineNum">    685 </span><span class="lineCov">    1 / 1     : 	if (this-&gt;network) </span>
-<span class="lineNum">    686 </span>              : 	{ </span>
-<span class="lineNum">    687 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;have_a_break = false; </span>
-<span class="lineNum">    688 </span>              : 		return; </span>
-<span class="lineNum">    689 </span>              : 	} </span>
-<span class="lineNum">    690 </span>              :  </span>
-<span class="lineNum">    691 </span><span class="lineCov">    1 / 1     : 	this-&gt;have_a_break = true; </span>
-<span class="lineNum">    692 </span><span class="lineCov">    2 / 2     : 	TheSID-&gt;PauseSound(); </span>
-<span class="lineNum">    693 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">    694 </span>              :  </span>
-<span class="lineNum">    695 </span>              : bool C64::IsPaused() </span>
-<span class="lineNum">    696 </span><span class="linePartCov">    1 / 3     : { </span>
-<span class="lineNum">    697 </span>              : 	return this-&gt;have_a_break; </span>
-<span class="lineNum">    698 </span><span class="lineCov">    2 / 2     : } </span>
-<span class="lineNum">    699 </span>              :  </span>
-<span class="lineNum">    700 </span>              :  </span>
-<span class="lineNum">    701 </span>              : void C64::Resume(void) </span>
-<span class="lineNum">    702 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    703 </span><span class="lineCov">    1 / 1     : 	this-&gt;have_a_break = false; </span>
-<span class="lineNum">    704 </span><span class="lineCov">    2 / 2     : 	TheSID-&gt;ResumeSound(); </span>
-<span class="lineNum">    705 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    706 </span>              :  </span>
-<span class="lineNum">    707 </span>              : #include &quot;C64_SDL.h&quot; </span>
+<span class="lineNum">    1</span>              : &#047;*  </span>
+<span class="lineNum">    2</span>              :  *  C64.cpp - Put the pieces together  </span>
+<span class="lineNum">    3</span>              :  *  </span>
+<span class="lineNum">    4</span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer  </span>
+<span class="lineNum">    5</span>              :  *  </span>
+<span class="lineNum">    6</span>              :  *  This program is free software; you can redistribute it and&#047;or modify  </span>
+<span class="lineNum">    7</span>              :  *  it under the terms of the GNU General Public License as published by  </span>
+<span class="lineNum">    8</span>              :  *  the Free Software Foundation; either version 2 of the License, or  </span>
+<span class="lineNum">    9</span>              :  *  (at your option) any later version.  </span>
+<span class="lineNum">   10</span>              :  *  </span>
+<span class="lineNum">   11</span>              :  *  This program is distributed in the hope that it will be useful,  </span>
+<span class="lineNum">   12</span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of  </span>
+<span class="lineNum">   13</span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  </span>
+<span class="lineNum">   14</span>              :  *  GNU General Public License for more details.  </span>
+<span class="lineNum">   15</span>              :  *  </span>
+<span class="lineNum">   16</span>              :  *  You should have received a copy of the GNU General Public License  </span>
+<span class="lineNum">   17</span>              :  *  along with this program; if not, write to the Free Software  </span>
+<span class="lineNum">   18</span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  </span>
+<span class="lineNum">   19</span>              :  *&#047;  </span>
+<span class="lineNum">   20</span>              :   </span>
+<span class="lineNum">   21</span>              : #include &quot;sysdeps.h&quot;  </span>
+<span class="lineNum">   22</span>              :   </span>
+<span class="lineNum">   23</span>              : #include &quot;C64.h&quot;  </span>
+<span class="lineNum">   24</span>              : #include &quot;CPUC64.h&quot;  </span>
+<span class="lineNum">   25</span>              : #include &quot;CPU1541.h&quot;  </span>
+<span class="lineNum">   26</span>              : #include &quot;VIC.h&quot;  </span>
+<span class="lineNum">   27</span>              : #include &quot;SID.h&quot;  </span>
+<span class="lineNum">   28</span>              : #include &quot;CIA.h&quot;  </span>
+<span class="lineNum">   29</span>              : #include &quot;REU.h&quot;  </span>
+<span class="lineNum">   30</span>              : #include &quot;IEC.h&quot;  </span>
+<span class="lineNum">   31</span>              : #include &quot;1541job.h&quot;  </span>
+<span class="lineNum">   32</span>              : #include &quot;Display.h&quot;  </span>
+<span class="lineNum">   33</span>              : #include &quot;Prefs.h&quot;  </span>
+<span class="lineNum">   34</span>              :   </span>
+<span class="lineNum">   35</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">   36</span>              : bool IsFrodoSC = true;  </span>
+<span class="lineNum">   37</span>              : #else  </span>
+<span class="lineNum">   38</span>              : bool IsFrodoSC = false;  </span>
+<span class="lineNum">   39</span>              : #endif  </span>
+<span class="lineNum">   40</span>              :   </span>
+<span class="lineNum">   41</span>              :   </span>
+<span class="lineNum">   42</span>              : &#047;*  </span>
+<span class="lineNum">   43</span>              :  *  Constructor: Allocate objects and memory  </span>
+<span class="lineNum">   44</span>              :  *&#047;  </span>
+<span class="lineNum">   45</span>              :   </span>
+<span class="lineNum">   46</span><span class="lineCov">      5  /   5: C64::C64()  </span>
+<span class="lineNum">   47</span>              : {  </span>
+<span class="lineNum">   48</span>              : 	uint8 *p;  </span>
+<span class="lineNum">   49</span>              :   </span>
+<span class="lineNum">   50</span>              : 	&#047;&#047; The thread is not yet running  </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1: 	thread_running = false;  </span>
+<span class="lineNum">   52</span><span class="lineCov">      1  /   1: 	quit_thyself = false;  </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1: 	have_a_break = false;  </span>
+<span class="lineNum">   54</span>              :   </span>
+<span class="lineNum">   55</span>              : 	&#047;&#047; System-dependent things  </span>
+<span class="lineNum">   56</span><span class="lineCov">      1  /   1: 	c64_ctor1();  </span>
+<span class="lineNum">   57</span>              :   </span>
+<span class="lineNum">   58</span>              : 	&#047;&#047; Open display  </span>
+<span class="lineNum">   59</span>              : 	printf(&quot;ssof1 %d:%d&#092;n&quot;,  </span>
+<span class="lineNum">   60</span>              : 			sizeof(C64Display), sizeof(C64));  </span>
+<span class="lineNum">   61</span><span class="lineCov">      1  /   1: 	TheDisplay = new C64Display(this);  </span>
+<span class="lineNum">   62</span>              :   </span>
+<span class="lineNum">   63</span>              : 	&#047;&#047; Allocate RAM&#047;ROM memory  </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1: 	RAM = new uint8[C64_RAM_SIZE];  </span>
+<span class="lineNum">   65</span><span class="lineCov">      1  /   1: 	Basic = new uint8[BASIC_ROM_SIZE];  </span>
+<span class="lineNum">   66</span><span class="lineCov">      1  /   1: 	Kernal = new uint8[KERNAL_ROM_SIZE];  </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1: 	Char = new uint8[CHAR_ROM_SIZE];  </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1: 	Color = new uint8[COLOR_RAM_SIZE];  </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1: 	RAM1541 = new uint8[DRIVE_RAM_SIZE];  </span>
+<span class="lineNum">   70</span><span class="lineCov">      1  /   1: 	ROM1541 = new uint8[DRIVE_ROM_SIZE];  </span>
+<span class="lineNum">   71</span>              :   </span>
+<span class="lineNum">   72</span>              : 	&#047;&#047; Create the chips  </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1: 	TheCPU = new MOS6510(this, RAM, Basic, Kernal, Char, Color);  </span>
+<span class="lineNum">   74</span>              :   </span>
+<span class="lineNum">   75</span><span class="lineCov">      1  /   1: 	TheJob1541 = new Job1541(RAM1541);  </span>
+<span class="lineNum">   76</span><span class="lineCov">      1  /   1: 	TheCPU1541 = new MOS6502_1541(this, TheJob1541, TheDisplay, RAM1541, ROM1541);  </span>
+<span class="lineNum">   77</span>              :   </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1: 	TheVIC = TheCPU-&gt;TheVIC = new MOS6569(this, TheDisplay, TheCPU, RAM, Char, Color);  </span>
+<span class="lineNum">   79</span><span class="lineCov">      1  /   1: 	TheSID = TheCPU-&gt;TheSID = new MOS6581(this);  </span>
+<span class="lineNum">   80</span><span class="lineCov">      1  /   1: 	TheCIA1 = TheCPU-&gt;TheCIA1 = new MOS6526_1(TheCPU, TheVIC);  </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1: 	TheCIA2 = TheCPU-&gt;TheCIA2 = TheCPU1541-&gt;TheCIA2 = new MOS6526_2(TheCPU, TheVIC, TheCPU1541);  </span>
+<span class="lineNum">   82</span><span class="lineCov">      1  /   1: 	TheIEC = TheCPU-&gt;TheIEC = new IEC(TheDisplay);  </span>
+<span class="lineNum">   83</span><span class="lineCov">      2  /   2: 	TheREU = TheCPU-&gt;TheREU = new REU(TheCPU);  </span>
+<span class="lineNum">   84</span>              :   </span>
+<span class="lineNum">   85</span>              : 	&#047;&#047; Initialize RAM with powerup pattern  </span>
+<span class="lineNum">   86</span><span class="lineCov">      2  /   2: 	p = RAM;  </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1: 	for (unsigned i=0; i&lt;512; i++) {  </span>
+<span class="lineNum">   88</span><span class="lineCov">      1  /   1: 		for (unsigned j=0; j&lt;64; j++)  </span>
+<span class="lineNum">   89</span><span class="lineCov">      1  /   1: 			*p++ = 0;  </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1: 		for (unsigned j=0; j&lt;64; j++)  </span>
+<span class="lineNum">   91</span><span class="lineCov">      1  /   1: 			*p++ = 0xff;  </span>
+<span class="lineNum">   92</span>              : 	}  </span>
+<span class="lineNum">   93</span>              :   </span>
+<span class="lineNum">   94</span>              : 	&#047;&#047; Initialize color RAM with random values  </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: 	p = Color;  </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1: 	for (unsigned i=0; i&lt;COLOR_RAM_SIZE; i++)  </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1: 		*p++ = rand() &amp; 0x0f;  </span>
+<span class="lineNum">   98</span>              :   </span>
+<span class="lineNum">   99</span>              : 	&#047;&#047; Clear 1541 RAM  </span>
+<span class="lineNum">  100</span>              : 	memset(RAM1541, 0, DRIVE_RAM_SIZE);  </span>
+<span class="lineNum">  101</span>              :   </span>
+<span class="lineNum">  102</span>              : 	&#047;&#047; Open joystick drivers if required  </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1: 	open_joystick(0);  </span>
+<span class="lineNum">  104</span><span class="lineCov">      1  /   1: 	open_joystick(1);  </span>
+<span class="lineNum">  105</span><span class="lineCov">      1  /   1: 	joykey = 0xff;  </span>
+<span class="lineNum">  106</span>              :   </span>
+<span class="lineNum">  107</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">  108</span><span class="lineCov">      1  /   1: 	CycleCounter = 0;  </span>
+<span class="lineNum">  109</span>              : #endif  </span>
+<span class="lineNum">  110</span>              :   </span>
+<span class="lineNum">  111</span>              : 	&#047;&#047; System-dependent things  </span>
+<span class="lineNum">  112</span><span class="lineCov">      2  /   2: 	c64_ctor2();  </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1: }  </span>
+<span class="lineNum">  114</span>              :   </span>
+<span class="lineNum">  115</span>              :   </span>
+<span class="lineNum">  116</span>              : &#047;*  </span>
+<span class="lineNum">  117</span>              :  *  Destructor: Delete all objects  </span>
+<span class="lineNum">  118</span>              :  *&#047;  </span>
+<span class="lineNum">  119</span>              :   </span>
+<span class="lineNum">  120</span><span class="lineCov">      2  /   2: C64::~C64()  </span>
+<span class="lineNum">  121</span>              : {  </span>
+<span class="lineNum">  122</span><span class="lineCov">      1  /   1: 	close_joystick(0);  </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1: 	close_joystick(1);  </span>
+<span class="lineNum">  124</span>              :   </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 	delete TheJob1541;  </span>
+<span class="lineNum">  126</span><span class="lineCov">      1  /   1: 	delete TheREU;  </span>
+<span class="lineNum">  127</span><span class="lineCov">      1  /   1: 	delete TheIEC;  </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1: 	delete TheCIA2;  </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1: 	delete TheCIA1;  </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1: 	delete TheSID;  </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1: 	delete TheVIC;  </span>
+<span class="lineNum">  132</span><span class="lineCov">      1  /   1: 	delete TheCPU1541;  </span>
+<span class="lineNum">  133</span><span class="lineCov">      1  /   1: 	delete TheCPU;  </span>
+<span class="lineNum">  134</span><span class="lineCov">      1  /   1: 	delete TheDisplay;  </span>
+<span class="lineNum">  135</span>              :   </span>
+<span class="lineNum">  136</span><span class="lineCov">      1  /   1: 	delete[] RAM;  </span>
+<span class="lineNum">  137</span><span class="lineCov">      1  /   1: 	delete[] Basic;  </span>
+<span class="lineNum">  138</span><span class="lineCov">      1  /   1: 	delete[] Kernal;  </span>
+<span class="lineNum">  139</span><span class="lineCov">      1  /   1: 	delete[] Char;  </span>
+<span class="lineNum">  140</span><span class="lineCov">      1  /   1: 	delete[] Color;  </span>
+<span class="lineNum">  141</span><span class="lineCov">      1  /   1: 	delete[] RAM1541;  </span>
+<span class="lineNum">  142</span><span class="lineCov">      2  /   2: 	delete[] ROM1541;  </span>
+<span class="lineNum">  143</span>              :   </span>
+<span class="lineNum">  144</span>              : 	c64_dtor();  </span>
+<span class="lineNum">  145</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  146</span>              :   </span>
+<span class="lineNum">  147</span>              :   </span>
+<span class="lineNum">  148</span>              : &#047;*  </span>
+<span class="lineNum">  149</span>              :  *  Reset C64  </span>
+<span class="lineNum">  150</span>              :  *&#047;  </span>
+<span class="lineNum">  151</span>              :   </span>
+<span class="lineNum">  152</span>              : void C64::Reset(void)  </span>
+<span class="lineNum">  153</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  154</span><span class="lineCov">      1  /   1: 	TheCPU-&gt;AsyncReset();  </span>
+<span class="lineNum">  155</span><span class="lineCov">      1  /   1: 	TheCPU1541-&gt;AsyncReset();  </span>
+<span class="lineNum">  156</span><span class="lineCov">      1  /   1: 	TheSID-&gt;Reset();  </span>
+<span class="lineNum">  157</span><span class="lineCov">      1  /   1: 	TheCIA1-&gt;Reset();  </span>
+<span class="lineNum">  158</span><span class="lineCov">      1  /   1: 	TheCIA2-&gt;Reset();  </span>
+<span class="lineNum">  159</span><span class="lineCov">      2  /   2: 	TheIEC-&gt;Reset();  </span>
+<span class="lineNum">  160</span><span class="lineCov">      1  /   1: }  </span>
+<span class="lineNum">  161</span>              :   </span>
+<span class="lineNum">  162</span>              :   </span>
+<span class="lineNum">  163</span>              : &#047;*  </span>
+<span class="lineNum">  164</span>              :  *  NMI C64  </span>
+<span class="lineNum">  165</span>              :  *&#047;  </span>
+<span class="lineNum">  166</span>              :   </span>
+<span class="lineNum">  167</span>              : void C64::NMI(void)  </span>
+<span class="lineNum">  168</span><span class="lineNoCov">      0  /   1: {  </span>
+<span class="lineNum">  169</span><span class="lineNoCov">      0  /   2: 	TheCPU-&gt;AsyncNMI();  </span>
+<span class="lineNum">  170</span><span class="lineNoCov">      0  /   1: }  </span>
+<span class="lineNum">  171</span>              :   </span>
+<span class="lineNum">  172</span>              :   </span>
+<span class="lineNum">  173</span>              : &#047;*  </span>
+<span class="lineNum">  174</span>              :  *  The preferences have changed. prefs is a pointer to the new  </span>
+<span class="lineNum">  175</span>              :  *   preferences, ThePrefs still holds the previous ones.  </span>
+<span class="lineNum">  176</span>              :  *   The emulation must be in the paused state!  </span>
+<span class="lineNum">  177</span>              :  *&#047;  </span>
+<span class="lineNum">  178</span>              :   </span>
+<span class="lineNum">  179</span>              : void C64::NewPrefs(Prefs *prefs)  </span>
+<span class="lineNum">  180</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  181</span><span class="lineCov">      1  /   1: 	PatchKernal(prefs-&gt;FastReset, prefs-&gt;Emul1541Proc);  </span>
+<span class="lineNum">  182</span>              :   </span>
+<span class="lineNum">  183</span><span class="lineCov">      1  /   1: 	TheDisplay-&gt;NewPrefs(prefs);  </span>
+<span class="lineNum">  184</span>              :   </span>
+<span class="lineNum">  185</span><span class="lineCov">      1  /   1: 	TheIEC-&gt;NewPrefs(prefs);  </span>
+<span class="lineNum">  186</span><span class="lineCov">      1  /   1: 	TheJob1541-&gt;NewPrefs(prefs);  </span>
+<span class="lineNum">  187</span>              :   </span>
+<span class="lineNum">  188</span><span class="lineCov">      1  /   1: 	TheREU-&gt;NewPrefs(prefs);  </span>
+<span class="lineNum">  189</span><span class="lineCov">      1  /   1: 	TheSID-&gt;NewPrefs(prefs);  </span>
+<span class="lineNum">  190</span>              :   </span>
+<span class="lineNum">  191</span>              : 	&#047;&#047; Reset 1541 processor if turned on  </span>
+<span class="lineNum">  192</span><span class="lineCov">      1  /   1: 	if (!ThePrefs.Emul1541Proc &amp;&amp; prefs-&gt;Emul1541Proc)  </span>
+<span class="lineNum">  193</span><span class="lineNoCov">      0  /   2: 		TheCPU1541-&gt;AsyncReset();  </span>
+<span class="lineNum">  194</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  195</span>              :   </span>
+<span class="lineNum">  196</span>              :   </span>
+<span class="lineNum">  197</span>              : &#047;*  </span>
+<span class="lineNum">  198</span>              :  *  Patch kernal IEC routines  </span>
+<span class="lineNum">  199</span>              :  *&#047;  </span>
+<span class="lineNum">  200</span>              :   </span>
+<span class="lineNum">  201</span>              : void C64::PatchKernal(bool fast_reset, bool emul_1541_proc)  </span>
+<span class="lineNum">  202</span><span class="lineCov">      3  /   3: {  </span>
+<span class="lineNum">  203</span><span class="lineCov">      2  /   2: 	if (fast_reset) {  </span>
+<span class="lineNum">  204</span><span class="lineNoCov">      0  /   2: 		Kernal[0x1d84] = 0xa0;  </span>
+<span class="lineNum">  205</span><span class="lineNoCov">      0  /   1: 		Kernal[0x1d85] = 0x00;  </span>
+<span class="lineNum">  206</span>              : 	} else {  </span>
+<span class="lineNum">  207</span><span class="lineCov">      2  /   2: 		Kernal[0x1d84] = orig_kernal_1d84;  </span>
+<span class="lineNum">  208</span><span class="lineCov">      1  /   1: 		Kernal[0x1d85] = orig_kernal_1d85;  </span>
+<span class="lineNum">  209</span>              : 	}  </span>
+<span class="lineNum">  210</span>              :   </span>
+<span class="lineNum">  211</span><span class="linePartCov">      2  /   4: 	if (emul_1541_proc) {  </span>
+<span class="lineNum">  212</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d40] = 0x78;  </span>
+<span class="lineNum">  213</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d41] = 0x20;  </span>
+<span class="lineNum">  214</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d23] = 0x78;  </span>
+<span class="lineNum">  215</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d24] = 0x20;  </span>
+<span class="lineNum">  216</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d36] = 0x78;  </span>
+<span class="lineNum">  217</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0d37] = 0x20;  </span>
+<span class="lineNum">  218</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0e13] = 0x78;  </span>
+<span class="lineNum">  219</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0e14] = 0xa9;  </span>
+<span class="lineNum">  220</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0def] = 0x78;  </span>
+<span class="lineNum">  221</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0df0] = 0x20;  </span>
+<span class="lineNum">  222</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0dbe] = 0xad;  </span>
+<span class="lineNum">  223</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0dbf] = 0x00;  </span>
+<span class="lineNum">  224</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0dcc] = 0x78;  </span>
+<span class="lineNum">  225</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0dcd] = 0x20;  </span>
+<span class="lineNum">  226</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0e03] = 0x20;  </span>
+<span class="lineNum">  227</span><span class="lineNoCov">      0  /   1: 		Kernal[0x0e04] = 0xbe;  </span>
+<span class="lineNum">  228</span>              : 	} else {  </span>
+<span class="lineNum">  229</span><span class="lineCov">      1  /   1: 		Kernal[0x0d40] = 0xf2;	&#047;&#047; IECOut  </span>
+<span class="lineNum">  230</span><span class="lineCov">      1  /   1: 		Kernal[0x0d41] = 0x00;  </span>
+<span class="lineNum">  231</span><span class="lineCov">      1  /   1: 		Kernal[0x0d23] = 0xf2;	&#047;&#047; IECOutATN  </span>
+<span class="lineNum">  232</span><span class="lineCov">      1  /   1: 		Kernal[0x0d24] = 0x01;  </span>
+<span class="lineNum">  233</span><span class="lineCov">      1  /   1: 		Kernal[0x0d36] = 0xf2;	&#047;&#047; IECOutSec  </span>
+<span class="lineNum">  234</span><span class="lineCov">      1  /   1: 		Kernal[0x0d37] = 0x02;  </span>
+<span class="lineNum">  235</span><span class="lineCov">      1  /   1: 		Kernal[0x0e13] = 0xf2;	&#047;&#047; IECIn  </span>
+<span class="lineNum">  236</span><span class="lineCov">      1  /   1: 		Kernal[0x0e14] = 0x03;  </span>
+<span class="lineNum">  237</span><span class="lineCov">      1  /   1: 		Kernal[0x0def] = 0xf2;	&#047;&#047; IECSetATN  </span>
+<span class="lineNum">  238</span><span class="lineCov">      1  /   1: 		Kernal[0x0df0] = 0x04;  </span>
+<span class="lineNum">  239</span><span class="lineCov">      1  /   1: 		Kernal[0x0dbe] = 0xf2;	&#047;&#047; IECRelATN  </span>
+<span class="lineNum">  240</span><span class="lineCov">      1  /   1: 		Kernal[0x0dbf] = 0x05;  </span>
+<span class="lineNum">  241</span><span class="lineCov">      1  /   1: 		Kernal[0x0dcc] = 0xf2;	&#047;&#047; IECTurnaround  </span>
+<span class="lineNum">  242</span><span class="lineCov">      1  /   1: 		Kernal[0x0dcd] = 0x06;  </span>
+<span class="lineNum">  243</span><span class="lineCov">      1  /   1: 		Kernal[0x0e03] = 0xf2;	&#047;&#047; IECRelease  </span>
+<span class="lineNum">  244</span><span class="lineCov">      1  /   1: 		Kernal[0x0e04] = 0x07;  </span>
+<span class="lineNum">  245</span>              : 	}  </span>
+<span class="lineNum">  246</span>              :   </span>
+<span class="lineNum">  247</span>              : 	&#047;&#047; 1541  </span>
+<span class="lineNum">  248</span><span class="lineCov">      1  /   1: 	ROM1541[0x2ae4] = 0xea;		&#047;&#047; Don&#039;t check ROM checksum  </span>
+<span class="lineNum">  249</span><span class="lineCov">      1  /   1: 	ROM1541[0x2ae5] = 0xea;  </span>
+<span class="lineNum">  250</span><span class="lineCov">      1  /   1: 	ROM1541[0x2ae8] = 0xea;  </span>
+<span class="lineNum">  251</span><span class="lineCov">      1  /   1: 	ROM1541[0x2ae9] = 0xea;  </span>
+<span class="lineNum">  252</span><span class="lineCov">      1  /   1: 	ROM1541[0x2c9b] = 0xf2;		&#047;&#047; DOS idle loop  </span>
+<span class="lineNum">  253</span><span class="lineCov">      1  /   1: 	ROM1541[0x2c9c] = 0x00;  </span>
+<span class="lineNum">  254</span><span class="lineCov">      1  /   1: 	ROM1541[0x3594] = 0x20;		&#047;&#047; Write sector  </span>
+<span class="lineNum">  255</span><span class="lineCov">      1  /   1: 	ROM1541[0x3595] = 0xf2;  </span>
+<span class="lineNum">  256</span><span class="lineCov">      1  /   1: 	ROM1541[0x3596] = 0xf5;  </span>
+<span class="lineNum">  257</span><span class="lineCov">      1  /   1: 	ROM1541[0x3597] = 0xf2;  </span>
+<span class="lineNum">  258</span><span class="lineCov">      1  /   1: 	ROM1541[0x3598] = 0x01;  </span>
+<span class="lineNum">  259</span><span class="lineCov">      1  /   1: 	ROM1541[0x3b0c] = 0xf2;		&#047;&#047; Format track  </span>
+<span class="lineNum">  260</span><span class="lineCov">      1  /   1: 	ROM1541[0x3b0d] = 0x02;  </span>
+<span class="lineNum">  261</span><span class="lineCov">      1  /   1: }  </span>
+<span class="lineNum">  262</span>              :   </span>
+<span class="lineNum">  263</span>              :   </span>
+<span class="lineNum">  264</span>              : &#047;*  </span>
+<span class="lineNum">  265</span>              :  *  Save RAM contents  </span>
+<span class="lineNum">  266</span>              :  *&#047;  </span>
+<span class="lineNum">  267</span>              :   </span>
+<span class="lineNum">  268</span>              : void C64::SaveRAM(char *filename)  </span>
+<span class="lineNum">  269</span><span class="lineNoCov">      0  /   2: {  </span>
+<span class="lineNum">  270</span>              : 	FILE *f;  </span>
+<span class="lineNum">  271</span>              :   </span>
+<span class="lineNum">  272</span><span class="lineNoCov">      0  /   2: 	if ((f = fopen(filename, &quot;wb&quot;)) == NULL)  </span>
+<span class="lineNum">  273</span><span class="lineNoCov">      0  /   1: 		ShowRequester(&quot;RAM save failed.&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  274</span>              : 	else {  </span>
+<span class="lineNum">  275</span><span class="lineNoCov">      0  /   1: 		fwrite((void*)RAM, 1, 0x10000, f);  </span>
+<span class="lineNum">  276</span><span class="lineNoCov">      0  /   1: 		fwrite((void*)Color, 1, 0x400, f);  </span>
+<span class="lineNum">  277</span><span class="lineNoCov">      0  /   1: 		if (ThePrefs.Emul1541Proc)  </span>
+<span class="lineNum">  278</span><span class="lineNoCov">      0  /   1: 			fwrite((void*)RAM1541, 1, 0x800, f);  </span>
+<span class="lineNum">  279</span><span class="lineNoCov">      0  /   4: 		fclose(f);  </span>
+<span class="lineNum">  280</span>              : 	}  </span>
+<span class="lineNum">  281</span><span class="lineNoCov">      0  /   3: }  </span>
+<span class="lineNum">  282</span>              :   </span>
+<span class="lineNum">  283</span>              :   </span>
+<span class="lineNum">  284</span>              : &#047;*  </span>
+<span class="lineNum">  285</span>              :  *  Save CPU state to snapshot  </span>
+<span class="lineNum">  286</span>              :  *  </span>
+<span class="lineNum">  287</span>              :  *  0: Error  </span>
+<span class="lineNum">  288</span>              :  *  1: OK  </span>
+<span class="lineNum">  289</span>              :  *  -1: Instruction not completed  </span>
+<span class="lineNum">  290</span>              :  *&#047;  </span>
+<span class="lineNum">  291</span>              :   </span>
+<span class="lineNum">  292</span>              : int C64::SaveCPUState(FILE *f)  </span>
+<span class="lineNum">  293</span><span class="lineNoCov">      0  /   3: {  </span>
+<span class="lineNum">  294</span>              : 	MOS6510State state;  </span>
+<span class="lineNum">  295</span><span class="lineNoCov">      0  /   2: 	TheCPU-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  296</span>              :   </span>
+<span class="lineNum">  297</span><span class="lineNoCov">      0  /   1: 	if (!state.instruction_complete)  </span>
+<span class="lineNum">  298</span><span class="lineNoCov">      0  /   1: 		return -1;  </span>
+<span class="lineNum">  299</span>              :   </span>
+<span class="lineNum">  300</span><span class="lineNoCov">      0  /   2: 	int i = fwrite(RAM, 0x10000, 1, f);  </span>
+<span class="lineNum">  301</span><span class="lineNoCov">      0  /   4: 	i += fwrite(Color, 0x400, 1, f);  </span>
+<span class="lineNum">  302</span><span class="lineNoCov">      0  /   3: 	i += fwrite((void*)&amp;state, sizeof(state), 1, f);  </span>
+<span class="lineNum">  303</span>              :   </span>
+<span class="lineNum">  304</span><span class="lineNoCov">      0  /   1: 	return i == 3;  </span>
+<span class="lineNum">  305</span><span class="lineNoCov">      0  /   1: }  </span>
+<span class="lineNum">  306</span>              :   </span>
+<span class="lineNum">  307</span>              :   </span>
+<span class="lineNum">  308</span>              : &#047;*  </span>
+<span class="lineNum">  309</span>              :  *  Load CPU state from snapshot  </span>
+<span class="lineNum">  310</span>              :  *&#047;  </span>
+<span class="lineNum">  311</span>              :   </span>
+<span class="lineNum">  312</span>              : bool C64::LoadCPUState(FILE *f)  </span>
+<span class="lineNum">  313</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  314</span>              : 	MOS6510State state;  </span>
+<span class="lineNum">  315</span>              :   </span>
+<span class="lineNum">  316</span>              : 	int i = fread(RAM, 0x10000, 1, f);  </span>
+<span class="lineNum">  317</span><span class="lineCov">      1  /   1: 	i += fread(Color, 0x400, 1, f);  </span>
+<span class="lineNum">  318</span><span class="lineCov">      3  /   3: 	i += fread((void*)&amp;state, sizeof(state), 1, f);  </span>
+<span class="lineNum">  319</span>              :   </span>
+<span class="lineNum">  320</span><span class="lineCov">      1  /   1: 	if (i == 3) {  </span>
+<span class="lineNum">  321</span><span class="lineCov">      1  /   1: 		TheCPU-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  322</span><span class="lineCov">      1  /   1: 		return true;  </span>
+<span class="lineNum">  323</span>              : 	} else  </span>
+<span class="lineNum">  324</span><span class="lineCov">      1  /   1: 		return false;  </span>
+<span class="lineNum">  325</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  326</span>              :   </span>
+<span class="lineNum">  327</span>              :   </span>
+<span class="lineNum">  328</span>              : &#047;*  </span>
+<span class="lineNum">  329</span>              :  *  Save 1541 state to snapshot  </span>
+<span class="lineNum">  330</span>              :  *  </span>
+<span class="lineNum">  331</span>              :  *  0: Error  </span>
+<span class="lineNum">  332</span>              :  *  1: OK  </span>
+<span class="lineNum">  333</span>              :  *  -1: Instruction not completed  </span>
+<span class="lineNum">  334</span>              :  *&#047;  </span>
+<span class="lineNum">  335</span>              :   </span>
+<span class="lineNum">  336</span>              : int C64::Save1541State(FILE *f)  </span>
+<span class="lineNum">  337</span><span class="lineNoCov">      0  /   3: {  </span>
+<span class="lineNum">  338</span>              : 	MOS6502State state;  </span>
+<span class="lineNum">  339</span><span class="lineNoCov">      0  /   2: 	TheCPU1541-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  340</span>              :   </span>
+<span class="lineNum">  341</span><span class="lineNoCov">      0  /   3: 	if (!state.idle &amp;&amp; !state.instruction_complete)  </span>
+<span class="lineNum">  342</span><span class="lineNoCov">      0  /   1: 		return -1;  </span>
+<span class="lineNum">  343</span>              :   </span>
+<span class="lineNum">  344</span><span class="lineNoCov">      0  /   2: 	int i = fwrite(RAM1541, 0x800, 1, f);  </span>
+<span class="lineNum">  345</span><span class="lineNoCov">      0  /   2: 	i += fwrite((void*)&amp;state, sizeof(state), 1, f);  </span>
+<span class="lineNum">  346</span>              :   </span>
+<span class="lineNum">  347</span><span class="lineNoCov">      0  /   1: 	return i == 2;  </span>
+<span class="lineNum">  348</span><span class="lineNoCov">      0  /   2: }  </span>
+<span class="lineNum">  349</span>              :   </span>
+<span class="lineNum">  350</span>              :   </span>
+<span class="lineNum">  351</span>              : &#047;*  </span>
+<span class="lineNum">  352</span>              :  *  Load 1541 state from snapshot  </span>
+<span class="lineNum">  353</span>              :  *&#047;  </span>
+<span class="lineNum">  354</span>              :   </span>
+<span class="lineNum">  355</span>              : bool C64::Load1541State(FILE *f)  </span>
+<span class="lineNum">  356</span><span class="lineNoCov">      0  /   2: {  </span>
+<span class="lineNum">  357</span>              : 	MOS6502State state;  </span>
+<span class="lineNum">  358</span>              :   </span>
+<span class="lineNum">  359</span>              : 	int i = fread(RAM1541, 0x800, 1, f);  </span>
+<span class="lineNum">  360</span><span class="lineNoCov">      0  /   3: 	i += fread((void*)&amp;state, sizeof(state), 1, f);  </span>
+<span class="lineNum">  361</span>              :   </span>
+<span class="lineNum">  362</span><span class="lineNoCov">      0  /   1: 	if (i == 2) {  </span>
+<span class="lineNum">  363</span><span class="lineNoCov">      0  /   1: 		TheCPU1541-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  364</span><span class="lineNoCov">      0  /   1: 		return true;  </span>
+<span class="lineNum">  365</span>              : 	} else  </span>
+<span class="lineNum">  366</span><span class="lineNoCov">      0  /   1: 		return false;  </span>
+<span class="lineNum">  367</span><span class="lineNoCov">      0  /   2: }  </span>
+<span class="lineNum">  368</span>              :   </span>
+<span class="lineNum">  369</span>              :   </span>
+<span class="lineNum">  370</span>              : &#047;*  </span>
+<span class="lineNum">  371</span>              :  *  Save VIC state to snapshot  </span>
+<span class="lineNum">  372</span>              :  *&#047;  </span>
+<span class="lineNum">  373</span>              :   </span>
+<span class="lineNum">  374</span>              : bool C64::SaveVICState(FILE *f)  </span>
+<span class="lineNum">  375</span><span class="lineNoCov">      0  /   2: {  </span>
+<span class="lineNum">  376</span>              : 	MOS6569State state;  </span>
+<span class="lineNum">  377</span><span class="lineNoCov">      0  /   1: 	TheVIC-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  378</span><span class="lineNoCov">      0  /   1: 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1;  </span>
+<span class="lineNum">  379</span><span class="lineNoCov">      0  /   1: }  </span>
+<span class="lineNum">  380</span>              :   </span>
+<span class="lineNum">  381</span>              :   </span>
+<span class="lineNum">  382</span>              : &#047;*  </span>
+<span class="lineNum">  383</span>              :  *  Load VIC state from snapshot  </span>
+<span class="lineNum">  384</span>              :  *&#047;  </span>
+<span class="lineNum">  385</span>              :   </span>
+<span class="lineNum">  386</span>              : bool C64::LoadVICState(FILE *f)  </span>
+<span class="lineNum">  387</span><span class="lineCov">      4  /   4: {  </span>
+<span class="lineNum">  388</span>              : 	MOS6569State state;  </span>
+<span class="lineNum">  389</span>              :   </span>
+<span class="lineNum">  390</span><span class="lineCov">      3  /   3: 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  391</span><span class="lineCov">      1  /   1: 		TheVIC-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  392</span><span class="lineCov">      1  /   1: 		return true;  </span>
+<span class="lineNum">  393</span>              : 	} else  </span>
+<span class="lineNum">  394</span><span class="lineCov">      1  /   1: 		return false;  </span>
+<span class="lineNum">  395</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  396</span>              :   </span>
+<span class="lineNum">  397</span>              :   </span>
+<span class="lineNum">  398</span>              : &#047;*  </span>
+<span class="lineNum">  399</span>              :  *  Save SID state to snapshot  </span>
+<span class="lineNum">  400</span>              :  *&#047;  </span>
+<span class="lineNum">  401</span>              :   </span>
+<span class="lineNum">  402</span>              : bool C64::SaveSIDState(FILE *f)  </span>
+<span class="lineNum">  403</span><span class="lineNoCov">      0  /   1: {  </span>
+<span class="lineNum">  404</span>              : 	MOS6581State state;  </span>
+<span class="lineNum">  405</span><span class="lineNoCov">      0  /   1: 	TheSID-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  406</span><span class="lineNoCov">      0  /   1: 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1;  </span>
+<span class="lineNum">  407</span><span class="lineNoCov">      0  /   1: }  </span>
+<span class="lineNum">  408</span>              :   </span>
+<span class="lineNum">  409</span>              :   </span>
+<span class="lineNum">  410</span>              : &#047;*  </span>
+<span class="lineNum">  411</span>              :  *  Load SID state from snapshot  </span>
+<span class="lineNum">  412</span>              :  *&#047;  </span>
+<span class="lineNum">  413</span>              :   </span>
+<span class="lineNum">  414</span>              : bool C64::LoadSIDState(FILE *f)  </span>
+<span class="lineNum">  415</span><span class="lineCov">      1  /   1: {  </span>
+<span class="lineNum">  416</span>              : 	MOS6581State state;  </span>
+<span class="lineNum">  417</span>              :   </span>
+<span class="lineNum">  418</span><span class="lineCov">      3  /   3: 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  419</span><span class="lineCov">      1  /   1: 		TheSID-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  420</span><span class="lineCov">      1  /   1: 		return true;  </span>
+<span class="lineNum">  421</span>              : 	} else  </span>
+<span class="lineNum">  422</span><span class="lineCov">      1  /   1: 		return false;  </span>
+<span class="lineNum">  423</span><span class="linePartCov">      2  /   3: }  </span>
+<span class="lineNum">  424</span>              :   </span>
+<span class="lineNum">  425</span>              :   </span>
+<span class="lineNum">  426</span>              : &#047;*  </span>
+<span class="lineNum">  427</span>              :  *  Save CIA states to snapshot  </span>
+<span class="lineNum">  428</span>              :  *&#047;  </span>
+<span class="lineNum">  429</span>              :   </span>
+<span class="lineNum">  430</span>              : bool C64::SaveCIAState(FILE *f)  </span>
+<span class="lineNum">  431</span><span class="lineNoCov">      0  /   3: {  </span>
+<span class="lineNum">  432</span>              : 	MOS6526State state;  </span>
+<span class="lineNum">  433</span><span class="lineNoCov">      0  /   2: 	TheCIA1-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  434</span>              :   </span>
+<span class="lineNum">  435</span><span class="lineNoCov">      0  /   2: 	if (fwrite((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  436</span><span class="lineNoCov">      0  /   1: 		TheCIA2-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  437</span><span class="lineNoCov">      0  /   2: 		return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1;  </span>
+<span class="lineNum">  438</span>              : 	} else  </span>
+<span class="lineNum">  439</span><span class="lineNoCov">      0  /   1: 		return false;  </span>
+<span class="lineNum">  440</span><span class="lineNoCov">      0  /   3: }  </span>
+<span class="lineNum">  441</span>              :   </span>
+<span class="lineNum">  442</span>              :   </span>
+<span class="lineNum">  443</span>              : &#047;*  </span>
+<span class="lineNum">  444</span>              :  *  Load CIA states from snapshot  </span>
+<span class="lineNum">  445</span>              :  *&#047;  </span>
+<span class="lineNum">  446</span>              :   </span>
+<span class="lineNum">  447</span>              : bool C64::LoadCIAState(FILE *f)  </span>
+<span class="lineNum">  448</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  449</span>              : 	MOS6526State state;  </span>
+<span class="lineNum">  450</span>              :   </span>
+<span class="lineNum">  451</span><span class="lineCov">      3  /   3: 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  452</span><span class="lineCov">      1  /   1: 		TheCIA1-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  453</span><span class="lineCov">      2  /   2: 		if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  454</span><span class="lineCov">      2  /   2: 			TheCIA2-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  455</span><span class="lineCov">      2  /   2: 			return true;  </span>
+<span class="lineNum">  456</span>              : 		} else  </span>
+<span class="lineNum">  457</span>              : 			return false;  </span>
+<span class="lineNum">  458</span>              : 	} else  </span>
+<span class="lineNum">  459</span><span class="lineCov">      1  /   1: 		return false;  </span>
+<span class="lineNum">  460</span><span class="lineCov">      1  /   1: }  </span>
+<span class="lineNum">  461</span>              :   </span>
+<span class="lineNum">  462</span>              :   </span>
+<span class="lineNum">  463</span>              : &#047;*  </span>
+<span class="lineNum">  464</span>              :  *  Save 1541 GCR state to snapshot  </span>
+<span class="lineNum">  465</span>              :  *&#047;  </span>
+<span class="lineNum">  466</span>              :   </span>
+<span class="lineNum">  467</span>              : bool C64::Save1541JobState(FILE *f)  </span>
+<span class="lineNum">  468</span><span class="lineNoCov">      0  /   1: {  </span>
+<span class="lineNum">  469</span>              : 	Job1541State state;  </span>
+<span class="lineNum">  470</span><span class="lineNoCov">      0  /   1: 	TheJob1541-&gt;GetState(&amp;state);  </span>
+<span class="lineNum">  471</span><span class="lineNoCov">      0  /   1: 	return fwrite((void*)&amp;state, sizeof(state), 1, f) == 1;  </span>
+<span class="lineNum">  472</span><span class="lineNoCov">      0  /   1: }  </span>
+<span class="lineNum">  473</span>              :   </span>
+<span class="lineNum">  474</span>              :   </span>
+<span class="lineNum">  475</span>              : &#047;*  </span>
+<span class="lineNum">  476</span>              :  *  Load 1541 GCR state from snapshot  </span>
+<span class="lineNum">  477</span>              :  *&#047;  </span>
+<span class="lineNum">  478</span>              :   </span>
+<span class="lineNum">  479</span>              : bool C64::Load1541JobState(FILE *f)  </span>
+<span class="lineNum">  480</span><span class="lineNoCov">      0  /   1: {  </span>
+<span class="lineNum">  481</span>              : 	Job1541State state;  </span>
+<span class="lineNum">  482</span>              :   </span>
+<span class="lineNum">  483</span><span class="lineNoCov">      0  /   3: 	if (fread((void*)&amp;state, sizeof(state), 1, f) == 1) {  </span>
+<span class="lineNum">  484</span><span class="lineNoCov">      0  /   1: 		TheJob1541-&gt;SetState(&amp;state);  </span>
+<span class="lineNum">  485</span><span class="lineNoCov">      0  /   1: 		return true;  </span>
+<span class="lineNum">  486</span>              : 	} else  </span>
+<span class="lineNum">  487</span><span class="lineNoCov">      0  /   1: 		return false;  </span>
+<span class="lineNum">  488</span><span class="lineNoCov">      0  /   3: }  </span>
+<span class="lineNum">  489</span>              :   </span>
+<span class="lineNum">  490</span>              :   </span>
+<span class="lineNum">  491</span>              : #define SNAPSHOT_HEADER &quot;FrodoSnapshot&quot;  </span>
+<span class="lineNum">  492</span>              : #define SNAPSHOT_1541 1  </span>
+<span class="lineNum">  493</span>              :   </span>
+<span class="lineNum">  494</span>              : #define ADVANCE_CYCLES	&#092;  </span>
+<span class="lineNum">  495</span>              : 	TheVIC-&gt;EmulateCycle(); &#092;  </span>
+<span class="lineNum">  496</span>              : 	TheCIA1-&gt;EmulateCycle(); &#092;  </span>
+<span class="lineNum">  497</span>              : 	TheCIA2-&gt;EmulateCycle(); &#092;  </span>
+<span class="lineNum">  498</span>              : 	TheCPU-&gt;EmulateCycle(); &#092;  </span>
+<span class="lineNum">  499</span>              : 	if (ThePrefs.Emul1541Proc) { &#092;  </span>
+<span class="lineNum">  500</span>              : 		TheCPU1541-&gt;CountVIATimers(1); &#092;  </span>
+<span class="lineNum">  501</span>              : 		if (!TheCPU1541-&gt;Idle) &#092;  </span>
+<span class="lineNum">  502</span>              : 			TheCPU1541-&gt;EmulateCycle(); &#092;  </span>
+<span class="lineNum">  503</span>              : 	}  </span>
+<span class="lineNum">  504</span>              :   </span>
+<span class="lineNum">  505</span>              :   </span>
+<span class="lineNum">  506</span>              : &#047;*  </span>
+<span class="lineNum">  507</span>              :  *  Save snapshot (emulation must be paused and in VBlank)  </span>
+<span class="lineNum">  508</span>              :  *  </span>
+<span class="lineNum">  509</span>              :  *  To be able to use SC snapshots with SL, SC snapshots are made thus that no  </span>
+<span class="lineNum">  510</span>              :  *  partially dealt with instructions are saved. Instead all devices are advanced  </span>
+<span class="lineNum">  511</span>              :  *  cycle by cycle until the current instruction has been finished. The number of  </span>
+<span class="lineNum">  512</span>              :  *  cycles this takes is saved in the snapshot and will be reconstructed if the  </span>
+<span class="lineNum">  513</span>              :  *  snapshot is loaded into FrodoSC again.  </span>
+<span class="lineNum">  514</span>              :  *&#047;  </span>
+<span class="lineNum">  515</span>              :   </span>
+<span class="lineNum">  516</span>              : void C64::SaveSnapshot(const char *filename)  </span>
+<span class="lineNum">  517</span><span class="lineNoCov">      0  /   2: {  </span>
+<span class="lineNum">  518</span>              : 	FILE *f;  </span>
+<span class="lineNum">  519</span>              : 	uint8 flags;  </span>
+<span class="lineNum">  520</span>              : 	uint8 delay;  </span>
+<span class="lineNum">  521</span>              : 	int stat;  </span>
+<span class="lineNum">  522</span>              :   </span>
+<span class="lineNum">  523</span><span class="lineNoCov">      0  /   2: 	if ((f = fopen(filename, &quot;wb&quot;)) == NULL) {  </span>
+<span class="lineNum">  524</span><span class="lineNoCov">      0  /   1: 		ShowRequester(&quot;Unable to open snapshot file&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  525</span>              : 		return;  </span>
+<span class="lineNum">  526</span>              : 	}  </span>
+<span class="lineNum">  527</span>              :   </span>
+<span class="lineNum">  528</span>              : 	fprintf(f, &quot;%s%c&quot;, SNAPSHOT_HEADER, 10);  </span>
+<span class="lineNum">  529</span><span class="lineNoCov">      0  /   1: 	fputc(0, f);	&#047;&#047; Version number 0  </span>
+<span class="lineNum">  530</span>              : 	flags = 0;  </span>
+<span class="lineNum">  531</span>              : 	if (ThePrefs.Emul1541Proc)  </span>
+<span class="lineNum">  532</span>              : 		flags |= SNAPSHOT_1541;  </span>
+<span class="lineNum">  533</span><span class="lineNoCov">      0  /   1: 	fputc(flags, f);  </span>
+<span class="lineNum">  534</span><span class="lineNoCov">      0  /   1: 	SaveVICState(f);  </span>
+<span class="lineNum">  535</span><span class="lineNoCov">      0  /   1: 	SaveSIDState(f);  </span>
+<span class="lineNum">  536</span><span class="lineNoCov">      0  /   1: 	SaveCIAState(f);  </span>
+<span class="lineNum">  537</span>              :   </span>
+<span class="lineNum">  538</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">  539</span><span class="lineNoCov">      0  /   1: 	delay = 0;  </span>
+<span class="lineNum">  540</span>              : 	do {  </span>
+<span class="lineNum">  541</span><span class="lineNoCov">      0  /   1: 		if ((stat = SaveCPUState(f)) == -1) {	&#047;&#047; -1 -&gt; Instruction not finished yet  </span>
+<span class="lineNum">  542</span><span class="lineNoCov">      0  /   3: 			ADVANCE_CYCLES;	&#047;&#047; Advance everything by one cycle  </span>
+<span class="lineNum">  543</span><span class="lineNoCov">      0  /   1: 			delay++;  </span>
+<span class="lineNum">  544</span>              : 		}  </span>
+<span class="lineNum">  545</span>              : 	} while (stat == -1);  </span>
+<span class="lineNum">  546</span><span class="lineNoCov">      0  /   1: 	fputc(delay, f);	&#047;&#047; Number of cycles the saved CPUC64 lags behind the previous chips  </span>
+<span class="lineNum">  547</span>              : #else  </span>
+<span class="lineNum">  548</span>              : 	SaveCPUState(f);  </span>
+<span class="lineNum">  549</span>              : 	fputc(0, f);		&#047;&#047; No delay  </span>
+<span class="lineNum">  550</span>              : #endif  </span>
+<span class="lineNum">  551</span>              :   </span>
+<span class="lineNum">  552</span><span class="lineNoCov">      0  /   1: 	if (ThePrefs.Emul1541Proc) {  </span>
+<span class="lineNum">  553</span><span class="lineNoCov">      0  /   2: 		fwrite(ThePrefs.DrivePath[0], 256, 1, f);  </span>
+<span class="lineNum">  554</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">  555</span><span class="lineNoCov">      0  /   1: 		delay = 0;  </span>
+<span class="lineNum">  556</span>              : 		do {  </span>
+<span class="lineNum">  557</span><span class="lineNoCov">      0  /   1: 			if ((stat = Save1541State(f)) == -1) {  </span>
+<span class="lineNum">  558</span><span class="lineNoCov">      0  /   3: 				ADVANCE_CYCLES;  </span>
+<span class="lineNum">  559</span><span class="lineNoCov">      0  /   1: 				delay++;  </span>
+<span class="lineNum">  560</span>              : 			}  </span>
+<span class="lineNum">  561</span>              : 		} while (stat == -1);  </span>
+<span class="lineNum">  562</span><span class="lineNoCov">      0  /   1: 		fputc(delay, f);  </span>
+<span class="lineNum">  563</span>              : #else  </span>
+<span class="lineNum">  564</span>              : 		Save1541State(f);  </span>
+<span class="lineNum">  565</span>              : 		fputc(0, f);	&#047;&#047; No delay  </span>
+<span class="lineNum">  566</span>              : #endif  </span>
+<span class="lineNum">  567</span><span class="lineNoCov">      0  /   1: 		Save1541JobState(f);  </span>
+<span class="lineNum">  568</span>              : 	}  </span>
+<span class="lineNum">  569</span><span class="lineNoCov">      0  /   4: 	fclose(f);  </span>
+<span class="lineNum">  570</span>              :   </span>
+<span class="lineNum">  571</span><span class="lineNoCov">      0  /   3: }  </span>
+<span class="lineNum">  572</span>              :   </span>
+<span class="lineNum">  573</span>              :   </span>
+<span class="lineNum">  574</span>              : &#047;*  </span>
+<span class="lineNum">  575</span>              :  *  Load snapshot (emulation must be paused and in VBlank)  </span>
+<span class="lineNum">  576</span>              :  *&#047;  </span>
+<span class="lineNum">  577</span>              :   </span>
+<span class="lineNum">  578</span>              : bool C64::LoadSnapshot(const char *filename)  </span>
+<span class="lineNum">  579</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  580</span>              : 	FILE *f;  </span>
+<span class="lineNum">  581</span>              :   </span>
+<span class="lineNum">  582</span><span class="lineCov">      1  /   1: 	if ((f = fopen(filename, &quot;rb&quot;)) != NULL) {  </span>
+<span class="lineNum">  583</span><span class="lineCov">      3  /   3: 		char Header[] = SNAPSHOT_HEADER;  </span>
+<span class="lineNum">  584</span><span class="lineCov">      2  /   2: 		char *b = Header, c = 0;  </span>
+<span class="lineNum">  585</span>              : 		uint8 delay, i;  </span>
+<span class="lineNum">  586</span>              :   </span>
+<span class="lineNum">  587</span>              : 		&#047;&#047; For some reason memcmp()&#047;strcmp() and so forth utterly fail here.  </span>
+<span class="lineNum">  588</span><span class="lineCov">      2  /   2: 		while (*b &gt; 32) {  </span>
+<span class="lineNum">  589</span><span class="lineCov">      2  /   2: 			if ((c = fgetc(f)) != *b++) {  </span>
+<span class="lineNum">  590</span>              : 				b = NULL;  </span>
+<span class="lineNum">  591</span>              : 				break;  </span>
+<span class="lineNum">  592</span>              : 			}  </span>
+<span class="lineNum">  593</span>              : 		}  </span>
+<span class="lineNum">  594</span><span class="lineCov">      1  /   1: 		if (b != NULL) {  </span>
+<span class="lineNum">  595</span>              : 			uint8 flags;  </span>
+<span class="lineNum">  596</span>              : 			bool error = false;  </span>
+<span class="lineNum">  597</span>              : #ifndef FRODO_SC  </span>
+<span class="lineNum">  598</span>              : 			long vicptr;	&#047;&#047; File offset of VIC data  </span>
+<span class="lineNum">  599</span>              : #endif  </span>
+<span class="lineNum">  600</span>              :   </span>
+<span class="lineNum">  601</span><span class="lineCov">      2  /   2: 			while (c != 10)  </span>
+<span class="lineNum">  602</span><span class="lineCov">      1  /   1: 				c = fgetc(f);	&#047;&#047; Shouldn&#039;t be necessary  </span>
+<span class="lineNum">  603</span><span class="lineCov">      1  /   1: 			if (fgetc(f) != 0) {  </span>
+<span class="lineNum">  604</span><span class="lineNoCov">      0  /   1: 				ShowRequester(&quot;Unknown snapshot format&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  605</span><span class="lineNoCov">      0  /   1: 				fclose(f);  </span>
+<span class="lineNum">  606</span><span class="lineNoCov">      0  /   1: 				return false;  </span>
+<span class="lineNum">  607</span>              : 			}  </span>
+<span class="lineNum">  608</span><span class="lineCov">      2  /   2: 			flags = fgetc(f);  </span>
+<span class="lineNum">  609</span>              : #ifndef FRODO_SC  </span>
+<span class="lineNum">  610</span>              : 			vicptr = ftell(f);  </span>
+<span class="lineNum">  611</span>              : #endif  </span>
+<span class="lineNum">  612</span>              :   </span>
+<span class="lineNum">  613</span><span class="lineCov">      3  /   3: 			error |= !LoadVICState(f);  </span>
+<span class="lineNum">  614</span><span class="lineCov">      4  /   4: 			error |= !LoadSIDState(f);  </span>
+<span class="lineNum">  615</span><span class="lineCov">      5  /   5: 			error |= !LoadCIAState(f);  </span>
+<span class="lineNum">  616</span><span class="lineCov">      3  /   3: 			error |= !LoadCPUState(f);  </span>
+<span class="lineNum">  617</span>              :   </span>
+<span class="lineNum">  618</span><span class="lineCov">      4  /   4: 			delay = fgetc(f);	&#047;&#047; Number of cycles the 6510 is ahead of the previous chips  </span>
+<span class="lineNum">  619</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">  620</span>              : 			&#047;&#047; Make the other chips &quot;catch up&quot; with the 6510  </span>
+<span class="lineNum">  621</span><span class="linePartCov">      2  /   4: 			for (i=0; i&lt;delay; i++) {  </span>
+<span class="lineNum">  622</span><span class="lineNoCov">      0  /   2: 				TheVIC-&gt;EmulateCycle();  </span>
+<span class="lineNum">  623</span><span class="lineNoCov">      0  /   1: 				TheCIA1-&gt;EmulateCycle();  </span>
+<span class="lineNum">  624</span><span class="lineNoCov">      0  /   1: 				TheCIA2-&gt;EmulateCycle();  </span>
+<span class="lineNum">  625</span>              : 			}  </span>
+<span class="lineNum">  626</span>              : #endif  </span>
+<span class="lineNum">  627</span><span class="lineCov">      1  /   1: 			if ((flags &amp; SNAPSHOT_1541) != 0) {  </span>
+<span class="lineNum">  628</span><span class="lineNoCov">      0  /   1: 				Prefs *prefs = new Prefs(ThePrefs);  </span>
+<span class="lineNum">  629</span>              : 	  </span>
+<span class="lineNum">  630</span>              : 				&#047;&#047; First switch on emulation  </span>
+<span class="lineNum">  631</span><span class="lineNoCov">      0  /   5: 				error |= (fread(prefs-&gt;DrivePath[0], 256, 1, f) != 1);  </span>
+<span class="lineNum">  632</span><span class="lineNoCov">      0  /   1: 				prefs-&gt;Emul1541Proc = true;  </span>
+<span class="lineNum">  633</span><span class="lineNoCov">      0  /   2: 				NewPrefs(prefs);  </span>
+<span class="lineNum">  634</span><span class="lineNoCov">      0  /   2: 				ThePrefs = *prefs;  </span>
+<span class="lineNum">  635</span><span class="lineNoCov">      0  /   2: 				delete prefs;  </span>
+<span class="lineNum">  636</span>              : 	  </span>
+<span class="lineNum">  637</span>              : 				&#047;&#047; Then read the context  </span>
+<span class="lineNum">  638</span><span class="lineNoCov">      0  /   3: 				error |= !Load1541State(f);  </span>
+<span class="lineNum">  639</span>              : 	  </span>
+<span class="lineNum">  640</span><span class="lineNoCov">      0  /   2: 				delay = fgetc(f);	&#047;&#047; Number of cycles the 6502 is ahead of the previous chips  </span>
+<span class="lineNum">  641</span>              : #ifdef FRODO_SC  </span>
+<span class="lineNum">  642</span>              : 				&#047;&#047; Make the other chips &quot;catch up&quot; with the 6502  </span>
+<span class="lineNum">  643</span><span class="lineNoCov">      0  /   4: 				for (i=0; i&lt;delay; i++) {  </span>
+<span class="lineNum">  644</span><span class="lineNoCov">      0  /   2: 					TheVIC-&gt;EmulateCycle();  </span>
+<span class="lineNum">  645</span><span class="lineNoCov">      0  /   1: 					TheCIA1-&gt;EmulateCycle();  </span>
+<span class="lineNum">  646</span><span class="lineNoCov">      0  /   1: 					TheCIA2-&gt;EmulateCycle();  </span>
+<span class="lineNum">  647</span><span class="lineNoCov">      0  /   1: 					TheCPU-&gt;EmulateCycle();  </span>
+<span class="lineNum">  648</span>              : 				}  </span>
+<span class="lineNum">  649</span>              : #endif  </span>
+<span class="lineNum">  650</span><span class="lineNoCov">      0  /   1: 				Load1541JobState(f);  </span>
+<span class="lineNum">  651</span><span class="lineCov">      1  /   1: 			} else if (ThePrefs.Emul1541Proc) {	&#047;&#047; No emulation in snapshot, but currently active?  </span>
+<span class="lineNum">  652</span><span class="lineNoCov">      0  /   1: 				Prefs *prefs = new Prefs(ThePrefs);  </span>
+<span class="lineNum">  653</span><span class="lineNoCov">      0  /   1: 				prefs-&gt;Emul1541Proc = false;  </span>
+<span class="lineNum">  654</span><span class="lineNoCov">      0  /   1: 				NewPrefs(prefs);  </span>
+<span class="lineNum">  655</span><span class="lineNoCov">      0  /   2: 				ThePrefs = *prefs;  </span>
+<span class="lineNum">  656</span><span class="lineNoCov">      0  /   2: 				delete prefs;  </span>
+<span class="lineNum">  657</span>              : 			}  </span>
+<span class="lineNum">  658</span>              :   </span>
+<span class="lineNum">  659</span>              : #ifndef FRODO_SC  </span>
+<span class="lineNum">  660</span>              : 			fseek(f, vicptr, SEEK_SET);  </span>
+<span class="lineNum">  661</span>              : 			LoadVICState(f);	&#047;&#047; Load VIC data twice in SL (is REALLY necessary sometimes!)  </span>
+<span class="lineNum">  662</span>              : #endif  </span>
+<span class="lineNum">  663</span><span class="lineCov">      1  /   1: 			fclose(f);  </span>
+<span class="lineNum">  664</span>              : 	  </span>
+<span class="lineNum">  665</span><span class="lineCov">      1  /   1: 			if (error) {  </span>
+<span class="lineNum">  666</span><span class="lineNoCov">      0  /   1: 				ShowRequester(&quot;Error reading snapshot file&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  667</span><span class="lineNoCov">      0  /   1: 				Reset();  </span>
+<span class="lineNum">  668</span><span class="lineNoCov">      0  /   1: 				return false;  </span>
+<span class="lineNum">  669</span>              : 			} else  </span>
+<span class="lineNum">  670</span><span class="lineCov">      1  /   1: 				return true;  </span>
+<span class="lineNum">  671</span>              : 		} else {  </span>
+<span class="lineNum">  672</span><span class="lineNoCov">      0  /   1: 			fclose(f);  </span>
+<span class="lineNum">  673</span><span class="lineNoCov">      0  /   1: 			ShowRequester(&quot;Not a Frodo snapshot file&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  674</span><span class="lineNoCov">      0  /   1: 			return false;  </span>
+<span class="lineNum">  675</span>              : 		}  </span>
+<span class="lineNum">  676</span>              : 	} else {  </span>
+<span class="lineNum">  677</span><span class="lineNoCov">      0  /   1: 		ShowRequester(&quot;Can&#039;t open snapshot file&quot;, &quot;OK&quot;, NULL);  </span>
+<span class="lineNum">  678</span><span class="lineNoCov">      0  /   1: 		return false;  </span>
+<span class="lineNum">  679</span>              : 	}  </span>
+<span class="lineNum">  680</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  681</span>              :   </span>
+<span class="lineNum">  682</span>              : void C64::Pause(void)  </span>
+<span class="lineNum">  683</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  684</span>              : 	&#047;* No pause when the network is running *&#047;  </span>
+<span class="lineNum">  685</span><span class="lineCov">      1  /   1: 	if (this-&gt;network)  </span>
+<span class="lineNum">  686</span>              : 	{  </span>
+<span class="lineNum">  687</span><span class="lineNoCov">      0  /   1: 		this-&gt;have_a_break = false;  </span>
+<span class="lineNum">  688</span>              : 		return;  </span>
+<span class="lineNum">  689</span>              : 	}  </span>
+<span class="lineNum">  690</span>              :   </span>
+<span class="lineNum">  691</span><span class="lineCov">      1  /   1: 	this-&gt;have_a_break = true;  </span>
+<span class="lineNum">  692</span><span class="lineCov">      2  /   2: 	TheSID-&gt;PauseSound();  </span>
+<span class="lineNum">  693</span><span class="linePartCov">      1  /   2: }  </span>
+<span class="lineNum">  694</span>              :   </span>
+<span class="lineNum">  695</span>              : bool C64::IsPaused()  </span>
+<span class="lineNum">  696</span><span class="lineCov">      3  /   3: {  </span>
+<span class="lineNum">  697</span>              : 	return this-&gt;have_a_break;  </span>
+<span class="lineNum">  698</span><span class="lineCov">      2  /   2: }  </span>
+<span class="lineNum">  699</span>              :   </span>
+<span class="lineNum">  700</span>              :   </span>
+<span class="lineNum">  701</span>              : void C64::Resume(void)  </span>
+<span class="lineNum">  702</span><span class="lineCov">      2  /   2: {  </span>
+<span class="lineNum">  703</span><span class="lineCov">      1  /   1: 	this-&gt;have_a_break = false;  </span>
+<span class="lineNum">  704</span><span class="lineCov">      2  /   2: 	TheSID-&gt;ResumeSound();  </span>
+<span class="lineNum">  705</span>              : 	&#047;&#047;SDL_FillRect(real_screen, NULL, 0);  </span>
+<span class="lineNum">  706</span><span class="lineCov">      1  /   1: }  </span>
+<span class="lineNum">  707</span>              :   </span>
+<span class="lineNum">  708</span>              : #include &quot;C64_SDL.h&quot;  </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

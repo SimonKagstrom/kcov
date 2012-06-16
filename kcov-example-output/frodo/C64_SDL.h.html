@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,21 +13,21 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">149</td>
+          <td class="headerValue" width="10%">148</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftMed" width="15%">49.0 %</td>
+          <td class="coverPerLeftMed" width="15%">48.6%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
-          <td class="headerValue" width="10%">73</td>
+          <td class="headerValue" width="10%">72</td>
         </tr>
       </table>
     </td>
@@ -35,389 +35,389 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : /* </span>
-<span class="lineNum">      2 </span>              :  *  C64_x.i - Put the pieces together, X specific stuff </span>
-<span class="lineNum">      3 </span>              :  * </span>
-<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002 Christian Bauer </span>
-<span class="lineNum">      5 </span>              :  *  Unix stuff by Bernd Schmidt/Lutz Vieweg </span>
-<span class="lineNum">      6 </span>              :  */ </span>
-<span class="lineNum">      7 </span>              :  </span>
-<span class="lineNum">      8 </span>              : #include &quot;main.h&quot; </span>
-<span class="lineNum">      9 </span>              :  </span>
-<span class="lineNum">     10 </span>              : #include &lt;sys/types.h&gt; </span>
-<span class="lineNum">     11 </span>              : #include &lt;dirent.h&gt; </span>
-<span class="lineNum">     12 </span>              :  </span>
-<span class="lineNum">     13 </span>              : #include &quot;gui/gui.hh&quot; </span>
-<span class="lineNum">     14 </span>              : #include &quot;gui/status_bar.hh&quot; </span>
-<span class="lineNum">     15 </span>              : #include &quot;gui/virtual_keyboard.hh&quot; </span>
-<span class="lineNum">     16 </span>              :  </span>
-<span class="lineNum">     17 </span>              : #if defined(GEKKO) </span>
-<span class="lineNum">     18 </span>              : #include &lt;wiiuse/wpad.h&gt; </span>
-<span class="lineNum">     19 </span>              : #include &lt;ogc/lwp_watchdog.h&gt; </span>
-<span class="lineNum">     20 </span>              : #endif </span>
-<span class="lineNum">     21 </span>              :  </span>
-<span class="lineNum">     22 </span>              : #define C64_NETWORK_BROKER &quot;c64-network.game-host.org&quot; </span>
-<span class="lineNum">     23 </span>              :  </span>
-<span class="lineNum">     24 </span>              : /* TODO: */ </span>
-<span class="lineNum">     25 </span>              : extern char *network_server_connect; </span>
-<span class="lineNum">     26 </span>              :  </span>
-<span class="lineNum">     27 </span>              :  </span>
-<span class="lineNum">     28 </span>              : static struct timeval tv_start; </span>
-<span class="lineNum">     29 </span>              :  </span>
-<span class="lineNum">     30 </span>              : /* </span>
-<span class="lineNum">     31 </span>              :  *  Constructor, system-dependent things </span>
-<span class="lineNum">     32 </span>              :  */ </span>
-<span class="lineNum">     33 </span>              : void C64::c64_ctor1(void) </span>
-<span class="lineNum">     34 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">     35 </span>              : 	// Initialize joystick variables </span>
-<span class="lineNum">     36 </span>              : #ifdef HAVE_LINUX_JOYSTICK_H </span>
-<span class="lineNum">     37 </span>              : 	joyfd[0] = joyfd[1] = -1; </span>
-<span class="lineNum">     38 </span>              : 	joy_minx = joy_miny = 32767; </span>
-<span class="lineNum">     39 </span>              : 	joy_maxx = joy_maxy = -32768; </span>
-<span class="lineNum">     40 </span>              : #endif </span>
-<span class="lineNum">     41 </span><span class="lineCov">    1 / 1     : 	this-&gt;linecnt = 0; </span>
-<span class="lineNum">     42 </span>              :  </span>
-<span class="lineNum">     43 </span><span class="lineCov">    1 / 1     : 	this-&gt;fake_key_sequence = false; </span>
-<span class="lineNum">     44 </span><span class="lineCov">    1 / 1     : 	this-&gt;fake_key_index = 0; </span>
-<span class="lineNum">     45 </span><span class="lineCov">    1 / 1     : 	this-&gt;fake_key_keytime = 4; </span>
-<span class="lineNum">     46 </span><span class="lineCov">    1 / 1     :         this-&gt;fake_key_str = &quot;\nLOAD \&quot;*\&quot;,8,1\nRUN\n&quot;; </span>
-<span class="lineNum">     47 </span>              :  </span>
-<span class="lineNum">     48 </span><span class="lineCov">    1 / 1     : 	this-&gt;prefs_changed = false; </span>
-<span class="lineNum">     49 </span><span class="lineCov">    1 / 1     : 	memset(this-&gt;save_game_name, 0, sizeof(this-&gt;save_game_name)); </span>
-<span class="lineNum">     50 </span>              : 	strcpy(this-&gt;save_game_name, &quot;unknown&quot;); </span>
-<span class="lineNum">     51 </span>              :  </span>
-<span class="lineNum">     52 </span>              : 	strncpy(this-&gt;server_hostname, C64_NETWORK_BROKER, </span>
-<span class="lineNum">     53 </span><span class="lineCov">    1 / 1     : 			sizeof(this-&gt;server_hostname)); </span>
-<span class="lineNum">     54 </span><span class="lineCov">    1 / 1     : 	this-&gt;server_port = 46214; </span>
-<span class="lineNum">     55 </span><span class="lineCov">    1 / 1     : 	this-&gt;network_connection_type = NONE; </span>
-<span class="lineNum">     56 </span><span class="lineCov">    1 / 1     : 	this-&gt;network = NULL; </span>
-<span class="lineNum">     57 </span>              :  </span>
-<span class="lineNum">     58 </span><span class="lineCov">    2 / 2     : 	if (network_server_connect) { </span>
-<span class="lineNum">     59 </span>              : 		printf(&quot;Connecting to %s\n&quot;, network_server_connect); </span>
-<span class="lineNum">     60 </span>              : 		strcpy(this-&gt;server_hostname, network_server_connect); </span>
-<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;network = new Network(this-&gt;server_hostname, this-&gt;server_port); </span>
-<span class="lineNum">     62 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;network_connection_type = CONNECT; </span>
-<span class="lineNum">     63 </span>              : 	} </span>
-<span class="lineNum">     64 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">     65 </span>              :  </span>
-<span class="lineNum">     66 </span>              : void C64::c64_ctor2(void) </span>
-<span class="lineNum">     67 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">     68 </span><span class="lineCov">    1 / 1     : 	gettimeofday(&amp;tv_start, NULL); </span>
-<span class="lineNum">     69 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">     70 </span>              :  </span>
-<span class="lineNum">     71 </span>              :  </span>
-<span class="lineNum">     72 </span>              : /* </span>
-<span class="lineNum">     73 </span>              :  *  Destructor, system-dependent things </span>
-<span class="lineNum">     74 </span>              :  */ </span>
-<span class="lineNum">     75 </span>              :  </span>
-<span class="lineNum">     76 </span>              : void C64::c64_dtor(void) </span>
-<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">     78 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">     79 </span>              :  </span>
-<span class="lineNum">     80 </span>              :  </span>
-<span class="lineNum">     81 </span>              : void C64::pushKeyCode(int kc, bool up) </span>
-<span class="lineNum">     82 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">     83 </span><span class="lineNoCov">    0 / 1     : 	TheDisplay-&gt;UpdateKeyMatrix(kc, up, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix, NULL); </span>
-<span class="lineNum">     84 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">     85 </span>              :  </span>
-<span class="lineNum">     86 </span>              : /* From dreamcast port but heavily modified */ </span>
-<span class="lineNum">     87 </span>              : void C64::run_fake_key_sequence() </span>
-<span class="lineNum">     88 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">     89 </span><span class="lineNoCov">    0 / 1     : 	int kc = Gui::gui-&gt;kbd-&gt;charToKeycode(this-&gt;fake_key_str[this-&gt;fake_key_index]); </span>
-<span class="lineNum">     90 </span>              :  </span>
-<span class="lineNum">     91 </span><span class="lineNoCov">    0 / 1     : 	TheDisplay-&gt;FakeKeyPress(kc, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix); </span>
-<span class="lineNum">     92 </span>              :  </span>
-<span class="lineNum">     93 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;fake_key_keytime --; </span>
-<span class="lineNum">     94 </span><span class="lineNoCov">    0 / 2     :         if (this-&gt;fake_key_keytime == 0) </span>
-<span class="lineNum">     95 </span>              :         { </span>
-<span class="lineNum">     96 </span><span class="lineNoCov">    0 / 1     :                 this-&gt;fake_key_keytime = 4; </span>
-<span class="lineNum">     97 </span><span class="lineNoCov">    0 / 1     :                 this-&gt;fake_key_index ++; </span>
-<span class="lineNum">     98 </span><span class="lineNoCov">    0 / 2     :         	TheDisplay-&gt;FakeKeyPress(-1, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix); </span>
-<span class="lineNum">     99 </span>              :  </span>
-<span class="lineNum">    100 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;fake_key_str[this-&gt;fake_key_index] == '\0') </span>
-<span class="lineNum">    101 </span>              :                 { </span>
-<span class="lineNum">    102 </span><span class="lineNoCov">    0 / 1     :                         this-&gt;fake_key_sequence = false; </span>
-<span class="lineNum">    103 </span><span class="lineNoCov">    0 / 1     :                         this-&gt;fake_key_index = 0; </span>
-<span class="lineNum">    104 </span><span class="lineNoCov">    0 / 1     :                         this-&gt;fake_key_keytime = 5; </span>
-<span class="lineNum">    105 </span>              :                 } </span>
-<span class="lineNum">    106 </span>              :         } </span>
-<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 2     : } </span>
-<span class="lineNum">    108 </span>              :  </span>
-<span class="lineNum">    109 </span>              : void C64::startFakeKeySequence(const char *str) </span>
-<span class="lineNum">    110 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">    111 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;fake_key_str = str; </span>
-<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 1     : 	this-&gt;fake_key_sequence = true; </span>
-<span class="lineNum">    113 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    114 </span>              :  </span>
-<span class="lineNum">    115 </span>              : /* </span>
-<span class="lineNum">    116 </span>              :  *  Start main emulation thread </span>
-<span class="lineNum">    117 </span>              :  */ </span>
-<span class="lineNum">    118 </span>              :  </span>
-<span class="lineNum">    119 </span>              : void C64::Run(void) </span>
-<span class="lineNum">    120 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    121 </span>              : 	// Reset chips </span>
-<span class="lineNum">    122 </span><span class="lineCov">    1 / 1     : 	TheCPU-&gt;Reset(); </span>
-<span class="lineNum">    123 </span><span class="lineCov">    1 / 1     : 	TheSID-&gt;Reset(); </span>
-<span class="lineNum">    124 </span><span class="lineCov">    1 / 1     : 	TheCIA1-&gt;Reset(); </span>
-<span class="lineNum">    125 </span><span class="lineCov">    1 / 1     : 	TheCIA2-&gt;Reset(); </span>
-<span class="lineNum">    126 </span><span class="lineCov">    1 / 1     : 	TheCPU1541-&gt;Reset(); </span>
-<span class="lineNum">    127 </span>              :  </span>
-<span class="lineNum">    128 </span>              : 	// Patch kernal IEC routines </span>
-<span class="lineNum">    129 </span><span class="lineCov">    1 / 1     : 	orig_kernal_1d84 = Kernal[0x1d84]; </span>
-<span class="lineNum">    130 </span><span class="lineCov">    1 / 1     : 	orig_kernal_1d85 = Kernal[0x1d85]; </span>
-<span class="lineNum">    131 </span><span class="lineCov">    1 / 1     : 	PatchKernal(ThePrefs.FastReset, ThePrefs.Emul1541Proc); </span>
-<span class="lineNum">    132 </span>              :  </span>
-<span class="lineNum">    133 </span><span class="lineCov">    1 / 1     : 	quit_thyself = false; </span>
-<span class="lineNum">    134 </span><span class="lineCov">    2 / 2     : 	thread_func(); </span>
-<span class="lineNum">    135 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    136 </span>              :  </span>
-<span class="lineNum">    137 </span>              : void C64::network_vblank() </span>
-<span class="lineNum">    138 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    139 </span>              :         static uint32_t last_time_update; </span>
-<span class="lineNum">    140 </span>              : #if defined(GEKKO) </span>
-<span class="lineNum">    141 </span>              :         Uint32 now = ticks_to_millisecs(gettime()); </span>
-<span class="lineNum">    142 </span>              : #else </span>
-<span class="lineNum">    143 </span><span class="lineCov">    2 / 2     :         Uint32 now = SDL_GetTicks(); </span>
-<span class="lineNum">    144 </span>              : #endif </span>
-<span class="lineNum">    145 </span>              :  </span>
-<span class="lineNum">    146 </span><span class="lineCov">    2 / 2     :         if (this-&gt;network) { </span>
-<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 2     :         	Uint8 *master = this-&gt;TheDisplay-&gt;BitmapBase(); </span>
-<span class="lineNum">    148 </span><span class="lineNoCov">    0 / 1     :         	Network *remote = this-&gt;network; </span>
-<span class="lineNum">    149 </span>              : 		uint8 *js; </span>
-<span class="lineNum">    150 </span>              :         	static bool has_throttled; </span>
-<span class="lineNum">    151 </span>              :  </span>
-<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 2     :         	if (this-&gt;quit_thyself) </span>
-<span class="lineNum">    153 </span>              : 		{ </span>
-<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     :         		remote-&gt;Disconnect(); </span>
-<span class="lineNum">    155 </span><span class="lineNoCov">    0 / 1     :         		delete remote; </span>
-<span class="lineNum">    156 </span><span class="lineNoCov">    0 / 1     : 			this-&gt;network = NULL; </span>
-<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 2     : 			TheC64-&gt;network_connection_type = NONE; </span>
-<span class="lineNum">    158 </span>              :  </span>
-<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : 			return; </span>
-<span class="lineNum">    160 </span>              : 		} </span>
-<span class="lineNum">    161 </span>              :  </span>
-<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     :         	remote-&gt;Tick( now - last_time_update ); </span>
-<span class="lineNum">    163 </span><span class="lineNoCov">    0 / 1     :         	if (this-&gt;network_connection_type == MASTER) { </span>
-<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 1     :         		if (ThePrefs.JoystickSwap) </span>
-<span class="lineNum">    165 </span>              :         			js = &amp;TheCIA1-&gt;Joystick2; </span>
-<span class="lineNum">    166 </span>              :         		else </span>
-<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 1     :         			js = &amp;TheCIA1-&gt;Joystick1; </span>
-<span class="lineNum">    168 </span>              :         	} else { </span>
-<span class="lineNum">    169 </span>              : 				/* Both are the same */ </span>
-<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 1     :         			js = &amp;TheCIA1-&gt;Joystick2; </span>
-<span class="lineNum">    171 </span>              :         	} </span>
-<span class="lineNum">    172 </span>              :  </span>
-<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 		remote-&gt;ResetNetworkUpdate(); </span>
-<span class="lineNum">    174 </span>              :         	/* Has the peer sent any data? */ </span>
-<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 1     :         	if (remote-&gt;ReceiveUpdate() == true) </span>
-<span class="lineNum">    176 </span>              :         	{ </span>
-<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     :         		if (remote-&gt;DecodeUpdate(this-&gt;TheDisplay, </span>
-<span class="lineNum">    178 </span>              :         				js, this-&gt;TheSID) == false) </span>
-<span class="lineNum">    179 </span>              :         		{ </span>
-<span class="lineNum">    180 </span>              :         			/* Disconnect or sending crap, remove this guy! */ </span>
-<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 1     :         			Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Peer disconnected&quot;); </span>
-<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     :         			delete remote; </span>
-<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     :         			this-&gt;network = NULL; </span>
-<span class="lineNum">    184 </span><span class="lineNoCov">    0 / 2     :         			if (this-&gt;network_connection_type == CLIENT) </span>
-<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     :         				this-&gt;Reset(); </span>
-<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 1     :         			this-&gt;network_connection_type = NONE; </span>
-<span class="lineNum">    187 </span><span class="lineNoCov">    0 / 1     :         			return; </span>
-<span class="lineNum">    188 </span>              :         		} </span>
-<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 1     :                 	if (this-&gt;network_connection_type == CLIENT) </span>
-<span class="lineNum">    190 </span><span class="lineNoCov">    0 / 1     :                 		this-&gt;TheDisplay-&gt;Update(remote-&gt;GetScreen()); </span>
-<span class="lineNum">    191 </span>              :         	} </span>
-<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 1     : 		const char *msg = TheDisplay-&gt;GetTextMessage(); </span>
-<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : 		if (msg &amp;&amp; strlen(msg) &gt; 0) </span>
-<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 1     : 			remote-&gt;EncodeTextMessage(msg, TheDisplay-&gt;text_message_broadcast); </span>
-<span class="lineNum">    195 </span><span class="lineNoCov">    0 / 1     : 		free((void *)msg); </span>
-<span class="lineNum">    196 </span>              :  </span>
-<span class="lineNum">    197 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;network_connection_type == CONNECT) </span>
-<span class="lineNum">    198 </span>              :         		return; </span>
-<span class="lineNum">    199 </span>              :  </span>
-<span class="lineNum">    200 </span>              :         	/* Encode and send updates to the other side (what is determined by  </span>
-<span class="lineNum">    201 </span>              :         	 * if this is the master or not) */ </span>
-<span class="lineNum">    202 </span><span class="lineNoCov">    0 / 1     : 		if (this-&gt;network_connection_type == MASTER) </span>
-<span class="lineNum">    203 </span>              : 		{ </span>
-<span class="lineNum">    204 </span>              : 			/* Skip this frame if the data rate is too high */ </span>
-<span class="lineNum">    205 </span><span class="lineNoCov">    0 / 1     : 			if (remote-&gt;ThrottleTraffic()) </span>
-<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 1     : 				has_throttled = true; </span>
-<span class="lineNum">    207 </span>              : 			else { </span>
-<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 1     : 				remote-&gt;EncodeDisplay(master, remote-&gt;GetScreen()); </span>
-<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 				remote-&gt;FlushSound(); </span>
-<span class="lineNum">    210 </span>              : 			} </span>
-<span class="lineNum">    211 </span>              :         	} </span>
-<span class="lineNum">    212 </span>              :  </span>
-<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 		remote-&gt;EncodeJoystickUpdate(*js); </span>
-<span class="lineNum">    214 </span>              :  </span>
-<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 1     : 		if (remote-&gt;SendPeerUpdate() == false) </span>
-<span class="lineNum">    216 </span>              :         	{ </span>
-<span class="lineNum">    217 </span>              :         		/* Disconnect or broken data */ </span>
-<span class="lineNum">    218 </span>              :         		printf(&quot;Could not send update\n&quot;); </span>
-<span class="lineNum">    219 </span>              :         	} </span>
-<span class="lineNum">    220 </span>              :  </span>
-<span class="lineNum">    221 </span>              : 		static uint32_t last_traffic_update; </span>
-<span class="lineNum">    222 </span>              :  </span>
-<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 1     : 		if (last_time_update - last_traffic_update &gt; 300) </span>
-<span class="lineNum">    224 </span>              : 		{ </span>
-<span class="lineNum">    225 </span>              : 			TheDisplay-&gt;NetworkTrafficMeter(remote-&gt;GetKbps() / (8 * 1024.0), </span>
-<span class="lineNum">    226 </span><span class="lineNoCov">    0 / 1     : 					has_throttled); </span>
-<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 1     : 			last_traffic_update = now; </span>
-<span class="lineNum">    228 </span><span class="lineNoCov">    0 / 1     : 			has_throttled = false; </span>
-<span class="lineNum">    229 </span>              :         	} </span>
-<span class="lineNum">    230 </span>              :         } </span>
-<span class="lineNum">    231 </span>              :  </span>
-<span class="lineNum">    232 </span><span class="lineCov">    1 / 1     :         last_time_update = now; </span>
-<span class="lineNum">    233 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    234 </span>              :  </span>
-<span class="lineNum">    235 </span>              : /* </span>
-<span class="lineNum">    236 </span>              :  *  Vertical blank: Poll keyboard and joysticks, update window </span>
-<span class="lineNum">    237 </span>              :  */ </span>
-<span class="lineNum">    238 </span>              :  </span>
-<span class="lineNum">    239 </span>              : void C64::VBlank(bool draw_frame) </span>
-<span class="lineNum">    240 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    241 </span>              : 	/* From Acorn port */ </span>
-<span class="lineNum">    242 </span>              : 	static uint32_t lastFrame; </span>
-<span class="lineNum">    243 </span>              :         uint32_t now; </span>
-<span class="lineNum">    244 </span>              :         uint8 j1, j2; </span>
-<span class="lineNum">    245 </span>              :         int joy_port_1 = 0; </span>
-<span class="lineNum">    246 </span>              :  </span>
-<span class="lineNum">    247 </span>              :         if (ThePrefs.JoystickSwap) </span>
-<span class="lineNum">    248 </span>              :         	joy_port_1 = 1; </span>
-<span class="lineNum">    249 </span>              :  </span>
-<span class="lineNum">    250 </span><span class="lineCov">    1 / 1     : 	SDL_JoystickUpdate(); </span>
-<span class="lineNum">    251 </span>              : 	// Poll joysticks </span>
-<span class="lineNum">    252 </span><span class="lineCov">    2 / 2     : 	j1 = poll_joystick(!joy_port_1); </span>
-<span class="lineNum">    253 </span><span class="lineCov">    3 / 3     : 	j2 = poll_joystick(joy_port_1); </span>
-<span class="lineNum">    254 </span>              :  </span>
-<span class="lineNum">    255 </span>              : 	// Poll keyboard </span>
-<span class="lineNum">    256 </span><span class="linePartCov">    1 / 2     : 	TheDisplay-&gt;PollKeyboard(TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix, &amp;joykey); </span>
-<span class="lineNum">    257 </span><span class="lineCov">    1 / 1     : 	if (TheDisplay-&gt;quit_requested) </span>
-<span class="lineNum">    258 </span><span class="lineNoCov">    0 / 1     : 		quit_thyself = true; </span>
-<span class="lineNum">    259 </span>              :  </span>
-<span class="lineNum">    260 </span><span class="lineCov">    1 / 1     : 	if (this-&gt;fake_key_sequence) </span>
-<span class="lineNum">    261 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;run_fake_key_sequence(); </span>
-<span class="lineNum">    262 </span>              :  </span>
-<span class="lineNum">    263 </span>              : 	/* Keyboard joystick input */ </span>
-<span class="lineNum">    264 </span><span class="lineCov">    1 / 1     : 	if (ThePrefs.JoystickSwap) </span>
-<span class="lineNum">    265 </span><span class="lineNoCov">    0 / 1     : 		j1 &amp;= joykey; </span>
-<span class="lineNum">    266 </span>              : 	else </span>
-<span class="lineNum">    267 </span><span class="lineCov">    1 / 1     : 		j2 &amp;= joykey; </span>
-<span class="lineNum">    268 </span>              :  </span>
-<span class="lineNum">    269 </span><span class="linePartCov">    1 / 2     : 	if (this-&gt;network_connection_type == CLIENT) </span>
-<span class="lineNum">    270 </span>              : 	{ </span>
-<span class="lineNum">    271 </span>              : 		Uint8 which = j2; </span>
-<span class="lineNum">    272 </span>              :  </span>
-<span class="lineNum">    273 </span><span class="lineNoCov">    0 / 2     : 		if (ThePrefs.JoystickSwap) </span>
-<span class="lineNum">    274 </span>              : 			which = j1; </span>
-<span class="lineNum">    275 </span>              :  </span>
-<span class="lineNum">    276 </span><span class="lineNoCov">    0 / 2     : 		TheCIA1-&gt;Joystick1 = which; </span>
-<span class="lineNum">    277 </span><span class="lineNoCov">    0 / 1     : 		TheCIA1-&gt;Joystick2 = which; </span>
-<span class="lineNum">    278 </span>              : 	} </span>
-<span class="lineNum">    279 </span><span class="lineCov">    1 / 1     : 	else if (this-&gt;network_connection_type == MASTER) </span>
-<span class="lineNum">    280 </span>              : 	{ </span>
-<span class="lineNum">    281 </span>              : 		/* The other comes from the network */ </span>
-<span class="lineNum">    282 </span><span class="lineNoCov">    0 / 1     : 		if (ThePrefs.JoystickSwap) </span>
-<span class="lineNum">    283 </span><span class="lineNoCov">    0 / 1     : 			TheCIA1-&gt;Joystick1 = j1; </span>
-<span class="lineNum">    284 </span>              : 		else </span>
-<span class="lineNum">    285 </span>              : 			TheCIA1-&gt;Joystick2 = j2; </span>
-<span class="lineNum">    286 </span>              : 	} </span>
-<span class="lineNum">    287 </span>              : 	else </span>
-<span class="lineNum">    288 </span>              : 	{ </span>
-<span class="lineNum">    289 </span><span class="lineCov">    1 / 1     : 		TheCIA1-&gt;Joystick1 = j1; </span>
-<span class="lineNum">    290 </span><span class="lineCov">    1 / 1     : 		TheCIA1-&gt;Joystick2 = j2; </span>
-<span class="lineNum">    291 </span>              : 	} </span>
-<span class="lineNum">    292 </span>              :  </span>
-<span class="lineNum">    293 </span>              : 	// Count TOD clocks </span>
-<span class="lineNum">    294 </span><span class="lineCov">    1 / 1     : 	TheCIA1-&gt;CountTOD(); </span>
-<span class="lineNum">    295 </span><span class="lineCov">    1 / 1     : 	TheCIA2-&gt;CountTOD(); </span>
-<span class="lineNum">    296 </span>              :  </span>
-<span class="lineNum">    297 </span>              : 	// Update window if needed </span>
-<span class="lineNum">    298 </span><span class="lineCov">    1 / 1     : 	if (draw_frame &amp;&amp; this-&gt;network_connection_type != CLIENT) { </span>
-<span class="lineNum">    299 </span><span class="lineCov">    1 / 1     : 		TheDisplay-&gt;Update(); </span>
-<span class="lineNum">    300 </span>              : 	} </span>
-<span class="lineNum">    301 </span>              :  </span>
-<span class="lineNum">    302 </span><span class="lineCov">    1 / 1     : 	this-&gt;network_vblank(); </span>
-<span class="lineNum">    303 </span>              :  </span>
-<span class="lineNum">    304 </span><span class="lineCov">    1 / 1     : 	Gui::gui-&gt;runLogic(); </span>
-<span class="lineNum">    305 </span>              :  </span>
-<span class="lineNum">    306 </span><span class="lineCov">    1 / 1     : 	if (this-&gt;quit_thyself) </span>
-<span class="lineNum">    307 </span><span class="lineCov">    1 / 1     : 		ThePrefs.Save(ThePrefs.PrefsPath); </span>
-<span class="lineNum">    308 </span>              : #if defined(GEKKO) </span>
-<span class="lineNum">    309 </span>              : 	if (this-&gt;quit_thyself &amp;&amp; Network::networking_started == true) </span>
-<span class="lineNum">    310 </span>              : 		SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0); </span>
-<span class="lineNum">    311 </span>              :         now = ticks_to_millisecs(gettime()); </span>
-<span class="lineNum">    312 </span>              : #else </span>
-<span class="lineNum">    313 </span><span class="lineCov">    2 / 2     :         now = SDL_GetTicks(); </span>
-<span class="lineNum">    314 </span>              : #endif </span>
-<span class="lineNum">    315 </span>              :  </span>
-<span class="lineNum">    316 </span><span class="linePartCov">    1 / 2     :         if ( (now - lastFrame) &lt; ThePrefs.MsPerFrame) { </span>
-<span class="lineNum">    317 </span><span class="lineCov">    1 / 1     :         	usleep( (ThePrefs.MsPerFrame - (now - lastFrame)) * 1000); </span>
-<span class="lineNum">    318 </span>              :         } </span>
-<span class="lineNum">    319 </span><span class="lineCov">    1 / 1     :         lastFrame = now; </span>
-<span class="lineNum">    320 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    321 </span>              :  </span>
-<span class="lineNum">    322 </span>              : /* </span>
-<span class="lineNum">    323 </span>              :  * The emulation's main loop </span>
-<span class="lineNum">    324 </span>              :  */ </span>
-<span class="lineNum">    325 </span>              :  </span>
-<span class="lineNum">    326 </span>              : void C64::thread_func(void) </span>
-<span class="lineNum">    327 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    328 </span>              : 	int linecnt = 0; </span>
-<span class="lineNum">    329 </span>              :  </span>
-<span class="lineNum">    330 </span>              : #ifdef FRODO_SC </span>
-<span class="lineNum">    331 </span><span class="linePartCov">    1 / 2     : 	while (!quit_thyself) { </span>
-<span class="lineNum">    332 </span>              :  </span>
-<span class="lineNum">    333 </span>              : 		// The order of calls is important here </span>
-<span class="lineNum">    334 </span><span class="lineCov">    1 / 1     : 		if (TheVIC-&gt;EmulateCycle()) </span>
-<span class="lineNum">    335 </span><span class="lineCov">    1 / 1     : 			TheSID-&gt;EmulateLine(); </span>
-<span class="lineNum">    336 </span>              : 		/* No need to emulate anything for the client */ </span>
-<span class="lineNum">    337 </span><span class="lineCov">    1 / 1     : 		if (!this-&gt;have_a_break &amp;&amp; this-&gt;network_connection_type != CLIENT) { </span>
-<span class="lineNum">    338 </span><span class="lineCov">    1 / 1     : 			TheCIA1-&gt;CheckIRQs(); </span>
-<span class="lineNum">    339 </span><span class="lineCov">    1 / 1     : 			TheCIA2-&gt;CheckIRQs(); </span>
-<span class="lineNum">    340 </span><span class="lineCov">    1 / 1     : 			TheCIA1-&gt;EmulateCycle(); </span>
-<span class="lineNum">    341 </span><span class="lineCov">    1 / 1     : 			TheCIA2-&gt;EmulateCycle(); </span>
-<span class="lineNum">    342 </span><span class="lineCov">    1 / 1     : 			TheCPU-&gt;EmulateCycle(); </span>
-<span class="lineNum">    343 </span>              :  </span>
-<span class="lineNum">    344 </span><span class="lineCov">    1 / 1     : 			if (ThePrefs.Emul1541Proc) { </span>
-<span class="lineNum">    345 </span><span class="lineNoCov">    0 / 1     : 				TheCPU1541-&gt;CountVIATimers(1); </span>
-<span class="lineNum">    346 </span><span class="lineNoCov">    0 / 1     : 				if (!TheCPU1541-&gt;Idle) </span>
-<span class="lineNum">    347 </span><span class="lineNoCov">    0 / 1     : 					TheCPU1541-&gt;EmulateCycle(); </span>
-<span class="lineNum">    348 </span>              : 			} </span>
-<span class="lineNum">    349 </span>              : 		} </span>
-<span class="lineNum">    350 </span><span class="lineCov">    1 / 1     : 		CycleCounter++; </span>
-<span class="lineNum">    351 </span>              : #else </span>
-<span class="lineNum">    352 </span>              : 	while (!quit_thyself) { </span>
-<span class="lineNum">    353 </span>              :  </span>
-<span class="lineNum">    354 </span>              : 		// The order of calls is important here </span>
-<span class="lineNum">    355 </span>              : 		int cycles = TheVIC-&gt;EmulateLine(); </span>
-<span class="lineNum">    356 </span>              : 		TheSID-&gt;EmulateLine(); </span>
-<span class="lineNum">    357 </span>              : #if !PRECISE_CIA_CYCLES </span>
-<span class="lineNum">    358 </span>              : 		TheCIA1-&gt;EmulateLine(ThePrefs.CIACycles); </span>
-<span class="lineNum">    359 </span>              : 		TheCIA2-&gt;EmulateLine(ThePrefs.CIACycles); </span>
-<span class="lineNum">    360 </span>              : #endif </span>
-<span class="lineNum">    361 </span>              :  </span>
-<span class="lineNum">    362 </span>              : 		if (ThePrefs.Emul1541Proc) { </span>
-<span class="lineNum">    363 </span>              : 			int cycles_1541 = ThePrefs.FloppyCycles; </span>
-<span class="lineNum">    364 </span>              : 			TheCPU1541-&gt;CountVIATimers(cycles_1541); </span>
-<span class="lineNum">    365 </span>              :  </span>
-<span class="lineNum">    366 </span>              : 			if (!TheCPU1541-&gt;Idle) { </span>
-<span class="lineNum">    367 </span>              : 				// 1541 processor active, alternately execute </span>
-<span class="lineNum">    368 </span>              : 				//  6502 and 6510 instructions until both have </span>
-<span class="lineNum">    369 </span>              : 				//  used up their cycles </span>
-<span class="lineNum">    370 </span>              : 				while (cycles &gt;= 0 || cycles_1541 &gt;= 0) </span>
-<span class="lineNum">    371 </span>              : 					if (cycles &gt; cycles_1541) </span>
-<span class="lineNum">    372 </span>              : 						cycles -= TheCPU-&gt;EmulateLine(1); </span>
-<span class="lineNum">    373 </span>              : 					else </span>
-<span class="lineNum">    374 </span>              : 						cycles_1541 -= TheCPU1541-&gt;EmulateLine(1); </span>
-<span class="lineNum">    375 </span>              : 			} else </span>
-<span class="lineNum">    376 </span>              : 				TheCPU-&gt;EmulateLine(cycles); </span>
-<span class="lineNum">    377 </span>              : 		} else </span>
-<span class="lineNum">    378 </span>              : 			// 1541 processor disabled, only emulate 6510 </span>
-<span class="lineNum">    379 </span>              : 			TheCPU-&gt;EmulateLine(cycles); </span>
-<span class="lineNum">    380 </span>              : #endif </span>
-<span class="lineNum">    381 </span>              : 		linecnt++; </span>
-<span class="lineNum">    382 </span>              : 	} </span>
-<span class="lineNum">    383 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    1</span>              : &#047;* </span>
+<span class="lineNum">    2</span>              :  *  C64_x.i - Put the pieces together, X specific stuff </span>
+<span class="lineNum">    3</span>              :  * </span>
+<span class="lineNum">    4</span>              :  *  Frodo (C) 1994-1997,2002 Christian Bauer </span>
+<span class="lineNum">    5</span>              :  *  Unix stuff by Bernd Schmidt&#047;Lutz Vieweg </span>
+<span class="lineNum">    6</span>              :  *&#047; </span>
+<span class="lineNum">    7</span>              :  </span>
+<span class="lineNum">    8</span>              : #include &quot;main.h&quot; </span>
+<span class="lineNum">    9</span>              :  </span>
+<span class="lineNum">   10</span>              : #include &lt;sys&#047;types.h&gt; </span>
+<span class="lineNum">   11</span>              : #include &lt;dirent.h&gt; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : #include &quot;gui&#047;gui.hh&quot; </span>
+<span class="lineNum">   14</span>              : #include &quot;gui&#047;status_bar.hh&quot; </span>
+<span class="lineNum">   15</span>              : #include &quot;gui&#047;virtual_keyboard.hh&quot; </span>
+<span class="lineNum">   16</span>              :  </span>
+<span class="lineNum">   17</span>              : #if defined(GEKKO) </span>
+<span class="lineNum">   18</span>              : #include &lt;wiiuse&#047;wpad.h&gt; </span>
+<span class="lineNum">   19</span>              : #include &lt;ogc&#047;lwp_watchdog.h&gt; </span>
+<span class="lineNum">   20</span>              : #endif </span>
+<span class="lineNum">   21</span>              :  </span>
+<span class="lineNum">   22</span>              : #define C64_NETWORK_BROKER &quot;c64-network.game-host.org&quot; </span>
+<span class="lineNum">   23</span>              :  </span>
+<span class="lineNum">   24</span>              : &#047;* TODO: *&#047; </span>
+<span class="lineNum">   25</span>              : extern char *network_server_connect; </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span>              :  </span>
+<span class="lineNum">   28</span>              : static struct timeval tv_start; </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span>              : &#047;* </span>
+<span class="lineNum">   31</span>              :  *  Constructor, system-dependent things </span>
+<span class="lineNum">   32</span>              :  *&#047; </span>
+<span class="lineNum">   33</span>              : void C64::c64_ctor1(void) </span>
+<span class="lineNum">   34</span><span class="lineCov">      3  /   3: { </span>
+<span class="lineNum">   35</span>              : 	&#047;&#047; Initialize joystick variables </span>
+<span class="lineNum">   36</span>              : #ifdef HAVE_LINUX_JOYSTICK_H </span>
+<span class="lineNum">   37</span>              : 	joyfd[0] = joyfd[1] = -1; </span>
+<span class="lineNum">   38</span>              : 	joy_minx = joy_miny = 32767; </span>
+<span class="lineNum">   39</span>              : 	joy_maxx = joy_maxy = -32768; </span>
+<span class="lineNum">   40</span>              : #endif </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1: 	this-&gt;linecnt = 0; </span>
+<span class="lineNum">   42</span>              :  </span>
+<span class="lineNum">   43</span><span class="lineCov">      1  /   1: 	this-&gt;fake_key_sequence = false; </span>
+<span class="lineNum">   44</span><span class="lineCov">      1  /   1: 	this-&gt;fake_key_index = 0; </span>
+<span class="lineNum">   45</span><span class="lineCov">      1  /   1: 	this-&gt;fake_key_keytime = 4; </span>
+<span class="lineNum">   46</span><span class="lineCov">      1  /   1:         this-&gt;fake_key_str = &quot;&#092;nLOAD &#092;&quot;*&#092;&quot;,8,1&#092;nRUN&#092;n&quot;; </span>
+<span class="lineNum">   47</span>              :  </span>
+<span class="lineNum">   48</span><span class="lineCov">      1  /   1: 	this-&gt;prefs_changed = false; </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1: 	memset(this-&gt;save_game_name, 0, sizeof(this-&gt;save_game_name)); </span>
+<span class="lineNum">   50</span>              : 	strcpy(this-&gt;save_game_name, &quot;unknown&quot;); </span>
+<span class="lineNum">   51</span>              :  </span>
+<span class="lineNum">   52</span>              : 	strncpy(this-&gt;server_hostname, C64_NETWORK_BROKER, </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1: 			sizeof(this-&gt;server_hostname)); </span>
+<span class="lineNum">   54</span><span class="lineCov">      1  /   1: 	this-&gt;server_port = 46214; </span>
+<span class="lineNum">   55</span><span class="lineCov">      1  /   1: 	this-&gt;network_connection_type = NONE; </span>
+<span class="lineNum">   56</span><span class="lineCov">      1  /   1: 	this-&gt;network = NULL; </span>
+<span class="lineNum">   57</span>              :  </span>
+<span class="lineNum">   58</span><span class="lineCov">      2  /   2: 	if (network_server_connect) { </span>
+<span class="lineNum">   59</span>              : 		printf(&quot;Connecting to %s&#092;n&quot;, network_server_connect); </span>
+<span class="lineNum">   60</span>              : 		strcpy(this-&gt;server_hostname, network_server_connect); </span>
+<span class="lineNum">   61</span><span class="lineNoCov">      0  /   1: 		this-&gt;network = new Network(this-&gt;server_hostname, this-&gt;server_port); </span>
+<span class="lineNum">   62</span><span class="lineNoCov">      0  /   1: 		this-&gt;network_connection_type = CONNECT; </span>
+<span class="lineNum">   63</span>              : 	} </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">   65</span>              :  </span>
+<span class="lineNum">   66</span>              : void C64::c64_ctor2(void) </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1: 	gettimeofday(&amp;tv_start, NULL); </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">   70</span>              :  </span>
+<span class="lineNum">   71</span>              :  </span>
+<span class="lineNum">   72</span>              : &#047;* </span>
+<span class="lineNum">   73</span>              :  *  Destructor, system-dependent things </span>
+<span class="lineNum">   74</span>              :  *&#047; </span>
+<span class="lineNum">   75</span>              :  </span>
+<span class="lineNum">   76</span>              : void C64::c64_dtor(void) </span>
+<span class="lineNum">   77</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">   79</span>              :  </span>
+<span class="lineNum">   80</span>              :  </span>
+<span class="lineNum">   81</span>              : void C64::pushKeyCode(int kc, bool up) </span>
+<span class="lineNum">   82</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">   83</span><span class="lineNoCov">      0  /   1: 	TheDisplay-&gt;UpdateKeyMatrix(kc, up, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix, NULL); </span>
+<span class="lineNum">   84</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span>              : &#047;* From dreamcast port but heavily modified *&#047; </span>
+<span class="lineNum">   87</span>              : void C64::run_fake_key_sequence() </span>
+<span class="lineNum">   88</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">   89</span><span class="lineNoCov">      0  /   1: 	int kc = Gui::gui-&gt;kbd-&gt;charToKeycode(this-&gt;fake_key_str[this-&gt;fake_key_index]); </span>
+<span class="lineNum">   90</span>              :  </span>
+<span class="lineNum">   91</span><span class="lineNoCov">      0  /   1: 	TheDisplay-&gt;FakeKeyPress(kc, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix); </span>
+<span class="lineNum">   92</span>              :  </span>
+<span class="lineNum">   93</span><span class="lineNoCov">      0  /   2: 	this-&gt;fake_key_keytime --; </span>
+<span class="lineNum">   94</span><span class="lineNoCov">      0  /   2:         if (this-&gt;fake_key_keytime == 0) </span>
+<span class="lineNum">   95</span>              :         { </span>
+<span class="lineNum">   96</span><span class="lineNoCov">      0  /   1:                 this-&gt;fake_key_keytime = 4; </span>
+<span class="lineNum">   97</span><span class="lineNoCov">      0  /   1:                 this-&gt;fake_key_index ++; </span>
+<span class="lineNum">   98</span><span class="lineNoCov">      0  /   2:         	TheDisplay-&gt;FakeKeyPress(-1, TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix); </span>
+<span class="lineNum">   99</span>              :  </span>
+<span class="lineNum">  100</span><span class="lineNoCov">      0  /   1: 		if (this-&gt;fake_key_str[this-&gt;fake_key_index] == &#039;&#092;0&#039;) </span>
+<span class="lineNum">  101</span>              :                 { </span>
+<span class="lineNum">  102</span><span class="lineNoCov">      0  /   1:                         this-&gt;fake_key_sequence = false; </span>
+<span class="lineNum">  103</span><span class="lineNoCov">      0  /   1:                         this-&gt;fake_key_index = 0; </span>
+<span class="lineNum">  104</span><span class="lineNoCov">      0  /   1:                         this-&gt;fake_key_keytime = 5; </span>
+<span class="lineNum">  105</span>              :                 } </span>
+<span class="lineNum">  106</span>              :         } </span>
+<span class="lineNum">  107</span><span class="lineNoCov">      0  /   2: } </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span>              : void C64::startFakeKeySequence(const char *str) </span>
+<span class="lineNum">  110</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">  111</span><span class="lineNoCov">      0  /   2: 	this-&gt;fake_key_str = str; </span>
+<span class="lineNum">  112</span><span class="lineNoCov">      0  /   1: 	this-&gt;fake_key_sequence = true; </span>
+<span class="lineNum">  113</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">  114</span>              :  </span>
+<span class="lineNum">  115</span>              : &#047;* </span>
+<span class="lineNum">  116</span>              :  *  Start main emulation thread </span>
+<span class="lineNum">  117</span>              :  *&#047; </span>
+<span class="lineNum">  118</span>              :  </span>
+<span class="lineNum">  119</span>              : void C64::Run(void) </span>
+<span class="lineNum">  120</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">  121</span>              : 	&#047;&#047; Reset chips </span>
+<span class="lineNum">  122</span><span class="lineCov">      1  /   1: 	TheCPU-&gt;Reset(); </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1: 	TheSID-&gt;Reset(); </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1: 	TheCIA1-&gt;Reset(); </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 	TheCIA2-&gt;Reset(); </span>
+<span class="lineNum">  126</span><span class="lineCov">      1  /   1: 	TheCPU1541-&gt;Reset(); </span>
+<span class="lineNum">  127</span>              :  </span>
+<span class="lineNum">  128</span>              : 	&#047;&#047; Patch kernal IEC routines </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1: 	orig_kernal_1d84 = Kernal[0x1d84]; </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1: 	orig_kernal_1d85 = Kernal[0x1d85]; </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1: 	PatchKernal(ThePrefs.FastReset, ThePrefs.Emul1541Proc); </span>
+<span class="lineNum">  132</span>              :  </span>
+<span class="lineNum">  133</span><span class="lineCov">      1  /   1: 	quit_thyself = false; </span>
+<span class="lineNum">  134</span><span class="linePartCov">      2  /   3: 	thread_func(); </span>
+<span class="lineNum">  135</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  136</span>              :  </span>
+<span class="lineNum">  137</span>              : void C64::network_vblank() </span>
+<span class="lineNum">  138</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  139</span>              :         static uint32_t last_time_update; </span>
+<span class="lineNum">  140</span>              : #if defined(GEKKO) </span>
+<span class="lineNum">  141</span>              :         Uint32 now = ticks_to_millisecs(gettime()); </span>
+<span class="lineNum">  142</span>              : #else </span>
+<span class="lineNum">  143</span><span class="lineCov">      2  /   2:         Uint32 now = SDL_GetTicks(); </span>
+<span class="lineNum">  144</span>              : #endif </span>
+<span class="lineNum">  145</span>              :  </span>
+<span class="lineNum">  146</span><span class="lineCov">      2  /   2:         if (this-&gt;network) { </span>
+<span class="lineNum">  147</span><span class="lineNoCov">      0  /   2:         	Uint8 *master = this-&gt;TheDisplay-&gt;BitmapBase(); </span>
+<span class="lineNum">  148</span><span class="lineNoCov">      0  /   1:         	Network *remote = this-&gt;network; </span>
+<span class="lineNum">  149</span>              : 		uint8 *js; </span>
+<span class="lineNum">  150</span>              :         	static bool has_throttled; </span>
+<span class="lineNum">  151</span>              :  </span>
+<span class="lineNum">  152</span><span class="lineNoCov">      0  /   2:         	if (this-&gt;quit_thyself) </span>
+<span class="lineNum">  153</span>              : 		{ </span>
+<span class="lineNum">  154</span><span class="lineNoCov">      0  /   1:         		remote-&gt;Disconnect(); </span>
+<span class="lineNum">  155</span><span class="lineNoCov">      0  /   1:         		delete remote; </span>
+<span class="lineNum">  156</span><span class="lineNoCov">      0  /   1: 			this-&gt;network = NULL; </span>
+<span class="lineNum">  157</span><span class="lineNoCov">      0  /   2: 			TheC64-&gt;network_connection_type = NONE; </span>
+<span class="lineNum">  158</span>              :  </span>
+<span class="lineNum">  159</span>              : 			return; </span>
+<span class="lineNum">  160</span>              : 		} </span>
+<span class="lineNum">  161</span>              :  </span>
+<span class="lineNum">  162</span><span class="lineNoCov">      0  /   1:         	remote-&gt;Tick( now - last_time_update ); </span>
+<span class="lineNum">  163</span><span class="lineNoCov">      0  /   1:         	if (this-&gt;network_connection_type == MASTER) { </span>
+<span class="lineNum">  164</span><span class="lineNoCov">      0  /   1:         		if (ThePrefs.JoystickSwap) </span>
+<span class="lineNum">  165</span>              :         			js = &amp;TheCIA1-&gt;Joystick2; </span>
+<span class="lineNum">  166</span>              :         		else </span>
+<span class="lineNum">  167</span><span class="lineNoCov">      0  /   1:         			js = &amp;TheCIA1-&gt;Joystick1; </span>
+<span class="lineNum">  168</span>              :         	} else { </span>
+<span class="lineNum">  169</span>              : 				&#047;* Both are the same *&#047; </span>
+<span class="lineNum">  170</span><span class="lineNoCov">      0  /   1:         			js = &amp;TheCIA1-&gt;Joystick2; </span>
+<span class="lineNum">  171</span>              :         	} </span>
+<span class="lineNum">  172</span>              :  </span>
+<span class="lineNum">  173</span><span class="lineNoCov">      0  /   1: 		remote-&gt;ResetNetworkUpdate(); </span>
+<span class="lineNum">  174</span>              :         	&#047;* Has the peer sent any data? *&#047; </span>
+<span class="lineNum">  175</span><span class="lineNoCov">      0  /   1:         	if (remote-&gt;ReceiveUpdate() == true) </span>
+<span class="lineNum">  176</span>              :         	{ </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   1:         		if (remote-&gt;DecodeUpdate(this-&gt;TheDisplay, </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   1:         				js, this-&gt;TheSID) == false) </span>
+<span class="lineNum">  179</span>              :         		{ </span>
+<span class="lineNum">  180</span>              :         			&#047;* Disconnect or sending crap, remove this guy! *&#047; </span>
+<span class="lineNum">  181</span><span class="lineNoCov">      0  /   1:         			Gui::gui-&gt;status_bar-&gt;queueMessage(&quot;Peer disconnected&quot;); </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1:         			delete remote; </span>
+<span class="lineNum">  183</span><span class="lineNoCov">      0  /   1:         			this-&gt;network = NULL; </span>
+<span class="lineNum">  184</span><span class="lineNoCov">      0  /   2:         			if (this-&gt;network_connection_type == CLIENT) </span>
+<span class="lineNum">  185</span><span class="lineNoCov">      0  /   1:         				this-&gt;Reset(); </span>
+<span class="lineNum">  186</span><span class="lineNoCov">      0  /   1:         			this-&gt;network_connection_type = NONE; </span>
+<span class="lineNum">  187</span><span class="lineNoCov">      0  /   1:         			return; </span>
+<span class="lineNum">  188</span>              :         		} </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   1:                 	if (this-&gt;network_connection_type == CLIENT) </span>
+<span class="lineNum">  190</span><span class="lineNoCov">      0  /   1:                 		this-&gt;TheDisplay-&gt;Update(remote-&gt;GetScreen()); </span>
+<span class="lineNum">  191</span>              :         	} </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1: 		const char *msg = TheDisplay-&gt;GetTextMessage(); </span>
+<span class="lineNum">  193</span><span class="lineNoCov">      0  /   1: 		if (msg &amp;&amp; strlen(msg) &gt; 0) </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   1: 			remote-&gt;EncodeTextMessage(msg, TheDisplay-&gt;text_message_broadcast); </span>
+<span class="lineNum">  195</span><span class="lineNoCov">      0  /   1: 		free((void *)msg); </span>
+<span class="lineNum">  196</span>              :  </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   1: 		if (this-&gt;network_connection_type == CONNECT) </span>
+<span class="lineNum">  198</span>              :         		return; </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span>              :         	&#047;* Encode and send updates to the other side (what is determined by  </span>
+<span class="lineNum">  201</span>              :         	 * if this is the master or not) *&#047; </span>
+<span class="lineNum">  202</span><span class="lineNoCov">      0  /   1: 		if (this-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">  203</span>              : 		{ </span>
+<span class="lineNum">  204</span>              : 			&#047;* Skip this frame if the data rate is too high *&#047; </span>
+<span class="lineNum">  205</span><span class="lineNoCov">      0  /   1: 			if (remote-&gt;ThrottleTraffic()) </span>
+<span class="lineNum">  206</span><span class="lineNoCov">      0  /   1: 				has_throttled = true; </span>
+<span class="lineNum">  207</span>              : 			else { </span>
+<span class="lineNum">  208</span><span class="lineNoCov">      0  /   1: 				remote-&gt;EncodeDisplay(master, remote-&gt;GetScreen()); </span>
+<span class="lineNum">  209</span><span class="lineNoCov">      0  /   1: 				remote-&gt;FlushSound(); </span>
+<span class="lineNum">  210</span>              : 			} </span>
+<span class="lineNum">  211</span>              :         	} </span>
+<span class="lineNum">  212</span>              :  </span>
+<span class="lineNum">  213</span><span class="lineNoCov">      0  /   1: 		remote-&gt;EncodeJoystickUpdate(*js); </span>
+<span class="lineNum">  214</span>              :  </span>
+<span class="lineNum">  215</span><span class="lineNoCov">      0  /   1: 		if (remote-&gt;SendPeerUpdate() == false) </span>
+<span class="lineNum">  216</span>              :         	{ </span>
+<span class="lineNum">  217</span>              :         		&#047;* Disconnect or broken data *&#047; </span>
+<span class="lineNum">  218</span>              :         		printf(&quot;Could not send update&#092;n&quot;); </span>
+<span class="lineNum">  219</span>              :         	} </span>
+<span class="lineNum">  220</span>              :  </span>
+<span class="lineNum">  221</span>              : 		static uint32_t last_traffic_update; </span>
+<span class="lineNum">  222</span>              :  </span>
+<span class="lineNum">  223</span><span class="lineNoCov">      0  /   1: 		if (last_time_update - last_traffic_update &gt; 300) </span>
+<span class="lineNum">  224</span>              : 		{ </span>
+<span class="lineNum">  225</span>              : 			TheDisplay-&gt;NetworkTrafficMeter(remote-&gt;GetKbps() &#047; (8 * 1024.0), </span>
+<span class="lineNum">  226</span><span class="lineNoCov">      0  /   1: 					has_throttled); </span>
+<span class="lineNum">  227</span><span class="lineNoCov">      0  /   1: 			last_traffic_update = now; </span>
+<span class="lineNum">  228</span><span class="lineNoCov">      0  /   1: 			has_throttled = false; </span>
+<span class="lineNum">  229</span>              :         	} </span>
+<span class="lineNum">  230</span>              :         } </span>
+<span class="lineNum">  231</span>              :  </span>
+<span class="lineNum">  232</span><span class="lineCov">      1  /   1:         last_time_update = now; </span>
+<span class="lineNum">  233</span><span class="linePartCov">      1  /   2: } </span>
+<span class="lineNum">  234</span>              :  </span>
+<span class="lineNum">  235</span>              : &#047;* </span>
+<span class="lineNum">  236</span>              :  *  Vertical blank: Poll keyboard and joysticks, update window </span>
+<span class="lineNum">  237</span>              :  *&#047; </span>
+<span class="lineNum">  238</span>              :  </span>
+<span class="lineNum">  239</span>              : void C64::VBlank(bool draw_frame) </span>
+<span class="lineNum">  240</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">  241</span>              : 	&#047;* From Acorn port *&#047; </span>
+<span class="lineNum">  242</span>              : 	static uint32_t lastFrame; </span>
+<span class="lineNum">  243</span>              :         uint32_t now; </span>
+<span class="lineNum">  244</span>              :         uint8 j1, j2; </span>
+<span class="lineNum">  245</span><span class="lineCov">      1  /   1:         int joy_port_1 = 0; </span>
+<span class="lineNum">  246</span>              :  </span>
+<span class="lineNum">  247</span>              :         if (ThePrefs.JoystickSwap) </span>
+<span class="lineNum">  248</span>              :         	joy_port_1 = 1; </span>
+<span class="lineNum">  249</span>              :  </span>
+<span class="lineNum">  250</span><span class="lineCov">      1  /   1: 	SDL_JoystickUpdate(); </span>
+<span class="lineNum">  251</span>              : 	&#047;&#047; Poll joysticks </span>
+<span class="lineNum">  252</span><span class="lineCov">      2  /   2: 	j1 = poll_joystick(!joy_port_1); </span>
+<span class="lineNum">  253</span><span class="lineCov">      3  /   3: 	j2 = poll_joystick(joy_port_1); </span>
+<span class="lineNum">  254</span>              :  </span>
+<span class="lineNum">  255</span>              : 	&#047;&#047; Poll keyboard </span>
+<span class="lineNum">  256</span><span class="lineCov">      2  /   2: 	TheDisplay-&gt;PollKeyboard(TheCIA1-&gt;KeyMatrix, TheCIA1-&gt;RevMatrix, &amp;joykey); </span>
+<span class="lineNum">  257</span><span class="lineCov">      1  /   1: 	if (TheDisplay-&gt;quit_requested) </span>
+<span class="lineNum">  258</span><span class="lineNoCov">      0  /   1: 		quit_thyself = true; </span>
+<span class="lineNum">  259</span>              :  </span>
+<span class="lineNum">  260</span><span class="lineCov">      1  /   1: 	if (this-&gt;fake_key_sequence) </span>
+<span class="lineNum">  261</span><span class="lineNoCov">      0  /   1: 		this-&gt;run_fake_key_sequence(); </span>
+<span class="lineNum">  262</span>              :  </span>
+<span class="lineNum">  263</span>              : 	&#047;* Keyboard joystick input *&#047; </span>
+<span class="lineNum">  264</span><span class="lineCov">      1  /   1: 	if (ThePrefs.JoystickSwap) </span>
+<span class="lineNum">  265</span><span class="lineCov">      1  /   1: 		j1 &amp;= joykey; </span>
+<span class="lineNum">  266</span>              : 	else </span>
+<span class="lineNum">  267</span><span class="lineNoCov">      0  /   1: 		j2 &amp;= joykey; </span>
+<span class="lineNum">  268</span>              :  </span>
+<span class="lineNum">  269</span><span class="linePartCov">      1  /   2: 	if (this-&gt;network_connection_type == CLIENT) </span>
+<span class="lineNum">  270</span>              : 	{ </span>
+<span class="lineNum">  271</span><span class="lineNoCov">      0  /   2: 		Uint8 which = j2; </span>
+<span class="lineNum">  272</span>              :  </span>
+<span class="lineNum">  273</span>              : 		if (ThePrefs.JoystickSwap) </span>
+<span class="lineNum">  274</span>              : 			which = j1; </span>
+<span class="lineNum">  275</span>              :  </span>
+<span class="lineNum">  276</span><span class="lineNoCov">      0  /   2: 		TheCIA1-&gt;Joystick1 = which; </span>
+<span class="lineNum">  277</span><span class="lineNoCov">      0  /   1: 		TheCIA1-&gt;Joystick2 = which; </span>
+<span class="lineNum">  278</span>              : 	} </span>
+<span class="lineNum">  279</span><span class="lineCov">      1  /   1: 	else if (this-&gt;network_connection_type == MASTER) </span>
+<span class="lineNum">  280</span>              : 	{ </span>
+<span class="lineNum">  281</span>              : 		&#047;* The other comes from the network *&#047; </span>
+<span class="lineNum">  282</span><span class="lineNoCov">      0  /   1: 		if (ThePrefs.JoystickSwap) </span>
+<span class="lineNum">  283</span><span class="lineNoCov">      0  /   1: 			TheCIA1-&gt;Joystick1 = j1; </span>
+<span class="lineNum">  284</span>              : 		else </span>
+<span class="lineNum">  285</span>              : 			TheCIA1-&gt;Joystick2 = j2; </span>
+<span class="lineNum">  286</span>              : 	} </span>
+<span class="lineNum">  287</span>              : 	else </span>
+<span class="lineNum">  288</span>              : 	{ </span>
+<span class="lineNum">  289</span><span class="lineCov">      1  /   1: 		TheCIA1-&gt;Joystick1 = j1; </span>
+<span class="lineNum">  290</span><span class="lineCov">      1  /   1: 		TheCIA1-&gt;Joystick2 = j2; </span>
+<span class="lineNum">  291</span>              : 	} </span>
+<span class="lineNum">  292</span>              :  </span>
+<span class="lineNum">  293</span>              : 	&#047;&#047; Count TOD clocks </span>
+<span class="lineNum">  294</span><span class="lineCov">      1  /   1: 	TheCIA1-&gt;CountTOD(); </span>
+<span class="lineNum">  295</span><span class="lineCov">      1  /   1: 	TheCIA2-&gt;CountTOD(); </span>
+<span class="lineNum">  296</span>              :  </span>
+<span class="lineNum">  297</span>              : 	&#047;&#047; Update window if needed </span>
+<span class="lineNum">  298</span><span class="lineCov">      1  /   1: 	if (draw_frame &amp;&amp; this-&gt;network_connection_type != CLIENT) { </span>
+<span class="lineNum">  299</span><span class="lineCov">      1  /   1: 		TheDisplay-&gt;Update(); </span>
+<span class="lineNum">  300</span>              : 	} </span>
+<span class="lineNum">  301</span>              :  </span>
+<span class="lineNum">  302</span><span class="lineCov">      1  /   1: 	this-&gt;network_vblank(); </span>
+<span class="lineNum">  303</span>              :  </span>
+<span class="lineNum">  304</span><span class="lineCov">      1  /   1: 	Gui::gui-&gt;runLogic(); </span>
+<span class="lineNum">  305</span>              :  </span>
+<span class="lineNum">  306</span>              : 	&#047;&#047;if (this-&gt;quit_thyself) </span>
+<span class="lineNum">  307</span>              : 	&#047;&#047;	ThePrefs.Save(ThePrefs.PrefsPath); </span>
+<span class="lineNum">  308</span>              : #if defined(GEKKO) </span>
+<span class="lineNum">  309</span>              : 	if (this-&gt;quit_thyself &amp;&amp; Network::networking_started == true) </span>
+<span class="lineNum">  310</span>              : 		SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0); </span>
+<span class="lineNum">  311</span>              :         now = ticks_to_millisecs(gettime()); </span>
+<span class="lineNum">  312</span>              : #else </span>
+<span class="lineNum">  313</span><span class="lineCov">      2  /   2:         now = SDL_GetTicks(); </span>
+<span class="lineNum">  314</span>              : #endif </span>
+<span class="lineNum">  315</span>              :  </span>
+<span class="lineNum">  316</span><span class="lineCov">      2  /   2:         if ( (now - lastFrame) &lt; ThePrefs.MsPerFrame) { </span>
+<span class="lineNum">  317</span><span class="lineCov">      1  /   1:         	usleep( (ThePrefs.MsPerFrame - (now - lastFrame)) * 1000); </span>
+<span class="lineNum">  318</span>              :         } </span>
+<span class="lineNum">  319</span><span class="lineCov">      1  /   1:         lastFrame = now; </span>
+<span class="lineNum">  320</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  321</span>              :  </span>
+<span class="lineNum">  322</span>              : &#047;* </span>
+<span class="lineNum">  323</span>              :  * The emulation&#039;s main loop </span>
+<span class="lineNum">  324</span>              :  *&#047; </span>
+<span class="lineNum">  325</span>              :  </span>
+<span class="lineNum">  326</span>              : void C64::thread_func(void) </span>
+<span class="lineNum">  327</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">  328</span>              : 	int linecnt = 0; </span>
+<span class="lineNum">  329</span>              :  </span>
+<span class="lineNum">  330</span>              : #ifdef FRODO_SC </span>
+<span class="lineNum">  331</span><span class="lineCov">      2  /   2: 	while (!quit_thyself) { </span>
+<span class="lineNum">  332</span>              :  </span>
+<span class="lineNum">  333</span>              : 		&#047;&#047; The order of calls is important here </span>
+<span class="lineNum">  334</span><span class="lineCov">      1  /   1: 		if (TheVIC-&gt;EmulateCycle()) </span>
+<span class="lineNum">  335</span><span class="lineCov">      1  /   1: 			TheSID-&gt;EmulateLine(); </span>
+<span class="lineNum">  336</span>              : 		&#047;* No need to emulate anything for the client *&#047; </span>
+<span class="lineNum">  337</span><span class="lineCov">      1  /   1: 		if (!this-&gt;have_a_break &amp;&amp; this-&gt;network_connection_type != CLIENT) { </span>
+<span class="lineNum">  338</span><span class="lineCov">      1  /   1: 			TheCIA1-&gt;CheckIRQs(); </span>
+<span class="lineNum">  339</span><span class="lineCov">      1  /   1: 			TheCIA2-&gt;CheckIRQs(); </span>
+<span class="lineNum">  340</span><span class="lineCov">      1  /   1: 			TheCIA1-&gt;EmulateCycle(); </span>
+<span class="lineNum">  341</span><span class="lineCov">      1  /   1: 			TheCIA2-&gt;EmulateCycle(); </span>
+<span class="lineNum">  342</span><span class="lineCov">      1  /   1: 			TheCPU-&gt;EmulateCycle(); </span>
+<span class="lineNum">  343</span>              :  </span>
+<span class="lineNum">  344</span><span class="lineCov">      1  /   1: 			if (ThePrefs.Emul1541Proc) { </span>
+<span class="lineNum">  345</span><span class="lineNoCov">      0  /   1: 				TheCPU1541-&gt;CountVIATimers(1); </span>
+<span class="lineNum">  346</span><span class="lineNoCov">      0  /   1: 				if (!TheCPU1541-&gt;Idle) </span>
+<span class="lineNum">  347</span><span class="lineNoCov">      0  /   1: 					TheCPU1541-&gt;EmulateCycle(); </span>
+<span class="lineNum">  348</span>              : 			} </span>
+<span class="lineNum">  349</span>              : 		} </span>
+<span class="lineNum">  350</span><span class="lineCov">      1  /   1: 		CycleCounter++; </span>
+<span class="lineNum">  351</span>              : #else </span>
+<span class="lineNum">  352</span>              : 	while (!quit_thyself) { </span>
+<span class="lineNum">  353</span>              :  </span>
+<span class="lineNum">  354</span>              : 		&#047;&#047; The order of calls is important here </span>
+<span class="lineNum">  355</span>              : 		int cycles = TheVIC-&gt;EmulateLine(); </span>
+<span class="lineNum">  356</span>              : 		TheSID-&gt;EmulateLine(); </span>
+<span class="lineNum">  357</span>              : #if !PRECISE_CIA_CYCLES </span>
+<span class="lineNum">  358</span>              : 		TheCIA1-&gt;EmulateLine(ThePrefs.CIACycles); </span>
+<span class="lineNum">  359</span>              : 		TheCIA2-&gt;EmulateLine(ThePrefs.CIACycles); </span>
+<span class="lineNum">  360</span>              : #endif </span>
+<span class="lineNum">  361</span>              :  </span>
+<span class="lineNum">  362</span>              : 		if (ThePrefs.Emul1541Proc) { </span>
+<span class="lineNum">  363</span>              : 			int cycles_1541 = ThePrefs.FloppyCycles; </span>
+<span class="lineNum">  364</span>              : 			TheCPU1541-&gt;CountVIATimers(cycles_1541); </span>
+<span class="lineNum">  365</span>              :  </span>
+<span class="lineNum">  366</span>              : 			if (!TheCPU1541-&gt;Idle) { </span>
+<span class="lineNum">  367</span>              : 				&#047;&#047; 1541 processor active, alternately execute </span>
+<span class="lineNum">  368</span>              : 				&#047;&#047;  6502 and 6510 instructions until both have </span>
+<span class="lineNum">  369</span>              : 				&#047;&#047;  used up their cycles </span>
+<span class="lineNum">  370</span>              : 				while (cycles &gt;= 0 || cycles_1541 &gt;= 0) </span>
+<span class="lineNum">  371</span>              : 					if (cycles &gt; cycles_1541) </span>
+<span class="lineNum">  372</span>              : 						cycles -= TheCPU-&gt;EmulateLine(1); </span>
+<span class="lineNum">  373</span>              : 					else </span>
+<span class="lineNum">  374</span>              : 						cycles_1541 -= TheCPU1541-&gt;EmulateLine(1); </span>
+<span class="lineNum">  375</span>              : 			} else </span>
+<span class="lineNum">  376</span>              : 				TheCPU-&gt;EmulateLine(cycles); </span>
+<span class="lineNum">  377</span>              : 		} else </span>
+<span class="lineNum">  378</span>              : 			&#047;&#047; 1541 processor disabled, only emulate 6510 </span>
+<span class="lineNum">  379</span>              : 			TheCPU-&gt;EmulateLine(cycles); </span>
+<span class="lineNum">  380</span>              : #endif </span>
+<span class="lineNum">  381</span>              : 		linecnt++; </span>
+<span class="lineNum">  382</span>              : 	} </span>
+<span class="lineNum">  383</span><span class="lineCov">      1  /   1: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

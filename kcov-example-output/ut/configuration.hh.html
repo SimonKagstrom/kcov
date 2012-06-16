@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ut</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>ut</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2012-06-16 11:52:55</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #pragma once </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : #include &lt;string&gt; </span>
+<span class="lineNum">    4</span>              : #include &lt;map&gt; </span>
+<span class="lineNum">    5</span>              :  </span>
+<span class="lineNum">    6</span>              : namespace kcov </span>
+<span class="lineNum">    7</span>              : { </span>
+<span class="lineNum">    8</span><span class="lineCov">      3  /   3: 	class IConfiguration </span>
+<span class="lineNum">    9</span>              : 	{ </span>
+<span class="lineNum">   10</span>              : 	public: </span>
+<span class="lineNum">   11</span>              : 		enum SortType </span>
+<span class="lineNum">   12</span>              : 		{ </span>
+<span class="lineNum">   13</span>              : 			PERCENTAGE, </span>
+<span class="lineNum">   14</span>              : 			FILENAME, </span>
+<span class="lineNum">   15</span>              : 			FILE_LENGTH, </span>
+<span class="lineNum">   16</span>              : 			UNCOVERED_LINES </span>
+<span class="lineNum">   17</span>              : 		}; </span>
+<span class="lineNum">   18</span>              :  </span>
+<span class="lineNum">   19</span>              : 		virtual void printUsage() = 0; </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span>              : 		virtual std::string &amp;getOutDirectory() = 0; </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : 		virtual std::string &amp;getBinaryName() = 0; </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : 		virtual std::string &amp;getBinaryPath() = 0; </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span>              : 		virtual enum SortType getSortType() = 0; </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : 		virtual unsigned int getLowLimit() = 0; </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span>              : 		virtual unsigned int getHighLimit() = 0; </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span>              : 		virtual unsigned int getPathStripLevel() = 0; </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span>              : 		virtual const char **getArgv() = 0; </span>
+<span class="lineNum">   36</span>              :  </span>
+<span class="lineNum">   37</span>              : 		virtual std::map&lt;unsigned int,std::string&gt; &amp;getExcludePattern() = 0; </span>
+<span class="lineNum">   38</span>              :  </span>
+<span class="lineNum">   39</span>              : 		virtual std::map&lt;unsigned int,std::string&gt; &amp;getOnlyIncludePattern() = 0; </span>
+<span class="lineNum">   40</span>              :  </span>
+<span class="lineNum">   41</span>              : 		virtual std::map&lt;unsigned int,std::string&gt; &amp;getOnlyIncludePath() = 0; </span>
+<span class="lineNum">   42</span>              :  </span>
+<span class="lineNum">   43</span>              : 		virtual std::map&lt;unsigned int,std::string&gt; &amp;getExcludePath() = 0; </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span>              : 		virtual bool parse(unsigned int argc, const char *argv[]) = 0; </span>
+<span class="lineNum">   46</span>              :  </span>
+<span class="lineNum">   47</span>              :  </span>
+<span class="lineNum">   48</span>              : 		static IConfiguration &amp;getInstance(); </span>
+<span class="lineNum">   49</span>              : 	}; </span>
+<span class="lineNum">   50</span>              : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

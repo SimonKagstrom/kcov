@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ut</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>ut</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2012-06-16 11:52:55</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">169</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">97.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">164</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #include &lt;reporter.hh&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;elf.hh&gt; </span>
+<span class="lineNum">    3</span>              : #include &lt;collector.hh&gt; </span>
+<span class="lineNum">    4</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    5</span>              : #include &lt;filter.hh&gt; </span>
+<span class="lineNum">    6</span>              :  </span>
+<span class="lineNum">    7</span>              : #include &lt;string&gt; </span>
+<span class="lineNum">    8</span>              : #include &lt;list&gt; </span>
+<span class="lineNum">    9</span>              : #include &lt;unordered_map&gt; </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : using namespace kcov; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : #define KCOV_MAGIC      0x6b636f76 &#047;* &quot;kcov&quot; *&#047; </span>
+<span class="lineNum">   14</span>              : #define KCOV_DB_VERSION 1 </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : struct marshalHeaderStruct </span>
+<span class="lineNum">   17</span>              : { </span>
+<span class="lineNum">   18</span>              : 	uint32_t magic; </span>
+<span class="lineNum">   19</span>              : 	uint32_t db_version; </span>
+<span class="lineNum">   20</span>              : 	uint64_t checksum; </span>
+<span class="lineNum">   21</span>              : }; </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : class Reporter : public IReporter, public IElf::IListener, public ICollector::IListener </span>
+<span class="lineNum">   24</span>              : { </span>
+<span class="lineNum">   25</span>              : public: </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1: 	Reporter(IElf &amp;elf, ICollector &amp;collector) : </span>
+<span class="lineNum">   27</span><span class="linePartCov">      1  /   2: 		m_elf(elf), m_collector(collector), m_filter(IFilter::getInstance()) </span>
+<span class="lineNum">   28</span>              : 	{ </span>
+<span class="lineNum">   29</span><span class="lineCov">      1  /   1: 		m_elf.registerListener(*this); </span>
+<span class="lineNum">   30</span><span class="lineCov">      1  /   1: 		m_collector.registerListener(*this); </span>
+<span class="lineNum">   31</span><span class="linePartCov">      2  /   3: 	} </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1: 	bool lineIsCode(const char *file, unsigned int lineNr) </span>
+<span class="lineNum">   34</span>              : 	{ </span>
+<span class="lineNum">   35</span><span class="linePartCov">      1  /   3: 		return m_lines.find(LineId(file, lineNr)) != m_lines.end(); </span>
+<span class="lineNum">   36</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span><span class="lineCov">      1  /   1: 	LineExecutionCount getLineExecutionCount(const char *file, unsigned int lineNr) </span>
+<span class="lineNum">   39</span>              : 	{ </span>
+<span class="lineNum">   40</span><span class="linePartCov">      1  /   2: 		LineMap_t::iterator it = m_lines.find(LineId(file, lineNr)); </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span><span class="lineCov">      1  /   1: 		if (it == m_lines.end()) </span>
+<span class="lineNum">   43</span><span class="lineNoCov">      0  /   1: 			return LineExecutionCount(0, 0); </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span><span class="lineCov">      1  /   1: 		Line *line = it-&gt;second; </span>
+<span class="lineNum">   46</span>              :  </span>
+<span class="lineNum">   47</span>              : 		return LineExecutionCount(line-&gt;hits(), </span>
+<span class="lineNum">   48</span><span class="lineCov">      1  /   1: 				line-&gt;possibleHits()); </span>
+<span class="lineNum">   49</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1: 	ExecutionSummary getExecutionSummary() </span>
+<span class="lineNum">   52</span>              : 	{ </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1: 		unsigned int executedLines = 0; </span>
+<span class="lineNum">   54</span><span class="lineCov">      1  /   1: 		unsigned int nrLines = 0; </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span><span class="lineCov">      4  /   4: 		for (LineMap_t::iterator it = m_lines.begin(); </span>
+<span class="lineNum">   57</span><span class="lineCov">      1  /   1: 				it != m_lines.end(); </span>
+<span class="lineNum">   58</span><span class="lineCov">      1  /   1: 				it++) { </span>
+<span class="lineNum">   59</span><span class="lineCov">      1  /   1: 			Line *cur = it-&gt;second; </span>
+<span class="lineNum">   60</span>              :  </span>
+<span class="lineNum">   61</span><span class="linePartCov">      1  /   3: 			if (!m_filter.runFilters(cur-&gt;m_file)) </span>
+<span class="lineNum">   62</span><span class="lineNoCov">      0  /   1: 				continue; </span>
+<span class="lineNum">   63</span>              :  </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1: 			executedLines += !!cur-&gt;hits(); </span>
+<span class="lineNum">   65</span><span class="lineCov">      1  /   1: 			nrLines++; </span>
+<span class="lineNum">   66</span>              : 		} </span>
+<span class="lineNum">   67</span>              :  </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1: 		return ExecutionSummary(nrLines, executedLines); </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">   70</span>              :  </span>
+<span class="lineNum">   71</span><span class="lineCov">      1  /   1: 	void *marshal(size_t *szOut) </span>
+<span class="lineNum">   72</span>              : 	{ </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1: 		size_t sz = getMarshalSize(); </span>
+<span class="lineNum">   74</span>              : 		void *start; </span>
+<span class="lineNum">   75</span>              : 		uint8_t *p; </span>
+<span class="lineNum">   76</span>              :  </span>
+<span class="lineNum">   77</span><span class="lineCov">      1  /   1: 		start = malloc(sz); </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1: 		if (!start) </span>
+<span class="lineNum">   79</span><span class="lineNoCov">      0  /   1: 			return NULL; </span>
+<span class="lineNum">   80</span><span class="lineCov">      1  /   1: 		p = marshalHeader((uint8_t *)start); </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span><span class="lineCov">      4  /   4: 		for (LineMap_t::iterator it = m_lines.begin(); </span>
+<span class="lineNum">   83</span><span class="lineCov">      1  /   1: 				it != m_lines.end(); </span>
+<span class="lineNum">   84</span><span class="lineCov">      1  /   1: 				it++) { </span>
+<span class="lineNum">   85</span><span class="lineCov">      1  /   1: 			Line *cur = it-&gt;second; </span>
+<span class="lineNum">   86</span>              :  </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1: 			p = cur-&gt;marshal(p); </span>
+<span class="lineNum">   88</span>              : 		} </span>
+<span class="lineNum">   89</span>              :  </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1: 		*szOut = sz; </span>
+<span class="lineNum">   91</span>              :  </span>
+<span class="lineNum">   92</span><span class="lineCov">      1  /   1: 		return start; </span>
+<span class="lineNum">   93</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: 	bool unMarshal(void *data, size_t sz) </span>
+<span class="lineNum">   96</span>              : 	{ </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1: 		uint8_t *start = (uint8_t *)data; </span>
+<span class="lineNum">   98</span><span class="lineCov">      1  /   1: 		uint8_t *p = start; </span>
+<span class="lineNum">   99</span>              : 		size_t n; </span>
+<span class="lineNum">  100</span>              :  </span>
+<span class="lineNum">  101</span><span class="lineCov">      1  /   1: 		p = unMarshalHeader(p); </span>
+<span class="lineNum">  102</span>              :  </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1: 		if (!p) </span>
+<span class="lineNum">  104</span><span class="lineCov">      1  /   1: 			return false; </span>
+<span class="lineNum">  105</span>              :  </span>
+<span class="lineNum">  106</span><span class="lineCov">      1  /   1: 		n = (sz - (p - start)) &#047; getMarshalEntrySize(); </span>
+<span class="lineNum">  107</span>              :  </span>
+<span class="lineNum">  108</span>              : 		&#047;&#047; Should already be 0, but anyway </span>
+<span class="lineNum">  109</span><span class="lineCov">      4  /   4: 		for (AddrToLineMap_t::iterator it = m_addrToLine.begin(); </span>
+<span class="lineNum">  110</span><span class="lineCov">      1  /   1: 				it != m_addrToLine.end(); </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1: 				it++) </span>
+<span class="lineNum">  112</span><span class="lineCov">      1  /   1: 			it-&gt;second-&gt;clearHits(); </span>
+<span class="lineNum">  113</span>              :  </span>
+<span class="lineNum">  114</span><span class="lineCov">      2  /   2: 		for (size_t i = 0; i &lt; n; i++) { </span>
+<span class="lineNum">  115</span>              : 			unsigned long addr; </span>
+<span class="lineNum">  116</span>              : 			unsigned int hits; </span>
+<span class="lineNum">  117</span>              :  </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1: 			p = Line::unMarshal(p, &amp;addr, &amp;hits); </span>
+<span class="lineNum">  119</span><span class="lineCov">      1  /   1: 			Line *line = m_addrToLine[addr]; </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span><span class="lineCov">      1  /   1: 			if (!line) </span>
+<span class="lineNum">  122</span><span class="lineNoCov">      0  /   1: 				continue; </span>
+<span class="lineNum">  123</span>              :  </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1: 			if (!hits) </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 				continue; </span>
+<span class="lineNum">  126</span>              :  </span>
+<span class="lineNum">  127</span>              : 			&#047;&#047; Really an internal error, but let&#039;s not hang on corrupted data </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1: 			if (hits &gt; line-&gt;possibleHits()) </span>
+<span class="lineNum">  129</span><span class="lineNoCov">      0  /   1: 				hits = line-&gt;possibleHits(); </span>
+<span class="lineNum">  130</span>              :  </span>
+<span class="lineNum">  131</span>              : 			&#047;&#047; Register all hits for this address </span>
+<span class="lineNum">  132</span><span class="linePartCov">      1  /   2: 			while (hits--) </span>
+<span class="lineNum">  133</span><span class="lineCov">      1  /   1: 				line-&gt;registerHit(addr); </span>
+<span class="lineNum">  134</span>              : 		} </span>
+<span class="lineNum">  135</span>              :  </span>
+<span class="lineNum">  136</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">  137</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  138</span>              :  </span>
+<span class="lineNum">  139</span>              : private: </span>
+<span class="lineNum">  140</span><span class="lineCov">      1  /   1: 	size_t getMarshalEntrySize() </span>
+<span class="lineNum">  141</span>              : 	{ </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: 		return 2 * sizeof(uint64_t); </span>
+<span class="lineNum">  143</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  144</span>              :  </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: 	size_t getMarshalSize() </span>
+<span class="lineNum">  146</span>              : 	{ </span>
+<span class="lineNum">  147</span><span class="lineCov">      1  /   1: 		size_t out = 0; </span>
+<span class="lineNum">  148</span>              :  </span>
+<span class="lineNum">  149</span><span class="lineCov">      4  /   4: 		for (LineMap_t::iterator it = m_lines.begin(); </span>
+<span class="lineNum">  150</span><span class="lineCov">      1  /   1: 				it != m_lines.end(); </span>
+<span class="lineNum">  151</span><span class="lineCov">      1  /   1: 				it++) { </span>
+<span class="lineNum">  152</span><span class="lineCov">      1  /   1: 			Line *cur = it-&gt;second; </span>
+<span class="lineNum">  153</span>              :  </span>
+<span class="lineNum">  154</span><span class="lineCov">      1  /   1: 			out += cur-&gt;m_addrs.size(); </span>
+<span class="lineNum">  155</span>              : 		} </span>
+<span class="lineNum">  156</span>              :  </span>
+<span class="lineNum">  157</span>              :  </span>
+<span class="lineNum">  158</span><span class="lineCov">      1  /   1: 		return out * getMarshalEntrySize() + sizeof(struct marshalHeaderStruct); </span>
+<span class="lineNum">  159</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  160</span>              :  </span>
+<span class="lineNum">  161</span><span class="lineCov">      1  /   1: 	uint8_t *marshalHeader(uint8_t *p) </span>
+<span class="lineNum">  162</span>              : 	{ </span>
+<span class="lineNum">  163</span><span class="lineCov">      1  /   1: 		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p; </span>
+<span class="lineNum">  164</span>              :  </span>
+<span class="lineNum">  165</span><span class="lineCov">      1  /   1: 		hdr-&gt;magic = KCOV_MAGIC; </span>
+<span class="lineNum">  166</span><span class="lineCov">      1  /   1: 		hdr-&gt;db_version = KCOV_DB_VERSION; </span>
+<span class="lineNum">  167</span><span class="lineCov">      1  /   1: 		hdr-&gt;checksum = m_elf.getChecksum(); </span>
+<span class="lineNum">  168</span>              :  </span>
+<span class="lineNum">  169</span><span class="lineCov">      1  /   1: 		return p + sizeof(struct marshalHeaderStruct); </span>
+<span class="lineNum">  170</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  171</span>              :  </span>
+<span class="lineNum">  172</span><span class="lineCov">      1  /   1: 	uint8_t *unMarshalHeader(uint8_t *p) </span>
+<span class="lineNum">  173</span>              : 	{ </span>
+<span class="lineNum">  174</span><span class="lineCov">      1  /   1: 		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p; </span>
+<span class="lineNum">  175</span>              :  </span>
+<span class="lineNum">  176</span><span class="lineCov">      1  /   1: 		if (hdr-&gt;magic != KCOV_MAGIC) </span>
+<span class="lineNum">  177</span><span class="lineCov">      1  /   1: 			return NULL; </span>
+<span class="lineNum">  178</span>              :  </span>
+<span class="lineNum">  179</span><span class="lineCov">      1  /   1: 		if (hdr-&gt;db_version != KCOV_DB_VERSION) </span>
+<span class="lineNum">  180</span><span class="lineCov">      1  /   1: 			return NULL; </span>
+<span class="lineNum">  181</span>              :  </span>
+<span class="lineNum">  182</span><span class="lineCov">      1  /   1: 		if (hdr-&gt;checksum != m_elf.getChecksum()) </span>
+<span class="lineNum">  183</span><span class="lineCov">      1  /   1: 			return NULL; </span>
+<span class="lineNum">  184</span>              :  </span>
+<span class="lineNum">  185</span><span class="lineCov">      1  /   1: 		return p + sizeof(struct marshalHeaderStruct); </span>
+<span class="lineNum">  186</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  187</span>              :  </span>
+<span class="lineNum">  188</span>              : 	&#047;* Called when the ELF is parsed *&#047; </span>
+<span class="lineNum">  189</span><span class="lineCov">      1  /   1: 	void onLine(const char *file, unsigned int lineNr, unsigned long addr) </span>
+<span class="lineNum">  190</span>              : 	{ </span>
+<span class="lineNum">  191</span><span class="lineCov">      1  /   1: 		LineId key(file, lineNr); </span>
+<span class="lineNum">  192</span>              :  </span>
+<span class="lineNum">  193</span><span class="lineCov">      1  /   1: 		LineMap_t::iterator it = m_lines.find(key); </span>
+<span class="lineNum">  194</span>              : 		Line *line; </span>
+<span class="lineNum">  195</span>              :  </span>
+<span class="lineNum">  196</span><span class="lineCov">      1  /   1: 		if (it == m_lines.end()) { </span>
+<span class="lineNum">  197</span><span class="lineCov">      1  /   1: 			if (!file_exists(file)) </span>
+<span class="lineNum">  198</span>              : 				return; </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="linePartCov">      1  /   2: 			line = new Line(key); </span>
+<span class="lineNum">  201</span><span class="lineCov">      1  /   1: 			m_lines[key] = line; </span>
+<span class="lineNum">  202</span>              : 		} else { </span>
+<span class="lineNum">  203</span><span class="lineCov">      1  /   1: 			line = it-&gt;second; </span>
+<span class="lineNum">  204</span>              : 		} </span>
+<span class="lineNum">  205</span>              :  </span>
+<span class="lineNum">  206</span><span class="lineCov">      1  /   1: 		line-&gt;addAddress(addr); </span>
+<span class="lineNum">  207</span><span class="linePartCov">      2  /   3: 		m_addrToLine[addr] = line; </span>
+<span class="lineNum">  208</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  209</span>              :  </span>
+<span class="lineNum">  210</span>              : 	&#047;* Called during runtime *&#047; </span>
+<span class="lineNum">  211</span><span class="lineCov">      1  /   1: 	void onBreakpoint(unsigned long addr) </span>
+<span class="lineNum">  212</span>              : 	{ </span>
+<span class="lineNum">  213</span><span class="lineCov">      1  /   1: 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr); </span>
+<span class="lineNum">  214</span>              :  </span>
+<span class="lineNum">  215</span><span class="lineCov">      1  /   1: 		if (it == m_addrToLine.end()) </span>
+<span class="lineNum">  216</span><span class="lineCov">      1  /   1: 			return; </span>
+<span class="lineNum">  217</span><span class="lineCov">      1  /   1: 		Line *line = it-&gt;second; </span>
+<span class="lineNum">  218</span>              :  </span>
+<span class="lineNum">  219</span><span class="lineCov">      1  /   1: 		line-&gt;registerHit(addr); </span>
+<span class="lineNum">  220</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  221</span>              :  </span>
+<span class="lineNum">  222</span>              :  </span>
+<span class="lineNum">  223</span><span class="linePartCov">      8  /   9: 	class LineId </span>
+<span class="lineNum">  224</span>              : 	{ </span>
+<span class="lineNum">  225</span>              : 	public: </span>
+<span class="lineNum">  226</span><span class="lineCov">      1  /   1: 		LineId(const char *fileName, int nr) : </span>
+<span class="lineNum">  227</span><span class="linePartCov">      1  /   3: 			m_file(fileName), m_lineNr(nr) </span>
+<span class="lineNum">  228</span>              : 		{ </span>
+<span class="lineNum">  229</span><span class="lineCov">      1  /   1: 		} </span>
+<span class="lineNum">  230</span>              :  </span>
+<span class="lineNum">  231</span><span class="lineCov">      1  /   1: 		bool operator==(const LineId &amp;other) const </span>
+<span class="lineNum">  232</span>              : 		{ </span>
+<span class="lineNum">  233</span><span class="lineCov">      1  /   1: 			return (m_file == other.m_file) &amp;&amp; (m_lineNr == other.m_lineNr); </span>
+<span class="lineNum">  234</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  235</span>              :  </span>
+<span class="lineNum">  236</span>              : 		std::string m_file; </span>
+<span class="lineNum">  237</span>              : 		unsigned int m_lineNr; </span>
+<span class="lineNum">  238</span>              : 	}; </span>
+<span class="lineNum">  239</span>              :  </span>
+<span class="lineNum">  240</span>              : 	class LineIdHash </span>
+<span class="lineNum">  241</span>              : 	{ </span>
+<span class="lineNum">  242</span>              : 	public: </span>
+<span class="lineNum">  243</span><span class="lineCov">      1  /   1: 		size_t operator()(const LineId &amp;obj) const </span>
+<span class="lineNum">  244</span>              : 		{ </span>
+<span class="lineNum">  245</span><span class="lineCov">      1  /   1: 			return std::hash&lt;std::string&gt;()(obj.m_file) ^ std::hash&lt;int&gt;()(obj.m_lineNr); </span>
+<span class="lineNum">  246</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  247</span>              : 	}; </span>
+<span class="lineNum">  248</span>              :  </span>
+<span class="lineNum">  249</span>              : 	class Line </span>
+<span class="lineNum">  250</span>              : 	{ </span>
+<span class="lineNum">  251</span>              : 	public: </span>
+<span class="lineNum">  252</span>              : 		typedef std::unordered_map&lt;unsigned long, int&gt; AddrToHitsMap_t; </span>
+<span class="lineNum">  253</span>              :  </span>
+<span class="lineNum">  254</span><span class="lineCov">      1  /   1: 		Line(LineId id) : m_file(id.m_file), </span>
+<span class="lineNum">  255</span><span class="linePartCov">      1  /   3: 				m_lineNr(id.m_lineNr) </span>
+<span class="lineNum">  256</span>              :  </span>
+<span class="lineNum">  257</span>              : 		{ </span>
+<span class="lineNum">  258</span><span class="lineCov">      1  /   1: 		} </span>
+<span class="lineNum">  259</span>              :  </span>
+<span class="lineNum">  260</span><span class="lineCov">      1  /   1: 		void addAddress(unsigned long addr) </span>
+<span class="lineNum">  261</span>              : 		{ </span>
+<span class="lineNum">  262</span><span class="lineCov">      1  /   1: 			m_addrs[addr] = 0; </span>
+<span class="lineNum">  263</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  264</span>              :  </span>
+<span class="lineNum">  265</span><span class="lineCov">      1  /   1: 		unsigned int registerHit(unsigned long addr) </span>
+<span class="lineNum">  266</span>              : 		{ </span>
+<span class="lineNum">  267</span><span class="lineCov">      1  /   1: 			unsigned int out = !m_addrs[addr]; </span>
+<span class="lineNum">  268</span>              :  </span>
+<span class="lineNum">  269</span><span class="lineCov">      1  /   1: 			m_addrs[addr] = 1; </span>
+<span class="lineNum">  270</span>              :  </span>
+<span class="lineNum">  271</span><span class="lineCov">      1  /   1: 			return out; </span>
+<span class="lineNum">  272</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  273</span>              :  </span>
+<span class="lineNum">  274</span><span class="lineCov">      1  /   1: 		void clearHits() </span>
+<span class="lineNum">  275</span>              : 		{ </span>
+<span class="lineNum">  276</span><span class="lineCov">      4  /   4: 			for (AddrToHitsMap_t::iterator it = m_addrs.begin(); </span>
+<span class="lineNum">  277</span><span class="lineCov">      1  /   1: 					it != m_addrs.end(); </span>
+<span class="lineNum">  278</span><span class="lineCov">      1  /   1: 					it++) </span>
+<span class="lineNum">  279</span><span class="lineCov">      1  /   1: 				it-&gt;second = 0; </span>
+<span class="lineNum">  280</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  281</span>              :  </span>
+<span class="lineNum">  282</span><span class="lineCov">      1  /   1: 		unsigned int hits() </span>
+<span class="lineNum">  283</span>              : 		{ </span>
+<span class="lineNum">  284</span><span class="lineCov">      1  /   1: 			unsigned int out = 0; </span>
+<span class="lineNum">  285</span>              :  </span>
+<span class="lineNum">  286</span><span class="lineCov">      4  /   4: 			for (AddrToHitsMap_t::iterator it = m_addrs.begin(); </span>
+<span class="lineNum">  287</span><span class="lineCov">      1  /   1: 					it != m_addrs.end(); </span>
+<span class="lineNum">  288</span><span class="lineCov">      1  /   1: 					it++) </span>
+<span class="lineNum">  289</span><span class="lineCov">      1  /   1: 				out += it-&gt;second; </span>
+<span class="lineNum">  290</span>              :  </span>
+<span class="lineNum">  291</span><span class="lineCov">      1  /   1: 			return out; </span>
+<span class="lineNum">  292</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  293</span>              :  </span>
+<span class="lineNum">  294</span><span class="lineCov">      1  /   1: 		unsigned int possibleHits() </span>
+<span class="lineNum">  295</span>              : 		{ </span>
+<span class="lineNum">  296</span><span class="lineCov">      1  /   1: 			return m_addrs.size(); </span>
+<span class="lineNum">  297</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  298</span>              :  </span>
+<span class="lineNum">  299</span><span class="lineCov">      1  /   1: 		uint8_t *marshal(uint8_t *start) </span>
+<span class="lineNum">  300</span>              : 		{ </span>
+<span class="lineNum">  301</span><span class="lineCov">      1  /   1: 			uint64_t *data = (uint64_t *)start; </span>
+<span class="lineNum">  302</span>              :  </span>
+<span class="lineNum">  303</span><span class="lineCov">      4  /   4: 			for (AddrToHitsMap_t::iterator it = m_addrs.begin(); </span>
+<span class="lineNum">  304</span><span class="lineCov">      1  /   1: 					it != m_addrs.end(); </span>
+<span class="lineNum">  305</span><span class="lineCov">      1  /   1: 					it++) { </span>
+<span class="lineNum">  306</span>              : 				&#047;&#047; Address and number of hits </span>
+<span class="lineNum">  307</span><span class="lineCov">      1  /   1: 				*data++ = (uint64_t)it-&gt;first; </span>
+<span class="lineNum">  308</span><span class="lineCov">      1  /   1: 				*data++ = (uint64_t)it-&gt;second; </span>
+<span class="lineNum">  309</span>              : 			} </span>
+<span class="lineNum">  310</span>              :  </span>
+<span class="lineNum">  311</span><span class="lineCov">      1  /   1: 			return (uint8_t *)data; </span>
+<span class="lineNum">  312</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  313</span>              :  </span>
+<span class="lineNum">  314</span><span class="lineCov">      1  /   1: 		static uint8_t *unMarshal(uint8_t *p, </span>
+<span class="lineNum">  315</span>              : 				unsigned long *outAddr, unsigned int *outHits) </span>
+<span class="lineNum">  316</span>              : 		{ </span>
+<span class="lineNum">  317</span><span class="lineCov">      1  /   1: 			uint64_t *data = (uint64_t *)p; </span>
+<span class="lineNum">  318</span>              :  </span>
+<span class="lineNum">  319</span><span class="lineCov">      1  /   1: 			*outAddr = *data++; </span>
+<span class="lineNum">  320</span><span class="lineCov">      1  /   1: 			*outHits = *data++; </span>
+<span class="lineNum">  321</span>              :  </span>
+<span class="lineNum">  322</span><span class="lineCov">      1  /   1: 			return (uint8_t *)data; </span>
+<span class="lineNum">  323</span><span class="lineCov">      2  /   2: 		} </span>
+<span class="lineNum">  324</span>              :  </span>
+<span class="lineNum">  325</span>              : 		std::string m_file; </span>
+<span class="lineNum">  326</span>              : 		unsigned int m_lineNr; </span>
+<span class="lineNum">  327</span>              : 		AddrToHitsMap_t m_addrs; </span>
+<span class="lineNum">  328</span>              : 	}; </span>
+<span class="lineNum">  329</span>              :  </span>
+<span class="lineNum">  330</span>              : 	typedef std::unordered_map&lt;LineId, Line *, LineIdHash&gt; LineMap_t; </span>
+<span class="lineNum">  331</span>              : 	typedef std::unordered_map&lt;unsigned long, Line *&gt; AddrToLineMap_t; </span>
+<span class="lineNum">  332</span>              :  </span>
+<span class="lineNum">  333</span>              : 	LineMap_t m_lines; </span>
+<span class="lineNum">  334</span>              : 	AddrToLineMap_t m_addrToLine; </span>
+<span class="lineNum">  335</span>              :  </span>
+<span class="lineNum">  336</span>              : 	IElf &amp;m_elf; </span>
+<span class="lineNum">  337</span>              : 	ICollector &amp;m_collector; </span>
+<span class="lineNum">  338</span>              : 	IFilter &amp;m_filter; </span>
+<span class="lineNum">  339</span>              : }; </span>
+<span class="lineNum">  340</span>              :  </span>
+<span class="lineNum">  341</span>              : IReporter &amp;IReporter::create(IElf &amp;elf, ICollector &amp;collector) </span>
+<span class="lineNum">  342</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  343</span><span class="linePartCov">      1  /   3: 	return *new Reporter(elf, collector); </span>
+<span class="lineNum">  344</span><span class="lineCov">      1  /   1: } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

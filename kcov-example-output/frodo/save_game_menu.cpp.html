@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,21 +13,21 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
           <td class="headerValue" width="10%">86</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftHi" width="15%">59.3 %</td>
+          <td class="coverPerLeftMed" width="15%">62.8%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
-          <td class="headerValue" width="10%">51</td>
+          <td class="headerValue" width="10%">54</td>
         </tr>
       </table>
     </td>
@@ -35,224 +35,235 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #include &lt;unistd.h&gt; /* unlink */ </span>
-<span class="lineNum">      2 </span>              :  </span>
-<span class="lineNum">      3 </span>              : #include &lt;C64.h&gt; </span>
-<span class="lineNum">      4 </span>              :  </span>
-<span class="lineNum">      5 </span>              : #include &lt;utils.hh&gt; </span>
-<span class="lineNum">      6 </span>              :  </span>
-<span class="lineNum">      7 </span>              : #include &quot;menu.hh&quot; </span>
-<span class="lineNum">      8 </span>              : #include &quot;file_browser.hh&quot; </span>
-<span class="lineNum">      9 </span>              : #include &quot;game_info.hh&quot; </span>
-<span class="lineNum">     10 </span>              : #include &quot;game_info_box.hh&quot; </span>
-<span class="lineNum">     11 </span>              :  </span>
-<span class="lineNum">     12 </span>              : static const char *save_exts[] = {&quot;.sav&quot;, &quot;.SAV&quot;, NULL}; </span>
-<span class="lineNum">     13 </span>              :  </span>
-<span class="lineNum">     14 </span>              : class SaveGameMenu; </span>
-<span class="lineNum">     15 </span>              :  </span>
-<span class="lineNum">     16 </span>              : class SaveGameView : public GuiView </span>
-<span class="lineNum">     17 </span>              : { </span>
-<span class="lineNum">     18 </span>              : public: </span>
-<span class="lineNum">     19 </span>              : 	SaveGameView(); </span>
-<span class="lineNum">     20 </span>              :  </span>
-<span class="lineNum">     21 </span>              : 	~SaveGameView(); </span>
-<span class="lineNum">     22 </span>              :  </span>
-<span class="lineNum">     23 </span>              : 	void pushEvent(event_t ev); </span>
-<span class="lineNum">     24 </span>              :  </span>
-<span class="lineNum">     25 </span>              : 	void loadGameInfo(const char *what); </span>
-<span class="lineNum">     26 </span>              :  </span>
-<span class="lineNum">     27 </span>              : 	void setDirectory(const char *path); </span>
-<span class="lineNum">     28 </span>              :  </span>
-<span class="lineNum">     29 </span>              : 	void setLoadSnapshot(bool which); </span>
-<span class="lineNum">     30 </span>              :  </span>
-<span class="lineNum">     31 </span>              : 	void viewPushCallback(); </span>
-<span class="lineNum">     32 </span>              :  </span>
-<span class="lineNum">     33 </span>              : 	void saveSnapshot(); </span>
-<span class="lineNum">     34 </span>              :  </span>
-<span class="lineNum">     35 </span>              : 	/* Inherited */ </span>
-<span class="lineNum">     36 </span>              : 	void runLogic(); </span>
-<span class="lineNum">     37 </span>              :  </span>
-<span class="lineNum">     38 </span>              : 	void draw(SDL_Surface *where); </span>
-<span class="lineNum">     39 </span>              :  </span>
-<span class="lineNum">     40 </span>              : 	SaveGameMenu *menu; </span>
-<span class="lineNum">     41 </span>              : 	GameInfoBox *gameInfo; </span>
-<span class="lineNum">     42 </span>              : }; </span>
-<span class="lineNum">     43 </span>              :  </span>
-<span class="lineNum">     44 </span>              :  </span>
-<span class="lineNum">     45 </span>              : class SaveGameMenu : public FileBrowser, TimeoutHandler </span>
-<span class="lineNum">     46 </span>              : { </span>
-<span class="lineNum">     47 </span>              : 	friend class SaveGameView; </span>
-<span class="lineNum">     48 </span>              :  </span>
-<span class="lineNum">     49 </span>              : public: </span>
-<span class="lineNum">     50 </span>              : 	SaveGameMenu(Font *font) : </span>
-<span class="lineNum">     51 </span><span class="linePartCov">    2 / 4     : 		FileBrowser(save_exts, font) </span>
-<span class="lineNum">     52 </span>              : 	{ </span>
-<span class="lineNum">     53 </span><span class="linePartCov">    1 / 2     : 		this-&gt;loadSnapshot = true; </span>
-<span class="lineNum">     54 </span>              : 	} </span>
-<span class="lineNum">     55 </span>              :  </span>
-<span class="lineNum">     56 </span>              : 	~SaveGameMenu() </span>
-<span class="lineNum">     57 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
-<span class="lineNum">     58 </span><span class="lineNoCov">    0 / 4     : 	} </span>
-<span class="lineNum">     59 </span>              :  </span>
-<span class="lineNum">     60 </span><span class="lineCov">    2 / 2     : 	virtual void selectCallback(int which) </span>
-<span class="lineNum">     61 </span>              : 	{ </span>
-<span class="lineNum">     62 </span><span class="lineCov">    1 / 1     : 		const char *fileName = this-&gt;pp_msgs[this-&gt;cur_sel]; </span>
-<span class="lineNum">     63 </span>              : 		char *new_path; </span>
-<span class="lineNum">     64 </span>              : 		char *prefs_path; </span>
-<span class="lineNum">     65 </span>              :  </span>
-<span class="lineNum">     66 </span>              : 		/* If we selected a directory, just take the next one */ </span>
-<span class="lineNum">     67 </span><span class="lineCov">    1 / 1     : 		if (fileName[0] == '[') </span>
-<span class="lineNum">     68 </span>              : 		{ </span>
-<span class="lineNum">     69 </span><span class="lineNoCov">    0 / 2     : 			this-&gt;pushDirectory(fileName); </span>
-<span class="lineNum">     70 </span>              : 			return; </span>
-<span class="lineNum">     71 </span>              : 		} </span>
-<span class="lineNum">     72 </span><span class="lineCov">    1 / 1     : 		new_path = (char *)xmalloc(strlen(this-&gt;cur_path_prefix) + 3 + strlen(fileName)); </span>
-<span class="lineNum">     73 </span><span class="lineCov">    1 / 1     : 		prefs_path = (char *)xmalloc(strlen(this-&gt;cur_path_prefix) + 8 + strlen(fileName)); </span>
-<span class="lineNum">     74 </span>              :  </span>
-<span class="lineNum">     75 </span>              : 		sprintf(new_path, &quot;%s/%s&quot;, this-&gt;cur_path_prefix, fileName); </span>
-<span class="lineNum">     76 </span>              : 		sprintf(prefs_path, &quot;%s.prefs&quot;, new_path); </span>
-<span class="lineNum">     77 </span>              :  </span>
-<span class="lineNum">     78 </span><span class="lineCov">    1 / 1     : 		if (this-&gt;loadSnapshot) </span>
-<span class="lineNum">     79 </span>              : 		{ </span>
-<span class="lineNum">     80 </span><span class="lineCov">    1 / 1     : 			int display_type = Gui::gui-&gt;np-&gt;DisplayType; </span>
-<span class="lineNum">     81 </span>              :  </span>
-<span class="lineNum">     82 </span><span class="lineCov">    1 / 1     : 			TheC64-&gt;LoadSnapshot(new_path); </span>
-<span class="lineNum">     83 </span>              :  </span>
-<span class="lineNum">     84 </span>              : 			this-&gt;updateGameInfo(fileName); </span>
-<span class="lineNum">     85 </span><span class="lineCov">    1 / 1     : 			Gui::gui-&gt;updateGameInfo(Gui::gui-&gt;sgv-&gt;gameInfo-&gt;gi); </span>
-<span class="lineNum">     86 </span><span class="lineCov">    1 / 1     : 			Gui::gui-&gt;np-&gt;Load(prefs_path); </span>
-<span class="lineNum">     87 </span>              : 			/* Don't change display type */ </span>
-<span class="lineNum">     88 </span><span class="lineCov">    1 / 1     : 			Gui::gui-&gt;np-&gt;DisplayType = display_type; </span>
-<span class="lineNum">     89 </span>              : 		} else </span>
-<span class="lineNum">     90 </span><span class="lineNoCov">    0 / 1     : 			unlink(new_path); </span>
-<span class="lineNum">     91 </span><span class="lineCov">    1 / 1     : 		free(prefs_path); </span>
-<span class="lineNum">     92 </span><span class="lineCov">    1 / 1     : 		free(new_path); </span>
-<span class="lineNum">     93 </span><span class="lineCov">    2 / 2     : 		Gui::gui-&gt;popView(); </span>
-<span class="lineNum">     94 </span><span class="linePartCov">    1 / 2     : 	} </span>
-<span class="lineNum">     95 </span>              :  </span>
-<span class="lineNum">     96 </span><span class="lineCov">    1 / 1     : 	virtual void hoverCallback(int which) </span>
-<span class="lineNum">     97 </span>              : 	{ </span>
-<span class="lineNum">     98 </span><span class="lineCov">    1 / 1     : 		TimerController::controller-&gt;arm(this, 350); </span>
-<span class="lineNum">     99 </span><span class="linePartCov">    1 / 2     : 	} </span>
-<span class="lineNum">    100 </span>              :  </span>
-<span class="lineNum">    101 </span><span class="lineNoCov">    0 / 1     : 	virtual void escapeCallback(int which) </span>
-<span class="lineNum">    102 </span>              : 	{ </span>
-<span class="lineNum">    103 </span><span class="lineNoCov">    0 / 3     : 		Gui::gui-&gt;popView(); </span>
-<span class="lineNum">    104 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    105 </span>              :  </span>
-<span class="lineNum">    106 </span>              : 	void updateGameInfo(const char *fileName) </span>
-<span class="lineNum">    107 </span>              : 	{ </span>
-<span class="lineNum">    108 </span>              : 		char *cpy = xstrdup(fileName); </span>
-<span class="lineNum">    109 </span>              : 		char *p = strstr(cpy, &quot;.sav&quot;); </span>
-<span class="lineNum">    110 </span>              :  </span>
-<span class="lineNum">    111 </span><span class="lineCov">    2 / 2     : 		if (p) </span>
-<span class="lineNum">    112 </span><span class="lineCov">    2 / 2     : 			*p = '\0'; </span>
-<span class="lineNum">    113 </span><span class="lineCov">    2 / 2     : 		Gui::gui-&gt;sgv-&gt;loadGameInfo(cpy); </span>
-<span class="lineNum">    114 </span><span class="lineCov">    3 / 3     : 		free(cpy); </span>
-<span class="lineNum">    115 </span>              : 	} </span>
-<span class="lineNum">    116 </span>              :  </span>
-<span class="lineNum">    117 </span><span class="lineCov">    2 / 2     : 	virtual void timeoutCallback() </span>
-<span class="lineNum">    118 </span>              : 	{ </span>
-<span class="lineNum">    119 </span>              : 		this-&gt;updateGameInfo(this-&gt;pp_msgs[this-&gt;cur_sel]); </span>
-<span class="lineNum">    120 </span><span class="lineCov">    1 / 1     : 	} </span>
-<span class="lineNum">    121 </span>              :  </span>
-<span class="lineNum">    122 </span>              : 	bool loadSnapshot; </span>
-<span class="lineNum">    123 </span>              : }; </span>
-<span class="lineNum">    124 </span>              :  </span>
-<span class="lineNum">    125 </span>              :  </span>
-<span class="lineNum">    126 </span><span class="linePartCov">    2 / 4     : SaveGameView::SaveGameView() : GuiView() </span>
-<span class="lineNum">    127 </span>              : { </span>
-<span class="lineNum">    128 </span><span class="linePartCov">    2 / 4     : 	this-&gt;menu = new SaveGameMenu(Gui::gui-&gt;default_font); </span>
-<span class="lineNum">    129 </span><span class="linePartCov">    2 / 4     : 	this-&gt;gameInfo = new GameInfoBox(Gui::gui-&gt;default_font); </span>
-<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 2     : } </span>
-<span class="lineNum">    131 </span>              :  </span>
-<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 4     : SaveGameView::~SaveGameView() </span>
-<span class="lineNum">    133 </span>              : { </span>
-<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 6     : 	delete this-&gt;menu; </span>
-<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 6     : 	delete this-&gt;gameInfo; </span>
-<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 6     : } </span>
-<span class="lineNum">    137 </span>              :  </span>
-<span class="lineNum">    138 </span>              : void SaveGameView::loadGameInfo(const char *what) </span>
-<span class="lineNum">    139 </span><span class="lineCov">    4 / 4     : { </span>
-<span class="lineNum">    140 </span><span class="linePartCov">    1 / 4     : 	this-&gt;gameInfo-&gt;loadGameInfo(what, Gui::gui-&gt;save_game_path); </span>
-<span class="lineNum">    141 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    142 </span>              :  </span>
-<span class="lineNum">    143 </span>              : void SaveGameView::setDirectory(const char *path) </span>
-<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    145 </span><span class="linePartCov">    1 / 3     : 	this-&gt;menu-&gt;setDirectory(path); </span>
-<span class="lineNum">    146 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    147 </span>              :  </span>
-<span class="lineNum">    148 </span>              : void SaveGameView::setLoadSnapshot(bool what) </span>
-<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    150 </span><span class="linePartCov">    1 / 2     : 	this-&gt;menu-&gt;loadSnapshot = what; </span>
-<span class="lineNum">    151 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    152 </span>              :  </span>
-<span class="lineNum">    153 </span>              : void SaveGameView::viewPushCallback() </span>
-<span class="lineNum">    154 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    155 </span><span class="lineCov">    1 / 1     : 	this-&gt;gameInfo-&gt;setGameInfo(NULL); </span>
-<span class="lineNum">    156 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    157 </span>              :  </span>
-<span class="lineNum">    158 </span><span class="lineNoCov">    0 / 2     : void SaveGameView::saveSnapshot() </span>
-<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : { </span>
-<span class="lineNum">    160 </span>              : 	const char *name = &quot;unknown&quot;; </span>
-<span class="lineNum">    161 </span>              : 	const char *out_name; </span>
-<span class="lineNum">    162 </span>              : 	char *prefs_name; </span>
-<span class="lineNum">    163 </span>              : 	char *save; </span>
-<span class="lineNum">    164 </span>              :  </span>
-<span class="lineNum">    165 </span><span class="lineNoCov">    0 / 1     : 	if (strlen(Gui::gui-&gt;np-&gt;DrivePath[0]) != 0) </span>
-<span class="lineNum">    166 </span>              : 		name = Gui::gui-&gt;np-&gt;DrivePath[0]; </span>
-<span class="lineNum">    167 </span>              : 	out_name = strrchr(name, '/'); </span>
-<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 	if (!out_name) </span>
-<span class="lineNum">    169 </span>              : 		out_name = name; </span>
-<span class="lineNum">    170 </span>              : 	else </span>
-<span class="lineNum">    171 </span><span class="lineNoCov">    0 / 1     : 		out_name++; </span>
-<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 1     : 	save = (char*)xmalloc( strlen(Gui::gui-&gt;save_game_path) + strlen(out_name) + 6 ); </span>
-<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 	prefs_name = (char*)xmalloc( strlen(Gui::gui-&gt;save_game_path) + strlen(out_name) + 12 ); </span>
-<span class="lineNum">    174 </span>              :  </span>
-<span class="lineNum">    175 </span>              : 	sprintf(save, &quot;%s/%s.sav&quot;, Gui::gui-&gt;save_game_path, out_name); </span>
-<span class="lineNum">    176 </span>              : 	sprintf(prefs_name, &quot;%s.prefs&quot;, save); </span>
-<span class="lineNum">    177 </span>              :  </span>
-<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 1     : 	bool was_paused = TheC64-&gt;IsPaused(); </span>
-<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 1     : 	if (!was_paused) </span>
-<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 1     : 		TheC64-&gt;Pause(); </span>
-<span class="lineNum">    181 </span><span class="lineNoCov">    0 / 2     : 	TheC64-&gt;SaveSnapshot(save); </span>
-<span class="lineNum">    182 </span>              : 	if (!was_paused) </span>
-<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 1     : 		TheC64-&gt;Resume(); </span>
-<span class="lineNum">    184 </span>              :  </span>
-<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     : 	Gui::gui-&gt;cur_gameInfo-&gt;setScreenshot(sdl_surface_8bit_copy(Gui::gui-&gt;screenshot)); </span>
-<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 1     : 	Gui::gui-&gt;saveGameInfo(Gui::gui-&gt;save_game_path, out_name); </span>
-<span class="lineNum">    187 </span><span class="lineNoCov">    0 / 1     : 	ThePrefs.Save(prefs_name); </span>
-<span class="lineNum">    188 </span>              :  </span>
-<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 1     : 	Gui::gui-&gt;pushDialogueBox(new DialogueBox(save_state_done)); </span>
-<span class="lineNum">    190 </span>              :  </span>
-<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 1     : 	free(save); </span>
-<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 2     : 	free(prefs_name); </span>
-<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : } </span>
-<span class="lineNum">    194 </span>              :  </span>
-<span class="lineNum">    195 </span>              : void SaveGameView::runLogic() </span>
-<span class="lineNum">    196 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    197 </span><span class="linePartCov">    1 / 2     : 	this-&gt;menu-&gt;runLogic(); </span>
-<span class="lineNum">    198 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    199 </span>              :  </span>
-<span class="lineNum">    200 </span>              : void SaveGameView::pushEvent(event_t ev) </span>
-<span class="lineNum">    201 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    202 </span><span class="lineCov">    2 / 2     : 	this-&gt;menu-&gt;pushEvent(ev); </span>
-<span class="lineNum">    203 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    204 </span>              :  </span>
-<span class="lineNum">    205 </span>              : void SaveGameView::draw(SDL_Surface *where) </span>
-<span class="lineNum">    206 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">    207 </span>              : 	SDL_Rect dst; </span>
-<span class="lineNum">    208 </span>              :  </span>
-<span class="lineNum">    209 </span>              : 	/* Blit the backgrounds */ </span>
-<span class="lineNum">    210 </span><span class="lineCov">    1 / 1     : 	dst = (SDL_Rect){20,45,300,400}; </span>
-<span class="lineNum">    211 </span><span class="linePartCov">    2 / 3     : 	SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
-<span class="lineNum">    212 </span>              :  </span>
-<span class="lineNum">    213 </span><span class="lineCov">    1 / 1     : 	dst = (SDL_Rect){350,13,0,0}; </span>
-<span class="lineNum">    214 </span><span class="lineCov">    2 / 2     : 	SDL_BlitSurface(Gui::gui-&gt;disc_info, NULL, where, &amp;dst); </span>
-<span class="lineNum">    215 </span>              :  </span>
-<span class="lineNum">    216 </span><span class="lineCov">    1 / 1     : 	this-&gt;menu-&gt;draw(where, 50, 70, 280, 375); </span>
-<span class="lineNum">    217 </span><span class="lineCov">    1 / 1     : 	this-&gt;gameInfo-&gt;draw(where, 390, 55, 242, 447); </span>
-<span class="lineNum">    218 </span><span class="lineCov">    1 / 1     : } </span>
+<span class="lineNum">    1</span>              : #include &lt;unistd.h&gt; &#047;* unlink *&#047; </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : #include &lt;C64.h&gt; </span>
+<span class="lineNum">    4</span>              :  </span>
+<span class="lineNum">    5</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    6</span>              :  </span>
+<span class="lineNum">    7</span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">    8</span>              : #include &quot;file_browser.hh&quot; </span>
+<span class="lineNum">    9</span>              : #include &quot;game_info.hh&quot; </span>
+<span class="lineNum">   10</span>              : #include &quot;game_info_box.hh&quot; </span>
+<span class="lineNum">   11</span>              :  </span>
+<span class="lineNum">   12</span>              : static const char *save_exts[] = {&quot;.sav&quot;, &quot;.SAV&quot;, NULL}; </span>
+<span class="lineNum">   13</span>              :  </span>
+<span class="lineNum">   14</span>              : class SaveGameMenu; </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : class SaveGameView : public GuiView </span>
+<span class="lineNum">   17</span>              : { </span>
+<span class="lineNum">   18</span>              : public: </span>
+<span class="lineNum">   19</span>              : 	SaveGameView(); </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span>              : 	~SaveGameView(); </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : 	void pushEvent(event_t ev); </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : 	void loadGameInfo(const char *what); </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span>              : 	void setDirectory(const char *path); </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : 	void setLoadSnapshot(bool which); </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span>              : 	void viewPushCallback(); </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span>              : 	void saveSnapshot(); </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span>              : 	&#047;* Inherited *&#047; </span>
+<span class="lineNum">   36</span>              : 	void runLogic(); </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span>              : 	void draw(SDL_Surface *where); </span>
+<span class="lineNum">   39</span>              :  </span>
+<span class="lineNum">   40</span>              : 	SaveGameMenu *menu; </span>
+<span class="lineNum">   41</span>              : 	GameInfoBox *gameInfo; </span>
+<span class="lineNum">   42</span>              : }; </span>
+<span class="lineNum">   43</span>              :  </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span>              : class SaveGameMenu : public FileBrowser, TimeoutHandler </span>
+<span class="lineNum">   46</span>              : { </span>
+<span class="lineNum">   47</span>              : 	friend class SaveGameView; </span>
+<span class="lineNum">   48</span>              :  </span>
+<span class="lineNum">   49</span>              : public: </span>
+<span class="lineNum">   50</span>              : 	SaveGameMenu(Font *font) : </span>
+<span class="lineNum">   51</span><span class="lineCov">      2  /   2: 		FileBrowser(save_exts, font) </span>
+<span class="lineNum">   52</span>              : 	{ </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1: 		this-&gt;loadSnapshot = true; </span>
+<span class="lineNum">   54</span>              : 	} </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span>              : 	~SaveGameMenu() </span>
+<span class="lineNum">   57</span><span class="lineNoCov">      0  /   1: 	{ </span>
+<span class="lineNum">   58</span>              : 	} </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span><span class="lineCov">      2  /   2: 	virtual void selectCallback(int which) </span>
+<span class="lineNum">   61</span>              : 	{ </span>
+<span class="lineNum">   62</span><span class="lineCov">      1  /   1: 		const char *fileName = this-&gt;pp_msgs[this-&gt;cur_sel]; </span>
+<span class="lineNum">   63</span>              : 		char *new_path; </span>
+<span class="lineNum">   64</span>              : 		char *prefs_path; </span>
+<span class="lineNum">   65</span>              :  </span>
+<span class="lineNum">   66</span>              : 		&#047;* If we selected a directory, just take the next one *&#047; </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1: 		if (fileName[0] == &#039;[&#039;) </span>
+<span class="lineNum">   68</span>              : 		{ </span>
+<span class="lineNum">   69</span><span class="lineNoCov">      0  /   2: 			this-&gt;pushDirectory(fileName); </span>
+<span class="lineNum">   70</span>              : 			return; </span>
+<span class="lineNum">   71</span>              : 		} </span>
+<span class="lineNum">   72</span><span class="lineCov">      1  /   1: 		new_path = (char *)xmalloc(strlen(this-&gt;cur_path_prefix) + 3 + strlen(fileName)); </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1: 		prefs_path = (char *)xmalloc(strlen(this-&gt;cur_path_prefix) + 8 + strlen(fileName)); </span>
+<span class="lineNum">   74</span>              :  </span>
+<span class="lineNum">   75</span>              : 		sprintf(new_path, &quot;%s&#047;%s&quot;, this-&gt;cur_path_prefix, fileName); </span>
+<span class="lineNum">   76</span>              : 		sprintf(prefs_path, &quot;%s.prefs&quot;, new_path); </span>
+<span class="lineNum">   77</span>              :  </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1: 		if (this-&gt;loadSnapshot) </span>
+<span class="lineNum">   79</span>              : 		{ </span>
+<span class="lineNum">   80</span>              : 			&#047;&#047;int display_type = Gui::gui-&gt;np-&gt;DisplayType; </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span><span class="lineCov">      1  /   1: 			TheC64-&gt;Reset(); </span>
+<span class="lineNum">   83</span><span class="lineCov">      1  /   1: 			TheC64-&gt;LoadSnapshot(new_path); </span>
+<span class="lineNum">   84</span>              :  </span>
+<span class="lineNum">   85</span>              : 			this-&gt;updateGameInfo(fileName); </span>
+<span class="lineNum">   86</span><span class="lineCov">      1  /   1: 			Gui::gui-&gt;updateGameInfo(Gui::gui-&gt;sgv-&gt;gameInfo-&gt;gi); </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1: 			Gui::gui-&gt;np-&gt;Load(prefs_path); </span>
+<span class="lineNum">   88</span>              : 			&#047;* Don&#039;t change display type *&#047; </span>
+<span class="lineNum">   89</span>              : 			&#047;&#047;Gui::gui-&gt;np-&gt;DisplayType = display_type; </span>
+<span class="lineNum">   90</span>              : 		} else </span>
+<span class="lineNum">   91</span><span class="lineNoCov">      0  /   1: 			unlink(new_path); </span>
+<span class="lineNum">   92</span><span class="lineCov">      1  /   1: 		free(prefs_path); </span>
+<span class="lineNum">   93</span><span class="lineCov">      1  /   1: 		free(new_path); </span>
+<span class="lineNum">   94</span><span class="lineCov">      2  /   2: 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">   95</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   96</span>              :  </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1: 	virtual void hoverCallback(int which) </span>
+<span class="lineNum">   98</span>              : 	{ </span>
+<span class="lineNum">   99</span><span class="lineCov">      1  /   1: 		TimerController::controller-&gt;arm(this, 350); </span>
+<span class="lineNum">  100</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  101</span>              :  </span>
+<span class="lineNum">  102</span><span class="lineNoCov">      0  /   1: 	virtual void escapeCallback(int which) </span>
+<span class="lineNum">  103</span>              : 	{ </span>
+<span class="lineNum">  104</span><span class="lineNoCov">      0  /   3: 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">  105</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  106</span>              :  </span>
+<span class="lineNum">  107</span>              : 	void updateGameInfo(const char *fileName) </span>
+<span class="lineNum">  108</span>              : 	{ </span>
+<span class="lineNum">  109</span>              : 		char *cpy = xstrdup(fileName); </span>
+<span class="lineNum">  110</span>              : 		char *p = strstr(cpy, &quot;.sav&quot;); </span>
+<span class="lineNum">  111</span>              :  </span>
+<span class="lineNum">  112</span><span class="lineCov">      2  /   2: 		if (p) </span>
+<span class="lineNum">  113</span><span class="lineCov">      2  /   2: 			*p = &#039;&#092;0&#039;; </span>
+<span class="lineNum">  114</span><span class="lineCov">      2  /   2: 		Gui::gui-&gt;sgv-&gt;loadGameInfo(cpy); </span>
+<span class="lineNum">  115</span><span class="lineCov">      3  /   3: 		free(cpy); </span>
+<span class="lineNum">  116</span>              : 	} </span>
+<span class="lineNum">  117</span>              :  </span>
+<span class="lineNum">  118</span><span class="lineCov">      2  /   2: 	virtual void timeoutCallback() </span>
+<span class="lineNum">  119</span>              : 	{ </span>
+<span class="lineNum">  120</span><span class="lineCov">      1  /   1: 		this-&gt;updateGameInfo(this-&gt;pp_msgs[this-&gt;cur_sel]); </span>
+<span class="lineNum">  121</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  122</span>              :  </span>
+<span class="lineNum">  123</span>              : 	bool loadSnapshot; </span>
+<span class="lineNum">  124</span>              : }; </span>
+<span class="lineNum">  125</span>              :  </span>
+<span class="lineNum">  126</span>              :  </span>
+<span class="lineNum">  127</span><span class="lineCov">      3  /   3: SaveGameView::SaveGameView() : GuiView() </span>
+<span class="lineNum">  128</span>              : { </span>
+<span class="lineNum">  129</span><span class="lineCov">      2  /   2: 	this-&gt;menu = new SaveGameMenu(Gui::gui-&gt;default_font); </span>
+<span class="lineNum">  130</span><span class="lineCov">      2  /   2: 	this-&gt;gameInfo = new GameInfoBox(Gui::gui-&gt;default_font); </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  132</span>              :  </span>
+<span class="lineNum">  133</span><span class="lineNoCov">      0  /   2: SaveGameView::~SaveGameView() </span>
+<span class="lineNum">  134</span>              : { </span>
+<span class="lineNum">  135</span><span class="lineNoCov">      0  /   3: 	delete this-&gt;menu; </span>
+<span class="lineNum">  136</span><span class="lineNoCov">      0  /   3: 	delete this-&gt;gameInfo; </span>
+<span class="lineNum">  137</span><span class="lineNoCov">      0  /   3: } </span>
+<span class="lineNum">  138</span>              :  </span>
+<span class="lineNum">  139</span>              : void SaveGameView::loadGameInfo(const char *what) </span>
+<span class="lineNum">  140</span><span class="lineCov">      3  /   3: { </span>
+<span class="lineNum">  141</span><span class="lineCov">      2  /   2: 	this-&gt;gameInfo-&gt;loadGameInfo(what, Gui::gui-&gt;save_game_path); </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  143</span>              :  </span>
+<span class="lineNum">  144</span>              : void SaveGameView::setDirectory(const char *path) </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  146</span><span class="lineCov">      2  /   2: 	this-&gt;menu-&gt;setDirectory(path); </span>
+<span class="lineNum">  147</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  148</span>              :  </span>
+<span class="lineNum">  149</span>              : void SaveGameView::setLoadSnapshot(bool what) </span>
+<span class="lineNum">  150</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">  151</span><span class="linePartCov">      1  /   2: 	this-&gt;menu-&gt;loadSnapshot = what; </span>
+<span class="lineNum">  152</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">  153</span>              :  </span>
+<span class="lineNum">  154</span>              : void SaveGameView::viewPushCallback() </span>
+<span class="lineNum">  155</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  156</span><span class="lineCov">      1  /   1: 	this-&gt;gameInfo-&gt;setGameInfo(NULL); </span>
+<span class="lineNum">  157</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  158</span>              :  </span>
+<span class="lineNum">  159</span><span class="lineNoCov">      0  /   1: void SaveGameView::saveSnapshot() </span>
+<span class="lineNum">  160</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">  161</span>              : 	const char *name = &quot;unknown&quot;; </span>
+<span class="lineNum">  162</span>              : 	const char *out_name; </span>
+<span class="lineNum">  163</span>              : 	char *prefs_name; </span>
+<span class="lineNum">  164</span>              : 	char *save; </span>
+<span class="lineNum">  165</span>              :  </span>
+<span class="lineNum">  166</span>              : 	&#047;* </span>
+<span class="lineNum">  167</span>              : 	if (strlen(Gui::gui-&gt;np-&gt;DrivePath[0]) != 0) </span>
+<span class="lineNum">  168</span>              : 		name = Gui::gui-&gt;np-&gt;DrivePath[0]; </span>
+<span class="lineNum">  169</span>              : 	out_name = strrchr(name, &#039;&#047;&#039;); </span>
+<span class="lineNum">  170</span>              : 	if (!out_name) </span>
+<span class="lineNum">  171</span>              : 		out_name = name; </span>
+<span class="lineNum">  172</span>              : 	else </span>
+<span class="lineNum">  173</span>              : 		out_name++; </span>
+<span class="lineNum">  174</span>              : 	*&#047; </span>
+<span class="lineNum">  175</span>              : 	&#047;&#047;take the filename from gameinfo instead from drivepath </span>
+<span class="lineNum">  176</span><span class="lineNoCov">      0  /   1: 	out_name = Gui::gui-&gt;cur_gameInfo-&gt;filename; </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   2: 	if (!out_name) </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   1: 		out_name = name; </span>
+<span class="lineNum">  179</span>              : 	 </span>
+<span class="lineNum">  180</span><span class="lineNoCov">      0  /   1: 	save = (char*)xmalloc( strlen(Gui::gui-&gt;save_game_path) + strlen(out_name) + 6 ); </span>
+<span class="lineNum">  181</span><span class="lineNoCov">      0  /   1: 	prefs_name = (char*)xmalloc( strlen(Gui::gui-&gt;save_game_path) + strlen(out_name) + 12 ); </span>
+<span class="lineNum">  182</span>              :  </span>
+<span class="lineNum">  183</span>              : 	sprintf(save, &quot;%s&#047;%s.sav&quot;, Gui::gui-&gt;save_game_path, out_name); </span>
+<span class="lineNum">  184</span>              : 	sprintf(prefs_name, &quot;%s.prefs&quot;, save); </span>
+<span class="lineNum">  185</span>              :  </span>
+<span class="lineNum">  186</span><span class="lineNoCov">      0  /   1: 	bool was_paused = TheC64-&gt;IsPaused(); </span>
+<span class="lineNum">  187</span><span class="lineNoCov">      0  /   1: 	if (!was_paused) </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   1: 		TheC64-&gt;Pause(); </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   2: 	TheC64-&gt;SaveSnapshot(save); </span>
+<span class="lineNum">  190</span>              : 	if (!was_paused) </span>
+<span class="lineNum">  191</span><span class="lineNoCov">      0  /   1: 		TheC64-&gt;Resume(); </span>
+<span class="lineNum">  192</span>              :  </span>
+<span class="lineNum">  193</span>              : 	&#047;&#047;Take the screenshot from the one saved when the gui was activacted </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   1: 	Gui::gui-&gt;cur_gameInfo-&gt;setScreenshot(sdl_surface_8bit_copy(Gui::gui-&gt;screenshot)); </span>
+<span class="lineNum">  195</span><span class="lineNoCov">      0  /   1: 	Gui::gui-&gt;saveGameInfo(Gui::gui-&gt;save_game_path, out_name); </span>
+<span class="lineNum">  196</span>              : 	 </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   2: 	ThePrefs = *Gui::gui-&gt;np;  </span>
+<span class="lineNum">  198</span><span class="lineNoCov">      0  /   2: 	ThePrefs.Save_game(prefs_name); </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="lineNoCov">      0  /   1: 	Gui::gui-&gt;pushDialogueBox(new DialogueBox(save_state_done)); </span>
+<span class="lineNum">  201</span>              :  </span>
+<span class="lineNum">  202</span><span class="lineNoCov">      0  /   1: 	free(save); </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   2: 	free(prefs_name); </span>
+<span class="lineNum">  204</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">  205</span>              :  </span>
+<span class="lineNum">  206</span>              : void SaveGameView::runLogic() </span>
+<span class="lineNum">  207</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  208</span><span class="lineCov">      2  /   2: 	this-&gt;menu-&gt;runLogic(); </span>
+<span class="lineNum">  209</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  210</span>              :  </span>
+<span class="lineNum">  211</span>              : void SaveGameView::pushEvent(event_t ev) </span>
+<span class="lineNum">  212</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  213</span><span class="lineCov">      2  /   2: 	this-&gt;menu-&gt;pushEvent(ev); </span>
+<span class="lineNum">  214</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  215</span>              :  </span>
+<span class="lineNum">  216</span>              : void SaveGameView::draw(SDL_Surface *where) </span>
+<span class="lineNum">  217</span><span class="lineCov">      3  /   3: { </span>
+<span class="lineNum">  218</span>              : 	SDL_Rect dst; </span>
+<span class="lineNum">  219</span>              :  </span>
+<span class="lineNum">  220</span>              : 	&#047;* Blit the backgrounds *&#047; </span>
+<span class="lineNum">  221</span><span class="lineCov">      1  /   1: 	dst = (SDL_Rect){20,45,300,400}; </span>
+<span class="lineNum">  222</span><span class="lineCov">      3  /   3: 	SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
+<span class="lineNum">  223</span>              :  </span>
+<span class="lineNum">  224</span><span class="lineCov">      1  /   1: 	dst = (SDL_Rect){350,13,0,0}; </span>
+<span class="lineNum">  225</span><span class="lineCov">      2  /   2: 	SDL_BlitSurface(Gui::gui-&gt;disc_info, NULL, where, &amp;dst); </span>
+<span class="lineNum">  226</span>              :  </span>
+<span class="lineNum">  227</span><span class="lineCov">      1  /   1: 	this-&gt;menu-&gt;draw(where, 50, 70, 280, 375); </span>
+<span class="lineNum">  228</span><span class="lineCov">      1  /   1: 	this-&gt;gameInfo-&gt;draw(where, 390, 55, 242, 447); </span>
+<span class="lineNum">  229</span><span class="lineCov">      1  /   1: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

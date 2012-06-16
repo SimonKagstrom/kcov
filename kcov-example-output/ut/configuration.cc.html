@@ -1,0 +1,394 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - ut</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>ut</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2012-06-16 11:52:55</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">166</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">88.6%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">147</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #include &lt;configuration.hh&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    3</span>              :  </span>
+<span class="lineNum">    4</span>              : #include &lt;getopt.h&gt; </span>
+<span class="lineNum">    5</span>              : #include &lt;limits.h&gt; </span>
+<span class="lineNum">    6</span>              : #include &lt;map&gt; </span>
+<span class="lineNum">    7</span>              : #include &lt;list&gt; </span>
+<span class="lineNum">    8</span>              : #include &lt;string&gt; </span>
+<span class="lineNum">    9</span>              : #include &lt;stdexcept&gt; </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : using namespace kcov; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : class Configuration : public IConfiguration </span>
+<span class="lineNum">   14</span>              : { </span>
+<span class="lineNum">   15</span>              : public: </span>
+<span class="lineNum">   16</span><span class="lineCov">      1  /   1: 	Configuration() </span>
+<span class="lineNum">   17</span><span class="linePartCov">      1  /   3: 	{ </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: 		m_outDirectory = &quot;&quot;; </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1: 		m_binaryName = &quot;&quot;; </span>
+<span class="lineNum">   20</span><span class="lineCov">      1  /   1: 		m_lowLimit = 25; </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1: 		m_highLimit = 75; </span>
+<span class="lineNum">   22</span><span class="lineCov">      1  /   1: 		m_pathStripLevel = 2; </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1: 		m_ptracePid = 0; </span>
+<span class="lineNum">   24</span><span class="lineCov">      1  /   1: 		m_sortType = FILENAME; </span>
+<span class="lineNum">   25</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1: 	bool usage(void) </span>
+<span class="lineNum">   28</span>              : 	{ </span>
+<span class="lineNum">   29</span>              : 		printf(&quot;Usage: kcov [OPTIONS] out-dir in-file [args...]&#092;n&quot; </span>
+<span class="lineNum">   30</span>              : 				&quot;&#092;n&quot; </span>
+<span class="lineNum">   31</span>              : 				&quot;Where [OPTIONS] are&#092;n&quot; </span>
+<span class="lineNum">   32</span>              : 				&quot; -h, --help             this text&#092;n&quot; </span>
+<span class="lineNum">   33</span>              : 				&quot; -p, --pid=PID          trace PID instead of executing in-file,&#092;n&quot; </span>
+<span class="lineNum">   34</span>              : 				&quot;                        in-file is optional in this case&#092;n&quot; </span>
+<span class="lineNum">   35</span>              : 				&quot; -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent],&#092;n&quot; </span>
+<span class="lineNum">   36</span>              : 				&quot;                        u[ncovered-lines], l[ines]&#092;n&quot; </span>
+<span class="lineNum">   37</span>              : 				&quot; -l, --limits=low,high  setup limits for low&#047;high coverage (default %u,%u)&#092;n&quot; </span>
+<span class="lineNum">   38</span>              : 				&quot; -t, --title=title      title for the coverage (default: filename)&#092;n&quot; </span>
+<span class="lineNum">   39</span>              : 				&quot; --path-strip-level=num path levels to show for common paths (default: %u)&#092;n&quot; </span>
+<span class="lineNum">   40</span>              : 				&quot; --include-path=path    comma-separated paths to include in the report&#092;n&quot; </span>
+<span class="lineNum">   41</span>              : 				&quot; --exclude-path=path    comma-separated paths to exclude from the report&#092;n&quot; </span>
+<span class="lineNum">   42</span>              : 				&quot; --include-pattern=pat  comma-separated path patterns to include in the report&#092;n&quot; </span>
+<span class="lineNum">   43</span>              : 				&quot; --exclude-pattern=pat  comma-separated path patterns to exclude from the report&#092;n&quot; </span>
+<span class="lineNum">   44</span>              : 				&quot;&#092;n&quot; </span>
+<span class="lineNum">   45</span>              : 				&quot;Examples:&#092;n&quot; </span>
+<span class="lineNum">   46</span>              : 				&quot;  kcov &#047;tmp&#047;frodo .&#047;frodo          # Check coverage for .&#047;frodo&#092;n&quot; </span>
+<span class="lineNum">   47</span>              : 				&quot;  kcov --pid=1000 &#047;tmp&#047;frodo       # Check coverage for PID 1000&#092;n&quot; </span>
+<span class="lineNum">   48</span>              : 				&quot;  kcov --include-pattern=&#047;src&#047;frodo&#047; &#047;tmp&#047;frodo .&#047;frodo  # Only include files&#092;n&quot; </span>
+<span class="lineNum">   49</span>              : 				&quot;                                                         # including &#047;src&#047;frodo&#092;n&quot; </span>
+<span class="lineNum">   50</span>              : 				&quot;&quot;, </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1: 				m_lowLimit, m_highLimit, m_pathStripLevel); </span>
+<span class="lineNum">   52</span><span class="lineCov">      1  /   1: 		return false; </span>
+<span class="lineNum">   53</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   54</span>              :  </span>
+<span class="lineNum">   55</span><span class="lineNoCov">      0  /   1: 	void printUsage() </span>
+<span class="lineNum">   56</span>              : 	{ </span>
+<span class="lineNum">   57</span><span class="lineNoCov">      0  /   1: 		usage(); </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span><span class="lineCov">      1  /   1: 	bool parse(unsigned int argc, const char *argv[]) </span>
+<span class="lineNum">   61</span>              : 	{ </span>
+<span class="lineNum">   62</span>              : 		static const struct option long_options[] = { </span>
+<span class="lineNum">   63</span>              : 				{&quot;help&quot;, no_argument, 0, &#039;h&#039;}, </span>
+<span class="lineNum">   64</span>              : 				{&quot;pid&quot;, required_argument, 0, &#039;p&#039;}, </span>
+<span class="lineNum">   65</span>              : 				{&quot;sort-type&quot;, required_argument, 0, &#039;s&#039;}, </span>
+<span class="lineNum">   66</span>              : 				{&quot;limits&quot;, required_argument, 0, &#039;l&#039;}, </span>
+<span class="lineNum">   67</span>              : 				{&quot;title&quot;, required_argument, 0, &#039;t&#039;}, </span>
+<span class="lineNum">   68</span>              : 				{&quot;path-strip-level&quot;, required_argument, 0, &#039;S&#039;}, </span>
+<span class="lineNum">   69</span>              : 				{&quot;exclude-pattern&quot;, required_argument, 0, &#039;x&#039;}, </span>
+<span class="lineNum">   70</span>              : 				{&quot;include-pattern&quot;, required_argument, 0, &#039;i&#039;}, </span>
+<span class="lineNum">   71</span>              : 				{&quot;exclude-path&quot;, required_argument, 0, &#039;X&#039;}, </span>
+<span class="lineNum">   72</span>              : 				{&quot;include-path&quot;, required_argument, 0, &#039;I&#039;}, </span>
+<span class="lineNum">   73</span>              : 				{&quot;debug&quot;, required_argument, 0, &#039;D&#039;}, </span>
+<span class="lineNum">   74</span>              : 				&#047;*{&quot;write-file&quot;, required_argument, 0, &#039;w&#039;}, Take back when the kernel stuff works *&#047; </span>
+<span class="lineNum">   75</span>              : 				&#047;*{&quot;read-file&quot;, required_argument, 0, &#039;r&#039;}, Ditto *&#047; </span>
+<span class="lineNum">   76</span>              : 				{0,0,0,0} </span>
+<span class="lineNum">   77</span>              : 		}; </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1: 		unsigned int afterOpts = 0; </span>
+<span class="lineNum">   79</span><span class="lineCov">      1  /   1: 		unsigned int extraNeeded = 2; </span>
+<span class="lineNum">   80</span>              : 		unsigned int lastArg; </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span>              :  </span>
+<span class="lineNum">   83</span><span class="lineCov">      1  /   1: 		m_onlyIncludePath.clear(); </span>
+<span class="lineNum">   84</span><span class="lineCov">      1  /   1: 		m_onlyIncludePattern.clear(); </span>
+<span class="lineNum">   85</span><span class="lineCov">      1  /   1: 		m_excludePath.clear(); </span>
+<span class="lineNum">   86</span><span class="lineCov">      1  /   1: 		m_excludePattern.clear(); </span>
+<span class="lineNum">   87</span>              :  </span>
+<span class="lineNum">   88</span>              : 		&#047;* Scan through the parameters for an ELF file: That will be the </span>
+<span class="lineNum">   89</span>              : 		 * second last argument in the list. </span>
+<span class="lineNum">   90</span>              : 		 * </span>
+<span class="lineNum">   91</span>              : 		 * After that it&#039;s arguments to the external program. </span>
+<span class="lineNum">   92</span>              : 		 *&#047; </span>
+<span class="lineNum">   93</span><span class="lineCov">      2  /   2: 		for (lastArg = 1; lastArg &lt; argc; lastArg++) { </span>
+<span class="lineNum">   94</span><span class="lineCov">      1  /   1: 			if (file_is_elf(argv[lastArg])) </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">   96</span>              : 		} </span>
+<span class="lineNum">   97</span>              :  </span>
+<span class="lineNum">   98</span>              : 		&#047;* Hooray for reentrancy... *&#047; </span>
+<span class="lineNum">   99</span><span class="lineCov">      1  /   1: 		optind = 0; </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1: 		optarg = 0; </span>
+<span class="lineNum">  101</span><span class="lineCov">      2  /   2: 		while (1) { </span>
+<span class="lineNum">  102</span>              : 			char *endp; </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1: 			int option_index = 0; </span>
+<span class="lineNum">  104</span>              : 			int c; </span>
+<span class="lineNum">  105</span>              :  </span>
+<span class="lineNum">  106</span>              : 			c = getopt_long (lastArg, (char **)argv, </span>
+<span class="lineNum">  107</span><span class="lineCov">      1  /   1: 					&quot;hp:s:l:t:&quot;, long_options, &amp;option_index); </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span>              : 			&#047;* No more options *&#047; </span>
+<span class="lineNum">  110</span><span class="lineCov">      1  /   1: 			if (c == -1) </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  112</span>              :  </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1: 			switch (c) { </span>
+<span class="lineNum">  114</span>              : 			case 0: </span>
+<span class="lineNum">  115</span><span class="lineNoCov">      0  /   1: 				break; </span>
+<span class="lineNum">  116</span>              : 			case &#039;h&#039;: </span>
+<span class="lineNum">  117</span><span class="lineCov">      1  /   1: 				return usage(); </span>
+<span class="lineNum">  118</span>              : 			case &#039;p&#039;: </span>
+<span class="lineNum">  119</span><span class="lineNoCov">      0  /   1: 				m_ptracePid = strtoul(optarg, &amp;endp, 0); </span>
+<span class="lineNum">  120</span><span class="lineNoCov">      0  /   1: 				extraNeeded = 1; </span>
+<span class="lineNum">  121</span><span class="lineNoCov">      0  /   1: 				break; </span>
+<span class="lineNum">  122</span>              : 			case &#039;s&#039;: </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1: 				if (*optarg == &#039;p&#039; || *optarg == &#039;P&#039;) </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1: 					m_sortType = PERCENTAGE; </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 				else if (*optarg == &#039;u&#039; || *optarg == &#039;U&#039;) </span>
+<span class="lineNum">  126</span><span class="lineNoCov">      0  /   1: 					m_sortType = UNCOVERED_LINES; </span>
+<span class="lineNum">  127</span><span class="lineCov">      1  /   1: 				else if (*optarg == &#039;l&#039; || *optarg == &#039;L&#039;) </span>
+<span class="lineNum">  128</span><span class="lineNoCov">      0  /   1: 					m_sortType = FILE_LENGTH; </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1: 				else if (*optarg != &#039;f&#039; &amp;&amp; *optarg != &#039;F&#039;) </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1: 					return usage(); </span>
+<span class="lineNum">  131</span><span class="lineCov">      2  /   2: 				break; </span>
+<span class="lineNum">  132</span>              : 			case &#039;t&#039;: </span>
+<span class="lineNum">  133</span><span class="lineNoCov">      0  /   1: 				m_title = optarg; </span>
+<span class="lineNum">  134</span><span class="lineNoCov">      0  /   1: 				break; </span>
+<span class="lineNum">  135</span>              : 			case &#039;S&#039;: </span>
+<span class="lineNum">  136</span><span class="linePartCov">      1  /   2: 				if (!isInteger(std::string(optarg))) </span>
+<span class="lineNum">  137</span><span class="lineCov">      1  /   1: 					return usage(); </span>
+<span class="lineNum">  138</span><span class="linePartCov">      1  /   2: 				m_pathStripLevel = stoul(std::string(optarg)); </span>
+<span class="lineNum">  139</span><span class="lineCov">      1  /   1: 				if (m_pathStripLevel == 0) </span>
+<span class="lineNum">  140</span><span class="lineNoCov">      0  /   1: 					m_pathStripLevel = ~0; </span>
+<span class="lineNum">  141</span><span class="linePartCov">      1  /   2: 				break; </span>
+<span class="lineNum">  142</span>              : 			case &#039;D&#039;: </span>
+<span class="lineNum">  143</span><span class="lineNoCov">      0  /   2: 				if (!isInteger(std::string(optarg))) </span>
+<span class="lineNum">  144</span><span class="lineNoCov">      0  /   1: 					return usage(); </span>
+<span class="lineNum">  145</span><span class="lineNoCov">      0  /   2: 				g_kcov_debug_mask = stoul(std::string(optarg)); </span>
+<span class="lineNum">  146</span><span class="lineNoCov">      0  /   1: 				break; </span>
+<span class="lineNum">  147</span>              : 			case &#039;i&#039;: </span>
+<span class="lineNum">  148</span><span class="linePartCov">      1  /   2: 				m_onlyIncludePattern = getCommaSeparatedList(std::string(optarg)); </span>
+<span class="lineNum">  149</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  150</span>              : 			case &#039;x&#039;: </span>
+<span class="lineNum">  151</span><span class="linePartCov">      1  /   2: 				m_excludePattern = getCommaSeparatedList(std::string(optarg)); </span>
+<span class="lineNum">  152</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  153</span>              : 			case &#039;I&#039;: </span>
+<span class="lineNum">  154</span><span class="linePartCov">      1  /   2: 				m_onlyIncludePath = getCommaSeparatedList(std::string(optarg)); </span>
+<span class="lineNum">  155</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  156</span>              : 			case &#039;X&#039;: </span>
+<span class="lineNum">  157</span><span class="linePartCov">      1  /   2: 				m_excludePath = getCommaSeparatedList(std::string(optarg)); </span>
+<span class="lineNum">  158</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  159</span>              : 			case &#039;l&#039;: { </span>
+<span class="lineNum">  160</span><span class="linePartCov">      1  /   2: 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg)); </span>
+<span class="lineNum">  161</span>              :  </span>
+<span class="lineNum">  162</span><span class="lineCov">      1  /   1: 				if (vec.size() != 2) </span>
+<span class="lineNum">  163</span><span class="lineCov">      1  /   1: 					return usage(); </span>
+<span class="lineNum">  164</span>              :  </span>
+<span class="lineNum">  165</span><span class="linePartCov">      1  /   2: 				if (!isInteger(vec[0]) || !isInteger(vec[1])) </span>
+<span class="lineNum">  166</span><span class="lineCov">      1  /   1: 					return usage(); </span>
+<span class="lineNum">  167</span>              :  </span>
+<span class="lineNum">  168</span><span class="lineCov">      1  /   1: 				m_lowLimit = stoul(vec[0]); </span>
+<span class="lineNum">  169</span><span class="lineCov">      1  /   1: 				m_highLimit = stoul(vec[1]); </span>
+<span class="lineNum">  170</span><span class="linePartCov">      1  /   2: 				break; </span>
+<span class="lineNum">  171</span>              : 			} </span>
+<span class="lineNum">  172</span>              : 			default: </span>
+<span class="lineNum">  173</span><span class="lineNoCov">      0  /   1: 				error(&quot;Unrecognized option: -%c&#092;n&quot;, optopt); </span>
+<span class="lineNum">  174</span><span class="lineNoCov">      0  /   1: 				break; </span>
+<span class="lineNum">  175</span>              : 			} </span>
+<span class="lineNum">  176</span>              : 		} </span>
+<span class="lineNum">  177</span>              :  </span>
+<span class="lineNum">  178</span><span class="lineCov">      1  /   1: 		afterOpts = optind; </span>
+<span class="lineNum">  179</span>              :  </span>
+<span class="lineNum">  180</span>              : 		&#047;* When tracing by PID, the filename is optional *&#047; </span>
+<span class="lineNum">  181</span><span class="lineCov">      1  /   1: 		if (argc &lt; afterOpts + extraNeeded) </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1: 			return usage(); </span>
+<span class="lineNum">  183</span>              :  </span>
+<span class="lineNum">  184</span><span class="lineCov">      1  /   1: 		m_outDirectory = argv[afterOpts]; </span>
+<span class="lineNum">  185</span><span class="lineCov">      1  /   1: 		if (m_outDirectory[m_outDirectory.size() - 1] != &#039;&#047;&#039;) </span>
+<span class="lineNum">  186</span><span class="lineCov">      1  /   1: 			m_outDirectory += &quot;&#047;&quot;; </span>
+<span class="lineNum">  187</span><span class="lineCov">      1  /   1: 		if (argc &gt;= afterOpts + 2) </span>
+<span class="lineNum">  188</span>              : 		{ </span>
+<span class="lineNum">  189</span><span class="linePartCov">      1  /   2: 			StringPair_t tmp = splitPath(argv[afterOpts + 1]); </span>
+<span class="lineNum">  190</span>              :  </span>
+<span class="lineNum">  191</span><span class="lineCov">      1  /   1: 			m_binaryPath = tmp.first; </span>
+<span class="lineNum">  192</span><span class="linePartCov">      2  /   3: 			m_binaryName = tmp.second; </span>
+<span class="lineNum">  193</span>              : 		} </span>
+<span class="lineNum">  194</span><span class="lineCov">      1  /   1: 		m_programArgs = &amp;argv[afterOpts + 1]; </span>
+<span class="lineNum">  195</span>              :  </span>
+<span class="lineNum">  196</span>              :  </span>
+<span class="lineNum">  197</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">  198</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="lineCov">      1  /   1: 	std::string &amp;getOutDirectory() </span>
+<span class="lineNum">  201</span>              : 	{ </span>
+<span class="lineNum">  202</span><span class="lineCov">      1  /   1: 		return m_outDirectory; </span>
+<span class="lineNum">  203</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  204</span>              :  </span>
+<span class="lineNum">  205</span><span class="lineCov">      1  /   1: 	std::string &amp;getBinaryName() </span>
+<span class="lineNum">  206</span>              : 	{ </span>
+<span class="lineNum">  207</span><span class="lineCov">      1  /   1: 		return m_binaryName; </span>
+<span class="lineNum">  208</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  209</span>              :  </span>
+<span class="lineNum">  210</span><span class="lineCov">      1  /   1: 	std::string &amp;getBinaryPath() </span>
+<span class="lineNum">  211</span>              : 	{ </span>
+<span class="lineNum">  212</span><span class="lineCov">      1  /   1: 		return m_binaryPath; </span>
+<span class="lineNum">  213</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  214</span>              :  </span>
+<span class="lineNum">  215</span><span class="lineCov">      1  /   1: 	unsigned int getLowLimit() </span>
+<span class="lineNum">  216</span>              : 	{ </span>
+<span class="lineNum">  217</span><span class="lineCov">      1  /   1: 		return m_lowLimit; </span>
+<span class="lineNum">  218</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  219</span>              :  </span>
+<span class="lineNum">  220</span><span class="lineCov">      1  /   1: 	unsigned int getHighLimit() </span>
+<span class="lineNum">  221</span>              : 	{ </span>
+<span class="lineNum">  222</span><span class="lineCov">      1  /   1: 		return m_highLimit; </span>
+<span class="lineNum">  223</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  224</span>              :  </span>
+<span class="lineNum">  225</span><span class="lineCov">      1  /   1: 	const char **getArgv() </span>
+<span class="lineNum">  226</span>              : 	{ </span>
+<span class="lineNum">  227</span><span class="lineCov">      1  /   1: 		return m_programArgs; </span>
+<span class="lineNum">  228</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  229</span>              :  </span>
+<span class="lineNum">  230</span><span class="lineCov">      1  /   1: 	enum SortType getSortType() </span>
+<span class="lineNum">  231</span>              : 	{ </span>
+<span class="lineNum">  232</span><span class="lineCov">      1  /   1: 		return m_sortType; </span>
+<span class="lineNum">  233</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  234</span>              :  </span>
+<span class="lineNum">  235</span><span class="lineCov">      1  /   1: 	std::map&lt;unsigned int, std::string&gt; &amp;getExcludePattern() </span>
+<span class="lineNum">  236</span>              : 	{ </span>
+<span class="lineNum">  237</span><span class="lineCov">      1  /   1: 		return m_excludePattern; </span>
+<span class="lineNum">  238</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  239</span>              :  </span>
+<span class="lineNum">  240</span><span class="lineCov">      1  /   1: 	std::map&lt;unsigned int, std::string&gt; &amp;getOnlyIncludePattern() </span>
+<span class="lineNum">  241</span>              : 	{ </span>
+<span class="lineNum">  242</span><span class="lineCov">      1  /   1: 		return m_onlyIncludePattern; </span>
+<span class="lineNum">  243</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  244</span>              :  </span>
+<span class="lineNum">  245</span><span class="lineCov">      1  /   1: 	std::map&lt;unsigned int, std::string&gt; &amp;getOnlyIncludePath() </span>
+<span class="lineNum">  246</span>              : 	{ </span>
+<span class="lineNum">  247</span><span class="lineCov">      1  /   1: 		return m_onlyIncludePath; </span>
+<span class="lineNum">  248</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  249</span>              :  </span>
+<span class="lineNum">  250</span><span class="lineCov">      1  /   1: 	std::map&lt;unsigned int, std::string&gt; &amp;getExcludePath() </span>
+<span class="lineNum">  251</span>              : 	{ </span>
+<span class="lineNum">  252</span><span class="lineCov">      1  /   1: 		return m_excludePath; </span>
+<span class="lineNum">  253</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  254</span>              :  </span>
+<span class="lineNum">  255</span><span class="lineCov">      1  /   1: 	unsigned int getPathStripLevel() </span>
+<span class="lineNum">  256</span>              : 	{ </span>
+<span class="lineNum">  257</span><span class="lineCov">      1  /   1: 		return m_pathStripLevel; </span>
+<span class="lineNum">  258</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  259</span>              :  </span>
+<span class="lineNum">  260</span>              : 	&#047;&#047; &quot;private&quot;, but we ignore that in the unit test </span>
+<span class="lineNum">  261</span>              : 	typedef std::map&lt;unsigned int, std::string&gt; StrVecMap_t; </span>
+<span class="lineNum">  262</span>              : 	typedef std::pair&lt;std::string, std::string&gt; StringPair_t; </span>
+<span class="lineNum">  263</span>              :  </span>
+<span class="lineNum">  264</span><span class="lineCov">      1  /   1: 	bool isInteger(std::string str) </span>
+<span class="lineNum">  265</span>              : 	{ </span>
+<span class="lineNum">  266</span>              : 		size_t pos; </span>
+<span class="lineNum">  267</span>              :  </span>
+<span class="lineNum">  268</span>              : 		try </span>
+<span class="lineNum">  269</span>              : 		{ </span>
+<span class="lineNum">  270</span><span class="lineCov">      1  /   1: 			stoul(str, &amp;pos); </span>
+<span class="lineNum">  271</span>              : 		} </span>
+<span class="lineNum">  272</span><span class="linePartCov">      2  /   3: 		catch(std::invalid_argument &amp;e) </span>
+<span class="lineNum">  273</span>              : 		{ </span>
+<span class="lineNum">  274</span><span class="lineCov">      1  /   1: 			return false; </span>
+<span class="lineNum">  275</span>              : 		} </span>
+<span class="lineNum">  276</span>              :  </span>
+<span class="lineNum">  277</span><span class="lineCov">      2  /   2: 		return pos == str.size(); </span>
+<span class="lineNum">  278</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  279</span>              :  </span>
+<span class="lineNum">  280</span><span class="lineCov">      1  /   1: 	StrVecMap_t getCommaSeparatedList(std::string str) </span>
+<span class="lineNum">  281</span>              : 	{ </span>
+<span class="lineNum">  282</span><span class="lineCov">      1  /   1: 		StrVecMap_t out; </span>
+<span class="lineNum">  283</span>              :  </span>
+<span class="lineNum">  284</span><span class="lineCov">      1  /   1: 		if (str.find(&#039;,&#039;) == std::string::npos) { </span>
+<span class="lineNum">  285</span><span class="lineCov">      1  /   1: 			out[0] = str; </span>
+<span class="lineNum">  286</span><span class="lineCov">      1  /   1: 			return out; </span>
+<span class="lineNum">  287</span>              : 		} </span>
+<span class="lineNum">  288</span>              :  </span>
+<span class="lineNum">  289</span>              : 		size_t pos, lastPos; </span>
+<span class="lineNum">  290</span><span class="lineCov">      1  /   1: 		unsigned int n = 0; </span>
+<span class="lineNum">  291</span>              :  </span>
+<span class="lineNum">  292</span><span class="lineCov">      1  /   1: 		lastPos = 0; </span>
+<span class="lineNum">  293</span><span class="lineCov">      2  /   2: 		for (pos = str.find_first_of(&quot;,&quot;); </span>
+<span class="lineNum">  294</span>              : 				pos != std::string::npos; </span>
+<span class="lineNum">  295</span><span class="lineCov">      1  /   1: 				pos = str.find_first_of(&quot;,&quot;, pos + 1)) { </span>
+<span class="lineNum">  296</span><span class="lineCov">      1  /   1: 			std::string cur = str.substr(lastPos, pos - lastPos); </span>
+<span class="lineNum">  297</span>              :  </span>
+<span class="lineNum">  298</span><span class="lineCov">      1  /   1: 			out[n++] = cur; </span>
+<span class="lineNum">  299</span><span class="lineCov">      1  /   1: 			lastPos = pos; </span>
+<span class="lineNum">  300</span><span class="linePartCov">      1  /   2: 		} </span>
+<span class="lineNum">  301</span><span class="linePartCov">      1  /   2: 		out[n] = str.substr(lastPos + 1, str.size() - lastPos); </span>
+<span class="lineNum">  302</span>              :  </span>
+<span class="lineNum">  303</span><span class="linePartCov">      1  /   2: 		return out; </span>
+<span class="lineNum">  304</span><span class="lineCov">      2  /   2: 	} </span>
+<span class="lineNum">  305</span>              :  </span>
+<span class="lineNum">  306</span><span class="lineCov">      1  /   1: 	StringPair_t splitPath(const char *pathStr) </span>
+<span class="lineNum">  307</span>              : 	{ </span>
+<span class="lineNum">  308</span><span class="lineCov">      1  /   1: 		StringPair_t out; </span>
+<span class="lineNum">  309</span><span class="linePartCov">      1  /   2: 		std::string path(pathStr); </span>
+<span class="lineNum">  310</span>              :  </span>
+<span class="lineNum">  311</span><span class="lineCov">      1  /   1: 		size_t pos = path.rfind(&#039;&#047;&#039;); </span>
+<span class="lineNum">  312</span>              :  </span>
+<span class="lineNum">  313</span><span class="lineCov">      1  /   1: 		out.first = &quot;&quot;; </span>
+<span class="lineNum">  314</span><span class="lineCov">      1  /   1: 		out.second = path; </span>
+<span class="lineNum">  315</span><span class="lineCov">      1  /   1: 		if (pos != std::string::npos) { </span>
+<span class="lineNum">  316</span><span class="linePartCov">      1  /   2: 			out.first= path.substr(0, pos + 1); </span>
+<span class="lineNum">  317</span><span class="linePartCov">      1  /   2: 			out.second = path.substr(pos + 1, std::string::npos); </span>
+<span class="lineNum">  318</span>              : 		} </span>
+<span class="lineNum">  319</span>              :  </span>
+<span class="lineNum">  320</span><span class="linePartCov">      1  /   2: 		return out; </span>
+<span class="lineNum">  321</span><span class="lineCov">      2  /   2: 	} </span>
+<span class="lineNum">  322</span>              :  </span>
+<span class="lineNum">  323</span>              :  </span>
+<span class="lineNum">  324</span>              : 	unsigned int m_lowLimit; </span>
+<span class="lineNum">  325</span>              : 	unsigned int m_highLimit; </span>
+<span class="lineNum">  326</span>              : 	unsigned int m_pathStripLevel; </span>
+<span class="lineNum">  327</span>              : 	enum SortType m_sortType; </span>
+<span class="lineNum">  328</span>              : 	unsigned int m_ptracePid; </span>
+<span class="lineNum">  329</span>              : 	std::string m_outDirectory; </span>
+<span class="lineNum">  330</span>              : 	std::string m_binaryName; </span>
+<span class="lineNum">  331</span>              : 	std::string m_binaryPath; </span>
+<span class="lineNum">  332</span>              : 	const char **m_programArgs; </span>
+<span class="lineNum">  333</span>              : 	std::string m_title; </span>
+<span class="lineNum">  334</span>              : 	StrVecMap_t m_excludePattern; </span>
+<span class="lineNum">  335</span>              : 	StrVecMap_t m_onlyIncludePattern; </span>
+<span class="lineNum">  336</span>              : 	StrVecMap_t m_excludePath; </span>
+<span class="lineNum">  337</span>              : 	StrVecMap_t m_onlyIncludePath; </span>
+<span class="lineNum">  338</span>              : }; </span>
+<span class="lineNum">  339</span>              :  </span>
+<span class="lineNum">  340</span>              :  </span>
+<span class="lineNum">  341</span>              : IConfiguration &amp; IConfiguration::getInstance() </span>
+<span class="lineNum">  342</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  343</span>              : 	static Configuration *g_instance; </span>
+<span class="lineNum">  344</span>              :  </span>
+<span class="lineNum">  345</span><span class="lineCov">      1  /   1: 	if (!g_instance) </span>
+<span class="lineNum">  346</span><span class="linePartCov">      1  /   2: 		g_instance = new Configuration(); </span>
+<span class="lineNum">  347</span>              :  </span>
+<span class="lineNum">  348</span><span class="lineCov">      1  /   1: 	return *g_instance; </span>
+<span class="lineNum">  349</span><span class="lineCov">      1  /   1: } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a> (based on <a href="http://bcov.sourceforge.net">bcov</a>)</td></tr>
+</table>
+<br/>
+</body>
+</html>

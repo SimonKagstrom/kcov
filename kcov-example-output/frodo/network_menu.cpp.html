@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">77</td>
+          <td class="headerValue" width="10%">79</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftLo" width="15%">6.5 %</td>
+          <td class="coverPerLeftLo" width="15%">6.3%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">5</td>
@@ -35,205 +35,205 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #include &quot;gui.hh&quot; </span>
-<span class="lineNum">      2 </span>              : #include &quot;menu.hh&quot; </span>
-<span class="lineNum">      3 </span>              : #include &quot;help_box.hh&quot; </span>
-<span class="lineNum">      4 </span>              : #include &quot;virtual_keyboard.hh&quot; </span>
-<span class="lineNum">      5 </span>              :  </span>
-<span class="lineNum">      6 </span>              : #include &lt;sysdeps.h&gt; </span>
-<span class="lineNum">      7 </span>              : #include &lt;C64.h&gt; </span>
-<span class="lineNum">      8 </span>              :  </span>
-<span class="lineNum">      9 </span>              : class NetworkView; </span>
-<span class="lineNum">     10 </span>              :  </span>
-<span class="lineNum">     11 </span>              : class NetworkMenu : public Menu, public KeyboardListener </span>
-<span class="lineNum">     12 </span>              : { </span>
-<span class="lineNum">     13 </span>              : 	friend class NetworkView; </span>
-<span class="lineNum">     14 </span>              :  </span>
-<span class="lineNum">     15 </span>              : public: </span>
-<span class="lineNum">     16 </span><span class="lineCov">    2 / 2     : 	NetworkMenu(Font *font, HelpBox *help) : Menu(font) </span>
-<span class="lineNum">     17 </span>              : 	{ </span>
-<span class="lineNum">     18 </span><span class="lineCov">    1 / 1     : 		this-&gt;help = help; </span>
-<span class="lineNum">     19 </span>              : 		memset(this-&gt;messages, 0, sizeof(this-&gt;messages)); </span>
-<span class="lineNum">     20 </span>              : 		memset(this-&gt;strs, 0, sizeof(this-&gt;strs)); </span>
-<span class="lineNum">     21 </span>              : 	} </span>
-<span class="lineNum">     22 </span>              :  </span>
-<span class="lineNum">     23 </span>              : 	~NetworkMenu() </span>
-<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
-<span class="lineNum">     25 </span><span class="lineNoCov">    0 / 4     : 	} </span>
-<span class="lineNum">     26 </span>              :  </span>
-<span class="lineNum">     27 </span><span class="lineNoCov">    0 / 2     : 	virtual void stringCallback(const char *str) </span>
-<span class="lineNum">     28 </span>              : 	{ </span>
-<span class="lineNum">     29 </span><span class="lineNoCov">    0 / 1     : 		switch (this-&gt;cur_sel) </span>
-<span class="lineNum">     30 </span>              : 		{ </span>
-<span class="lineNum">     31 </span>              : 		case 0: </span>
-<span class="lineNum">     32 </span>              : 			strncpy(Gui::gui-&gt;np-&gt;NetworkName, str, sizeof(Gui::gui-&gt;np-&gt;NetworkName)); </span>
-<span class="lineNum">     33 </span>              : 			break; </span>
-<span class="lineNum">     34 </span>              : 		case 1: </span>
-<span class="lineNum">     35 </span>              : 			strncpy(Gui::gui-&gt;np-&gt;NetworkServer, str, sizeof(Gui::gui-&gt;np-&gt;NetworkName)); </span>
-<span class="lineNum">     36 </span>              : 			break; </span>
-<span class="lineNum">     37 </span>              : 		case 2: </span>
-<span class="lineNum">     38 </span>              : 		{ </span>
-<span class="lineNum">     39 </span>              : 			char *endp; </span>
-<span class="lineNum">     40 </span>              : 			unsigned long v; </span>
-<span class="lineNum">     41 </span>              :  </span>
-<span class="lineNum">     42 </span><span class="lineNoCov">    0 / 1     : 			v = strtoul(str, &amp;endp, 0); </span>
-<span class="lineNum">     43 </span><span class="lineNoCov">    0 / 1     : 			if (endp == str) </span>
-<span class="lineNum">     44 </span>              : 			{ </span>
-<span class="lineNum">     45 </span><span class="lineNoCov">    0 / 1     : 				DialogueBox *error_dialogue = new DialogueBox(network_port_dialogue_messages); </span>
-<span class="lineNum">     46 </span>              : 				Gui::gui-&gt;pushDialogueBox(error_dialogue); </span>
-<span class="lineNum">     47 </span>              : 			} </span>
-<span class="lineNum">     48 </span>              : 			else </span>
-<span class="lineNum">     49 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;np-&gt;NetworkPort = v; </span>
-<span class="lineNum">     50 </span>              : 		} break; </span>
-<span class="lineNum">     51 </span>              : 		default: </span>
-<span class="lineNum">     52 </span><span class="lineNoCov">    0 / 1     : 			panic(&quot;Cur sel is %d, not possible!\n&quot;, this-&gt;cur_sel); </span>
-<span class="lineNum">     53 </span>              : 			break; </span>
-<span class="lineNum">     54 </span>              : 		} </span>
-<span class="lineNum">     55 </span>              : 		this-&gt;updateMessages(); </span>
-<span class="lineNum">     56 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">     57 </span>              :  </span>
-<span class="lineNum">     58 </span><span class="lineNoCov">    0 / 2     : 	virtual void selectCallback(int which) </span>
-<span class="lineNum">     59 </span>              : 	{ </span>
-<span class="lineNum">     60 </span>              : 		printf(&quot;option entry %d selected: %s\n&quot;, which, this-&gt;pp_msgs[which]); </span>
-<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 2     : 		switch (which) </span>
-<span class="lineNum">     62 </span>              : 		{ </span>
-<span class="lineNum">     63 </span>              : 		case 0: </span>
-<span class="lineNum">     64 </span>              : 		case 1: </span>
-<span class="lineNum">     65 </span><span class="lineNoCov">    0 / 2     : 			VirtualKeyboard::kbd-&gt;activate(); </span>
-<span class="lineNum">     66 </span><span class="lineNoCov">    0 / 3     : 			VirtualKeyboard::kbd-&gt;registerListener(this); </span>
-<span class="lineNum">     67 </span>              : 			break; </span>
-<span class="lineNum">     68 </span>              : 		case 2: </span>
-<span class="lineNum">     69 </span><span class="lineNoCov">    0 / 2     : 			Gui::gui-&gt;pushView(Gui::gui-&gt;nrv); </span>
-<span class="lineNum">     70 </span>              : 			break; </span>
-<span class="lineNum">     71 </span>              : 		case 4: </span>
-<span class="lineNum">     72 </span><span class="lineNoCov">    0 / 1     : 			if (TheC64-&gt;network) </span>
-<span class="lineNum">     73 </span><span class="lineNoCov">    0 / 2     : 				TheC64-&gt;network-&gt;Disconnect(); </span>
-<span class="lineNum">     74 </span><span class="lineNoCov">    0 / 1     : 			else if ( strncmp(Gui::gui-&gt;np-&gt;NetworkName, &quot;Unset&quot;, strlen(&quot;Unset&quot;)) == 0) </span>
-<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_unset_name_dlg)); </span>
-<span class="lineNum">     76 </span>              : 			else </span>
-<span class="lineNum">     77 </span>              : 			{ </span>
-<span class="lineNum">     78 </span>              : 				TheC64-&gt;network = new Network(Gui::gui-&gt;np-&gt;NetworkServer, </span>
-<span class="lineNum">     79 </span><span class="lineNoCov">    0 / 2     : 						Gui::gui-&gt;np-&gt;NetworkPort); </span>
-<span class="lineNum">     80 </span><span class="lineNoCov">    0 / 1     : 				TheC64-&gt;network_connection_type = CONNECT; </span>
-<span class="lineNum">     81 </span><span class="lineNoCov">    0 / 2     : 				Gui::gui-&gt;exitMenu(); </span>
-<span class="lineNum">     82 </span><span class="lineNoCov">    0 / 3     : 				TheC64-&gt;network-&gt;ConnectToBroker(); </span>
-<span class="lineNum">     83 </span>              : 			} </span>
-<span class="lineNum">     84 </span>              : 			break; </span>
-<span class="lineNum">     85 </span>              : 		case 6: </span>
-<span class="lineNum">     86 </span><span class="lineNoCov">    0 / 1     : 			if (TheC64-&gt;network_connection_type == NONE) </span>
-<span class="lineNum">     87 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_need_connection)); </span>
-<span class="lineNum">     88 </span>              : 			else </span>
-<span class="lineNum">     89 </span>              : 			{ </span>
-<span class="lineNum">     90 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;exitMenu(); </span>
-<span class="lineNum">     91 </span><span class="lineNoCov">    0 / 1     : 				TheC64-&gt;TheDisplay-&gt;TypeNetworkMessage(true); </span>
-<span class="lineNum">     92 </span>              : 			} </span>
-<span class="lineNum">     93 </span>              : 			break; </span>
-<span class="lineNum">     94 </span>              : 		case 7: </span>
-<span class="lineNum">     95 </span><span class="lineNoCov">    0 / 1     : 			if (TheC64-&gt;network_connection_type != MASTER &amp;&amp; </span>
-<span class="lineNum">     96 </span>              : 					TheC64-&gt;network_connection_type != CLIENT) </span>
-<span class="lineNum">     97 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_need_peer)); </span>
-<span class="lineNum">     98 </span>              : 			else </span>
-<span class="lineNum">     99 </span>              : 			{ </span>
-<span class="lineNum">    100 </span><span class="lineNoCov">    0 / 1     : 				Gui::gui-&gt;exitMenu(); </span>
-<span class="lineNum">    101 </span><span class="lineNoCov">    0 / 3     : 				TheC64-&gt;TheDisplay-&gt;TypeNetworkMessage(); </span>
-<span class="lineNum">    102 </span>              : 			} </span>
-<span class="lineNum">    103 </span>              : 			break; </span>
-<span class="lineNum">    104 </span>              : 		default: </span>
-<span class="lineNum">    105 </span>              : 			break; </span>
-<span class="lineNum">    106 </span>              : 		} </span>
-<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 7     : 	} </span>
-<span class="lineNum">    108 </span>              :  </span>
-<span class="lineNum">    109 </span><span class="lineNoCov">    0 / 1     : 	virtual void hoverCallback(int which) </span>
-<span class="lineNum">    110 </span>              : 	{ </span>
-<span class="lineNum">    111 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;help-&gt;updateHelpMessage(which); </span>
-<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 2     : 	} </span>
-<span class="lineNum">    113 </span>              :  </span>
-<span class="lineNum">    114 </span><span class="lineNoCov">    0 / 1     : 	virtual void escapeCallback(int which) </span>
-<span class="lineNum">    115 </span>              : 	{ </span>
-<span class="lineNum">    116 </span><span class="lineNoCov">    0 / 3     : 		Gui::gui-&gt;popView(); </span>
-<span class="lineNum">    117 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    118 </span>              :  </span>
-<span class="lineNum">    119 </span>              : private: </span>
-<span class="lineNum">    120 </span>              : 	void updateMessages() </span>
-<span class="lineNum">    121 </span>              : 	{ </span>
-<span class="lineNum">    122 </span><span class="lineNoCov">    0 / 2     : 		memset(this-&gt;strs, 0, sizeof(this-&gt;strs)); </span>
-<span class="lineNum">    123 </span>              : 		snprintf(this-&gt;strs[0], sizeof(this-&gt;strs[0]) - 1, &quot;Set username (%s)&quot;, </span>
-<span class="lineNum">    124 </span>              : 				Gui::gui-&gt;np-&gt;NetworkName); </span>
-<span class="lineNum">    125 </span>              : 		snprintf(this-&gt;strs[1], sizeof(this-&gt;strs[1]) - 1, &quot;Server (%s)&quot;, </span>
-<span class="lineNum">    126 </span><span class="lineNoCov">    0 / 2     : 				Gui::gui-&gt;np-&gt;NetworkServer); </span>
-<span class="lineNum">    127 </span>              : 		snprintf(this-&gt;strs[2], sizeof(this-&gt;strs[2]) - 1, &quot;Set region (%s)&quot;, </span>
-<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 4     : 				region_to_str(Gui::gui-&gt;np-&gt;NetworkRegion)); </span>
-<span class="lineNum">    129 </span>              :  </span>
-<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[0] = this-&gt;strs[0]; </span>
-<span class="lineNum">    131 </span><span class="lineNoCov">    0 / 4     : 		this-&gt;messages[1] = this-&gt;strs[1]; </span>
-<span class="lineNum">    132 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[2] = this-&gt;strs[2]; </span>
-<span class="lineNum">    133 </span>              :  </span>
-<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[3] = &quot; &quot;; </span>
-<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 8     : 		this-&gt;messages[4] = TheC64-&gt;network ? &quot;Disconnect&quot; : &quot;Connect to the network!&quot;; </span>
-<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[5] = &quot; &quot;; </span>
-<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[6] = &quot;Post network message&quot;; </span>
-<span class="lineNum">    138 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[7] = &quot;Post peer message&quot;; </span>
-<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;messages[8] = NULL; </span>
-<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;setText(this-&gt;messages); </span>
-<span class="lineNum">    141 </span>              : 	} </span>
-<span class="lineNum">    142 </span>              :  </span>
-<span class="lineNum">    143 </span>              : 	char strs[3][255]; </span>
-<span class="lineNum">    144 </span>              : 	const char *messages[9]; </span>
-<span class="lineNum">    145 </span>              :  </span>
-<span class="lineNum">    146 </span>              : 	HelpBox *help; </span>
-<span class="lineNum">    147 </span>              : }; </span>
-<span class="lineNum">    148 </span>              :  </span>
-<span class="lineNum">    149 </span>              :  </span>
-<span class="lineNum">    150 </span>              : class NetworkView : public GuiView </span>
-<span class="lineNum">    151 </span>              : { </span>
-<span class="lineNum">    152 </span>              : public: </span>
-<span class="lineNum">    153 </span><span class="lineCov">    1 / 1     : 	NetworkView() : GuiView() </span>
-<span class="lineNum">    154 </span>              : 	{ </span>
-<span class="lineNum">    155 </span><span class="lineCov">    1 / 1     : 		this-&gt;help = new HelpBox(Gui::gui-&gt;small_font, network_menu_help); </span>
-<span class="lineNum">    156 </span><span class="lineCov">    2 / 2     : 		this-&gt;menu = new NetworkMenu(Gui::gui-&gt;default_font, this-&gt;help); </span>
-<span class="lineNum">    157 </span>              : 	} </span>
-<span class="lineNum">    158 </span>              :  </span>
-<span class="lineNum">    159 </span>              : 	~NetworkView() </span>
-<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 2     : 	{ </span>
-<span class="lineNum">    161 </span><span class="lineNoCov">    0 / 6     : 		delete this-&gt;help; </span>
-<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 4     : 		delete this-&gt;menu; </span>
-<span class="lineNum">    163 </span>              : 	} </span>
-<span class="lineNum">    164 </span>              :  </span>
-<span class="lineNum">    165 </span><span class="lineNoCov">    0 / 1     : 	void runLogic() </span>
-<span class="lineNum">    166 </span>              : 	{ </span>
-<span class="lineNum">    167 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;menu-&gt;runLogic(); </span>
-<span class="lineNum">    168 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    169 </span>              :  </span>
-<span class="lineNum">    170 </span><span class="lineNoCov">    0 / 1     : 	void pushEvent(event_t ev) </span>
-<span class="lineNum">    171 </span>              : 	{ </span>
-<span class="lineNum">    172 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;menu-&gt;pushEvent(ev); </span>
-<span class="lineNum">    173 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    174 </span>              :  </span>
-<span class="lineNum">    175 </span><span class="lineNoCov">    0 / 2     : 	void viewPushCallback() </span>
-<span class="lineNum">    176 </span>              : 	{ </span>
-<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 		this-&gt;menu-&gt;updateMessages(); </span>
-<span class="lineNum">    178 </span><span class="lineNoCov">    0 / 1     : 	} </span>
-<span class="lineNum">    179 </span>              :  </span>
-<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 3     : 	void draw(SDL_Surface *where) </span>
-<span class="lineNum">    181 </span>              : 	{ </span>
-<span class="lineNum">    182 </span>              : 		 SDL_Rect dst; </span>
-<span class="lineNum">    183 </span>              :  </span>
-<span class="lineNum">    184 </span>              : 		 /* Blit the backgrounds */ </span>
-<span class="lineNum">    185 </span><span class="lineNoCov">    0 / 1     : 		 dst = (SDL_Rect){20,45,300,400}; </span>
-<span class="lineNum">    186 </span><span class="lineNoCov">    0 / 3     : 		 SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
-<span class="lineNum">    187 </span>              :  </span>
-<span class="lineNum">    188 </span><span class="lineNoCov">    0 / 1     : 		 dst = (SDL_Rect){350,13,0,0}; </span>
-<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 2     : 		 SDL_BlitSurface(Gui::gui-&gt;infobox, NULL, where, &amp;dst); </span>
-<span class="lineNum">    190 </span>              :  </span>
-<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 1     : 		 this-&gt;menu-&gt;draw(where, 50, 70, 300, 400); </span>
-<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 1     : 		 this-&gt;help-&gt;draw(where, 354, 24, 264, 210); </span>
-<span class="lineNum">    193 </span><span class="lineNoCov">    0 / 1     : 		 Gui::gui-&gt;server_msgs-&gt;draw(where); </span>
-<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 2     : 	} </span>
-<span class="lineNum">    195 </span>              :  </span>
-<span class="lineNum">    196 </span>              : protected: </span>
-<span class="lineNum">    197 </span>              : 	NetworkMenu *menu; </span>
-<span class="lineNum">    198 </span>              : 	HelpBox *help; </span>
-<span class="lineNum">    199 </span>              : }; </span>
+<span class="lineNum">    1</span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">    2</span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">    3</span>              : #include &quot;help_box.hh&quot; </span>
+<span class="lineNum">    4</span>              : #include &quot;virtual_keyboard.hh&quot; </span>
+<span class="lineNum">    5</span>              :  </span>
+<span class="lineNum">    6</span>              : #include &lt;sysdeps.h&gt; </span>
+<span class="lineNum">    7</span>              : #include &lt;C64.h&gt; </span>
+<span class="lineNum">    8</span>              :  </span>
+<span class="lineNum">    9</span>              : class NetworkView; </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : class NetworkMenu : public Menu, public KeyboardListener </span>
+<span class="lineNum">   12</span>              : { </span>
+<span class="lineNum">   13</span>              : 	friend class NetworkView; </span>
+<span class="lineNum">   14</span>              :  </span>
+<span class="lineNum">   15</span>              : public: </span>
+<span class="lineNum">   16</span><span class="lineCov">      2  /   2: 	NetworkMenu(Font *font, HelpBox *help) : Menu(font) </span>
+<span class="lineNum">   17</span>              : 	{ </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: 		this-&gt;help = help; </span>
+<span class="lineNum">   19</span>              : 		memset(this-&gt;messages, 0, sizeof(this-&gt;messages)); </span>
+<span class="lineNum">   20</span>              : 		memset(this-&gt;strs, 0, sizeof(this-&gt;strs)); </span>
+<span class="lineNum">   21</span>              : 	} </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : 	~NetworkMenu() </span>
+<span class="lineNum">   24</span><span class="lineNoCov">      0  /   1: 	{ </span>
+<span class="lineNum">   25</span>              : 	} </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span><span class="lineNoCov">      0  /   2: 	virtual void stringCallback(const char *str) </span>
+<span class="lineNum">   28</span>              : 	{ </span>
+<span class="lineNum">   29</span><span class="lineNoCov">      0  /   1: 		switch (this-&gt;cur_sel) </span>
+<span class="lineNum">   30</span>              : 		{ </span>
+<span class="lineNum">   31</span>              : 		case 0: </span>
+<span class="lineNum">   32</span><span class="lineNoCov">      0  /   2: 			strncpy(Gui::gui-&gt;np-&gt;NetworkName, str, sizeof(Gui::gui-&gt;np-&gt;NetworkName)); </span>
+<span class="lineNum">   33</span>              : 			break; </span>
+<span class="lineNum">   34</span>              : 		case 1: </span>
+<span class="lineNum">   35</span><span class="lineNoCov">      0  /   2: 			strncpy(Gui::gui-&gt;np-&gt;NetworkServer, str, sizeof(Gui::gui-&gt;np-&gt;NetworkName)); </span>
+<span class="lineNum">   36</span>              : 			break; </span>
+<span class="lineNum">   37</span>              : 		case 2: </span>
+<span class="lineNum">   38</span>              : 		{ </span>
+<span class="lineNum">   39</span>              : 			char *endp; </span>
+<span class="lineNum">   40</span>              : 			unsigned long v; </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span><span class="lineNoCov">      0  /   1: 			v = strtoul(str, &amp;endp, 0); </span>
+<span class="lineNum">   43</span><span class="lineNoCov">      0  /   1: 			if (endp == str) </span>
+<span class="lineNum">   44</span>              : 			{ </span>
+<span class="lineNum">   45</span><span class="lineNoCov">      0  /   1: 				DialogueBox *error_dialogue = new DialogueBox(network_port_dialogue_messages); </span>
+<span class="lineNum">   46</span>              : 				Gui::gui-&gt;pushDialogueBox(error_dialogue); </span>
+<span class="lineNum">   47</span>              : 			} </span>
+<span class="lineNum">   48</span>              : 			else </span>
+<span class="lineNum">   49</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;np-&gt;NetworkPort = v; </span>
+<span class="lineNum">   50</span>              : 		} break; </span>
+<span class="lineNum">   51</span>              : 		default: </span>
+<span class="lineNum">   52</span><span class="lineNoCov">      0  /   1: 			panic(&quot;Cur sel is %d, not possible!&#092;n&quot;, this-&gt;cur_sel); </span>
+<span class="lineNum">   53</span>              : 			break; </span>
+<span class="lineNum">   54</span>              : 		} </span>
+<span class="lineNum">   55</span>              : 		this-&gt;updateMessages(); </span>
+<span class="lineNum">   56</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">   57</span>              :  </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   2: 	virtual void selectCallback(int which) </span>
+<span class="lineNum">   59</span>              : 	{ </span>
+<span class="lineNum">   60</span><span class="lineNoCov">      0  /   1: 		printf(&quot;option entry %d selected: %s&#092;n&quot;, which, this-&gt;pp_msgs[which]); </span>
+<span class="lineNum">   61</span><span class="lineNoCov">      0  /   2: 		switch (which) </span>
+<span class="lineNum">   62</span>              : 		{ </span>
+<span class="lineNum">   63</span>              : 		case 0: </span>
+<span class="lineNum">   64</span>              : 		case 1: </span>
+<span class="lineNum">   65</span><span class="lineNoCov">      0  /   2: 			VirtualKeyboard::kbd-&gt;activate(); </span>
+<span class="lineNum">   66</span><span class="lineNoCov">      0  /   3: 			VirtualKeyboard::kbd-&gt;registerListener(this); </span>
+<span class="lineNum">   67</span>              : 			break; </span>
+<span class="lineNum">   68</span>              : 		case 2: </span>
+<span class="lineNum">   69</span><span class="lineNoCov">      0  /   2: 			Gui::gui-&gt;pushView(Gui::gui-&gt;nrv); </span>
+<span class="lineNum">   70</span>              : 			break; </span>
+<span class="lineNum">   71</span>              : 		case 4: </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   1: 			if (TheC64-&gt;network) </span>
+<span class="lineNum">   73</span><span class="lineNoCov">      0  /   2: 				TheC64-&gt;network-&gt;Disconnect(); </span>
+<span class="lineNum">   74</span><span class="lineNoCov">      0  /   1: 			else if ( strncmp(Gui::gui-&gt;np-&gt;NetworkName, &quot;Unset&quot;, strlen(&quot;Unset&quot;)) == 0) </span>
+<span class="lineNum">   75</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_unset_name_dlg)); </span>
+<span class="lineNum">   76</span>              : 			else </span>
+<span class="lineNum">   77</span>              : 			{ </span>
+<span class="lineNum">   78</span>              : 				TheC64-&gt;network = new Network(Gui::gui-&gt;np-&gt;NetworkServer, </span>
+<span class="lineNum">   79</span><span class="lineNoCov">      0  /   2: 						Gui::gui-&gt;np-&gt;NetworkPort); </span>
+<span class="lineNum">   80</span><span class="lineNoCov">      0  /   1: 				TheC64-&gt;network_connection_type = CONNECT; </span>
+<span class="lineNum">   81</span><span class="lineNoCov">      0  /   2: 				Gui::gui-&gt;exitMenu(); </span>
+<span class="lineNum">   82</span><span class="lineNoCov">      0  /   3: 				TheC64-&gt;network-&gt;ConnectToBroker(); </span>
+<span class="lineNum">   83</span>              : 			} </span>
+<span class="lineNum">   84</span>              : 			break; </span>
+<span class="lineNum">   85</span>              : 		case 6: </span>
+<span class="lineNum">   86</span><span class="lineNoCov">      0  /   1: 			if (TheC64-&gt;network_connection_type == NONE) </span>
+<span class="lineNum">   87</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_need_connection)); </span>
+<span class="lineNum">   88</span>              : 			else </span>
+<span class="lineNum">   89</span>              : 			{ </span>
+<span class="lineNum">   90</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;exitMenu(); </span>
+<span class="lineNum">   91</span><span class="lineNoCov">      0  /   1: 				TheC64-&gt;TheDisplay-&gt;TypeNetworkMessage(true); </span>
+<span class="lineNum">   92</span>              : 			} </span>
+<span class="lineNum">   93</span>              : 			break; </span>
+<span class="lineNum">   94</span>              : 		case 7: </span>
+<span class="lineNum">   95</span><span class="lineNoCov">      0  /   1: 			if (TheC64-&gt;network_connection_type != MASTER &amp;&amp; </span>
+<span class="lineNum">   96</span>              : 					TheC64-&gt;network_connection_type != CLIENT) </span>
+<span class="lineNum">   97</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;pushDialogueBox(new DialogueBox(network_need_peer)); </span>
+<span class="lineNum">   98</span>              : 			else </span>
+<span class="lineNum">   99</span>              : 			{ </span>
+<span class="lineNum">  100</span><span class="lineNoCov">      0  /   1: 				Gui::gui-&gt;exitMenu(); </span>
+<span class="lineNum">  101</span><span class="lineNoCov">      0  /   3: 				TheC64-&gt;TheDisplay-&gt;TypeNetworkMessage(); </span>
+<span class="lineNum">  102</span>              : 			} </span>
+<span class="lineNum">  103</span>              : 			break; </span>
+<span class="lineNum">  104</span>              : 		default: </span>
+<span class="lineNum">  105</span>              : 			break; </span>
+<span class="lineNum">  106</span>              : 		} </span>
+<span class="lineNum">  107</span><span class="lineNoCov">      0  /   7: 	} </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span><span class="lineNoCov">      0  /   1: 	virtual void hoverCallback(int which) </span>
+<span class="lineNum">  110</span>              : 	{ </span>
+<span class="lineNum">  111</span><span class="lineNoCov">      0  /   1: 		this-&gt;help-&gt;updateHelpMessage(which); </span>
+<span class="lineNum">  112</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  113</span>              :  </span>
+<span class="lineNum">  114</span><span class="lineNoCov">      0  /   1: 	virtual void escapeCallback(int which) </span>
+<span class="lineNum">  115</span>              : 	{ </span>
+<span class="lineNum">  116</span><span class="lineNoCov">      0  /   3: 		Gui::gui-&gt;popView(); </span>
+<span class="lineNum">  117</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  118</span>              :  </span>
+<span class="lineNum">  119</span>              : private: </span>
+<span class="lineNum">  120</span>              : 	void updateMessages() </span>
+<span class="lineNum">  121</span>              : 	{ </span>
+<span class="lineNum">  122</span>              : 		memset(this-&gt;strs, 0, sizeof(this-&gt;strs)); </span>
+<span class="lineNum">  123</span>              : 		snprintf(this-&gt;strs[0], sizeof(this-&gt;strs[0]) - 1, &quot;Set username (%s)&quot;, </span>
+<span class="lineNum">  124</span><span class="lineNoCov">      0  /   6: 				Gui::gui-&gt;np-&gt;NetworkName); </span>
+<span class="lineNum">  125</span>              : 		snprintf(this-&gt;strs[1], sizeof(this-&gt;strs[1]) - 1, &quot;Server (%s)&quot;, </span>
+<span class="lineNum">  126</span><span class="lineNoCov">      0  /   4: 				Gui::gui-&gt;np-&gt;NetworkServer); </span>
+<span class="lineNum">  127</span>              : 		snprintf(this-&gt;strs[2], sizeof(this-&gt;strs[2]) - 1, &quot;Set region (%s)&quot;, </span>
+<span class="lineNum">  128</span><span class="lineNoCov">      0  /   4: 				region_to_str(Gui::gui-&gt;np-&gt;NetworkRegion)); </span>
+<span class="lineNum">  129</span>              :  </span>
+<span class="lineNum">  130</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[0] = this-&gt;strs[0]; </span>
+<span class="lineNum">  131</span><span class="lineNoCov">      0  /   4: 		this-&gt;messages[1] = this-&gt;strs[1]; </span>
+<span class="lineNum">  132</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[2] = this-&gt;strs[2]; </span>
+<span class="lineNum">  133</span>              :  </span>
+<span class="lineNum">  134</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[3] = &quot; &quot;; </span>
+<span class="lineNum">  135</span><span class="lineNoCov">      0  /   6: 		this-&gt;messages[4] = TheC64-&gt;network ? &quot;Disconnect&quot; : &quot;Connect to the network!&quot;; </span>
+<span class="lineNum">  136</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[5] = &quot; &quot;; </span>
+<span class="lineNum">  137</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[6] = &quot;Post network message&quot;; </span>
+<span class="lineNum">  138</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[7] = &quot;Post peer message&quot;; </span>
+<span class="lineNum">  139</span><span class="lineNoCov">      0  /   2: 		this-&gt;messages[8] = NULL; </span>
+<span class="lineNum">  140</span><span class="lineNoCov">      0  /   4: 		this-&gt;setText(this-&gt;messages); </span>
+<span class="lineNum">  141</span>              : 	} </span>
+<span class="lineNum">  142</span>              :  </span>
+<span class="lineNum">  143</span>              : 	char strs[3][255]; </span>
+<span class="lineNum">  144</span>              : 	const char *messages[9]; </span>
+<span class="lineNum">  145</span>              :  </span>
+<span class="lineNum">  146</span>              : 	HelpBox *help; </span>
+<span class="lineNum">  147</span>              : }; </span>
+<span class="lineNum">  148</span>              :  </span>
+<span class="lineNum">  149</span>              :  </span>
+<span class="lineNum">  150</span>              : class NetworkView : public GuiView </span>
+<span class="lineNum">  151</span>              : { </span>
+<span class="lineNum">  152</span>              : public: </span>
+<span class="lineNum">  153</span><span class="lineCov">      1  /   1: 	NetworkView() : GuiView() </span>
+<span class="lineNum">  154</span>              : 	{ </span>
+<span class="lineNum">  155</span><span class="lineCov">      3  /   3: 		this-&gt;help = new HelpBox(Gui::gui-&gt;small_font, network_menu_help); </span>
+<span class="lineNum">  156</span><span class="lineCov">      2  /   2: 		this-&gt;menu = new NetworkMenu(Gui::gui-&gt;default_font, this-&gt;help); </span>
+<span class="lineNum">  157</span>              : 	} </span>
+<span class="lineNum">  158</span>              :  </span>
+<span class="lineNum">  159</span>              : 	~NetworkView() </span>
+<span class="lineNum">  160</span><span class="lineNoCov">      0  /   1: 	{ </span>
+<span class="lineNum">  161</span><span class="lineNoCov">      0  /   3: 		delete this-&gt;help; </span>
+<span class="lineNum">  162</span><span class="lineNoCov">      0  /   2: 		delete this-&gt;menu; </span>
+<span class="lineNum">  163</span>              : 	} </span>
+<span class="lineNum">  164</span>              :  </span>
+<span class="lineNum">  165</span><span class="lineNoCov">      0  /   1: 	void runLogic() </span>
+<span class="lineNum">  166</span>              : 	{ </span>
+<span class="lineNum">  167</span><span class="lineNoCov">      0  /   3: 		this-&gt;menu-&gt;runLogic(); </span>
+<span class="lineNum">  168</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  169</span>              :  </span>
+<span class="lineNum">  170</span><span class="lineNoCov">      0  /   1: 	void pushEvent(event_t ev) </span>
+<span class="lineNum">  171</span>              : 	{ </span>
+<span class="lineNum">  172</span><span class="lineNoCov">      0  /   3: 		this-&gt;menu-&gt;pushEvent(ev); </span>
+<span class="lineNum">  173</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">  174</span>              :  </span>
+<span class="lineNum">  175</span><span class="lineNoCov">      0  /   2: 	void viewPushCallback() </span>
+<span class="lineNum">  176</span>              : 	{ </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   1: 		this-&gt;menu-&gt;updateMessages(); </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  179</span>              :  </span>
+<span class="lineNum">  180</span><span class="lineNoCov">      0  /   3: 	void draw(SDL_Surface *where) </span>
+<span class="lineNum">  181</span>              : 	{ </span>
+<span class="lineNum">  182</span>              : 		 SDL_Rect dst; </span>
+<span class="lineNum">  183</span>              :  </span>
+<span class="lineNum">  184</span>              : 		 &#047;* Blit the backgrounds *&#047; </span>
+<span class="lineNum">  185</span><span class="lineNoCov">      0  /   1: 		 dst = (SDL_Rect){20,45,300,400}; </span>
+<span class="lineNum">  186</span><span class="lineNoCov">      0  /   3: 		 SDL_BlitSurface(Gui::gui-&gt;main_menu_bg, NULL, where, &amp;dst); </span>
+<span class="lineNum">  187</span>              :  </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   1: 		 dst = (SDL_Rect){350,13,0,0}; </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   2: 		 SDL_BlitSurface(Gui::gui-&gt;infobox, NULL, where, &amp;dst); </span>
+<span class="lineNum">  190</span>              :  </span>
+<span class="lineNum">  191</span><span class="lineNoCov">      0  /   1: 		 this-&gt;menu-&gt;draw(where, 50, 70, 300, 400); </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1: 		 this-&gt;help-&gt;draw(where, 354, 24, 264, 210); </span>
+<span class="lineNum">  193</span><span class="lineNoCov">      0  /   1: 		 Gui::gui-&gt;server_msgs-&gt;draw(where); </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  195</span>              :  </span>
+<span class="lineNum">  196</span>              : protected: </span>
+<span class="lineNum">  197</span>              : 	NetworkMenu *menu; </span>
+<span class="lineNum">  198</span>              : 	HelpBox *help; </span>
+<span class="lineNum">  199</span>              : }; </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

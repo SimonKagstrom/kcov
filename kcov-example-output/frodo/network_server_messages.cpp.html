@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">34</td>
+          <td class="headerValue" width="10%">37</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftMed" width="15%">35.3 %</td>
+          <td class="coverPerLeftMed" width="15%">32.4%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">12</td>
@@ -35,84 +35,84 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #include &quot;network_server_messages.hh&quot; </span>
-<span class="lineNum">      2 </span>              : #include &quot;utils.hh&quot; </span>
-<span class="lineNum">      3 </span>              :  </span>
-<span class="lineNum">      4 </span><span class="linePartCov">    2 / 4     : NetworkServerMessages::NetworkServerMessages() : StatusBar() </span>
-<span class="lineNum">      5 </span>              : { </span>
-<span class="lineNum">      6 </span>              : 	unsigned i; </span>
-<span class="lineNum">      7 </span>              :  </span>
-<span class="lineNum">      8 </span><span class="linePartCov">    1 / 2     : 	for (i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
-<span class="lineNum">      9 </span><span class="linePartCov">    1 / 2     : 		this-&gt;flowed_messages[i] = (char *)xmalloc(28); </span>
-<span class="lineNum">     10 </span><span class="linePartCov">    1 / 2     : 	this-&gt;flowed_messages[i] = NULL; </span>
-<span class="lineNum">     11 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">     12 </span>              :  </span>
-<span class="lineNum">     13 </span><span class="lineNoCov">    0 / 4     : NetworkServerMessages::~NetworkServerMessages() </span>
-<span class="lineNum">     14 </span>              : { </span>
-<span class="lineNum">     15 </span><span class="lineNoCov">    0 / 4     : 	for (unsigned i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
-<span class="lineNum">     16 </span><span class="lineNoCov">    0 / 4     : 		free(this-&gt;flowed_messages[i]); </span>
-<span class="lineNum">     17 </span><span class="lineNoCov">    0 / 2     : } </span>
-<span class="lineNum">     18 </span>              :  </span>
-<span class="lineNum">     19 </span>              : void NetworkServerMessages::draw(SDL_Surface *where) </span>
-<span class="lineNum">     20 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">     21 </span>              : 	SDL_Rect dst; </span>
-<span class="lineNum">     22 </span>              : 	int x = 350; </span>
-<span class="lineNum">     23 </span>              : 	int y = 242; </span>
-<span class="lineNum">     24 </span><span class="lineCov">    3 / 3     : 	int w = Gui::gui-&gt;network_message_box-&gt;w; </span>
-<span class="lineNum">     25 </span><span class="lineCov">    1 / 1     : 	int h = Gui::gui-&gt;network_message_box-&gt;h; </span>
-<span class="lineNum">     26 </span>              :  </span>
-<span class="lineNum">     27 </span><span class="lineCov">    2 / 2     : 	dst = (SDL_Rect){x,y,0,0}; </span>
-<span class="lineNum">     28 </span><span class="lineCov">    4 / 4     : 	SDL_BlitSurface(Gui::gui-&gt;network_message_box, NULL, where, &amp;dst); </span>
-<span class="lineNum">     29 </span>              :  </span>
-<span class="lineNum">     30 </span><span class="lineCov">    3 / 3     : 	Menu::draw(where, x+6, y+8, w-6, h-8); </span>
-<span class="lineNum">     31 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">     32 </span>              :  </span>
-<span class="lineNum">     33 </span>              : void NetworkServerMessages::timeoutCallback() </span>
-<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">     35 </span>              : 	const char *cur = this-&gt;messages[this-&gt;tail]; </span>
-<span class="lineNum">     36 </span>              : 	char *cpy = xstrdup(cur); </span>
-<span class="lineNum">     37 </span>              : 	char *msgp; </span>
-<span class="lineNum">     38 </span>              : 	char *p; </span>
-<span class="lineNum">     39 </span>              : 	size_t line_len = 0; </span>
-<span class="lineNum">     40 </span>              : 	size_t line = 0; </span>
-<span class="lineNum">     41 </span>              :  </span>
-<span class="lineNum">     42 </span><span class="lineNoCov">    0 / 2     : 	for (unsigned i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
-<span class="lineNum">     43 </span><span class="lineNoCov">    0 / 2     : 		this-&gt;flowed_messages[i][0] = '\0'; </span>
-<span class="lineNum">     44 </span>              :  </span>
-<span class="lineNum">     45 </span><span class="lineNoCov">    0 / 3     : 	p = strtok_r(cpy, &quot; &quot;, &amp;msgp); </span>
-<span class="lineNum">     46 </span><span class="lineNoCov">    0 / 7     : 	while (p) </span>
-<span class="lineNum">     47 </span>              : 	{ </span>
-<span class="lineNum">     48 </span><span class="lineNoCov">    0 / 1     : 		int word_len = strlen(p); </span>
-<span class="lineNum">     49 </span>              :  </span>
-<span class="lineNum">     50 </span><span class="lineNoCov">    0 / 1     : 		if (line_len + word_len &gt; 24) </span>
-<span class="lineNum">     51 </span>              : 		{ </span>
-<span class="lineNum">     52 </span><span class="lineNoCov">    0 / 1     : 			line++; </span>
-<span class="lineNum">     53 </span>              : 			/* Too long! */ </span>
-<span class="lineNum">     54 </span><span class="lineNoCov">    0 / 1     : 			if (line &gt;= ARRAY_SIZE(this-&gt;flowed_messages)) </span>
-<span class="lineNum">     55 </span>              : 				break; </span>
-<span class="lineNum">     56 </span>              : 			line_len = 0; </span>
-<span class="lineNum">     57 </span>              : 		} </span>
-<span class="lineNum">     58 </span>              : 		strcat(this-&gt;flowed_messages[line], p); </span>
-<span class="lineNum">     59 </span>              : 		strcat(this-&gt;flowed_messages[line], &quot; &quot;); </span>
-<span class="lineNum">     60 </span>              :  </span>
-<span class="lineNum">     61 </span><span class="lineNoCov">    0 / 1     : 		line_len += word_len + 1; </span>
-<span class="lineNum">     62 </span><span class="lineNoCov">    0 / 3     : 		p = strtok_r(NULL, &quot; &quot;, &amp;msgp); </span>
-<span class="lineNum">     63 </span>              : 	} </span>
-<span class="lineNum">     64 </span><span class="lineNoCov">    0 / 4     : 	for (line = line + 1; line &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; line++) </span>
-<span class="lineNum">     65 </span>              : 		strcpy(this-&gt;flowed_messages[line], &quot;#&quot;); </span>
-<span class="lineNum">     66 </span>              :  </span>
-<span class="lineNum">     67 </span><span class="lineNoCov">    0 / 2     : 	this-&gt;setText((const char **)this-&gt;flowed_messages); </span>
-<span class="lineNum">     68 </span>              :  </span>
-<span class="lineNum">     69 </span>              : 	while (1) </span>
-<span class="lineNum">     70 </span>              : 	{ </span>
-<span class="lineNum">     71 </span><span class="lineNoCov">    0 / 3     : 		this-&gt;tail = (this-&gt;tail + 1) % N_STATUS_MESSAGES; </span>
-<span class="lineNum">     72 </span><span class="lineNoCov">    0 / 3     : 		if (this-&gt;messages[this-&gt;tail]) </span>
-<span class="lineNum">     73 </span>              : 			break; </span>
-<span class="lineNum">     74 </span>              : 	} </span>
-<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 2     : 	TimerController::controller-&gt;arm(this, 5000); </span>
-<span class="lineNum">     76 </span>              :  </span>
-<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 1     : 	free(cpy); </span>
-<span class="lineNum">     78 </span><span class="lineNoCov">    0 / 1     : } </span>
+<span class="lineNum">    1</span>              : #include &quot;network_server_messages.hh&quot; </span>
+<span class="lineNum">    2</span>              : #include &quot;utils.hh&quot; </span>
+<span class="lineNum">    3</span>              :  </span>
+<span class="lineNum">    4</span><span class="lineCov">      2  /   2: NetworkServerMessages::NetworkServerMessages() : StatusBar() </span>
+<span class="lineNum">    5</span>              : { </span>
+<span class="lineNum">    6</span>              : 	unsigned i; </span>
+<span class="lineNum">    7</span>              :  </span>
+<span class="lineNum">    8</span><span class="lineCov">      2  /   2: 	for (i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
+<span class="lineNum">    9</span><span class="lineCov">      1  /   1: 		this-&gt;flowed_messages[i] = (char *)xmalloc(28); </span>
+<span class="lineNum">   10</span><span class="lineCov">      1  /   1: 	this-&gt;flowed_messages[i] = NULL; </span>
+<span class="lineNum">   11</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span><span class="lineNoCov">      0  /   3: NetworkServerMessages::~NetworkServerMessages() </span>
+<span class="lineNum">   14</span>              : { </span>
+<span class="lineNum">   15</span><span class="lineNoCov">      0  /   3: 	for (unsigned i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
+<span class="lineNum">   16</span><span class="lineNoCov">      0  /   2: 		free(this-&gt;flowed_messages[i]); </span>
+<span class="lineNum">   17</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">   18</span>              :  </span>
+<span class="lineNum">   19</span>              : void NetworkServerMessages::draw(SDL_Surface *where) </span>
+<span class="lineNum">   20</span><span class="lineCov">      3  /   3: { </span>
+<span class="lineNum">   21</span>              : 	SDL_Rect dst; </span>
+<span class="lineNum">   22</span>              : 	int x = 350; </span>
+<span class="lineNum">   23</span>              : 	int y = 242; </span>
+<span class="lineNum">   24</span><span class="lineCov">      3  /   3: 	int w = Gui::gui-&gt;network_message_box-&gt;w; </span>
+<span class="lineNum">   25</span><span class="lineCov">      1  /   1: 	int h = Gui::gui-&gt;network_message_box-&gt;h; </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span><span class="lineCov">      3  /   3: 	dst = (SDL_Rect){x,y,0,0}; </span>
+<span class="lineNum">   28</span><span class="lineCov">      3  /   3: 	SDL_BlitSurface(Gui::gui-&gt;network_message_box, NULL, where, &amp;dst); </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span><span class="lineCov">      3  /   3: 	Menu::draw(where, x+6, y+8, w-6, h-8); </span>
+<span class="lineNum">   31</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span>              : void NetworkServerMessages::timeoutCallback() </span>
+<span class="lineNum">   34</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">   35</span><span class="lineNoCov">      0  /   1: 	const char *cur = this-&gt;messages[this-&gt;tail]; </span>
+<span class="lineNum">   36</span>              : 	char *cpy = xstrdup(cur); </span>
+<span class="lineNum">   37</span>              : 	char *msgp; </span>
+<span class="lineNum">   38</span>              : 	char *p; </span>
+<span class="lineNum">   39</span>              : 	size_t line_len = 0; </span>
+<span class="lineNum">   40</span>              : 	size_t line = 0; </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span><span class="lineNoCov">      0  /   2: 	for (unsigned i = 0; i &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; i++) </span>
+<span class="lineNum">   43</span><span class="lineNoCov">      0  /   2: 		this-&gt;flowed_messages[i][0] = &#039;&#092;0&#039;; </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span><span class="lineNoCov">      0  /   2: 	p = strtok_r(cpy, &quot; &quot;, &amp;msgp); </span>
+<span class="lineNum">   46</span><span class="lineNoCov">      0  /   4: 	while (p) </span>
+<span class="lineNum">   47</span>              : 	{ </span>
+<span class="lineNum">   48</span><span class="lineNoCov">      0  /   1: 		int word_len = strlen(p); </span>
+<span class="lineNum">   49</span>              :  </span>
+<span class="lineNum">   50</span><span class="lineNoCov">      0  /   1: 		if (line_len + word_len &gt; 24) </span>
+<span class="lineNum">   51</span>              : 		{ </span>
+<span class="lineNum">   52</span><span class="lineNoCov">      0  /   1: 			line++; </span>
+<span class="lineNum">   53</span>              : 			&#047;* Too long! *&#047; </span>
+<span class="lineNum">   54</span><span class="lineNoCov">      0  /   1: 			if (line &gt;= ARRAY_SIZE(this-&gt;flowed_messages)) </span>
+<span class="lineNum">   55</span>              : 				break; </span>
+<span class="lineNum">   56</span><span class="lineNoCov">      0  /   1: 			line_len = 0; </span>
+<span class="lineNum">   57</span>              : 		} </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   2: 		strcat(this-&gt;flowed_messages[line], p); </span>
+<span class="lineNum">   59</span>              : 		strcat(this-&gt;flowed_messages[line], &quot; &quot;); </span>
+<span class="lineNum">   60</span>              :  </span>
+<span class="lineNum">   61</span><span class="lineNoCov">      0  /   1: 		line_len += word_len + 1; </span>
+<span class="lineNum">   62</span><span class="lineNoCov">      0  /   3: 		p = strtok_r(NULL, &quot; &quot;, &amp;msgp); </span>
+<span class="lineNum">   63</span>              : 	} </span>
+<span class="lineNum">   64</span><span class="lineNoCov">      0  /   4: 	for (line = line + 1; line &lt; ARRAY_SIZE(this-&gt;flowed_messages) - 1; line++) </span>
+<span class="lineNum">   65</span>              : 		strcpy(this-&gt;flowed_messages[line], &quot;#&quot;); </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span><span class="lineNoCov">      0  /   2: 	this-&gt;setText((const char **)this-&gt;flowed_messages); </span>
+<span class="lineNum">   68</span>              :  </span>
+<span class="lineNum">   69</span>              : 	while (1) </span>
+<span class="lineNum">   70</span>              : 	{ </span>
+<span class="lineNum">   71</span><span class="lineNoCov">      0  /   2: 		this-&gt;tail = (this-&gt;tail + 1) % N_STATUS_MESSAGES; </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   2: 		if (this-&gt;messages[this-&gt;tail]) </span>
+<span class="lineNum">   73</span>              : 			break; </span>
+<span class="lineNum">   74</span>              : 	} </span>
+<span class="lineNum">   75</span><span class="lineNoCov">      0  /   2: 	TimerController::controller-&gt;arm(this, 5000); </span>
+<span class="lineNum">   76</span>              :  </span>
+<span class="lineNum">   77</span><span class="lineNoCov">      0  /   1: 	free(cpy); </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

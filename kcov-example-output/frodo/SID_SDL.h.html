@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,21 +13,21 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">49</td>
+          <td class="headerValue" width="10%">51</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftHi" width="15%">98.0 %</td>
+          <td class="coverPerLeftHi" width="15%">98.0%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
-          <td class="headerValue" width="10%">48</td>
+          <td class="headerValue" width="10%">50</td>
         </tr>
       </table>
     </td>
@@ -35,162 +35,164 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : /* </span>
-<span class="lineNum">      2 </span>              :  *  SID_SDL.h - 6581 emulation, SDL specific stuff </span>
-<span class="lineNum">      3 </span>              :  * </span>
-<span class="lineNum">      4 </span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
-<span class="lineNum">      5 </span>              :  * </span>
-<span class="lineNum">      6 </span>              :  *  SDL stuff by Simon Kagstrom </span>
-<span class="lineNum">      7 </span>              :  * </span>
-<span class="lineNum">      8 </span>              :  *  This program is free software; you can redistribute it and/or modify </span>
-<span class="lineNum">      9 </span>              :  *  it under the terms of the GNU General Public License as published by </span>
-<span class="lineNum">     10 </span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
-<span class="lineNum">     11 </span>              :  *  (at your option) any later version. </span>
-<span class="lineNum">     12 </span>              :  * </span>
-<span class="lineNum">     13 </span>              :  *  This program is distributed in the hope that it will be useful, </span>
-<span class="lineNum">     14 </span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
-<span class="lineNum">     15 </span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
-<span class="lineNum">     16 </span>              :  *  GNU General Public License for more details. </span>
-<span class="lineNum">     17 </span>              :  * </span>
-<span class="lineNum">     18 </span>              :  *  You should have received a copy of the GNU General Public License </span>
-<span class="lineNum">     19 </span>              :  *  along with this program; if not, write to the Free Software </span>
-<span class="lineNum">     20 </span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
-<span class="lineNum">     21 </span>              :  */ </span>
-<span class="lineNum">     22 </span>              :  </span>
-<span class="lineNum">     23 </span>              : #include &lt;unistd.h&gt; </span>
-<span class="lineNum">     24 </span>              : #include &lt;fcntl.h&gt; </span>
-<span class="lineNum">     25 </span>              : #include &lt;SDL.h&gt; </span>
-<span class="lineNum">     26 </span>              :  </span>
-<span class="lineNum">     27 </span>              : #include &quot;VIC.h&quot; </span>
-<span class="lineNum">     28 </span>              :  </span>
-<span class="lineNum">     29 </span>              : static SDL_AudioSpec spec; </span>
-<span class="lineNum">     30 </span>              :  </span>
-<span class="lineNum">     31 </span>              : #define FRODO_SNDBUF 512 </span>
-<span class="lineNum">     32 </span>              : #define SOUNDBUFSIZE 1536 </span>
-<span class="lineNum">     33 </span>              : #define N_BUFS 8 </span>
-<span class="lineNum">     34 </span>              :  </span>
-<span class="lineNum">     35 </span>              : static int16 soundbuffer[N_BUFS][FRODO_SNDBUF]; </span>
-<span class="lineNum">     36 </span>              : static int head, tail; </span>
-<span class="lineNum">     37 </span>              :  </span>
-<span class="lineNum">     38 </span>              : static void fill_audio(void *udata, Uint8 *stream, int len) </span>
-<span class="lineNum">     39 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">     40 </span>              : 	const int sz = FRODO_SNDBUF * 2; </span>
-<span class="lineNum">     41 </span>              : 	int off = 0; </span>
-<span class="lineNum">     42 </span>              :  </span>
-<span class="lineNum">     43 </span>              : 	memset(stream, 0, len); </span>
-<span class="lineNum">     44 </span><span class="lineCov">    3 / 3     : 	while (tail != head) </span>
-<span class="lineNum">     45 </span>              : 	{ </span>
-<span class="lineNum">     46 </span>              : 		//printf(&quot;Copying %d bytes at off %d, tail %d, head %d\n&quot;, len, off, tail, head); </span>
-<span class="lineNum">     47 </span>              : 		memcpy(stream + off, soundbuffer[tail], sz); </span>
-<span class="lineNum">     48 </span><span class="lineCov">    1 / 1     : 		off += sz; </span>
-<span class="lineNum">     49 </span><span class="lineCov">    1 / 1     : 		if (off &gt;= len) </span>
-<span class="lineNum">     50 </span>              : 			break; </span>
-<span class="lineNum">     51 </span><span class="lineCov">    2 / 2     : 		tail = (tail + 1) % N_BUFS; </span>
-<span class="lineNum">     52 </span>              : 	} </span>
-<span class="lineNum">     53 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">     54 </span>              :  </span>
-<span class="lineNum">     55 </span>              : /* </span>
-<span class="lineNum">     56 </span>              :  *  Initialization </span>
-<span class="lineNum">     57 </span>              :  */ </span>
-<span class="lineNum">     58 </span>              :  </span>
-<span class="lineNum">     59 </span>              : void DigitalRenderer::init_sound(void) </span>
-<span class="lineNum">     60 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">     61 </span><span class="lineCov">    1 / 1     : 	this-&gt;sndbufsize = FRODO_SNDBUF; </span>
-<span class="lineNum">     62 </span>              :  </span>
-<span class="lineNum">     63 </span>              : 	/* Set the audio format */ </span>
-<span class="lineNum">     64 </span><span class="lineCov">    1 / 1     : 	spec.freq = 32000; </span>
-<span class="lineNum">     65 </span><span class="lineCov">    1 / 1     : 	spec.format = AUDIO_S16SYS; </span>
-<span class="lineNum">     66 </span><span class="lineCov">    1 / 1     : 	spec.channels = 1;    /* 1 = mono, 2 = stereo */ </span>
-<span class="lineNum">     67 </span><span class="lineCov">    1 / 1     : 	spec.samples = SOUNDBUFSIZE; </span>
-<span class="lineNum">     68 </span><span class="lineCov">    1 / 1     : 	spec.callback = fill_audio; </span>
-<span class="lineNum">     69 </span><span class="lineCov">    1 / 1     : 	spec.userdata = (void*)this; </span>
-<span class="lineNum">     70 </span>              :  </span>
-<span class="lineNum">     71 </span><span class="lineCov">    1 / 1     : 	ready = false; </span>
-<span class="lineNum">     72 </span><span class="lineCov">    1 / 1     : 	if ( SDL_OpenAudio(&amp;spec, NULL) &lt; 0 ) { </span>
-<span class="lineNum">     73 </span><span class="lineNoCov">    0 / 1     : 		fprintf(stderr, &quot;Couldn't open audio: %s\n&quot;, SDL_GetError()); </span>
-<span class="lineNum">     74 </span>              : 		return ; </span>
-<span class="lineNum">     75 </span>              : 	} </span>
-<span class="lineNum">     76 </span>              :  </span>
-<span class="lineNum">     77 </span><span class="lineCov">    2 / 2     : 	this-&gt;sound_buffer = new int16[this-&gt;sndbufsize]; </span>
-<span class="lineNum">     78 </span>              : 	memset(this-&gt;sound_buffer, 0, sizeof(int16) * this-&gt;sndbufsize); </span>
-<span class="lineNum">     79 </span><span class="lineCov">    1 / 1     : 	ready = true; </span>
-<span class="lineNum">     80 </span><span class="lineCov">    2 / 2     : 	SDL_PauseAudio(0); </span>
-<span class="lineNum">     81 </span><span class="linePartCov">    1 / 2     : } </span>
-<span class="lineNum">     82 </span>              :  </span>
-<span class="lineNum">     83 </span>              :  </span>
-<span class="lineNum">     84 </span>              : /* </span>
-<span class="lineNum">     85 </span>              :  *  Destructor </span>
-<span class="lineNum">     86 </span>              :  */ </span>
-<span class="lineNum">     87 </span>              :  </span>
-<span class="lineNum">     88 </span><span class="linePartCov">    2 / 6     : DigitalRenderer::~DigitalRenderer() </span>
-<span class="lineNum">     89 </span>              : { </span>
-<span class="lineNum">     90 </span><span class="linePartCov">    1 / 3     : 	SDL_CloseAudio(); </span>
-<span class="lineNum">     91 </span><span class="linePartCov">    1 / 3     : } </span>
-<span class="lineNum">     92 </span>              :  </span>
-<span class="lineNum">     93 </span>              :  </span>
-<span class="lineNum">     94 </span>              : /* </span>
-<span class="lineNum">     95 </span>              :  *  Pause sound output </span>
-<span class="lineNum">     96 </span>              :  */ </span>
-<span class="lineNum">     97 </span>              :  </span>
-<span class="lineNum">     98 </span>              : void DigitalRenderer::Pause(void) </span>
-<span class="lineNum">     99 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    100 </span><span class="linePartCov">    1 / 2     : 	SDL_PauseAudio(1); </span>
-<span class="lineNum">    101 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    102 </span>              :  </span>
-<span class="lineNum">    103 </span>              :  </span>
-<span class="lineNum">    104 </span>              : /* </span>
-<span class="lineNum">    105 </span>              :  * Resume sound output </span>
-<span class="lineNum">    106 </span>              :  */ </span>
-<span class="lineNum">    107 </span>              :  </span>
-<span class="lineNum">    108 </span>              : void DigitalRenderer::Resume(void) </span>
-<span class="lineNum">    109 </span><span class="lineCov">    1 / 1     : { </span>
-<span class="lineNum">    110 </span><span class="linePartCov">    1 / 2     : 	SDL_PauseAudio(0); </span>
-<span class="lineNum">    111 </span><span class="lineCov">    1 / 1     : } </span>
-<span class="lineNum">    112 </span>              :  </span>
-<span class="lineNum">    113 </span>              :  </span>
-<span class="lineNum">    114 </span>              : /* </span>
-<span class="lineNum">    115 </span>              :  * Fill buffer, sample volume (for sampled voice) </span>
-<span class="lineNum">    116 </span>              :  */ </span>
-<span class="lineNum">    117 </span>              :  </span>
-<span class="lineNum">    118 </span>              : void DigitalRenderer::PushVolume(uint8 vol) </span>
-<span class="lineNum">    119 </span><span class="lineCov">    3 / 3     : { </span>
-<span class="lineNum">    120 </span>              : 	static int divisor = 0; </span>
-<span class="lineNum">    121 </span>              : 	static int to_output = 0; </span>
-<span class="lineNum">    122 </span>              :  </span>
-<span class="lineNum">    123 </span><span class="lineCov">    1 / 1     : 	sample_buf[sample_in_ptr] = volume; </span>
-<span class="lineNum">    124 </span><span class="linePartCov">    4 / 5     : 	sample_in_ptr = (sample_in_ptr + 1) % SAMPLE_BUF_SIZE; </span>
-<span class="lineNum">    125 </span>              :  </span>
-<span class="lineNum">    126 </span>              : 	/* </span>
-<span class="lineNum">    127 </span>              : 	 * Now see how many samples have to be added for this line </span>
-<span class="lineNum">    128 </span>              : 	 */ </span>
-<span class="lineNum">    129 </span><span class="lineCov">    3 / 3     : 	divisor += SAMPLE_FREQ; </span>
-<span class="lineNum">    130 </span><span class="linePartCov">    2 / 4     : 	while (divisor &gt;= 0) </span>
-<span class="lineNum">    131 </span>              : 	{ </span>
-<span class="lineNum">    132 </span>              : 		divisor -= TOTAL_RASTERS*SCREEN_FREQ; </span>
-<span class="lineNum">    133 </span><span class="lineCov">    1 / 1     : 		to_output++; </span>
-<span class="lineNum">    134 </span>              : 	} </span>
-<span class="lineNum">    135 </span>              :  </span>
-<span class="lineNum">    136 </span><span class="lineCov">    1 / 1     : 	if (to_output &gt;= sndbufsize) { </span>
-<span class="lineNum">    137 </span>              : 		int datalen = sndbufsize; </span>
-<span class="lineNum">    138 </span><span class="lineCov">    2 / 2     : 		to_output -= datalen; </span>
-<span class="lineNum">    139 </span>              :  </span>
-<span class="lineNum">    140 </span><span class="lineCov">    1 / 1     : 		SDL_LockAudio(); </span>
-<span class="lineNum">    141 </span><span class="linePartCov">    1 / 2     : 		calc_buffer(soundbuffer[head], datalen * 2); </span>
-<span class="lineNum">    142 </span><span class="lineCov">    2 / 2     : 		head = (head + 1) % N_BUFS; </span>
-<span class="lineNum">    143 </span><span class="lineCov">    2 / 2     : 		if (head == tail) { </span>
-<span class="lineNum">    144 </span><span class="lineCov">    1 / 1     : 			tail = (head + 1) % N_BUFS; </span>
-<span class="lineNum">    145 </span>              : 		} </span>
-<span class="lineNum">    146 </span><span class="lineCov">    2 / 2     : 		SDL_UnlockAudio(); </span>
-<span class="lineNum">    147 </span>              : 	} </span>
-<span class="lineNum">    148 </span><span class="linePartCov">    2 / 3     : } </span>
-<span class="lineNum">    149 </span>              :  </span>
-<span class="lineNum">    150 </span>              :  </span>
-<span class="lineNum">    151 </span>              : void DigitalRenderer::EmulateLine(void) </span>
-<span class="lineNum">    152 </span><span class="lineCov">    2 / 2     : { </span>
-<span class="lineNum">    153 </span><span class="lineCov">    1 / 1     : 	if (!ready) </span>
-<span class="lineNum">    154 </span>              : 		return; </span>
-<span class="lineNum">    155 </span><span class="lineCov">    1 / 1     : 	this-&gt;PushVolume(volume); </span>
-<span class="lineNum">    156 </span><span class="linePartCov">    1 / 2     : } </span>
+<span class="lineNum">    1</span>              : &#047;* </span>
+<span class="lineNum">    2</span>              :  *  SID_SDL.h - 6581 emulation, SDL specific stuff </span>
+<span class="lineNum">    3</span>              :  * </span>
+<span class="lineNum">    4</span>              :  *  Frodo (C) 1994-1997,2002-2005 Christian Bauer </span>
+<span class="lineNum">    5</span>              :  * </span>
+<span class="lineNum">    6</span>              :  *  SDL stuff by Simon Kagstrom </span>
+<span class="lineNum">    7</span>              :  * </span>
+<span class="lineNum">    8</span>              :  *  This program is free software; you can redistribute it and&#047;or modify </span>
+<span class="lineNum">    9</span>              :  *  it under the terms of the GNU General Public License as published by </span>
+<span class="lineNum">   10</span>              :  *  the Free Software Foundation; either version 2 of the License, or </span>
+<span class="lineNum">   11</span>              :  *  (at your option) any later version. </span>
+<span class="lineNum">   12</span>              :  * </span>
+<span class="lineNum">   13</span>              :  *  This program is distributed in the hope that it will be useful, </span>
+<span class="lineNum">   14</span>              :  *  but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">   15</span>              :  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">   16</span>              :  *  GNU General Public License for more details. </span>
+<span class="lineNum">   17</span>              :  * </span>
+<span class="lineNum">   18</span>              :  *  You should have received a copy of the GNU General Public License </span>
+<span class="lineNum">   19</span>              :  *  along with this program; if not, write to the Free Software </span>
+<span class="lineNum">   20</span>              :  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA </span>
+<span class="lineNum">   21</span>              :  *&#047; </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : #include &lt;unistd.h&gt; </span>
+<span class="lineNum">   24</span>              : #include &lt;fcntl.h&gt; </span>
+<span class="lineNum">   25</span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span>              : #include &quot;VIC.h&quot; </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : #include &quot;utils.hh&quot; </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span>              : static SDL_AudioSpec spec; </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span>              : #define FRODO_SNDBUF 512 </span>
+<span class="lineNum">   34</span>              : #define SOUNDBUFSIZE 1536 </span>
+<span class="lineNum">   35</span>              : #define N_BUFS 8 </span>
+<span class="lineNum">   36</span>              :  </span>
+<span class="lineNum">   37</span>              : static int16 soundbuffer[N_BUFS][FRODO_SNDBUF]; </span>
+<span class="lineNum">   38</span>              : static int head, tail; </span>
+<span class="lineNum">   39</span>              :  </span>
+<span class="lineNum">   40</span><span class="lineCov">      2  /   2: static void fill_audio(void *udata, Uint8 *stream, int len) </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">   42</span>              : 	const int sz = FRODO_SNDBUF * 2; </span>
+<span class="lineNum">   43</span>              : 	int off = 0; </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span>              : 	memset(stream, 0, len); </span>
+<span class="lineNum">   46</span><span class="lineCov">      3  /   3: 	while (tail != head) </span>
+<span class="lineNum">   47</span>              : 	{ </span>
+<span class="lineNum">   48</span>              : 		&#047;&#047;printf(&quot;Copying %d bytes at off %d, tail %d, head %d&#092;n&quot;, len, off, tail, head); </span>
+<span class="lineNum">   49</span>              : 		memcpy(stream + off, soundbuffer[tail], sz); </span>
+<span class="lineNum">   50</span><span class="lineCov">      1  /   1: 		off += sz; </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1: 		if (off &gt;= len) </span>
+<span class="lineNum">   52</span>              : 			break; </span>
+<span class="lineNum">   53</span><span class="lineCov">      2  /   2: 		tail = (tail + 1) % N_BUFS; </span>
+<span class="lineNum">   54</span>              : 	} </span>
+<span class="lineNum">   55</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">   56</span>              :  </span>
+<span class="lineNum">   57</span>              : &#047;* </span>
+<span class="lineNum">   58</span>              :  *  Initialization </span>
+<span class="lineNum">   59</span>              :  *&#047; </span>
+<span class="lineNum">   60</span>              :  </span>
+<span class="lineNum">   61</span>              : void DigitalRenderer::init_sound(void) </span>
+<span class="lineNum">   62</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1: 	this-&gt;sndbufsize = FRODO_SNDBUF; </span>
+<span class="lineNum">   64</span>              :  </span>
+<span class="lineNum">   65</span>              : 	&#047;* Set the audio format *&#047; </span>
+<span class="lineNum">   66</span><span class="lineCov">      1  /   1: 	spec.freq = 32000; </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1: 	spec.format = AUDIO_S16SYS; </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1: 	spec.channels = 1;    &#047;* 1 = mono, 2 = stereo *&#047; </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1: 	spec.samples = SOUNDBUFSIZE; </span>
+<span class="lineNum">   70</span><span class="lineCov">      1  /   1: 	spec.callback = fill_audio; </span>
+<span class="lineNum">   71</span><span class="lineCov">      1  /   1: 	spec.userdata = (void*)this; </span>
+<span class="lineNum">   72</span>              :  </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1: 	ready = false; </span>
+<span class="lineNum">   74</span><span class="lineCov">      1  /   1: 	if ( SDL_OpenAudio(&amp;spec, NULL) &lt; 0 ) { </span>
+<span class="lineNum">   75</span><span class="lineNoCov">      0  /   1: 		LOG(&quot;Couldn&#039;t open audio: %s&#092;n&quot;, SDL_GetError()); </span>
+<span class="lineNum">   76</span>              : 		return ; </span>
+<span class="lineNum">   77</span>              : 	} </span>
+<span class="lineNum">   78</span>              :  </span>
+<span class="lineNum">   79</span><span class="lineCov">      2  /   2: 	this-&gt;sound_buffer = new int16[this-&gt;sndbufsize]; </span>
+<span class="lineNum">   80</span><span class="lineCov">      1  /   1: 	memset(this-&gt;sound_buffer, 0, sizeof(int16) * this-&gt;sndbufsize); </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1: 	ready = true; </span>
+<span class="lineNum">   82</span><span class="lineCov">      2  /   2: 	SDL_PauseAudio(0); </span>
+<span class="lineNum">   83</span><span class="linePartCov">      1  /   2: } </span>
+<span class="lineNum">   84</span>              :  </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span>              : &#047;* </span>
+<span class="lineNum">   87</span>              :  *  Destructor </span>
+<span class="lineNum">   88</span>              :  *&#047; </span>
+<span class="lineNum">   89</span>              :  </span>
+<span class="lineNum">   90</span><span class="linePartCov">      2  /   4: DigitalRenderer::~DigitalRenderer() </span>
+<span class="lineNum">   91</span>              : { </span>
+<span class="lineNum">   92</span><span class="linePartCov">      1  /   2: 	SDL_CloseAudio(); </span>
+<span class="lineNum">   93</span><span class="linePartCov">      1  /   2: } </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span>              :  </span>
+<span class="lineNum">   96</span>              : &#047;* </span>
+<span class="lineNum">   97</span>              :  *  Pause sound output </span>
+<span class="lineNum">   98</span>              :  *&#047; </span>
+<span class="lineNum">   99</span>              :  </span>
+<span class="lineNum">  100</span>              : void DigitalRenderer::Pause(void) </span>
+<span class="lineNum">  101</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  102</span><span class="lineCov">      2  /   2: 	SDL_PauseAudio(1); </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  104</span>              :  </span>
+<span class="lineNum">  105</span>              :  </span>
+<span class="lineNum">  106</span>              : &#047;* </span>
+<span class="lineNum">  107</span>              :  * Resume sound output </span>
+<span class="lineNum">  108</span>              :  *&#047; </span>
+<span class="lineNum">  109</span>              :  </span>
+<span class="lineNum">  110</span>              : void DigitalRenderer::Resume(void) </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  112</span><span class="lineCov">      2  /   2: 	SDL_PauseAudio(0); </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1: } </span>
+<span class="lineNum">  114</span>              :  </span>
+<span class="lineNum">  115</span>              :  </span>
+<span class="lineNum">  116</span>              : &#047;* </span>
+<span class="lineNum">  117</span>              :  * Fill buffer, sample volume (for sampled voice) </span>
+<span class="lineNum">  118</span>              :  *&#047; </span>
+<span class="lineNum">  119</span>              :  </span>
+<span class="lineNum">  120</span><span class="lineCov">      2  /   2: void DigitalRenderer::PushVolume(uint8 vol) </span>
+<span class="lineNum">  121</span><span class="lineCov">      3  /   3: { </span>
+<span class="lineNum">  122</span>              : 	static int divisor = 0; </span>
+<span class="lineNum">  123</span>              : 	static int to_output = 0; </span>
+<span class="lineNum">  124</span>              :  </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 	sample_buf[sample_in_ptr] = volume; </span>
+<span class="lineNum">  126</span><span class="lineCov">      5  /   5: 	sample_in_ptr = (sample_in_ptr + 1) % SAMPLE_BUF_SIZE; </span>
+<span class="lineNum">  127</span>              :  </span>
+<span class="lineNum">  128</span>              : 	&#047;* </span>
+<span class="lineNum">  129</span>              : 	 * Now see how many samples have to be added for this line </span>
+<span class="lineNum">  130</span>              : 	 *&#047; </span>
+<span class="lineNum">  131</span><span class="lineCov">      3  /   3: 	divisor += SAMPLE_FREQ; </span>
+<span class="lineNum">  132</span><span class="linePartCov">      4  /   5: 	while (divisor &gt;= 0) </span>
+<span class="lineNum">  133</span>              : 	{ </span>
+<span class="lineNum">  134</span>              : 		divisor -= TOTAL_RASTERS*SCREEN_FREQ; </span>
+<span class="lineNum">  135</span>              : 		to_output++; </span>
+<span class="lineNum">  136</span>              : 	} </span>
+<span class="lineNum">  137</span>              :  </span>
+<span class="lineNum">  138</span><span class="lineCov">      1  /   1: 	if (to_output &gt;= sndbufsize) { </span>
+<span class="lineNum">  139</span>              : 		int datalen = sndbufsize; </span>
+<span class="lineNum">  140</span><span class="lineCov">      2  /   2: 		to_output -= datalen; </span>
+<span class="lineNum">  141</span>              :  </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: 		SDL_LockAudio(); </span>
+<span class="lineNum">  143</span><span class="lineCov">      2  /   2: 		calc_buffer(soundbuffer[head], datalen * 2); </span>
+<span class="lineNum">  144</span><span class="lineCov">      2  /   2: 		head = (head + 1) % N_BUFS; </span>
+<span class="lineNum">  145</span><span class="lineCov">      2  /   2: 		if (head == tail) { </span>
+<span class="lineNum">  146</span><span class="lineCov">      1  /   1: 			tail = (head + 1) % N_BUFS; </span>
+<span class="lineNum">  147</span>              : 		} </span>
+<span class="lineNum">  148</span><span class="lineCov">      2  /   2: 		SDL_UnlockAudio(); </span>
+<span class="lineNum">  149</span>              : 	} </span>
+<span class="lineNum">  150</span><span class="lineCov">      3  /   3: } </span>
+<span class="lineNum">  151</span>              :  </span>
+<span class="lineNum">  152</span>              :  </span>
+<span class="lineNum">  153</span>              : void DigitalRenderer::EmulateLine(void) </span>
+<span class="lineNum">  154</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">  155</span><span class="lineCov">      1  /   1: 	if (!ready) </span>
+<span class="lineNum">  156</span>              : 		return; </span>
+<span class="lineNum">  157</span><span class="lineCov">      1  /   1: 	this-&gt;PushVolume(volume); </span>
+<span class="lineNum">  158</span><span class="linePartCov">      1  /   2: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

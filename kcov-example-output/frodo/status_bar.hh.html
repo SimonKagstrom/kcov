@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
           <td class="headerValue" width="10%">4</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftMed" width="15%">25.0 %</td>
+          <td class="coverPerLeftLo" width="15%">25.0%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">1</td>
@@ -35,44 +35,44 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #ifndef __STATUS_BAR_HH__ </span>
-<span class="lineNum">      2 </span>              : #define __STATUS_BAR_HH__ </span>
-<span class="lineNum">      3 </span>              :  </span>
-<span class="lineNum">      4 </span>              : #include &lt;timer.hh&gt; </span>
-<span class="lineNum">      5 </span>              :  </span>
-<span class="lineNum">      6 </span>              : #include &quot;menu.hh&quot; </span>
-<span class="lineNum">      7 </span>              : #include &quot;gui.hh&quot; </span>
-<span class="lineNum">      8 </span>              :  </span>
-<span class="lineNum">      9 </span>              : #define N_STATUS_MESSAGES 10 </span>
-<span class="lineNum">     10 </span>              :  </span>
-<span class="lineNum">     11 </span>              : class StatusBar : public Menu, public TimeoutHandler </span>
-<span class="lineNum">     12 </span><span class="lineNoCov">    0 / 6     : { </span>
-<span class="lineNum">     13 </span>              : public: </span>
-<span class="lineNum">     14 </span>              : 	StatusBar(); </span>
-<span class="lineNum">     15 </span>              :  </span>
-<span class="lineNum">     16 </span>              : 	void queueMessage(const char *message, ...); </span>
-<span class="lineNum">     17 </span>              :  </span>
-<span class="lineNum">     18 </span>              : 	virtual void draw(SDL_Surface *where); </span>
-<span class="lineNum">     19 </span>              :  </span>
-<span class="lineNum">     20 </span><span class="linePartCov">    1 / 6     : 	virtual void hoverCallback(int which) {}; </span>
-<span class="lineNum">     21 </span>              :  </span>
-<span class="lineNum">     22 </span><span class="lineNoCov">    0 / 6     : 	virtual void selectCallback(int which) {}; </span>
-<span class="lineNum">     23 </span>              :  </span>
-<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 6     : 	virtual void escapeCallback(int which) {}; </span>
-<span class="lineNum">     25 </span>              :  </span>
-<span class="lineNum">     26 </span>              : protected: </span>
-<span class="lineNum">     27 </span>              : 	virtual void timeoutCallback(); </span>
-<span class="lineNum">     28 </span>              :  </span>
-<span class="lineNum">     29 </span>              : 	const char *dequeueMessage(); </span>
-<span class="lineNum">     30 </span>              :  </span>
-<span class="lineNum">     31 </span>              : 	const char *messages[N_STATUS_MESSAGES]; </span>
-<span class="lineNum">     32 </span>              : 	const char *cur_message; </span>
-<span class="lineNum">     33 </span>              : 	int head, tail; </span>
-<span class="lineNum">     34 </span>              : 	int x; </span>
-<span class="lineNum">     35 </span>              : 	int y; </span>
-<span class="lineNum">     36 </span>              : }; </span>
-<span class="lineNum">     37 </span>              :  </span>
-<span class="lineNum">     38 </span>              : #endif /* __DIALOGUE_BOX_HH__ */ </span>
+<span class="lineNum">    1</span>              : #ifndef __STATUS_BAR_HH__ </span>
+<span class="lineNum">    2</span>              : #define __STATUS_BAR_HH__ </span>
+<span class="lineNum">    3</span>              :  </span>
+<span class="lineNum">    4</span>              : #include &lt;timer.hh&gt; </span>
+<span class="lineNum">    5</span>              :  </span>
+<span class="lineNum">    6</span>              : #include &quot;menu.hh&quot; </span>
+<span class="lineNum">    7</span>              : #include &quot;gui.hh&quot; </span>
+<span class="lineNum">    8</span>              :  </span>
+<span class="lineNum">    9</span>              : #define N_STATUS_MESSAGES 10 </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : class StatusBar : public Menu, public TimeoutHandler </span>
+<span class="lineNum">   12</span><span class="lineNoCov">      0  /   4: { </span>
+<span class="lineNum">   13</span>              : public: </span>
+<span class="lineNum">   14</span>              : 	StatusBar(); </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : 	void queueMessage(const char *message, ...); </span>
+<span class="lineNum">   17</span>              :  </span>
+<span class="lineNum">   18</span>              : 	virtual void draw(SDL_Surface *where); </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span><span class="linePartCov">      2  /   3: 	virtual void hoverCallback(int which) {}; </span>
+<span class="lineNum">   21</span>              :  </span>
+<span class="lineNum">   22</span><span class="lineNoCov">      0  /   3: 	virtual void selectCallback(int which) {}; </span>
+<span class="lineNum">   23</span>              :  </span>
+<span class="lineNum">   24</span><span class="lineNoCov">      0  /   3: 	virtual void escapeCallback(int which) {}; </span>
+<span class="lineNum">   25</span>              :  </span>
+<span class="lineNum">   26</span>              : protected: </span>
+<span class="lineNum">   27</span>              : 	virtual void timeoutCallback(); </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : 	const char *dequeueMessage(); </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span>              : 	const char *messages[N_STATUS_MESSAGES]; </span>
+<span class="lineNum">   32</span>              : 	const char *cur_message; </span>
+<span class="lineNum">   33</span>              : 	int head, tail; </span>
+<span class="lineNum">   34</span>              : 	int x; </span>
+<span class="lineNum">   35</span>              : 	int y; </span>
+<span class="lineNum">   36</span>              : }; </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span>              : #endif &#047;* __DIALOGUE_BOX_HH__ *&#047; </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

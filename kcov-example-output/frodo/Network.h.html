@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:08</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
           <td class="headerValue" width="10%">8</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftLo" width="15%">0.0 %</td>
+          <td class="coverPerLeftLo" width="15%">0.0%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">0</td>
@@ -35,460 +35,460 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #ifndef NETWORK_H </span>
-<span class="lineNum">      2 </span>              : #define NETWORK_H </span>
-<span class="lineNum">      3 </span>              :  </span>
-<span class="lineNum">      4 </span>              : #if defined(GEKKO) </span>
-<span class="lineNum">      5 </span>              : # include &lt;network.h&gt; </span>
-<span class="lineNum">      6 </span>              : #else </span>
-<span class="lineNum">      7 </span>              :  #include &lt;arpa/inet.h&gt; </span>
-<span class="lineNum">      8 </span>              : #endif </span>
-<span class="lineNum">      9 </span>              : #include &lt;SDL.h&gt; </span>
-<span class="lineNum">     10 </span>              :  </span>
-<span class="lineNum">     11 </span>              : #include &quot;SID.h&quot; </span>
-<span class="lineNum">     12 </span>              : #include &quot;Display.h&quot; </span>
-<span class="lineNum">     13 </span>              :  </span>
-<span class="lineNum">     14 </span>              : #define FRODO_NETWORK_PROTOCOL_VERSION 4 </span>
-<span class="lineNum">     15 </span>              :  </span>
-<span class="lineNum">     16 </span>              : #define FRODO_NETWORK_MAGIC 0x1976 </span>
-<span class="lineNum">     17 </span>              :  </span>
-<span class="lineNum">     18 </span>              : #define NETWORK_UPDATE_SIZE     (128 * 1024) </span>
-<span class="lineNum">     19 </span>              : #define NETWORK_SOUND_BUF_SIZE   8192 </span>
-<span class="lineNum">     20 </span>              :  </span>
-<span class="lineNum">     21 </span>              : #define SCREENSHOT_FACTOR 4 </span>
-<span class="lineNum">     22 </span>              : #define SCREENSHOT_X (DISPLAY_X / SCREENSHOT_FACTOR) </span>
-<span class="lineNum">     23 </span>              : #define SCREENSHOT_Y (DISPLAY_Y / SCREENSHOT_FACTOR) </span>
-<span class="lineNum">     24 </span>              :  </span>
-<span class="lineNum">     25 </span>              : typedef enum </span>
-<span class="lineNum">     26 </span>              : { </span>
-<span class="lineNum">     27 </span>              : 	REGION_UNKNOWN = 0, </span>
-<span class="lineNum">     28 </span>              : 	REGION_EUROPE = 1, </span>
-<span class="lineNum">     29 </span>              : 	REGION_AFRICA = 2, </span>
-<span class="lineNum">     30 </span>              : 	REGION_NORTH_AMERICA = 3, </span>
-<span class="lineNum">     31 </span>              : 	REGION_SOUTH_AMERICA = 4, </span>
-<span class="lineNum">     32 </span>              : 	REGION_MIDDLE_EAST = 5, </span>
-<span class="lineNum">     33 </span>              : 	REGION_SOUTH_ASIA = 6, </span>
-<span class="lineNum">     34 </span>              : 	REGION_EAST_ASIA = 7, </span>
-<span class="lineNum">     35 </span>              : 	REGION_OCEANIA = 8, </span>
-<span class="lineNum">     36 </span>              : 	REGION_ANTARTICA = 9, </span>
-<span class="lineNum">     37 </span>              : } network_region_t; </span>
-<span class="lineNum">     38 </span>              :  </span>
-<span class="lineNum">     39 </span>              : typedef enum </span>
-<span class="lineNum">     40 </span>              : { </span>
-<span class="lineNum">     41 </span>              : 	/* Connection-related messages */ </span>
-<span class="lineNum">     42 </span>              : 	CONNECT_TO_BROKER  = 99, /* Hello, broker */ </span>
-<span class="lineNum">     43 </span>              : 	LIST_PEERS         = 98, /* List of peers */ </span>
-<span class="lineNum">     44 </span>              : 	CONNECT_TO_PEER    = 97, /* A peer wants to connect */ </span>
-<span class="lineNum">     45 </span>              : 	DISCONNECT         = 96, /* Disconnect from a peer */ </span>
-<span class="lineNum">     46 </span>              : 	SELECT_PEER        = 93, /* (client) Select who to connect to */ </span>
-<span class="lineNum">     47 </span>              : 	PING               = 95, /* (broker) are you alive? */ </span>
-<span class="lineNum">     48 </span>              : 	ACK                = 94, /* Answer to broker */ </span>
-<span class="lineNum">     49 </span>              : 	BANDWIDTH_PING     = 92, /* Large packet to calculate bandwidth */ </span>
-<span class="lineNum">     50 </span>              : 	BANDWIDTH_ACK	   = 91, /* Answer to BANDWIDTH_PING */ </span>
-<span class="lineNum">     51 </span>              : 	REGISTER_DATA      = 90, /* Register data (screenshots typically) */ </span>
-<span class="lineNum">     52 </span>              : 	/* Non-data messages */ </span>
-<span class="lineNum">     53 </span>              : 	STOP               = 55, /* End of this update sequence */ </span>
-<span class="lineNum">     54 </span>              : 	/* Data transfer of various kinds */ </span>
-<span class="lineNum">     55 </span>              : 	DISPLAY_UPDATE_RAW = 1, </span>
-<span class="lineNum">     56 </span>              : 	DISPLAY_UPDATE_RLE = 2, </span>
-<span class="lineNum">     57 </span>              : 	DISPLAY_UPDATE_DIFF= 3, </span>
-<span class="lineNum">     58 </span>              : 	SOUND_UPDATE_RAW   = 4, </span>
-<span class="lineNum">     59 </span>              : 	SOUND_UPDATE_RLE   = 5, </span>
-<span class="lineNum">     60 </span>              : 	KEYBOARD_UPDATE    = 6, </span>
-<span class="lineNum">     61 </span>              : 	JOYSTICK_UPDATE    = 7, </span>
-<span class="lineNum">     62 </span>              : 	ENTER_MENU         = 8, </span>
-<span class="lineNum">     63 </span>              : 	TEXT_MESSAGE       = 9, </span>
-<span class="lineNum">     64 </span>              : 	SOUND_UPDATE	   = 10, </span>
-<span class="lineNum">     65 </span>              : } network_message_type_t; </span>
-<span class="lineNum">     66 </span>              :  </span>
-<span class="lineNum">     67 </span>              :  </span>
-<span class="lineNum">     68 </span>              : typedef enum </span>
-<span class="lineNum">     69 </span>              : { </span>
-<span class="lineNum">     70 </span>              : 	OK = 0, </span>
-<span class="lineNum">     71 </span>              : 	AGAIN_ERROR, </span>
-<span class="lineNum">     72 </span>              : 	VERSION_ERROR, </span>
-<span class="lineNum">     73 </span>              : 	SERVER_GARBAGE_ERROR, </span>
-<span class="lineNum">     74 </span>              : 	NO_PEERS_ERROR, </span>
-<span class="lineNum">     75 </span>              : } network_connection_error_t; </span>
-<span class="lineNum">     76 </span>              :  </span>
-<span class="lineNum">     77 </span>              : struct NetworkUpdate </span>
-<span class="lineNum">     78 </span>              : { </span>
-<span class="lineNum">     79 </span>              : 	uint16 magic;  /* Should be 0x1976 */ </span>
-<span class="lineNum">     80 </span>              : 	uint16 type;   /* See above */ </span>
-<span class="lineNum">     81 </span>              : 	uint32 size; </span>
-<span class="lineNum">     82 </span>              :  </span>
-<span class="lineNum">     83 </span>              : 	/* The rest is just data of some type */ </span>
-<span class="lineNum">     84 </span>              : 	uint8 data[]; </span>
-<span class="lineNum">     85 </span>              : }; </span>
-<span class="lineNum">     86 </span>              :  </span>
-<span class="lineNum">     87 </span>              : struct NetworkUpdateServerInfo </span>
-<span class="lineNum">     88 </span>              : { </span>
-<span class="lineNum">     89 </span>              : 	uint32 game_info_seq_nr; </span>
-<span class="lineNum">     90 </span>              : 	uint32 dummy[3]; /* Future */ </span>
-<span class="lineNum">     91 </span>              : }; </span>
-<span class="lineNum">     92 </span>              :  </span>
-<span class="lineNum">     93 </span>              :  </span>
-<span class="lineNum">     94 </span>              : struct NetworkUpdateDisplay </span>
-<span class="lineNum">     95 </span>              : { </span>
-<span class="lineNum">     96 </span>              : 	uint8 square; </span>
-<span class="lineNum">     97 </span>              : 	uint8 data[]; </span>
-<span class="lineNum">     98 </span>              : }; </span>
-<span class="lineNum">     99 </span>              :  </span>
-<span class="lineNum">    100 </span>              : #define NETWORK_UPDATE_TEXT_MESSAGE_BROADCAST 1 </span>
-<span class="lineNum">    101 </span>              : struct NetworkUpdateTextMessage </span>
-<span class="lineNum">    102 </span>              : { </span>
-<span class="lineNum">    103 </span>              : 	uint8 flags;  /* Broadcast or not */ </span>
-<span class="lineNum">    104 </span>              : 	uint8 data[]; /* NULL-terminated string */ </span>
-<span class="lineNum">    105 </span>              : }; </span>
-<span class="lineNum">    106 </span>              :  </span>
-<span class="lineNum">    107 </span>              : struct NetworkUpdateJoystick </span>
-<span class="lineNum">    108 </span>              : { </span>
-<span class="lineNum">    109 </span>              : 	uint8 val; </span>
-<span class="lineNum">    110 </span>              : }; </span>
-<span class="lineNum">    111 </span>              :  </span>
-<span class="lineNum">    112 </span>              : struct NetworkUpdateSelectPeer </span>
-<span class="lineNum">    113 </span>              : { </span>
-<span class="lineNum">    114 </span>              : 	uint32 server_id; </span>
-<span class="lineNum">    115 </span>              : }; </span>
-<span class="lineNum">    116 </span>              :  </span>
-<span class="lineNum">    117 </span>              : struct NetworkUpdatePingAck </span>
-<span class="lineNum">    118 </span>              : { </span>
-<span class="lineNum">    119 </span>              : 	uint32 seq; </span>
-<span class="lineNum">    120 </span>              : 	uint8 data[]; /* Only used for bandwidth ping/acks */ </span>
-<span class="lineNum">    121 </span>              : }; </span>
-<span class="lineNum">    122 </span>              :  </span>
-<span class="lineNum">    123 </span>              : struct NetworkUpdateRegisterData </span>
-<span class="lineNum">    124 </span>              : { </span>
-<span class="lineNum">    125 </span>              : 	uint32_t key; </span>
-<span class="lineNum">    126 </span>              : 	uint32_t metadata; /* Type etc */ </span>
-<span class="lineNum">    127 </span>              : 	uint8_t  data[]; </span>
-<span class="lineNum">    128 </span>              : }; </span>
-<span class="lineNum">    129 </span>              :  </span>
-<span class="lineNum">    130 </span>              : struct NetworkUpdateGameInfoHash </span>
-<span class="lineNum">    131 </span>              : { </span>
-<span class="lineNum">    132 </span>              : 	uint16_t hash;		/* Hash by filename */ </span>
-<span class="lineNum">    133 </span>              : 	uint16_t seq_nr; </span>
-<span class="lineNum">    134 </span>              : }; </span>
-<span class="lineNum">    135 </span>              :  </span>
-<span class="lineNum">    136 </span>              : struct NetworkUpdateGameInfoHashList </span>
-<span class="lineNum">    137 </span>              : { </span>
-<span class="lineNum">    138 </span>              : 	uint16_t n_entries; </span>
-<span class="lineNum">    139 </span>              : 	NetworkUpdateGameInfoHash hashes[]; </span>
-<span class="lineNum">    140 </span>              : }; </span>
-<span class="lineNum">    141 </span>              :  </span>
-<span class="lineNum">    142 </span>              : struct NetworkUpdateGameInfoList </span>
-<span class="lineNum">    143 </span>              : { </span>
-<span class="lineNum">    144 </span>              : 	uint16_t n_entries; </span>
-<span class="lineNum">    145 </span>              : 	uint32_t register_keys[]; </span>
-<span class="lineNum">    146 </span>              : }; </span>
-<span class="lineNum">    147 </span>              :  </span>
-<span class="lineNum">    148 </span>              : struct NetworkUpdateSoundInfo </span>
-<span class="lineNum">    149 </span>              : { </span>
-<span class="lineNum">    150 </span>              : 	uint16 delay_cycles; </span>
-<span class="lineNum">    151 </span>              : 	uint8 adr; </span>
-<span class="lineNum">    152 </span>              : 	uint8 val; </span>
-<span class="lineNum">    153 </span>              : }; </span>
-<span class="lineNum">    154 </span>              :  </span>
-<span class="lineNum">    155 </span>              : struct NetworkUpdateSound </span>
-<span class="lineNum">    156 </span>              : { </span>
-<span class="lineNum">    157 </span>              : 	uint16 n_items; </span>
-<span class="lineNum">    158 </span>              : 	uint16 flags; </span>
-<span class="lineNum">    159 </span>              : 	NetworkUpdateSoundInfo info[]; </span>
-<span class="lineNum">    160 </span>              : }; </span>
-<span class="lineNum">    161 </span>              :  </span>
-<span class="lineNum">    162 </span>              : /* </span>
-<span class="lineNum">    163 </span>              :  * Sent by the third-party broker server when someone wants to connect </span>
-<span class="lineNum">    164 </span>              :  * to this machine. </span>
-<span class="lineNum">    165 </span>              :  * </span>
-<span class="lineNum">    166 </span>              :  * See http://www.brynosaurus.com/pub/net/p2pnat/ for how the UDP hole </span>
-<span class="lineNum">    167 </span>              :  * punching actually works. </span>
-<span class="lineNum">    168 </span>              :  */ </span>
-<span class="lineNum">    169 </span>              : struct NetworkUpdatePeerInfo </span>
-<span class="lineNum">    170 </span>              : { </span>
-<span class="lineNum">    171 </span>              : 	uint16 private_port; </span>
-<span class="lineNum">    172 </span>              : 	uint16 public_port; </span>
-<span class="lineNum">    173 </span>              :  </span>
-<span class="lineNum">    174 </span>              : 	/* Encoded as hex numbers in a string - c0a80a02\0 -&gt; 192.168.10.2. </span>
-<span class="lineNum">    175 </span>              : 	 * Some more space to fit IPv6 stuff */ </span>
-<span class="lineNum">    176 </span>              : 	uint8 private_ip[16]; </span>
-<span class="lineNum">    177 </span>              : 	uint8 public_ip[16]; </span>
-<span class="lineNum">    178 </span>              :  </span>
-<span class="lineNum">    179 </span>              : 	uint16 key;          /* Random value to separate same names */ </span>
-<span class="lineNum">    180 </span>              : 	uint16 is_master; </span>
-<span class="lineNum">    181 </span>              : 	uint8 name[32];      /* &quot;SIMON&quot;, &quot;LINDA&quot; etc */ </span>
-<span class="lineNum">    182 </span>              : 	uint32 server_id;    /* Used by the server */ </span>
-<span class="lineNum">    183 </span>              : 	uint32 version;      /* Version number */ </span>
-<span class="lineNum">    184 </span>              :  </span>
-<span class="lineNum">    185 </span>              : 	uint8  region;		 /* Europe, africa etc */ </span>
-<span class="lineNum">    186 </span>              : 	uint8  d;		 /* Dummy */ </span>
-<span class="lineNum">    187 </span>              : 	uint16 avatar;		 /* Hash of the avatar */ </span>
-<span class="lineNum">    188 </span>              : 	uint32 screenshot_key;	 /* Key number of the screenshot */ </span>
-<span class="lineNum">    189 </span>              : }; </span>
-<span class="lineNum">    190 </span>              :  </span>
-<span class="lineNum">    191 </span>              : #define NETWORK_UPDATE_LIST_PEERS_IS_CONNECT 1 </span>
-<span class="lineNum">    192 </span>              : struct NetworkUpdateListPeers </span>
-<span class="lineNum">    193 </span>              : { </span>
-<span class="lineNum">    194 </span>              : 	uint32 n_peers; </span>
-<span class="lineNum">    195 </span>              : 	uint8  your_ip[16]; </span>
-<span class="lineNum">    196 </span>              : 	uint16 your_port; </span>
-<span class="lineNum">    197 </span>              : 	uint8  flags; </span>
-<span class="lineNum">    198 </span>              : 	uint8  d;		/* Pad to 4 bytes */ </span>
-<span class="lineNum">    199 </span>              :  </span>
-<span class="lineNum">    200 </span>              : 	/* Followed by the actual peers */ </span>
-<span class="lineNum">    201 </span>              : 	NetworkUpdatePeerInfo peers[]; </span>
-<span class="lineNum">    202 </span>              : }; </span>
-<span class="lineNum">    203 </span>              :  </span>
-<span class="lineNum">    204 </span>              : static inline NetworkUpdate *InitNetworkUpdate(NetworkUpdate *ud, uint16 type, uint32 size) </span>
-<span class="lineNum">    205 </span>              : { </span>
-<span class="lineNum">    206 </span><span class="lineNoCov">    0 / 14    : 	ud-&gt;magic = FRODO_NETWORK_MAGIC; </span>
-<span class="lineNum">    207 </span><span class="lineNoCov">    0 / 14    : 	ud-&gt;size = size; </span>
-<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 15    : 	ud-&gt;type = type; </span>
-<span class="lineNum">    209 </span>              :  </span>
-<span class="lineNum">    210 </span>              : 	return ud; </span>
-<span class="lineNum">    211 </span>              : } </span>
-<span class="lineNum">    212 </span>              :  </span>
-<span class="lineNum">    213 </span>              : class Network </span>
-<span class="lineNum">    214 </span>              : { </span>
-<span class="lineNum">    215 </span>              : public: </span>
-<span class="lineNum">    216 </span>              : 	Network(const char *remote_host, int port); </span>
-<span class="lineNum">    217 </span>              :  </span>
-<span class="lineNum">    218 </span>              : 	~Network(); </span>
-<span class="lineNum">    219 </span>              :  </span>
-<span class="lineNum">    220 </span>              : 	void EncodeDisplay(Uint8 *master, Uint8 *remote); </span>
-<span class="lineNum">    221 </span>              :  </span>
-<span class="lineNum">    222 </span>              : 	void EncodeJoystickUpdate(Uint8 v); </span>
-<span class="lineNum">    223 </span>              :  </span>
-<span class="lineNum">    224 </span>              : 	void EncodeTextMessage(const char *str, bool broadcast = false); </span>
-<span class="lineNum">    225 </span>              :  </span>
-<span class="lineNum">    226 </span>              : 	void EnqueueSound(uint32 linecnt, uint8 addr, uint8 val); </span>
-<span class="lineNum">    227 </span>              :  </span>
-<span class="lineNum">    228 </span>              : 	void RegisterSidWrite(uint32 linecnt, uint8 addr, uint8 val); </span>
-<span class="lineNum">    229 </span>              :  </span>
-<span class="lineNum">    230 </span>              : 	void FlushSound(void); </span>
-<span class="lineNum">    231 </span>              :  </span>
-<span class="lineNum">    232 </span>              : 	struct NetworkUpdateSoundInfo *DequeueSound(); </span>
-<span class="lineNum">    233 </span>              :  </span>
-<span class="lineNum">    234 </span>              :  </span>
-<span class="lineNum">    235 </span>              : 	bool DecodeUpdate(C64Display *display, uint8 *js, MOS6581 *dst); </span>
-<span class="lineNum">    236 </span>              :  </span>
-<span class="lineNum">    237 </span>              : 	void ResetNetworkUpdate(void); </span>
-<span class="lineNum">    238 </span>              :  </span>
-<span class="lineNum">    239 </span>              : 	void DrawTransferredBlocks(SDL_Surface *screen); </span>
-<span class="lineNum">    240 </span>              :  </span>
-<span class="lineNum">    241 </span>              : 	size_t GetKbps() { </span>
-<span class="lineNum">    242 </span>              : 		return this-&gt;kbps; </span>
-<span class="lineNum">    243 </span>              : 	} </span>
-<span class="lineNum">    244 </span>              :  </span>
-<span class="lineNum">    245 </span>              : 	bool ThrottleTraffic() { </span>
-<span class="lineNum">    246 </span>              : 		return this-&gt;kbps &gt; this-&gt;target_kbps; </span>
-<span class="lineNum">    247 </span>              : 	} </span>
-<span class="lineNum">    248 </span>              :  </span>
-<span class="lineNum">    249 </span>              : 	void ResetBytesSent() { </span>
-<span class="lineNum">    250 </span>              : 		this-&gt;traffic = 0; </span>
-<span class="lineNum">    251 </span>              : 	} </span>
-<span class="lineNum">    252 </span>              :  </span>
-<span class="lineNum">    253 </span>              : 	void Tick(int ms); </span>
-<span class="lineNum">    254 </span>              :  </span>
-<span class="lineNum">    255 </span>              : 	void CloseSocket(); </span>
-<span class="lineNum">    256 </span>              :  </span>
-<span class="lineNum">    257 </span>              : 	bool SendUpdateDirect(struct sockaddr_in *addr, NetworkUpdate *what); </span>
-<span class="lineNum">    258 </span>              :  </span>
-<span class="lineNum">    259 </span>              : 	bool SendUpdate(struct sockaddr_in *addr); </span>
-<span class="lineNum">    260 </span>              :  </span>
-<span class="lineNum">    261 </span>              : 	bool SendPeerUpdate() </span>
-<span class="lineNum">    262 </span>              : 	{ </span>
-<span class="lineNum">    263 </span><span class="lineNoCov">    0 / 4     : 		return this-&gt;SendUpdate(&amp;this-&gt;peer_addr); </span>
-<span class="lineNum">    264 </span>              : 	} </span>
-<span class="lineNum">    265 </span>              :  </span>
-<span class="lineNum">    266 </span>              : 	bool SendServerUpdate() </span>
-<span class="lineNum">    267 </span>              : 	{ </span>
-<span class="lineNum">    268 </span><span class="lineNoCov">    0 / 4     : 		return this-&gt;SendUpdate(&amp;this-&gt;server_addr); </span>
-<span class="lineNum">    269 </span>              : 	} </span>
-<span class="lineNum">    270 </span>              :  </span>
-<span class="lineNum">    271 </span>              : 	bool ReceiveUpdate(); </span>
-<span class="lineNum">    272 </span>              :  </span>
-<span class="lineNum">    273 </span>              : 	bool ReceiveUpdate(struct timeval *tv); </span>
-<span class="lineNum">    274 </span>              :  </span>
-<span class="lineNum">    275 </span>              : 	static bool StartNetworkServer(int port); </span>
-<span class="lineNum">    276 </span>              :  </span>
-<span class="lineNum">    277 </span>              : 	static bool CheckNewConnection(); </span>
-<span class="lineNum">    278 </span>              :  </span>
-<span class="lineNum">    279 </span>              : 	Uint8 *GetScreen() </span>
-<span class="lineNum">    280 </span>              : 	{ </span>
-<span class="lineNum">    281 </span>              : 		return this-&gt;screen; </span>
-<span class="lineNum">    282 </span>              : 	} </span>
-<span class="lineNum">    283 </span>              :  </span>
-<span class="lineNum">    284 </span>              : 	bool SelectPeer(const char *hostname, uint16_t port, uint32_t server_id); </span>
-<span class="lineNum">    285 </span>              :  </span>
-<span class="lineNum">    286 </span>              : 	bool CancelPeerSelection() </span>
-<span class="lineNum">    287 </span>              : 	{ </span>
-<span class="lineNum">    288 </span><span class="lineNoCov">    0 / 2     : 		return this-&gt;SelectPeer(NULL,0,0); </span>
-<span class="lineNum">    289 </span>              : 	} </span>
-<span class="lineNum">    290 </span>              :  </span>
-<span class="lineNum">    291 </span>              : 	network_connection_error_t ConnectFSM(); </span>
-<span class="lineNum">    292 </span>              :  </span>
-<span class="lineNum">    293 </span>              : 	/** </span>
-<span class="lineNum">    294 </span>              : 	 * Disconnect from the other end. You should delete the object </span>
-<span class="lineNum">    295 </span>              : 	 * after having done this. </span>
-<span class="lineNum">    296 </span>              : 	 */ </span>
-<span class="lineNum">    297 </span>              : 	void Disconnect(); </span>
-<span class="lineNum">    298 </span>              :  </span>
-<span class="lineNum">    299 </span>              : 	bool is_master; /* Some peers are more equal than others */ </span>
-<span class="lineNum">    300 </span>              :  </span>
-<span class="lineNum">    301 </span>              : 	void InitNetwork(); </span>
-<span class="lineNum">    302 </span>              :  </span>
-<span class="lineNum">    303 </span>              : 	void ShutdownNetwork(); </span>
-<span class="lineNum">    304 </span>              :  </span>
-<span class="lineNum">    305 </span>              :  </span>
-<span class="lineNum">    306 </span>              : 	bool ConnectToBroker(); </span>
-<span class="lineNum">    307 </span>              :  </span>
-<span class="lineNum">    308 </span>              : 	bool ConnectToPeer(); </span>
-<span class="lineNum">    309 </span>              :  </span>
-<span class="lineNum">    310 </span>              : 	bool WaitForPeerReply(); </span>
-<span class="lineNum">    311 </span>              :  </span>
-<span class="lineNum">    312 </span>              : 	bool SendBandWidthTest(); </span>
-<span class="lineNum">    313 </span>              :  </span>
-<span class="lineNum">    314 </span>              : 	network_connection_error_t WaitForBandWidthReply(); </span>
-<span class="lineNum">    315 </span>              :  </span>
-<span class="lineNum">    316 </span>              : 	network_connection_error_t WaitForPeerList(); </span>
-<span class="lineNum">    317 </span>              :  </span>
-<span class="lineNum">    318 </span>              : 	network_connection_error_t WaitForPeerAddress(); </span>
-<span class="lineNum">    319 </span>              :  </span>
-<span class="lineNum">    320 </span>              : 	network_connection_error_t WaitForPeerSelection(); </span>
-<span class="lineNum">    321 </span>              :  </span>
-<span class="lineNum">    322 </span>              : 	bool SelectPeer(uint32 id); </span>
-<span class="lineNum">    323 </span>              :  </span>
-<span class="lineNum">    324 </span>              : protected: </span>
-<span class="lineNum">    325 </span>              : 	/** Encode part of a screen into @a dst in a single sweep </span>
-<span class="lineNum">    326 </span>              : 	 *  </span>
-<span class="lineNum">    327 </span>              : 	 * @param dst the destination update structure </span>
-<span class="lineNum">    328 </span>              : 	 * @param screen the screen to encode </span>
-<span class="lineNum">    329 </span>              : 	 * @param remote the current remote screen </span>
-<span class="lineNum">    330 </span>              : 	 * @param square the square index of the screen to encode </span>
-<span class="lineNum">    331 </span>              : 	 * </span>
-<span class="lineNum">    332 </span>              : 	 * @return the size of the encoded message </span>
-<span class="lineNum">    333 </span>              : 	 */ </span>
-<span class="lineNum">    334 </span>              : 	size_t EncodeDisplaySquare(struct NetworkUpdate *dst, </span>
-<span class="lineNum">    335 </span>              : 			Uint8 *screen, Uint8 *remote, int square, </span>
-<span class="lineNum">    336 </span>              : 			bool use_diff = true); </span>
-<span class="lineNum">    337 </span>              :  </span>
-<span class="lineNum">    338 </span>              : 	/** </span>
-<span class="lineNum">    339 </span>              : 	 * Decode a display update message onto @a screen </span>
-<span class="lineNum">    340 </span>              : 	 * </span>
-<span class="lineNum">    341 </span>              : 	 * @param src the message to decode </span>
-<span class="lineNum">    342 </span>              : 	 */ </span>
-<span class="lineNum">    343 </span>              : 	bool DecodeDisplayUpdate(struct NetworkUpdate *src); </span>
-<span class="lineNum">    344 </span>              :  </span>
-<span class="lineNum">    345 </span>              : 	void AddNetworkUpdate(struct NetworkUpdate *update); </span>
-<span class="lineNum">    346 </span>              :  </span>
-<span class="lineNum">    347 </span>              : 	size_t GetNetworkUpdateSize(void) </span>
-<span class="lineNum">    348 </span>              : 	{ </span>
-<span class="lineNum">    349 </span><span class="lineNoCov">    0 / 1     : 		return (Uint8*)this-&gt;cur_ud - (Uint8*)this-&gt;ud; </span>
-<span class="lineNum">    350 </span>              : 	} </span>
-<span class="lineNum">    351 </span>              :  </span>
-<span class="lineNum">    352 </span>              : 	/** </span>
-<span class="lineNum">    353 </span>              : 	 * Compare two display squares. </span>
-<span class="lineNum">    354 </span>              : 	 * </span>
-<span class="lineNum">    355 </span>              : 	 * @param a the first square (first byte) </span>
-<span class="lineNum">    356 </span>              : 	 * @param b the second square (first byte) </span>
-<span class="lineNum">    357 </span>              : 	 * </span>
-<span class="lineNum">    358 </span>              : 	 * @return true if they are equal </span>
-<span class="lineNum">    359 </span>              : 	 */ </span>
-<span class="lineNum">    360 </span>              : 	bool CompareSquare(Uint8 *a, Uint8 *b); </span>
-<span class="lineNum">    361 </span>              :  </span>
-<span class="lineNum">    362 </span>              : 	bool DecodeDisplayDiff(struct NetworkUpdate *src, </span>
-<span class="lineNum">    363 </span>              : 			int x, int y); </span>
-<span class="lineNum">    364 </span>              : 	bool DecodeDisplayRLE(struct NetworkUpdate *src, </span>
-<span class="lineNum">    365 </span>              : 			int x, int y); </span>
-<span class="lineNum">    366 </span>              : 	bool DecodeDisplayRaw(struct NetworkUpdate *src, </span>
-<span class="lineNum">    367 </span>              : 			int x, int y); </span>
-<span class="lineNum">    368 </span>              :  </span>
-<span class="lineNum">    369 </span>              : 	void SendPingAck(struct sockaddr_in *addr, int seq, uint16 type, size_t data_size); </span>
-<span class="lineNum">    370 </span>              :  </span>
-<span class="lineNum">    371 </span>              : 	bool ReceiveUpdate(NetworkUpdate *dst, size_t sz, struct timeval *tv); </span>
-<span class="lineNum">    372 </span>              :  </span>
-<span class="lineNum">    373 </span>              : 	bool ReceiveData(void *dst, int sock, size_t sz); </span>
-<span class="lineNum">    374 </span>              :  </span>
-<span class="lineNum">    375 </span>              : 	bool InitSocket(); </span>
-<span class="lineNum">    376 </span>              :  </span>
-<span class="lineNum">    377 </span>              : 	/* Simple wrapper around our friend recvfrom */ </span>
-<span class="lineNum">    378 </span>              : 	ssize_t ReceiveFrom(void *dst, int sock, size_t sz, </span>
-<span class="lineNum">    379 </span>              : 			struct sockaddr_in *from); </span>
-<span class="lineNum">    380 </span>              :  </span>
-<span class="lineNum">    381 </span>              : 	ssize_t SendTo(void *src, int sock, size_t sz, </span>
-<span class="lineNum">    382 </span>              : 			struct sockaddr_in *to); </span>
-<span class="lineNum">    383 </span>              :  </span>
-<span class="lineNum">    384 </span>              : 	bool SendData(void *src, int sock, size_t sz); </span>
-<span class="lineNum">    385 </span>              :  </span>
-<span class="lineNum">    386 </span>              : 	virtual bool Select(int sock, struct timeval *tv); </span>
-<span class="lineNum">    387 </span>              :  </span>
-<span class="lineNum">    388 </span>              : 	bool IpToStr(char *dst, uint8 *ip); </span>
-<span class="lineNum">    389 </span>              :  </span>
-<span class="lineNum">    390 </span>              : 	bool InitSockaddr (struct sockaddr_in *name, </span>
-<span class="lineNum">    391 </span>              : 			const char *hostname, uint16_t port); </span>
-<span class="lineNum">    392 </span>              :  </span>
-<span class="lineNum">    393 </span>              : 	bool MarshalData(NetworkUpdate *ud); </span>
-<span class="lineNum">    394 </span>              :  </span>
-<span class="lineNum">    395 </span>              : 	bool MarshalAllData(NetworkUpdate *p); </span>
-<span class="lineNum">    396 </span>              :  </span>
-<span class="lineNum">    397 </span>              : 	bool DeMarshalAllData(NetworkUpdate *ud, size_t max_size); </span>
-<span class="lineNum">    398 </span>              :  </span>
-<span class="lineNum">    399 </span>              : 	bool DeMarshalData(NetworkUpdate *ud); </span>
-<span class="lineNum">    400 </span>              :  </span>
-<span class="lineNum">    401 </span>              : 	bool ScanDataForStop(NetworkUpdate *ud, size_t max_size); </span>
-<span class="lineNum">    402 </span>              :  </span>
-<span class="lineNum">    403 </span>              : 	bool AppendScreenshot(NetworkUpdatePeerInfo *pi); </span>
-<span class="lineNum">    404 </span>              :  </span>
-<span class="lineNum">    405 </span>              : 	size_t FillNetworkBuffer(NetworkUpdate *p); </span>
-<span class="lineNum">    406 </span>              :  </span>
-<span class="lineNum">    407 </span>              : 	NetworkUpdate *GetNext(NetworkUpdate *p) </span>
-<span class="lineNum">    408 </span>              : 	{ </span>
-<span class="lineNum">    409 </span><span class="lineNoCov">    0 / 4     : 		return (NetworkUpdate*)((Uint8*)p + p-&gt;size); </span>
-<span class="lineNum">    410 </span>              : 	} </span>
-<span class="lineNum">    411 </span>              : 	 </span>
-<span class="lineNum">    412 </span>              : 	NetworkUpdate *receive_ud; </span>
-<span class="lineNum">    413 </span>              : 	NetworkUpdate *ud; </span>
-<span class="lineNum">    414 </span>              : 	NetworkUpdate *cur_ud; </span>
-<span class="lineNum">    415 </span>              : 	Uint8 *raw_buf; </span>
-<span class="lineNum">    416 </span>              : 	Uint8 *rle_buf; </span>
-<span class="lineNum">    417 </span>              : 	Uint8 *diff_buf; </span>
-<span class="lineNum">    418 </span>              : 	Uint8 screenshot[SCREENSHOT_X * SCREENSHOT_Y / 2]; </span>
-<span class="lineNum">    419 </span>              : 	Uint32 *square_updated; </span>
-<span class="lineNum">    420 </span>              :  </span>
-<span class="lineNum">    421 </span>              : 	size_t traffic, last_traffic; </span>
-<span class="lineNum">    422 </span>              : 	int time_since_last_reset; </span>
-<span class="lineNum">    423 </span>              : 	int target_kbps; </span>
-<span class="lineNum">    424 </span>              : 	int kbps; </span>
-<span class="lineNum">    425 </span>              :  </span>
-<span class="lineNum">    426 </span>              : 	/* The current square to refresh */ </span>
-<span class="lineNum">    427 </span>              : 	int refresh_square; </span>
-<span class="lineNum">    428 </span>              :  </span>
-<span class="lineNum">    429 </span>              : 	Uint8 *screen; </span>
-<span class="lineNum">    430 </span>              : 	int joystick_port; </span>
-<span class="lineNum">    431 </span>              : 	bool connected; </span>
-<span class="lineNum">    432 </span>              : 	Uint8 cur_joystick_data; </span>
-<span class="lineNum">    433 </span>              :  </span>
-<span class="lineNum">    434 </span>              : 	/* Connection to the peer */ </span>
-<span class="lineNum">    435 </span>              : 	int peer_selected; </span>
-<span class="lineNum">    436 </span>              : 	int sock; </span>
-<span class="lineNum">    437 </span>              : 	struct sockaddr_in peer_addr; </span>
-<span class="lineNum">    438 </span>              : 	struct sockaddr_in server_addr; </span>
-<span class="lineNum">    439 </span>              :  </span>
-<span class="lineNum">    440 </span>              : 	const char *connection_error_message; </span>
-<span class="lineNum">    441 </span>              :  </span>
-<span class="lineNum">    442 </span>              : 	uint32 bandwidth_ping_ms; </span>
-<span class="lineNum">    443 </span>              :  </span>
-<span class="lineNum">    444 </span>              : 	NetworkUpdateSoundInfo sound_active[NETWORK_SOUND_BUF_SIZE]; </span>
-<span class="lineNum">    445 </span>              : 	int sound_head; </span>
-<span class="lineNum">    446 </span>              : 	int sound_tail; </span>
-<span class="lineNum">    447 </span>              : 	uint32 sound_last_cycles; </span>
-<span class="lineNum">    448 </span>              : 	uint32 sound_last_send; </span>
-<span class="lineNum">    449 </span>              :  </span>
-<span class="lineNum">    450 </span>              : public: </span>
-<span class="lineNum">    451 </span>              : 	static bool networking_started; </span>
-<span class="lineNum">    452 </span>              : }; </span>
-<span class="lineNum">    453 </span>              :  </span>
-<span class="lineNum">    454 </span>              : #endif /* NETWORK_H */ </span>
+<span class="lineNum">    1</span>              : #ifndef NETWORK_H </span>
+<span class="lineNum">    2</span>              : #define NETWORK_H </span>
+<span class="lineNum">    3</span>              :  </span>
+<span class="lineNum">    4</span>              : #if defined(GEKKO) </span>
+<span class="lineNum">    5</span>              : # include &lt;network.h&gt; </span>
+<span class="lineNum">    6</span>              : #else </span>
+<span class="lineNum">    7</span>              :  #include &lt;arpa&#047;inet.h&gt; </span>
+<span class="lineNum">    8</span>              : #endif </span>
+<span class="lineNum">    9</span>              : #include &lt;SDL.h&gt; </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : #include &quot;SID.h&quot; </span>
+<span class="lineNum">   12</span>              : #include &quot;Display.h&quot; </span>
+<span class="lineNum">   13</span>              :  </span>
+<span class="lineNum">   14</span>              : #define FRODO_NETWORK_PROTOCOL_VERSION 4 </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : #define FRODO_NETWORK_MAGIC 0x1976 </span>
+<span class="lineNum">   17</span>              :  </span>
+<span class="lineNum">   18</span>              : #define NETWORK_UPDATE_SIZE     (128 * 1024) </span>
+<span class="lineNum">   19</span>              : #define NETWORK_SOUND_BUF_SIZE   8192 </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span>              : #define SCREENSHOT_FACTOR 4 </span>
+<span class="lineNum">   22</span>              : #define SCREENSHOT_X (DISPLAY_X &#047; SCREENSHOT_FACTOR) </span>
+<span class="lineNum">   23</span>              : #define SCREENSHOT_Y (DISPLAY_Y &#047; SCREENSHOT_FACTOR) </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : typedef enum </span>
+<span class="lineNum">   26</span>              : { </span>
+<span class="lineNum">   27</span>              : 	REGION_UNKNOWN = 0, </span>
+<span class="lineNum">   28</span>              : 	REGION_EUROPE = 1, </span>
+<span class="lineNum">   29</span>              : 	REGION_AFRICA = 2, </span>
+<span class="lineNum">   30</span>              : 	REGION_NORTH_AMERICA = 3, </span>
+<span class="lineNum">   31</span>              : 	REGION_SOUTH_AMERICA = 4, </span>
+<span class="lineNum">   32</span>              : 	REGION_MIDDLE_EAST = 5, </span>
+<span class="lineNum">   33</span>              : 	REGION_SOUTH_ASIA = 6, </span>
+<span class="lineNum">   34</span>              : 	REGION_EAST_ASIA = 7, </span>
+<span class="lineNum">   35</span>              : 	REGION_OCEANIA = 8, </span>
+<span class="lineNum">   36</span>              : 	REGION_ANTARTICA = 9, </span>
+<span class="lineNum">   37</span>              : } network_region_t; </span>
+<span class="lineNum">   38</span>              :  </span>
+<span class="lineNum">   39</span>              : typedef enum </span>
+<span class="lineNum">   40</span>              : { </span>
+<span class="lineNum">   41</span>              : 	&#047;* Connection-related messages *&#047; </span>
+<span class="lineNum">   42</span>              : 	CONNECT_TO_BROKER  = 99, &#047;* Hello, broker *&#047; </span>
+<span class="lineNum">   43</span>              : 	LIST_PEERS         = 98, &#047;* List of peers *&#047; </span>
+<span class="lineNum">   44</span>              : 	CONNECT_TO_PEER    = 97, &#047;* A peer wants to connect *&#047; </span>
+<span class="lineNum">   45</span>              : 	DISCONNECT         = 96, &#047;* Disconnect from a peer *&#047; </span>
+<span class="lineNum">   46</span>              : 	SELECT_PEER        = 93, &#047;* (client) Select who to connect to *&#047; </span>
+<span class="lineNum">   47</span>              : 	PING               = 95, &#047;* (broker) are you alive? *&#047; </span>
+<span class="lineNum">   48</span>              : 	ACK                = 94, &#047;* Answer to broker *&#047; </span>
+<span class="lineNum">   49</span>              : 	BANDWIDTH_PING     = 92, &#047;* Large packet to calculate bandwidth *&#047; </span>
+<span class="lineNum">   50</span>              : 	BANDWIDTH_ACK	   = 91, &#047;* Answer to BANDWIDTH_PING *&#047; </span>
+<span class="lineNum">   51</span>              : 	REGISTER_DATA      = 90, &#047;* Register data (screenshots typically) *&#047; </span>
+<span class="lineNum">   52</span>              : 	&#047;* Non-data messages *&#047; </span>
+<span class="lineNum">   53</span>              : 	STOP               = 55, &#047;* End of this update sequence *&#047; </span>
+<span class="lineNum">   54</span>              : 	&#047;* Data transfer of various kinds *&#047; </span>
+<span class="lineNum">   55</span>              : 	DISPLAY_UPDATE_RAW = 1, </span>
+<span class="lineNum">   56</span>              : 	DISPLAY_UPDATE_RLE = 2, </span>
+<span class="lineNum">   57</span>              : 	DISPLAY_UPDATE_DIFF= 3, </span>
+<span class="lineNum">   58</span>              : 	SOUND_UPDATE_RAW   = 4, </span>
+<span class="lineNum">   59</span>              : 	SOUND_UPDATE_RLE   = 5, </span>
+<span class="lineNum">   60</span>              : 	KEYBOARD_UPDATE    = 6, </span>
+<span class="lineNum">   61</span>              : 	JOYSTICK_UPDATE    = 7, </span>
+<span class="lineNum">   62</span>              : 	ENTER_MENU         = 8, </span>
+<span class="lineNum">   63</span>              : 	TEXT_MESSAGE       = 9, </span>
+<span class="lineNum">   64</span>              : 	SOUND_UPDATE	   = 10, </span>
+<span class="lineNum">   65</span>              : } network_message_type_t; </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span>              :  </span>
+<span class="lineNum">   68</span>              : typedef enum </span>
+<span class="lineNum">   69</span>              : { </span>
+<span class="lineNum">   70</span>              : 	OK = 0, </span>
+<span class="lineNum">   71</span>              : 	AGAIN_ERROR, </span>
+<span class="lineNum">   72</span>              : 	VERSION_ERROR, </span>
+<span class="lineNum">   73</span>              : 	SERVER_GARBAGE_ERROR, </span>
+<span class="lineNum">   74</span>              : 	NO_PEERS_ERROR, </span>
+<span class="lineNum">   75</span>              : } network_connection_error_t; </span>
+<span class="lineNum">   76</span>              :  </span>
+<span class="lineNum">   77</span>              : struct NetworkUpdate </span>
+<span class="lineNum">   78</span>              : { </span>
+<span class="lineNum">   79</span>              : 	uint16 magic;  &#047;* Should be 0x1976 *&#047; </span>
+<span class="lineNum">   80</span>              : 	uint16 type;   &#047;* See above *&#047; </span>
+<span class="lineNum">   81</span>              : 	uint32 size; </span>
+<span class="lineNum">   82</span>              :  </span>
+<span class="lineNum">   83</span>              : 	&#047;* The rest is just data of some type *&#047; </span>
+<span class="lineNum">   84</span>              : 	uint8 data[]; </span>
+<span class="lineNum">   85</span>              : }; </span>
+<span class="lineNum">   86</span>              :  </span>
+<span class="lineNum">   87</span>              : struct NetworkUpdateServerInfo </span>
+<span class="lineNum">   88</span>              : { </span>
+<span class="lineNum">   89</span>              : 	uint32 game_info_seq_nr; </span>
+<span class="lineNum">   90</span>              : 	uint32 dummy[3]; &#047;* Future *&#047; </span>
+<span class="lineNum">   91</span>              : }; </span>
+<span class="lineNum">   92</span>              :  </span>
+<span class="lineNum">   93</span>              :  </span>
+<span class="lineNum">   94</span>              : struct NetworkUpdateDisplay </span>
+<span class="lineNum">   95</span>              : { </span>
+<span class="lineNum">   96</span>              : 	uint8 square; </span>
+<span class="lineNum">   97</span>              : 	uint8 data[]; </span>
+<span class="lineNum">   98</span>              : }; </span>
+<span class="lineNum">   99</span>              :  </span>
+<span class="lineNum">  100</span>              : #define NETWORK_UPDATE_TEXT_MESSAGE_BROADCAST 1 </span>
+<span class="lineNum">  101</span>              : struct NetworkUpdateTextMessage </span>
+<span class="lineNum">  102</span>              : { </span>
+<span class="lineNum">  103</span>              : 	uint8 flags;  &#047;* Broadcast or not *&#047; </span>
+<span class="lineNum">  104</span>              : 	uint8 data[]; &#047;* NULL-terminated string *&#047; </span>
+<span class="lineNum">  105</span>              : }; </span>
+<span class="lineNum">  106</span>              :  </span>
+<span class="lineNum">  107</span>              : struct NetworkUpdateJoystick </span>
+<span class="lineNum">  108</span>              : { </span>
+<span class="lineNum">  109</span>              : 	uint8 val; </span>
+<span class="lineNum">  110</span>              : }; </span>
+<span class="lineNum">  111</span>              :  </span>
+<span class="lineNum">  112</span>              : struct NetworkUpdateSelectPeer </span>
+<span class="lineNum">  113</span>              : { </span>
+<span class="lineNum">  114</span>              : 	uint32 server_id; </span>
+<span class="lineNum">  115</span>              : }; </span>
+<span class="lineNum">  116</span>              :  </span>
+<span class="lineNum">  117</span>              : struct NetworkUpdatePingAck </span>
+<span class="lineNum">  118</span>              : { </span>
+<span class="lineNum">  119</span>              : 	uint32 seq; </span>
+<span class="lineNum">  120</span>              : 	uint8 data[]; &#047;* Only used for bandwidth ping&#047;acks *&#047; </span>
+<span class="lineNum">  121</span>              : }; </span>
+<span class="lineNum">  122</span>              :  </span>
+<span class="lineNum">  123</span>              : struct NetworkUpdateRegisterData </span>
+<span class="lineNum">  124</span>              : { </span>
+<span class="lineNum">  125</span>              : 	uint32_t key; </span>
+<span class="lineNum">  126</span>              : 	uint32_t metadata; &#047;* Type etc *&#047; </span>
+<span class="lineNum">  127</span>              : 	uint8_t  data[]; </span>
+<span class="lineNum">  128</span>              : }; </span>
+<span class="lineNum">  129</span>              :  </span>
+<span class="lineNum">  130</span>              : struct NetworkUpdateGameInfoHash </span>
+<span class="lineNum">  131</span>              : { </span>
+<span class="lineNum">  132</span>              : 	uint16_t hash;		&#047;* Hash by filename *&#047; </span>
+<span class="lineNum">  133</span>              : 	uint16_t seq_nr; </span>
+<span class="lineNum">  134</span>              : }; </span>
+<span class="lineNum">  135</span>              :  </span>
+<span class="lineNum">  136</span>              : struct NetworkUpdateGameInfoHashList </span>
+<span class="lineNum">  137</span>              : { </span>
+<span class="lineNum">  138</span>              : 	uint16_t n_entries; </span>
+<span class="lineNum">  139</span>              : 	NetworkUpdateGameInfoHash hashes[]; </span>
+<span class="lineNum">  140</span>              : }; </span>
+<span class="lineNum">  141</span>              :  </span>
+<span class="lineNum">  142</span>              : struct NetworkUpdateGameInfoList </span>
+<span class="lineNum">  143</span>              : { </span>
+<span class="lineNum">  144</span>              : 	uint16_t n_entries; </span>
+<span class="lineNum">  145</span>              : 	uint32_t register_keys[]; </span>
+<span class="lineNum">  146</span>              : }; </span>
+<span class="lineNum">  147</span>              :  </span>
+<span class="lineNum">  148</span>              : struct NetworkUpdateSoundInfo </span>
+<span class="lineNum">  149</span>              : { </span>
+<span class="lineNum">  150</span>              : 	uint16 delay_cycles; </span>
+<span class="lineNum">  151</span>              : 	uint8 adr; </span>
+<span class="lineNum">  152</span>              : 	uint8 val; </span>
+<span class="lineNum">  153</span>              : }; </span>
+<span class="lineNum">  154</span>              :  </span>
+<span class="lineNum">  155</span>              : struct NetworkUpdateSound </span>
+<span class="lineNum">  156</span>              : { </span>
+<span class="lineNum">  157</span>              : 	uint16 n_items; </span>
+<span class="lineNum">  158</span>              : 	uint16 flags; </span>
+<span class="lineNum">  159</span>              : 	NetworkUpdateSoundInfo info[]; </span>
+<span class="lineNum">  160</span>              : }; </span>
+<span class="lineNum">  161</span>              :  </span>
+<span class="lineNum">  162</span>              : &#047;* </span>
+<span class="lineNum">  163</span>              :  * Sent by the third-party broker server when someone wants to connect </span>
+<span class="lineNum">  164</span>              :  * to this machine. </span>
+<span class="lineNum">  165</span>              :  * </span>
+<span class="lineNum">  166</span>              :  * See http:&#047;&#047;www.brynosaurus.com&#047;pub&#047;net&#047;p2pnat&#047; for how the UDP hole </span>
+<span class="lineNum">  167</span>              :  * punching actually works. </span>
+<span class="lineNum">  168</span>              :  *&#047; </span>
+<span class="lineNum">  169</span>              : struct NetworkUpdatePeerInfo </span>
+<span class="lineNum">  170</span>              : { </span>
+<span class="lineNum">  171</span>              : 	uint16 private_port; </span>
+<span class="lineNum">  172</span>              : 	uint16 public_port; </span>
+<span class="lineNum">  173</span>              :  </span>
+<span class="lineNum">  174</span>              : 	&#047;* Encoded as hex numbers in a string - c0a80a02&#092;0 -&gt; 192.168.10.2. </span>
+<span class="lineNum">  175</span>              : 	 * Some more space to fit IPv6 stuff *&#047; </span>
+<span class="lineNum">  176</span>              : 	uint8 private_ip[16]; </span>
+<span class="lineNum">  177</span>              : 	uint8 public_ip[16]; </span>
+<span class="lineNum">  178</span>              :  </span>
+<span class="lineNum">  179</span>              : 	uint16 key;          &#047;* Random value to separate same names *&#047; </span>
+<span class="lineNum">  180</span>              : 	uint16 is_master; </span>
+<span class="lineNum">  181</span>              : 	uint8 name[32];      &#047;* &quot;SIMON&quot;, &quot;LINDA&quot; etc *&#047; </span>
+<span class="lineNum">  182</span>              : 	uint32 server_id;    &#047;* Used by the server *&#047; </span>
+<span class="lineNum">  183</span>              : 	uint32 version;      &#047;* Version number *&#047; </span>
+<span class="lineNum">  184</span>              :  </span>
+<span class="lineNum">  185</span>              : 	uint8  region;		 &#047;* Europe, africa etc *&#047; </span>
+<span class="lineNum">  186</span>              : 	uint8  d;		 &#047;* Dummy *&#047; </span>
+<span class="lineNum">  187</span>              : 	uint16 avatar;		 &#047;* Hash of the avatar *&#047; </span>
+<span class="lineNum">  188</span>              : 	uint32 screenshot_key;	 &#047;* Key number of the screenshot *&#047; </span>
+<span class="lineNum">  189</span>              : }; </span>
+<span class="lineNum">  190</span>              :  </span>
+<span class="lineNum">  191</span>              : #define NETWORK_UPDATE_LIST_PEERS_IS_CONNECT 1 </span>
+<span class="lineNum">  192</span>              : struct NetworkUpdateListPeers </span>
+<span class="lineNum">  193</span>              : { </span>
+<span class="lineNum">  194</span>              : 	uint32 n_peers; </span>
+<span class="lineNum">  195</span>              : 	uint8  your_ip[16]; </span>
+<span class="lineNum">  196</span>              : 	uint16 your_port; </span>
+<span class="lineNum">  197</span>              : 	uint8  flags; </span>
+<span class="lineNum">  198</span>              : 	uint8  d;		&#047;* Pad to 4 bytes *&#047; </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span>              : 	&#047;* Followed by the actual peers *&#047; </span>
+<span class="lineNum">  201</span>              : 	NetworkUpdatePeerInfo peers[]; </span>
+<span class="lineNum">  202</span>              : }; </span>
+<span class="lineNum">  203</span>              :  </span>
+<span class="lineNum">  204</span>              : static inline NetworkUpdate *InitNetworkUpdate(NetworkUpdate *ud, uint16 type, uint32 size) </span>
+<span class="lineNum">  205</span>              : { </span>
+<span class="lineNum">  206</span><span class="lineNoCov">      0  /  14: 	ud-&gt;magic = FRODO_NETWORK_MAGIC; </span>
+<span class="lineNum">  207</span><span class="lineNoCov">      0  /  12: 	ud-&gt;size = size; </span>
+<span class="lineNum">  208</span><span class="lineNoCov">      0  /  15: 	ud-&gt;type = type; </span>
+<span class="lineNum">  209</span>              :  </span>
+<span class="lineNum">  210</span>              : 	return ud; </span>
+<span class="lineNum">  211</span>              : } </span>
+<span class="lineNum">  212</span>              :  </span>
+<span class="lineNum">  213</span>              : class Network </span>
+<span class="lineNum">  214</span>              : { </span>
+<span class="lineNum">  215</span>              : public: </span>
+<span class="lineNum">  216</span>              : 	Network(const char *remote_host, int port); </span>
+<span class="lineNum">  217</span>              :  </span>
+<span class="lineNum">  218</span>              : 	~Network(); </span>
+<span class="lineNum">  219</span>              :  </span>
+<span class="lineNum">  220</span>              : 	void EncodeDisplay(Uint8 *master, Uint8 *remote); </span>
+<span class="lineNum">  221</span>              :  </span>
+<span class="lineNum">  222</span>              : 	void EncodeJoystickUpdate(Uint8 v); </span>
+<span class="lineNum">  223</span>              :  </span>
+<span class="lineNum">  224</span>              : 	void EncodeTextMessage(const char *str, bool broadcast = false); </span>
+<span class="lineNum">  225</span>              :  </span>
+<span class="lineNum">  226</span>              : 	void EnqueueSound(uint32 linecnt, uint8 addr, uint8 val); </span>
+<span class="lineNum">  227</span>              :  </span>
+<span class="lineNum">  228</span>              : 	void RegisterSidWrite(uint32 linecnt, uint8 addr, uint8 val); </span>
+<span class="lineNum">  229</span>              :  </span>
+<span class="lineNum">  230</span>              : 	void FlushSound(void); </span>
+<span class="lineNum">  231</span>              :  </span>
+<span class="lineNum">  232</span>              : 	struct NetworkUpdateSoundInfo *DequeueSound(); </span>
+<span class="lineNum">  233</span>              :  </span>
+<span class="lineNum">  234</span>              :  </span>
+<span class="lineNum">  235</span>              : 	bool DecodeUpdate(C64Display *display, uint8 *js, MOS6581 *dst); </span>
+<span class="lineNum">  236</span>              :  </span>
+<span class="lineNum">  237</span>              : 	void ResetNetworkUpdate(void); </span>
+<span class="lineNum">  238</span>              :  </span>
+<span class="lineNum">  239</span>              : 	void DrawTransferredBlocks(SDL_Surface *screen); </span>
+<span class="lineNum">  240</span>              :  </span>
+<span class="lineNum">  241</span>              : 	size_t GetKbps() { </span>
+<span class="lineNum">  242</span>              : 		return this-&gt;kbps; </span>
+<span class="lineNum">  243</span>              : 	} </span>
+<span class="lineNum">  244</span>              :  </span>
+<span class="lineNum">  245</span>              : 	bool ThrottleTraffic() { </span>
+<span class="lineNum">  246</span>              : 		return this-&gt;kbps &gt; this-&gt;target_kbps; </span>
+<span class="lineNum">  247</span>              : 	} </span>
+<span class="lineNum">  248</span>              :  </span>
+<span class="lineNum">  249</span>              : 	void ResetBytesSent() { </span>
+<span class="lineNum">  250</span>              : 		this-&gt;traffic = 0; </span>
+<span class="lineNum">  251</span>              : 	} </span>
+<span class="lineNum">  252</span>              :  </span>
+<span class="lineNum">  253</span>              : 	void Tick(int ms); </span>
+<span class="lineNum">  254</span>              :  </span>
+<span class="lineNum">  255</span>              : 	void CloseSocket(); </span>
+<span class="lineNum">  256</span>              :  </span>
+<span class="lineNum">  257</span>              : 	bool SendUpdateDirect(struct sockaddr_in *addr, NetworkUpdate *what); </span>
+<span class="lineNum">  258</span>              :  </span>
+<span class="lineNum">  259</span>              : 	bool SendUpdate(struct sockaddr_in *addr); </span>
+<span class="lineNum">  260</span>              :  </span>
+<span class="lineNum">  261</span>              : 	bool SendPeerUpdate() </span>
+<span class="lineNum">  262</span>              : 	{ </span>
+<span class="lineNum">  263</span><span class="lineNoCov">      0  /   5: 		return this-&gt;SendUpdate(&amp;this-&gt;peer_addr); </span>
+<span class="lineNum">  264</span>              : 	} </span>
+<span class="lineNum">  265</span>              :  </span>
+<span class="lineNum">  266</span>              : 	bool SendServerUpdate() </span>
+<span class="lineNum">  267</span>              : 	{ </span>
+<span class="lineNum">  268</span><span class="lineNoCov">      0  /   5: 		return this-&gt;SendUpdate(&amp;this-&gt;server_addr); </span>
+<span class="lineNum">  269</span>              : 	} </span>
+<span class="lineNum">  270</span>              :  </span>
+<span class="lineNum">  271</span>              : 	bool ReceiveUpdate(); </span>
+<span class="lineNum">  272</span>              :  </span>
+<span class="lineNum">  273</span>              : 	bool ReceiveUpdate(struct timeval *tv); </span>
+<span class="lineNum">  274</span>              :  </span>
+<span class="lineNum">  275</span>              : 	static bool StartNetworkServer(int port); </span>
+<span class="lineNum">  276</span>              :  </span>
+<span class="lineNum">  277</span>              : 	static bool CheckNewConnection(); </span>
+<span class="lineNum">  278</span>              :  </span>
+<span class="lineNum">  279</span>              : 	Uint8 *GetScreen() </span>
+<span class="lineNum">  280</span>              : 	{ </span>
+<span class="lineNum">  281</span>              : 		return this-&gt;screen; </span>
+<span class="lineNum">  282</span>              : 	} </span>
+<span class="lineNum">  283</span>              :  </span>
+<span class="lineNum">  284</span>              : 	bool SelectPeer(const char *hostname, uint16_t port, uint32_t server_id); </span>
+<span class="lineNum">  285</span>              :  </span>
+<span class="lineNum">  286</span>              : 	bool CancelPeerSelection() </span>
+<span class="lineNum">  287</span>              : 	{ </span>
+<span class="lineNum">  288</span><span class="lineNoCov">      0  /   2: 		return this-&gt;SelectPeer(NULL,0,0); </span>
+<span class="lineNum">  289</span>              : 	} </span>
+<span class="lineNum">  290</span>              :  </span>
+<span class="lineNum">  291</span>              : 	network_connection_error_t ConnectFSM(); </span>
+<span class="lineNum">  292</span>              :  </span>
+<span class="lineNum">  293</span>              : 	&#047;** </span>
+<span class="lineNum">  294</span>              : 	 * Disconnect from the other end. You should delete the object </span>
+<span class="lineNum">  295</span>              : 	 * after having done this. </span>
+<span class="lineNum">  296</span>              : 	 *&#047; </span>
+<span class="lineNum">  297</span>              : 	void Disconnect(); </span>
+<span class="lineNum">  298</span>              :  </span>
+<span class="lineNum">  299</span>              : 	bool is_master; &#047;* Some peers are more equal than others *&#047; </span>
+<span class="lineNum">  300</span>              :  </span>
+<span class="lineNum">  301</span>              : 	void InitNetwork(); </span>
+<span class="lineNum">  302</span>              :  </span>
+<span class="lineNum">  303</span>              : 	void ShutdownNetwork(); </span>
+<span class="lineNum">  304</span>              :  </span>
+<span class="lineNum">  305</span>              :  </span>
+<span class="lineNum">  306</span>              : 	bool ConnectToBroker(); </span>
+<span class="lineNum">  307</span>              :  </span>
+<span class="lineNum">  308</span>              : 	bool ConnectToPeer(); </span>
+<span class="lineNum">  309</span>              :  </span>
+<span class="lineNum">  310</span>              : 	bool WaitForPeerReply(); </span>
+<span class="lineNum">  311</span>              :  </span>
+<span class="lineNum">  312</span>              : 	bool SendBandWidthTest(); </span>
+<span class="lineNum">  313</span>              :  </span>
+<span class="lineNum">  314</span>              : 	network_connection_error_t WaitForBandWidthReply(); </span>
+<span class="lineNum">  315</span>              :  </span>
+<span class="lineNum">  316</span>              : 	network_connection_error_t WaitForPeerList(); </span>
+<span class="lineNum">  317</span>              :  </span>
+<span class="lineNum">  318</span>              : 	network_connection_error_t WaitForPeerAddress(); </span>
+<span class="lineNum">  319</span>              :  </span>
+<span class="lineNum">  320</span>              : 	network_connection_error_t WaitForPeerSelection(); </span>
+<span class="lineNum">  321</span>              :  </span>
+<span class="lineNum">  322</span>              : 	bool SelectPeer(uint32 id); </span>
+<span class="lineNum">  323</span>              :  </span>
+<span class="lineNum">  324</span>              : protected: </span>
+<span class="lineNum">  325</span>              : 	&#047;** Encode part of a screen into @a dst in a single sweep </span>
+<span class="lineNum">  326</span>              : 	 *  </span>
+<span class="lineNum">  327</span>              : 	 * @param dst the destination update structure </span>
+<span class="lineNum">  328</span>              : 	 * @param screen the screen to encode </span>
+<span class="lineNum">  329</span>              : 	 * @param remote the current remote screen </span>
+<span class="lineNum">  330</span>              : 	 * @param square the square index of the screen to encode </span>
+<span class="lineNum">  331</span>              : 	 * </span>
+<span class="lineNum">  332</span>              : 	 * @return the size of the encoded message </span>
+<span class="lineNum">  333</span>              : 	 *&#047; </span>
+<span class="lineNum">  334</span>              : 	size_t EncodeDisplaySquare(struct NetworkUpdate *dst, </span>
+<span class="lineNum">  335</span>              : 			Uint8 *screen, Uint8 *remote, int square, </span>
+<span class="lineNum">  336</span>              : 			bool use_diff = true); </span>
+<span class="lineNum">  337</span>              :  </span>
+<span class="lineNum">  338</span>              : 	&#047;** </span>
+<span class="lineNum">  339</span>              : 	 * Decode a display update message onto @a screen </span>
+<span class="lineNum">  340</span>              : 	 * </span>
+<span class="lineNum">  341</span>              : 	 * @param src the message to decode </span>
+<span class="lineNum">  342</span>              : 	 *&#047; </span>
+<span class="lineNum">  343</span>              : 	bool DecodeDisplayUpdate(struct NetworkUpdate *src); </span>
+<span class="lineNum">  344</span>              :  </span>
+<span class="lineNum">  345</span>              : 	void AddNetworkUpdate(struct NetworkUpdate *update); </span>
+<span class="lineNum">  346</span>              :  </span>
+<span class="lineNum">  347</span>              : 	size_t GetNetworkUpdateSize(void) </span>
+<span class="lineNum">  348</span>              : 	{ </span>
+<span class="lineNum">  349</span><span class="lineNoCov">      0  /   1: 		return (Uint8*)this-&gt;cur_ud - (Uint8*)this-&gt;ud; </span>
+<span class="lineNum">  350</span>              : 	} </span>
+<span class="lineNum">  351</span>              :  </span>
+<span class="lineNum">  352</span>              : 	&#047;** </span>
+<span class="lineNum">  353</span>              : 	 * Compare two display squares. </span>
+<span class="lineNum">  354</span>              : 	 * </span>
+<span class="lineNum">  355</span>              : 	 * @param a the first square (first byte) </span>
+<span class="lineNum">  356</span>              : 	 * @param b the second square (first byte) </span>
+<span class="lineNum">  357</span>              : 	 * </span>
+<span class="lineNum">  358</span>              : 	 * @return true if they are equal </span>
+<span class="lineNum">  359</span>              : 	 *&#047; </span>
+<span class="lineNum">  360</span>              : 	bool CompareSquare(Uint8 *a, Uint8 *b); </span>
+<span class="lineNum">  361</span>              :  </span>
+<span class="lineNum">  362</span>              : 	bool DecodeDisplayDiff(struct NetworkUpdate *src, </span>
+<span class="lineNum">  363</span>              : 			int x, int y); </span>
+<span class="lineNum">  364</span>              : 	bool DecodeDisplayRLE(struct NetworkUpdate *src, </span>
+<span class="lineNum">  365</span>              : 			int x, int y); </span>
+<span class="lineNum">  366</span>              : 	bool DecodeDisplayRaw(struct NetworkUpdate *src, </span>
+<span class="lineNum">  367</span>              : 			int x, int y); </span>
+<span class="lineNum">  368</span>              :  </span>
+<span class="lineNum">  369</span>              : 	void SendPingAck(struct sockaddr_in *addr, int seq, uint16 type, size_t data_size); </span>
+<span class="lineNum">  370</span>              :  </span>
+<span class="lineNum">  371</span>              : 	bool ReceiveUpdate(NetworkUpdate *dst, size_t sz, struct timeval *tv); </span>
+<span class="lineNum">  372</span>              :  </span>
+<span class="lineNum">  373</span>              : 	bool ReceiveData(void *dst, int sock, size_t sz); </span>
+<span class="lineNum">  374</span>              :  </span>
+<span class="lineNum">  375</span>              : 	bool InitSocket(); </span>
+<span class="lineNum">  376</span>              :  </span>
+<span class="lineNum">  377</span>              : 	&#047;* Simple wrapper around our friend recvfrom *&#047; </span>
+<span class="lineNum">  378</span>              : 	ssize_t ReceiveFrom(void *dst, int sock, size_t sz, </span>
+<span class="lineNum">  379</span>              : 			struct sockaddr_in *from); </span>
+<span class="lineNum">  380</span>              :  </span>
+<span class="lineNum">  381</span>              : 	ssize_t SendTo(void *src, int sock, size_t sz, </span>
+<span class="lineNum">  382</span>              : 			struct sockaddr_in *to); </span>
+<span class="lineNum">  383</span>              :  </span>
+<span class="lineNum">  384</span>              : 	bool SendData(void *src, int sock, size_t sz); </span>
+<span class="lineNum">  385</span>              :  </span>
+<span class="lineNum">  386</span>              : 	virtual bool Select(int sock, struct timeval *tv); </span>
+<span class="lineNum">  387</span>              :  </span>
+<span class="lineNum">  388</span>              : 	bool IpToStr(char *dst, uint8 *ip); </span>
+<span class="lineNum">  389</span>              :  </span>
+<span class="lineNum">  390</span>              : 	bool InitSockaddr (struct sockaddr_in *name, </span>
+<span class="lineNum">  391</span>              : 			const char *hostname, uint16_t port); </span>
+<span class="lineNum">  392</span>              :  </span>
+<span class="lineNum">  393</span>              : 	bool MarshalData(NetworkUpdate *ud); </span>
+<span class="lineNum">  394</span>              :  </span>
+<span class="lineNum">  395</span>              : 	bool MarshalAllData(NetworkUpdate *p); </span>
+<span class="lineNum">  396</span>              :  </span>
+<span class="lineNum">  397</span>              : 	bool DeMarshalAllData(NetworkUpdate *ud, size_t max_size); </span>
+<span class="lineNum">  398</span>              :  </span>
+<span class="lineNum">  399</span>              : 	bool DeMarshalData(NetworkUpdate *ud); </span>
+<span class="lineNum">  400</span>              :  </span>
+<span class="lineNum">  401</span>              : 	bool ScanDataForStop(NetworkUpdate *ud, size_t max_size); </span>
+<span class="lineNum">  402</span>              :  </span>
+<span class="lineNum">  403</span>              : 	bool AppendScreenshot(NetworkUpdatePeerInfo *pi); </span>
+<span class="lineNum">  404</span>              :  </span>
+<span class="lineNum">  405</span>              : 	size_t FillNetworkBuffer(NetworkUpdate *p); </span>
+<span class="lineNum">  406</span>              :  </span>
+<span class="lineNum">  407</span>              : 	NetworkUpdate *GetNext(NetworkUpdate *p) </span>
+<span class="lineNum">  408</span>              : 	{ </span>
+<span class="lineNum">  409</span><span class="lineNoCov">      0  /   3: 		return (NetworkUpdate*)((Uint8*)p + p-&gt;size); </span>
+<span class="lineNum">  410</span>              : 	} </span>
+<span class="lineNum">  411</span>              : 	 </span>
+<span class="lineNum">  412</span>              : 	NetworkUpdate *receive_ud; </span>
+<span class="lineNum">  413</span>              : 	NetworkUpdate *ud; </span>
+<span class="lineNum">  414</span>              : 	NetworkUpdate *cur_ud; </span>
+<span class="lineNum">  415</span>              : 	Uint8 *raw_buf; </span>
+<span class="lineNum">  416</span>              : 	Uint8 *rle_buf; </span>
+<span class="lineNum">  417</span>              : 	Uint8 *diff_buf; </span>
+<span class="lineNum">  418</span>              : 	Uint8 screenshot[SCREENSHOT_X * SCREENSHOT_Y &#047; 2]; </span>
+<span class="lineNum">  419</span>              : 	Uint32 *square_updated; </span>
+<span class="lineNum">  420</span>              :  </span>
+<span class="lineNum">  421</span>              : 	size_t traffic, last_traffic; </span>
+<span class="lineNum">  422</span>              : 	int time_since_last_reset; </span>
+<span class="lineNum">  423</span>              : 	int target_kbps; </span>
+<span class="lineNum">  424</span>              : 	int kbps; </span>
+<span class="lineNum">  425</span>              :  </span>
+<span class="lineNum">  426</span>              : 	&#047;* The current square to refresh *&#047; </span>
+<span class="lineNum">  427</span>              : 	int refresh_square; </span>
+<span class="lineNum">  428</span>              :  </span>
+<span class="lineNum">  429</span>              : 	Uint8 *screen; </span>
+<span class="lineNum">  430</span>              : 	int joystick_port; </span>
+<span class="lineNum">  431</span>              : 	bool connected; </span>
+<span class="lineNum">  432</span>              : 	Uint8 cur_joystick_data; </span>
+<span class="lineNum">  433</span>              :  </span>
+<span class="lineNum">  434</span>              : 	&#047;* Connection to the peer *&#047; </span>
+<span class="lineNum">  435</span>              : 	int peer_selected; </span>
+<span class="lineNum">  436</span>              : 	int sock; </span>
+<span class="lineNum">  437</span>              : 	struct sockaddr_in peer_addr; </span>
+<span class="lineNum">  438</span>              : 	struct sockaddr_in server_addr; </span>
+<span class="lineNum">  439</span>              :  </span>
+<span class="lineNum">  440</span>              : 	const char *connection_error_message; </span>
+<span class="lineNum">  441</span>              :  </span>
+<span class="lineNum">  442</span>              : 	uint32 bandwidth_ping_ms; </span>
+<span class="lineNum">  443</span>              :  </span>
+<span class="lineNum">  444</span>              : 	NetworkUpdateSoundInfo sound_active[NETWORK_SOUND_BUF_SIZE]; </span>
+<span class="lineNum">  445</span>              : 	int sound_head; </span>
+<span class="lineNum">  446</span>              : 	int sound_tail; </span>
+<span class="lineNum">  447</span>              : 	uint32 sound_last_cycles; </span>
+<span class="lineNum">  448</span>              : 	uint32 sound_last_send; </span>
+<span class="lineNum">  449</span>              :  </span>
+<span class="lineNum">  450</span>              : public: </span>
+<span class="lineNum">  451</span>              : 	static bool networking_started; </span>
+<span class="lineNum">  452</span>              : }; </span>
+<span class="lineNum">  453</span>              :  </span>
+<span class="lineNum">  454</span>              : #endif &#047;* NETWORK_H *&#047; </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <title>Coverage - ./frodo</title>
+  <title>Coverage - frodo</title>
   <link rel="stylesheet" type="text/css" href="bcov.css"/>
 </head>
 <body>
@@ -13,18 +13,18 @@
       <table cellpadding="1" border="0" width="100%">
         <tr>
           <td class="headerItem" width="20%">Command:</td>
-          <td class="headerValue" width="80%" colspan=6>./frodo</td>
+          <td class="headerValue" width="80%" colspan=6>frodo</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Date:</td>
-          <td class="headerValue" width="15%">2010-11-27 09:09:09</td>
+          <td class="headerValue" width="15%">2012-06-16 11:50:06</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
-          <td class="headerValue" width="10%">118</td>
+          <td class="headerValue" width="10%">127</td>
         </tr>
         <tr>
           <td class="headerItem" width="20%">Code&nbsp;covered:</td>
-          <td class="coverPerLeftLo" width="15%">0.0 %</td>
+          <td class="coverPerLeftLo" width="15%">0.0%</td>
           <td width="5%"></td>
           <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
           <td class="headerValue" width="10%">0</td>
@@ -35,330 +35,330 @@
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 <pre class="source">
-<span class="lineNum">      1 </span>              : #include &lt;stdio.h&gt; </span>
-<span class="lineNum">      2 </span>              : #include &lt;stdlib.h&gt; </span>
-<span class="lineNum">      3 </span>              : #include &lt;string.h&gt; </span>
-<span class="lineNum">      4 </span>              :  </span>
-<span class="lineNum">      5 </span>              : /* Ugly kludge to remove warnings. This file should really be fixed instead... */ </span>
-<span class="lineNum">      6 </span>              : #define fread(ptr, size, nmemb, stream) do { if (fread(ptr,size,nmemb,stream) != nmemb) printf(&quot;fread failed&quot;);} while(0) </span>
-<span class="lineNum">      7 </span>              :  </span>
-<span class="lineNum">      8 </span>              : /********************************************************************************************/ </span>
-<span class="lineNum">      9 </span>              : static long GetFilePos(int Track, int Sector) </span>
-<span class="lineNum">     10 </span><span class="lineNoCov">    0 / 3     : { </span>
-<span class="lineNum">     11 </span>              : 	long pos; </span>
-<span class="lineNum">     12 </span>              :  </span>
-<span class="lineNum">     13 </span>              : 	pos = 0; </span>
-<span class="lineNum">     14 </span>              :  </span>
-<span class="lineNum">     15 </span><span class="lineNoCov">    0 / 3     : 	if (Track &gt;= 1 &amp;&amp; Track &lt;= 17) </span>
-<span class="lineNum">     16 </span>              : 	{ </span>
-<span class="lineNum">     17 </span>              : 		if (Sector &gt; 20) </span>
-<span class="lineNum">     18 </span>              : 		{ </span>
-<span class="lineNum">     19 </span>              : 			Sector = 20; </span>
-<span class="lineNum">     20 </span>              : 		} </span>
-<span class="lineNum">     21 </span>              : 		pos += (Track - 1) * 21 * 256; </span>
-<span class="lineNum">     22 </span><span class="lineNoCov">    0 / 1     : 		pos += Sector * 256; </span>
-<span class="lineNum">     23 </span>              : 	} </span>
-<span class="lineNum">     24 </span><span class="lineNoCov">    0 / 1     : 	else if (Track &gt;= 18 &amp;&amp; Track &lt;= 24) </span>
-<span class="lineNum">     25 </span>              : 	{ </span>
-<span class="lineNum">     26 </span>              : 		if (Sector &gt; 18) </span>
-<span class="lineNum">     27 </span>              : 		{ </span>
-<span class="lineNum">     28 </span>              : 			Sector = 18; </span>
-<span class="lineNum">     29 </span>              : 		} </span>
-<span class="lineNum">     30 </span>              : 		pos += 17 * 21 * 256; </span>
-<span class="lineNum">     31 </span><span class="lineNoCov">    0 / 1     : 		pos += (Track - 18) * 19 * 256; </span>
-<span class="lineNum">     32 </span><span class="lineNoCov">    0 / 1     : 		pos += Sector * 256; </span>
-<span class="lineNum">     33 </span>              : 	} </span>
-<span class="lineNum">     34 </span><span class="lineNoCov">    0 / 1     : 	else if (Track &gt;= 25 &amp;&amp; Track &lt;= 30) </span>
-<span class="lineNum">     35 </span>              : 	{ </span>
-<span class="lineNum">     36 </span>              : 		if (Sector &gt; 17) </span>
-<span class="lineNum">     37 </span>              : 		{ </span>
-<span class="lineNum">     38 </span>              : 			Sector = 17; </span>
-<span class="lineNum">     39 </span>              : 		} </span>
-<span class="lineNum">     40 </span>              : 		pos += 17 * 21 * 256; </span>
-<span class="lineNum">     41 </span>              : 		pos +=  7 * 19 * 256; </span>
-<span class="lineNum">     42 </span><span class="lineNoCov">    0 / 2     : 		pos += (Track - 25) * 18 * 256; </span>
-<span class="lineNum">     43 </span><span class="lineNoCov">    0 / 2     : 		pos += Sector * 256; </span>
-<span class="lineNum">     44 </span>              : 	} </span>
-<span class="lineNum">     45 </span><span class="lineNoCov">    0 / 1     : 	else if (Track &gt;= 31 &amp;&amp; Track &lt;= 35) </span>
-<span class="lineNum">     46 </span>              : 	{ </span>
-<span class="lineNum">     47 </span>              : 		if (Sector &gt; 16) </span>
-<span class="lineNum">     48 </span>              : 		{ </span>
-<span class="lineNum">     49 </span>              : 			Sector = 16; </span>
-<span class="lineNum">     50 </span>              : 		} </span>
-<span class="lineNum">     51 </span>              : 		pos += 17 * 21 * 256; </span>
-<span class="lineNum">     52 </span>              : 		pos +=  7 * 19 * 256; </span>
-<span class="lineNum">     53 </span>              : 		pos +=  6 * 18 * 256; </span>
-<span class="lineNum">     54 </span><span class="lineNoCov">    0 / 1     : 		pos += (Track - 31) * 17 * 256; </span>
-<span class="lineNum">     55 </span><span class="lineNoCov">    0 / 1     : 		pos += Sector * 256; </span>
-<span class="lineNum">     56 </span>              : 	} </span>
-<span class="lineNum">     57 </span><span class="lineNoCov">    0 / 1     : 	else if (Track &gt;= 36 &amp;&amp; Track &lt;= 40) </span>
-<span class="lineNum">     58 </span>              : 	{ </span>
-<span class="lineNum">     59 </span>              : 		if (Sector &gt; 16) </span>
-<span class="lineNum">     60 </span>              : 		{ </span>
-<span class="lineNum">     61 </span>              : 			Sector = 16; </span>
-<span class="lineNum">     62 </span>              : 		} </span>
-<span class="lineNum">     63 </span>              : 		pos += 17 * 21 * 256; </span>
-<span class="lineNum">     64 </span>              : 		pos +=  7 * 19 * 256; </span>
-<span class="lineNum">     65 </span>              : 		pos +=  6 * 18 * 256; </span>
-<span class="lineNum">     66 </span>              : 		pos +=  5 * 17 * 256; </span>
-<span class="lineNum">     67 </span><span class="lineNoCov">    0 / 1     : 		pos += (Track - 36) * 17 * 256; </span>
-<span class="lineNum">     68 </span><span class="lineNoCov">    0 / 1     : 		pos += Sector * 256; </span>
-<span class="lineNum">     69 </span>              : 	} </span>
-<span class="lineNum">     70 </span>              : 	else </span>
-<span class="lineNum">     71 </span>              : 	{ </span>
-<span class="lineNum">     72 </span>              : 		return 0; </span>
-<span class="lineNum">     73 </span>              : 	} </span>
-<span class="lineNum">     74 </span>              : 	return pos; </span>
-<span class="lineNum">     75 </span><span class="lineNoCov">    0 / 3     : } </span>
-<span class="lineNum">     76 </span>              : /**********************************************************************************************************/ </span>
-<span class="lineNum">     77 </span><span class="lineNoCov">    0 / 1     : const char **DirD64(const char *FileName) //mode = 0: quiet mode </span>
-<span class="lineNum">     78 </span><span class="lineNoCov">    0 / 2     : { </span>
-<span class="lineNum">     79 </span>              : 	long pos, newpos, oldpos; </span>
-<span class="lineNum">     80 </span>              : 	unsigned char buffer[256]; </span>
-<span class="lineNum">     81 </span>              : 	unsigned char ext[256]; </span>
-<span class="lineNum">     82 </span>              : 	unsigned char name[256]; </span>
-<span class="lineNum">     83 </span>              : 	unsigned char quotname[256]; </span>
-<span class="lineNum">     84 </span>              : 	unsigned char blocks[256]; </span>
-<span class="lineNum">     85 </span>              : 	unsigned char Type; </span>
-<span class="lineNum">     86 </span>              : 	unsigned char Track; </span>
-<span class="lineNum">     87 </span>              : 	unsigned char Sector; </span>
-<span class="lineNum">     88 </span>              : 	unsigned char track; </span>
-<span class="lineNum">     89 </span>              : 	unsigned char sector; </span>
-<span class="lineNum">     90 </span>              : 	unsigned char blow; </span>
-<span class="lineNum">     91 </span>              : 	unsigned char bhigh; </span>
-<span class="lineNum">     92 </span>              : 	int pblocks; </span>
-<span class="lineNum">     93 </span>              : 	unsigned int bfree; </span>
-<span class="lineNum">     94 </span>              : 	unsigned int f64count = 0; </span>
-<span class="lineNum">     95 </span>              : 	unsigned int Temp, i, j, k, totalblocks; </span>
-<span class="lineNum">     96 </span>              : 	const char **file_list; </span>
-<span class="lineNum">     97 </span>              : 	FILE *File; </span>
-<span class="lineNum">     98 </span>              : 	int cnt = 16; </span>
-<span class="lineNum">     99 </span>              : 	int cur = 0; </span>
-<span class="lineNum">    100 </span>              :  </span>
-<span class="lineNum">    101 </span><span class="lineNoCov">    0 / 2     : 	File = fopen(FileName, &quot;rb&quot;); </span>
-<span class="lineNum">    102 </span><span class="lineNoCov">    0 / 2     : 	if (!File) </span>
-<span class="lineNum">    103 </span>              : 	{ </span>
-<span class="lineNum">    104 </span>              : 		return NULL; </span>
-<span class="lineNum">    105 </span>              : 	} </span>
-<span class="lineNum">    106 </span>              :  </span>
-<span class="lineNum">    107 </span><span class="lineNoCov">    0 / 2     : 	file_list = (const char**)malloc(cnt * sizeof(char*)); </span>
-<span class="lineNum">    108 </span><span class="lineNoCov">    0 / 4     : 	file_list[cur] = strdup((char*)&quot;Empty Disc&quot;); </span>
-<span class="lineNum">    109 </span><span class="lineNoCov">    0 / 1     : 	file_list[cur + 1] = NULL; </span>
-<span class="lineNum">    110 </span>              :  </span>
-<span class="lineNum">    111 </span><span class="lineNoCov">    0 / 1     : 	pos = GetFilePos(18, 0); </span>
-<span class="lineNum">    112 </span><span class="lineNoCov">    0 / 1     : 	fseek(File, pos, SEEK_SET); </span>
-<span class="lineNum">    113 </span>              :  </span>
-<span class="lineNum">    114 </span><span class="lineNoCov">    0 / 1     : 	Track = 0; </span>
-<span class="lineNum">    115 </span><span class="lineNoCov">    0 / 1     : 	Sector = 0; </span>
-<span class="lineNum">    116 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;Track, 1, 1, File); </span>
-<span class="lineNum">    117 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;Sector, 1, 1, File); </span>
-<span class="lineNum">    118 </span>              :  </span>
-<span class="lineNum">    119 </span><span class="lineNoCov">    0 / 1     : 	fread(buffer, 2, 1, File); </span>
-<span class="lineNum">    120 </span>              :  </span>
-<span class="lineNum">    121 </span>              : 	bfree = 0; </span>
-<span class="lineNum">    122 </span><span class="lineNoCov">    0 / 1     : 	k = 0; </span>
-<span class="lineNum">    123 </span><span class="lineNoCov">    0 / 1     : 	for (j = 1; j &lt;= 17; j++) </span>
-<span class="lineNum">    124 </span>              : 	{ </span>
-<span class="lineNum">    125 </span><span class="lineNoCov">    0 / 1     : 		i = 0; </span>
-<span class="lineNum">    126 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    127 </span>              : 		bfree += i; </span>
-<span class="lineNum">    128 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    129 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    130 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    131 </span>              :  </span>
-<span class="lineNum">    132 </span>              : 	} </span>
-<span class="lineNum">    133 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    134 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    135 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    136 </span><span class="lineNoCov">    0 / 1     : 	fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    137 </span><span class="lineNoCov">    0 / 1     : 	for (j = 19; j &lt;= 24; j++) </span>
-<span class="lineNum">    138 </span>              : 	{ </span>
-<span class="lineNum">    139 </span><span class="lineNoCov">    0 / 1     : 		i = 0; </span>
-<span class="lineNum">    140 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    141 </span>              : 		bfree += i; </span>
-<span class="lineNum">    142 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    143 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    144 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    145 </span>              :  </span>
-<span class="lineNum">    146 </span>              : 	} </span>
-<span class="lineNum">    147 </span><span class="lineNoCov">    0 / 1     : 	for (j = 25; j &lt;= 30; j++) </span>
-<span class="lineNum">    148 </span>              : 	{ </span>
-<span class="lineNum">    149 </span><span class="lineNoCov">    0 / 1     : 		i = 0; </span>
-<span class="lineNum">    150 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    151 </span>              : 		bfree += i; </span>
-<span class="lineNum">    152 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    153 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    154 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    155 </span>              :  </span>
-<span class="lineNum">    156 </span>              : 	} </span>
-<span class="lineNum">    157 </span><span class="lineNoCov">    0 / 1     : 	for (j = 31; j &lt;= 35; j++) </span>
-<span class="lineNum">    158 </span>              : 	{ </span>
-<span class="lineNum">    159 </span><span class="lineNoCov">    0 / 1     : 		i = 0; </span>
-<span class="lineNum">    160 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    161 </span>              : 		bfree += i; </span>
-<span class="lineNum">    162 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    163 </span>              : 		//		bfree += 0xFF - k; </span>
-<span class="lineNum">    164 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    165 </span>              : 		//		bfree += 0xFF - k; </span>
-<span class="lineNum">    166 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    167 </span>              : 		//		bfree += 0x01 - k; </span>
-<span class="lineNum">    168 </span>              :  </span>
-<span class="lineNum">    169 </span>              : 	} </span>
-<span class="lineNum">    170 </span>              : 	/* </span>
-<span class="lineNum">    171 </span>              :     1-17   21 sectors * 256 bytes </span>
-<span class="lineNum">    172 </span>              :    18-24   19 sectors * 256 bytes </span>
-<span class="lineNum">    173 </span>              :    25-30   18 sectors * 256 bytes </span>
-<span class="lineNum">    174 </span>              :    31-35   17 sectors * 256 bytes </span>
-<span class="lineNum">    175 </span>              : 	 */ </span>
-<span class="lineNum">    176 </span>              :  </span>
-<span class="lineNum">    177 </span><span class="lineNoCov">    0 / 1     : 	fread(buffer, 16, 1, File); </span>
-<span class="lineNum">    178 </span>              :  </span>
-<span class="lineNum">    179 </span><span class="lineNoCov">    0 / 2     : 	buffer[16] = 0; </span>
-<span class="lineNum">    180 </span><span class="lineNoCov">    0 / 4     : 	for (i = 0; i &lt; 16; i++) </span>
-<span class="lineNum">    181 </span>              : 	{ </span>
-<span class="lineNum">    182 </span><span class="lineNoCov">    0 / 1     : 		if (buffer[i] == 0xa0) </span>
-<span class="lineNum">    183 </span><span class="lineNoCov">    0 / 2     : 			buffer[i] = 0; </span>
-<span class="lineNum">    184 </span>              : 	} </span>
-<span class="lineNum">    185 </span>              : 	//	SetDlgItemText(hHandle, IDC_DISKTITLE, buffer); </span>
-<span class="lineNum">    186 </span>              :  </span>
-<span class="lineNum">    187 </span><span class="lineNoCov">    0 / 1     : 	fread(buffer, 16, 1, File); </span>
-<span class="lineNum">    188 </span><span class="lineNoCov">    0 / 1     : 	fread(buffer, 16, 1, File); </span>
-<span class="lineNum">    189 </span><span class="lineNoCov">    0 / 1     : 	for (j = 36; j &lt;= 40; j++) </span>
-<span class="lineNum">    190 </span>              : 	{ </span>
-<span class="lineNum">    191 </span><span class="lineNoCov">    0 / 1     : 		i = 0; </span>
-<span class="lineNum">    192 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;i, 1, 1, File); </span>
-<span class="lineNum">    193 </span>              : 		bfree += i; </span>
-<span class="lineNum">    194 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    195 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    196 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;k, 1, 1, File); </span>
-<span class="lineNum">    197 </span>              :  </span>
-<span class="lineNum">    198 </span>              : 	} </span>
-<span class="lineNum">    199 </span><span class="lineNoCov">    0 / 2     : 	pos = GetFilePos(18, 1); </span>
-<span class="lineNum">    200 </span>              : 	totalblocks = 0; </span>
-<span class="lineNum">    201 </span>              : 	do </span>
-<span class="lineNum">    202 </span>              : 	{ </span>
-<span class="lineNum">    203 </span><span class="lineNoCov">    0 / 1     : 		if (fseek(File, pos, SEEK_SET)) </span>
-<span class="lineNum">    204 </span>              : 		{ </span>
-<span class="lineNum">    205 </span>              : 			break; </span>
-<span class="lineNum">    206 </span>              : 		} </span>
-<span class="lineNum">    207 </span><span class="lineNoCov">    0 / 1     : 		Track = 0; </span>
-<span class="lineNum">    208 </span><span class="lineNoCov">    0 / 1     : 		Sector = 0; </span>
-<span class="lineNum">    209 </span><span class="lineNoCov">    0 / 1     : 		track = 0; </span>
-<span class="lineNum">    210 </span><span class="lineNoCov">    0 / 1     : 		sector = 0; </span>
-<span class="lineNum">    211 </span><span class="lineNoCov">    0 / 1     : 		Type = 0; </span>
-<span class="lineNum">    212 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;Track, 1, 1, File); </span>
-<span class="lineNum">    213 </span><span class="lineNoCov">    0 / 1     : 		fread(&amp;Sector, 1, 1, File); </span>
-<span class="lineNum">    214 </span><span class="lineNoCov">    0 / 2     : 		pos = GetFilePos((int)Track, (int)Sector); </span>
-<span class="lineNum">    215 </span><span class="lineNoCov">    0 / 2     : 		for (i = 0; i &lt; 8; i++) </span>
-<span class="lineNum">    216 </span>              : 		{ </span>
-<span class="lineNum">    217 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;Type, 1, 1, File); </span>
-<span class="lineNum">    218 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;track, 1, 1, File); </span>
-<span class="lineNum">    219 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;sector, 1, 1, File); </span>
-<span class="lineNum">    220 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;name, 16, 1, File); </span>
-<span class="lineNum">    221 </span><span class="lineNoCov">    0 / 1     : 			name[16] = 0; </span>
-<span class="lineNum">    222 </span>              :  </span>
-<span class="lineNum">    223 </span><span class="lineNoCov">    0 / 2     : 			for (j = 0; j &lt; 16; j++) </span>
-<span class="lineNum">    224 </span>              : 			{ </span>
-<span class="lineNum">    225 </span><span class="lineNoCov">    0 / 1     : 				if (name[j] == 0xa0) </span>
-<span class="lineNum">    226 </span>              : 				{ </span>
-<span class="lineNum">    227 </span><span class="lineNoCov">    0 / 2     : 					name[j] = 0; </span>
-<span class="lineNum">    228 </span>              : 				} </span>
-<span class="lineNum">    229 </span>              : 				else if (name[j] &gt; 0x7a) </span>
-<span class="lineNum">    230 </span>              : 				{ </span>
-<span class="lineNum">    231 </span>              : 					//					name[j] = '_'; </span>
-<span class="lineNum">    232 </span>              : 				} </span>
-<span class="lineNum">    233 </span>              : 			} </span>
-<span class="lineNum">    234 </span>              :  </span>
-<span class="lineNum">    235 </span><span class="lineNoCov">    0 / 1     : 			fread(buffer, 9, 1, File); </span>
-<span class="lineNum">    236 </span><span class="lineNoCov">    0 / 1     : 			Temp = 0; </span>
-<span class="lineNum">    237 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;blow, 1, 1, File); </span>
-<span class="lineNum">    238 </span><span class="lineNoCov">    0 / 1     : 			fread(&amp;bhigh, 1, 1, File); </span>
-<span class="lineNum">    239 </span><span class="lineNoCov">    0 / 2     : 			Temp = 256 * bhigh+blow; </span>
-<span class="lineNum">    240 </span><span class="lineNoCov">    0 / 1     : 			fread(buffer, 2, 1, File); </span>
-<span class="lineNum">    241 </span><span class="lineNoCov">    0 / 1     : 			if (Type == 0x00) </span>
-<span class="lineNum">    242 </span>              : 				continue; </span>
-<span class="lineNum">    243 </span><span class="lineNoCov">    0 / 2     : 			switch (Type) </span>
-<span class="lineNum">    244 </span>              : 			{ </span>
-<span class="lineNum">    245 </span>              : 			case 0x82: </span>
-<span class="lineNum">    246 </span>              : 				strcpy((char*)ext, &quot;prg&quot;); </span>
-<span class="lineNum">    247 </span>              : 				break; </span>
-<span class="lineNum">    248 </span>              : 			case 0x81: </span>
-<span class="lineNum">    249 </span>              : 				strcpy((char*)ext, &quot;seq&quot;); </span>
-<span class="lineNum">    250 </span>              : 				break; </span>
-<span class="lineNum">    251 </span>              : 			case 0x80: </span>
-<span class="lineNum">    252 </span>              : 				strcpy((char*)ext, &quot;del&quot;); </span>
-<span class="lineNum">    253 </span>              : 				break; </span>
-<span class="lineNum">    254 </span>              : 			case 0x84: </span>
-<span class="lineNum">    255 </span>              : 				strcpy((char*)ext, &quot;rel&quot;); </span>
-<span class="lineNum">    256 </span>              : 				break; </span>
-<span class="lineNum">    257 </span>              : 			case 0x83: </span>
-<span class="lineNum">    258 </span>              : 				strcpy((char*)ext, &quot;user&quot;); </span>
-<span class="lineNum">    259 </span>              : 				break; </span>
-<span class="lineNum">    260 </span>              : 			case 0xc2: </span>
-<span class="lineNum">    261 </span>              : 				strcpy((char*)ext, &quot;prg&lt;&quot;); </span>
-<span class="lineNum">    262 </span>              : 				break; </span>
-<span class="lineNum">    263 </span>              : 			case 0xc1: </span>
-<span class="lineNum">    264 </span>              : 				strcpy((char*)ext, &quot;seq&lt;&quot;); </span>
-<span class="lineNum">    265 </span>              : 				break; </span>
-<span class="lineNum">    266 </span>              : 			case 0xc0: </span>
-<span class="lineNum">    267 </span>              : 				strcpy((char*)ext, &quot;del&lt;&quot;); </span>
-<span class="lineNum">    268 </span>              : 				break; </span>
-<span class="lineNum">    269 </span>              : 			case 0xc4: </span>
-<span class="lineNum">    270 </span>              : 				strcpy((char*)ext, &quot;rel&lt;&quot;); </span>
-<span class="lineNum">    271 </span>              : 				break; </span>
-<span class="lineNum">    272 </span>              : 			case 0xc3: </span>
-<span class="lineNum">    273 </span>              : 				strcpy((char*)ext, &quot;user&lt;&quot;); </span>
-<span class="lineNum">    274 </span>              : 				break; </span>
-<span class="lineNum">    275 </span>              : 			default: </span>
-<span class="lineNum">    276 </span>              : 				strcpy((char*)ext, &quot;user&lt;&quot;); </span>
-<span class="lineNum">    277 </span>              : 				break; </span>
-<span class="lineNum">    278 </span>              : 			} </span>
-<span class="lineNum">    279 </span><span class="lineNoCov">    0 / 1     : 			f64count ++; </span>
-<span class="lineNum">    280 </span>              : 			totalblocks += Temp; </span>
-<span class="lineNum">    281 </span><span class="lineNoCov">    0 / 2     : 			pblocks = (int)Temp; </span>
-<span class="lineNum">    282 </span>              : 			sprintf((char*)blocks, &quot;%d&quot;, Temp); </span>
-<span class="lineNum">    283 </span>              :  </span>
-<span class="lineNum">    284 </span><span class="lineNoCov">    0 / 1     : 			newpos = GetFilePos((int)track, (int)sector); </span>
-<span class="lineNum">    285 </span><span class="lineNoCov">    0 / 1     : 			if (newpos) </span>
-<span class="lineNum">    286 </span>              : 			{ </span>
-<span class="lineNum">    287 </span><span class="lineNoCov">    0 / 2     : 				oldpos = ftell(File); </span>
-<span class="lineNum">    288 </span>              :  </span>
-<span class="lineNum">    289 </span><span class="lineNoCov">    0 / 2     : 				if (!fseek(File, newpos, SEEK_SET)) </span>
-<span class="lineNum">    290 </span>              : 				{ </span>
-<span class="lineNum">    291 </span><span class="lineNoCov">    0 / 1     : 					fread(&amp;Temp, 2, 1, File); </span>
-<span class="lineNum">    292 </span><span class="lineNoCov">    0 / 1     : 					fread(&amp;Temp, 2, 1, File); </span>
-<span class="lineNum">    293 </span>              : 				} </span>
-<span class="lineNum">    294 </span>              : 				else </span>
-<span class="lineNum">    295 </span>              : 					break; </span>
-<span class="lineNum">    296 </span>              :  </span>
-<span class="lineNum">    297 </span><span class="lineNoCov">    0 / 1     : 				if (fseek(File, oldpos, SEEK_SET)) </span>
-<span class="lineNum">    298 </span>              : 					break; </span>
-<span class="lineNum">    299 </span>              : 			} </span>
-<span class="lineNum">    300 </span>              :  </span>
-<span class="lineNum">    301 </span>              : 			sprintf((char*)quotname, &quot;\&quot;%s\&quot;&quot;, name); </span>
-<span class="lineNum">    302 </span>              : 			sprintf((char*)buffer, &quot;%-4d%-18s%c&quot;, pblocks, quotname, ext[0]); </span>
-<span class="lineNum">    303 </span><span class="lineNoCov">    0 / 2     : 			file_list[cur++] = strdup((char*)buffer); </span>
-<span class="lineNum">    304 </span><span class="lineNoCov">    0 / 1     : 			file_list[cur] = NULL; </span>
-<span class="lineNum">    305 </span><span class="lineNoCov">    0 / 2     : 			if (cur &gt; cnt - 2) </span>
-<span class="lineNum">    306 </span>              : 			{ </span>
-<span class="lineNum">    307 </span><span class="lineNoCov">    0 / 1     : 				cnt = cnt + 32; </span>
-<span class="lineNum">    308 </span><span class="lineNoCov">    0 / 2     : 				file_list = (const char**)realloc(file_list, cnt * sizeof(char*)); </span>
-<span class="lineNum">    309 </span><span class="lineNoCov">    0 / 2     : 				if (!file_list) </span>
-<span class="lineNum">    310 </span>              : 					return NULL; </span>
-<span class="lineNum">    311 </span>              : 			} </span>
-<span class="lineNum">    312 </span>              : 		} </span>
-<span class="lineNum">    313 </span><span class="lineNoCov">    0 / 1     : 		if (f64count &gt; 128) </span>
-<span class="lineNum">    314 </span>              : 			break; </span>
-<span class="lineNum">    315 </span>              : 	} </span>
-<span class="lineNum">    316 </span><span class="lineNoCov">    0 / 1     : 	while (Track); </span>
-<span class="lineNum">    317 </span>              :  </span>
-<span class="lineNum">    318 </span><span class="lineNoCov">    0 / 1     : 	fclose(File); </span>
-<span class="lineNum">    319 </span>              : 	return file_list; </span>
-<span class="lineNum">    320 </span>              :  </span>
-<span class="lineNum">    321 </span>              : 	//	sprintf(buffer, &quot;%d blocks free.&quot;, 664 - totalblocks); </span>
-<span class="lineNum">    322 </span>              : 	//	SetDlgItemText(hHandle, IDC_FREEBLOCKS, buffer); </span>
-<span class="lineNum">    323 </span>              :  </span>
-<span class="lineNum">    324 </span><span class="lineNoCov">    0 / 3     : } </span>
+<span class="lineNum">    1</span>              : #include &lt;stdio.h&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;stdlib.h&gt; </span>
+<span class="lineNum">    3</span>              : #include &lt;string.h&gt; </span>
+<span class="lineNum">    4</span>              :  </span>
+<span class="lineNum">    5</span>              : &#047;* Ugly kludge to remove warnings. This file should really be fixed instead... *&#047; </span>
+<span class="lineNum">    6</span>              : #define fread(ptr, size, nmemb, stream) do { if (fread(ptr,size,nmemb,stream) != nmemb) printf(&quot;fread failed&quot;);} while(0) </span>
+<span class="lineNum">    7</span>              :  </span>
+<span class="lineNum">    8</span>              : &#047;********************************************************************************************&#047; </span>
+<span class="lineNum">    9</span>              : static long GetFilePos(int Track, int Sector) </span>
+<span class="lineNum">   10</span><span class="lineNoCov">      0  /   3: { </span>
+<span class="lineNum">   11</span>              : 	long pos; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : 	pos = 0; </span>
+<span class="lineNum">   14</span>              :  </span>
+<span class="lineNum">   15</span><span class="lineNoCov">      0  /   3: 	if (Track &gt;= 1 &amp;&amp; Track &lt;= 17) </span>
+<span class="lineNum">   16</span>              : 	{ </span>
+<span class="lineNum">   17</span>              : 		if (Sector &gt; 20) </span>
+<span class="lineNum">   18</span>              : 		{ </span>
+<span class="lineNum">   19</span>              : 			Sector = 20; </span>
+<span class="lineNum">   20</span>              : 		} </span>
+<span class="lineNum">   21</span><span class="lineNoCov">      0  /   1: 		pos += (Track - 1) * 21 * 256; </span>
+<span class="lineNum">   22</span><span class="lineNoCov">      0  /   2: 		pos += Sector * 256; </span>
+<span class="lineNum">   23</span>              : 	} </span>
+<span class="lineNum">   24</span><span class="lineNoCov">      0  /   1: 	else if (Track &gt;= 18 &amp;&amp; Track &lt;= 24) </span>
+<span class="lineNum">   25</span>              : 	{ </span>
+<span class="lineNum">   26</span>              : 		if (Sector &gt; 18) </span>
+<span class="lineNum">   27</span>              : 		{ </span>
+<span class="lineNum">   28</span>              : 			Sector = 18; </span>
+<span class="lineNum">   29</span>              : 		} </span>
+<span class="lineNum">   30</span>              : 		pos += 17 * 21 * 256; </span>
+<span class="lineNum">   31</span><span class="lineNoCov">      0  /   1: 		pos += (Track - 18) * 19 * 256; </span>
+<span class="lineNum">   32</span><span class="lineNoCov">      0  /   1: 		pos += Sector * 256; </span>
+<span class="lineNum">   33</span>              : 	} </span>
+<span class="lineNum">   34</span><span class="lineNoCov">      0  /   1: 	else if (Track &gt;= 25 &amp;&amp; Track &lt;= 30) </span>
+<span class="lineNum">   35</span>              : 	{ </span>
+<span class="lineNum">   36</span>              : 		if (Sector &gt; 17) </span>
+<span class="lineNum">   37</span>              : 		{ </span>
+<span class="lineNum">   38</span>              : 			Sector = 17; </span>
+<span class="lineNum">   39</span>              : 		} </span>
+<span class="lineNum">   40</span>              : 		pos += 17 * 21 * 256; </span>
+<span class="lineNum">   41</span>              : 		pos +=  7 * 19 * 256; </span>
+<span class="lineNum">   42</span><span class="lineNoCov">      0  /   2: 		pos += (Track - 25) * 18 * 256; </span>
+<span class="lineNum">   43</span><span class="lineNoCov">      0  /   2: 		pos += Sector * 256; </span>
+<span class="lineNum">   44</span>              : 	} </span>
+<span class="lineNum">   45</span><span class="lineNoCov">      0  /   1: 	else if (Track &gt;= 31 &amp;&amp; Track &lt;= 35) </span>
+<span class="lineNum">   46</span>              : 	{ </span>
+<span class="lineNum">   47</span>              : 		if (Sector &gt; 16) </span>
+<span class="lineNum">   48</span>              : 		{ </span>
+<span class="lineNum">   49</span>              : 			Sector = 16; </span>
+<span class="lineNum">   50</span>              : 		} </span>
+<span class="lineNum">   51</span>              : 		pos += 17 * 21 * 256; </span>
+<span class="lineNum">   52</span>              : 		pos +=  7 * 19 * 256; </span>
+<span class="lineNum">   53</span>              : 		pos +=  6 * 18 * 256; </span>
+<span class="lineNum">   54</span><span class="lineNoCov">      0  /   1: 		pos += (Track - 31) * 17 * 256; </span>
+<span class="lineNum">   55</span><span class="lineNoCov">      0  /   1: 		pos += Sector * 256; </span>
+<span class="lineNum">   56</span>              : 	} </span>
+<span class="lineNum">   57</span><span class="lineNoCov">      0  /   2: 	else if (Track &gt;= 36 &amp;&amp; Track &lt;= 40) </span>
+<span class="lineNum">   58</span>              : 	{ </span>
+<span class="lineNum">   59</span>              : 		if (Sector &gt; 16) </span>
+<span class="lineNum">   60</span>              : 		{ </span>
+<span class="lineNum">   61</span>              : 			Sector = 16; </span>
+<span class="lineNum">   62</span>              : 		} </span>
+<span class="lineNum">   63</span>              : 		pos += 17 * 21 * 256; </span>
+<span class="lineNum">   64</span>              : 		pos +=  7 * 19 * 256; </span>
+<span class="lineNum">   65</span>              : 		pos +=  6 * 18 * 256; </span>
+<span class="lineNum">   66</span>              : 		pos +=  5 * 17 * 256; </span>
+<span class="lineNum">   67</span><span class="lineNoCov">      0  /   1: 		pos += (Track - 36) * 17 * 256; </span>
+<span class="lineNum">   68</span><span class="lineNoCov">      0  /   1: 		pos += Sector * 256; </span>
+<span class="lineNum">   69</span>              : 	} </span>
+<span class="lineNum">   70</span>              : 	else </span>
+<span class="lineNum">   71</span>              : 	{ </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   1: 		return 0; </span>
+<span class="lineNum">   73</span>              : 	} </span>
+<span class="lineNum">   74</span>              : 	return pos; </span>
+<span class="lineNum">   75</span><span class="lineNoCov">      0  /   3: } </span>
+<span class="lineNum">   76</span>              : &#047;**********************************************************************************************************&#047; </span>
+<span class="lineNum">   77</span><span class="lineNoCov">      0  /   1: const char **DirD64(const char *FileName) &#047;&#047;mode = 0: quiet mode </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   2: { </span>
+<span class="lineNum">   79</span>              : 	long pos, newpos, oldpos; </span>
+<span class="lineNum">   80</span>              : 	unsigned char buffer[256]; </span>
+<span class="lineNum">   81</span>              : 	unsigned char ext[256]; </span>
+<span class="lineNum">   82</span>              : 	unsigned char name[256]; </span>
+<span class="lineNum">   83</span>              : 	unsigned char quotname[256]; </span>
+<span class="lineNum">   84</span>              : 	unsigned char blocks[256]; </span>
+<span class="lineNum">   85</span>              : 	unsigned char Type; </span>
+<span class="lineNum">   86</span>              : 	unsigned char Track; </span>
+<span class="lineNum">   87</span>              : 	unsigned char Sector; </span>
+<span class="lineNum">   88</span>              : 	unsigned char track; </span>
+<span class="lineNum">   89</span>              : 	unsigned char sector; </span>
+<span class="lineNum">   90</span>              : 	unsigned char blow; </span>
+<span class="lineNum">   91</span>              : 	unsigned char bhigh; </span>
+<span class="lineNum">   92</span>              : 	int pblocks; </span>
+<span class="lineNum">   93</span>              : 	unsigned int bfree; </span>
+<span class="lineNum">   94</span><span class="lineNoCov">      0  /   1: 	unsigned int f64count = 0; </span>
+<span class="lineNum">   95</span>              : 	unsigned int Temp, i, j, k, totalblocks; </span>
+<span class="lineNum">   96</span>              : 	const char **file_list; </span>
+<span class="lineNum">   97</span>              : 	FILE *File; </span>
+<span class="lineNum">   98</span><span class="lineNoCov">      0  /   1: 	int cnt = 16; </span>
+<span class="lineNum">   99</span><span class="lineNoCov">      0  /   1: 	int cur = 0; </span>
+<span class="lineNum">  100</span>              :  </span>
+<span class="lineNum">  101</span><span class="lineNoCov">      0  /   2: 	File = fopen(FileName, &quot;rb&quot;); </span>
+<span class="lineNum">  102</span><span class="lineNoCov">      0  /   2: 	if (!File) </span>
+<span class="lineNum">  103</span>              : 	{ </span>
+<span class="lineNum">  104</span><span class="lineNoCov">      0  /   1: 		return NULL; </span>
+<span class="lineNum">  105</span>              : 	} </span>
+<span class="lineNum">  106</span>              :  </span>
+<span class="lineNum">  107</span><span class="lineNoCov">      0  /   2: 	file_list = (const char**)malloc(cnt * sizeof(char*)); </span>
+<span class="lineNum">  108</span><span class="lineNoCov">      0  /   3: 	file_list[cur] = strdup((char*)&quot;Empty Disc&quot;); </span>
+<span class="lineNum">  109</span><span class="lineNoCov">      0  /   1: 	file_list[cur + 1] = NULL; </span>
+<span class="lineNum">  110</span>              :  </span>
+<span class="lineNum">  111</span><span class="lineNoCov">      0  /   2: 	pos = GetFilePos(18, 0); </span>
+<span class="lineNum">  112</span><span class="lineNoCov">      0  /   1: 	fseek(File, pos, SEEK_SET); </span>
+<span class="lineNum">  113</span>              :  </span>
+<span class="lineNum">  114</span><span class="lineNoCov">      0  /   1: 	Track = 0; </span>
+<span class="lineNum">  115</span><span class="lineNoCov">      0  /   1: 	Sector = 0; </span>
+<span class="lineNum">  116</span><span class="lineNoCov">      0  /   3: 	fread(&amp;Track, 1, 1, File); </span>
+<span class="lineNum">  117</span><span class="lineNoCov">      0  /   3: 	fread(&amp;Sector, 1, 1, File); </span>
+<span class="lineNum">  118</span>              :  </span>
+<span class="lineNum">  119</span><span class="lineNoCov">      0  /   3: 	fread(buffer, 2, 1, File); </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span>              : 	bfree = 0; </span>
+<span class="lineNum">  122</span><span class="lineNoCov">      0  /   1: 	k = 0; </span>
+<span class="lineNum">  123</span><span class="lineNoCov">      0  /   3: 	for (j = 1; j &lt;= 17; j++) </span>
+<span class="lineNum">  124</span>              : 	{ </span>
+<span class="lineNum">  125</span><span class="lineNoCov">      0  /   1: 		i = 0; </span>
+<span class="lineNum">  126</span><span class="lineNoCov">      0  /   3: 		fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  127</span>              : 		bfree += i; </span>
+<span class="lineNum">  128</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  129</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  130</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  131</span>              :  </span>
+<span class="lineNum">  132</span>              : 	} </span>
+<span class="lineNum">  133</span><span class="lineNoCov">      0  /   3: 	fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  134</span><span class="lineNoCov">      0  /   3: 	fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  135</span><span class="lineNoCov">      0  /   3: 	fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  136</span><span class="lineNoCov">      0  /   3: 	fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  137</span><span class="lineNoCov">      0  /   1: 	for (j = 19; j &lt;= 24; j++) </span>
+<span class="lineNum">  138</span>              : 	{ </span>
+<span class="lineNum">  139</span><span class="lineNoCov">      0  /   1: 		i = 0; </span>
+<span class="lineNum">  140</span><span class="lineNoCov">      0  /   3: 		fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  141</span>              : 		bfree += i; </span>
+<span class="lineNum">  142</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  143</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  144</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  145</span>              :  </span>
+<span class="lineNum">  146</span>              : 	} </span>
+<span class="lineNum">  147</span><span class="lineNoCov">      0  /   1: 	for (j = 25; j &lt;= 30; j++) </span>
+<span class="lineNum">  148</span>              : 	{ </span>
+<span class="lineNum">  149</span><span class="lineNoCov">      0  /   1: 		i = 0; </span>
+<span class="lineNum">  150</span><span class="lineNoCov">      0  /   3: 		fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  151</span>              : 		bfree += i; </span>
+<span class="lineNum">  152</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  153</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  154</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  155</span>              :  </span>
+<span class="lineNum">  156</span>              : 	} </span>
+<span class="lineNum">  157</span><span class="lineNoCov">      0  /   1: 	for (j = 31; j &lt;= 35; j++) </span>
+<span class="lineNum">  158</span>              : 	{ </span>
+<span class="lineNum">  159</span><span class="lineNoCov">      0  /   1: 		i = 0; </span>
+<span class="lineNum">  160</span><span class="lineNoCov">      0  /   3: 		fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  161</span>              : 		bfree += i; </span>
+<span class="lineNum">  162</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  163</span>              : 		&#047;&#047;		bfree += 0xFF - k; </span>
+<span class="lineNum">  164</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  165</span>              : 		&#047;&#047;		bfree += 0xFF - k; </span>
+<span class="lineNum">  166</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  167</span>              : 		&#047;&#047;		bfree += 0x01 - k; </span>
+<span class="lineNum">  168</span>              :  </span>
+<span class="lineNum">  169</span>              : 	} </span>
+<span class="lineNum">  170</span>              : 	&#047;* </span>
+<span class="lineNum">  171</span>              :     1-17   21 sectors * 256 bytes </span>
+<span class="lineNum">  172</span>              :    18-24   19 sectors * 256 bytes </span>
+<span class="lineNum">  173</span>              :    25-30   18 sectors * 256 bytes </span>
+<span class="lineNum">  174</span>              :    31-35   17 sectors * 256 bytes </span>
+<span class="lineNum">  175</span>              : 	 *&#047; </span>
+<span class="lineNum">  176</span>              :  </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   2: 	fread(buffer, 16, 1, File); </span>
+<span class="lineNum">  178</span>              :  </span>
+<span class="lineNum">  179</span><span class="lineNoCov">      0  /   2: 	buffer[16] = 0; </span>
+<span class="lineNum">  180</span><span class="lineNoCov">      0  /   4: 	for (i = 0; i &lt; 16; i++) </span>
+<span class="lineNum">  181</span>              : 	{ </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1: 		if (buffer[i] == 0xa0) </span>
+<span class="lineNum">  183</span><span class="lineNoCov">      0  /   2: 			buffer[i] = 0; </span>
+<span class="lineNum">  184</span>              : 	} </span>
+<span class="lineNum">  185</span>              : 	&#047;&#047;	SetDlgItemText(hHandle, IDC_DISKTITLE, buffer); </span>
+<span class="lineNum">  186</span>              :  </span>
+<span class="lineNum">  187</span><span class="lineNoCov">      0  /   2: 	fread(buffer, 16, 1, File); </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   2: 	fread(buffer, 16, 1, File); </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   1: 	for (j = 36; j &lt;= 40; j++) </span>
+<span class="lineNum">  190</span>              : 	{ </span>
+<span class="lineNum">  191</span><span class="lineNoCov">      0  /   1: 		i = 0; </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   3: 		fread(&amp;i, 1, 1, File); </span>
+<span class="lineNum">  193</span>              : 		bfree += i; </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  195</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  196</span><span class="lineNoCov">      0  /   2: 		fread(&amp;k, 1, 1, File); </span>
+<span class="lineNum">  197</span>              :  </span>
+<span class="lineNum">  198</span>              : 	} </span>
+<span class="lineNum">  199</span><span class="lineNoCov">      0  /   2: 	pos = GetFilePos(18, 1); </span>
+<span class="lineNum">  200</span>              : 	totalblocks = 0; </span>
+<span class="lineNum">  201</span>              : 	do </span>
+<span class="lineNum">  202</span>              : 	{ </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   1: 		if (fseek(File, pos, SEEK_SET)) </span>
+<span class="lineNum">  204</span>              : 		{ </span>
+<span class="lineNum">  205</span>              : 			break; </span>
+<span class="lineNum">  206</span>              : 		} </span>
+<span class="lineNum">  207</span><span class="lineNoCov">      0  /   1: 		Track = 0; </span>
+<span class="lineNum">  208</span><span class="lineNoCov">      0  /   1: 		Sector = 0; </span>
+<span class="lineNum">  209</span><span class="lineNoCov">      0  /   1: 		track = 0; </span>
+<span class="lineNum">  210</span><span class="lineNoCov">      0  /   1: 		sector = 0; </span>
+<span class="lineNum">  211</span><span class="lineNoCov">      0  /   1: 		Type = 0; </span>
+<span class="lineNum">  212</span><span class="lineNoCov">      0  /   3: 		fread(&amp;Track, 1, 1, File); </span>
+<span class="lineNum">  213</span><span class="lineNoCov">      0  /   3: 		fread(&amp;Sector, 1, 1, File); </span>
+<span class="lineNum">  214</span><span class="lineNoCov">      0  /   2: 		pos = GetFilePos((int)Track, (int)Sector); </span>
+<span class="lineNum">  215</span><span class="lineNoCov">      0  /   2: 		for (i = 0; i &lt; 8; i++) </span>
+<span class="lineNum">  216</span>              : 		{ </span>
+<span class="lineNum">  217</span><span class="lineNoCov">      0  /   3: 			fread(&amp;Type, 1, 1, File); </span>
+<span class="lineNum">  218</span><span class="lineNoCov">      0  /   3: 			fread(&amp;track, 1, 1, File); </span>
+<span class="lineNum">  219</span><span class="lineNoCov">      0  /   3: 			fread(&amp;sector, 1, 1, File); </span>
+<span class="lineNum">  220</span><span class="lineNoCov">      0  /   3: 			fread(&amp;name, 16, 1, File); </span>
+<span class="lineNum">  221</span><span class="lineNoCov">      0  /   1: 			name[16] = 0; </span>
+<span class="lineNum">  222</span>              :  </span>
+<span class="lineNum">  223</span><span class="lineNoCov">      0  /   2: 			for (j = 0; j &lt; 16; j++) </span>
+<span class="lineNum">  224</span>              : 			{ </span>
+<span class="lineNum">  225</span><span class="lineNoCov">      0  /   1: 				if (name[j] == 0xa0) </span>
+<span class="lineNum">  226</span>              : 				{ </span>
+<span class="lineNum">  227</span><span class="lineNoCov">      0  /   2: 					name[j] = 0; </span>
+<span class="lineNum">  228</span>              : 				} </span>
+<span class="lineNum">  229</span>              : 				else if (name[j] &gt; 0x7a) </span>
+<span class="lineNum">  230</span>              : 				{ </span>
+<span class="lineNum">  231</span>              : 					&#047;&#047;					name[j] = &#039;_&#039;; </span>
+<span class="lineNum">  232</span>              : 				} </span>
+<span class="lineNum">  233</span>              : 			} </span>
+<span class="lineNum">  234</span>              :  </span>
+<span class="lineNum">  235</span><span class="lineNoCov">      0  /   2: 			fread(buffer, 9, 1, File); </span>
+<span class="lineNum">  236</span><span class="lineNoCov">      0  /   1: 			Temp = 0; </span>
+<span class="lineNum">  237</span><span class="lineNoCov">      0  /   3: 			fread(&amp;blow, 1, 1, File); </span>
+<span class="lineNum">  238</span><span class="lineNoCov">      0  /   3: 			fread(&amp;bhigh, 1, 1, File); </span>
+<span class="lineNum">  239</span><span class="lineNoCov">      0  /   2: 			Temp = 256 * bhigh+blow; </span>
+<span class="lineNum">  240</span><span class="lineNoCov">      0  /   2: 			fread(buffer, 2, 1, File); </span>
+<span class="lineNum">  241</span><span class="lineNoCov">      0  /   1: 			if (Type == 0x00) </span>
+<span class="lineNum">  242</span>              : 				continue; </span>
+<span class="lineNum">  243</span><span class="lineNoCov">      0  /   2: 			switch (Type) </span>
+<span class="lineNum">  244</span>              : 			{ </span>
+<span class="lineNum">  245</span>              : 			case 0x82: </span>
+<span class="lineNum">  246</span>              : 				strcpy((char*)ext, &quot;prg&quot;); </span>
+<span class="lineNum">  247</span>              : 				break; </span>
+<span class="lineNum">  248</span>              : 			case 0x81: </span>
+<span class="lineNum">  249</span>              : 				strcpy((char*)ext, &quot;seq&quot;); </span>
+<span class="lineNum">  250</span>              : 				break; </span>
+<span class="lineNum">  251</span>              : 			case 0x80: </span>
+<span class="lineNum">  252</span>              : 				strcpy((char*)ext, &quot;del&quot;); </span>
+<span class="lineNum">  253</span>              : 				break; </span>
+<span class="lineNum">  254</span>              : 			case 0x84: </span>
+<span class="lineNum">  255</span>              : 				strcpy((char*)ext, &quot;rel&quot;); </span>
+<span class="lineNum">  256</span>              : 				break; </span>
+<span class="lineNum">  257</span>              : 			case 0x83: </span>
+<span class="lineNum">  258</span>              : 				strcpy((char*)ext, &quot;user&quot;); </span>
+<span class="lineNum">  259</span>              : 				break; </span>
+<span class="lineNum">  260</span>              : 			case 0xc2: </span>
+<span class="lineNum">  261</span>              : 				strcpy((char*)ext, &quot;prg&lt;&quot;); </span>
+<span class="lineNum">  262</span>              : 				break; </span>
+<span class="lineNum">  263</span>              : 			case 0xc1: </span>
+<span class="lineNum">  264</span>              : 				strcpy((char*)ext, &quot;seq&lt;&quot;); </span>
+<span class="lineNum">  265</span>              : 				break; </span>
+<span class="lineNum">  266</span>              : 			case 0xc0: </span>
+<span class="lineNum">  267</span>              : 				strcpy((char*)ext, &quot;del&lt;&quot;); </span>
+<span class="lineNum">  268</span>              : 				break; </span>
+<span class="lineNum">  269</span>              : 			case 0xc4: </span>
+<span class="lineNum">  270</span>              : 				strcpy((char*)ext, &quot;rel&lt;&quot;); </span>
+<span class="lineNum">  271</span>              : 				break; </span>
+<span class="lineNum">  272</span>              : 			case 0xc3: </span>
+<span class="lineNum">  273</span>              : 				strcpy((char*)ext, &quot;user&lt;&quot;); </span>
+<span class="lineNum">  274</span>              : 				break; </span>
+<span class="lineNum">  275</span>              : 			default: </span>
+<span class="lineNum">  276</span>              : 				strcpy((char*)ext, &quot;user&lt;&quot;); </span>
+<span class="lineNum">  277</span>              : 				break; </span>
+<span class="lineNum">  278</span>              : 			} </span>
+<span class="lineNum">  279</span><span class="lineNoCov">      0  /   1: 			f64count ++; </span>
+<span class="lineNum">  280</span>              : 			totalblocks += Temp; </span>
+<span class="lineNum">  281</span><span class="lineNoCov">      0  /   2: 			pblocks = (int)Temp; </span>
+<span class="lineNum">  282</span><span class="lineNoCov">      0  /   2: 			sprintf((char*)blocks, &quot;%d&quot;, Temp); </span>
+<span class="lineNum">  283</span>              :  </span>
+<span class="lineNum">  284</span><span class="lineNoCov">      0  /   1: 			newpos = GetFilePos((int)track, (int)sector); </span>
+<span class="lineNum">  285</span><span class="lineNoCov">      0  /   1: 			if (newpos) </span>
+<span class="lineNum">  286</span>              : 			{ </span>
+<span class="lineNum">  287</span><span class="lineNoCov">      0  /   2: 				oldpos = ftell(File); </span>
+<span class="lineNum">  288</span>              :  </span>
+<span class="lineNum">  289</span><span class="lineNoCov">      0  /   2: 				if (!fseek(File, newpos, SEEK_SET)) </span>
+<span class="lineNum">  290</span>              : 				{ </span>
+<span class="lineNum">  291</span><span class="lineNoCov">      0  /   2: 					fread(&amp;Temp, 2, 1, File); </span>
+<span class="lineNum">  292</span><span class="lineNoCov">      0  /   2: 					fread(&amp;Temp, 2, 1, File); </span>
+<span class="lineNum">  293</span>              : 				} </span>
+<span class="lineNum">  294</span>              : 				else </span>
+<span class="lineNum">  295</span>              : 					break; </span>
+<span class="lineNum">  296</span>              :  </span>
+<span class="lineNum">  297</span><span class="lineNoCov">      0  /   1: 				if (fseek(File, oldpos, SEEK_SET)) </span>
+<span class="lineNum">  298</span>              : 					break; </span>
+<span class="lineNum">  299</span>              : 			} </span>
+<span class="lineNum">  300</span>              :  </span>
+<span class="lineNum">  301</span><span class="lineNoCov">      0  /   3: 			sprintf((char*)quotname, &quot;&#092;&quot;%s&#092;&quot;&quot;, name); </span>
+<span class="lineNum">  302</span><span class="lineNoCov">      0  /   3: 			sprintf((char*)buffer, &quot;%-4d%-18s%c&quot;, pblocks, quotname, ext[0]); </span>
+<span class="lineNum">  303</span><span class="lineNoCov">      0  /   2: 			file_list[cur++] = strdup((char*)buffer); </span>
+<span class="lineNum">  304</span><span class="lineNoCov">      0  /   1: 			file_list[cur] = NULL; </span>
+<span class="lineNum">  305</span><span class="lineNoCov">      0  /   2: 			if (cur &gt; cnt - 2) </span>
+<span class="lineNum">  306</span>              : 			{ </span>
+<span class="lineNum">  307</span><span class="lineNoCov">      0  /   1: 				cnt = cnt + 32; </span>
+<span class="lineNum">  308</span><span class="lineNoCov">      0  /   2: 				file_list = (const char**)realloc(file_list, cnt * sizeof(char*)); </span>
+<span class="lineNum">  309</span><span class="lineNoCov">      0  /   2: 				if (!file_list) </span>
+<span class="lineNum">  310</span>              : 					return NULL; </span>
+<span class="lineNum">  311</span>              : 			} </span>
+<span class="lineNum">  312</span>              : 		} </span>
+<span class="lineNum">  313</span><span class="lineNoCov">      0  /   1: 		if (f64count &gt; 128) </span>
+<span class="lineNum">  314</span>              : 			break; </span>
+<span class="lineNum">  315</span>              : 	} </span>
+<span class="lineNum">  316</span><span class="lineNoCov">      0  /   1: 	while (Track); </span>
+<span class="lineNum">  317</span>              :  </span>
+<span class="lineNum">  318</span><span class="lineNoCov">      0  /   1: 	fclose(File); </span>
+<span class="lineNum">  319</span>              : 	return file_list; </span>
+<span class="lineNum">  320</span>              :  </span>
+<span class="lineNum">  321</span>              : 	&#047;&#047;	sprintf(buffer, &quot;%d blocks free.&quot;, 664 - totalblocks); </span>
+<span class="lineNum">  322</span>              : 	&#047;&#047;	SetDlgItemText(hHandle, IDC_FREEBLOCKS, buffer); </span>
+<span class="lineNum">  323</span>              :  </span>
+<span class="lineNum">  324</span><span class="lineNoCov">      0  /   3: } </span>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
