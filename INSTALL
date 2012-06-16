@@ -1,7 +1,7 @@
 Building Kcov
 =============
 
-You need development headers and libraries for libglib and elfutils to build
+You need development headers and libraries for libstdc++ and elfutils to build
 kcov.
 
 Create an empty build dir and do the following steps:
