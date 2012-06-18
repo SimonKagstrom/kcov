@@ -48,9 +48,9 @@ namespace kcov
 		/**
 		 * For a new process and attach to it with ptrace
 		 *
-		 * @return 0 when in the child, -1 on error or the pid otherwise
+		 * @return true if OK, false otherwise
 		 */
-		virtual int start(const char *executable) = 0;
+		virtual bool start(const char *executable) = 0;
 
 		/**
 		 * Continue execution until next breakpoint.

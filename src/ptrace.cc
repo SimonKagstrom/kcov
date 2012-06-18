@@ -95,19 +95,15 @@ public:
 	}
 
 
-	int start(const char *executable)
+	bool start(const char *executable)
 	{
-		char *const *argv = (char *const *)IConfiguration::getInstance().getArgv();
-		pid_t child, who;
-		int status;
-
 		m_breakpointToAddrMap.clear();
 		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
 
 		/* Basic check first */
 		if (access(executable, X_OK) != 0)
-			return -1;
+			return false;
 
 		std::string kcov_solib_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() +
@@ -144,44 +140,16 @@ public:
 		putenv(m_envString);
 
 		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);
-		/* Executable exists, try to launch it */
-		if ((child = fork()) == 0) {
-			int res;
 
-			/* And launch the process */
-			res = ptrace(PTRACE_TRACEME, 0, 0, 0);
-			if (res < 0) {
-				perror("Can't set me as ptraced");
-				return -1;
-			}
-			execv(executable, argv);
+		unsigned int pid = IConfiguration::getInstance().getAttachPid();
+		bool res = false;
 
-			/* Exec failed */
-			return -1;
-		}
+		if (pid != 0)
+			res = attachPid(pid);
+		else
+			res = forkChild(executable);
 
-		/* Fork error? */
-		if (child < 0) {
-			perror("fork");
-			return -1;
-		}
-		m_child = m_activeChild = child;
-
-		kcov_debug(PTRACE_MSG, "PT forked %d\n", child);
-
-		/* Wait for the initial stop */
-		who = waitpid(child, &status, 0);
-		if (who < 0) {
-			perror("waitpid");
-			return -1;
-		}
-		if (!WIFSTOPPED(status)) {
-			fprintf(stderr, "Child hasn't stopped: %x\n", status);
-			return -1;
-		}
-		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
-
-		return m_activeChild;
+		return res;
 	}
 
 	int setBreakpoint(unsigned long addr)
@@ -409,6 +377,69 @@ public:
 	}
 
 private:
+	bool forkChild(const char *executable)
+	{
+		char *const *argv = (char *const *)IConfiguration::getInstance().getArgv();
+		pid_t child, who;
+		int status;
+
+		/* Executable exists, try to launch it */
+		if ((child = fork()) == 0) {
+			int res;
+
+			/* And launch the process */
+			res = ptrace(PTRACE_TRACEME, 0, 0, 0);
+			if (res < 0) {
+				perror("Can't set me as ptraced");
+				return false;
+			}
+			execv(executable, argv);
+
+			/* Exec failed */
+			return false;
+		}
+
+		/* Fork error? */
+		if (child < 0) {
+			perror("fork");
+			return false;
+		}
+		m_child = m_activeChild = child;
+
+		kcov_debug(PTRACE_MSG, "PT forked %d\n", child);
+
+		/* Wait for the initial stop */
+		who = waitpid(child, &status, 0);
+		if (who < 0) {
+			perror("waitpid");
+			return false;
+		}
+		if (!WIFSTOPPED(status)) {
+			fprintf(stderr, "Child hasn't stopped: %x\n", status);
+			return false;
+		}
+		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
+
+		return true;
+	}
+
+	bool attachPid(pid_t pid)
+	{
+		m_activeChild = pid;
+
+		errno = 0;
+		ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
+		if (errno) {
+			const char *err = strerror(errno);
+
+			fprintf(stderr, "Can't attach to %d. Error %s\n", pid, err);
+			return false;
+		}
+		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
+
+		return true;
+	}
+
 	unsigned long getPcFromRegs(struct user_regs_struct *regs)
 	{
 		return arch_getPcFromRegs(regs);

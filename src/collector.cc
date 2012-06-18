@@ -24,8 +24,8 @@ public:
 
 	int run()
 	{
-		if (m_engine.start(m_elf.getFilename()) < 0) {
-			error("Can't start %s", m_elf.getFilename());
+		if (!m_engine.start(m_elf.getFilename())) {
+			error("Can't start/attach to %s", m_elf.getFilename());
 			return -1;
 		}
 
