@@ -99,7 +99,6 @@ public:
 		optind = 0;
 		optarg = 0;
 		while (1) {
-			char *endp;
 			int option_index = 0;
 			int c;
 
@@ -116,7 +115,9 @@ public:
 			case 'h':
 				return usage();
 			case 'p':
-				m_ptracePid = strtoul(optarg, &endp, 0);
+				if (!isInteger(std::string(optarg)))
+					return usage();
+				m_ptracePid = stoul(std::string(optarg));
 				extraNeeded = 1;
 				break;
 			case 's':
@@ -210,6 +211,11 @@ public:
 	std::string &getBinaryPath()
 	{
 		return m_binaryPath;
+	}
+
+	unsigned int getAttachPid()
+	{
+		return m_ptracePid;
 	}
 
 	unsigned int getLowLimit()

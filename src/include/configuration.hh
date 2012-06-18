@@ -26,6 +26,8 @@ namespace kcov
 
 		virtual enum SortType getSortType() = 0;
 
+		virtual unsigned int getAttachPid() = 0;
+
 		virtual unsigned int getLowLimit() = 0;
 
 		virtual unsigned int getHighLimit() = 0;
