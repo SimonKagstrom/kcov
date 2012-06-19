@@ -42,7 +42,7 @@ TEST(collector)
 
 	EXPECT_CALL(engine, start(_))
 		.Times(Exactly(1))
-		.WillRepeatedly(Return(0))
+		.WillRepeatedly(Return(true))
 		;
 
 	IEngine::Event evExit, evOnce;
