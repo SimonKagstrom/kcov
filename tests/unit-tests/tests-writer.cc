@@ -12,6 +12,7 @@
 #include <thread>
 
 #include "../../src/html-writer.hh"
+#include "../../src/cobertura-writer.hh"
 
 using namespace kcov;
 
