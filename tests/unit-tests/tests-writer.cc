@@ -89,8 +89,10 @@ TEST(writer, DEADLINE_REALTIME_MS(10000))
 
 	IOutputHandler &output = IOutputHandler::create(reporter);
 	IWriter &writer = createHtmlWriter(*elf, reporter, output);
+	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
 
 	output.registerWriter(writer);
+	output.registerWriter(coberturaWriter);
 
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
