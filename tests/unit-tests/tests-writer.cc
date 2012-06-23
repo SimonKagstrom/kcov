@@ -108,6 +108,8 @@ TEST(writer, DEADLINE_REALTIME_MS(10000))
 
 	output.stop();
 
+	ASSERT_TRUE(file_exists("/tmp/vobb/test-binary/test-source.c.html"));
+	ASSERT_TRUE(file_exists("/tmp/vobb/test-binary/cobertura.xml"));
 
 	EXPECT_CALL(reporter, unMarshal(_,_))
 		.Times(Exactly(1))
