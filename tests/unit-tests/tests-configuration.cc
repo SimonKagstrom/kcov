@@ -98,6 +98,9 @@ TEST(configuration)
 	ASSERT_TRUE(conf->getExcludePattern()[0] == "d/e/f");
 
 	ASSERT_TRUE(conf->getAttachPid() == 0U);
+	res = runParse(fmt("-p ejNummer /tmp/vobb %s", filename.c_str()));
+	ASSERT_FALSE(res);
+
 	res = runParse(fmt("-p 10 /tmp/vobb %s", filename.c_str()));
 	ASSERT_TRUE(res);
 
