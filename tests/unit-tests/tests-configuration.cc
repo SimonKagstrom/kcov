@@ -96,4 +96,12 @@ TEST(configuration)
 
 	ASSERT_TRUE(conf->getExcludePattern().size() == 1U);
 	ASSERT_TRUE(conf->getExcludePattern()[0] == "d/e/f");
+
+	ASSERT_TRUE(conf->getAttachPid() == 0U);
+	res = runParse(fmt("-p 10 /tmp/vobb %s", filename.c_str()));
+	ASSERT_TRUE(res);
+
+	res = runParse(fmt("--pid=100 /tmp/vobb %s", filename.c_str()));
+	ASSERT_TRUE(res);
+	ASSERT_TRUE(conf->getAttachPid() == 100U);
 }
