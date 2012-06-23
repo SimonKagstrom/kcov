@@ -81,6 +81,14 @@ TEST(configuration)
 	res = runParse(fmt("-l yo,89 /tmp/vobb --sort-type=p %s", filename.c_str()));
 	ASSERT_TRUE(!res);
 
+	res = runParse(fmt("/tmp/vobb --sort-type=u %s", filename.c_str()));
+	ASSERT_TRUE(res);
+	ASSERT_TRUE(conf->getSortType() == IConfiguration::UNCOVERED_LINES);
+
+	res = runParse(fmt("/tmp/vobb --sort-type=l %s", filename.c_str()));
+	ASSERT_TRUE(res);
+	ASSERT_TRUE(conf->getSortType() == IConfiguration::FILE_LENGTH);
+
 	res = runParse(fmt("--path-strip-level=ejNummer /tmp/vobb, %s", filename.c_str()));
 	ASSERT_FALSE(res);
 
