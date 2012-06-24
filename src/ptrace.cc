@@ -269,9 +269,12 @@ public:
 
 		checkSolibData();
 
+		kcov_debug(PTRACE_MSG, "PT continuing %d\n", m_activeChild);
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, 0);
-		if (res < 0)
+		if (res < 0) {
+			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
 			return out;
+		}
 
 		while (1) {
 			who = waitpid(-1, &status, __WALL);
@@ -281,6 +284,8 @@ public:
 			m_activeChild = who;
 
 			out.addr = getPc(m_activeChild);
+
+			kcov_debug(PTRACE_MSG, "PT stopped 0x%08x\n", status);
 
 			// A signal?
 			if (WIFSTOPPED(status)) {
