@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <map>
@@ -317,6 +318,10 @@ public:
 					return out;
 				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
 					sig = 0;
+				} else if (sig == SIGSTOP) {
+					out.type = ev_breakpoint;
+					out.data = -1;
+					return out;
 				}
 
 				// No, deliver it directly
@@ -440,6 +445,20 @@ private:
 			fprintf(stderr, "Can't attach to %d. Error %s\n", pid, err);
 			return false;
 		}
+
+		/* Wait for the initial stop */
+		int status;
+		int who = waitpid(m_activeChild, &status, 0);
+		if (who < 0) {
+			perror("waitpid");
+			return false;
+		}
+		if (!WIFSTOPPED(status)) {
+			fprintf(stderr, "Child hasn't stopped: %x\n", status);
+			return false;
+		}
+
+		::kill(m_activeChild, SIGSTOP);
 		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
 
 		return true;
