@@ -48,8 +48,9 @@ TEST(filter)
 	res = filter.runFilters("varken-eller");
 	ASSERT_FALSE(res);
 
+	std::string ip = std::string("--include-path=") + crpcut::get_start_dir();
 	const char *argv4[] = {NULL,
-			(std::string("--include-path=") + crpcut::get_start_dir()).c_str(),
+			ip.c_str(),
 			"/tmp/vobb",
 			filename.c_str(), "tjena"};
 	res = conf.parse(5, argv4);
@@ -63,8 +64,9 @@ TEST(filter)
 	res = filter.runFilters("hejsan-hoppsan");
 	ASSERT_FALSE(res);
 
+	std::string ep = std::string("--exclude-path=") + crpcut::get_start_dir();
 	const char *argv5[] = {NULL,
-			(std::string("--exclude-path=") + crpcut::get_start_dir()).c_str(),
+			ep.c_str(),
 			"/tmp/vobb",
 			filename.c_str(), "tjena"};
 	res = conf.parse(5, argv5);
