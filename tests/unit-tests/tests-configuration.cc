@@ -26,7 +26,8 @@ static bool runParse(std::string args)
 	for (std::list<std::string>::iterator it = argList.begin();
 			it != argList.end();
 			it++) {
-		argv[i] = (*it).c_str();
+		// Yes, these are memory leaks.
+		argv[i] = strdup((*it).c_str());
 		i++;
 	}
 
