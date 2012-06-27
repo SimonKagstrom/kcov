@@ -45,7 +45,6 @@ TEST(configuration)
 	ASSERT_TRUE(res);
 
 	const char **a = conf->getArgv();
-	printf("XYZ: %s\n", a[0]);
 	ASSERT_TRUE(filename == a[0]);
 	ASSERT_TRUE(std::string("tjena") == a[1]);
 
