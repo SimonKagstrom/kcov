@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include <unordered_map>
+#include <mutex>
 
 using namespace kcov;
 
@@ -32,20 +33,33 @@ public:
 
 	bool lineIsCode(const char *file, unsigned int lineNr)
 	{
-		return m_lines.find(LineId(file, lineNr)) != m_lines.end();
+		bool out;
+
+		m_mutex.lock();
+		out =  m_lines.find(LineId(file, lineNr)) != m_lines.end();
+		m_mutex.unlock();
+
+		return out;
 	}
 
 	LineExecutionCount getLineExecutionCount(const char *file, unsigned int lineNr)
 	{
+		unsigned int hits = 0;
+		unsigned int possibleHits = 0;
+
+		m_mutex.lock();
 		LineMap_t::iterator it = m_lines.find(LineId(file, lineNr));
 
-		if (it == m_lines.end())
-			return LineExecutionCount(0, 0);
+		if (it != m_lines.end()) {
+			Line *line = it->second;
 
-		Line *line = it->second;
+			hits = line->hits();
+			possibleHits = line->possibleHits();
+		}
+		m_mutex.unlock();
 
-		return LineExecutionCount(line->hits(),
-				line->possibleHits());
+		return LineExecutionCount(hits,
+				possibleHits);
 	}
 
 	ExecutionSummary getExecutionSummary()
@@ -53,6 +67,7 @@ public:
 		unsigned int executedLines = 0;
 		unsigned int nrLines = 0;
 
+		m_mutex.lock();
 		for (LineMap_t::iterator it = m_lines.begin();
 				it != m_lines.end();
 				it++) {
@@ -64,6 +79,7 @@ public:
 			executedLines += !!cur->hits();
 			nrLines++;
 		}
+		m_mutex.unlock();
 
 		return ExecutionSummary(nrLines, executedLines);
 	}
@@ -80,6 +96,7 @@ public:
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
+		m_mutex.lock();
 		for (LineMap_t::iterator it = m_lines.begin();
 				it != m_lines.end();
 				it++) {
@@ -87,6 +104,7 @@ public:
 
 			p = cur->marshal(p);
 		}
+		m_mutex.unlock();
 
 		*szOut = sz;
 
@@ -106,6 +124,7 @@ public:
 
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
+		m_mutex.lock();
 		// Should already be 0, but anyway
 		for (AddrToLineMap_t::iterator it = m_addrToLine.begin();
 				it != m_addrToLine.end();
@@ -133,6 +152,7 @@ public:
 			while (hits--)
 				line->registerHit(addr);
 		}
+		m_mutex.unlock();
 
 		return true;
 	}
@@ -191,12 +211,13 @@ private:
 	{
 		LineId key(file, lineNr);
 
+		m_mutex.lock();
 		LineMap_t::iterator it = m_lines.find(key);
 		Line *line;
 
 		if (it == m_lines.end()) {
 			if (!file_exists(file))
-				return;
+				goto out;
 
 			line = new Line(key);
 			m_lines[key] = line;
@@ -206,18 +227,23 @@ private:
 
 		line->addAddress(addr);
 		m_addrToLine[addr] = line;
+
+out:
+		m_mutex.unlock();
 	}
 
 	/* Called during runtime */
 	void onBreakpoint(unsigned long addr)
 	{
+		m_mutex.lock();
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
-		if (it == m_addrToLine.end())
-			return;
-		Line *line = it->second;
+		if (it != m_addrToLine.end()) {
+			Line *line = it->second;
 
-		line->registerHit(addr);
+			line->registerHit(addr);
+		}
+		m_mutex.unlock();
 	}
 
 
@@ -333,6 +359,7 @@ private:
 
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
+	std::mutex m_mutex; // Protects m_lines, m_addrToLine
 
 	IElf &m_elf;
 	ICollector &m_collector;
