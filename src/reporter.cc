@@ -77,6 +77,7 @@ public:
 		start = malloc(sz);
 		if (!start)
 			return NULL;
+		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
 		for (LineMap_t::iterator it = m_lines.begin();
