@@ -294,7 +294,7 @@ out_err:
 					goto out_elf_begin;
 			}
 
-			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) == 0)
+			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) != (SHF_EXECINSTR | SHF_ALLOC))
 				continue;
 
 			// If we have segments already, we can safely skip this
