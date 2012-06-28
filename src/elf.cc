@@ -58,6 +58,7 @@ public:
 		m_filename = strdup(filename);
 
 		m_curSegments.clear();
+		m_executableSegments.clear();
 		for (uint32_t i = 0; data && i < data->n_segments; i++) {
 			struct phdr_data_segment *seg = &data->segments[i];
 
@@ -293,14 +294,13 @@ out_err:
 					goto out_elf_begin;
 			}
 
-			// If we have segments already, we can safely skip this
-			if (!setupSegments)
-				continue;
-
 			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) == 0)
 				continue;
 
-			m_curSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
+			// If we have segments already, we can safely skip this
+			if (setupSegments)
+				m_curSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
+			m_executableSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 		}
 		elf_end(m_elf);
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
@@ -342,8 +342,8 @@ private:
 
 	bool addressIsValid(uint64_t addr)
 	{
-		for (SegmentList_t::iterator it = m_curSegments.begin();
-				it != m_curSegments.end(); it++) {
+		for (SegmentList_t::iterator it = m_executableSegments.begin();
+				it != m_executableSegments.end(); it++) {
 			Segment cur = *it;
 
 			if (addr >= cur.m_paddr && addr < cur.m_paddr + cur.m_size) {
@@ -370,6 +370,7 @@ private:
 	}
 
 	SegmentList_t m_curSegments;
+	SegmentList_t m_executableSegments;
 	IFilter &m_filter;
 
 	Elf *m_elf;
