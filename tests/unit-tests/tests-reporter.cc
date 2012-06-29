@@ -26,6 +26,7 @@ public:
 	MOCK_METHOD1(registerListener, void(IListener &listener));
 	MOCK_METHOD0(prepare, int());
 	MOCK_METHOD0(run, int());
+	MOCK_METHOD0(stop, void());
 
 	void mockRegisterListener(IListener &listener)
 	{
