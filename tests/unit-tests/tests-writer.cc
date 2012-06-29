@@ -32,6 +32,8 @@ public:
 
 	MOCK_METHOD2(unMarshal, bool(void *data, size_t sz));
 
+	MOCK_METHOD0(stop, void());
+
 	void *mockMarshal(size_t *outSz)
 	{
 		void *out = malloc(32);
