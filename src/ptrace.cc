@@ -64,6 +64,8 @@ public:
 	Ptrace() : m_solibValid(false), m_solibFd(-1), m_ldPreloadString(NULL), m_envString(NULL)
 	{
 		m_breakpointId = 0;
+		m_parentCpu = kcov_get_current_cpu();
+		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 	}
 
 	bool readMemory(uint8_t *dst, unsigned long addr, size_t bytes)
@@ -283,7 +285,6 @@ public:
 				return out;
 
 			m_activeChild = who;
-
 			out.addr = getPc(m_activeChild);
 
 			kcov_debug(PTRACE_MSG, "PT stopped 0x%08x\n", status);
@@ -415,6 +416,9 @@ private:
 			return false;
 		}
 		m_child = m_activeChild = child;
+		// Might not be completely necessary (the child should inherit this
+		// from the parent), but better safe than sorry
+		kcov_tie_process_to_cpu(m_child, m_parentCpu);
 
 		kcov_debug(PTRACE_MSG, "PT forked %d\n", child);
 
@@ -457,6 +461,7 @@ private:
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
+		kcov_tie_process_to_cpu(m_activeChild, m_parentCpu);
 
 		::kill(m_activeChild, SIGSTOP);
 		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
@@ -517,6 +522,8 @@ private:
 	uint8_t m_solibData[128 * 1024];
 	char *m_ldPreloadString;
 	char *m_envString;
+
+	int m_parentCpu;
 };
 
 IEngine &IEngine::getInstance()
