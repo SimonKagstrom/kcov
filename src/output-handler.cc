@@ -9,6 +9,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <dirent.h>
 #include <pthread.h>
 
@@ -106,6 +107,14 @@ namespace kcov
 
 		void threadMain()
 		{
+			sigset_t set;
+
+			sigemptyset(&set);
+			sigaddset(&set, SIGINT);
+			sigaddset(&set, SIGTERM);
+
+			// Block INT and TERM to avoid Ctrl-C ending up in this thread
+			sigprocmask(SIG_BLOCK, &set, NULL);
 			while (!m_stop) {
 				for (WriterList_t::iterator it = m_writers.begin();
 						it != m_writers.end();
