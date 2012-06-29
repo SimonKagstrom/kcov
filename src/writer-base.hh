@@ -14,7 +14,7 @@ namespace kcov
 	class IReporter;
 	class IOutputHandler;
 
-	class WriterBase : public IElf::IListener
+	class WriterBase : public IElf::IListener, public IWriter
 	{
 	protected:
 		WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output);
@@ -53,6 +53,8 @@ namespace kcov
 				std::string &name);
 
 		void setupCommonPaths();
+
+		void stop();
 
 		IElf &m_elf;
 		IReporter &m_reporter;

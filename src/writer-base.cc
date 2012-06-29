@@ -138,3 +138,9 @@ void WriterBase::setupCommonPaths()
 	}
 	m_fileMutex.unlock();
 }
+
+void WriterBase::stop()
+{
+	// Called from the main process, which must release this on stop.
+	m_fileMutex.unlock();
+}

@@ -13,7 +13,7 @@
 
 using namespace kcov;
 
-class CoberturaWriter : public WriterBase, public IWriter
+class CoberturaWriter : public WriterBase
 {
 public:
 	CoberturaWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :

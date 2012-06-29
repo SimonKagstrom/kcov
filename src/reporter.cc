@@ -157,6 +157,13 @@ public:
 		return true;
 	}
 
+	virtual void stop()
+	{
+		// Otherwise the writer thread can hang here
+		m_mutex.unlock();
+	}
+
+
 private:
 	size_t getMarshalEntrySize()
 	{

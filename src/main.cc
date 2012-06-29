@@ -15,9 +15,13 @@
 using namespace kcov;
 
 static IOutputHandler *g_output;
+static ICollector *g_collector;
+static IReporter *g_reporter;
 
 static void ctrlc(int sig)
 {
+	g_collector->stop();
+	g_reporter->stop();
 	g_output->stop();
 	IEngine::getInstance().kill();
 	exit(0);
@@ -49,6 +53,8 @@ int main(int argc, const char *argv[])
 	output.registerWriter(coberturaWriter);
 
 	g_output = &output;
+	g_reporter = &reporter;
+	g_collector = &collector;
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);
 

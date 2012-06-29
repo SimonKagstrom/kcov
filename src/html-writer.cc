@@ -105,7 +105,7 @@ static const char css_text[] = "/* Based upon the lcov CSS style, style files ca
 		"td.coverNumLo { text-align: right; padding-left: 10px; padding-right: 10px; background-color: #FF0000; }\n";
 
 
-class HtmlWriter : public IWriter, public WriterBase
+class HtmlWriter : public WriterBase
 {
 public:
 	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :

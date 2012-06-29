@@ -71,6 +71,9 @@ public:
 		return 0;
 	}
 
+	virtual void stop()
+	{
+	}
 
 private:
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)

@@ -75,13 +75,17 @@ namespace kcov
 		{
 			m_stop = true;
 
-			while (!m_threadStopped)
-			{
-				struct timespec ts;
-				ts.tv_sec = 0;
-				ts.tv_nsec = 100 * 1000 * 1000;
+			for (WriterList_t::iterator it = m_writers.begin();
+					it != m_writers.end();
+					it++)
+				(*it)->stop();
 
-				nanosleep(&ts, NULL);
+			// Wait for half a second
+			for (unsigned int i = 0; i < 50; i++)
+			{
+				if (m_threadStopped)
+					break;
+				mdelay(10);
 			}
 
 			for (WriterList_t::iterator it = m_writers.begin();
@@ -104,6 +108,15 @@ namespace kcov
 		}
 
 	private:
+		void mdelay(unsigned int ms)
+		{
+			struct timespec ts;
+			ts.tv_sec = 0;
+			ts.tv_nsec = ms * 1000 * 1000;
+
+			nanosleep(&ts, NULL);
+		}
+
 
 		void threadMain()
 		{
