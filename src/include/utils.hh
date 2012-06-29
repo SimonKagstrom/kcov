@@ -104,3 +104,9 @@ unsigned long get_aligned_4b(unsigned long addr);
 
 
 std::string fmt(const char *fmt, ...);
+
+int coin_get_current_cpu(void);
+
+int kcov_get_current_cpu(void);
+
+void kcov_tie_process_to_cpu(pid_t pid, int cpu);
