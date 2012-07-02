@@ -285,6 +285,8 @@ public:
 			if (who == -1)
 				return out;
 
+			m_children[who] = 1;
+
 			m_activeChild = who;
 			out.addr = getPc(m_activeChild);
 
@@ -319,6 +321,7 @@ public:
 
 					return out;
 				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
+					printf("Hoolabaloo\n");
 					sig = 0;
 				} else if (sig == SIGSTOP) {
 					out.type = ev_breakpoint;
@@ -335,7 +338,9 @@ public:
 			}
 			// Thread died?
 			if (WIFSIGNALED(status) || WIFEXITED(status)) {
-				if (m_child == m_activeChild) {
+				m_children.erase(who);
+
+				if (m_children.size() == 0) {
 					out.type = ev_exit;
 					out.data = WEXITSTATUS(status);
 					return out;
@@ -508,6 +513,7 @@ private:
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
 	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
 	typedef std::unordered_map<unsigned long, uint8_t> instructionMap_t;
+	typedef std::unordered_map<pid_t, int> ChildMap_t;
 
 	int m_breakpointId;
 
@@ -517,6 +523,7 @@ private:
 
 	pid_t m_activeChild;
 	pid_t m_child;
+	ChildMap_t m_children;
 
 	bool m_solibValid;
 	int m_solibFd;
