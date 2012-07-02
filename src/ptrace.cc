@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <map>
+#include <unordered_map>
 #include <list>
 
 using namespace kcov;
@@ -504,9 +505,9 @@ private:
 		return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
 	}
 
-	typedef std::map<int, unsigned long> breakpointToAddrMap_t;
-	typedef std::map<unsigned long, int> addrToBreakpointMap_t;
-	typedef std::map<unsigned long, uint8_t> instructionMap_t;
+	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
+	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
+	typedef std::unordered_map<unsigned long, uint8_t> instructionMap_t;
 
 	int m_breakpointId;
 
