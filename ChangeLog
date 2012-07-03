@@ -1,4 +1,24 @@
 Kcov (9):
+	* Fix icache conflict bug (present while instrumenting shared libraries)
+	  on multi-CPU systems by forcing all traced processes to one CPU
+
+	* Re-enable the --pid=PID argument to trace a running process again
+
+	* Fix race condition in the reporter
+
+	* Only set breakpoints in executable sections. This avoids problems where
+	  the DWARF line information points to non-code sections (which can happen)
+
+	* Fix coverage reporting of orphaned children (where the parent does not
+	  wait(2) for the child
+
+	* Use std::unordered_map for breakpoints (improves performance somewhat)
+
+	* Improve unit tests
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, 
+
+Kcov (9):
 	* Completely refactor the source code (yes, everything!), and add
 	  unit tests to verify kcov itself. The code is now in C++.
 	  
