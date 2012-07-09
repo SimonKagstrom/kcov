@@ -38,6 +38,8 @@ namespace kcov
 			unsigned int m_executedLines;
 		};
 
+		virtual ~IReporter() {}
+
 		virtual bool lineIsCode(const char *file, unsigned int lineNr) = 0;
 
 		virtual LineExecutionCount getLineExecutionCount(const char *file, unsigned int lineNr) = 0;

@@ -8,6 +8,8 @@ namespace kcov
 	class IWriter
 	{
 	public:
+		virtual ~IWriter() {}
+
 		virtual void onStartup() = 0;
 
 		virtual void onStop() = 0;

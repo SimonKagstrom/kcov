@@ -30,6 +30,8 @@ namespace kcov
 
 		static IEngine &getInstance();
 
+		virtual ~IEngine() {}
+
 		/**
 		 * Set a breakpoint
 		 *

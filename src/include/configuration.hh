@@ -16,6 +16,8 @@ namespace kcov
 			UNCOVERED_LINES
 		};
 
+		virtual ~IConfiguration() {}
+
 		virtual void printUsage() = 0;
 
 		virtual std::string &getOutDirectory() = 0;

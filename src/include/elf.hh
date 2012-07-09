@@ -22,6 +22,8 @@ namespace kcov
 		static IElf &getInstance();
 
 
+		virtual ~IElf() {}
+
 		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
 		virtual const char *getFilename() = 0;

@@ -17,5 +17,8 @@ namespace kcov
 
 
 		static IFilter &getInstance();
+
+
+		virtual ~IFilter() {}
 	};
 }

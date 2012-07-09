@@ -10,6 +10,8 @@ namespace kcov
 	class IOutputHandler
 	{
 	public:
+		virtual ~IOutputHandler() {}
+
 		virtual void registerWriter(IWriter &writer) = 0;
 
 		virtual void start() = 0;
