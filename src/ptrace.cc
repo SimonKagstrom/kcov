@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <list>
 
+#include "library-binary.h"
+
 using namespace kcov;
 
 #define str(s) #s
@@ -113,17 +115,11 @@ public:
 				IOutputHandler::getInstance().getOutDirectory() +
 				"kcov-solib.pipe";
 		std::string kcov_solib_path =
+				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
 
-		for (const char **path = &solibPaths[0]; *path != NULL; path++)
-		{
-			std::string cur = (std::string(*path) + "/" + kcov_solib_path);
+		write_file(__library_data, __library_data_size, kcov_solib_path.c_str());
 
-			if (file_exists(cur.c_str())) {
-				kcov_solib_path = cur;
-				break;
-			}
-		}
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;
 		unlink(kcov_solib_pipe_path.c_str());

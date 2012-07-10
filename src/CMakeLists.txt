@@ -40,7 +40,6 @@ set (KCOV_LIBRARY_PREFIX "/tmp")
 
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
-
 include_directories(
 	include/
 	${LIBELF_INCLUDE_DIRS}
@@ -50,7 +49,15 @@ include_directories(
 link_directories (/home/ska/local/lib)
 
 add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
-add_executable (${TGT} ${${TGT}_SRCS})
+
+add_custom_command(
+   OUTPUT library.c
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so > library.c
+   DEPENDS ${SOLIB}
+   )
+
+
+add_executable (${TGT} ${${TGT}_SRCS} library.c)
 
 target_link_libraries(${TGT}
 	${LIBDWARF_LIBRARIES}
