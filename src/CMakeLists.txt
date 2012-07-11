@@ -65,4 +65,4 @@ target_link_libraries(${TGT}
 	dl
 	pthread)
 
-install (TARGETS ${PROJECT_NAME} ${SOLIB} ${INSTALL_TARGETS_PATH})
+install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
