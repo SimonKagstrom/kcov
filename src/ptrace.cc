@@ -25,16 +25,6 @@ using namespace kcov;
 #define str(s) #s
 #define xstr(s) str(s)
 
-const char *solibPaths[] =
-{
-		xstr(KCOV_LIBRARY_PREFIX),
-		"/usr/local/lib",
-		"/opt/lib",
-		"/usr/lib",
-		"/lib",
-		NULL
-};
-
 static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
 {
 	unsigned long out;
