@@ -8,6 +8,14 @@ set (tests_SRCS
 	subdir2/file.c
 )
 
+set (fork_SRCS
+	fork/fork.c
+)
+
+set (fork_no_wait_SRCS
+	fork/fork-no-wait.c
+)
+
 set (recursive-ptrace_SRCS
 	recursive-ptrace/main.cc
 )
@@ -15,9 +23,11 @@ set (recursive-ptrace_SRCS
 set(CMAKE_BUILD_TYPE distribution)
 set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "-g")
-add_executable(tests ${tests_SRCS})
 
+add_executable(tests ${tests_SRCS})
 add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
+add_executable(fork ${fork_SRCS})
+add_executable(fork_no_wait ${fork_no_wait_SRCS})
 
 
 
