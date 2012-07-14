@@ -172,7 +172,7 @@ public:
 			}
 			default:
 				error("Unrecognized option: -%c\n", optopt);
-				break;
+				return usage();
 			}
 		}
 
