@@ -20,15 +20,32 @@ set (recursive-ptrace_SRCS
 	recursive-ptrace/main.cc
 )
 
+set (shared_library_test_SRCS
+	shared-library/main.c
+)
+
+
+add_library(shared_library SHARED shared-library/solib.c)
+
+
 set(CMAKE_BUILD_TYPE distribution)
 set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "-g")
+
+
+find_library(shared_library_LIBRARY
+  NAMES shared_library
+  PATHS ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 
 add_executable(tests ${tests_SRCS})
 add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
+add_executable(shared_library_test ${shared_library_test_SRCS})
 
+target_link_libraries(shared_library_test shared_library)
 
 
 add_custom_target(tests-stripped ALL

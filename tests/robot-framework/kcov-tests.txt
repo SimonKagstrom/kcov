@@ -19,13 +19,20 @@ fork-no-wait
 
 fork
     Run    ${kcov} ${out} ./fork
-    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 21
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 21
     Should Contain    ${output}    0
-    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 26
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 26
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 34
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 34
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 37
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 37
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 46
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 46
+    Should Contain    ${output}    1
+
+shared-library
+    Run    ${kcov} ${out} ./shared_library_test
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml main_c 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    1
