@@ -8,6 +8,14 @@ ${kcov_path}      %{WORKSPACE}
 ${xml_lookup}     ${kcov_path}/tests/tools/lookup-xml-node.py
 
 *** Test Cases ***
+too-few-arguments
+    ${rc}=    Run and return RC    ${kcov} ${out}
+    Should be equal as integers    ${rc}    1
+
+wrong-arguments
+    ${rc}=    Run and return RC    ${kcov} --abcd=efg ${out} tests-stripped
+    Should be equal as integers    ${rc}    1
+
 fork-no-wait
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork_no_wait
     Should be equal as integers    ${rc}    0
