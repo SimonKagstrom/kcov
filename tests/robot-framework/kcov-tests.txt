@@ -1,15 +1,15 @@
 *** Settings ***
-Library           ../tools/lookup-xml-node.py
 Library           OperatingSystem
 
 *** Variables ***
+${kcov}           kcov
 ${out}            /tmp/kcov
 ${kcov_path}      /home/ska/projects/kcov/
 ${xml_lookup}     ${kcov_path}/tests/tools/lookup-xml-node.py
 
 *** Test Cases ***
 fork-no-wait
-    Run    kcov ${out} ./fork_no_wait
+    Run    ${kcov} ${out} ./fork_no_wait
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 20
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 22
@@ -18,10 +18,14 @@ fork-no-wait
     Should Contain    ${output}    1
 
 fork
-    Run    kcov ${out} ./fork
-    ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 20
+    Run    ${kcov} ${out} ./fork
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 21
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 26
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 22
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 34
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 24
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 37
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_no_wait_c 46
     Should Contain    ${output}    1
