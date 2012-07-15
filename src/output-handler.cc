@@ -109,16 +109,6 @@ namespace kcov
 		}
 
 	private:
-		void mdelay(unsigned int ms)
-		{
-			struct timespec ts;
-			ts.tv_sec = 0;
-			ts.tv_nsec = ms * 1000 * 1000;
-
-			nanosleep(&ts, NULL);
-		}
-
-
 		void threadMain()
 		{
 			sigset_t set;

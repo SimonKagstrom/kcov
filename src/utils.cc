@@ -223,3 +223,12 @@ void kcov_tie_process_to_cpu(pid_t pid, int cpu)
 			"Can't set CPU affinity. Coincident won't work");
 	CPU_FREE(set);
 }
+
+void mdelay(unsigned int ms)
+{
+	struct timespec ts;
+	ts.tv_sec = 0;
+	ts.tv_nsec = ms * 1000 * 1000;
+
+	nanosleep(&ts, NULL);
+}
