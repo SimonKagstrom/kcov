@@ -17,8 +17,9 @@ wrong-arguments
     Should be equal as integers    ${rc}    1
 
 fork-no-wait
+    ${no_kcov_rc}=    Run and return RC    ./fork_no_wait
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork_no_wait
-    Should be equal as integers    ${rc}    0
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 20
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 22
@@ -27,8 +28,9 @@ fork-no-wait
     Should Contain    ${output}    1
 
 fork
+    ${no_kcov_rc}=    Run and return RC    ./fork
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork
-    Should be equal as integers    ${rc}    0
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 21
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 26
@@ -41,8 +43,9 @@ fork
     Should Contain    ${output}    1
 
 shared-library
+    ${no_kcov_rc}=    Run and return RC    ./shared_library_test
     ${rc}=    Run and return RC    ${kcov} ${out} ./shared_library_test
-    Should be equal as integers    ${rc}    0
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml main_c 9
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
