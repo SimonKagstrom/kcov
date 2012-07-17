@@ -307,7 +307,6 @@ public:
 
 					return out;
 				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
-					printf("Hoolabaloo\n");
 					sig = 0;
 				} else if (sig == SIGSTOP) {
 					out.type = ev_breakpoint;
