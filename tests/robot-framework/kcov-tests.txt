@@ -50,3 +50,12 @@ shared-library
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    1
+
+shared-library-filter-out
+    ${no_kcov_rc}=    Run and return RC    ./shared_library_test
+    ${rc}=    Run and return RC    ${kcov} --exclude-pattern=solib ${out} ./shared_library_test
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml main_c 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
+    Should Contain    ${output}    nocode
