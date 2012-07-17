@@ -26,5 +26,5 @@ int main(int argc, const char *argv[])
 
 	/* No wait for children */
 
-	return 0;
+	return 4; // To test non-0/-1/1 exit codes
 }
