@@ -328,11 +328,13 @@ public:
 
 				if (m_children.size() == 0) {
 					Event tmp = continueExecution();
-					if (tmp.type != ev_error)
-						continue;
 
 					out.type = ev_exit;
 					out.data = WEXITSTATUS(status);
+
+					if (tmp.type != ev_error)
+						continue;
+
 					return out;
 				}
 
