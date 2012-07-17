@@ -16,8 +16,10 @@ Kcov (9):
 
 	* Improve unit tests
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>, 
+	* Add robot-framework testsuite that can be run from a Jenkins server
 
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	
 Kcov (9):
 	* Completely refactor the source code (yes, everything!), and add
 	  unit tests to verify kcov itself. The code is now in C++.
