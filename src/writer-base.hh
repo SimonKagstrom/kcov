@@ -34,6 +34,8 @@ namespace kcov
 			unsigned int m_executedLines;
 			unsigned int m_lastLineNr;
 
+			static int fileNameCount;
+
 		private:
 			void readFile(const char *filename);
 		};

@@ -12,6 +12,8 @@ struct summaryStruct
 	char name[256];
 };
 
+int WriterBase::File::fileNameCount;
+
 WriterBase::WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output) :
 		m_elf(elf), m_reporter(reporter)
 {
@@ -28,7 +30,10 @@ WriterBase::File::File(const char *filename) :
 		m_fileName = m_name.substr(pos + 1, std::string::npos);
 	else
 		m_fileName = m_name;
-	m_outFileName = m_fileName + ".html";
+
+	// Make this name unique (we might have several files with the same name)
+	m_outFileName = fmt("%s.%d.html", m_fileName.c_str(), fileNameCount);
+	fileNameCount++;
 
 	readFile(filename);
 }
