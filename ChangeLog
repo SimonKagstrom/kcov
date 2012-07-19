@@ -1,4 +1,7 @@
 Kcov (9):
+	* Fix bug where multiple files with the same name would only be shown
+	  once in the HTML output.
+
 	* Fix icache conflict bug (present while instrumenting shared libraries)
 	  on multi-CPU systems by forcing all traced processes to one CPU
 
