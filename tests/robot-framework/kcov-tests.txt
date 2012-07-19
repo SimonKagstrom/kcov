@@ -59,3 +59,20 @@ shared-library-filter-out
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    nocode
+
+main-test
+    ${no_kcov_rc}=    Run and return RC    ./main-tests
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 14
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 18
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 25
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 7
+    Should Contain    ${output}    0
