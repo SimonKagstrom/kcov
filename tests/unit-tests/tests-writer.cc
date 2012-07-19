@@ -10,6 +10,8 @@
 
 #include <chrono>
 #include <thread>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "../../src/html-writer.hh"
 #include "../../src/cobertura-writer.hh"
@@ -43,6 +45,24 @@ public:
 		return out;
 	}
 };
+
+static int filePatternInDir(const char *name, const char *pattern)
+{
+	DIR *d = opendir(name);
+	ASSERT_TRUE(d);
+
+	struct dirent *de = readdir(d);
+	int out = 0;
+
+	while (de)
+	{
+		if (strstr(de->d_name, pattern))
+			out++;
+		de = readdir(d);
+	}
+
+	return out;
+}
 
 TEST(writer, DEADLINE_REALTIME_MS(20000))
 {
@@ -110,7 +130,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 	output.stop();
 
-	ASSERT_TRUE(file_exists("/tmp/vobb/test-binary/test-source.c.html"));
+	ASSERT_TRUE(filePatternInDir("/tmp/vobb/test-binary", "test-source.c") == 1);
 	ASSERT_TRUE(file_exists("/tmp/vobb/test-binary/cobertura.xml"));
 
 	EXPECT_CALL(reporter, unMarshal(_,_))
@@ -120,4 +140,61 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	output.start();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	output.stop();
+}
+
+
+TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
+{
+	IElf *elf;
+	bool res;
+	char filename[1024];
+	MockReporter reporter;
+	IReporter::LineExecutionCount def(0, 1);
+	IReporter::LineExecutionCount partial(1, 2);
+	IReporter::LineExecutionCount full(3, 3);
+	IReporter::ExecutionSummary summary(17, 4);
+
+	sprintf(filename, "%s/same-name-test", crpcut::get_start_dir());
+	elf = IElf::open(filename);
+	ASSERT_TRUE(elf);
+
+	const char *argv[] = {NULL, "/tmp/vobb", filename};
+	IConfiguration &conf = IConfiguration::getInstance();
+	res = conf.parse(3, argv);
+	ASSERT_TRUE(res);
+
+	EXPECT_CALL(reporter, lineIsCode(_,_))
+		.Times(AtLeast(1))
+		.WillRepeatedly(Return(true))
+		;
+
+	EXPECT_CALL(reporter, getLineExecutionCount(_,_))
+		.Times(AtLeast(1))
+		.WillRepeatedly(Return(def))
+		;
+	EXPECT_CALL(reporter, getExecutionSummary())
+		.Times(AtLeast(2))
+		.WillRepeatedly(Return(summary))
+		;
+
+	IOutputHandler &output = IOutputHandler::create(reporter);
+	IWriter &writer = createHtmlWriter(*elf, reporter, output);
+
+	output.registerWriter(writer);
+
+	res = elf->parse();
+	ASSERT_TRUE(res == true);
+	output.start();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	EXPECT_CALL(reporter, marshal(_))
+		.Times(Exactly(1))
+		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
+		;
+
+	output.stop();
+
+	int cnt = filePatternInDir("/tmp/vobb/same-name-test", "html");
+	ASSERT_TRUE(cnt == 4); // index.html + 3 source files
 }

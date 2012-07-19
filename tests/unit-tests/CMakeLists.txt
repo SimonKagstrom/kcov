@@ -58,6 +58,12 @@ target_link_libraries(${TGT}
 	${LIBELF_LIBRARIES}
 	dl
 	pthread)
+
+add_executable (same-name-test
+	../main.cc
+	../subdir/file.c
+	../subdir2/file.c
+)
   
 add_executable (test-binary test-source.c second-source.c)
 SET_TARGET_PROPERTIES(test-binary PROPERTIES COMPILE_FLAGS "-nostdinc")
