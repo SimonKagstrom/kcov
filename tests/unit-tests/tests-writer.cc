@@ -75,11 +75,13 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	IReporter::LineExecutionCount full(3, 3);
 	IReporter::ExecutionSummary summary(17, 4);
 
+	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writer");
+
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
 	elf = IElf::open(filename);
 	ASSERT_TRUE(elf);
 
-	const char *argv[] = {NULL, "/tmp/vobb", filename};
+	const char *argv[] = {NULL, outDir.c_str(), filename};
 	IConfiguration &conf = IConfiguration::getInstance();
 	res = conf.parse(3, argv);
 	ASSERT_TRUE(res);
@@ -124,14 +126,14 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	EXPECT_CALL(reporter, marshal(_))
-		.Times(Exactly(2))
+		.Times(AtLeast(1))
 		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
 	output.stop();
 
-	ASSERT_TRUE(filePatternInDir("/tmp/vobb/test-binary", "test-source.c") == 1);
-	ASSERT_TRUE(file_exists("/tmp/vobb/test-binary/cobertura.xml"));
+	ASSERT_TRUE(filePatternInDir((outDir + "/test-binary").c_str(), "test-source.c") == 1);
+	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
 	EXPECT_CALL(reporter, unMarshal(_,_))
 		.Times(Exactly(1))
@@ -154,11 +156,13 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	IReporter::LineExecutionCount full(3, 3);
 	IReporter::ExecutionSummary summary(17, 4);
 
+	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writerSameName");
+
 	sprintf(filename, "%s/same-name-test", crpcut::get_start_dir());
 	elf = IElf::open(filename);
 	ASSERT_TRUE(elf);
 
-	const char *argv[] = {NULL, "/tmp/vobb", filename};
+	const char *argv[] = {NULL, outDir.c_str(), filename};
 	IConfiguration &conf = IConfiguration::getInstance();
 	res = conf.parse(3, argv);
 	ASSERT_TRUE(res);
@@ -189,12 +193,12 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	EXPECT_CALL(reporter, marshal(_))
-		.Times(Exactly(1))
+		.Times(AtLeast(1))
 		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
 	output.stop();
 
-	int cnt = filePatternInDir("/tmp/vobb/same-name-test", "html");
+	int cnt = filePatternInDir((outDir + "/same-name-test").c_str(), "html");
 	ASSERT_TRUE(cnt == 4); // index.html + 3 source files
 }
