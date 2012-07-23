@@ -1,3 +1,7 @@
+Kcov (11):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (10):
 	* Fix bug where multiple files with the same name would only be shown
 	  once in the HTML output.
