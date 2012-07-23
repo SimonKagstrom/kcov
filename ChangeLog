@@ -21,7 +21,7 @@ Kcov (9):
 
 	* Add robot-framework testsuite that can be run from a Jenkins server
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jul 23 13:28:43 CEST 2012
 	
 Kcov (9):
 	* Completely refactor the source code (yes, everything!), and add
