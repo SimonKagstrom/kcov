@@ -105,7 +105,8 @@ out_open:
 		if (lstat(m_filename, &st) < 0)
 			return 0;
 
-		m_checksum = ((uint64_t)st.st_mtim.tv_sec << 32) | ((uint64_t)st.st_mtim.tv_nsec);
+		if (m_isMainFile)
+			m_checksum = ((uint64_t)st.st_mtim.tv_sec << 32) | ((uint64_t)st.st_mtim.tv_nsec);
 
 		parseOneElf();
 		parseOneDwarf();
