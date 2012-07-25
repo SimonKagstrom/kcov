@@ -8,7 +8,7 @@
 
 using namespace kcov;
 
-class FunctionListener : public IElf::IListener
+class FunctionListener : public IElf::ILineListener
 {
 public:
 
@@ -53,7 +53,7 @@ TEST(elf, DEADLINE_REALTIME_MS(30000))
 	elf = IElf::open(filename);
 	ASSERT_TRUE(elf);
 
-	elf->registerListener(listener);
+	elf->registerLineListener(listener);
 
 	res = elf->parse();
 	ASSERT_TRUE(res == true);

@@ -319,7 +319,7 @@ out_open:
 		return ret;
 	}
 
-	void registerListener(IListener &listener)
+	void registerLineListener(ILineListener &listener)
 	{
 		m_listeners.push_back(&listener);
 	}
@@ -339,7 +339,7 @@ private:
 	};
 
 	typedef std::list<Segment> SegmentList_t;
-	typedef std::list<IListener *> ListenerList_t;
+	typedef std::list<ILineListener *> ListenerList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{
@@ -377,7 +377,7 @@ private:
 	Elf *m_elf;
 	bool m_elfIs32Bit;
 	ListenerList_t m_listeners;
-	IListener *m_listener;
+	ILineListener *m_listener;
 	const char *m_filename;
 	uint64_t m_checksum;
 };

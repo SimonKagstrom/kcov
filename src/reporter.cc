@@ -21,13 +21,13 @@ struct marshalHeaderStruct
 	uint64_t checksum;
 };
 
-class Reporter : public IReporter, public IElf::IListener, public ICollector::IListener
+class Reporter : public IReporter, public IElf::ILineListener, public ICollector::IListener
 {
 public:
 	Reporter(IElf &elf, ICollector &collector) :
 		m_elf(elf), m_collector(collector), m_filter(IFilter::getInstance())
 	{
-		m_elf.registerListener(*this);
+		m_elf.registerLineListener(*this);
 		m_collector.registerListener(*this);
 	}
 

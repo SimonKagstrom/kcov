@@ -14,7 +14,7 @@ namespace kcov
 	class IReporter;
 	class IOutputHandler;
 
-	class WriterBase : public IElf::IListener, public IWriter
+	class WriterBase : public IElf::ILineListener, public IWriter
 	{
 	protected:
 		WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output);

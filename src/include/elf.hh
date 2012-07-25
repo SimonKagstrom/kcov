@@ -10,7 +10,7 @@ namespace kcov
 	class IElf
 	{
 	public:
-		class IListener
+		class ILineListener
 		{
 		public:
 			virtual void onLine(const char *file, unsigned int lineNr,
@@ -28,7 +28,7 @@ namespace kcov
 
 		virtual const char *getFilename() = 0;
 
-		virtual void registerListener(IListener &listener) = 0;
+		virtual void registerLineListener(ILineListener &listener) = 0;
 
 		virtual bool parse() = 0;
 

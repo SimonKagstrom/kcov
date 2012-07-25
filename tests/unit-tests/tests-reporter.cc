@@ -37,7 +37,7 @@ public:
 };
 
 
-class ElfListener : public IElf::IListener
+class ElfListener : public IElf::ILineListener
 {
 public:
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
@@ -63,7 +63,7 @@ TEST(reporter)
 	elf = IElf::open(filename);
 	ASSERT_TRUE(elf);
 
-	elf->registerListener(elfListener);
+	elf->registerLineListener(elfListener);
 
 	MockCollector collector;
 

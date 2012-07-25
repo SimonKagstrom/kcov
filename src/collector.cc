@@ -9,12 +9,12 @@
 
 using namespace kcov;
 
-class Collector : public ICollector, public IElf::IListener
+class Collector : public ICollector, public IElf::ILineListener
 {
 public:
 	Collector(IElf &elf) : m_elf(elf), m_engine(IEngine::getInstance())
 	{
-		m_elf.registerListener(*this);
+		m_elf.registerLineListener(*this);
 	}
 
 	void registerListener(ICollector::IListener &listener)

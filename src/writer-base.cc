@@ -18,7 +18,7 @@ WriterBase::WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output) :
 		m_elf(elf), m_reporter(reporter)
 {
 		m_commonPath = "not set";
-		m_elf.registerListener(*this);
+		m_elf.registerLineListener(*this);
 }
 
 WriterBase::File::File(const char *filename) :
