@@ -17,6 +17,12 @@ namespace kcov
 					unsigned long addr) = 0;
 		};
 
+		class IFileListener
+		{
+		public:
+			virtual void onFile(const char *file, bool isSolib) = 0;
+		};
+
 		static IElf *open(const char *filename);
 
 		static IElf &getInstance();
@@ -29,6 +35,8 @@ namespace kcov
 		virtual const char *getFilename() = 0;
 
 		virtual void registerLineListener(ILineListener &listener) = 0;
+
+		virtual void registerFileListener(IFileListener &listener) = 0;
 
 		virtual bool parse() = 0;
 

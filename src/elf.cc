@@ -37,6 +37,7 @@ public:
 		m_filename = NULL;
 		m_checksum = 0;
 		m_elfIs32Bit = true;
+		m_isMainFile = true;
 	}
 	virtual ~Elf()
 	{
@@ -108,6 +109,16 @@ out_open:
 
 		parseOneElf();
 		parseOneDwarf();
+
+		for (FileListenerList_t::iterator it = m_fileListeners.begin();
+				it != m_fileListeners.end();
+				it++) {
+			IFileListener *cur = *it;
+
+			cur->onFile(m_filename, !m_isMainFile);
+		}
+		// After the first, all other are solibs
+		m_isMainFile = false;
 
 		return true;
 	}
@@ -209,8 +220,8 @@ out_open:
 
 					if (m_filter.runFilters(file_path) == true)
 					{
-						for (ListenerList_t::iterator it = m_listeners.begin();
-								it != m_listeners.end();
+						for (LineListenerList_t::iterator it = m_lineListeners.begin();
+								it != m_lineListeners.end();
 								it++)
 							(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
 					}
@@ -321,7 +332,12 @@ out_open:
 
 	void registerLineListener(ILineListener &listener)
 	{
-		m_listeners.push_back(&listener);
+		m_lineListeners.push_back(&listener);
+	}
+
+	void registerFileListener(IFileListener &listener)
+	{
+		m_fileListeners.push_back(&listener);
 	}
 
 private:
@@ -339,7 +355,8 @@ private:
 	};
 
 	typedef std::list<Segment> SegmentList_t;
-	typedef std::list<ILineListener *> ListenerList_t;
+	typedef std::list<ILineListener *> LineListenerList_t;
+	typedef std::list<IFileListener *> FileListenerList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{
@@ -376,9 +393,10 @@ private:
 
 	Elf *m_elf;
 	bool m_elfIs32Bit;
-	ListenerList_t m_listeners;
-	ILineListener *m_listener;
+	LineListenerList_t m_lineListeners;
+	FileListenerList_t m_fileListeners;
 	const char *m_filename;
+	bool m_isMainFile;
 	uint64_t m_checksum;
 };
 
