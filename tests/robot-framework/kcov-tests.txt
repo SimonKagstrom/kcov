@@ -76,3 +76,17 @@ main-test
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 7
     Should Contain    ${output}    0
+
+accumulate-data
+    ${rc}=    Run and return RC    ${kcov} ${out} ./argv_dependent
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/argv_dependent/cobertura.xml argv_dependent_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/argv_dependent/cobertura.xml argv_dependent_c 11
+    Should Contain    ${output}    0
+    ${rc}=    Run and return RC    ${kcov} ${out} ./argv_dependent a
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/argv_dependent/cobertura.xml argv_dependent_c 11
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/argv_dependent/cobertura.xml argv_dependent_c 5
+    Should Contain    ${output}    1

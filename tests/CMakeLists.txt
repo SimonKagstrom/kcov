@@ -8,6 +8,10 @@ set (main_tests_SRCS
 	subdir2/file.c
 )
 
+set (argv_dependent_SRCS
+	argv-dependent.c
+)
+
 set (fork_SRCS
 	fork/fork.c
 )
@@ -44,6 +48,7 @@ add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
 add_executable(shared_library_test ${shared_library_test_SRCS})
+add_executable(argv_dependent ${argv_dependent_SRCS})
 
 target_link_libraries(shared_library_test shared_library)
 
