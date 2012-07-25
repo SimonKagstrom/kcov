@@ -1,4 +1,6 @@
 Kcov (11):
+	* Unbreak accumulating data from multiple runs again (introduced
+	  sometime during refactoring), and add test case for this
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 

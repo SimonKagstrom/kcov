@@ -2,6 +2,7 @@
 #include <writer.hh>
 #include <configuration.hh>
 #include <reporter.hh>
+#include <elf.hh>
 #include <utils.hh>
 
 #include <thread>
@@ -16,7 +17,7 @@
 
 namespace kcov
 {
-	class OutputHandler : public IOutputHandler
+	class OutputHandler : public IOutputHandler, IElf::IFileListener
 	{
 	public:
 		OutputHandler(IReporter &reporter) : m_reporter(reporter)
@@ -33,6 +34,8 @@ namespace kcov
 
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
+
+			IElf::getInstance().registerFileListener(*this);
 		}
 
 		std::string getBaseDirectory()
@@ -51,18 +54,27 @@ namespace kcov
 			m_writers.push_back(&writer);
 		}
 
-		void start()
+		// From IElf::IFileListener
+		void onFile(const char *file, bool isSolib)
 		{
+			// Only unmarshal the main file
+			if (isSolib)
+				return;
+
 			size_t sz;
 
 			void *data = read_file(&sz, m_dbFileName.c_str());
 
 			if (data) {
-				m_reporter.unMarshal(data, sz);
-
-				free(data);
+				if (!m_reporter.unMarshal(data, sz))
+					warning("Can't unmarshal %s\n", m_dbFileName.c_str());
 			}
 
+			free(data);
+		}
+
+		void start()
+		{
 			for (WriterList_t::iterator it = m_writers.begin();
 					it != m_writers.end();
 					it++)

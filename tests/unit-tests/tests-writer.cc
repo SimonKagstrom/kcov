@@ -119,6 +119,11 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	output.registerWriter(writer);
 	output.registerWriter(coberturaWriter);
 
+	EXPECT_CALL(reporter, unMarshal(_,_))
+		.Times(Exactly(1))
+		.WillOnce(Return(true))
+		;
+
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
 	output.start();
@@ -135,10 +140,6 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(filePatternInDir((outDir + "/test-binary").c_str(), "test-source.c") == 1);
 	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
-	EXPECT_CALL(reporter, unMarshal(_,_))
-		.Times(Exactly(1))
-		.WillOnce(Return(true))
-		;
 	output.start();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	output.stop();
