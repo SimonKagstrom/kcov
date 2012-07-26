@@ -105,6 +105,12 @@ TEST(configuration)
 	ASSERT_TRUE(conf->getExcludePattern().size() == 1U);
 	ASSERT_TRUE(conf->getExcludePattern()[0] == "d/e/f");
 
+	res = runParse(fmt("--include-path=~/a /tmp/vobb %s", filename.c_str()));
+	ASSERT_TRUE(res);
+
+	ASSERT_TRUE(conf->getOnlyIncludePath().size() == 1U);
+	ASSERT_TRUE(conf->getOnlyIncludePath()[0] == fmt("%s/a", get_home()));
+
 	ASSERT_TRUE(conf->getAttachPid() == 0U);
 	res = runParse(fmt("-p ejNummer /tmp/vobb %s", filename.c_str()));
 	ASSERT_FALSE(res);

@@ -153,9 +153,11 @@ public:
 				break;
 			case 'I':
 				m_onlyIncludePath = getCommaSeparatedList(std::string(optarg));
+				expandPath(m_onlyIncludePath);
 				break;
 			case 'X':
 				m_excludePath = getCommaSeparatedList(std::string(optarg));
+				expandPath(m_excludePath);
 				break;
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
@@ -281,6 +283,19 @@ public:
 		}
 
 		return pos == str.size();
+	}
+
+	void expandPath(StrVecMap_t &paths)
+	{
+		for (StrVecMap_t::iterator it = paths.begin();
+				it != paths.end();
+				it++) {
+			std::string s = it->second;
+
+			if (s[0] == '~')
+				s = get_home() + s.substr(1, s.size());
+			it->second = s;
+		}
 	}
 
 	StrVecMap_t getCommaSeparatedList(std::string str)

@@ -113,21 +113,9 @@ const char *dir_concat(const char *dir, const char *filename)
 	return out;
 }
 
-const char *expand_path(const char *path)
+const char *get_home(void)
 {
-	size_t p_len = strlen(path);
-	const char *home = getenv("HOME");
-	size_t home_len;
-	char *out;
-
-	if (!home || p_len < 1 || path[0] != '~')
-		return xstrdup(path);
-
-	home_len = strlen(home);
-	out = (char *)xmalloc(home_len + p_len + 8);
-	snprintf(out, home_len + p_len + 8, "%s/%s", home, path + 1);
-
-	return out;
+	return getenv("HOME");
 }
 
 

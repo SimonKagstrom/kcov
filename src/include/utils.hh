@@ -95,8 +95,7 @@ extern int file_exists(const char *path);
 
 extern int concat_files(const char *dst, const char *file_a, const char *file_b);
 
-/* Expand ~ etc in a path */
-extern const char *expand_path(const char *path);
+extern const char *get_home();
 
 unsigned long get_aligned(unsigned long addr);
 
