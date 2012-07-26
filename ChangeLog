@@ -1,4 +1,6 @@
 Kcov (11):
+	* Expand ~'s in the --include-path and --exclude-path options
+
 	* Unbreak accumulating data from multiple runs again (introduced
 	  sometime during refactoring), and add test case for this
 
