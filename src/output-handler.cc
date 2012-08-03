@@ -67,7 +67,7 @@ namespace kcov
 
 			if (data) {
 				if (!m_reporter.unMarshal(data, sz))
-					warning("Can't unmarshal %s\n", m_dbFileName.c_str());
+					kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
 			}
 
 			free(data);
