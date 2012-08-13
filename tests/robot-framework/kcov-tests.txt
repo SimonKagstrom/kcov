@@ -93,7 +93,7 @@ accumulate-data
 
 popen-test
     ${no_kcov_rc}=    Run and return RC    ./test_popen
-    ${rc}=    Run and return RC
+    ${rc}=    Run and return RC    ${kcov} ${out} ./test_popen
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${kcov} ${out} ./test_popen
     Should Contain    ${output}    popen OK
