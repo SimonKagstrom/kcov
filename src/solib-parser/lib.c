@@ -56,4 +56,7 @@ void  __attribute__((constructor))at_startup(void)
 	free(p);
 
 	close(fd);
+
+	// Clear from the environment
+	putenv("KCOV_SOLIB_PATH");
 }
