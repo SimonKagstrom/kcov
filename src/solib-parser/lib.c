@@ -29,20 +29,17 @@ void  __attribute__((constructor))at_startup(void)
 {
 	char *kcov_solib_path;
 	void *p;
+	ssize_t written;
 	size_t sz;
 	int fd;
 
 	kcov_solib_path = getenv("KCOV_SOLIB_PATH");
 	if (!kcov_solib_path)
-	{
-		printf("not set\n");
 		return;
-	}
 
 	fd = open(kcov_solib_path, O_WRONLY);
-	if (fd < 0)
-	{
-		printf("no open %s\n", kcov_solib_path);
+	if (fd < 0) {
+		fprintf(stderr, "kcov-solib: Can't open %s\n", kcov_solib_path);
 		return;
 	}
 
@@ -51,7 +48,10 @@ void  __attribute__((constructor))at_startup(void)
 	dl_iterate_phdr(phdrCallback, NULL);
 
 	p = phdr_data_marshal(phdr_data, &sz);
-	write(fd, p, sz);
+	written = write(fd, p, sz);
+
+	if (written != sz)
+		fprintf(stderr, "kcov-solib: Can't write to solib FIFO (%d)\n", written);
 
 	free(p);
 
