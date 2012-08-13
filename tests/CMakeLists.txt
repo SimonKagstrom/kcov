@@ -28,6 +28,10 @@ set (shared_library_test_SRCS
 	shared-library/main.c
 )
 
+set (test_popen_SRCS
+	popen/test-popen.c
+)
+
 
 add_library(shared_library SHARED shared-library/solib.c)
 
@@ -49,6 +53,7 @@ add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
 add_executable(shared_library_test ${shared_library_test_SRCS})
 add_executable(argv_dependent ${argv_dependent_SRCS})
+add_executable(test_popen ${test_popen_SRCS})
 
 target_link_libraries(shared_library_test shared_library)
 
