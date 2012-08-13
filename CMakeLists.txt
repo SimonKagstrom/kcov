@@ -12,7 +12,7 @@ set (PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJEC
 
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE  Debug)
+  set (CMAKE_BUILD_TYPE  Release)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # ====================================
