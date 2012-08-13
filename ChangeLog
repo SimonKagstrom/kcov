@@ -1,4 +1,9 @@
 Kcov (11):
+	* Fix bug in shared library handling where repeated exec()s would
+	  cause strange hangs. Fixed by unsetting the KCOV_SOLIB_PATH environment
+	  variable after the first executable has been started.
+	  Add test-popen test case to check for this.
+
 	* Expand ~'s in the --include-path and --exclude-path options
 
 	* Unbreak accumulating data from multiple runs again (introduced
