@@ -90,3 +90,10 @@ accumulate-data
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/argv_dependent/cobertura.xml argv_dependent_c 5
     Should Contain    ${output}    1
+
+popen-test
+    ${no_kcov_rc}=    Run and return RC    ./test_popen
+    ${rc}=    Run and return RC
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${kcov} ${out} ./test_popen
+    Should Contain    ${output}    popen OK
