@@ -58,4 +58,6 @@ int main(int argc, const char *argv[])
 		}
 	}
 	printf("popen OK\n");
+
+	return 0;
 }
