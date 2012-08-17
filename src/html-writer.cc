@@ -289,8 +289,6 @@ private:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
-		setupCommonPaths();
-
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
 
@@ -352,6 +350,8 @@ private:
 			writeOne(file);
 		}
 		m_fileMutex.unlock();
+
+		setupCommonPaths();
 
 		writeIndex();
 

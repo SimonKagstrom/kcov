@@ -1,4 +1,6 @@
 Kcov (11):
+	* Fix handling of common paths in HTML writer
+
 	* Fix bug in shared library handling where repeated exec()s would
 	  cause strange hangs. Fixed by unsetting the KCOV_SOLIB_PATH environment
 	  variable after the first executable has been started.
