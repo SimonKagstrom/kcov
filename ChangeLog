@@ -11,7 +11,7 @@ Kcov (11):
 	* Unbreak accumulating data from multiple runs again (introduced
 	  sometime during refactoring), and add test case for this
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Aug 18 08:45:03 CEST 2012
 
 Kcov (10):
 	* Fix bug where multiple files with the same name would only be shown
