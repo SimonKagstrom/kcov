@@ -51,7 +51,7 @@ void  __attribute__((constructor))at_startup(void)
 	written = write(fd, p, sz);
 
 	if (written != sz)
-		fprintf(stderr, "kcov-solib: Can't write to solib FIFO (%d)\n", written);
+		fprintf(stderr, "kcov-solib: Can't write to solib FIFO (%zu)\n", written);
 
 	free(p);
 
