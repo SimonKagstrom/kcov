@@ -1,3 +1,5 @@
 *.o
 *~
+*.pyc
+*.pyo
 kcov
