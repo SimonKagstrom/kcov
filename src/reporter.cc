@@ -240,7 +240,7 @@ out:
 	}
 
 	/* Called during runtime */
-	void onBreakpoint(unsigned long addr)
+	void onAddress(unsigned long addr)
 	{
 		m_mutex.lock();
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);

@@ -10,7 +10,7 @@ namespace kcov
 		class IListener
 		{
 		public:
-			virtual void onBreakpoint(unsigned long addr) = 0;
+			virtual void onAddress(unsigned long addr) = 0;
 		};
 
 		static ICollector &create(IElf *elf);

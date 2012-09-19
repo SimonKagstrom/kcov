@@ -12,7 +12,7 @@ using namespace kcov;
 class MockCollectorListener : public ICollector::IListener
 {
 public:
-	MOCK_METHOD1(onBreakpoint, void(unsigned long addr));
+	MOCK_METHOD1(onAddress, void(unsigned long addr));
 };
 
 TEST(collector)
@@ -55,7 +55,7 @@ TEST(collector)
 	evOnce.type = ev_breakpoint;
 	evOnce.data = 1;
 
-	EXPECT_CALL(listener, onBreakpoint(1))
+	EXPECT_CALL(listener, onAddress(1))
 		.Times(Exactly(1))
 		;
 
