@@ -1,3 +1,5 @@
+namespace std { class type_info; }
+
 #include <reporter.hh>
 #include <elf.hh>
 #include <configuration.hh>

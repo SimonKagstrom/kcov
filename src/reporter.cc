@@ -149,8 +149,7 @@ public:
 				hits = line->possibleHits();
 
 			// Register all hits for this address
-			while (hits--)
-				line->registerHit(addr);
+			line->registerHit(addr, hits);
 		}
 		m_mutex.unlock();
 
@@ -240,7 +239,7 @@ out:
 	}
 
 	/* Called during runtime */
-	void onAddress(unsigned long addr)
+	void onAddress(unsigned long addr, unsigned long hits)
 	{
 		m_mutex.lock();
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
@@ -248,7 +247,7 @@ out:
 		if (it != m_addrToLine.end()) {
 			Line *line = it->second;
 
-			line->registerHit(addr);
+			line->registerHit(addr, hits);
 		}
 		m_mutex.unlock();
 	}
@@ -296,7 +295,7 @@ out:
 			m_addrs[addr] = 0;
 		}
 
-		unsigned int registerHit(unsigned long addr)
+		unsigned int registerHit(unsigned long addr, unsigned long hits)
 		{
 			unsigned int out = !m_addrs[addr];
 

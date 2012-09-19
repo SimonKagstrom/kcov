@@ -36,14 +36,15 @@ public:
 
 		// FIXME: Here are assumptions that won't hold...
 		unsigned addrs = sz / sizeof(uint32_t);
-		for (unsigned i = 0; i < addrs; i++) {
+		for (unsigned i = 0; i < addrs; i += 2) {
 			uint32_t addr = data[i];
+			uint32_t hits = data[i + 1];
 
 			// Report addresses
 			for (ListenerList_t::iterator it = m_listeners.begin();
 					it != m_listeners.end();
 					it++)
-				(*it)->onAddress(addr);
+				(*it)->onAddress(addr, hits);
 		}
 
 		free(data);

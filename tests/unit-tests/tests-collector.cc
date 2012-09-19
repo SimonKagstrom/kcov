@@ -12,7 +12,7 @@ using namespace kcov;
 class MockCollectorListener : public ICollector::IListener
 {
 public:
-	MOCK_METHOD1(onAddress, void(unsigned long addr));
+	MOCK_METHOD2(onAddress, void(unsigned long addr, unsigned long hits));
 };
 
 TEST(collector)
