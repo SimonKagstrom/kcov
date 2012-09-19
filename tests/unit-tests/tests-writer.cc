@@ -128,7 +128,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(res == true);
 	output.start();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
 	EXPECT_CALL(reporter, marshal(_))
 		.Times(AtLeast(1))
