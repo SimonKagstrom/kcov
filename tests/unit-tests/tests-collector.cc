@@ -55,7 +55,7 @@ TEST(collector)
 	evOnce.type = ev_breakpoint;
 	evOnce.data = 1;
 
-	EXPECT_CALL(listener, onAddress(1))
+	EXPECT_CALL(listener, onAddress(1, _))
 		.Times(Exactly(1))
 		;
 
