@@ -10,7 +10,7 @@ find_package (LibDwarf REQUIRED)
 # project name and version
 # ====================================
 project (kcov)
-set (TGT kcov)
+set (KCOV kcov)
 
 set (SOLIB kcov_sowrapper)
 
@@ -19,7 +19,7 @@ set (${SOLIB}_SRCS
 	solib-parser/lib.c
 	)
 
-set (${TGT}_SRCS
+set (${KCOV}_SRCS
     cobertura-writer.cc
     collector.cc
     configuration.cc
@@ -57,9 +57,9 @@ add_custom_command(
    )
 
 
-add_executable (${TGT} ${${TGT}_SRCS} library.c)
+add_executable (${KCOV} ${${KCOV}_SRCS} library.c)
 
-target_link_libraries(${TGT}
+target_link_libraries(${KCOV}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
