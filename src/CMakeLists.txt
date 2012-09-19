@@ -11,6 +11,7 @@ find_package (LibDwarf REQUIRED)
 # ====================================
 project (kcov)
 set (KCOV kcov)
+set (KCOV_PROFILER kcov-profiler)
 
 set (SOLIB kcov_sowrapper)
 
@@ -31,6 +32,20 @@ set (${KCOV}_SRCS
     ptrace.cc
     reporter.cc
     solib-parser/phdr_data.c
+    utils.cc
+    writer-base.cc
+    )
+
+set (${KCOV_PROFILER}_SRCS
+    cobertura-writer.cc
+    configuration.cc
+    elf.cc
+    filter.cc
+    html-writer.cc
+    output-handler.cc
+    profiler-collector.cc
+    profiler-main.cc
+    reporter.cc
     utils.cc
     writer-base.cc
     )
@@ -58,8 +73,15 @@ add_custom_command(
 
 
 add_executable (${KCOV} ${${KCOV}_SRCS} library.c)
+add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 
 target_link_libraries(${KCOV}
+	${LIBDWARF_LIBRARIES}
+	${LIBELF_LIBRARIES}
+	dl
+	pthread)
+
+target_link_libraries(${KCOV_PROFILER}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
