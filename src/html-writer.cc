@@ -313,6 +313,12 @@ private:
 					it++)
 				s = s + it->second;
 		}
+		else if (IConfiguration::getInstance().getSortType() == IConfiguration::REVERSE_PERCENTAGE) {
+			for (std::multimap<double, std::string>::iterator it = fileListByPercent.begin();
+					it != fileListByPercent.end();
+					it++)
+				s = it->second + s;
+		}
 		else if (IConfiguration::getInstance().getSortType() == IConfiguration::UNCOVERED_LINES) {
 			for (std::multimap<double, std::string>::iterator it = fileListByUncoveredLines.begin();
 					it != fileListByUncoveredLines.end();
