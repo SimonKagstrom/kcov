@@ -125,19 +125,33 @@ private:
 
 	void writeOne(File *file)
 	{
+		enum IConfiguration::OutputType type = IConfiguration::getInstance().getOutputType();
 		std::string outName = m_outDirectory + "/" + file->m_outFileName;
+		uint64_t nTotalExecutedAddresses = 0;
 		unsigned int nExecutedLines = 0;
 		unsigned int nCodeLines = 0;
 
 		std::string s =
 				"<pre class=\"source\">\n";
+		if (type == IConfiguration::OUTPUT_PROFILER) {
+			for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
+				IReporter::LineExecutionCount cnt =
+						m_reporter.getLineExecutionCount(file->m_name.c_str(), n);
+
+				nTotalExecutedAddresses += cnt.m_hits;
+			}
+		}
+
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
 			std::string line = file->m_lineMap[n];
 
 			s += "<span class=\"lineNum\">" + fmt("%5u", n) + "</span>";
 
 			if (!m_reporter.lineIsCode(file->m_name.c_str(), n)) {
-				s += "              : " + escapeHtml(line) + "</span>\n";
+				if (type == IConfiguration::OUTPUT_COVERAGE)
+					s += "              : " + escapeHtml(line) + "</span>\n";
+				else
+					s += "                : " + escapeHtml(line) + "</span>\n";
 				continue;
 			}
 
@@ -146,7 +160,10 @@ private:
 
 			std::string lineClass = "lineNoCov";
 
-			nExecutedLines += !!cnt.m_hits;
+			if (type == IConfiguration::OUTPUT_COVERAGE)
+				nExecutedLines += !!cnt.m_hits;
+			else
+				nExecutedLines += cnt.m_hits;
 			nCodeLines++;
 
 			if (cnt.m_hits == cnt.m_possibleHits)
@@ -154,10 +171,39 @@ private:
 			else if (cnt.m_hits)
 				lineClass = "linePartCov";
 
-			s += "<span class=\"" + lineClass + "\">    " +
-					fmt("%3u", cnt.m_hits) + "  / " + fmt("%3u", cnt.m_possibleHits) + ": " +
-					escapeHtml(line) +
-					"</span>\n";
+			if (type == IConfiguration::OUTPUT_COVERAGE) {
+				s += "<span class=\"" + lineClass + "\">    " +
+						fmt("%3u", cnt.m_hits) + "  / " + fmt("%3u", cnt.m_possibleHits) + ": " +
+						escapeHtml(line) +
+						"</span>\n";
+			} else {
+				double percentage = 0;
+
+				if (nTotalExecutedAddresses != 0)
+					percentage = ((double)cnt.m_hits / (double)nTotalExecutedAddresses) * 100;
+
+				unsigned int red = 21;
+				unsigned int green = 129;
+				unsigned int blue = 148;
+
+				if (percentage > 0 && percentage < 5) {
+					red = 71; green = 157; blue = 117;
+				} else if (percentage >= 5 && percentage < 15) {
+					red = 123; green = 195; blue = 73;
+				} else if (percentage >= 15 && percentage < 30) {
+					red = 209; green = 214; blue = 0;
+				} else if (percentage >= 30 && percentage < 45) {
+					red = 240; green = 151; blue = 0;
+				} else if (percentage >= 45) {
+					red = 252; green = 107; blue = 0;
+				}
+
+				s += "<span style=\"background-color:" + fmt("#%02x%02x%02x", red, green, blue) + "\">" +
+						fmt("%8u", cnt.m_hits) + " / " + fmt("%3u%%", (unsigned int)percentage) + " </span>: " +
+						"<span>" +
+						escapeHtml(line) +
+						"</span>\n";
+			}
 		}
 		s += "</pre>\n";
 
@@ -172,9 +218,11 @@ private:
 
 	void writeIndex()
 	{
-		std::string s;
+		enum IConfiguration::OutputType type = IConfiguration::getInstance().getOutputType();
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
+		uint64_t nTotalExecutedAddresses = 0;
+		std::string s;
 
 		std::multimap<double, std::string> fileListByPercent;
 		std::multimap<double, std::string> fileListByUncoveredLines;
@@ -182,6 +230,15 @@ private:
 		std::map<std::string, std::string> fileListByName;
 
 		m_fileMutex.lock();
+		if (type == IConfiguration::OUTPUT_PROFILER) {
+			for (FileMap_t::iterator it = m_files.begin();
+					it != m_files.end();
+					it++) {
+				File *file = it->second;
+
+				nTotalExecutedAddresses += file->m_executedLines;
+			}
+		}
 		for (FileMap_t::iterator it = m_files.begin();
 				it != m_files.end();
 				it++) {
@@ -190,11 +247,16 @@ private:
 			unsigned int nCodeLines = file->m_codeLines;
 			double percent = 0;
 
-			if (nCodeLines != 0)
-				percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
+			if (type == IConfiguration::OUTPUT_COVERAGE) {
+				if (nCodeLines != 0)
+					percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
 
-			nTotalCodeLines += nCodeLines;
-			nTotalExecutedLines += nExecutedLines;
+				nTotalCodeLines += nCodeLines;
+				nTotalExecutedLines += nExecutedLines;
+			} else {
+				// Profiler
+				percent = ((double)nExecutedLines / (double)nTotalExecutedAddresses) * 100;
+			}
 
 			std::string coverPer = strFromPercentage(percent);
 
@@ -226,9 +288,13 @@ private:
 				"      <td class=\"coverFile\"><a href=\"" + file->m_outFileName + "\" title=\"" + file->m_fileName + "\">" + listName + "</a></td>\n"
 				"      <td class=\"coverBar\" align=\"center\">\n"
 				"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">" + constructBar(percent) + "</td></tr></table>\n"
-				"      </td>\n"
-				"      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
+				"      </td>\n";
+			if (type == IConfiguration::OUTPUT_COVERAGE)
+				cur += "      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
 				"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", nExecutedLines) + "&nbsp;/&nbsp;" + fmt("%u", nCodeLines) + "&nbsp;lines</td>\n"
+				"    </tr>\n";
+			else
+				cur += "      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
 				"    </tr>\n";
 
 			fileListByName[file->m_name] = cur;
@@ -427,7 +493,10 @@ private:
 		std::string date(date_buf);
 		std::string instrumentedLines = fmt("%u", nCodeLines);
 		std::string lines = fmt("%u", nExecutedLines);
-		std::string covered = fmt("%.1f", percentage);
+		std::string covered = fmt("%.1f%%", percentage);
+
+		if (conf.getOutputType() == IConfiguration::OUTPUT_PROFILER)
+			covered = fmt("%u samples", nExecutedLines);
 
 		std::string commandStr = "";
 		if (includeCommand)
@@ -460,7 +529,7 @@ private:
 				"        </tr>\n"
 				"        <tr>\n"
 				"          <td class=\"headerItem\" width=\"20%\">Code&nbsp;covered:</td>\n"
-				"          <td class=\"coverPerLeft" + percentage_text + "\" width=\"15%\">" + covered + "%</td>\n"
+				"          <td class=\"coverPerLeft" + percentage_text + "\" width=\"15%\">" + covered + "</td>\n"
 				"          <td width=\"5%\"></td>\n"
 				"          <td class=\"headerItem\" width=\"20%\">Executed&nbsp;lines:</td>\n"
 				"          <td class=\"headerValue\" width=\"10%\">" + lines + "</td>\n"
