@@ -34,7 +34,7 @@ public:
 				" -p, --pid=PID          trace PID instead of executing in-file,\n"
 				"                        in-file is optional in this case\n"
 				" -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent],\n"
-				"                        u[ncovered-lines], l[ines]\n"
+				"                        r[everse-percent], u[ncovered-lines], l[ines]\n"
 				" -l, --limits=low,high  setup limits for low/high coverage (default %u,%u)\n"
 				" -t, --title=title      title for the coverage (default: filename)\n"
 				" --path-strip-level=num path levels to show for common paths (default: %u)\n"
@@ -124,6 +124,8 @@ public:
 			case 's':
 				if (*optarg == 'p' || *optarg == 'P')
 					m_sortType = PERCENTAGE;
+				else if (*optarg == 'r' || *optarg == 'R')
+					m_sortType = REVERSE_PERCENTAGE;
 				else if (*optarg == 'u' || *optarg == 'U')
 					m_sortType = UNCOVERED_LINES;
 				else if (*optarg == 'l' || *optarg == 'L')

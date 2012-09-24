@@ -11,6 +11,7 @@ namespace kcov
 		enum SortType
 		{
 			PERCENTAGE,
+			REVERSE_PERCENTAGE,
 			FILENAME,
 			FILE_LENGTH,
 			UNCOVERED_LINES
