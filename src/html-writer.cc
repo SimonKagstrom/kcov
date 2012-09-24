@@ -254,6 +254,9 @@ private:
 				nTotalCodeLines += nCodeLines;
 				nTotalExecutedLines += nExecutedLines;
 			} else {
+				if (nExecutedLines == 0)
+					continue;
+
 				// Profiler
 				percent = ((double)nExecutedLines / (double)nTotalExecutedAddresses) * 100;
 			}
