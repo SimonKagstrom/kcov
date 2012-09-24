@@ -32,6 +32,8 @@ int main(int argc, const char *argv[])
 	if (!conf.parse(argc, argv))
 		return 1;
 
+	conf.setOutputType(IConfiguration::OUTPUT_PROFILER);
+
 	std::string file = conf.getBinaryPath() + conf.getBinaryName();
 	IElf *elf = IElf::open(file.c_str());
 	if (!elf) {

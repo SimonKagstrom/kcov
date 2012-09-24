@@ -16,6 +16,12 @@ namespace kcov
 			UNCOVERED_LINES
 		};
 
+		enum OutputType
+		{
+			OUTPUT_COVERAGE,
+			OUTPUT_PROFILER
+		};
+
 		virtual ~IConfiguration() {}
 
 		virtual void printUsage() = 0;
@@ -45,6 +51,10 @@ namespace kcov
 		virtual std::map<unsigned int,std::string> &getOnlyIncludePath() = 0;
 
 		virtual std::map<unsigned int,std::string> &getExcludePath() = 0;
+
+		virtual enum OutputType getOutputType() = 0;
+
+		virtual void setOutputType(enum OutputType) = 0;
 
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
 

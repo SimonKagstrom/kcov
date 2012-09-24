@@ -22,6 +22,7 @@ public:
 		m_pathStripLevel = 2;
 		m_ptracePid = 0;
 		m_sortType = FILENAME;
+		m_outputType = OUTPUT_COVERAGE;
 	}
 
 	bool usage(void)
@@ -265,6 +266,17 @@ public:
 		return m_pathStripLevel;
 	}
 
+	enum OutputType getOutputType()
+	{
+		return m_outputType;
+	}
+
+	void setOutputType(enum OutputType type)
+	{
+		m_outputType = type;
+	}
+
+
 	// "private", but we ignore that in the unit test
 	typedef std::map<unsigned int, std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
@@ -356,6 +368,7 @@ public:
 	StrVecMap_t m_onlyIncludePattern;
 	StrVecMap_t m_excludePath;
 	StrVecMap_t m_onlyIncludePath;
+	enum OutputType m_outputType;
 };
 
 
