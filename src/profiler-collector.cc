@@ -35,7 +35,7 @@ public:
 		m_elf.parse();
 
 		// FIXME: Here are assumptions that won't hold...
-		unsigned addrs = sz / (sizeof(uint32_t) * 2);
+		unsigned addrs = sz / (sizeof(uint32_t));
 		for (unsigned i = 0; i < addrs; i += 2) {
 			uint32_t addr = data[i];
 			uint32_t hits = data[i + 1];
