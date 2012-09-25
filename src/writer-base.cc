@@ -73,8 +73,13 @@ void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long add
 	if (m_files.find(std::string(file)) != m_files.end())
 		goto out;
 
-	if (!file_exists(file))
+	if (m_nonExistingFiles.find(std::string(file)) != m_nonExistingFiles.end())
 		goto out;
+
+	if (!file_exists(file)) {
+		m_nonExistingFiles[std::string(file)] = NULL;
+		goto out;
+	}
 
 	m_files[std::string(file)] = new File(file);
 

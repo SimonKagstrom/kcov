@@ -61,6 +61,7 @@ namespace kcov
 		IElf &m_elf;
 		IReporter &m_reporter;
 		FileMap_t m_files;
+		FileMap_t m_nonExistingFiles;
 		std::mutex m_fileMutex;
 		std::string m_commonPath;
 	};
