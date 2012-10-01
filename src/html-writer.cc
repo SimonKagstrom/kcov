@@ -411,6 +411,7 @@ private:
 		s = getHeader(nTotalCodeLines, nTotalExecutedLines, false) + getIndexHeader() + s + getFooter(NULL);
 
 		write_file((void *)s.c_str(), s.size(), (m_indexDirectory + "index.html").c_str());
+		closedir(dir);
 	}
 
 
