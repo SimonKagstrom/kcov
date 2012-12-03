@@ -1,3 +1,21 @@
+Kcov (12):
+	* Some build fixes to make it build with clang++
+
+	* Fix various warnings
+
+	* Add experimental profiler based on kcov
+
+	* Add sorting by reverse-percent (high -> low, -u option)
+
+	* Cache non-existing files to avoid doing lstat calls all the
+	  time (slight performance improvement)
+
+	* closedir() was not called from the html-writer, which creates
+	  a resource leak (Karl Vogel)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	
+
 Kcov (11):
 	* Fix handling of common paths in HTML writer
 
