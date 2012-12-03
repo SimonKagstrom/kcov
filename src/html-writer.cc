@@ -109,8 +109,7 @@ class HtmlWriter : public WriterBase
 {
 public:
 	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
-		WriterBase(elf, reporter, output),
-		m_stop(false)
+		WriterBase(elf, reporter, output)
 	{
 		m_indexDirectory = output.getBaseDirectory();
 		m_outDirectory = output.getOutDirectory();
@@ -646,7 +645,6 @@ private:
 	}
 
 
-	bool m_stop;
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
 	std::string m_summaryDbFileName;
