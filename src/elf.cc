@@ -28,10 +28,10 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
-class Elf : public IElf
+class ElfInstance : public IElf
 {
 public:
-	Elf() : m_filter(IFilter::getInstance())
+	ElfInstance() : m_filter(IFilter::getInstance())
 	{
 		m_elf = NULL;
 		m_filename = NULL;
@@ -39,7 +39,7 @@ public:
 		m_elfIs32Bit = true;
 		m_isMainFile = true;
 	}
-	virtual ~Elf()
+	virtual ~ElfInstance()
 	{
 		free((void *)m_filename);
 	}
@@ -72,7 +72,7 @@ public:
 
 	bool checkFile()
 	{
-		Elf *elf;
+		struct Elf *elf;
 		bool out = true;
 		int fd;
 
@@ -392,7 +392,7 @@ private:
 	SegmentList_t m_executableSegments;
 	IFilter &m_filter;
 
-	Elf *m_elf;
+	struct Elf *m_elf;
 	bool m_elfIs32Bit;
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
@@ -401,7 +401,7 @@ private:
 	uint64_t m_checksum;
 };
 
-static Elf *g_instance;
+static ElfInstance *g_instance;
 IElf *IElf::open(const char *filename)
 {
 	static bool initialized = false;
@@ -412,7 +412,7 @@ IElf *IElf::open(const char *filename)
 		initialized = true;
 	}
 
-	g_instance = new Elf();
+	g_instance = new ElfInstance();
 
 	if (g_instance->addFile(filename) == false) {
 		delete g_instance;
