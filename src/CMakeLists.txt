@@ -78,12 +78,14 @@ add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 target_link_libraries(${KCOV}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
+	stdc++
 	dl
 	pthread)
 
 target_link_libraries(${KCOV_PROFILER}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
+	stdc++
 	dl
 	pthread)
 
