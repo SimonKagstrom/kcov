@@ -54,7 +54,8 @@ namespace kcov
 		virtual std::map<unsigned int,std::string> &getExcludePath() = 0;
 
 		virtual enum OutputType getOutputType() = 0;
-
+		virtual const std::string& getNewPathPrefix() = 0;
+		virtual const std::string& getOriginalPathPrefix() = 0;
 		virtual void setOutputType(enum OutputType) = 0;
 
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;

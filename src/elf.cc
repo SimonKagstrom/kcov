@@ -14,7 +14,7 @@
 #include <map>
 #include <list>
 #include <string>
-
+#include <configuration.hh>
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
@@ -38,6 +38,10 @@ public:
 		m_checksum = 0;
 		m_elfIs32Bit = true;
 		m_isMainFile = true;
+		/******* Swap debug source root with runtime source root *****/
+		origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
+		newRoot  = IConfiguration::getInstance().getNewPathPrefix();
+		
 	}
 	virtual ~ElfInstance()
 	{
@@ -211,12 +215,26 @@ out_open:
 					if (line_source[0] != '/')
 						file_path = full_file_path;
 
-					char *rp = ::realpath(file_path, NULL);
+					/******** replace the path information found in the debug symbols with *********/
+					/******** the value from in the newRoot variable.         *********/
+					char *rp = 0;
+					if (origRoot.length() > 0 && newRoot.length() > 0) {
+ 					  std::string dwarfPath = file_path;
+					  size_t dwIndex = dwarfPath.find(origRoot);
+					  if (dwIndex != std::string::npos) {
+					    dwarfPath.replace(dwIndex, origRoot.length(), newRoot);
+					    rp = ::realpath(dwarfPath.c_str(), NULL);
 
+					  }
+					}
+					else {
+					  rp = ::realpath(file_path, NULL);
+					}
 					if (rp)
 					{
 						free((void *)full_file_path);
 						file_path = full_file_path = rp;
+
 					}
 
 					if (m_filter.runFilters(file_path) == true)
@@ -399,6 +417,10 @@ private:
 	const char *m_filename;
 	bool m_isMainFile;
 	uint64_t m_checksum;
+        /***** Add strings to update path information. *******/
+	std::string origRoot;
+	std::string newRoot;
+
 };
 
 static ElfInstance *g_instance;
