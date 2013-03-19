@@ -295,14 +295,16 @@ public:
 		return m_outputType;
 	}
 
-        const std::string& getOriginalPathPrefix()
-        {
-	  return m_originalPathPrefix;
+	const std::string& getOriginalPathPrefix()
+	{
+		return m_originalPathPrefix;
 	}
-        const std::string& getNewPathPrefix()
-        {
-	  return m_newPathPrefix;
+
+	const std::string& getNewPathPrefix()
+	{
+		return m_newPathPrefix;
 	}
+
 	void setOutputType(enum OutputType type)
 	{
 		m_outputType = type;
