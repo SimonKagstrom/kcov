@@ -125,8 +125,10 @@ public:
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
 
-		if (file_exists(kcov_solib_path.c_str()))
-			putenv(m_ldPreloadString);
+		if (IConfiguration::getInstance().getParseSolibs()) {
+			if (file_exists(kcov_solib_path.c_str()))
+				putenv(m_ldPreloadString);
+		}
 		putenv(m_envString);
 
 		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);

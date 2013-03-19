@@ -58,6 +58,8 @@ namespace kcov
 		virtual const std::string& getOriginalPathPrefix() = 0;
 		virtual void setOutputType(enum OutputType) = 0;
 
+		virtual bool getParseSolibs() = 0;
+
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
 
 

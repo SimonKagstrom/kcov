@@ -25,6 +25,7 @@ public:
 		m_outputType = OUTPUT_COVERAGE;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
+		m_parseSolibs = true;
 	}
 
 	bool usage(void)
@@ -40,6 +41,7 @@ public:
 				" -l, --limits=low,high  setup limits for low/high coverage (default %u,%u)\n"
 				" -t, --title=title      title for the coverage (default: filename)\n"
 				" --path-strip-level=num path levels to show for common paths (default: %u)\n"
+				" --skip-solibs          don't parse shared libraries (default: parse solibs)\n"
 				" --include-path=path    comma-separated paths to include in the report\n"
 				" --exclude-path=path    comma-separated paths to exclude from the report\n"
 				" --include-pattern=pat  comma-separated path patterns to include in the report\n"
@@ -71,6 +73,7 @@ public:
 				{"limits", required_argument, 0, 'l'},
 				{"title", required_argument, 0, 't'},
 				{"path-strip-level", required_argument, 0, 'S'},
+				{"skip-solibs", no_argument, 0, 'L'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -121,6 +124,9 @@ public:
 				break;
 			case 'h':
 				return usage();
+			case 'L':
+				m_parseSolibs = false;
+				break;
 			case 'p':
 				if (!isInteger(std::string(optarg)))
 					return usage();
@@ -305,6 +311,11 @@ public:
 		return m_newPathPrefix;
 	}
 
+	bool getParseSolibs()
+	{
+		return m_parseSolibs;
+	}
+
 	void setOutputType(enum OutputType type)
 	{
 		m_outputType = type;
@@ -400,6 +411,7 @@ public:
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
+	bool m_parseSolibs;
 	StrVecMap_t m_excludePattern;
 	StrVecMap_t m_onlyIncludePattern;
 	StrVecMap_t m_excludePath;
