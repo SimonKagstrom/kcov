@@ -1,6 +1,6 @@
 #include <configuration.hh>
 #include <utils.hh>
-
+#include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
 #include <map>
@@ -23,6 +23,8 @@ public:
 		m_ptracePid = 0;
 		m_sortType = FILENAME;
 		m_outputType = OUTPUT_COVERAGE;
+		m_originalPathPrefix="";
+		m_newPathPrefix="";
 	}
 
 	bool usage(void)
@@ -42,6 +44,8 @@ public:
 				" --exclude-path=path    comma-separated paths to exclude from the report\n"
 				" --include-pattern=pat  comma-separated path patterns to include in the report\n"
 				" --exclude-pattern=pat  comma-separated path patterns to exclude from the report\n"
+				" --original-path=path   the original source path to search derived from the binary.\n"
+		                " --new-path=path        the new source path to search for the source code.\n"
 				"\n"
 				"Examples:\n"
 				"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
@@ -72,6 +76,8 @@ public:
 				{"exclude-path", required_argument, 0, 'X'},
 				{"include-path", required_argument, 0, 'I'},
 				{"debug", required_argument, 0, 'D'},
+				{"original-path", required_argument, 0, 'O'},
+				{"new-path", required_argument, 0, 'N'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -175,6 +181,22 @@ public:
 				m_highLimit = stoul(vec[1]);
 				break;
 			}
+			case 'O': {
+			  m_originalPathPrefix = std::string(optarg);
+			  break;
+			}
+			case 'N': {
+			  m_newPathPrefix = std::string(optarg);
+			  char* rp = ::realpath(m_newPathPrefix.c_str(), NULL);
+			  if (rp) {
+			    free((void*) rp);
+			  }
+			  else {
+			    error("%s is not a valid path.\n", m_newPathPrefix.c_str());
+			  }
+			  
+			  break;
+			}
 			default:
 				error("Unrecognized option: -%c\n", optopt);
 				return usage();
@@ -273,6 +295,14 @@ public:
 		return m_outputType;
 	}
 
+        const std::string& getOriginalPathPrefix()
+        {
+	  return m_originalPathPrefix;
+	}
+        const std::string& getNewPathPrefix()
+        {
+	  return m_newPathPrefix;
+	}
 	void setOutputType(enum OutputType type)
 	{
 		m_outputType = type;
@@ -366,6 +396,8 @@ public:
 	std::string m_binaryPath;
 	const char **m_programArgs;
 	std::string m_title;
+	std::string m_originalPathPrefix;
+	std::string m_newPathPrefix;
 	StrVecMap_t m_excludePattern;
 	StrVecMap_t m_onlyIncludePattern;
 	StrVecMap_t m_excludePath;
