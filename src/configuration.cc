@@ -7,7 +7,7 @@
 #include <list>
 #include <string>
 #include <stdexcept>
-
+#include <iostream>
 using namespace kcov;
 
 class Configuration : public IConfiguration
@@ -33,21 +33,22 @@ public:
 		printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
 				"\n"
 				"Where [OPTIONS] are\n"
-				" -h, --help             this text\n"
-				" -p, --pid=PID          trace PID instead of executing in-file,\n"
-				"                        in-file is optional in this case\n"
-				" -s, --sort-type=type   how to sort files: f[ilename] (default), p[ercent],\n"
-				"                        r[everse-percent], u[ncovered-lines], l[ines]\n"
-				" -l, --limits=low,high  setup limits for low/high coverage (default %u,%u)\n"
-				" -t, --title=title      title for the coverage (default: filename)\n"
-				" --path-strip-level=num path levels to show for common paths (default: %u)\n"
-				" --skip-solibs          don't parse shared libraries (default: parse solibs)\n"
-				" --include-path=path    comma-separated paths to include in the report\n"
-				" --exclude-path=path    comma-separated paths to exclude from the report\n"
-				" --include-pattern=pat  comma-separated path patterns to include in the report\n"
-				" --exclude-pattern=pat  comma-separated path patterns to exclude from the report\n"
-				" --original-path=path   the original source path to search derived from the binary.\n"
-		                " --new-path=path        the new source path to search for the source code.\n"
+				" -h, --help              this text\n"
+				" -p, --pid=PID           trace PID instead of executing in-file,\n"
+				"                         in-file is optional in this case\n"
+				" -s, --sort-type=type    how to sort files: f[ilename] (default), p[ercent],\n"
+				"                         r[everse-percent], u[ncovered-lines], l[ines]\n"
+				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
+				" -t, --title=title       title for the coverage (default: filename)\n"
+				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
+				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
+				" --include-path=path     comma-separated paths to include in the report\n"
+				" --exclude-path=path     comma-separated paths to exclude from the report\n"
+				" --include-pattern=pat   comma-separated path patterns to include in the report\n"
+				" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
+				"                         report\n"
+				" --replace-src-path=path replace the string found before the : with the string \n"
+				"                         found after the :\n"
 				"\n"
 				"Examples:\n"
 				"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
@@ -79,8 +80,7 @@ public:
 				{"exclude-path", required_argument, 0, 'X'},
 				{"include-path", required_argument, 0, 'I'},
 				{"debug", required_argument, 0, 'D'},
-				{"original-path", required_argument, 0, 'O'},
-				{"new-path", required_argument, 0, 'N'},
+				{"replace-src-path", required_argument, 0, 'R'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -187,20 +187,30 @@ public:
 				m_highLimit = stoul(vec[1]);
 				break;
 			}
-			case 'O': {
-			  m_originalPathPrefix = std::string(optarg);
-			  break;
-			}
-			case 'N': {
-			  m_newPathPrefix = std::string(optarg);
-			  char* rp = ::realpath(m_newPathPrefix.c_str(), NULL);
-			  if (rp) {
-			    free((void*) rp);
+			case 'R': {
+			  std::string tmpArg = std::string(optarg);
+			  size_t tokenPosFront = tmpArg.find_first_of(":");
+			  size_t tokenPosBack  = tmpArg.find_last_of(":");
+
+			  if ((tokenPosFront != std::string::npos) && 
+			      (tokenPosFront == tokenPosBack)) {
+
+			    m_originalPathPrefix = tmpArg.substr(0, tokenPosFront);
+			    m_newPathPrefix = tmpArg.substr(tokenPosFront + 1);
+			    
+			    char* rp = ::realpath(m_newPathPrefix.c_str(), NULL);
+			    if (rp) {
+			      free((void*) rp);
+			    }
+			    else {
+			      error("%s is not a valid path.\n", m_newPathPrefix.c_str());
+			    }
+			    
 			  }
 			  else {
-			    error("%s is not a valid path.\n", m_newPathPrefix.c_str());
+			    error("%s is formatted incorrectly\n", tmpArg.c_str());
+			    
 			  }
-			  
 			  break;
 			}
 			default:
