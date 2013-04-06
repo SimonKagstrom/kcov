@@ -80,13 +80,15 @@ target_link_libraries(${KCOV}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
-	pthread)
+	pthread
+	z)
 
 target_link_libraries(${KCOV_PROFILER}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
-	pthread)
+	pthread
+	z)
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
