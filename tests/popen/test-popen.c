@@ -27,7 +27,7 @@ int test_popen(void)
 		data = realloc(data, alloc_sz);
 		if (!data)
 		{
-			fprintf(stderr, "realloc %u failed\n", alloc_sz);
+			fprintf(stderr, "realloc %zu failed\n", alloc_sz);
 			break;
 		}
 
