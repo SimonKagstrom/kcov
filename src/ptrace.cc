@@ -327,6 +327,15 @@ public:
 			if (WIFSIGNALED(status) || WIFEXITED(status)) {
 				m_children.erase(who);
 
+				if (IConfiguration::getInstance().getExitFirstProcess() && who == m_firstChild) {
+					IConfiguration &conf = IConfiguration::getInstance();
+					std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
+
+					std::string exitCode = fmt("%u", WEXITSTATUS(status));
+
+					write_file(exitCode.c_str(), exitCode.size(), "%s", fifoName.c_str());
+				}
+
 				if (m_children.size() == 0) {
 					Event tmp = continueExecution();
 
@@ -414,7 +423,7 @@ private:
 			perror("fork");
 			return false;
 		}
-		m_child = m_activeChild = child;
+		m_child = m_activeChild = m_firstChild = child;
 		// Might not be completely necessary (the child should inherit this
 		// from the parent), but better safe than sorry
 		kcov_tie_process_to_cpu(m_child, m_parentCpu);
@@ -438,7 +447,7 @@ private:
 
 	bool attachPid(pid_t pid)
 	{
-		m_activeChild = pid;
+		m_child = m_activeChild = m_firstChild = pid;
 
 		errno = 0;
 		ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
@@ -516,6 +525,7 @@ private:
 
 	pid_t m_activeChild;
 	pid_t m_child;
+	pid_t m_firstChild;
 	ChildMap_t m_children;
 
 	bool m_solibValid;
