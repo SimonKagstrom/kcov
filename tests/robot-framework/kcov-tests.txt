@@ -97,3 +97,10 @@ popen-test
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${kcov} ${out} ./test_popen
     Should Contain    ${output}    popen OK
+
+global-constructors-test
+    ${no_kcov_rc}=    Run and return RC    ./global-constructors
+    ${rc}=    Run and return RC    ${kcov} ${out} ./global-constructors
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/global-constructors/cobertura.xml test_global_ctors_cc 4
+    Should Contain    ${output}    1
