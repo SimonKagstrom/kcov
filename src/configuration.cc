@@ -26,6 +26,7 @@ public:
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
 		m_parseSolibs = true;
+		m_exitFirstProcess = false;
 	}
 
 	bool usage(void)
@@ -42,6 +43,8 @@ public:
 				" -t, --title=title       title for the coverage (default: filename)\n"
 				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
+				" --exit-first-process    exit when the first process exits, i.e., honor the"
+				"                         behavior of daemons (default: wait until last)\n"
 				" --include-path=path     comma-separated paths to include in the report\n"
 				" --exclude-path=path     comma-separated paths to exclude from the report\n"
 				" --include-pattern=pat   comma-separated path patterns to include in the report\n"
@@ -75,6 +78,7 @@ public:
 				{"title", required_argument, 0, 't'},
 				{"path-strip-level", required_argument, 0, 'S'},
 				{"skip-solibs", no_argument, 0, 'L'},
+				{"exit-first-process", no_argument, 0, 'F'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -126,6 +130,9 @@ public:
 				return usage();
 			case 'L':
 				m_parseSolibs = false;
+				break;
+			case 'F':
+				m_exitFirstProcess = true;
 				break;
 			case 'p':
 				if (!isInteger(std::string(optarg)))
@@ -326,6 +333,11 @@ public:
 		return m_parseSolibs;
 	}
 
+	bool getExitFirstProcess()
+	{
+		return m_exitFirstProcess;
+	}
+
 	void setOutputType(enum OutputType type)
 	{
 		m_outputType = type;
@@ -422,6 +434,7 @@ public:
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
 	bool m_parseSolibs;
+	bool m_exitFirstProcess;
 	StrVecMap_t m_excludePattern;
 	StrVecMap_t m_onlyIncludePattern;
 	StrVecMap_t m_excludePath;

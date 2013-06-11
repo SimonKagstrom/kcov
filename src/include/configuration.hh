@@ -60,6 +60,8 @@ namespace kcov
 
 		virtual bool getParseSolibs() = 0;
 
+		virtual bool getExitFirstProcess() = 0;
+
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
 
 
