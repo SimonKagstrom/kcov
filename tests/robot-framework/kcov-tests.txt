@@ -104,3 +104,24 @@ global-constructors-test
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/global-constructors/cobertura.xml test_global_ctors_cc 4
     Should Contain    ${output}    1
+
+daemon-wait-for-last-child-test
+	Run                            rm -rf ${out}/test_daemon
+    ${no_kcov_rc}=    Run and return RC    ./test_daemon
+    Should be equal as integers    ${no_kcov_rc}    2
+    ${rc}=    Run and return RC    ${kcov} ${out} ./test_daemon
+    Should be equal as integers    ${rc}    4
+    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
+    Should Contain    ${output}    1
+    
+daemon-no-wait-for-last-child-test
+	Run                            rm -rf ${out}/test_daemon/cobertura.xml
+    ${no_kcov_rc}=    Run and return RC    ./test_daemon
+    ${rc}=    Run and return RC    ${kcov} --exit-first-process ${out} ./test_daemon
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
+    Should Contain    ${output}    0
+    Run                            sleep 5
+    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
+    Should Contain    ${output}    1
+    
