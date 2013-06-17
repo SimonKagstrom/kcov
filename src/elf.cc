@@ -63,6 +63,8 @@ public:
 		free((void *)m_filename);
 		m_filename = strdup(filename);
 
+		m_buildId.clear();
+
 		m_curSegments.clear();
 		m_executableSegments.clear();
 		for (uint32_t i = 0; data && i < data->n_segments; i++) {
@@ -144,6 +146,25 @@ out_open:
 
 		/* Initialize libdwarf */
 		dbg = dwarf_begin(fd, DWARF_C_READ);
+
+		if (!dbg && m_buildId.length() > 0) {
+			/* Look for separate debug info */
+			std::string debug_file = std::string("/usr/lib/debug/.build-id/" +
+							     m_buildId.substr(0,2) +
+							     "/" +
+							     m_buildId.substr(2, std::string::npos) +
+							     ".debug");
+
+			close(fd);
+			fd = ::open(debug_file.c_str(), O_RDONLY, 0);
+			if (fd < 0) {
+				error("Cannot open %s\n", debug_file.c_str());
+				return false;
+			}
+
+			dbg = dwarf_begin(fd, DWARF_C_READ);
+		}
+
 		if (!dbg) {
 			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename);
 			close(fd);
@@ -269,6 +290,7 @@ out_err:
 		size_t sz;
 		char *raw;
 		int fd;
+		unsigned int i;
 
 		fd = ::open(m_filename, O_RDONLY, 0);
 		if (fd < 0) {
@@ -294,15 +316,21 @@ out_err:
 		setupSegments = m_curSegments.size() == 0;
 		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
 		{
+			uint64_t sh_type;
 			uint64_t sh_addr;
 			uint64_t sh_size;
 			uint64_t sh_flags;
 			uint64_t sh_name;
+			uint64_t n_namesz;
+			uint64_t n_descsz;
+			uint64_t n_type;
+			char *n_data;
 			char *name;
 
 			if (m_elfIs32Bit) {
 				Elf32_Shdr *shdr32 = elf32_getshdr(scn);
 
+				sh_type = shdr32->sh_type;
 				sh_addr = shdr32->sh_addr;
 				sh_size = shdr32->sh_size;
 				sh_flags = shdr32->sh_flags;
@@ -310,6 +338,7 @@ out_err:
 			} else {
 				Elf64_Shdr *shdr64 = elf64_getshdr(scn);
 
+				sh_type = shdr64->sh_type;
 				sh_addr = shdr64->sh_addr;
 				sh_size = shdr64->sh_size;
 				sh_flags = shdr64->sh_flags;
@@ -323,6 +352,36 @@ out_err:
 					error("elf_getdata failed on section %s in %s\n",
 							name, m_filename);
 					goto out_elf_begin;
+			}
+
+			if (sh_type == SHT_NOTE) {
+				if (m_elfIs32Bit) {
+					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
+
+					n_namesz = nhdr32->n_namesz;
+					n_descsz = nhdr32->n_descsz;
+					n_type = nhdr32->n_type;
+					n_data = (char *)data->d_buf + sizeof (Elf32_Nhdr);
+				} else {
+					Elf64_Nhdr *nhdr64 = (Elf64_Nhdr *)data->d_buf;
+
+					n_namesz = nhdr64->n_namesz;
+					n_descsz = nhdr64->n_descsz;
+					n_type = nhdr64->n_type;
+					n_data = (char *)data->d_buf + sizeof (Elf64_Nhdr);
+				}
+
+				if (::strcmp(n_data, ELF_NOTE_GNU) == 0 &&
+				    n_type == NT_GNU_BUILD_ID) {
+					const char *hex_digits = "0123456789abcdef";
+					unsigned char *build_id;
+
+					build_id = (unsigned char *)n_data + n_namesz;
+					for (i = 0; i < n_descsz; i++) {
+						m_buildId.push_back(hex_digits[(build_id[i] >> 4) & 0xf]);
+						m_buildId.push_back(hex_digits[(build_id[i] >> 0) & 0xf]);
+					}
+				}
 			}
 
 			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) != (SHF_EXECINSTR | SHF_ALLOC))
@@ -415,6 +474,7 @@ private:
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
 	const char *m_filename;
+	std::string m_buildId;
 	bool m_isMainFile;
 	uint64_t m_checksum;
         /***** Add strings to update path information. *******/
