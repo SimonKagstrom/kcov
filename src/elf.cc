@@ -158,7 +158,9 @@ out_open:
 			close(fd);
 			fd = ::open(debug_file.c_str(), O_RDONLY, 0);
 			if (fd < 0) {
-				error("Cannot open %s\n", debug_file.c_str());
+				// Some shared libraries have neither symbols nor build-id files
+				if (m_isMainFile)
+					error("Cannot open %s\n", debug_file.c_str());
 				return false;
 			}
 
