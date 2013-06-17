@@ -1,4 +1,19 @@
 Kcov (12):
+	* Add support for looking for debug info in separate files
+	  via build-id (Alexander Larsson)
+
+	* Add --exit-first-process option to fork kcov when covering
+	  daemons (otherwise kcov will wait for all children to finish)
+
+	* Add --skip-solibs option to disable processing of shared
+	  libraries, which also works around a bug which sometimes
+	  triggers 
+
+	* Add --replace-source-path option for cases where the sources
+	  have been moved (James Warner)
+
+	* Fix linking (Igor Murzov) 
+
 	* Some build fixes to make it build with clang++
 
 	* Fix various warnings
