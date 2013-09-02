@@ -43,7 +43,7 @@ public:
 				" -t, --title=title       title for the coverage (default: filename)\n"
 				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
-				" --exit-first-process    exit when the first process exits, i.e., honor the"
+				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
 				" --include-path=path     comma-separated paths to include in the report\n"
 				" --exclude-path=path     comma-separated paths to exclude from the report\n"
