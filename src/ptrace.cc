@@ -76,21 +76,6 @@ public:
 		return true;
 	}
 
-	bool readProcessMemory(uint8_t *dst, void *start, size_t bytes)
-	{
-		panic_if (bytes != sizeof(unsigned long),
-				"Can only read a word at a time now");
-
-		panic_if ((unsigned long)start & (sizeof(unsigned long) - 1),
-				"Address must be aligned");
-
-		unsigned long data = ptrace(PTRACE_PEEKTEXT, m_activeChild, start, 0);
-		memcpy(dst, &data, bytes);
-
-		return true;
-	}
-
-
 	bool start(const char *executable)
 	{
 		m_breakpointToAddrMap.clear();
