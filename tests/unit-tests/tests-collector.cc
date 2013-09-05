@@ -31,7 +31,7 @@ TEST(collector)
 
 	collector.registerListener(listener);
 
-	EXPECT_CALL(engine, setBreakpoint(_))
+	EXPECT_CALL(engine, registerBreakpoint(_))
 		.Times(AtLeast(1))
 		;
 

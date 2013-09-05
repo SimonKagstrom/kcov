@@ -31,6 +31,7 @@ public:
 
 		// This will set all breakpoints
 		m_elf.parse();
+		m_engine.setupAllBreakpoints();
 
 		while (1) {
 			IEngine::Event ev;
@@ -81,7 +82,7 @@ private:
 		if (addr == 0)
 			return;
 
-		m_engine.setBreakpoint(addr);
+		m_engine.registerBreakpoint(addr);
 		m_addrs[addr]++;
 	}
 

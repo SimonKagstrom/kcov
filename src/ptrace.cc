@@ -144,7 +144,7 @@ public:
 		return res;
 	}
 
-	int setBreakpoint(unsigned long addr)
+	int registerBreakpoint(unsigned long addr)
 	{
 		uint8_t data;
 		int id;
@@ -161,14 +161,28 @@ public:
 		m_breakpointToAddrMap[id] = addr;
 		m_addrToBreakpointMap[addr] = id;
 		m_instructionMap[addr] = data;
+		m_pendingBreakpoints.push_back(addr);
 
-		kcov_debug(BP_MSG, "BP set at 0x%lx\n", addr);
-
-		// Set the breakpoint
-		writeByte(m_activeChild, addr, 0xcc);
+		kcov_debug(BP_MSG, "BP registered at 0x%lx\n", addr);
 
 		return id;
 	}
+
+	void setupAllBreakpoints()
+	{
+		for (PendingBreakpointList_t::iterator it = m_pendingBreakpoints.begin();
+				it != m_pendingBreakpoints.end();
+				++it) {
+			unsigned long addr = *it;
+
+			// Set the breakpoint
+			writeByte(m_activeChild, addr, 0xcc);
+		}
+
+		m_pendingBreakpoints.clear();
+	}
+
+
 
 	void clearAllBreakpoints()
 	{
@@ -243,6 +257,8 @@ public:
 
 			elf.addFile(cur->name, cur);
 			elf.parse();
+
+			setupAllBreakpoints();
 		}
 
 		m_solibValid = true;
@@ -515,6 +531,7 @@ private:
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
 	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
 	typedef std::unordered_map<unsigned long, uint8_t> instructionMap_t;
+	typedef std::list<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
 
 	int m_breakpointId;
@@ -522,6 +539,7 @@ private:
 	instructionMap_t m_instructionMap;
 	breakpointToAddrMap_t m_breakpointToAddrMap;
 	addrToBreakpointMap_t m_addrToBreakpointMap;
+	PendingBreakpointList_t m_pendingBreakpoints;
 
 	pid_t m_activeChild;
 	pid_t m_child;

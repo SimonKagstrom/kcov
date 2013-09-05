@@ -39,7 +39,9 @@ namespace kcov
 		 *
 		 * @return the ID of the breakpoint, or -1 on failure
 		 */
-		virtual int setBreakpoint(unsigned long addr) = 0;
+		virtual int registerBreakpoint(unsigned long addr) = 0;
+
+		virtual void setupAllBreakpoints() = 0;
 
 		virtual bool clearBreakpoint(int id) = 0;
 
