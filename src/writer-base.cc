@@ -68,23 +68,18 @@ void WriterBase::File::readFile(const char *filename)
 
 void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long addr)
 {
-	m_fileMutex.lock();
-
 	if (m_files.find(std::string(file)) != m_files.end())
-		goto out;
+		return;
 
 	if (m_nonExistingFiles.find(std::string(file)) != m_nonExistingFiles.end())
-		goto out;
+		return;
 
 	if (!file_exists(file)) {
 		m_nonExistingFiles[std::string(file)] = NULL;
-		goto out;
+		return;
 	}
 
 	m_files[std::string(file)] = new File(file);
-
-out:
-	m_fileMutex.unlock();
 }
 
 
@@ -123,7 +118,6 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 
 void WriterBase::setupCommonPaths()
 {
-	m_fileMutex.lock();
 	for (FileMap_t::iterator it = m_files.begin();
 			it != m_files.end();
 			it++) {
@@ -146,11 +140,8 @@ void WriterBase::setupCommonPaths()
 				break;
 		}
 	}
-	m_fileMutex.unlock();
 }
 
 void WriterBase::stop()
 {
-	// Called from the main process, which must release this on stop.
-	m_fileMutex.unlock();
 }

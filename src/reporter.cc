@@ -7,7 +7,6 @@
 #include <string>
 #include <list>
 #include <unordered_map>
-#include <mutex>
 
 using namespace kcov;
 
@@ -35,9 +34,7 @@ public:
 	{
 		bool out;
 
-		m_mutex.lock();
 		out =  m_lines.find(LineId(file, lineNr)) != m_lines.end();
-		m_mutex.unlock();
 
 		return out;
 	}
@@ -47,7 +44,6 @@ public:
 		unsigned int hits = 0;
 		unsigned int possibleHits = 0;
 
-		m_mutex.lock();
 		LineMap_t::iterator it = m_lines.find(LineId(file, lineNr));
 
 		if (it != m_lines.end()) {
@@ -56,7 +52,6 @@ public:
 			hits = line->hits();
 			possibleHits = line->possibleHits();
 		}
-		m_mutex.unlock();
 
 		return LineExecutionCount(hits,
 				possibleHits);
@@ -67,7 +62,6 @@ public:
 		unsigned int executedLines = 0;
 		unsigned int nrLines = 0;
 
-		m_mutex.lock();
 		for (LineMap_t::iterator it = m_lines.begin();
 				it != m_lines.end();
 				it++) {
@@ -79,7 +73,6 @@ public:
 			executedLines += !!cur->hits();
 			nrLines++;
 		}
-		m_mutex.unlock();
 
 		return ExecutionSummary(nrLines, executedLines);
 	}
@@ -96,7 +89,6 @@ public:
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
-		m_mutex.lock();
 		for (LineMap_t::iterator it = m_lines.begin();
 				it != m_lines.end();
 				it++) {
@@ -104,7 +96,6 @@ public:
 
 			p = cur->marshal(p);
 		}
-		m_mutex.unlock();
 
 		*szOut = sz;
 
@@ -124,7 +115,6 @@ public:
 
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
-		m_mutex.lock();
 		// Should already be 0, but anyway
 		for (AddrToLineMap_t::iterator it = m_addrToLine.begin();
 				it != m_addrToLine.end();
@@ -151,15 +141,12 @@ public:
 			// Register all hits for this address
 			line->registerHit(addr, hits);
 		}
-		m_mutex.unlock();
 
 		return true;
 	}
 
 	virtual void stop()
 	{
-		// Otherwise the writer thread can hang here
-		m_mutex.unlock();
 	}
 
 
@@ -217,13 +204,12 @@ private:
 	{
 		LineId key(file, lineNr);
 
-		m_mutex.lock();
 		LineMap_t::iterator it = m_lines.find(key);
 		Line *line;
 
 		if (it == m_lines.end()) {
 			if (!file_exists(file))
-				goto out;
+				return;
 
 			line = new Line(key);
 			m_lines[key] = line;
@@ -233,15 +219,11 @@ private:
 
 		line->addAddress(addr);
 		m_addrToLine[addr] = line;
-
-out:
-		m_mutex.unlock();
 	}
 
 	/* Called during runtime */
 	void onAddress(unsigned long addr, unsigned long hits)
 	{
-		m_mutex.lock();
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
 		if (it != m_addrToLine.end()) {
@@ -249,7 +231,6 @@ out:
 
 			line->registerHit(addr, hits);
 		}
-		m_mutex.unlock();
 	}
 
 
@@ -365,7 +346,6 @@ out:
 
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
-	std::mutex m_mutex; // Protects m_lines, m_addrToLine
 
 	IElf &m_elf;
 	ICollector &m_collector;
