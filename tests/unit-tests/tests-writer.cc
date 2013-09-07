@@ -128,7 +128,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(res == true);
 	output.start();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(800));
+	output.produce();
 
 	EXPECT_CALL(reporter, marshal(_))
 		.Times(AtLeast(1))
@@ -141,7 +141,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
 	output.start();
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	output.produce();
 	output.stop();
 }
 
@@ -191,7 +191,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(res == true);
 	output.start();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	output.produce();
 
 	EXPECT_CALL(reporter, marshal(_))
 		.Times(AtLeast(1))
