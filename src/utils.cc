@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <libelf.h>
+#include <time.h>
 
 #include "utils.hh"
 
@@ -219,4 +220,9 @@ void mdelay(unsigned int ms)
 	ts.tv_nsec = ms * 1000 * 1000;
 
 	nanosleep(&ts, NULL);
+}
+
+uint64_t get_ms_timestamp(void)
+{
+	return ((uint64_t)time(NULL)) * 1000;
 }
