@@ -25,6 +25,12 @@ using namespace kcov;
 #define str(s) #s
 #define xstr(s) str(s)
 
+
+static unsigned long getAligned(unsigned long addr)
+{
+	return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
+}
+
 static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
 {
 	unsigned long out;
@@ -51,6 +57,43 @@ static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
 #endif
 }
 
+
+static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_data)
+{
+	unsigned long aligned_addr = getAligned(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+	unsigned long val;
+
+#if defined(__i386__) || defined(__x86_64__)
+	val = (old_data & ~(0xffUL << shift)) |
+			(0xccUL << shift);
+#else
+# error Unsupported architecture
+#endif
+
+	return val;
+}
+
+static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_data, unsigned long cur_data)
+{
+	unsigned long aligned_addr = getAligned(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+	unsigned long old_byte = (old_data >> shift) & 0xffUL;
+	unsigned long val;
+#if defined(__i386__) || defined(__x86_64__)
+	val = (cur_data & ~(0xffUL << shift)) |
+			(old_byte << shift);
+#else
+# error Unsupported architecture
+#endif
+
+	return val;
+}
+
+
+
 class Ptrace : public IEngine
 {
 public:
@@ -61,17 +104,9 @@ public:
 		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 	}
 
-	bool readMemory(uint8_t *dst, unsigned long addr, size_t bytes)
+	bool readMemory(unsigned long *dst, unsigned long addr)
 	{
-		unsigned long aligned = getAligned(addr);
-		unsigned long offs = addr - aligned;
-		unsigned long shift = 8 * offs;
-		unsigned long data = ptrace(PTRACE_PEEKTEXT, m_activeChild, aligned, 0);
-
-		panic_if(bytes != 1,
-				"Can only read 1 byte now");
-
-		*dst = (data & (0xffULL << shift)) >> shift;
+		*dst = peekWord(addr);
 
 		return true;
 	}
@@ -131,14 +166,14 @@ public:
 
 	int registerBreakpoint(unsigned long addr)
 	{
-		uint8_t data;
+		unsigned long data;
 		int id;
 
 		// There already?
 		if (m_addrToBreakpointMap.find(addr) != m_addrToBreakpointMap.end())
 			return m_addrToBreakpointMap[addr];
 
-		if (readMemory(&data, addr, 1) == false)
+		if (readMemory(&data, addr) == false)
 			return -1;
 
 		id = m_breakpointId++;
@@ -159,9 +194,10 @@ public:
 				it != m_pendingBreakpoints.end();
 				++it) {
 			unsigned long addr = *it;
+			unsigned long cur_data = peekWord(addr);
 
 			// Set the breakpoint
-			writeByte(m_activeChild, addr, 0xcc);
+			pokeWord(addr,	arch_setupBreakpoint(addr, cur_data));
 		}
 
 		m_pendingBreakpoints.clear();
@@ -182,8 +218,10 @@ public:
 
 	bool clearBreakpoint(int id)
 	{
-		if (m_breakpointToAddrMap.find(id) == m_breakpointToAddrMap.end())
+		if (m_breakpointToAddrMap.find(id) == m_breakpointToAddrMap.end()) {
+			kcov_debug(BP_MSG, "Can't find breakpoint %d\n", id);
 			return false;
+		}
 
 		unsigned long addr = m_breakpointToAddrMap[id];
 
@@ -193,8 +231,12 @@ public:
 		panic_if(m_instructionMap.find(addr) == m_instructionMap.end(),
 				"Breakpoint found, but no instruction data at that point!");
 
+
 		// Clear the actual breakpoint instruction
-		writeByte(m_activeChild, addr, m_instructionMap[addr]);
+		unsigned long val = m_instructionMap[addr];
+		val = arch_clearBreakpoint(addr, val, peekWord(addr));
+
+		pokeWord(addr, val);
 
 		return true;
 	}
@@ -413,6 +455,7 @@ private:
 				perror("Can't set me as ptraced");
 				return false;
 			}
+			kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 			execv(executable, argv);
 
 			/* Exec failed */
@@ -493,29 +536,21 @@ private:
 		return getPcFromRegs(&regs);
 	}
 
-	// Assume x86 with single-byte breakpoint instructions for now...
-	void writeByte(int pid, unsigned long addr, uint8_t byte)
+	unsigned long peekWord(unsigned long addr)
 	{
 		unsigned long aligned = getAligned(addr);
-		unsigned long offs = addr - aligned;
-		unsigned long shift = 8 * offs;
-		unsigned long data = byte;
-		unsigned long old_data;
-		unsigned long val;
 
-		old_data = ptrace(PTRACE_PEEKTEXT, pid, aligned, 0);
-		val = (old_data & ~(0xffULL << shift)) | ((data & 0xff) << shift);
-		ptrace(PTRACE_POKETEXT, pid, aligned, val);
+		return ptrace(PTRACE_PEEKTEXT, m_activeChild, aligned, 0);
 	}
 
-	unsigned long getAligned(unsigned long addr)
+	void pokeWord(unsigned long addr, unsigned long val)
 	{
-		return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
+		ptrace(PTRACE_POKETEXT, m_activeChild, getAligned(addr), val);
 	}
 
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
 	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
-	typedef std::unordered_map<unsigned long, uint8_t> instructionMap_t;
+	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
 	typedef std::list<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
 
