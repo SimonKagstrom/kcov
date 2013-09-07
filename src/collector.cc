@@ -2,6 +2,7 @@
 #include <elf.hh>
 #include <utils.hh>
 #include <engine.hh>
+#include <output-handler.hh>
 
 #include <unordered_map>
 #include <string>
@@ -29,9 +30,13 @@ public:
 			return -1;
 		}
 
+		IOutputHandler &output = IOutputHandler::getInstance();
+
 		// This will set all breakpoints
 		m_elf.parse();
 		m_engine.setupAllBreakpoints();
+
+		uint64_t lastTimestamp = get_ms_timestamp();
 
 		while (1) {
 			IEngine::Event ev;
@@ -63,6 +68,13 @@ public:
 			default:
 				error("Unknown event %d", ev.type);
 				return -1;
+			}
+
+			uint64_t now = get_ms_timestamp();
+			if (now - lastTimestamp >= 1000) {
+				lastTimestamp = now;
+
+				output.produce();
 			}
 		}
 

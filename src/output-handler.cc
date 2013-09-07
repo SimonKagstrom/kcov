@@ -29,9 +29,6 @@ namespace kcov
 			m_dbFileName = m_outDirectory + "coverage.db";
 			m_summaryDbFileName = m_outDirectory + "summary.db";
 
-			m_threadStopped = false;
-			m_stop = false;
-
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
 
@@ -79,32 +76,11 @@ namespace kcov
 					it != m_writers.end();
 					it++)
 				(*it)->onStartup();
-
-			panic_if (pthread_create(&m_thread, NULL, threadMainStatic, this) < 0,
-					"Can't create thread");
 		}
 
 		void stop()
 		{
-			m_stop = true;
-
-			for (WriterList_t::iterator it = m_writers.begin();
-					it != m_writers.end();
-					it++)
-				(*it)->stop();
-
-			// Wait for half a second
-			for (unsigned int i = 0; i < 50; i++)
-			{
-				if (m_threadStopped)
-					break;
-				mdelay(10);
-			}
-
-			for (WriterList_t::iterator it = m_writers.begin();
-					it != m_writers.end();
-					it++)
-				(*it)->write();
+			produce();
 
 			size_t sz;
 			void *data = m_reporter.marshal(&sz);
@@ -120,39 +96,16 @@ namespace kcov
 				(*it)->onStop();
 		}
 
+		void produce()
+		{
+			for (WriterList_t::iterator it = m_writers.begin();
+					it != m_writers.end();
+					it++)
+				(*it)->write();
+		}
+
+
 	private:
-		void threadMain()
-		{
-			sigset_t set;
-
-			sigemptyset(&set);
-			sigaddset(&set, SIGINT);
-			sigaddset(&set, SIGTERM);
-
-			// Block INT and TERM to avoid Ctrl-C ending up in this thread
-			sigprocmask(SIG_BLOCK, &set, NULL);
-			while (!m_stop) {
-				for (WriterList_t::iterator it = m_writers.begin();
-						it != m_writers.end();
-						it++)
-					(*it)->write();
-
-				sleep(1);
-			}
-
-			m_threadStopped = true;
-		}
-
-		static void *threadMainStatic(void *pThis)
-		{
-			OutputHandler *p = (OutputHandler *)pThis;
-
-			p->threadMain();
-
-			return NULL;
-		}
-
-
 		typedef std::list<IWriter *> WriterList_t;
 
 		IReporter &m_reporter;
@@ -164,8 +117,6 @@ namespace kcov
 
 		WriterList_t m_writers;
 		pthread_t m_thread;
-		bool m_stop;
-		bool m_threadStopped;
 	};
 
 	static OutputHandler *instance;

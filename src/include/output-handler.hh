@@ -18,6 +18,8 @@ namespace kcov
 
 		virtual void stop() = 0;
 
+		virtual void produce() = 0;
+
 
 		virtual std::string getBaseDirectory() = 0;
 
