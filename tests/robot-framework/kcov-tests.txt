@@ -126,3 +126,9 @@ daemon-no-wait-for-last-child-test
     ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
     Should Contain    ${output}    1
     
+multiple-forks
+    ${no_kcov_rc}=    Run and return RC    ./multi_fork
+    ${rc}=    Run and return RC    ${kcov} ${out} ./multi_fork
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/multi_fork/cobertura.xml test_multi_fork_c 28
+    Should Contain    ${output}    1
