@@ -62,6 +62,9 @@ namespace kcov
 
 		virtual bool getExitFirstProcess() = 0;
 
+		virtual unsigned int getOutputInterval() = 0;
+
+
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
 
 

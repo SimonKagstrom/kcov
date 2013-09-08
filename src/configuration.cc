@@ -27,6 +27,7 @@ public:
 		m_newPathPrefix="";
 		m_parseSolibs = true;
 		m_exitFirstProcess = false;
+		m_outputInterval = 1000;
 	}
 
 	bool usage(void)
@@ -41,6 +42,8 @@ public:
 				"                         r[everse-percent], u[ncovered-lines], l[ines]\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
 				" -t, --title=title       title for the coverage (default: filename)\n"
+				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
+				"                         only output when kcov terminates, default %u)\n"
 				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
@@ -59,7 +62,7 @@ public:
 				"  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
 				"                                                         # including /src/frodo\n"
 				"",
-				m_lowLimit, m_highLimit, m_pathStripLevel);
+				m_lowLimit, m_highLimit, m_outputInterval, m_pathStripLevel);
 		return false;
 	}
 
@@ -75,6 +78,7 @@ public:
 				{"pid", required_argument, 0, 'p'},
 				{"sort-type", required_argument, 0, 's'},
 				{"limits", required_argument, 0, 'l'},
+				{"output-interval", required_argument, 0, 'O'},
 				{"title", required_argument, 0, 't'},
 				{"path-strip-level", required_argument, 0, 'S'},
 				{"skip-solibs", no_argument, 0, 'L'},
@@ -154,6 +158,12 @@ public:
 				break;
 			case 't':
 				m_title = optarg;
+				break;
+			case 'O':
+				if (!isInteger(std::string(optarg)))
+					return usage();
+
+				m_outputInterval = stoul(std::string(optarg));
 				break;
 			case 'S':
 				if (!isInteger(std::string(optarg)))
@@ -343,6 +353,10 @@ public:
 		m_outputType = type;
 	}
 
+	unsigned int getOutputInterval()
+	{
+		return m_outputInterval;
+	}
 
 	// "private", but we ignore that in the unit test
 	typedef std::map<unsigned int, std::string> StrVecMap_t;
@@ -440,6 +454,7 @@ public:
 	StrVecMap_t m_excludePath;
 	StrVecMap_t m_onlyIncludePath;
 	enum OutputType m_outputType;
+	unsigned int m_outputInterval;
 };
 
 

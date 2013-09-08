@@ -3,6 +3,7 @@
 #include <utils.hh>
 #include <engine.hh>
 #include <output-handler.hh>
+#include <configuration.hh>
 
 #include <unordered_map>
 #include <string>
@@ -31,6 +32,7 @@ public:
 		}
 
 		IOutputHandler &output = IOutputHandler::getInstance();
+		unsigned int outputInterval = IConfiguration::getInstance().getOutputInterval();
 
 		// This will set all breakpoints
 		m_elf.parse();
@@ -71,7 +73,9 @@ public:
 			}
 
 			uint64_t now = get_ms_timestamp();
-			if (now - lastTimestamp >= 1000) {
+
+			if (outputInterval != 0 &&
+					now - lastTimestamp >= outputInterval) {
 				lastTimestamp = now;
 
 				output.produce();
