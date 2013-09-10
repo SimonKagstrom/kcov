@@ -321,7 +321,7 @@ public:
 			m_activeChild = who;
 			out.addr = getPc(m_activeChild);
 
-			kcov_debug(PTRACE_MSG, "PT stopped 0x%08x\n", status);
+			kcov_debug(PTRACE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
 
 			// A signal?
 			if (WIFSTOPPED(status)) {
@@ -337,7 +337,7 @@ public:
 					if (it != m_addrToBreakpointMap.end())
 						out.data = it->second;
 
-					kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d\n", out.addr, out.data);
+					kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
 					if (out.data != -1)
 						singleStep();
 					return out;
@@ -350,6 +350,8 @@ public:
 					out.type = ev_crash;
 					out.data = sig;
 
+					kcov_debug(PTRACE_MSG, "PT crash 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
+
 					return out;
 				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
 					sig = 0;
@@ -360,8 +362,8 @@ public:
 				}
 
 				// No, deliver it directly
-				kcov_debug(PTRACE_MSG, "PT signal %d at 0x%lx for %d\n",
-						WSTOPSIG(status), out.addr, m_activeChild);
+				kcov_debug(PTRACE_MSG, "PT signal %d/0x%x at 0x%lx for %d\n",
+						WSTOPSIG(status), status, out.addr, m_activeChild);
 				ptrace(PTRACE_CONT, m_activeChild, 0, sig);
 
 				continue;
