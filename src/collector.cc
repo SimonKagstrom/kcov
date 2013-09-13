@@ -47,8 +47,7 @@ public:
 			switch (ev.type)
 			{
 			case ev_error:
-			case ev_syscall:
-			case ev_crash:
+			case ev_signal:
 				fprintf(stderr, "Process exited with %s\n", m_engine.eventToName(ev).c_str());
 
 				return -1;

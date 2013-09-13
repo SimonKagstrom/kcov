@@ -11,9 +11,8 @@ namespace kcov
 	{
 		ev_error       = -1,
 		ev_breakpoint  =  1,
-		ev_syscall     =  2,
-		ev_crash       =  3,
-		ev_exit        =  4,
+		ev_signal      =  2,
+		ev_exit        =  3,
 	};
 
 	class IEngine
