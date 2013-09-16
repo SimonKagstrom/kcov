@@ -347,7 +347,7 @@ public:
 						sig == SIGFPE ||
 						sig == SIGBUS ||
 						sig == SIGILL) {
-					out.type = ev_crash;
+					out.type = ev_signal;
 					out.data = sig;
 
 					kcov_debug(PTRACE_MSG, "PT crash 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
@@ -410,7 +410,7 @@ public:
 			return std::string("breakpoint at 0x%lx", ev.addr);
 		case ev_exit:
 			return fmt("exit code %d", ev.data);
-		case ev_crash:
+		case ev_signal:
 		{
 			if (ev.data == SIGSEGV)
 				return std::string("SIGSEGV");
