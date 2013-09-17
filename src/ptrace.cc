@@ -308,7 +308,7 @@ public:
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, 0);
 		if (res < 0) {
 			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
-			m_children.erase(m_activeChild);
+			return out;
 		}
 
 		while (1) {
