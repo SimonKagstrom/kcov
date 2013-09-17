@@ -36,6 +36,10 @@ set (fork_no_wait_SRCS
 	fork/fork-no-wait.c
 )
 
+set (signals_SRCS
+	signals/test-signals.c
+)
+
 set (multi_fork_SRCS
 	multi-fork/test-multi-fork.c
 )
@@ -78,6 +82,7 @@ add_executable(main-tests ${main_tests_SRCS})
 add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
+add_executable(signals ${signals_SRCS})
 add_executable(multi_fork ${multi_fork_SRCS})
 add_executable(shared_library_test ${shared_library_test_SRCS})
 add_executable(argv_dependent ${argv_dependent_SRCS})
