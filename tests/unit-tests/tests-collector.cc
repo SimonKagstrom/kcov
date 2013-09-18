@@ -15,7 +15,7 @@ public:
 	MOCK_METHOD2(onAddress, void(unsigned long addr, unsigned long hits));
 };
 
-TEST(collector)
+DISABLED_TEST(collector)
 {
 	MockEngine &engine = (MockEngine &)IEngine::getInstance();
 	MockCollectorListener listener;
@@ -59,7 +59,7 @@ TEST(collector)
 		.Times(Exactly(1))
 		;
 
-	EXPECT_CALL(engine, continueExecution())
+	EXPECT_CALL(engine, waitEvent())
 		.Times(Exactly(2))
 		.WillOnce(Return(evOnce))
 		.WillRepeatedly(Return(evExit))
@@ -80,9 +80,8 @@ TEST(collector)
 		.WillRepeatedly(Return(0))
 		;
 
-	EXPECT_CALL(engine, continueExecution())
+	EXPECT_CALL(engine, continueExecution(_))
 		.Times(Exactly(1))
-		.WillRepeatedly(Return(evOnce))
 		;
 	v = collector.run();
 

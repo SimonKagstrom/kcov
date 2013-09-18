@@ -291,114 +291,103 @@ public:
 		m_solibValid = true;
 	}
 
-	const Event continueExecution()
+	const Event waitEvent()
 	{
 		Event out;
 		int status;
 		int who;
-		int res;
 
 		// Assume error
-		out.type = ev_exit;
+		out.type = ev_error;
 		out.data = -1;
 
-		checkSolibData();
-
-		kcov_debug(PTRACE_MSG, "PT continuing %d\n", m_activeChild);
-		res = ptrace(PTRACE_CONT, m_activeChild, 0, 0);
-		if (res < 0) {
-			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
+		who = waitpid(-1, &status, __WALL);
+		if (who == -1) {
+			kcov_debug(PTRACE_MSG, "Returning error\n");
 			return out;
 		}
 
-		while (1) {
-			who = waitpid(-1, &status, __WALL);
-			if (who == -1)
+		m_children[who] = 1;
+
+		m_activeChild = who;
+		out.addr = getPc(m_activeChild);
+
+		kcov_debug(PTRACE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
+
+		// A signal?
+		if (WIFSTOPPED(status)) {
+			int sig = WSTOPSIG(status);
+
+			// A trap?
+			if (sig == SIGTRAP || sig == SIGSTOP) {
+				out.type = ev_breakpoint;
+				out.data = -1;
+
+				// Breakpoint id
+				addrToBreakpointMap_t::iterator it = m_addrToBreakpointMap.find(out.addr);
+				if (it != m_addrToBreakpointMap.end())
+					out.data = it->second;
+
+				kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
+				if (out.data != -1)
+					singleStep();
+
 				return out;
-
-			m_children[who] = 1;
-
-			m_activeChild = who;
-			out.addr = getPc(m_activeChild);
-
-			kcov_debug(PTRACE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
-
-			// A signal?
-			if (WIFSTOPPED(status)) {
-				int sig = WSTOPSIG(status);
-
-				// A trap?
-				if (sig == SIGTRAP) {
-					out.type = ev_breakpoint;
-					out.data = -1;
-
-					// Breakpoint id
-					addrToBreakpointMap_t::iterator it = m_addrToBreakpointMap.find(out.addr);
-					if (it != m_addrToBreakpointMap.end())
-						out.data = it->second;
-
-					kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
-					if (out.data != -1)
-						singleStep();
-					return out;
-				}
-				else if (sig == SIGSEGV ||
-						sig == SIGTERM ||
-						sig == SIGFPE ||
-						sig == SIGBUS ||
-						sig == SIGILL) {
-					out.type = ev_signal;
-					out.data = sig;
-
-					kcov_debug(PTRACE_MSG, "PT crash 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
-
-					return out;
-				} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
-					sig = 0;
-				} else if (sig == SIGSTOP) {
-					out.type = ev_breakpoint;
-					out.data = -1;
-					return out;
-				}
-
-				// No, deliver it directly
-				kcov_debug(PTRACE_MSG, "PT signal %d/0x%x at 0x%lx for %d\n",
-						WSTOPSIG(status), status, out.addr, m_activeChild);
-				ptrace(PTRACE_CONT, m_activeChild, 0, sig);
-
-				continue;
-			}
-			// Thread died?
-			if (WIFSIGNALED(status) || WIFEXITED(status)) {
-				m_children.erase(who);
-
-				if (IConfiguration::getInstance().getExitFirstProcess() && who == m_firstChild) {
-					IConfiguration &conf = IConfiguration::getInstance();
-					std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
-
-					std::string exitCode = fmt("%u", WEXITSTATUS(status));
-
-					write_file(exitCode.c_str(), exitCode.size(), "%s", fifoName.c_str());
-				}
-
-				if (m_children.size() == 0) {
-					Event tmp = continueExecution();
-
-					out.type = ev_exit;
-					out.data = WEXITSTATUS(status);
-
-					if (tmp.type != ev_error)
-						continue;
-
-					return out;
-				}
-
-				continue;
+			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
+				kcov_debug(PTRACE_MSG, "PT clone at 0x%lx for %d\n", out.addr, m_activeChild);
+				out.type = ev_signal;
+				out.data = 0;
 			}
 
-			out.type = ev_error;
+			kcov_debug(PTRACE_MSG, "PT signal %d at 0x%lx for %d\n",
+					WSTOPSIG(status), out.addr, m_activeChild);
+		} else if (WIFSIGNALED(status)) {
+			// Crashed/killed
+			int sig = WTERMSIG(status);
 
-			return out;
+			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%lx for %d\n",
+					sig, out.addr, m_activeChild);
+			m_children.erase(who);
+		} else if (WIFEXITED(status)) {
+			int exitStatus = WEXITSTATUS(status);
+
+			kcov_debug(PTRACE_MSG, "PT exit %d at 0x%lx for %d%s\n",
+					exitStatus, out.addr, m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
+
+			m_children.erase(who);
+
+			if (who == m_firstChild)
+				out.type = ev_exit_first_process;
+			else
+				out.type = ev_exit;
+
+			out.data = exitStatus;
+		}
+
+		return out;
+	}
+
+	bool childrenLeft()
+	{
+		return m_children.size() > 0;
+	}
+
+
+		/**
+		 * Continue execution with an event
+		 */
+	void continueExecution(const Event ev)
+	{
+		unsigned long v = ev.type == ev_signal ? ev.data : 0;
+		int res;
+
+		checkSolibData();
+
+		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, v);
+		res = ptrace(PTRACE_CONT, m_activeChild, 0, v);
+		if (res < 0) {
+			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
+			m_children.erase(m_activeChild);
 		}
 	}
 

@@ -26,6 +26,8 @@ public:
 
 	int run()
 	{
+		int out = 0;
+
 		if (!m_engine.start(m_elf.getFilename())) {
 			error("Can't start/attach to %s", m_elf.getFilename());
 			return -1;
@@ -40,21 +42,37 @@ public:
 
 		uint64_t lastTimestamp = get_ms_timestamp();
 
+		IEngine::Event ev;
 		while (1) {
-			IEngine::Event ev;
+			m_engine.continueExecution(ev);
 
-			ev = m_engine.continueExecution();
+			ev = m_engine.waitEvent();
 			switch (ev.type)
 			{
 			case ev_error:
+				if (!m_engine.childrenLeft())
+					goto out_err;
+				break;
 			case ev_signal:
+				if (m_engine.childrenLeft())
+					continue;
 				fprintf(stderr, "Process exited with %s\n", m_engine.eventToName(ev).c_str());
 
 				return -1;
 
-			case ev_exit:
-				return ev.data;
+			case ev_exit_first_process:
+				out = ev.data;
+				if (IConfiguration::getInstance().getExitFirstProcess()) {
+					IConfiguration &conf = IConfiguration::getInstance();
+					std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
 
+					std::string exitCode = fmt("%u", out);
+
+					write_file(exitCode.c_str(), exitCode.size(), "%s", fifoName.c_str());
+				}
+			case ev_exit:
+				out = ev.data;
+				break;
 			case ev_breakpoint:
 				for (ListenerList_t::iterator it = m_listeners.begin();
 						it != m_listeners.end();
@@ -80,11 +98,8 @@ public:
 				output.produce();
 			}
 		}
-
-		/* Should never get here */
-		panic("Unreachable code\n");
-
-		return 0;
+out_err:
+		return out;
 	}
 
 	virtual void stop()

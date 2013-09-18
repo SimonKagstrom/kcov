@@ -13,6 +13,7 @@ namespace kcov
 		ev_breakpoint  =  1,
 		ev_signal      =  2,
 		ev_exit        =  3,
+		ev_exit_first_process = 4,
 	};
 
 	class IEngine
@@ -21,6 +22,13 @@ namespace kcov
 		class Event
 		{
 		public:
+			Event() :
+				type(ev_signal),
+				data(0),
+				addr(0)
+			{
+			}
+
 			enum event_type type;
 
 			int data; // Typically the breakpoint
@@ -56,11 +64,19 @@ namespace kcov
 		virtual bool start(const char *executable) = 0;
 
 		/**
-		 * Continue execution until next breakpoint.
+		 * Wait for an event from the children
 		 *
 		 * @return the event the execution stopped at.
 		 */
-		virtual const Event continueExecution() = 0;
+		virtual const Event waitEvent() = 0;
+
+		/**
+		 * Continue execution with an event
+		 */
+		virtual void continueExecution(const Event ev) = 0;
+
+
+		virtual bool childrenLeft() = 0;
 
 		virtual std::string eventToName(Event ev) = 0;
 
