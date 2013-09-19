@@ -401,6 +401,8 @@ public:
 			return fmt("exit code %d", ev.data);
 		case ev_signal:
 		{
+			if (ev.data == SIGABRT)
+				return std::string("SIGABRT");
 			if (ev.data == SIGSEGV)
 				return std::string("SIGSEGV");
 			if (ev.data == SIGILL)
