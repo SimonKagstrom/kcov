@@ -126,3 +126,29 @@ daemon-no-wait-for-last-child-test
     ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
     Should Contain    ${output}    1
     
+signals
+	Run                            rm -rf ${out}/signals/cobertura.xml
+    ${no_kcov_rc}=    Run and return RC    ./signals hup
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals hup
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 14
+    ${no_kcov_rc}=    Run and return RC    ./signals int
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals int
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 19
+    ${no_kcov_rc}=    Run and return RC    ./signals quit
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals quit
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 24
+    ${no_kcov_rc}=    Run and return RC    ./signals abrt
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals abrt
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 39
+    ${no_kcov_rc}=    Run and return RC    ./signals segv
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals segv
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 69
+    ${no_kcov_rc}=    Run and return RC    ./signals term
+    ${rc}=    Run and return RC    ${kcov} ${out} ./signals term
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 89
