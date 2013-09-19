@@ -316,7 +316,13 @@ public:
 
 		// A signal?
 		if (WIFSTOPPED(status)) {
+			siginfo_t siginfo;
 			int sig = WSTOPSIG(status);
+
+			out.type = ev_signal;
+			out.data = sig;
+
+			ptrace(PTRACE_GETSIGINFO, m_activeChild, NULL, (void *)&siginfo);
 
 			// A trap?
 			if (sig == SIGTRAP || sig == SIGSTOP) {
@@ -335,7 +341,6 @@ public:
 				return out;
 			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
 				kcov_debug(PTRACE_MSG, "PT clone at 0x%lx for %d\n", out.addr, m_activeChild);
-				out.type = ev_signal;
 				out.data = 0;
 			}
 
@@ -344,6 +349,9 @@ public:
 		} else if (WIFSIGNALED(status)) {
 			// Crashed/killed
 			int sig = WTERMSIG(status);
+
+			out.type = ev_signal;
+			out.data = sig;
 
 			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%lx for %d\n",
 					sig, out.addr, m_activeChild);
