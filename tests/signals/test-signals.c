@@ -271,19 +271,16 @@ int main(int argc, const char *argv[])
 	}
 
 	if (child == 0) {
-		printf("In child %d\n", getpid());
 		signal(sig, handler_table[sig]);
 
 		sleep(2);
 		return 0;
 	} else {
 		// Parent
-		printf("In parent, child %d\n", child);
 		sleep(1);
 		kill(child, sig);
 	}
 
-	printf("Waiting in %d\n", getpid());
 	wait(&status);
 
 	return 0;
