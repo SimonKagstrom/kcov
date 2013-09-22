@@ -13,7 +13,7 @@
 
 #include "utils.hh"
 
-int g_kcov_debug_mask;
+int g_kcov_debug_mask = STATUS_MSG;
 
 extern int file_is_elf(const char *filename)
 {
