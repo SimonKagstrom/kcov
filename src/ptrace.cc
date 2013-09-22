@@ -377,7 +377,8 @@ public:
 
 	bool childrenLeft()
 	{
-		return m_children.size() > 0;
+		return m_children.size() > 0 &&
+				 m_children.find(m_firstChild) != m_children.end();
 	}
 
 
