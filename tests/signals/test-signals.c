@@ -39,11 +39,6 @@ void catch_abrt(int sig)
 	printf("ABRT\n");
 }
 
-void catch_giot(int sig)
-{
-	printf("GIOT\n");
-}
-
 void catch_bus(int sig)
 {
 	printf("BUS\n");
@@ -171,13 +166,13 @@ void catch_sys(int sig)
 
 static const char *handler_names[] =
 {
+	"zero has no handler",
 	"hup",
 	"int",
 	"quit",
 	"ill",
 	"trap",
 	"abrt",
-	"giot",
 	"bus",
 	"fpe",
 	"kill",
@@ -207,13 +202,13 @@ static const char *handler_names[] =
 
 static void (*handler_table[])(int) =
 {
+	NULL,
 	catch_hup,  //SIGHUP
 	catch_int,  //SIGINT
 	catch_quit, //SIGQUIT
 	catch_ill,  //SIGILL
 	catch_trap, //SIGTRAP
 	catch_abrt, //SIGABRT
-	catch_giot, //SIGIOT
 	catch_bus,  //SIGBUS
 	catch_fpe,  //SIGFPE
 	catch_kill, //SIGKILL
@@ -248,12 +243,16 @@ int main(int argc, const char *argv[])
 	pid_t child;
 	int status;
 	int sig;
+	unsigned self = 0;
 	size_t n_handlers = sizeof(handler_names) / sizeof(handler_names[0]);
 
 	if (argc <= 1) {
-		printf("Usage: xxx <signal>\n");
+		printf("Usage: xxx <signal> [self]\n");
 		exit(1);
 	}
+
+	if (argc == 3)
+		self = 1;
 
 	for (sig = 0; sig < n_handlers; sig++) {
 			if (strcmp(argv[1], handler_names[sig]) == 0)
@@ -278,7 +277,10 @@ int main(int argc, const char *argv[])
 	} else {
 		// Parent
 		sleep(1);
-		kill(child, sig);
+		if (self)
+			kill(getpid(), sig);
+		else
+			kill(child, sig);
 	}
 
 	wait(&status);
