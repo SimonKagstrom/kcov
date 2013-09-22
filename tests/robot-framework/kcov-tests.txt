@@ -152,3 +152,10 @@ signals
     ${rc}=    Run and return RC    ${kcov} ${out} ./signals term
     Should be equal as integers    ${no_kcov_rc}    ${rc}
     ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 89
+
+signals-self
+	Run								rm -rf ${out}/signals/cobertura.xml
+    ${output}=   Run				${kcov} ${out} ./signals segv self
+	Should Contain					${output}	kcov: Process exited with signal 11
+    ${output}=   Run				${kcov} ${out} ./signals abrt self
+	Should Contain					${output}	kcov: Process exited with signal 6
