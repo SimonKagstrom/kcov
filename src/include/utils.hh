@@ -29,10 +29,11 @@
 
 enum debug_mask
 {
-	INFO_MSG   = 1,
-	PTRACE_MSG = 2,
-	ELF_MSG    = 4,
-	BP_MSG     = 8,
+	INFO_MSG   =   1,
+	PTRACE_MSG =   2,
+	ELF_MSG    =   4,
+	BP_MSG     =   8,
+	STATUS_MSG =  16,
 };
 extern int g_kcov_debug_mask;
 

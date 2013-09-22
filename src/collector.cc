@@ -56,7 +56,7 @@ public:
 			case ev_signal:
 				if (m_engine.childrenLeft())
 					continue;
-				fprintf(stderr, "Process exited with %s\n", m_engine.eventToName(ev).c_str());
+				kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n", ev.data, m_engine.eventToName(ev).c_str());
 
 				return -1;
 
