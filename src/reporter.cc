@@ -126,10 +126,12 @@ public:
 			unsigned int hits;
 
 			p = Line::unMarshal(p, &addr, &hits);
-			Line *line = m_addrToLine[addr];
+			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
-			if (!line)
+			if (it == m_addrToLine.end())
 				continue;
+
+			Line *line = it->second;
 
 			if (!hits)
 				continue;
