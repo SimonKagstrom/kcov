@@ -17,6 +17,8 @@
 #include <map>
 #include <unordered_map>
 #include <list>
+#include <thread>
+#include <mutex>
 
 #include "library-binary.h"
 
@@ -97,7 +99,7 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 class Ptrace : public IEngine
 {
 public:
-	Ptrace() : m_solibValid(false), m_solibFd(-1), m_ldPreloadString(NULL), m_envString(NULL)
+	Ptrace() : m_ldPreloadString(NULL), m_envString(NULL)
 	{
 		m_breakpointId = 0;
 		m_parentCpu = kcov_get_current_cpu();
@@ -110,6 +112,8 @@ public:
 
 		return true;
 	}
+
+
 
 	bool start(const char *executable)
 	{
@@ -151,7 +155,8 @@ public:
 		}
 		putenv(m_envString);
 
-		m_solibFd = open(kcov_solib_pipe_path.c_str(), O_RDONLY | O_NONBLOCK);
+		m_solibPath = kcov_solib_pipe_path;
+		m_solibThread = std::thread(&Ptrace::solibThreadMain, this);
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
 		bool res = false;
@@ -203,7 +208,38 @@ public:
 		m_pendingBreakpoints.clear();
 	}
 
+	void solibThreadMain()
+	{
+		uint8_t buf[1024 * 1024];
+		int fd;
 
+		fd = open(m_solibPath.c_str(), O_RDONLY);
+
+		if (fd < 0)
+			return;
+
+		while (1) {
+			int r = read(fd, buf, sizeof(buf));
+
+			if (r <= 0)
+				break;
+			panic_if ((unsigned)r >= sizeof(buf),
+					"Too much solib data read");
+
+			struct phdr_data *p = phdr_data_unmarshal(buf);
+
+			if (!p)
+				continue;
+			struct phdr_data *cpy = (struct phdr_data*)xmalloc(sizeof(*p));
+			memcpy(cpy, p, sizeof(*p));
+
+			m_phdrListMutex.lock();
+			m_phdrs.push_back(cpy);
+			m_phdrListMutex.unlock();
+		}
+
+		close(fd);
+	}
 
 	void clearAllBreakpoints()
 	{
@@ -254,17 +290,14 @@ public:
 
 	void checkSolibData()
 	{
-		if (m_solibValid)
-			return;
+		struct phdr_data *p = NULL;
 
-		int r = read(m_solibFd, m_solibData, sizeof(m_solibData));
-
-		if (r <= 0)
-			return;
-		panic_if ((unsigned)r >= sizeof(m_solibData),
-				"Too much solib data read");
-
-		struct phdr_data *p = phdr_data_unmarshal(m_solibData);
+		m_phdrListMutex.lock();
+		if (!m_phdrs.empty()) {
+			p = m_phdrs.front();
+			m_phdrs.pop_front();
+		}
+		m_phdrListMutex.unlock();
 
 		if (!p)
 			return;
@@ -287,8 +320,6 @@ public:
 
 			setupAllBreakpoints();
 		}
-
-		m_solibValid = true;
 	}
 
 	const Event waitEvent()
@@ -555,6 +586,7 @@ private:
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
 	typedef std::list<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
+	typedef std::list<struct phdr_data *> PhdrList_t;
 
 	int m_breakpointId;
 
@@ -562,15 +594,16 @@ private:
 	breakpointToAddrMap_t m_breakpointToAddrMap;
 	addrToBreakpointMap_t m_addrToBreakpointMap;
 	PendingBreakpointList_t m_pendingBreakpoints;
+	PhdrList_t m_phdrs;
+	std::mutex m_phdrListMutex;
+	std::thread m_solibThread;
 
 	pid_t m_activeChild;
 	pid_t m_child;
 	pid_t m_firstChild;
 	ChildMap_t m_children;
 
-	bool m_solibValid;
-	int m_solibFd;
-	uint8_t m_solibData[128 * 1024];
+	std::string m_solibPath;
 	char *m_ldPreloadString;
 	char *m_envString;
 
