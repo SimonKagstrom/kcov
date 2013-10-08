@@ -14,10 +14,10 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
+#include <pthread.h>
 #include <map>
 #include <unordered_map>
 #include <list>
-#include <thread>
 #include <mutex>
 
 #include "library-binary.h"
@@ -99,10 +99,16 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 class Ptrace : public IEngine
 {
 public:
-	Ptrace() : m_ldPreloadString(NULL), m_envString(NULL)
+	Ptrace() :
+		m_breakpointId(0),
+		m_activeChild(0),
+		m_child(0),
+		m_firstChild(0),
+		m_ldPreloadString(NULL),
+		m_envString(NULL),
+		m_parentCpu(kcov_get_current_cpu())
 	{
-		m_breakpointId = 0;
-		m_parentCpu = kcov_get_current_cpu();
+		memset(&m_solibThread, 0, sizeof(m_solibThread));
 		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 	}
 
@@ -156,7 +162,8 @@ public:
 		putenv(m_envString);
 
 		m_solibPath = kcov_solib_pipe_path;
-		m_solibThread = std::thread(&Ptrace::solibThreadMain, this);
+		pthread_create(&m_solibThread, NULL,
+				Ptrace::threadStatic, (void *)this);
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
 		bool res = false;
@@ -241,6 +248,16 @@ public:
 		}
 
 		close(fd);
+	}
+
+	static void *threadStatic(void *pThis)
+	{
+		Ptrace *p = (Ptrace *)pThis;
+
+		p->solibThreadMain();
+
+		// Never reached
+		return NULL;
 	}
 
 	void clearAllBreakpoints()
@@ -600,7 +617,7 @@ private:
 	PendingBreakpointList_t m_pendingBreakpoints;
 	PhdrList_t m_phdrs;
 	std::mutex m_phdrListMutex;
-	std::thread m_solibThread;
+	pthread_t m_solibThread;
 
 	pid_t m_activeChild;
 	pid_t m_child;
