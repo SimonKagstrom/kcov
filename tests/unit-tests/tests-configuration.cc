@@ -122,7 +122,7 @@ TEST(configuration)
 	ASSERT_TRUE(res);
 	ASSERT_TRUE(conf->getAttachPid() == 100U);
 
-	ASSERT_TRUE(g_kcov_debug_mask == 0);
+	ASSERT_TRUE(g_kcov_debug_mask == STATUS_MSG);
 	res = runParse(fmt("--debug=7 /tmp/vobb %s", filename.c_str()));
 	ASSERT_TRUE(res);
 	ASSERT_TRUE(g_kcov_debug_mask == 7);
