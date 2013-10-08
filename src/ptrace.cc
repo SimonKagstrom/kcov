@@ -230,8 +230,10 @@ public:
 
 			if (!p)
 				continue;
-			struct phdr_data *cpy = (struct phdr_data*)xmalloc(sizeof(*p));
-			memcpy(cpy, p, sizeof(*p));
+			size_t sz = sizeof(struct phdr_data) + p->n_entries * sizeof(struct phdr_data_entry);
+			struct phdr_data *cpy = (struct phdr_data*)xmalloc(sz);
+
+			memcpy(cpy, p, sz);
 
 			m_phdrListMutex.lock();
 			m_phdrs.push_back(cpy);
@@ -320,6 +322,8 @@ public:
 
 			setupAllBreakpoints();
 		}
+
+		free(p);
 	}
 
 	const Event waitEvent()
