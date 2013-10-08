@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <semaphore.h>
 
 #include <string>
 
@@ -114,3 +115,26 @@ void kcov_tie_process_to_cpu(pid_t pid, int cpu);
 void mdelay(unsigned int ms);
 
 uint64_t get_ms_timestamp(void);
+
+
+class Semaphore
+{
+private:
+	sem_t m_sem;
+
+public:
+	Semaphore()
+	{
+		sem_init(&m_sem, 0, 0);
+	}
+
+	void notify()
+	{
+		sem_post(&m_sem);
+	}
+
+	void wait()
+	{
+		sem_wait(&m_sem);
+	}
+};
