@@ -1,4 +1,18 @@
 Kcov (12):
+	* Fix lockup bug in the solib code path (where processes with
+	  many solibs would hang at startup)
+
+	* Correct a crash in the reporter
+
+	* Add test case for signals
+
+	* Report from main thread to avoid threading issues
+	
+	* Fairly major refactoring of ptrace code to avoid an issue
+	  where two PTRACE_CONTINUE calls could be done without
+	  waitpid() in between. This would cause crashes in the
+	  traced program.
+
 	* Add support for looking for debug info in separate files
 	  via build-id (Alexander Larsson)
 
