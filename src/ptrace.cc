@@ -101,6 +101,7 @@ class Ptrace : public IEngine
 public:
 	Ptrace() :
 		m_breakpointId(0),
+		m_firstBreakpoint(true),
 		m_activeChild(0),
 		m_child(0),
 		m_firstChild(0),
@@ -235,18 +236,20 @@ public:
 
 			struct phdr_data *p = phdr_data_unmarshal(buf);
 
-			if (!p)
-				continue;
-			size_t sz = sizeof(struct phdr_data) + p->n_entries * sizeof(struct phdr_data_entry);
-			struct phdr_data *cpy = (struct phdr_data*)xmalloc(sz);
+			if (p) {
+				size_t sz = sizeof(struct phdr_data) + p->n_entries * sizeof(struct phdr_data_entry);
+				struct phdr_data *cpy = (struct phdr_data*)xmalloc(sz);
 
-			memcpy(cpy, p, sz);
+				memcpy(cpy, p, sz);
 
-			m_phdrListMutex.lock();
-			m_phdrs.push_back(cpy);
-			m_phdrListMutex.unlock();
+				m_phdrListMutex.lock();
+				m_phdrs.push_back(cpy);
+				m_phdrListMutex.unlock();
+			}
+			m_solibDataReadSemaphore.notify();
 		}
 
+		m_solibDataReadSemaphore.notify();
 		close(fd);
 	}
 
@@ -389,6 +392,11 @@ public:
 				kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
 				if (out.data != -1)
 					singleStep();
+
+				if (IConfiguration::getInstance().getParseSolibs() && m_firstBreakpoint) {
+					m_solibDataReadSemaphore.wait();
+					m_firstBreakpoint = false;
+				}
 
 				return out;
 			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
@@ -538,6 +546,7 @@ private:
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
+
 		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
 
 		return true;
@@ -618,6 +627,8 @@ private:
 	PhdrList_t m_phdrs;
 	std::mutex m_phdrListMutex;
 	pthread_t m_solibThread;
+	Semaphore m_solibDataReadSemaphore;
+	bool m_firstBreakpoint;
 
 	pid_t m_activeChild;
 	pid_t m_child;
