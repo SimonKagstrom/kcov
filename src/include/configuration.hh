@@ -60,6 +60,8 @@ namespace kcov
 
 		virtual bool getParseSolibs() = 0;
 
+		virtual void setParseSolibs(bool on) = 0;
+
 		virtual bool getExitFirstProcess() = 0;
 
 		virtual unsigned int getOutputInterval() = 0;

@@ -343,6 +343,11 @@ public:
 		return m_parseSolibs;
 	}
 
+	void setParseSolibs(bool on)
+	{
+		m_parseSolibs = on;
+	}
+
 	bool getExitFirstProcess()
 	{
 		return m_exitFirstProcess;
