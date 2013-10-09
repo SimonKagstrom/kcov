@@ -116,6 +116,7 @@ void mdelay(unsigned int ms);
 
 uint64_t get_ms_timestamp(void);
 
+bool machine_is_64bit(void);
 
 class Semaphore
 {

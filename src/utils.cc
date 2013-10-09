@@ -226,3 +226,8 @@ uint64_t get_ms_timestamp(void)
 {
 	return ((uint64_t)time(NULL)) * 1000;
 }
+
+bool machine_is_64bit(void)
+{
+	return sizeof(unsigned long) == 8;
+}
