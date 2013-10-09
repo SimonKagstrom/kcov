@@ -155,6 +155,8 @@ public:
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
+		if (IElf::getInstance().elfIs64Bit() != machine_is_64bit())
+			IConfiguration::getInstance().setParseSolibs(false);
 
 		if (IConfiguration::getInstance().getParseSolibs()) {
 			if (file_exists(kcov_solib_path.c_str()))
