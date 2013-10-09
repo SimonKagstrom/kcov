@@ -58,6 +58,11 @@ public:
 		return m_checksum;
 	}
 
+	bool elfIs64Bit()
+	{
+		return !m_elfIs32Bit;
+	}
+
 	bool addFile(const char *filename, struct phdr_data_entry *data = 0)
 	{
 		free((void *)m_filename);
@@ -95,6 +100,16 @@ public:
 		}
 		if (elf_kind(elf) == ELF_K_NONE)
 			out = false;
+
+		if (m_isMainFile) {
+			char *raw;
+			size_t sz;
+
+			raw = elf_getident(elf, &sz);
+
+			if (raw && sz > EI_CLASS)
+				m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
+		}
 
 		elf_end(elf);
 
@@ -289,8 +304,6 @@ out_err:
 		size_t shstrndx;
 		bool ret = false;
 		bool setupSegments = false;
-		size_t sz;
-		char *raw;
 		int fd;
 		unsigned int i;
 
@@ -304,11 +317,6 @@ out_err:
 				error("elf_begin failed on %s\n", m_filename);
 				goto out_open;
 		}
-
-		raw = elf_getident(m_elf, &sz);
-
-		if (raw && sz > EI_CLASS)
-			m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
 
 		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
 				error("elf_getshstrndx failed on %s\n", m_filename);

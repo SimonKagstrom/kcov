@@ -41,5 +41,7 @@ namespace kcov
 		virtual bool parse() = 0;
 
 		virtual uint64_t getChecksum() = 0;
+
+		virtual bool elfIs64Bit() = 0;
 	};
 }
