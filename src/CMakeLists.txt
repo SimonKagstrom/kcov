@@ -81,6 +81,7 @@ target_link_libraries(${KCOV}
 	stdc++
 	dl
 	pthread
+	m
 	z)
 
 target_link_libraries(${KCOV_PROFILER}
@@ -89,6 +90,7 @@ target_link_libraries(${KCOV_PROFILER}
 	stdc++
 	dl
 	pthread
+	m
 	z)
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
