@@ -115,7 +115,6 @@ namespace kcov
 		std::string m_summaryDbFileName;
 
 		WriterList_t m_writers;
-		pthread_t m_thread;
 	};
 
 	static OutputHandler *instance;
