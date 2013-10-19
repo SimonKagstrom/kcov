@@ -42,7 +42,7 @@ Kcov (12):
 	* closedir() was not called from the html-writer, which creates
 	  a resource leak (Karl Vogel)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Oct 19 11:06:42 CEST 2013
 	
 
 Kcov (11):
