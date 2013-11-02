@@ -20,7 +20,7 @@ struct phdr_data_entry
 	uint32_t n_segments;
 
 	// "Reasonable" max
-	struct phdr_data_segment segments[8];
+	struct phdr_data_segment segments[64];
 };
 
 struct phdr_data
