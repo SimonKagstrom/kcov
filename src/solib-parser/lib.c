@@ -20,7 +20,16 @@ static struct phdr_data *phdr_data;
 
 static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 {
-	phdr_data_add(&phdr_data, info);
+	phdr_data_add(phdr_data, info);
+
+	return 0;
+}
+
+static int phdrSizeCallback(struct dl_phdr_info *info, size_t size, void *data)
+{
+	size_t *ps = (size_t *)data;
+
+	*ps += sizeof(struct phdr_data_entry);
 
 	return 0;
 }
@@ -30,6 +39,7 @@ void  __attribute__((constructor))at_startup(void)
 	char *kcov_solib_path;
 	void *p;
 	ssize_t written;
+	size_t allocSize;
 	size_t sz;
 	int fd;
 
@@ -43,7 +53,15 @@ void  __attribute__((constructor))at_startup(void)
 		return;
 	}
 
-	phdr_data = phdr_data_new();
+	allocSize = sizeof(struct phdr_data);
+	dl_iterate_phdr(phdrSizeCallback, &allocSize);
+
+	phdr_data = phdr_data_new(allocSize);
+	if (!phdr_data) {
+		fprintf(stderr, "kcov-solib: Can't allocate %zu bytes\n", allocSize);
+		return;
+	}
+
 
 	dl_iterate_phdr(phdrCallback, NULL);
 

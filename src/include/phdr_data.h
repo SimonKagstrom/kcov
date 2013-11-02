@@ -34,9 +34,9 @@ struct phdr_data
 
 struct dl_phdr_info;
 
-struct phdr_data *phdr_data_new(void);
+struct phdr_data *phdr_data_new(size_t size);
 
-void phdr_data_add(struct phdr_data **p, struct dl_phdr_info *info);
+void phdr_data_add(struct phdr_data *p, struct dl_phdr_info *info);
 
 void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz);
 

@@ -12,9 +12,9 @@
 #define KCOV_MAGIC         0x6b636f76 /* "kcov" */
 #define KCOV_SOLIB_VERSION 2
 
-struct phdr_data *phdr_data_new(void)
+struct phdr_data *phdr_data_new(size_t allocSize)
 {
-	struct phdr_data *p = malloc(sizeof(struct phdr_data));
+	struct phdr_data *p = malloc(allocSize);
 
 	p->magic = KCOV_MAGIC;
 	p->version = KCOV_SOLIB_VERSION;
@@ -23,19 +23,11 @@ struct phdr_data *phdr_data_new(void)
 	return p;
 }
 
-void phdr_data_add(struct phdr_data **p_in, struct dl_phdr_info *info)
+void phdr_data_add(struct phdr_data *p, struct dl_phdr_info *info)
 {
-	struct phdr_data *p = *p_in;
 	uint32_t n = p->n_entries + 1;
 	uint32_t curEntry = p->n_entries;
 	int phdr;
-
-	p = realloc(p, sizeof(struct phdr_data) + n * sizeof(struct phdr_data_entry));
-	if (!p) {
-		fprintf(stderr, "Can't allocate phdr data");
-
-		return;
-	}
 
 	struct phdr_data_entry *cur = &p->entries[curEntry];
 
@@ -64,8 +56,6 @@ void phdr_data_add(struct phdr_data **p_in, struct dl_phdr_info *info)
 	}
 
 	p->n_entries = n;
-
-	*p_in = p;
 }
 
 void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz)
