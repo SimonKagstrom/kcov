@@ -12,6 +12,7 @@ find_package (LibDwarf REQUIRED)
 project (kcov)
 set (KCOV kcov)
 set (KCOV_PROFILER kcov-profiler)
+#set (CMAKE_EXE_LINKER_FLAGS "-static")
 
 set (SOLIB kcov_sowrapper)
 
