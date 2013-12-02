@@ -107,7 +107,8 @@ public:
 		m_firstChild(0),
 		m_ldPreloadString(NULL),
 		m_envString(NULL),
-		m_parentCpu(kcov_get_current_cpu())
+		m_parentCpu(kcov_get_current_cpu()),
+		m_solibFileOpen(false)
 	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
@@ -227,6 +228,8 @@ public:
 
 		if (fd < 0)
 			return;
+
+		m_solibFileOpen = true;
 
 		while (1) {
 			int r = read(fd, buf, sizeof(buf));
@@ -395,7 +398,7 @@ public:
 				if (out.data != -1)
 					singleStep();
 
-				if (IConfiguration::getInstance().getParseSolibs() && m_firstBreakpoint) {
+				if (m_solibFileOpen && m_firstBreakpoint) {
 					m_solibDataReadSemaphore.wait();
 					m_firstBreakpoint = false;
 				}
@@ -642,6 +645,8 @@ private:
 	char *m_envString;
 
 	int m_parentCpu;
+
+	bool m_solibFileOpen;
 };
 
 IEngine &IEngine::getInstance()

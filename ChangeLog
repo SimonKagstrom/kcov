@@ -1,4 +1,8 @@
 Kcov (13):
+	* Don't hang the kcov main process if a breakpoint comes in
+	  before the solib handler constructor has executed (depends on
+	  the construction order)
+
 	* Correct bug with realloc in solib handling (malloc all
 	  data once only)
 
