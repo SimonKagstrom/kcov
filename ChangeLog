@@ -6,7 +6,7 @@ Kcov (13):
 	* Correct bug with realloc in solib handling (malloc all
 	  data once only)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Dec  8 19:34:37 CET 2013
 
 Kcov (12):
 	* Fix lockup bug in the solib code path (where processes with
