@@ -27,20 +27,28 @@ using namespace kcov;
 #define str(s) #s
 #define xstr(s) str(s)
 
+enum
+{
+	i386_EIP = 12,
+	x86_64_RIP = 16,
+	ppc_NIP = 32,
+};
 
 static unsigned long getAligned(unsigned long addr)
 {
 	return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
 }
 
-static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
+static unsigned long arch_getPcFromRegs(unsigned long *regs)
 {
 	unsigned long out;
 
 #if defined(__i386__)
-	out = regs->eip - 1;
+	out = regs[i386_EIP] - 1;
 #elif defined(__x86_64__)
-	out = regs->rip - 1;
+	out = regs[x86_64_RIP] - 1;
+#elif defined(__powerpc__)
+	out = regs[ppc_NIP];
 #else
 # error Unsupported architecture
 #endif
@@ -48,12 +56,14 @@ static unsigned long arch_getPcFromRegs(struct user_regs_struct *regs)
 	return out;
 }
 
-static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
+static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 {
 #if defined(__i386__)
-	regs->eip--;
+	regs[i386_EIP]--;
 #elif defined(__x86_64__)
-	regs->rip--;
+	regs[x86_64_RIP]--;
+#elif defined(__powerpc__)
+	// Do nothing
 #else
 # error Unsupported architecture
 #endif
@@ -62,14 +72,17 @@ static void arch_adjustPcAfterBreakpoint(struct user_regs_struct *regs)
 
 static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_data)
 {
-	unsigned long aligned_addr = getAligned(addr);
-	unsigned long offs = addr - aligned_addr;
-	unsigned long shift = 8 * offs;
 	unsigned long val;
 
 #if defined(__i386__) || defined(__x86_64__)
+	unsigned long aligned_addr = getAligned(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+
 	val = (old_data & ~(0xffUL << shift)) |
 			(0xccUL << shift);
+#elif defined(__powerpc__)
+	val =  0x7fe00008; /* tw */
 #else
 # error Unsupported architecture
 #endif
@@ -79,14 +92,17 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 
 static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_data, unsigned long cur_data)
 {
+	unsigned long val;
+#if defined(__i386__) || defined(__x86_64__)
 	unsigned long aligned_addr = getAligned(addr);
 	unsigned long offs = addr - aligned_addr;
 	unsigned long shift = 8 * offs;
 	unsigned long old_byte = (old_data >> shift) & 0xffUL;
-	unsigned long val;
-#if defined(__i386__) || defined(__x86_64__)
+
 	val = (cur_data & ~(0xffUL << shift)) |
 			(old_byte << shift);
+#elif defined(__powerpc__)
+	val = old_data;
 #else
 # error Unsupported architecture
 #endif
@@ -306,13 +322,13 @@ public:
 
 	void singleStep()
 	{
-		struct user_regs_struct regs;
+		unsigned long regs[1024];
 
-		ptrace(PTRACE_GETREGS, m_activeChild, 0, &regs);
+		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
 
 		// Step back one instruction
-		arch_adjustPcAfterBreakpoint(&regs);
-		ptrace(PTRACE_SETREGS, m_activeChild, 0, &regs);
+		arch_adjustPcAfterBreakpoint(regs);
+		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
 	}
 
 	void checkSolibData()
@@ -589,31 +605,31 @@ private:
 		return true;
 	}
 
-	unsigned long getPcFromRegs(struct user_regs_struct *regs)
+	unsigned long getPcFromRegs(unsigned long *regs)
 	{
 		return arch_getPcFromRegs(regs);
 	}
 
 	unsigned long getPc(int pid)
 	{
-		struct user_regs_struct regs;
+		unsigned long regs[1024];
 
 		memset(&regs, 0, sizeof(regs));
-		ptrace(PTRACE_GETREGS, pid, 0, &regs);
+		ptrace((__ptrace_request)PTRACE_GETREGS, pid, 0, &regs);
 
-		return getPcFromRegs(&regs);
+		return getPcFromRegs(regs);
 	}
 
 	unsigned long peekWord(unsigned long addr)
 	{
 		unsigned long aligned = getAligned(addr);
 
-		return ptrace(PTRACE_PEEKTEXT, m_activeChild, aligned, 0);
+		return ptrace((__ptrace_request)PTRACE_PEEKTEXT, m_activeChild, aligned, 0);
 	}
 
 	void pokeWord(unsigned long addr, unsigned long val)
 	{
-		ptrace(PTRACE_POKETEXT, m_activeChild, getAligned(addr), val);
+		ptrace((__ptrace_request)PTRACE_POKETEXT, m_activeChild, getAligned(addr), val);
 	}
 
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
