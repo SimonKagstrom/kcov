@@ -101,11 +101,15 @@ int main(int argc, const char *argv[])
 	IReporter &reporter = IReporter::create(*elf, collector);
 	IOutputHandler &output = IOutputHandler::create(reporter);
 
+	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
+
 	// Register writers
-	IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
-	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
-	output.registerWriter(htmlWriter);
-	output.registerWriter(coberturaWriter);
+	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
+		IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
+		IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
+		output.registerWriter(htmlWriter);
+		output.registerWriter(coberturaWriter);
+	}
 
 	g_output = &output;
 	g_reporter = &reporter;
@@ -117,7 +121,15 @@ int main(int argc, const char *argv[])
 		daemonize();
 
 	output.start();
-	int ret = collector.run();
+
+	int ret = 0;
+
+	if (runningMode != IConfiguration::MODE_REPORT_ONLY) {
+		ret = collector.run();
+	} else {
+		elf->parse();
+	}
+
 	output.stop();
 	IEngine::getInstance().kill();
 

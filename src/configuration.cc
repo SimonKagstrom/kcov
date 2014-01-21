@@ -28,6 +28,7 @@ public:
 		m_parseSolibs = true;
 		m_exitFirstProcess = false;
 		m_outputInterval = 1000;
+		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 	}
 
 	bool usage(void)
@@ -48,6 +49,9 @@ public:
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
+				" --collect-only          Only collect coverage data (don't produce HTML/"
+				"                         Cobertura output)\n"
+				" --report-only           Produce output from stored databases, don't collect\n"
 				" --include-path=path     comma-separated paths to include in the report\n"
 				" --exclude-path=path     comma-separated paths to exclude from the report\n"
 				" --include-pattern=pat   comma-separated path patterns to include in the report\n"
@@ -61,6 +65,8 @@ public:
 				"  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
 				"  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
 				"                                                         # including /src/frodo\n"
+				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
+				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
 				"",
 				m_lowLimit, m_highLimit, m_outputInterval, m_pathStripLevel);
 		return false;
@@ -89,6 +95,8 @@ public:
 				{"include-path", required_argument, 0, 'I'},
 				{"debug", required_argument, 0, 'D'},
 				{"replace-src-path", required_argument, 0, 'R'},
+				{"collect-only", no_argument, 0, 'C'},
+				{"report-only", no_argument, 0, 'r'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -190,6 +198,12 @@ public:
 			case 'X':
 				m_excludePath = getCommaSeparatedList(std::string(optarg));
 				expandPath(m_excludePath);
+				break;
+			case 'C':
+				m_runMode = IConfiguration::MODE_COLLECT_ONLY;
+				break;
+			case 'r':
+				m_runMode = IConfiguration::MODE_REPORT_ONLY;
 				break;
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
@@ -363,6 +377,11 @@ public:
 		return m_outputInterval;
 	}
 
+	RunMode_t getRunningMode()
+	{
+		return m_runMode;
+	}
+
 	// "private", but we ignore that in the unit test
 	typedef std::map<unsigned int, std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
@@ -460,6 +479,7 @@ public:
 	StrVecMap_t m_onlyIncludePath;
 	enum OutputType m_outputType;
 	unsigned int m_outputInterval;
+	RunMode_t m_runMode;
 };
 
 

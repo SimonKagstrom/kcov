@@ -23,6 +23,13 @@ namespace kcov
 			OUTPUT_PROFILER
 		};
 
+		typedef enum
+		{
+			MODE_COLLECT_ONLY       = 1,
+			MODE_REPORT_ONLY        = 2,
+			MODE_COLLECT_AND_REPORT = 3,
+		} RunMode_t;
+
 		virtual ~IConfiguration() {}
 
 		virtual void printUsage() = 0;
@@ -65,6 +72,8 @@ namespace kcov
 		virtual bool getExitFirstProcess() = 0;
 
 		virtual unsigned int getOutputInterval() = 0;
+
+		virtual RunMode_t getRunningMode() = 0;
 
 
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
