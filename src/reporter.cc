@@ -8,10 +8,12 @@
 #include <list>
 #include <unordered_map>
 
+#include "swap-endian.hh"
+
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 1
+#define KCOV_DB_VERSION 2
 
 struct marshalHeaderStruct
 {
@@ -178,9 +180,9 @@ private:
 	{
 		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p;
 
-		hdr->magic = KCOV_MAGIC;
-		hdr->db_version = KCOV_DB_VERSION;
-		hdr->checksum = m_elf.getChecksum();
+		hdr->magic = to_be<uint32_t>(KCOV_MAGIC);
+		hdr->db_version = to_be<uint32_t>(KCOV_DB_VERSION);
+		hdr->checksum = to_be<uint64_t>(m_elf.getChecksum());
 
 		return p + sizeof(struct marshalHeaderStruct);
 	}
@@ -189,13 +191,13 @@ private:
 	{
 		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p;
 
-		if (hdr->magic != KCOV_MAGIC)
+		if (be_to_host<uint32_t>(hdr->magic) != KCOV_MAGIC)
 			return NULL;
 
-		if (hdr->db_version != KCOV_DB_VERSION)
+		if (be_to_host<uint32_t>(hdr->db_version) != KCOV_DB_VERSION)
 			return NULL;
 
-		if (hdr->checksum != m_elf.getChecksum())
+		if (be_to_host<uint64_t>(hdr->checksum) != m_elf.getChecksum())
 			return NULL;
 
 		return p + sizeof(struct marshalHeaderStruct);
@@ -318,8 +320,8 @@ private:
 					it != m_addrs.end();
 					it++) {
 				// Address and number of hits
-				*data++ = (uint64_t)it->first;
-				*data++ = (uint64_t)it->second;
+				*data++ = to_be<uint64_t>(it->first);
+				*data++ = to_be<uint64_t>(it->second);
 			}
 
 			return (uint8_t *)data;
@@ -330,8 +332,8 @@ private:
 		{
 			uint64_t *data = (uint64_t *)p;
 
-			*outAddr = *data++;
-			*outHits = *data++;
+			*outAddr = be_to_host(*data++);
+			*outHits = be_to_host(*data++);
 
 			return (uint8_t *)data;
 		}
