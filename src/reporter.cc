@@ -210,10 +210,8 @@ private:
 		Line *line;
 
 		if (it == m_lines.end()) {
-			if (!file_exists(file))
-				return;
-
 			line = new Line(key);
+
 			m_lines[key] = line;
 		} else {
 			line = it->second;
