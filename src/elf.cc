@@ -109,6 +109,8 @@ public:
 
 			if (raw && sz > EI_CLASS)
 				m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
+
+			m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
 		}
 
 		elf_end(elf);
@@ -125,9 +127,6 @@ out_open:
 
 		if (lstat(m_filename, &st) < 0)
 			return 0;
-
-		if (m_isMainFile)
-			m_checksum = ((uint64_t)st.st_mtim.tv_sec << 32) | ((uint64_t)st.st_mtim.tv_nsec);
 
 		parseOneElf();
 		parseOneDwarf();
