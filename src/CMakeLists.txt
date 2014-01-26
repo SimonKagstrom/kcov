@@ -74,18 +74,9 @@ add_custom_command(
 
 
 add_executable (${KCOV} ${${KCOV}_SRCS} library.c)
-add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
+#add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 
 target_link_libraries(${KCOV}
-	${LIBDWARF_LIBRARIES}
-	${LIBELF_LIBRARIES}
-	stdc++
-	dl
-	pthread
-	m
-	z)
-
-target_link_libraries(${KCOV_PROFILER}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	stdc++
