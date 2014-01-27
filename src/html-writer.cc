@@ -229,18 +229,14 @@ private:
 		std::map<std::string, std::string> fileListByName;
 
 		if (type == IConfiguration::OUTPUT_PROFILER) {
-			for (FileMap_t::iterator it = m_files.begin();
-					it != m_files.end();
-					it++) {
-				File *file = it->second;
+			for (const auto &it : m_files) {
+				auto file = it.second;
 
 				nTotalExecutedAddresses += file->m_executedLines;
 			}
 		}
-		for (FileMap_t::iterator it = m_files.begin();
-				it != m_files.end();
-				it++) {
-			File *file = it->second;
+		for (const auto &it : m_files) {
+			auto file = it.second;
 			unsigned int nExecutedLines = file->m_executedLines;
 			unsigned int nCodeLines = file->m_codeLines;
 			double percent = 0;
@@ -305,34 +301,24 @@ private:
 		}
 
 		if (IConfiguration::getInstance().getSortType() == IConfiguration::PERCENTAGE) {
-			for (std::multimap<double, std::string>::iterator it = fileListByPercent.begin();
-					it != fileListByPercent.end();
-					it++)
-				s = s + it->second;
+			for (const auto &it : fileListByPercent)
+				s = s + it.second;
 		}
 		else if (IConfiguration::getInstance().getSortType() == IConfiguration::REVERSE_PERCENTAGE) {
-			for (std::multimap<double, std::string>::iterator it = fileListByPercent.begin();
-					it != fileListByPercent.end();
-					it++)
-				s = it->second + s;
+			for (const auto &it : fileListByPercent)
+				s = it.second + s;
 		}
 		else if (IConfiguration::getInstance().getSortType() == IConfiguration::UNCOVERED_LINES) {
-			for (std::multimap<double, std::string>::iterator it = fileListByUncoveredLines.begin();
-					it != fileListByUncoveredLines.end();
-					it++)
-				s = it->second + s; // Sort backwards
+			for (const auto &it : fileListByUncoveredLines)
+				s = it.second + s; // Sort backwards
 		}
 		else if (IConfiguration::getInstance().getSortType() == IConfiguration::FILE_LENGTH) {
-			for (std::multimap<double, std::string>::iterator it = fileListByFileLength.begin();
-					it != fileListByFileLength.end();
-					it++)
-				s = it->second + s; // Ditto
+			for (const auto &it : fileListByFileLength)
+				s = it.second + s; // Ditto
 		}
 		else {
-			for (std::map<std::string, std::string>::iterator it = fileListByName.begin();
-					it != fileListByName.end();
-					it++)
-				s = s + it->second;
+			for (const auto &it : fileListByName)
+				s = s + it.second;
 		}
 
 		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(NULL);
@@ -414,13 +400,8 @@ private:
 
 	void write()
 	{
-		for (FileMap_t::iterator it = m_files.begin();
-				it != m_files.end();
-				it++) {
-			File *file = it->second;
-
-			writeOne(file);
-		}
+		for (const auto &it : m_files)
+			writeOne(it.second);
 
 		setupCommonPaths();
 

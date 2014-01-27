@@ -131,13 +131,9 @@ out_open:
 		parseOneElf();
 		parseOneDwarf();
 
-		for (FileListenerList_t::iterator it = m_fileListeners.begin();
-				it != m_fileListeners.end();
-				it++) {
-			IFileListener *cur = *it;
+		for (const auto &it : m_fileListeners)
+			it->onFile(m_filename, !m_isMainFile);
 
-			cur->onFile(m_filename, !m_isMainFile);
-		}
 		// After the first, all other are solibs
 		m_isMainFile = false;
 
@@ -276,10 +272,8 @@ out_open:
 
 					if (m_filter.runFilters(file_path) == true)
 					{
-						for (LineListenerList_t::iterator it = m_lineListeners.begin();
-								it != m_lineListeners.end();
-								it++)
-							(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
+						for (const auto &it : m_lineListeners)
+							it->onLine(file_path, line_nr, adjustAddressBySegment(addr));
 					}
 
 					free((void *)full_file_path);
@@ -447,11 +441,8 @@ private:
 
 	bool addressIsValid(uint64_t addr)
 	{
-		for (SegmentList_t::iterator it = m_executableSegments.begin();
-				it != m_executableSegments.end(); it++) {
-			Segment cur = *it;
-
-			if (addr >= cur.m_paddr && addr < cur.m_paddr + cur.m_size) {
+		for (const auto &it : m_executableSegments) {
+			if (addr >= it.m_paddr && addr < it.m_paddr + it.m_size) {
 				return true;
 			}
 		}
@@ -461,12 +452,9 @@ private:
 
 	uint64_t adjustAddressBySegment(uint64_t addr)
 	{
-		for (SegmentList_t::iterator it = m_curSegments.begin();
-				it != m_curSegments.end(); it++) {
-			Segment cur = *it;
-
-			if (addr >= cur.m_paddr && addr < cur.m_paddr + cur.m_size) {
-				addr = (addr - cur.m_paddr + cur.m_vaddr);
+		for (const auto &it : m_curSegments) {
+			if (addr >= it.m_paddr && addr < it.m_paddr + it.m_size) {
+				addr = (addr - it.m_paddr + it.m_vaddr);
 				break;
 			}
 		}

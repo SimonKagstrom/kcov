@@ -404,14 +404,12 @@ public:
 
 	void expandPath(StrVecMap_t &paths)
 	{
-		for (StrVecMap_t::iterator it = paths.begin();
-				it != paths.end();
-				it++) {
-			std::string s = it->second;
+		for (auto &it : paths) {
+			std::string &s = it.second;
 
 			if (s[0] == '~')
 				s = get_home() + s.substr(1, s.size());
-			it->second = s;
+			it.second = s;
 		}
 	}
 

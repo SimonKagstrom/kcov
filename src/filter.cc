@@ -68,19 +68,15 @@ private:
 			if (m_includePatterns.size() != 0)
 				out = false;
 
-			for (std::map<unsigned int, std::string>::iterator it = m_includePatterns.begin();
-					it != m_includePatterns.end();
-					it++) {
-				std::string &pattern = it->second;
+			for (const auto &it : m_includePatterns) {
+				const auto &pattern = it.second;
 
 				if (file.find(pattern) != std::string::npos)
 					out = true;
 			}
 
-			for (std::map<unsigned int, std::string>::iterator it = m_excludePatterns.begin();
-					it != m_excludePatterns.end();
-					it++) {
-				std::string &pattern = it->second;
+			for (const auto &it : m_excludePatterns) {
+				const auto &pattern = it.second;
 
 				if (file.find(pattern) != std::string::npos)
 					out = false;
@@ -125,19 +121,15 @@ private:
 			std::string pathStr(path);
 			free(path);
 
-			for (std::map<unsigned int, std::string>::iterator it = m_includePaths.begin();
-					it != m_includePaths.end();
-					it++) {
-				std::string &pathPattern = it->second;
+			for (const auto &it : m_includePaths) {
+				const auto &pathPattern = it.second;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = true;
 			}
 
-			for (std::map<unsigned int, std::string>::iterator it = m_excludePaths.begin();
-					it != m_excludePaths.end();
-					it++) {
-				std::string &pathPattern = it->second;
+			for (const auto &it : m_excludePaths) {
+				const auto &pathPattern = it.second;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = false;

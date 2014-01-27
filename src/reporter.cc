@@ -64,10 +64,8 @@ public:
 		unsigned int executedLines = 0;
 		unsigned int nrLines = 0;
 
-		for (LineMap_t::iterator it = m_lines.begin();
-				it != m_lines.end();
-				it++) {
-			Line *cur = it->second;
+		for (const auto &it : m_lines) {
+			Line *cur = it.second;
 
 			if (!m_filter.runFilters(cur->m_file))
 				continue;
@@ -91,10 +89,8 @@ public:
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
-		for (LineMap_t::iterator it = m_lines.begin();
-				it != m_lines.end();
-				it++) {
-			Line *cur = it->second;
+		for (const auto &it : m_lines) {
+			Line *cur = it.second;
 
 			p = cur->marshal(p);
 		}
@@ -118,10 +114,8 @@ public:
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
 		// Should already be 0, but anyway
-		for (AddrToLineMap_t::iterator it = m_addrToLine.begin();
-				it != m_addrToLine.end();
-				it++)
-			it->second->clearHits();
+		for (const auto &it : m_addrToLine)
+			it.second->clearHits();
 
 		for (size_t i = 0; i < n; i++) {
 			unsigned long addr;
@@ -164,10 +158,8 @@ private:
 	{
 		size_t out = 0;
 
-		for (LineMap_t::iterator it = m_lines.begin();
-				it != m_lines.end();
-				it++) {
-			Line *cur = it->second;
+		for (const auto &it : m_lines) {
+			Line *cur = it.second;
 
 			out += cur->m_addrs.size();
 		}
@@ -289,20 +281,16 @@ private:
 
 		void clearHits()
 		{
-			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
-					it != m_addrs.end();
-					it++)
-				it->second = 0;
+			for (auto &it : m_addrs)
+				it.second = 0;
 		}
 
 		unsigned int hits()
 		{
 			unsigned int out = 0;
 
-			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
-					it != m_addrs.end();
-					it++)
-				out += it->second;
+			for (const auto &it : m_addrs)
+				out += it.second;
 
 			return out;
 		}
@@ -316,12 +304,10 @@ private:
 		{
 			uint64_t *data = (uint64_t *)start;
 
-			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
-					it != m_addrs.end();
-					it++) {
+			for (const auto &it : m_addrs) {
 				// Address and number of hits
-				*data++ = to_be<uint64_t>(it->first);
-				*data++ = to_be<uint64_t>(it->second);
+				*data++ = to_be<uint64_t>(it.first);
+				*data++ = to_be<uint64_t>(it.second);
 			}
 
 			return (uint8_t *)data;

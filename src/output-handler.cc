@@ -71,10 +71,8 @@ namespace kcov
 
 		void start()
 		{
-			for (WriterList_t::iterator it = m_writers.begin();
-					it != m_writers.end();
-					it++)
-				(*it)->onStartup();
+			for (const auto &it : m_writers)
+				it->onStartup();
 		}
 
 		void stop()
@@ -89,18 +87,14 @@ namespace kcov
 
 			free(data);
 
-			for (WriterList_t::iterator it = m_writers.begin();
-					it != m_writers.end();
-					it++)
-				(*it)->onStop();
+			for (const auto &it : m_writers)
+				it->onStop();
 		}
 
 		void produce()
 		{
-			for (WriterList_t::iterator it = m_writers.begin();
-					it != m_writers.end();
-					it++)
-				(*it)->write();
+			for (const auto &it : m_writers)
+				it->write();
 		}
 
 
