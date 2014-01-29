@@ -60,6 +60,12 @@ Comma-separated list of patterns to exclude from the report.
 .TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
+.TP
+\fB\-\-collect\-only
+Only collect coverage data, don't produce HTML/Cobertura output
+.TP
+\fB\-\-report\-only
+Only report HTML/Cobertura output, don't collect data
 .SH EXAMPLES
 .PP
 Check coverage for ./frodo and generate HTML output in /tmp/kcov and cobertura output in /tmp/kcov/frodo/cobertura.xml
@@ -72,6 +78,14 @@ Check coverage for ./frodo but only include source files names with the string s
 .PP
 .RS
 kcov \-\-include\-pattern=src/frodo /tmp/kcov ./frodo
+.RE
+.PP
+Same as above but split collecting and reporting (perhaps on two different computers)
+.PP
+.RS
+kcov --collect-only /tmp/kcov ./frodo
+.PP
+kcov --report-only \-\-include\-pattern=src/frodo /tmp/kcov ./frodo
 .RE
 .SH HTML OUTPUT
 .PP
