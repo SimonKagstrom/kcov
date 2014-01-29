@@ -49,7 +49,7 @@ public:
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
-				" --collect-only          Only collect coverage data (don't produce HTML/"
+				" --collect-only          Only collect coverage data (don't produce HTML/\n"
 				"                         Cobertura output)\n"
 				" --report-only           Produce output from stored databases, don't collect\n"
 				" --include-path=path     comma-separated paths to include in the report\n"
