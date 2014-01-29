@@ -1,3 +1,15 @@
+Kcov (14):
+	* Add two options, --collect-only and --report-only to only collect
+	  coverage and produce Cobertura/HTML output respectively. Can be
+	  used for example on embedded systems where the source code isn't
+	  available.
+
+	* PowerPC support has been added (thanks to Aleksandr Vilchinskii and
+	  Konstantin Polivtsev for testing this)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
+
 Kcov (13):
 	* Don't hang the kcov main process if a breakpoint comes in
 	  before the solib handler constructor has executed (depends on
