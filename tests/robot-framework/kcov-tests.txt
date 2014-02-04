@@ -159,3 +159,15 @@ signals-self
 	Should Contain					${output}	kcov: Process exited with signal 11
     ${output}=   Run				${kcov} ${out} ./signals abrt self
 	Should Contain					${output}	kcov: Process exited with signal 6
+
+collect-only-and-report-only
+	Run								rm -rf ${out}/main-tests/
+    ${no_kcov_rc}=    Run and return RC    ./main-tests
+    ${rc}=    Run and return RC    ${kcov} --collect-only ${out} ./main-tests
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${rc}=    Run and return RC    test -e ${out}/main-tests/cobertura.xml
+    Should be equal as integers    ${rc}    1
+    ${rc}=    Run and return RC    ${kcov} --collect-only ${out} ./main-tests
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
