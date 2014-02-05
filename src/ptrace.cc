@@ -32,6 +32,7 @@ enum
 	i386_EIP = 12,
 	x86_64_RIP = 16,
 	ppc_NIP = 32,
+	arm_PC = 15,
 };
 
 static unsigned long getAligned(unsigned long addr)
@@ -47,6 +48,8 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 	out = regs[i386_EIP] - 1;
 #elif defined(__x86_64__)
 	out = regs[x86_64_RIP] - 1;
+#elif defined(__arm__)
+	out = regs[arm_PC] - 4;
 #elif defined(__powerpc__)
 	out = regs[ppc_NIP];
 #else
@@ -62,6 +65,8 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
+#elif defined(__arm__)
+	regs[arm_PC] -= 4;
 #elif defined(__powerpc__)
 	// Do nothing
 #else
@@ -83,6 +88,8 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 			(0xccUL << shift);
 #elif defined(__powerpc__)
 	val =  0x7fe00008; /* tw */
+#elif defined(__arm__)
+	val = 0x123456; //0xe1200070; /* BKPT */
 #else
 # error Unsupported architecture
 #endif
@@ -101,7 +108,7 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 
 	val = (cur_data & ~(0xffUL << shift)) |
 			(old_byte << shift);
-#elif defined(__powerpc__)
+#elif defined(__powerpc__) || defined(__arm__)
 	val = old_data;
 #else
 # error Unsupported architecture

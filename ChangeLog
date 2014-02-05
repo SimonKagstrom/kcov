@@ -7,7 +7,7 @@ Kcov (14):
 	* PowerPC support has been added (thanks to Aleksandr Vilchinskii and
 	  Konstantin Polivtsev for testing this)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Wed Feb  5 19:42:03 CET 2014
 
 
 Kcov (13):
