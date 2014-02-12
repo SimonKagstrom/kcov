@@ -321,7 +321,7 @@ private:
 				s = s + it.second;
 		}
 
-		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(NULL);
+		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(nullptr);
 
 		write_file((void *)s.c_str(), s.size(), (m_outDirectory + "index.html").c_str());
 
@@ -391,7 +391,7 @@ private:
 					"    </tr>\n";
 
 		}
-		s = getHeader(nTotalCodeLines, nTotalExecutedLines, false) + getIndexHeader() + s + getFooter(NULL);
+		s = getHeader(nTotalCodeLines, nTotalExecutedLines, false) + getIndexHeader() + s + getFooter(nullptr);
 
 		write_file((void *)s.c_str(), s.size(), (m_indexDirectory + "index.html").c_str());
 		closedir(dir);
@@ -472,7 +472,7 @@ private:
 		else if (percentage >= conf.getHighLimit())
 			percentage_text = "Hi";
 
-		t = time(NULL);
+		t = time(nullptr);
 		tm = localtime(&t);
 		strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", tm);
 

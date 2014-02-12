@@ -33,8 +33,8 @@ class ElfInstance : public IElf
 public:
 	ElfInstance() : m_filter(IFilter::getInstance())
 	{
-		m_elf = NULL;
-		m_filename = NULL;
+		m_elf = nullptr;
+		m_filename = nullptr;
 		m_checksum = 0;
 		m_elfIs32Bit = true;
 		m_isMainFile = true;
@@ -93,7 +93,7 @@ public:
 				return false;
 		}
 
-		if (!(elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
+		if (!(elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
 				error("elf_begin failed on %s\n", m_filename);
 				out = false;
 				goto out_open;
@@ -192,7 +192,7 @@ out_open:
 			Dwarf_Die die;
 			unsigned int i;
 
-			if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == NULL)
+			if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == nullptr)
 				goto out_err;
 
 			last_offset = offset;
@@ -256,12 +256,12 @@ out_open:
 					  size_t dwIndex = dwarfPath.find(origRoot);
 					  if (dwIndex != std::string::npos) {
 					    dwarfPath.replace(dwIndex, origRoot.length(), newRoot);
-					    rp = ::realpath(dwarfPath.c_str(), NULL);
+					    rp = ::realpath(dwarfPath.c_str(), nullptr);
 
 					  }
 					}
 					else {
-					  rp = ::realpath(file_path, NULL);
+					  rp = ::realpath(file_path, nullptr);
 					}
 					if (rp)
 					{
@@ -293,7 +293,7 @@ out_err:
 
 	bool parseOneElf()
 	{
-		Elf_Scn *scn = NULL;
+		Elf_Scn *scn = nullptr;
 		size_t shstrndx;
 		bool ret = false;
 		bool setupSegments = false;
@@ -306,7 +306,7 @@ out_err:
 				return false;
 		}
 
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
+		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
 				error("elf_begin failed on %s\n", m_filename);
 				goto out_open;
 		}
@@ -317,7 +317,7 @@ out_err:
 		}
 
 		setupSegments = m_curSegments.size() == 0;
-		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
+		while ( (scn = elf_nextscn(m_elf, scn)) != nullptr )
 		{
 			uint64_t sh_type;
 			uint64_t sh_addr;
@@ -348,7 +348,7 @@ out_err:
 				sh_name = shdr64->sh_name;
 			}
 
-			Elf_Data *data = elf_getdata(scn, NULL);
+			Elf_Data *data = elf_getdata(scn, nullptr);
 
 			name = elf_strptr(m_elf, shstrndx, sh_name);
 			if(!data) {
@@ -396,7 +396,7 @@ out_err:
 			m_executableSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 		}
 		elf_end(m_elf);
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
+		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
 			error("elf_begin failed on %s\n", m_filename);
 			goto out_open;
 		}
@@ -496,9 +496,9 @@ IElf *IElf::open(const char *filename)
 	if (g_instance->addFile(filename) == false) {
 		delete g_instance;
 
-		g_instance = NULL;
+		g_instance = nullptr;
 
-		return NULL;
+		return nullptr;
 	}
 
 	return g_instance;

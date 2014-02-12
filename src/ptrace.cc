@@ -128,8 +128,8 @@ public:
 		m_activeChild(0),
 		m_child(0),
 		m_firstChild(0),
-		m_ldPreloadString(NULL),
-		m_envString(NULL),
+		m_ldPreloadString(nullptr),
+		m_envString(nullptr),
 		m_parentCpu(kcov_get_current_cpu()),
 		m_solibFileOpen(false)
 	{
@@ -189,7 +189,7 @@ public:
 		putenv(m_envString);
 
 		m_solibPath = kcov_solib_pipe_path;
-		pthread_create(&m_solibThread, NULL,
+		pthread_create(&m_solibThread, nullptr,
 				Ptrace::threadStatic, (void *)this);
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
@@ -288,7 +288,7 @@ public:
 		p->solibThreadMain();
 
 		// Never reached
-		return NULL;
+		return nullptr;
 	}
 
 	void clearAllBreakpoints()
@@ -340,7 +340,7 @@ public:
 
 	void checkSolibData()
 	{
-		struct phdr_data *p = NULL;
+		struct phdr_data *p = nullptr;
 
 		m_phdrListMutex.lock();
 		if (!m_phdrs.empty()) {
@@ -405,7 +405,7 @@ public:
 			out.type = ev_signal;
 			out.data = sig;
 
-			ptrace(PTRACE_GETSIGINFO, m_activeChild, NULL, (void *)&siginfo);
+			ptrace(PTRACE_GETSIGINFO, m_activeChild, nullptr, (void *)&siginfo);
 
 			// A trap?
 			if (sig == SIGTRAP || sig == SIGSTOP) {

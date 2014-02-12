@@ -47,7 +47,7 @@ void WriterBase::File::readFile(const char *filename)
 
 	while (1)
 	{
-		char *lineptr = NULL;
+		char *lineptr = nullptr;
 		ssize_t res;
 		size_t n;
 
@@ -75,7 +75,7 @@ void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long add
 		return;
 
 	if (!file_exists(file)) {
-		m_nonExistingFiles[std::string(file)] = NULL;
+		m_nonExistingFiles[std::string(file)] = nullptr;
 		return;
 	}
 

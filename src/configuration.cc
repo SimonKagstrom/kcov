@@ -229,7 +229,7 @@ public:
 			    m_originalPathPrefix = tmpArg.substr(0, tokenPosFront);
 			    m_newPathPrefix = tmpArg.substr(tokenPosFront + 1);
 			    
-			    char* rp = ::realpath(m_newPathPrefix.c_str(), NULL);
+			    char* rp = ::realpath(m_newPathPrefix.c_str(), nullptr);
 			    if (rp) {
 			      free((void*) rp);
 			    }
