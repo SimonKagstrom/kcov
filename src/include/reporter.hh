@@ -4,7 +4,7 @@
 
 namespace kcov
 {
-	class IElf;
+	class IFileParser;
 	class ICollector;
 
 	class IReporter
@@ -52,6 +52,6 @@ namespace kcov
 
 		virtual void stop() = 0;
 
-		static IReporter &create(IElf &elf, ICollector &collector);
+		static IReporter &create(IFileParser &elf, ICollector &collector);
 	};
 }

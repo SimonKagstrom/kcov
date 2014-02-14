@@ -7,7 +7,7 @@ struct phdr_data_entry;
 
 namespace kcov
 {
-	class IElf
+	class IFileParser
 	{
 	public:
 		class ILineListener
@@ -23,12 +23,12 @@ namespace kcov
 			virtual void onFile(const char *file, bool isSolib) = 0;
 		};
 
-		static IElf *open(const char *filename);
+		static IFileParser *open(const char *filename);
 
-		static IElf &getInstance();
+		static IFileParser &getInstance();
 
 
-		virtual ~IElf() {}
+		virtual ~IFileParser() {}
 
 		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
 

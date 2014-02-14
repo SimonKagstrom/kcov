@@ -18,7 +18,7 @@ using namespace kcov;
 class CoberturaWriter : public WriterBase
 {
 public:
-	CoberturaWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
+	CoberturaWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output) :
 		WriterBase(elf, reporter, output),
 		m_output(output)
 	{
@@ -169,7 +169,7 @@ private:
 
 namespace kcov
 {
-	IWriter &createCoberturaWriter(IElf &elf, IReporter &reporter, IOutputHandler &output)
+	IWriter &createCoberturaWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output)
 	{
 		return *new CoberturaWriter(elf, reporter, output);
 	}

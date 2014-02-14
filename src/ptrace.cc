@@ -179,7 +179,7 @@ public:
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
-		if (IElf::getInstance().elfIs64Bit() != machine_is_64bit())
+		if (IFileParser::getInstance().elfIs64Bit() != machine_is_64bit())
 			IConfiguration::getInstance().setParseSolibs(false);
 
 		if (IConfiguration::getInstance().getParseSolibs()) {
@@ -359,7 +359,7 @@ public:
 			if (strstr(cur->name, "libkcov_sowrapper.so"))
 				continue;
 
-			IElf &elf = IElf::getInstance();
+			IFileParser &elf = IFileParser::getInstance();
 
 			elf.addFile(cur->name, cur);
 			elf.parse();

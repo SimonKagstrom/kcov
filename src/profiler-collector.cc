@@ -11,7 +11,7 @@ using namespace kcov;
 class Collector : public ICollector
 {
 public:
-	Collector(IElf &elf) : m_elf(elf)
+	Collector(IFileParser &elf) : m_elf(elf)
 	{
 	}
 
@@ -60,11 +60,11 @@ public:
 private:
 	typedef std::list<ICollector::IListener *> ListenerList_t;
 
-	IElf &m_elf;
+	IFileParser &m_elf;
 	ListenerList_t m_listeners;
 };
 
-ICollector &ICollector::create(IElf *elf)
+ICollector &ICollector::create(IFileParser *elf)
 {
 	return *new Collector(*elf);
 }

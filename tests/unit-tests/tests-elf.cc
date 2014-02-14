@@ -8,7 +8,7 @@
 
 using namespace kcov;
 
-class FunctionListener : public IElf::ILineListener
+class FunctionListener : public IFileParser::ILineListener
 {
 public:
 
@@ -42,15 +42,15 @@ TEST(elf, DEADLINE_REALTIME_MS(30000))
 	char filename[1024];
 	bool res;
 
-	IElf *elf = IElf::open("not-found");
+	IFileParser *elf = IFileParser::open("not-found");
 	ASSERT_TRUE(!elf);
 
 	sprintf(filename, "%s/Makefile", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(!elf);
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
 	elf->registerLineListener(listener);

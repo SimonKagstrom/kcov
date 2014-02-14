@@ -66,7 +66,7 @@ static int filePatternInDir(const char *name, const char *pattern)
 
 TEST(writer, DEADLINE_REALTIME_MS(20000))
 {
-	IElf *elf;
+	IFileParser *elf;
 	bool res;
 	char filename[1024];
 	MockReporter reporter;
@@ -78,7 +78,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writer");
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
 	const char *argv[] = {NULL, outDir.c_str(), filename};
@@ -148,7 +148,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 {
-	IElf *elf;
+	IFileParser *elf;
 	bool res;
 	char filename[1024];
 	MockReporter reporter;
@@ -160,7 +160,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writerSameName");
 
 	sprintf(filename, "%s/same-name-test", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
 	const char *argv[] = {NULL, outDir.c_str(), filename};

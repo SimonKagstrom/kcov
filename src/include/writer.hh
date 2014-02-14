@@ -2,7 +2,7 @@
 
 namespace kcov
 {
-	class IElf;
+	class IFileParser;
 	class IReporter;
 
 	class IWriter

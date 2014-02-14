@@ -108,7 +108,7 @@ static const char css_text[] = "/* Based upon the lcov CSS style, style files ca
 class HtmlWriter : public WriterBase
 {
 public:
-	HtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output) :
+	HtmlWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output) :
 		WriterBase(elf, reporter, output)
 	{
 		m_indexDirectory = output.getBaseDirectory();
@@ -629,7 +629,7 @@ private:
 
 namespace kcov
 {
-	IWriter &createHtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output)
+	IWriter &createHtmlWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output)
 	{
 		return *new HtmlWriter(elf, reporter, output);
 	}

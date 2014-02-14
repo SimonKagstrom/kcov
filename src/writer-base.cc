@@ -14,7 +14,7 @@ struct summaryStruct
 
 int WriterBase::File::fileNameCount;
 
-WriterBase::WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output) :
+WriterBase::WriterBase(IFileParser &elf, IReporter &reporter, IOutputHandler &output) :
 		m_elf(elf), m_reporter(reporter)
 {
 		m_commonPath = "not set";

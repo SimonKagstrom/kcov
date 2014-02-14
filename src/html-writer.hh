@@ -2,9 +2,9 @@
 
 namespace kcov
 {
-	class IElf;
+	class IFileParser;
 	class IReporter;
 	class IOutputHandler;
 
-	IWriter &createHtmlWriter(IElf &elf, IReporter &reporter, IOutputHandler &output);
+	IWriter &createHtmlWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output);
 }

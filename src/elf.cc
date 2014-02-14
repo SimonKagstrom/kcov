@@ -28,7 +28,7 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
-class ElfInstance : public IElf
+class ElfInstance : public IFileParser
 {
 public:
 	ElfInstance() : m_filter(IFilter::getInstance())
@@ -476,7 +476,7 @@ private:
 };
 
 static ElfInstance *g_instance;
-IElf *IElf::open(const char *filename)
+IFileParser *IFileParser::open(const char *filename)
 {
 	static bool initialized = false;
 
@@ -499,7 +499,7 @@ IElf *IElf::open(const char *filename)
 	return g_instance;
 }
 
-IElf &IElf::getInstance()
+IFileParser &IFileParser::getInstance()
 {
 	panic_if (!g_instance,
 			"ELF object not yet created");

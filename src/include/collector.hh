@@ -4,7 +4,7 @@
 
 namespace kcov
 {
-	class IElf;
+	class IFileParser;
 
 	class ICollector
 	{
@@ -15,7 +15,7 @@ namespace kcov
 			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
 		};
 
-		static ICollector &create(IElf *elf);
+		static ICollector &create(IFileParser *elf);
 
 		virtual void registerListener(IListener &listener) = 0;
 

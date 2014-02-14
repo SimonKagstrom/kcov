@@ -19,12 +19,12 @@ DISABLED_TEST(collector)
 {
 	MockEngine &engine = (MockEngine &)IEngine::getInstance();
 	MockCollectorListener listener;
-	IElf *elf;
+	IFileParser *elf;
 	char filename[1024];
 	bool res;
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
 	ICollector &collector = ICollector::create(elf);

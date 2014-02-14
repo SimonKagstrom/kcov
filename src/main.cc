@@ -91,7 +91,7 @@ int main(int argc, const char *argv[])
 		return 1;
 
 	std::string file = conf.getBinaryPath() + conf.getBinaryName();
-	IElf *elf = IElf::open(file.c_str());
+	IFileParser *elf = IFileParser::open(file.c_str());
 	if (!elf) {
 		conf.printUsage();
 		return 1;

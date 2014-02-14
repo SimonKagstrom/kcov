@@ -16,7 +16,7 @@
 
 namespace kcov
 {
-	class OutputHandler : public IOutputHandler, IElf::IFileListener
+	class OutputHandler : public IOutputHandler, IFileParser::IFileListener
 	{
 	public:
 		OutputHandler(IReporter &reporter) : m_reporter(reporter)
@@ -31,7 +31,7 @@ namespace kcov
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
 
-			IElf::getInstance().registerFileListener(*this);
+			IFileParser::getInstance().registerFileListener(*this);
 		}
 
 		std::string getBaseDirectory()

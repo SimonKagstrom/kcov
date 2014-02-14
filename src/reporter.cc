@@ -22,10 +22,10 @@ struct marshalHeaderStruct
 	uint64_t checksum;
 };
 
-class Reporter : public IReporter, public IElf::ILineListener, public ICollector::IListener
+class Reporter : public IReporter, public IFileParser::ILineListener, public ICollector::IListener
 {
 public:
-	Reporter(IElf &elf, ICollector &collector) :
+	Reporter(IFileParser &elf, ICollector &collector) :
 		m_elf(elf), m_collector(collector), m_filter(IFilter::getInstance())
 	{
 		m_elf.registerLineListener(*this);
@@ -335,12 +335,12 @@ private:
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
 
-	IElf &m_elf;
+	IFileParser &m_elf;
 	ICollector &m_collector;
 	IFilter &m_filter;
 };
 
-IReporter &IReporter::create(IElf &elf, ICollector &collector)
+IReporter &IReporter::create(IFileParser &elf, ICollector &collector)
 {
 	return *new Reporter(elf, collector);
 }

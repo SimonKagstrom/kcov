@@ -11,10 +11,10 @@
 
 using namespace kcov;
 
-class Collector : public ICollector, public IElf::ILineListener
+class Collector : public ICollector, public IFileParser::ILineListener
 {
 public:
-	Collector(IElf &elf) : m_elf(elf), m_engine(IEngine::getInstance())
+	Collector(IFileParser &elf) : m_elf(elf), m_engine(IEngine::getInstance())
 	{
 		m_elf.registerLineListener(*this);
 	}
@@ -118,12 +118,12 @@ private:
 	typedef std::list<ICollector::IListener *> ListenerList_t;
 
 	AddrMap_t m_addrs;
-	IElf &m_elf;
+	IFileParser &m_elf;
 	IEngine &m_engine;
 	ListenerList_t m_listeners;
 };
 
-ICollector &ICollector::create(IElf *elf)
+ICollector &ICollector::create(IFileParser *elf)
 {
 	return *new Collector(*elf);
 }

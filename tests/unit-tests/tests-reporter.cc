@@ -37,7 +37,7 @@ public:
 };
 
 
-class ElfListener : public IElf::ILineListener
+class ElfListener : public IFileParser::ILineListener
 {
 public:
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
@@ -55,12 +55,12 @@ public:
 TEST(reporter)
 {
 	ElfListener elfListener;
-	IElf *elf;
+	IFileParser *elf;
 	bool res;
 	char filename[1024];
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IElf::open(filename);
+	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
 	elf->registerLineListener(elfListener);

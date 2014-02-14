@@ -9,14 +9,14 @@
 
 namespace kcov
 {
-	class IElf;
+	class IFileParser;
 	class IReporter;
 	class IOutputHandler;
 
-	class WriterBase : public IElf::ILineListener, public IWriter
+	class WriterBase : public IFileParser::ILineListener, public IWriter
 	{
 	protected:
-		WriterBase(IElf &elf, IReporter &reporter, IOutputHandler &output);
+		WriterBase(IFileParser &elf, IReporter &reporter, IOutputHandler &output);
 
 		class File
 		{
@@ -57,7 +57,7 @@ namespace kcov
 
 		void stop();
 
-		IElf &m_elf;
+		IFileParser &m_elf;
 		IReporter &m_reporter;
 		FileMap_t m_files;
 		FileMap_t m_nonExistingFiles;
