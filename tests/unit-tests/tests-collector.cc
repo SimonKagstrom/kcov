@@ -1,7 +1,7 @@
 #include "test.hh"
 #include "mocks/mock-engine.hh"
 
-#include <elf.hh>
+#include <file-parser.hh>
 #include <collector.hh>
 #include <utils.hh>
 
@@ -68,7 +68,7 @@ DISABLED_TEST(collector)
 		.Times(Exactly(1))
 		;
 
-	v = collector.run();
+	v = collector.run(filename);
 
 	ASSERT_TRUE(v == evExit.data);
 
@@ -83,7 +83,7 @@ DISABLED_TEST(collector)
 	EXPECT_CALL(engine, continueExecution(_))
 		.Times(Exactly(1))
 		;
-	v = collector.run();
+	v = collector.run(filename);
 
 	ASSERT_TRUE(v == -1);
 }

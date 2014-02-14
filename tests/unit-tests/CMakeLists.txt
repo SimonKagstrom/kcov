@@ -7,7 +7,6 @@ find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (LibDwarf REQUIRED)
 find_package (GTest REQUIRED)
-find_package (GMock REQUIRED)
 
 # ====================================
 # project name and version
@@ -53,7 +52,7 @@ add_executable (${TGT} ${${TGT}_SRCS})
 target_link_libraries(${TGT}
 	${LIBCRPCUT_LIBRARIES}
 	${GTEST_BOTH_LIBRARIES}
-	${GMOCK_BOTH_LIBRARIES}
+	gmock
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl

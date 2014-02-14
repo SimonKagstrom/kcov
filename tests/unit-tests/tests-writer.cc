@@ -1,6 +1,6 @@
 #include "test.hh"
 
-#include <elf.hh>
+#include <file-parser.hh>
 #include <collector.hh>
 #include <configuration.hh>
 #include <reporter.hh>

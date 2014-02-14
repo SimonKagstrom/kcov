@@ -1,6 +1,6 @@
 #include "test.hh"
 
-#include <elf.hh>
+#include <file-parser.hh>
 #include <collector.hh>
 #include <reporter.hh>
 #include <utils.hh>
@@ -25,7 +25,7 @@ class MockCollector : public ICollector
 public:
 	MOCK_METHOD1(registerListener, void(IListener &listener));
 	MOCK_METHOD0(prepare, int());
-	MOCK_METHOD0(run, int());
+	MOCK_METHOD1(run, int(const std::string &));
 	MOCK_METHOD0(stop, void());
 
 	void mockRegisterListener(IListener &listener)
