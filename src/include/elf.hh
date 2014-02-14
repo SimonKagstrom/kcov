@@ -30,8 +30,6 @@ namespace kcov
 
 		virtual ~IFileParser() {}
 
-		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
-
 		virtual void registerLineListener(ILineListener &listener) = 0;
 
 		virtual void registerFileListener(IFileListener &listener) = 0;
@@ -39,6 +37,15 @@ namespace kcov
 		virtual bool parse() = 0;
 
 		virtual uint64_t getChecksum() = 0;
+	};
+
+	/**
+	 * Parser for compiled files (ELF)
+	 */
+	class ICompiledFileParser : public IFileParser
+	{
+	public:
+		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
 		virtual bool elfIs64Bit() = 0;
 	};

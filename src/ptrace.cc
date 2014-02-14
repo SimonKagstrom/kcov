@@ -148,6 +148,8 @@ public:
 
 	bool start(const std::string &executable)
 	{
+		ICompiledFileParser &elf = (ICompiledFileParser &)IFileParser::getInstance();
+
 		m_breakpointToAddrMap.clear();
 		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
@@ -179,7 +181,7 @@ public:
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
-		if (IFileParser::getInstance().elfIs64Bit() != machine_is_64bit())
+		if (elf.elfIs64Bit() != machine_is_64bit())
 			IConfiguration::getInstance().setParseSolibs(false);
 
 		if (IConfiguration::getInstance().getParseSolibs()) {
@@ -359,7 +361,7 @@ public:
 			if (strstr(cur->name, "libkcov_sowrapper.so"))
 				continue;
 
-			IFileParser &elf = IFileParser::getInstance();
+			ICompiledFileParser &elf = (ICompiledFileParser &)IFileParser::getInstance();
 
 			elf.addFile(cur->name, cur);
 			elf.parse();

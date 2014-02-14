@@ -28,7 +28,7 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
-class ElfInstance : public IFileParser
+class ElfInstance : public ICompiledFileParser
 {
 public:
 	ElfInstance() : m_filter(IFilter::getInstance())
