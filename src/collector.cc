@@ -1,5 +1,5 @@
 #include <collector.hh>
-#include <elf.hh>
+#include <file-parser.hh>
 #include <utils.hh>
 #include <engine.hh>
 #include <output-handler.hh>

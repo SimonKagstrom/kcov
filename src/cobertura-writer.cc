@@ -1,7 +1,7 @@
 namespace std { class type_info; }
 
 #include <reporter.hh>
-#include <elf.hh>
+#include <file-parser.hh>
 #include <configuration.hh>
 #include <writer.hh>
 #include <utils.hh>

@@ -2,7 +2,7 @@
 
 #include <writer.hh>
 #include <reporter.hh>
-#include <elf.hh>
+#include <file-parser.hh>
 
 #include <string>
 #include <unordered_map>

@@ -2,7 +2,7 @@
 #include <utils.hh>
 #include <configuration.hh>
 #include <output-handler.hh>
-#include <elf.hh>
+#include <file-parser.hh>
 #include <phdr_data.h>
 
 #include <unistd.h>

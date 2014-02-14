@@ -4,7 +4,7 @@
 #include <writer.hh>
 #include <collector.hh>
 #include <output-handler.hh>
-#include <elf.hh>
+#include <file-parser.hh>
 #include <utils.hh>
 
 #include <string.h>
