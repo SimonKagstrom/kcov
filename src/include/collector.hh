@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace kcov
 {
 	class IElf;
@@ -18,7 +20,7 @@ namespace kcov
 		virtual void registerListener(IListener &listener) = 0;
 
 
-		virtual int run() = 0;
+		virtual int run(const std::string &filename) = 0;
 
 		virtual void stop() = 0;
 

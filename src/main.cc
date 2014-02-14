@@ -125,7 +125,7 @@ int main(int argc, const char *argv[])
 	int ret = 0;
 
 	if (runningMode != IConfiguration::MODE_REPORT_ONLY) {
-		ret = collector.run();
+		ret = collector.run(file);
 	} else {
 		elf->parse();
 	}

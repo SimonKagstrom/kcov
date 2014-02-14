@@ -24,12 +24,12 @@ public:
 		m_listeners.push_back(&listener);
 	}
 
-	int run()
+	int run(const std::string &filename)
 	{
 		int out = 0;
 
-		if (!m_engine.start(m_elf.getFilename())) {
-			error("Can't start/attach to %s", m_elf.getFilename());
+		if (!m_engine.start(filename)) {
+			error("Can't start/attach to %s", filename.c_str());
 			return -1;
 		}
 

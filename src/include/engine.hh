@@ -61,7 +61,7 @@ namespace kcov
 		 *
 		 * @return true if OK, false otherwise
 		 */
-		virtual bool start(const char *executable) = 0;
+		virtual bool start(const std::string &executable) = 0;
 
 		/**
 		 * Wait for an event from the children

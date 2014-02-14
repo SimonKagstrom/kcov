@@ -32,8 +32,6 @@ namespace kcov
 
 		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
-		virtual const char *getFilename() = 0;
-
 		virtual void registerLineListener(ILineListener &listener) = 0;
 
 		virtual void registerFileListener(IFileListener &listener) = 0;

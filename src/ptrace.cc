@@ -146,14 +146,14 @@ public:
 
 
 
-	bool start(const char *executable)
+	bool start(const std::string &executable)
 	{
 		m_breakpointToAddrMap.clear();
 		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
 
 		/* Basic check first */
-		if (access(executable, X_OK) != 0)
+		if (access(executable.c_str(), X_OK) != 0)
 			return false;
 
 		std::string kcov_solib_pipe_path =
@@ -198,7 +198,7 @@ public:
 		if (pid != 0)
 			res = attachPid(pid);
 		else
-			res = forkChild(executable);
+			res = forkChild(executable.c_str());
 
 		return res;
 	}

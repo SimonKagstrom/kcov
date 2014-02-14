@@ -48,11 +48,6 @@ public:
 		free((void *)m_filename);
 	}
 
-	const char *getFilename()
-	{
-		return m_filename;
-	}
-
 	uint64_t getChecksum()
 	{
 		return m_checksum;
