@@ -12,7 +12,7 @@ namespace kcov
 	public:
 		enum FileFlags
 		{
-			FLG_NONE = 1,
+			FLG_NONE = 0,
 			FLG_TYPE_SOLIB = 1,
 		};
 
