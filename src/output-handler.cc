@@ -51,10 +51,10 @@ namespace kcov
 		}
 
 		// From IElf::IFileListener
-		void onFile(const char *file, bool isSolib)
+		void onFile(const char *file, enum IFileParser::FileFlags flags)
 		{
 			// Only unmarshal the main file
-			if (isSolib)
+			if (flags & IFileParser::FLG_TYPE_SOLIB)
 				return;
 
 			size_t sz;

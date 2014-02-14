@@ -10,6 +10,12 @@ namespace kcov
 	class IFileParser
 	{
 	public:
+		enum FileFlags
+		{
+			FLG_NONE = 1,
+			FLG_TYPE_SOLIB = 1,
+		};
+
 		class ILineListener
 		{
 		public:
@@ -20,7 +26,7 @@ namespace kcov
 		class IFileListener
 		{
 		public:
-			virtual void onFile(const char *file, bool isSolib) = 0;
+			virtual void onFile(const char *file, enum FileFlags flags) = 0;
 		};
 
 		static IFileParser *open(const char *filename);

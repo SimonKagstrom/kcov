@@ -127,7 +127,7 @@ out_open:
 		parseOneDwarf();
 
 		for (const auto &it : m_fileListeners)
-			it->onFile(m_filename, !m_isMainFile);
+			it->onFile(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
