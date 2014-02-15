@@ -14,9 +14,9 @@ using namespace kcov;
 class Collector : public ICollector, public IFileParser::ILineListener
 {
 public:
-	Collector(IFileParser &elf) : m_elf(elf), m_engine(IEngine::getInstance())
+	Collector(IFileParser &fileParser) : m_fileParser(fileParser), m_engine(IEngine::getInstance())
 	{
-		m_elf.registerLineListener(*this);
+		m_fileParser.registerLineListener(*this);
 	}
 
 	void registerListener(ICollector::IListener &listener)
@@ -37,7 +37,7 @@ public:
 		unsigned int outputInterval = IConfiguration::getInstance().getOutputInterval();
 
 		// This will set all breakpoints
-		m_elf.parse();
+		m_fileParser.parse();
 		m_engine.setupAllBreakpoints();
 
 		uint64_t lastTimestamp = get_ms_timestamp();
@@ -118,7 +118,7 @@ private:
 	typedef std::list<ICollector::IListener *> ListenerList_t;
 
 	AddrMap_t m_addrs;
-	IFileParser &m_elf;
+	IFileParser &m_fileParser;
 	IEngine &m_engine;
 	ListenerList_t m_listeners;
 };

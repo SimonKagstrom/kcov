@@ -25,10 +25,10 @@ struct marshalHeaderStruct
 class Reporter : public IReporter, public IFileParser::ILineListener, public ICollector::IListener
 {
 public:
-	Reporter(IFileParser &elf, ICollector &collector) :
-		m_elf(elf), m_collector(collector), m_filter(IFilter::getInstance())
+	Reporter(IFileParser &fileParser, ICollector &collector) :
+		m_fileParser(fileParser), m_collector(collector), m_filter(IFilter::getInstance())
 	{
-		m_elf.registerLineListener(*this);
+		m_fileParser.registerLineListener(*this);
 		m_collector.registerListener(*this);
 	}
 
@@ -174,7 +174,7 @@ private:
 
 		hdr->magic = to_be<uint32_t>(KCOV_MAGIC);
 		hdr->db_version = to_be<uint32_t>(KCOV_DB_VERSION);
-		hdr->checksum = to_be<uint64_t>(m_elf.getChecksum());
+		hdr->checksum = to_be<uint64_t>(m_fileParser.getChecksum());
 
 		return p + sizeof(struct marshalHeaderStruct);
 	}
@@ -189,13 +189,13 @@ private:
 		if (be_to_host<uint32_t>(hdr->db_version) != KCOV_DB_VERSION)
 			return nullptr;
 
-		if (be_to_host<uint64_t>(hdr->checksum) != m_elf.getChecksum())
+		if (be_to_host<uint64_t>(hdr->checksum) != m_fileParser.getChecksum())
 			return nullptr;
 
 		return p + sizeof(struct marshalHeaderStruct);
 	}
 
-	/* Called when the ELF is parsed */
+	/* Called when the file is parsed */
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
 	{
 		LineId key(file, lineNr);
@@ -335,12 +335,12 @@ private:
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
 
-	IFileParser &m_elf;
+	IFileParser &m_fileParser;
 	ICollector &m_collector;
 	IFilter &m_filter;
 };
 
-IReporter &IReporter::create(IFileParser &elf, ICollector &collector)
+IReporter &IReporter::create(IFileParser &parser, ICollector &collector)
 {
-	return *new Reporter(elf, collector);
+	return *new Reporter(parser, collector);
 }

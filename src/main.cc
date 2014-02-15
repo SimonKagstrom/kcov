@@ -91,22 +91,22 @@ int main(int argc, const char *argv[])
 		return 1;
 
 	std::string file = conf.getBinaryPath() + conf.getBinaryName();
-	IFileParser *elf = IFileParser::open(file.c_str());
-	if (!elf) {
+	IFileParser *parser = IFileParser::open(file.c_str());
+	if (!parser) {
 		conf.printUsage();
 		return 1;
 	}
 
-	ICollector &collector = ICollector::create(elf);
-	IReporter &reporter = IReporter::create(*elf, collector);
+	ICollector &collector = ICollector::create(parser);
+	IReporter &reporter = IReporter::create(*parser, collector);
 	IOutputHandler &output = IOutputHandler::create(reporter);
 
 	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
 
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
-		IWriter &htmlWriter = createHtmlWriter(*elf, reporter, output);
-		IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
+		IWriter &htmlWriter = createHtmlWriter(*parser, reporter, output);
+		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter, output);
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
 	}
@@ -127,7 +127,7 @@ int main(int argc, const char *argv[])
 	if (runningMode != IConfiguration::MODE_REPORT_ONLY) {
 		ret = collector.run(file);
 	} else {
-		elf->parse();
+		parser->parse();
 	}
 
 	output.stop();

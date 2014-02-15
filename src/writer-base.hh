@@ -57,7 +57,7 @@ namespace kcov
 
 		void stop();
 
-		IFileParser &m_elf;
+		IFileParser &m_fileParser;
 		IReporter &m_reporter;
 		FileMap_t m_files;
 		FileMap_t m_nonExistingFiles;

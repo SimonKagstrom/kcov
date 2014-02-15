@@ -14,11 +14,11 @@ struct summaryStruct
 
 int WriterBase::File::fileNameCount;
 
-WriterBase::WriterBase(IFileParser &elf, IReporter &reporter, IOutputHandler &output) :
-		m_elf(elf), m_reporter(reporter)
+WriterBase::WriterBase(IFileParser &parser, IReporter &reporter, IOutputHandler &output) :
+		m_fileParser(parser), m_reporter(reporter)
 {
 		m_commonPath = "not set";
-		m_elf.registerLineListener(*this);
+		m_fileParser.registerLineListener(*this);
 }
 
 WriterBase::File::File(const char *filename) :
