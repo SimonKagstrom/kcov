@@ -98,8 +98,13 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	IEngine &engine = IEngine::create(file);
-	ICollector &collector = ICollector::create(parser);
+	IEngine *engine = IEngineFactory::getInstance().matchEngine(file);
+	if (!engine) {
+		conf.printUsage();
+		return 1;
+	}
+
+	ICollector &collector = ICollector::create(*parser, *engine);
 	IReporter &reporter = IReporter::create(*parser, collector);
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter);
 
@@ -113,7 +118,7 @@ int main(int argc, const char *argv[])
 		output.registerWriter(coberturaWriter);
 	}
 
-	g_engine = &engine;
+	g_engine = engine;
 	g_output = &output;
 	g_reporter = &reporter;
 	g_collector = &collector;
@@ -134,7 +139,7 @@ int main(int argc, const char *argv[])
 	}
 
 	output.stop();
-	engine.kill();
+	engine->kill();
 
 	return ret;
 }

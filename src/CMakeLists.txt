@@ -26,6 +26,7 @@ set (${KCOV}_SRCS
     collector.cc
     configuration.cc
     elf.cc
+    engine-factory.cc
     filter.cc
     html-writer.cc
     main.cc

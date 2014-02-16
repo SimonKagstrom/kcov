@@ -14,7 +14,7 @@ using namespace kcov;
 class Collector : public ICollector, public IFileParser::ILineListener
 {
 public:
-	Collector(IFileParser &fileParser) : m_fileParser(fileParser), m_engine(IEngine::getInstance())
+	Collector(IFileParser &fileParser, IEngine &engine) : m_fileParser(fileParser), m_engine(engine)
 	{
 		m_fileParser.registerLineListener(*this);
 	}
@@ -123,7 +123,7 @@ private:
 	ListenerList_t m_listeners;
 };
 
-ICollector &ICollector::create(IFileParser *elf)
+ICollector &ICollector::create(IFileParser &elf, IEngine &engine)
 {
-	return *new Collector(*elf);
+	return *new Collector(elf, engine);
 }

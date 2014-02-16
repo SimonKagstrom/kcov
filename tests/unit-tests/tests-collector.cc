@@ -17,7 +17,7 @@ public:
 
 DISABLED_TEST(collector)
 {
-	MockEngine &engine = (MockEngine &)IEngine::getInstance();
+	MockEngine engine;
 	MockCollectorListener listener;
 	IFileParser *elf;
 	char filename[1024];
@@ -27,7 +27,7 @@ DISABLED_TEST(collector)
 	elf = IFileParser::open(filename);
 	ASSERT_TRUE(elf);
 
-	ICollector &collector = ICollector::create(elf);
+	ICollector &collector = ICollector::create(*elf, engine);
 
 	collector.registerListener(listener);
 

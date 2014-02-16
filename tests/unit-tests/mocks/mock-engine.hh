@@ -6,10 +6,12 @@
 
 using namespace kcov;
 
-class MockEngine : public IEngine {
+class MockEngine : public IEngine
+{
 public:
 	MockEngine()
 	{
+		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	MOCK_METHOD1(registerBreakpoint, int(unsigned long addr));
@@ -22,4 +24,9 @@ public:
 	MOCK_METHOD1(continueExecution, void(const Event));
 	MOCK_METHOD1(eventToName, std::string(Event ev));
 	MOCK_METHOD0(kill, void());
+
+	unsigned int matchFile(uint8_t *data, size_t dataSize)
+	{
+		return match_perfect;
+	}
 };

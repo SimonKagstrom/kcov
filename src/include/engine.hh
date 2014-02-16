@@ -16,6 +16,12 @@ namespace kcov
 		ev_exit_first_process = 4,
 	};
 
+	enum match_type
+	{
+		match_none = 0,
+		match_perfect = 0xffffffff,
+	};
+
 	class IEngine
 	{
 	public:
@@ -34,10 +40,6 @@ namespace kcov
 			int data; // Typically the breakpoint
 			unsigned long addr;
 		};
-
-		static IEngine &getInstance();
-
-		static IEngine &create(const std::string &filename);
 
 
 		virtual ~IEngine() {}
@@ -81,5 +83,26 @@ namespace kcov
 		virtual std::string eventToName(Event ev) = 0;
 
 		virtual void kill() = 0;
+
+
+		virtual unsigned int matchFile(uint8_t *data, size_t dataSize) = 0;
+	};
+
+	/**
+	 * Factory class for getting one of multiple engines, which can
+	 * match different file types.
+	 */
+	class IEngineFactory
+	{
+	public:
+		virtual ~IEngineFactory()
+		{
+		}
+
+		virtual void registerEngine(IEngine &engine) = 0;
+
+		virtual IEngine *matchEngine(const std::string &file) = 0;
+
+		static IEngineFactory &getInstance();
 	};
 }

@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <libelf.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -130,11 +131,12 @@ public:
 		m_firstChild(0),
 		m_ldPreloadString(nullptr),
 		m_envString(nullptr),
-		m_parentCpu(kcov_get_current_cpu()),
+		m_parentCpu(0),
 		m_solibFileOpen(false)
 	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
-		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
+
+		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	bool readMemory(unsigned long *dst, unsigned long addr)
@@ -148,6 +150,9 @@ public:
 
 	bool start(const std::string &executable)
 	{
+		m_parentCpu = kcov_get_current_cpu();
+		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
+
 		m_breakpointToAddrMap.clear();
 		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
@@ -521,6 +526,13 @@ public:
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 	}
 
+	unsigned int matchFile(uint8_t *data, size_t dataSize)
+	{
+		// Unless #!/bin/sh etc, this should win
+		return 1;
+	}
+
+
 private:
 	bool forkChild(const char *executable)
 	{
@@ -665,16 +677,4 @@ private:
 	bool m_solibFileOpen;
 };
 
-
-static Ptrace *g_instance;
-IEngine &IEngine::create(const std::string &filename)
-{
-	g_instance = new Ptrace();
-
-	return *g_instance;
-}
-
-IEngine &IEngine::getInstance()
-{
-	return *g_instance;
-}
+static Ptrace g_ptrace;
