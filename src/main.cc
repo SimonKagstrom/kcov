@@ -18,6 +18,7 @@
 
 using namespace kcov;
 
+static IEngine *g_engine;
 static IOutputHandler *g_output;
 static ICollector *g_collector;
 static IReporter *g_reporter;
@@ -27,7 +28,7 @@ static void ctrlc(int sig)
 	g_collector->stop();
 	g_reporter->stop();
 	g_output->stop();
-	IEngine::getInstance().kill();
+	g_engine->kill();
 	exit(0);
 }
 
@@ -112,6 +113,7 @@ int main(int argc, const char *argv[])
 		output.registerWriter(coberturaWriter);
 	}
 
+	g_engine = &engine;
 	g_output = &output;
 	g_reporter = &reporter;
 	g_collector = &collector;
