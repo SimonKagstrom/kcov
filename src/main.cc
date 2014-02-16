@@ -99,7 +99,7 @@ int main(int argc, const char *argv[])
 
 	ICollector &collector = ICollector::create(parser);
 	IReporter &reporter = IReporter::create(*parser, collector);
-	IOutputHandler &output = IOutputHandler::create(reporter);
+	IOutputHandler &output = IOutputHandler::create(*parser, reporter);
 
 	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
 

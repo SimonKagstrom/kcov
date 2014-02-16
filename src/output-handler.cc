@@ -19,7 +19,7 @@ namespace kcov
 	class OutputHandler : public IOutputHandler, IFileParser::IFileListener
 	{
 	public:
-		OutputHandler(IReporter &reporter) : m_reporter(reporter)
+		OutputHandler(IFileParser &parser, IReporter &reporter) : m_reporter(reporter)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
@@ -31,7 +31,7 @@ namespace kcov
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
 
-			IFileParser::getInstance().registerFileListener(*this);
+			parser.registerFileListener(*this);
 		}
 
 		std::string getBaseDirectory()
@@ -112,10 +112,10 @@ namespace kcov
 	};
 
 	static OutputHandler *instance;
-	IOutputHandler &IOutputHandler::create(IReporter &reporter)
+	IOutputHandler &IOutputHandler::create(IFileParser &parser, IReporter &reporter)
 	{
 		if (!instance)
-			instance = new OutputHandler(reporter);
+			instance = new OutputHandler(parser, reporter);
 
 		return *instance;
 	}

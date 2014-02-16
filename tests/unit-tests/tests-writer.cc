@@ -112,7 +112,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Return(summary))
 		;
 
-	IOutputHandler &output = IOutputHandler::create(reporter);
+	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
 	IWriter &writer = createHtmlWriter(*elf, reporter, output);
 	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
 
@@ -182,7 +182,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Return(summary))
 		;
 
-	IOutputHandler &output = IOutputHandler::create(reporter);
+	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
 	IWriter &writer = createHtmlWriter(*elf, reporter, output);
 
 	output.registerWriter(writer);
