@@ -92,11 +92,12 @@ int main(int argc, const char *argv[])
 		return 1;
 
 	std::string file = conf.getBinaryPath() + conf.getBinaryName();
-	IFileParser *parser = IFileParser::open(file.c_str());
+	IFileParser *parser = IParserManager::getInstance().matchParser(file);
 	if (!parser) {
 		conf.printUsage();
 		return 1;
 	}
+	parser->addFile(file);
 
 	IEngine *engine = IEngineFactory::getInstance().matchEngine(file);
 	if (!engine) {

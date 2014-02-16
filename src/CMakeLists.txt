@@ -32,6 +32,7 @@ set (${KCOV}_SRCS
     html-writer.cc
     main.cc
     output-handler.cc
+    parser-manager.cc
     reporter.cc
     solib-parser/phdr_data.c
     utils.cc

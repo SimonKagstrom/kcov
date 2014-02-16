@@ -78,7 +78,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writer");
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
 	const char *argv[] = {NULL, outDir.c_str(), filename};
@@ -160,7 +160,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "kcov-writerSameName");
 
 	sprintf(filename, "%s/same-name-test", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
 	const char *argv[] = {NULL, outDir.c_str(), filename};

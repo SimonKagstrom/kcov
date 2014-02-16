@@ -31,6 +31,7 @@ public:
 			if (it->matchFile(fileName, data, sz) > best->matchFile(fileName, data, sz))
 				best = it;
 		}
+		free((void *)data);
 
 		return best;
 	}

@@ -28,24 +28,27 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
-class ElfInstance : public ICompiledFileParser
+class ElfInstance : public IFileParser
 {
 public:
 	ElfInstance() : m_filter(IFilter::getInstance())
 	{
 		m_elf = nullptr;
-		m_filename = nullptr;
+		m_filename = "";
 		m_checksum = 0;
 		m_elfIs32Bit = true;
 		m_isMainFile = true;
+		m_initialized = false;
+
 		/******* Swap debug source root with runtime source root *****/
 		origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
 		newRoot  = IConfiguration::getInstance().getNewPathPrefix();
-		
+
+		IParserManager::getInstance().registerParser(*this);
 	}
+
 	virtual ~ElfInstance()
 	{
-		free((void *)m_filename);
 	}
 
 	uint64_t getChecksum()
@@ -58,10 +61,26 @@ public:
 		return !m_elfIs32Bit;
 	}
 
-	bool addFile(const char *filename, struct phdr_data_entry *data = 0)
+	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
-		free((void *)m_filename);
-		m_filename = strdup(filename);
+		Elf32_Ehdr *hdr = (Elf32_Ehdr *)data;
+
+		if (memcmp(hdr->e_ident, ELFMAG, strlen(ELFMAG)) == 0)
+			return match_perfect;
+
+		return match_none;
+	}
+
+	bool addFile(const std::string &filename, struct phdr_data_entry *data)
+	{
+		if (!m_initialized) {
+			panic_if(elf_version(EV_CURRENT) == EV_NONE,
+					"ELF version failed\n");
+			m_initialized = true;
+		}
+
+
+		m_filename = filename;
 
 		m_buildId.clear();
 
@@ -82,14 +101,14 @@ public:
 		bool out = true;
 		int fd;
 
-		fd = ::open(m_filename, O_RDONLY, 0);
+		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
 		if (fd < 0) {
-				error("Cannot open %s\n", m_filename);
+				error("Cannot open %s\n", m_filename.c_str());
 				return false;
 		}
 
 		if (!(elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
-				error("elf_begin failed on %s\n", m_filename);
+				error("elf_begin failed on %s\n", m_filename.c_str());
 				out = false;
 				goto out_open;
 		}
@@ -124,14 +143,14 @@ out_open:
 	{
 		struct stat st;
 
-		if (lstat(m_filename, &st) < 0)
+		if (lstat(m_filename.c_str(), &st) < 0)
 			return 0;
 
 		parseOneElf();
 		parseOneDwarf();
 
 		for (const auto &it : m_fileListeners)
-			it->onFile(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
+			it->onFile(m_filename.c_str(), m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
@@ -147,9 +166,9 @@ out_open:
 		Dwarf *dbg;
 		int fd;
 
-		fd = ::open(m_filename, O_RDONLY, 0);
+		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
 		if (fd < 0) {
-				error("Cannot open %s\n", m_filename);
+				error("Cannot open %s\n", m_filename.c_str());
 				return false;
 		}
 
@@ -177,7 +196,7 @@ out_open:
 		}
 
 		if (!dbg) {
-			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename);
+			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename.c_str());
 			close(fd);
 			return false;
 		}
@@ -299,19 +318,19 @@ out_err:
 		int fd;
 		unsigned int i;
 
-		fd = ::open(m_filename, O_RDONLY, 0);
+		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
 		if (fd < 0) {
-				error("Cannot open %s\n", m_filename);
+				error("Cannot open %s\n", m_filename.c_str());
 				return false;
 		}
 
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
-				error("elf_begin failed on %s\n", m_filename);
+				error("elf_begin failed on %s\n", m_filename.c_str());
 				goto out_open;
 		}
 
 		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
-				error("elf_getshstrndx failed on %s\n", m_filename);
+				error("elf_getshstrndx failed on %s\n", m_filename.c_str());
 				goto out_elf_begin;
 		}
 
@@ -352,7 +371,7 @@ out_err:
 			name = elf_strptr(m_elf, shstrndx, sh_name);
 			if(!data) {
 					error("elf_getdata failed on section %s in %s\n",
-							name, m_filename);
+							name, m_filename.c_str());
 					goto out_elf_begin;
 			}
 
@@ -396,7 +415,7 @@ out_err:
 		}
 		elf_end(m_elf);
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
-			error("elf_begin failed on %s\n", m_filename);
+			error("elf_begin failed on %s\n", m_filename.c_str());
 			goto out_open;
 		}
 
@@ -469,44 +488,16 @@ private:
 	bool m_elfIs32Bit;
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
-	const char *m_filename;
+	std::string m_filename;
 	std::string m_buildId;
 	bool m_isMainFile;
 	uint64_t m_checksum;
-        /***** Add strings to update path information. *******/
+	bool m_initialized;
+
+	/***** Add strings to update path information. *******/
 	std::string origRoot;
 	std::string newRoot;
 
 };
 
-static ElfInstance *g_instance;
-IFileParser *IFileParser::open(const char *filename)
-{
-	static bool initialized = false;
-
-	if (!initialized) {
-		panic_if(elf_version(EV_CURRENT) == EV_NONE,
-				"ELF version failed\n");
-		initialized = true;
-	}
-
-	g_instance = new ElfInstance();
-
-	if (g_instance->addFile(filename) == false) {
-		delete g_instance;
-
-		g_instance = nullptr;
-
-		return nullptr;
-	}
-
-	return g_instance;
-}
-
-IFileParser &IFileParser::getInstance()
-{
-	panic_if (!g_instance,
-			"ELF object not yet created");
-
-	return *g_instance;
-}
+static ElfInstance g_instance;

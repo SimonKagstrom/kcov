@@ -60,7 +60,7 @@ TEST(reporter)
 	char filename[1024];
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
 	elf->registerLineListener(elfListener);

@@ -42,15 +42,15 @@ TEST(elf, DEADLINE_REALTIME_MS(30000))
 	char filename[1024];
 	bool res;
 
-	IFileParser *elf = IFileParser::open("not-found");
+	IFileParser *elf = IParserManager::getInstance().matchParser("not-found");
 	ASSERT_TRUE(!elf);
 
 	sprintf(filename, "%s/Makefile", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(!elf);
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
 	elf->registerLineListener(listener);

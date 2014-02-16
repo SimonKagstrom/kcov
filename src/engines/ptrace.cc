@@ -132,7 +132,8 @@ public:
 		m_ldPreloadString(nullptr),
 		m_envString(nullptr),
 		m_parentCpu(0),
-		m_solibFileOpen(false)
+		m_solibFileOpen(false),
+		m_elf(NULL)
 	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
@@ -340,6 +341,9 @@ public:
 	{
 		struct phdr_data *p = nullptr;
 
+		if (!m_elf)
+			return;
+
 		m_phdrListMutex.lock();
 		if (!m_phdrs.empty()) {
 			p = m_phdrs.front();
@@ -361,10 +365,8 @@ public:
 			if (strstr(cur->name, "libkcov_sowrapper.so"))
 				continue;
 
-			ICompiledFileParser &elf = (ICompiledFileParser &)IFileParser::getInstance();
-
-			elf.addFile(cur->name, cur);
-			elf.parse();
+			m_elf->addFile(cur->name, cur);
+			m_elf->parse();
 
 			setupAllBreakpoints();
 		}
@@ -528,6 +530,12 @@ public:
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
+		m_elf = IParserManager::getInstance().matchParser(filename);
+
+		// We need a parser for this to work
+		if (!m_elf)
+			return match_none;
+
 		// Unless #!/bin/sh etc, this should win
 		return 1;
 	}
@@ -675,6 +683,8 @@ private:
 	int m_parentCpu;
 
 	bool m_solibFileOpen;
+
+	IFileParser *m_elf;
 };
 
 static Ptrace g_ptrace;

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <manager.hh>
+
 #include <sys/types.h>
 #include <stdint.h>
+
+#include <string>
 
 struct phdr_data_entry;
 
@@ -29,10 +33,7 @@ namespace kcov
 			virtual void onFile(const char *file, enum FileFlags flags) = 0;
 		};
 
-		static IFileParser *open(const char *filename);
-
-		static IFileParser &getInstance();
-
+		virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
 		virtual ~IFileParser() {}
 
@@ -43,14 +44,26 @@ namespace kcov
 		virtual bool parse() = 0;
 
 		virtual uint64_t getChecksum() = 0;
+
+		virtual unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 	};
 
+
 	/**
-	 * Parser for compiled files (ELF)
+	 * Manager class for getting one of multiple parsers, which can
+	 * match different file types.
 	 */
-	class ICompiledFileParser : public IFileParser
+	class IParserManager
 	{
 	public:
-		virtual bool addFile(const char *filename, struct phdr_data_entry *phdr_data = 0) = 0;
+		virtual ~IParserManager()
+		{
+		}
+
+		virtual void registerParser(IFileParser &parser) = 0;
+
+		virtual IFileParser *matchParser(const std::string &file) = 0;
+
+		static IParserManager &getInstance();
 	};
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <manager.hh>
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -14,12 +16,6 @@ namespace kcov
 		ev_signal      =  2,
 		ev_exit        =  3,
 		ev_exit_first_process = 4,
-	};
-
-	enum match_type
-	{
-		match_none = 0,
-		match_perfect = 0xffffffff,
 	};
 
 	class IEngine

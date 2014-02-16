@@ -19,10 +19,11 @@ set (${TGT}_SRCS
     ../../src/collector.cc
     ../../src/elf.cc
     ../../src/engine-factory.cc
+    ../../src/html-writer.cc
     ../../src/output-handler.cc
+    ../../src/parser-manager.cc
     ../../src/reporter.cc
     ../../src/utils.cc
-    ../../src/html-writer.cc
     ../../src/writer-base.cc
     main.cc
     tests-collector.cc

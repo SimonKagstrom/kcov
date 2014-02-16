@@ -24,7 +24,7 @@ DISABLED_TEST(collector)
 	bool res;
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
-	elf = IFileParser::open(filename);
+	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
 	ICollector &collector = ICollector::create(*elf, engine);
