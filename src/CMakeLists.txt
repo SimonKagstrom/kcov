@@ -28,6 +28,7 @@ set (${KCOV}_SRCS
     elf.cc
     engine-factory.cc
     engines/ptrace.cc
+    engines/python-engine.cc
     filter.cc
     html-writer.cc
     main.cc
