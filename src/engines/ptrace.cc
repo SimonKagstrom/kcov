@@ -21,7 +21,7 @@
 #include <list>
 #include <mutex>
 
-#include "library-binary.h"
+#include "../library-binary.h"
 
 using namespace kcov;
 

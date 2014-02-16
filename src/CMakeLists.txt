@@ -27,11 +27,11 @@ set (${KCOV}_SRCS
     configuration.cc
     elf.cc
     engine-factory.cc
+    engines/ptrace.cc
     filter.cc
     html-writer.cc
     main.cc
     output-handler.cc
-    ptrace.cc
     reporter.cc
     solib-parser/phdr_data.c
     utils.cc
