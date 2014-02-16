@@ -102,8 +102,12 @@ public:
 
 			raw = elf_getident(elf, &sz);
 
-			if (raw && sz > EI_CLASS)
+			if (raw && sz > EI_CLASS) {
 				m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
+
+				if (elfIs64Bit() != machine_is_64bit())
+					IConfiguration::getInstance().setParseSolibs(false);
+			}
 
 			m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
 		}

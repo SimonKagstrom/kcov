@@ -148,8 +148,6 @@ public:
 
 	bool start(const std::string &executable)
 	{
-		ICompiledFileParser &elf = (ICompiledFileParser &)IFileParser::getInstance();
-
 		m_breakpointToAddrMap.clear();
 		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
@@ -180,9 +178,6 @@ public:
 		free(m_ldPreloadString);
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
-
-		if (elf.elfIs64Bit() != machine_is_64bit())
-			IConfiguration::getInstance().setParseSolibs(false);
 
 		if (IConfiguration::getInstance().getParseSolibs()) {
 			if (file_exists(kcov_solib_path.c_str()))
