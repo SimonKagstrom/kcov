@@ -526,7 +526,7 @@ public:
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 	}
 
-	unsigned int matchFile(uint8_t *data, size_t dataSize)
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		// Unless #!/bin/sh etc, this should win
 		return 1;

@@ -25,7 +25,7 @@ public:
 	MOCK_METHOD1(eventToName, std::string(Event ev));
 	MOCK_METHOD0(kill, void());
 
-	unsigned int matchFile(uint8_t *data, size_t dataSize)
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		return match_perfect;
 	}

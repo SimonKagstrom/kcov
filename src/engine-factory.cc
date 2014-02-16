@@ -17,18 +17,18 @@ public:
 		m_engines.push_back(&engine);
 	}
 
-	IEngine *matchEngine(const std::string &file)
+	IEngine *matchEngine(const std::string &fileName)
 	{
 		IEngine *best = NULL;
 		size_t sz;
 
-		uint8_t *data = (uint8_t *)read_file(&sz, "%s", file.c_str());
+		uint8_t *data = (uint8_t *)read_file(&sz, "%s", fileName.c_str());
 
 		for (const auto &it : m_engines) {
 			if (!best)
 				best = it;
 
-			if (it->matchFile(data, sz) > best->matchFile(data, sz))
+			if (it->matchFile(fileName, data, sz) > best->matchFile(fileName, data, sz))
 				best = it;
 		}
 
