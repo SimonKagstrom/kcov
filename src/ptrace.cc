@@ -665,12 +665,16 @@ private:
 	bool m_solibFileOpen;
 };
 
+
+static Ptrace *g_instance;
+IEngine &IEngine::create(const std::string &filename)
+{
+	g_instance = new Ptrace();
+
+	return *g_instance;
+}
+
 IEngine &IEngine::getInstance()
 {
-	static Ptrace *instance;
-
-	if (!instance)
-		instance = new Ptrace();
-
-	return *instance;
+	return *g_instance;
 }

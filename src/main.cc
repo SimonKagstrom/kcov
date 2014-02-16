@@ -97,6 +97,7 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
+	IEngine &engine = IEngine::create(file);
 	ICollector &collector = ICollector::create(parser);
 	IReporter &reporter = IReporter::create(*parser, collector);
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter);
@@ -131,7 +132,7 @@ int main(int argc, const char *argv[])
 	}
 
 	output.stop();
-	IEngine::getInstance().kill();
+	engine.kill();
 
 	return ret;
 }

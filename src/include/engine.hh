@@ -37,6 +37,9 @@ namespace kcov
 
 		static IEngine &getInstance();
 
+		static IEngine &create(const std::string &filename);
+
+
 		virtual ~IEngine() {}
 
 		/**
