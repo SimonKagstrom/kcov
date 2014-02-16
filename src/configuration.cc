@@ -1,4 +1,5 @@
 #include <configuration.hh>
+#include <file-parser.hh>
 #include <utils.hh>
 #include <stdlib.h>
 #include <getopt.h>
@@ -117,7 +118,7 @@ public:
 		 * After that it's arguments to the external program.
 		 */
 		for (lastArg = 1; lastArg < argc; lastArg++) {
-			if (file_is_elf(argv[lastArg]))
+			if (IParserManager::getInstance().matchParser(argv[lastArg]))
 				break;
 		}
 

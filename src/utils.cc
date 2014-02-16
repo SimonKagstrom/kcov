@@ -8,31 +8,11 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <unistd.h>
-#include <libelf.h>
 #include <time.h>
 
 #include "utils.hh"
 
 int g_kcov_debug_mask = STATUS_MSG;
-
-extern int file_is_elf(const char *filename)
-{
-	Elf32_Ehdr hdr;
-	int ret = 0;
-	int fd;
-
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return ret;
-
-	/* Compare the header with the ELF magic */
-	if (read(fd, &hdr, sizeof(hdr)) == sizeof(hdr))
-		ret = memcmp(hdr.e_ident, ELFMAG, strlen(ELFMAG)) == 0;
-
-	close(fd);
-
-	return ret;
-}
 
 void *read_file(size_t *out_size, const char *fmt, ...)
 {

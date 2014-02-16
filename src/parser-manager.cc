@@ -24,6 +24,9 @@ public:
 
 		uint8_t *data = (uint8_t *)read_file(&sz, "%s", fileName.c_str());
 
+		if (!data)
+			return NULL;
+
 		for (const auto &it : m_parsers) {
 			unsigned int myVal = it->matchParser(fileName, data, sz);
 			if (myVal == match_none)

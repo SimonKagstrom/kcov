@@ -64,8 +64,6 @@ static inline char *xstrdup(const char *s)
 	return out;
 }
 
-extern int file_is_elf(const char *filename);
-
 static inline void *xmalloc(size_t sz)
 {
   void *out = malloc(sz);
