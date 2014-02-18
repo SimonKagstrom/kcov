@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import sys
+import second
+
+def fn():
+    print "hello!"
+    return
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print "Need at least one arg"
+        sys.exit(1)
+    
+    fn()
+    print "in main, but will return soon"
+    second.second_fn(int(sys.argv[1]))
+
+    try:
+        if int(sys.argv[1]) > 10:
+            raise Exception("metallgutten")
+    except:
+        print "Got an exception"
