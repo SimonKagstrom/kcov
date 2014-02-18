@@ -3,6 +3,17 @@
 
 using namespace kcov;
 
+const uint64_t COVERAGE_MAGIC = 0x6d6574616c6c6775ULL; // "metallgut"
+
+/* Should be 8-byte aligned */
+struct coverage_data
+{
+	uint64_t magic;
+	uint32_t size;
+	uint32_t line;
+	const char filename[];
+};
+
 class PythonEngine : public IEngine, public IFileParser
 {
 public:
