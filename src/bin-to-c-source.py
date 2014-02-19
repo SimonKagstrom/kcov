@@ -2,12 +2,12 @@
 
 import sys, struct
 
-def generate(data_in):
+def generate(data_in, base_name):
 	print "#include <stdint.h>"
 	print "#include <stdlib.h>"
 
-	print "size_t __library_data_size = 0x%x;" % (len(data))
-	print "uint8_t __library_data[] = {"
+	print "size_t %s_data_size = 0x%x;" % (base_name, len(data))
+	print "uint8_t %s_data[] = {" % (base_name)
 
 	for i in range(0, len(data), 20):
 		line = data[i:i+20]
@@ -21,10 +21,11 @@ def generate(data_in):
 	print "};"
 
 if __name__ == "__main__":
+	if len(sys.argv) < 3:
+		sys.exit(1)
+
 	f = open(sys.argv[1])
-
 	data = f.read()
-
 	f.close()
 
-	generate(data)
+	generate(data, sys.argv[2])

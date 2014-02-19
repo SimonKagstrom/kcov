@@ -71,8 +71,8 @@ add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 
 add_custom_command(
    OUTPUT library.c
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so > library.c
-   DEPENDS ${SOLIB}
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.c
+   DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
 
