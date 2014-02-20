@@ -75,8 +75,14 @@ add_custom_command(
    DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
+add_custom_command(
+   OUTPUT python-helper.c
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py  python_helper > python-helper.c
+   DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   )
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.c)
+
+add_executable (${KCOV} ${${KCOV}_SRCS} library.c python-helper.c)
 #add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 
 target_link_libraries(${KCOV}
