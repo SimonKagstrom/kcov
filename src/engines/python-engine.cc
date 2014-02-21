@@ -86,7 +86,7 @@ public:
 			panic_if (res < 0,
 					"Can't execute python helper");
 
-			exit(res);
+			exit(WEXITSTATUS(res));
 		} else if (m_child < 0) {
 			perror("fork");
 
