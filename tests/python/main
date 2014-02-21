@@ -21,3 +21,5 @@ if __name__ == "__main__":
             raise Exception("metallgutten")
     except:
         print "Got an exception"
+
+    sys.exit(int(sys.argv[1]))
