@@ -31,7 +31,8 @@ class PythonEngine : public IEngine, public IFileParser
 {
 public:
 	PythonEngine() :
-		m_child(0)
+		m_child(0),
+		m_running(false)
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 		IParserManager::getInstance().registerParser(*this);
@@ -84,13 +85,14 @@ public:
 			res = system(s.c_str());
 			panic_if (res < 0,
 					"Can't execute python helper");
+
+			exit(res);
 		} else if (m_child < 0) {
 			perror("fork");
 
 			return false;
 		}
-
-
+		m_running = true;
 
 		return true;
 	}
@@ -99,8 +101,20 @@ public:
 	{
 		Event out;
 		int status;
+		int rv;
 
-		waitpid(m_child, &status, 0);
+		rv = waitpid(m_child, &status, 0);
+		if (rv != m_child)
+			return out;
+
+		m_running = false;
+		if (WIFEXITED(status)) {
+			out.type = ev_exit;
+			out.data = WEXITSTATUS(status);
+		} else {
+			warning("Other status: 0x%x\n", status);
+			out.type = ev_error;
+		}
 
 		return out;
 	}
@@ -111,7 +125,7 @@ public:
 
 	bool childrenLeft()
 	{
-		return true;
+		return m_running;
 	}
 
 	std::string eventToName(Event ev)
@@ -167,6 +181,7 @@ public:
 	}
 private:
 		pid_t m_child;
+		bool m_running;
 };
 
 static PythonEngine g_instance;
