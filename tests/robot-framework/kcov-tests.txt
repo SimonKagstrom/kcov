@@ -171,3 +171,9 @@ collect-only-and-report-only
     Should be equal as integers    ${rc}    0
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
     Should Contain    ${output}    1
+
+python-exit-status
+	Run								rm -rf ${out}/main-tests/
+    ${no_kcov_rc}=    Run and return RC    python ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
