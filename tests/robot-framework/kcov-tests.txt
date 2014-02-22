@@ -177,3 +177,16 @@ python-exit-status
     ${no_kcov_rc}=    Run and return RC    python ${kcov_path}/tests/python/main 5
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
     Should be equal as integers    ${rc}    ${no_kcov_rc}
+
+python-coverage
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 23
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 2
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 3
+    Should Contain    ${output}    node
