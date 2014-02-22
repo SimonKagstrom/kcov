@@ -10,6 +10,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include <list>
+#include <unordered_map>
+
+#include "../swap-endian.hh"
+
 using namespace kcov;
 
 extern "C" size_t python_helper_data_size;
@@ -67,7 +72,7 @@ public:
 				return false;
 		}
 
-		std::string kcov_python_env = "KCOV_SOLIB_PATH=" + kcov_python_pipe_path;
+		std::string kcov_python_env = "KCOV_PYTHON_PIPE_PATH=" + kcov_python_pipe_path;
 		unlink(kcov_python_pipe_path.c_str());
 		mkfifo(kcov_python_pipe_path.c_str(), 0600);
 
@@ -99,15 +104,35 @@ public:
 			return false;
 		}
 		m_running = true;
+		m_pipe = fopen(kcov_python_pipe_path.c_str(), "r");
+		panic_if (!m_pipe,
+				"Can't open python pipe %s", kcov_python_pipe_path.c_str());
 
 		return true;
 	}
 
 	const Event waitEvent()
 	{
+		uint8_t buf[8192];
 		Event out;
 		int status;
 		int rv;
+
+		rv = fread((void *)buf, 1, sizeof(buf), m_pipe);
+		if (rv < (int)sizeof(struct coverage_data)) {
+			error("Read too little");
+
+			m_running = false;
+			out.type = ev_error;
+
+			return out;
+		}
+		if (parseCoverageData(buf, rv) != true) {
+			m_running = false;
+			out.type = ev_error;
+
+			return out;
+		}
 
 		rv = waitpid(m_child, &status, 0);
 		if (rv != m_child)
@@ -156,10 +181,12 @@ public:
 
 	void registerLineListener(ILineListener &listener)
 	{
+		m_lineListeners.push_back(&listener);
 	}
 
 	void registerFileListener(IFileListener &listener)
 	{
+		m_fileListeners.push_back(&listener);
 	}
 
 	bool parse()
@@ -185,8 +212,60 @@ public:
 		return match_none;
 	}
 private:
-		pid_t m_child;
-		bool m_running;
+
+	void unmarshalCoverageData(struct coverage_data *p)
+	{
+		p->magic = be_to_host<uint64_t>(p->magic);
+		p->size = be_to_host<uint32_t>(p->size);
+		p->line = be_to_host<uint32_t>(p->line);
+	}
+
+	bool parseCoverageData(uint8_t *raw, size_t size)
+	{
+		size_t size_left = size;
+
+		while (size_left > 0) {
+			struct coverage_data *p = (struct coverage_data *)raw;
+
+			unmarshalCoverageData(p);
+			if (p->magic != COVERAGE_MAGIC ||
+					p->size > size_left) {
+				error("Data magic wrong or size too large: magic 0x%llx, size %u (%zu left)\n",
+						(unsigned long long)p->magic,
+						(unsigned int)p->size,
+						size_left);
+
+				return false;
+			}
+
+			if (!m_reportedFiles[p->filename]) {
+				for (const auto &it : m_fileListeners)
+					it->onFile(p->filename, IFileParser::FLG_NONE);
+			}
+			for (const auto &it : m_lineListeners)
+				it->onLine(p->filename, p->line, 1);
+
+			printf("CUR: %s:%u\n", p->filename, p->line);
+
+			raw += p->size;
+			size_left -= p->size;
+		}
+
+		return true;
+	}
+
+
+	typedef std::list<ILineListener *> LineListenerList_t;
+	typedef std::list<IFileListener *> FileListenerList_t;
+	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
+
+	pid_t m_child;
+	bool m_running;
+	FILE *m_pipe;
+
+	LineListenerList_t m_lineListeners;
+	FileListenerList_t m_fileListeners;
+	ReportedFileMap_t m_reportedFiles;
 };
 
 static PythonEngine g_instance;
