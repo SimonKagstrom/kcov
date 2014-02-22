@@ -2,8 +2,11 @@
 # encoding: utf-8
 
 # Based on http://pymotw.com/2/sys/tracing.html, "Tracing a program as it runs"
+# and http://hg.python.org/cpython/file/2.7/Lib/trace.py
 
 import sys
+import os
+import struct
 
 def trace_lines(frame, event, arg):
     if event != 'line':
@@ -39,6 +42,33 @@ def a():
     
 TRACE_INTO = ['b']
 
-sys.settrace(trace_calls)
-a()
+def runctx(cmd, globals=None, locals=None):
+    if globals is None: globals = {}
+    if locals is None: locals = {}
+    sys.settrace(trace_calls)
+    try:
+        exec cmd in globals, locals
+    finally:
+        sys.settrace(None)
 
+if __name__ == "__main__":
+    prog_argv = sys.argv[1:]
+
+    sys.argv = prog_argv
+    progname = prog_argv[0]
+    sys.path[0] = os.path.split(progname)[0]
+
+    try:
+        with open(progname) as fp:
+            code = compile(fp.read(), progname, 'exec')
+            # try to emulate __main__ namespace as much as possible
+            globs = {
+                '__file__': progname,
+                '__name__': '__main__',
+                '__package__': None,
+                '__cached__': None,
+            }
+            runctx(code, globs, globs)
+    except IOError, err:
+        sys.stderr.write("Cannot run file %r because: %s" % (sys.argv[0], err))
+        sys.exit(127)
