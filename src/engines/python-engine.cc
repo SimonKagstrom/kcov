@@ -79,7 +79,13 @@ public:
 		/* Launch the python helper */
 		m_child = fork();
 		if (m_child == 0) {
-			std::string s = fmt("python %s %s", kcov_python_path.c_str(), executable.c_str());
+			const char **argv = IConfiguration::getInstance().getArgv();
+			unsigned int argc = IConfiguration::getInstance().getArgc();
+
+			std::string s = fmt("python %s ", kcov_python_path.c_str());
+			for (unsigned int i = 0; i < argc; i++)
+				s += std::string(argv[i]) + " ";
+
 			int res;
 
 			res = system(s.c_str());
