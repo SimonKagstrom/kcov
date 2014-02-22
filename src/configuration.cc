@@ -22,6 +22,8 @@ public:
 		m_highLimit = 75;
 		m_pathStripLevel = 2;
 		m_ptracePid = 0;
+		m_programArgs = NULL;
+		m_argc = 0;
 		m_sortType = FILENAME;
 		m_outputType = OUTPUT_COVERAGE;
 		m_originalPathPrefix="";
@@ -268,6 +270,7 @@ public:
 			m_binaryName = tmp.second;
 		}
 		m_programArgs = &argv[afterOpts + 1];
+		m_argc = argc - afterOpts - 1;
 
 
 		return true;
@@ -307,6 +310,12 @@ public:
 	{
 		return m_programArgs;
 	}
+
+	unsigned int getArgc()
+	{
+		return m_argc;
+	}
+
 
 	enum SortType getSortType()
 	{
@@ -467,6 +476,7 @@ public:
 	std::string m_binaryName;
 	std::string m_binaryPath;
 	const char **m_programArgs;
+	unsigned int m_argc;
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;

@@ -52,6 +52,8 @@ namespace kcov
 
 		virtual const char **getArgv() = 0;
 
+		virtual unsigned int getArgc() = 0;
+
 		virtual std::map<unsigned int,std::string> &getExcludePattern() = 0;
 
 		virtual std::map<unsigned int,std::string> &getOnlyIncludePattern() = 0;
