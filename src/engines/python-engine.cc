@@ -107,9 +107,8 @@ public:
 		if (rv != m_child)
 			return out;
 
-		m_running = false;
 		if (WIFEXITED(status)) {
-			out.type = ev_exit;
+			out.type = ev_exit_first_process;
 			out.data = WEXITSTATUS(status);
 		} else {
 			warning("Other status: 0x%x\n", status);
