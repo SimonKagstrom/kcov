@@ -70,6 +70,9 @@ public:
 
 					write_file(exitCode.c_str(), exitCode.size(), "%s", fifoName.c_str());
 				}
+				if (m_engine.childrenLeft())
+					return out;
+				break;
 			case ev_exit:
 				out = ev.data;
 				break;
