@@ -37,6 +37,12 @@ namespace kcov
 			unsigned long addr;
 		};
 
+		class IEventListener
+		{
+		public:
+			virtual void onEvent(const Event &ev) = 0;
+		};
+
 
 		virtual ~IEngine() {}
 
@@ -59,7 +65,7 @@ namespace kcov
 		 *
 		 * @return true if OK, false otherwise
 		 */
-		virtual bool start(const std::string &executable) = 0;
+		virtual bool start(IEventListener &listener, const std::string &executable) = 0;
 
 		/**
 		 * Wait for an event from the children
@@ -70,8 +76,10 @@ namespace kcov
 
 		/**
 		 * Continue execution with an event
+		 *
+		 * @return true if the process should continue, false otherwise
 		 */
-		virtual void continueExecution(const Event ev) = 0;
+		virtual bool continueExecution() = 0;
 
 
 		virtual bool childrenLeft() = 0;

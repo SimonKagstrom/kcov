@@ -133,7 +133,9 @@ public:
 		m_envString(nullptr),
 		m_parentCpu(0),
 		m_solibFileOpen(false),
-		m_elf(NULL)
+		m_elf(NULL),
+		m_listener(NULL),
+		m_signal(0)
 	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
@@ -149,8 +151,10 @@ public:
 
 
 
-	bool start(const std::string &executable)
+	bool start(IEventListener &listener, const std::string &executable)
 	{
+		m_listener = &listener;
+
 		m_parentCpu = kcov_get_current_cpu();
 		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 
@@ -473,19 +477,30 @@ public:
 		/**
 		 * Continue execution with an event
 		 */
-	void continueExecution(const Event ev)
+	bool continueExecution()
 	{
-		unsigned long v = ev.type == ev_signal ? ev.data : 0;
 		int res;
 
 		checkSolibData();
 
-		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, v);
-		res = ptrace(PTRACE_CONT, m_activeChild, 0, v);
+		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
+		res = ptrace(PTRACE_CONT, m_activeChild, 0, m_signal);
 		if (res < 0) {
 			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
 			m_children.erase(m_activeChild);
 		}
+
+
+		Event ev = waitEvent();
+		m_signal = ev.type == ev_signal ? ev.data : 0;
+
+		if (m_listener)
+			m_listener->onEvent(ev);
+
+		if (ev.type == ev_error)
+			return false;
+
+		return true;
 	}
 
 	std::string eventToName(Event ev)
@@ -685,6 +700,8 @@ private:
 	bool m_solibFileOpen;
 
 	IFileParser *m_elf;
+	IEventListener *m_listener;
+	unsigned long m_signal;
 };
 
 static Ptrace g_ptrace;

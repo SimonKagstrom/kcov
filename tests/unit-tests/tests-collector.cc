@@ -40,7 +40,7 @@ DISABLED_TEST(collector)
 
 	int v;
 
-	EXPECT_CALL(engine, start(_))
+	EXPECT_CALL(engine, start(_,_))
 		.Times(Exactly(1))
 		.WillRepeatedly(Return(true))
 		;
@@ -75,12 +75,12 @@ DISABLED_TEST(collector)
 	evOnce.type = ev_error;
 
 	// Test error
-	EXPECT_CALL(engine, start(_))
+	EXPECT_CALL(engine, start(_,_))
 		.Times(Exactly(1))
 		.WillRepeatedly(Return(0))
 		;
 
-	EXPECT_CALL(engine, continueExecution(_))
+	EXPECT_CALL(engine, continueExecution())
 		.Times(Exactly(1))
 		;
 	v = collector.run(filename);

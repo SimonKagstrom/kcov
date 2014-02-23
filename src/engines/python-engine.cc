@@ -37,7 +37,9 @@ class PythonEngine : public IEngine, public IFileParser
 public:
 	PythonEngine() :
 		m_child(0),
-		m_running(false)
+		m_running(false),
+		m_pipe(NULL),
+		m_listener(NULL)
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 		IParserManager::getInstance().registerParser(*this);
@@ -59,7 +61,7 @@ public:
 		return true;
 	}
 
-	bool start(const std::string &executable)
+	bool start(IEventListener &listener, const std::string &executable)
 	{
 		std::string kcov_python_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() + "kcov-python.pipe";
@@ -71,6 +73,8 @@ public:
 
 				return false;
 		}
+
+		m_listener = &listener;
 
 		std::string kcov_python_env = "KCOV_PYTHON_PIPE_PATH=" + kcov_python_pipe_path;
 		unlink(kcov_python_pipe_path.c_str());
@@ -146,11 +150,17 @@ public:
 			out.type = ev_error;
 		}
 
+		if (m_listener)
+			m_listener->onEvent(out);
+
 		return out;
 	}
 
-	void continueExecution(const Event ev)
+	bool continueExecution()
 	{
+		waitEvent();
+
+		return false;
 	}
 
 	bool childrenLeft()
@@ -245,6 +255,16 @@ private:
 			for (const auto &it : m_lineListeners)
 				it->onLine(p->filename, p->line, 1);
 
+			if (m_listener) {
+				Event ev;
+
+				ev.type = ev_breakpoint;
+				ev.addr = 1;
+				ev.data = 1;
+
+				m_listener->onEvent(ev);
+			}
+
 			printf("CUR: %s:%u\n", p->filename, p->line);
 
 			raw += p->size;
@@ -266,6 +286,8 @@ private:
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
 	ReportedFileMap_t m_reportedFiles;
+
+	IEventListener *m_listener;
 };
 
 static PythonEngine g_instance;
