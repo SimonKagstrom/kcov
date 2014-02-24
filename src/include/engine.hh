@@ -24,17 +24,17 @@ namespace kcov
 		class Event
 		{
 		public:
-			Event() :
-				type(ev_signal),
-				data(0),
-				addr(0)
+			Event(enum event_type type = ev_signal, int data = 0, uint64_t address = 0) :
+				type(type),
+				data(data),
+				addr(address)
 			{
 			}
 
 			enum event_type type;
 
 			int data; // Typically the breakpoint
-			unsigned long addr;
+			uint64_t addr;
 		};
 
 		class IEventListener
