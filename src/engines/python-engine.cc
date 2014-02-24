@@ -115,50 +115,49 @@ public:
 		return true;
 	}
 
-	const Event waitEvent()
+	bool checkEvents()
 	{
 		uint8_t buf[8192];
-		Event out;
-		int status;
 		int rv;
 
 		rv = fread((void *)buf, 1, sizeof(buf), m_pipe);
 		if (rv < (int)sizeof(struct coverage_data)) {
 			error("Read too little");
 
-			m_running = false;
-			out.type = ev_error;
+			reportEvent(ev_error, -1);
 
-			return out;
+			return false;
 		}
 		if (parseCoverageData(buf, rv) != true) {
-			m_running = false;
-			out.type = ev_error;
 
-			return out;
+			reportEvent(ev_error, -1);
+
+			return false;
 		}
 
-		rv = waitpid(m_child, &status, 0);
-		if (rv != m_child)
-			return out;
-
-		if (WIFEXITED(status)) {
-			out.type = ev_exit_first_process;
-			out.data = WEXITSTATUS(status);
-		} else {
-			warning("Other status: 0x%x\n", status);
-			out.type = ev_error;
-		}
-
-		if (m_listener)
-			m_listener->onEvent(out);
-
-		return out;
+		return true;
 	}
 
 	bool continueExecution()
 	{
-		waitEvent();
+		if (checkEvents() == false) {
+			m_running = false;
+			return false;
+		}
+
+		int status;
+		int rv;
+
+		rv = waitpid(m_child, &status, 0);
+		if (rv != m_child)
+			return false;
+
+		if (WIFEXITED(status)) {
+			reportEvent(ev_exit_first_process, WEXITSTATUS(status));
+		} else {
+			warning("Other status: 0x%x\n", status);
+			reportEvent(ev_error, -1);
+		}
 
 		return false;
 	}
@@ -221,7 +220,15 @@ public:
 
 		return match_none;
 	}
+
 private:
+	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0)
+	{
+		if (!m_listener)
+			return;
+
+		m_listener->onEvent(Event(type, data, address));
+	}
 
 	void unmarshalCoverageData(struct coverage_data *p)
 	{
