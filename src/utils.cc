@@ -12,6 +12,8 @@
 
 #include "utils.hh"
 
+#include <sstream>
+
 int g_kcov_debug_mask = STATUS_MSG;
 
 void *read_file(size_t *out_size, const char *fmt, ...)
@@ -210,4 +212,46 @@ uint64_t get_ms_timestamp(void)
 bool machine_is_64bit(void)
 {
 	return sizeof(unsigned long) == 8;
+}
+
+
+// http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
+static std::list<std::string> &split(const std::string &s, char delim,
+		std::list<std::string> &elems)
+{
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+
+    return elems;
+}
+
+
+std::list<std::string> split_string(const std::string &s, const char *delims)
+{
+    std::list<std::string> elems;
+    split(s, *delims, elems);
+
+    return elems;
+}
+
+std::string trim_string(const std::string &strIn)
+{
+	std::string str = strIn;
+	size_t endpos = str.find_last_not_of(" \t\n\r");
+
+	if (std::string::npos != endpos)
+		str = str.substr( 0, endpos+1 );
+
+	// trim leading spaces
+	size_t startpos = str.find_first_not_of(" \t");
+	if (std::string::npos != startpos)
+		str = str.substr( startpos );
+	else
+		str = "";
+
+	return str;
 }

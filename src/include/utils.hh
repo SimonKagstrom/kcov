@@ -7,6 +7,7 @@
 #include <semaphore.h>
 
 #include <string>
+#include <list>
 
 #define error(x...) do \
 { \
@@ -115,6 +116,10 @@ void mdelay(unsigned int ms);
 uint64_t get_ms_timestamp(void);
 
 bool machine_is_64bit(void);
+
+std::list<std::string> split_string(const std::string &s, const char *delims);
+
+std::string trim_string(const std::string &strIn);
 
 class Semaphore
 {
