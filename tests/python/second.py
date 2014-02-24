@@ -1,4 +1,25 @@
 def second_fn(arg):
-    if arg > 5:
+    if arg > 5: # Comment here, but valid line
         print "Yep"
+    # This is a comment
     print "Hopp"
+    kalle_anka()
+    arne_anka()
+
+def kalle_anka():
+    '''
+    satt
+    pa en planka
+'''
+    pass
+
+def arne_anka():
+    b = """
+    satt
+    inte
+    pa
+    en
+    planka
+"""
+    print b
+    
