@@ -59,11 +59,6 @@ DISABLED_TEST(collector)
 		.Times(Exactly(1))
 		;
 
-	EXPECT_CALL(engine, waitEvent())
-		.Times(Exactly(2))
-		.WillOnce(Return(evOnce))
-		.WillRepeatedly(Return(evExit))
-		;
 	EXPECT_CALL(engine, clearBreakpoint(evOnce.data))
 		.Times(Exactly(1))
 		;
