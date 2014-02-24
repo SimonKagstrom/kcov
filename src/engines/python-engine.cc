@@ -237,6 +237,65 @@ private:
 		p->line = be_to_host<uint32_t>(p->line);
 	}
 
+	// Sweep through lines in a file to determine what is valid code
+	void parseFile(const std::string &filename)
+	{
+		if (!m_listener)
+			return;
+
+		size_t sz;
+		char *p = (char *)read_file(&sz, "%s", filename.c_str());
+
+		// Can't handle this file
+		if (!p)
+			return;
+
+		std::string fileData(p, sz);
+		free((void*)p);
+
+		const auto &stringList = split_string(fileData, "\n");
+		unsigned int lineNo = 0;
+		bool multiLineString = false;
+
+		for (const auto &it : stringList) {
+			const auto &s = trim_string(it);
+
+			lineNo++;
+			// Empty line, ignore
+			if (s == "")
+				continue;
+
+			// Non-empty, but comment
+			if (s[0] == '#')
+				continue;
+
+			if (!multiLineString) {
+				if (multilineIdx(s) == 0)
+					multiLineString = true;
+			} else {
+				// Multi-line string active
+				if (multilineIdx(s) == s.size() - 3)
+					multiLineString = false;
+			}
+
+			if (multiLineString)
+				continue;
+
+			for (const auto &it : m_lineListeners)
+				it->onLine(filename.c_str(), lineNo, 0);
+		}
+	}
+
+	size_t multilineIdx(const std::string &s)
+	{
+		auto idx = s.find("'''");
+
+		if (idx == std::string::npos)
+			idx = s.find("\"\"\"");
+
+		return idx;
+	}
+
 	bool parseCoverageData(uint8_t *raw, size_t size)
 	{
 		size_t size_left = size;
@@ -260,6 +319,8 @@ private:
 
 				for (const auto &it : m_fileListeners)
 					it->onFile(p->filename, IFileParser::FLG_NONE);
+
+				parseFile(p->filename);
 			}
 			for (const auto &it : m_lineListeners)
 				it->onLine(p->filename, p->line, 1);
