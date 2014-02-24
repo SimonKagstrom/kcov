@@ -249,6 +249,8 @@ private:
 			}
 
 			if (!m_reportedFiles[p->filename]) {
+				m_reportedFiles[p->filename] = true;
+
 				for (const auto &it : m_fileListeners)
 					it->onFile(p->filename, IFileParser::FLG_NONE);
 			}
