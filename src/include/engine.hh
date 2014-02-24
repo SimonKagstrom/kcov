@@ -68,13 +68,6 @@ namespace kcov
 		virtual bool start(IEventListener &listener, const std::string &executable) = 0;
 
 		/**
-		 * Wait for an event from the children
-		 *
-		 * @return the event the execution stopped at.
-		 */
-		virtual const Event waitEvent() = 0;
-
-		/**
 		 * Continue execution with an event
 		 *
 		 * @return true if the process should continue, false otherwise
