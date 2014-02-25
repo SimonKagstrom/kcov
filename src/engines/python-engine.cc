@@ -2,6 +2,7 @@
 #include <engine.hh>
 #include <configuration.hh>
 #include <output-handler.hh>
+#include <lineid.hh>
 #include <utils.hh>
 
 #include <stdlib.h>
@@ -39,7 +40,8 @@ public:
 		m_child(0),
 		m_running(false),
 		m_pipe(NULL),
-		m_listener(NULL)
+		m_listener(NULL),
+		m_currentAddress(1) // 0 is an invalid address
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 		IParserManager::getInstance().registerParser(*this);
@@ -255,7 +257,7 @@ private:
 
 		const auto &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
-		bool multiLineString = false;
+		enum { start, multiline_active } state = start;
 
 		for (const auto &it : stringList) {
 			const auto &s = trim_string(it);
@@ -269,21 +271,52 @@ private:
 			if (s[0] == '#')
 				continue;
 
-			if (!multiLineString) {
-				if (multilineIdx(s) == 0)
-					multiLineString = true;
-			} else {
-				// Multi-line string active
-				if (multilineIdx(s) == s.size() - 3)
-					multiLineString = false;
+			auto idx = multilineIdx(s);
+
+			switch (state)
+			{
+			case start:
+				if (idx != std::string::npos) {
+					kcov_debug(PTRACE_MSG, "python multiline ON  %3d: %s\n", lineNo, s.c_str());
+
+					std::string s2 = s.substr(idx + 3, std::string::npos);
+
+					if (multilineIdx(s2) == std::string::npos)
+						state = multiline_active;
+
+					if (idx > 0)
+						fileLineFound(filename, lineNo);
+
+					// Don't report this line
+					continue;
+				}
+				break;
+			case multiline_active:
+				if (idx != std::string::npos) {
+					kcov_debug(PTRACE_MSG, "python multiline OFF %3d: %s\n", lineNo, s.c_str());
+					state = start;
+				}
+				continue; // Don't report this line
+			default:
+				panic("Unknown state %u", state);
+				break;
 			}
 
-			if (multiLineString)
-				continue;
-
-			for (const auto &it : m_lineListeners)
-				it->onLine(filename.c_str(), lineNo, 0);
+			fileLineFound(filename, lineNo);
 		}
+	}
+
+	void fileLineFound(const std::string &filename, unsigned int lineNo)
+	{
+		LineId id(filename, lineNo);
+		uint64_t address = m_currentAddress;
+
+		m_lineIdToAddress[id] = address;
+
+		for (const auto &lit : m_lineListeners)
+			lit->onLine(filename.c_str(), lineNo, address);
+
+		m_currentAddress++;
 	}
 
 	size_t multilineIdx(const std::string &s)
@@ -322,20 +355,21 @@ private:
 
 				parseFile(p->filename);
 			}
-			for (const auto &it : m_lineListeners)
-				it->onLine(p->filename, p->line, 1);
 
 			if (m_listener) {
+				uint64_t address = 0;
 				Event ev;
 
+				auto it = m_lineIdToAddress.find(LineId(p->filename, p->line));
+				if (it != m_lineIdToAddress.end())
+					address = it->second;
+
 				ev.type = ev_breakpoint;
-				ev.addr = 1;
+				ev.addr = address;
 				ev.data = 1;
 
 				m_listener->onEvent(ev);
 			}
-
-			printf("CUR: %s:%u\n", p->filename, p->line);
 
 			raw += p->size;
 			size_left -= p->size;
@@ -344,10 +378,10 @@ private:
 		return true;
 	}
 
-
 	typedef std::list<ILineListener *> LineListenerList_t;
 	typedef std::list<IFileListener *> FileListenerList_t;
 	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
+	typedef std::unordered_map<LineId, uint64_t, LineIdHash> LineIdToAddressMap_t;
 
 	pid_t m_child;
 	bool m_running;
@@ -356,8 +390,10 @@ private:
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
 	ReportedFileMap_t m_reportedFiles;
+	LineIdToAddressMap_t m_lineIdToAddress;
 
 	IEventListener *m_listener;
+	uint64_t m_currentAddress;
 };
 
 static PythonEngine g_instance;
