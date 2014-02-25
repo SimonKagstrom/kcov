@@ -184,9 +184,13 @@ python-coverage
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 23
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 24
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 2
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 3
-    Should Contain    ${output}    node
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 4
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 11
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
+    Should Contain    ${output}    0
