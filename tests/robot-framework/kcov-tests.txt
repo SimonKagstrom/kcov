@@ -173,18 +173,19 @@ collect-only-and-report-only
     Should Contain    ${output}    1
 
 python-exit-status
-	Run								rm -rf ${out}/main-tests/
+	Run								rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    python ${kcov_path}/tests/python/main 5
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
     Should be equal as integers    ${rc}    ${no_kcov_rc}
 
 python-coverage
+	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 24
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 22
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 2
     Should Contain    ${output}    1
@@ -194,3 +195,16 @@ python-coverage
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
     Should Contain    ${output}    0
+
+python-accumulate-data
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 16
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 19
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 16
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 19
+    Should Contain    ${output}    1

@@ -7,11 +7,15 @@ def fn():
     print "hello!"
     return
 
+def loop_fn():
+    for i in range(0,10):
+        print "NR", i
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Need at least one arg"
         sys.exit(1)
-    
+
     fn()
     print "in main, but will return soon"
     second.second_fn(int(sys.argv[1]))
@@ -22,4 +26,5 @@ if __name__ == "__main__":
     except:
         print "Got an exception"
 
+    loop_fn()
     sys.exit(int(sys.argv[1]))
