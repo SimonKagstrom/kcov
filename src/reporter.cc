@@ -3,6 +3,7 @@
 #include <collector.hh>
 #include <utils.hh>
 #include <filter.hh>
+#include <lineid.hh>
 
 #include <string>
 #include <list>
@@ -226,33 +227,6 @@ private:
 			line->registerHit(addr, hits);
 		}
 	}
-
-
-	class LineId
-	{
-	public:
-		LineId(const char *fileName, int nr) :
-			m_file(fileName), m_lineNr(nr)
-		{
-		}
-
-		bool operator==(const LineId &other) const
-		{
-			return (m_file == other.m_file) && (m_lineNr == other.m_lineNr);
-		}
-
-		std::string m_file;
-		unsigned int m_lineNr;
-	};
-
-	class LineIdHash
-	{
-	public:
-		size_t operator()(const LineId &obj) const
-		{
-			return std::hash<std::string>()(obj.m_file) ^ std::hash<int>()(obj.m_lineNr);
-		}
-	};
 
 	class Line
 	{
