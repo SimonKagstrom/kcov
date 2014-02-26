@@ -3,6 +3,7 @@
 #include <writer.hh>
 #include <reporter.hh>
 #include <file-parser.hh>
+#include <filter.hh>
 
 #include <string>
 #include <unordered_map>
@@ -62,5 +63,6 @@ namespace kcov
 		FileMap_t m_files;
 		FileMap_t m_nonExistingFiles;
 		std::string m_commonPath;
+		IFilter &m_filter;
 	};
 }

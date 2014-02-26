@@ -15,7 +15,8 @@ struct summaryStruct
 int WriterBase::File::fileNameCount;
 
 WriterBase::WriterBase(IFileParser &parser, IReporter &reporter, IOutputHandler &output) :
-		m_fileParser(parser), m_reporter(reporter)
+		m_fileParser(parser), m_reporter(reporter),
+		m_filter(IFilter::getInstance())
 {
 		m_commonPath = "not set";
 		m_fileParser.registerLineListener(*this);
@@ -68,6 +69,10 @@ void WriterBase::File::readFile(const char *filename)
 
 void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long addr)
 {
+	if (!m_filter.runFilters(file))
+		return;
+
+
 	if (m_files.find(std::string(file)) != m_files.end())
 		return;
 

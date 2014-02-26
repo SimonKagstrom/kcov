@@ -199,6 +199,9 @@ private:
 	/* Called when the file is parsed */
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
 	{
+		if (!m_filter.runFilters(file))
+			return;
+
 		LineId key(file, lineNr);
 
 		LineMap_t::iterator it = m_lines.find(key);

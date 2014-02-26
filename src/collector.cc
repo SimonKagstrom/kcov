@@ -4,6 +4,7 @@
 #include <engine.hh>
 #include <output-handler.hh>
 #include <configuration.hh>
+#include <filter.hh>
 
 #include <unordered_map>
 #include <string>
@@ -20,7 +21,8 @@ public:
 	Collector(IFileParser &fileParser, IEngine &engine) :
 		m_fileParser(fileParser),
 		m_engine(engine),
-		m_exitCode(-1)
+		m_exitCode(-1),
+		m_filter(IFilter::getInstance())
 	{
 		m_fileParser.registerLineListener(*this);
 	}
@@ -115,6 +117,11 @@ private:
 	// From IFileParser
 	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
 	{
+		if (!m_filter.runFilters(file))
+		{
+			return;
+		}
+
 		if (addr == 0)
 			return;
 
@@ -130,6 +137,8 @@ private:
 	IEngine &m_engine;
 	ListenerList_t m_listeners;
 	int m_exitCode;
+
+	IFilter &m_filter;
 };
 
 ICollector &ICollector::create(IFileParser &elf, IEngine &engine)

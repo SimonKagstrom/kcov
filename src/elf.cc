@@ -1,7 +1,6 @@
 #include <file-parser.hh>
 #include <engine.hh>
 #include <utils.hh>
-#include <filter.hh>
 #include <phdr_data.h>
 
 #include <sys/types.h>
@@ -31,7 +30,7 @@ enum SymbolType
 class ElfInstance : public IFileParser
 {
 public:
-	ElfInstance() : m_filter(IFilter::getInstance())
+	ElfInstance()
 	{
 		m_elf = nullptr;
 		m_filename = "";
@@ -288,11 +287,8 @@ out_open:
 
 					}
 
-					if (m_filter.runFilters(file_path) == true)
-					{
-						for (const auto &it : m_lineListeners)
-							it->onLine(file_path, line_nr, adjustAddressBySegment(addr));
-					}
+					for (const auto &it : m_lineListeners)
+						it->onLine(file_path, line_nr, adjustAddressBySegment(addr));
 
 					free((void *)full_file_path);
 				}
@@ -482,7 +478,6 @@ private:
 
 	SegmentList_t m_curSegments;
 	SegmentList_t m_executableSegments;
-	IFilter &m_filter;
 
 	struct Elf *m_elf;
 	bool m_elfIs32Bit;
