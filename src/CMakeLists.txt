@@ -5,6 +5,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (LibElf REQUIRED)
 find_package (LibDwarf REQUIRED)
+pkg_check_modules(LIBZ REQUIRED zlib)
 
 # ====================================
 # project name and version
@@ -63,6 +64,7 @@ include_directories(
 	include/
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDWARF_INCLUDE_DIRS}
+	${LIBZ_INCLUDE_DIRS}
 	)
 
 link_directories (/home/ska/local/lib)
@@ -92,6 +94,6 @@ target_link_libraries(${KCOV}
 	dl
 	pthread
 	m
-	z)
+	${LIBZ_LIBRARIES})
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
