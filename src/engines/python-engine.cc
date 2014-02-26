@@ -121,21 +121,39 @@ public:
 	bool checkEvents()
 	{
 		uint8_t buf[8192];
-		int rv;
+		size_t sz;
+		struct coverage_data *p;
 
-		rv = fread((void *)buf, 1, sizeof(buf), m_pipe);
-		if (rv < (int)sizeof(struct coverage_data)) {
-			error("Read too little");
+		p = readCoverageDatum(buf, sizeof(buf), sz);
 
+		if (!p) {
 			reportEvent(ev_error, -1);
 
 			return false;
 		}
-		if (parseCoverageData(buf, rv) != true) {
 
-			reportEvent(ev_error, -1);
+		if (!m_reportedFiles[p->filename]) {
+			m_reportedFiles[p->filename] = true;
 
-			return false;
+			for (const auto &it : m_fileListeners)
+				it->onFile(p->filename, IFileParser::FLG_NONE);
+
+			parseFile(p->filename);
+		}
+
+		if (m_listener) {
+			uint64_t address = 0;
+			Event ev;
+
+			auto it = m_lineIdToAddress.find(LineId(p->filename, p->line));
+			if (it != m_lineIdToAddress.end())
+				address = it->second;
+
+			ev.type = ev_breakpoint;
+			ev.addr = address;
+			ev.data = 1;
+
+			m_listener->onEvent(ev);
 		}
 
 		return true;
@@ -143,17 +161,19 @@ public:
 
 	bool continueExecution()
 	{
-		if (checkEvents() == false) {
-			m_running = false;
-			return false;
+		while (1) {
+			if (checkEvents() == false) {
+				m_running = false;
+				break;
+			}
 		}
 
 		int status;
 		int rv;
 
-		rv = waitpid(m_child, &status, 0);
+		rv = waitpid(m_child, &status, WNOHANG);
 		if (rv != m_child)
-			return false;
+			return true;
 
 		if (WIFEXITED(status)) {
 			reportEvent(ev_exit_first_process, WEXITSTATUS(status));
@@ -333,53 +353,42 @@ private:
 		return idx;
 	}
 
-	bool parseCoverageData(uint8_t *raw, size_t size)
+
+
+	struct coverage_data *readCoverageDatum(uint8_t *buf, size_t totalSize, size_t &outSz)
 	{
-		size_t size_left = size;
+		struct coverage_data *p = (struct coverage_data *)buf;
+		ssize_t rv;
 
-		while (size_left > 0) {
-			struct coverage_data *p = (struct coverage_data *)raw;
+		rv = fread(buf, 1, sizeof(struct coverage_data), m_pipe);
+		if (rv == 0)
+			return NULL; // Not an error
+		if (rv < (int)sizeof(struct coverage_data)) {
+			error("Read too little %zd", rv);
 
-			unmarshalCoverageData(p);
-			if (p->magic != COVERAGE_MAGIC ||
-					p->size > size_left) {
-				error("Data magic wrong or size too large: magic 0x%llx, size %u (%zu left)\n",
-						(unsigned long long)p->magic,
-						(unsigned int)p->size,
-						size_left);
+			return NULL;
+		}
+		unmarshalCoverageData(p);
 
-				return false;
-			}
+		if (p->magic != COVERAGE_MAGIC ||
+				p->size > totalSize - sizeof(struct coverage_data)) {
+			error("Data magic wrong or size too large: magic 0x%llx, size %u (%zu left)\n",
+					(unsigned long long)p->magic,
+					(unsigned int)p->size,
+					totalSize);
 
-			if (!m_reportedFiles[p->filename]) {
-				m_reportedFiles[p->filename] = true;
-
-				for (const auto &it : m_fileListeners)
-					it->onFile(p->filename, IFileParser::FLG_NONE);
-
-				parseFile(p->filename);
-			}
-
-			if (m_listener) {
-				uint64_t address = 0;
-				Event ev;
-
-				auto it = m_lineIdToAddress.find(LineId(p->filename, p->line));
-				if (it != m_lineIdToAddress.end())
-					address = it->second;
-
-				ev.type = ev_breakpoint;
-				ev.addr = address;
-				ev.data = 1;
-
-				m_listener->onEvent(ev);
-			}
-
-			raw += p->size;
-			size_left -= p->size;
+			return NULL;
 		}
 
-		return true;
+		size_t remainder = p->size - sizeof(struct coverage_data);
+		rv = fread(buf + sizeof(struct coverage_data), 1, remainder, m_pipe);
+		if (rv < (ssize_t)remainder) {
+			error("Read too little %zd vs %zu", rv, remainder);
+
+			return NULL;
+		}
+
+		return p;
 	}
 
 	typedef std::list<ILineListener *> LineListenerList_t;
