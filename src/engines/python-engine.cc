@@ -4,6 +4,7 @@
 #include <output-handler.hh>
 #include <lineid.hh>
 #include <utils.hh>
+#include <zlib.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -251,8 +252,11 @@ private:
 		// Can't handle this file
 		if (!p)
 			return;
-
 		std::string fileData(p, sz);
+
+		// Compute crc32 for this file
+		uint32_t crc = crc32(0, (unsigned char *)p, sz);
+
 		free((void*)p);
 
 		const auto &stringList = split_string(fileData, "\n");
@@ -285,7 +289,7 @@ private:
 						state = multiline_active;
 
 					if (idx > 0)
-						fileLineFound(filename, lineNo);
+						fileLineFound(crc, filename, lineNo);
 
 					// Don't report this line
 					continue;
@@ -302,14 +306,14 @@ private:
 				break;
 			}
 
-			fileLineFound(filename, lineNo);
+			fileLineFound(crc, filename, lineNo);
 		}
 	}
 
-	void fileLineFound(const std::string &filename, unsigned int lineNo)
+	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
 		LineId id(filename, lineNo);
-		uint64_t address = m_currentAddress;
+		uint64_t address = m_currentAddress ^ crc;
 
 		m_lineIdToAddress[id] = address;
 
