@@ -35,13 +35,16 @@ Using kcov is as simple as
 </UL>
 
 <P>
-You can see some <A HREF="kcov-example-output/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> and kcov itself here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A> and more information on the implementation can be found <A HREF="http://simonkagstrom.livejournal.com/50380.html">in this blog post</A>. A screenshot from the report:
+You can see some <A HREF="kcov-example-output/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> and kcov itself here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A> and more information on the implementation can be found <A HREF="http://simonkagstrom.livejournal.com/50380.html">in this blog post</A>.
+
+<P>
+Code coverage can be useful to find bugs. Let's say you, by mistake, managed to add an extra <tt>goto fail;</tt> in your code - that shows up quite well in the coverage report:a
 
 <P>
 <IMG SRC="kcov.png">
 
 <P>
-And when using it together with Jenkins, you get reports like these:
+When using kcov together with Jenkins, you get reports like these:
 <P>
 <IMG SRC="kcov-jenkins.png">
 
