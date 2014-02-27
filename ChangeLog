@@ -1,3 +1,15 @@
+Kcov (15):
+	* Implemented support for collecting Python code coverage! Usage is the
+	  same as for compiled code.
+
+	* Code-restructuring to allow multiple "engines", which makes it possible
+	  to add the python support above.
+
+	* More C++11-izing of the code
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
+
 Kcov (14):
 	* Add two options, --collect-only and --report-only to only collect
 	  coverage and produce Cobertura/HTML output respectively. Can be
