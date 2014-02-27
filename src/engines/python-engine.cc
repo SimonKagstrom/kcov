@@ -161,13 +161,11 @@ public:
 
 	bool continueExecution()
 	{
-		while (1) {
-			if (checkEvents() == false) {
-				m_running = false;
-				break;
-			}
-		}
+		if (checkEvents())
+			return true;
 
+
+		// Otherwise wait for child
 		int status;
 		int rv;
 
