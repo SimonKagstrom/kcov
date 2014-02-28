@@ -280,6 +280,7 @@ private:
 		const auto &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { start, multiline_active } state = start;
+		bool multiLineStartLine = false;
 
 		for (const auto &it : stringList) {
 			const auto &s = trim_string(it);
@@ -306,8 +307,9 @@ private:
 					if (multilineIdx(s2) == std::string::npos)
 						state = multiline_active;
 
+					// E.g., a = '''yadayada [...]'''
 					if (idx > 0)
-						fileLineFound(crc, filename, lineNo);
+						multiLineStartLine = true;
 
 					// Don't report this line
 					continue;
@@ -317,6 +319,14 @@ private:
 				if (idx != std::string::npos) {
 					kcov_debug(PTRACE_MSG, "python multiline OFF %3d: %s\n", lineNo, s.c_str());
 					state = start;
+
+					// The last line of a multi-line string will get reported by the
+					// python helper, so add this as a line if there was an assignment
+					// above
+					if (multiLineStartLine) {
+						fileLineFound(crc, filename, lineNo);
+						multiLineStartLine = false;
+					}
 				}
 				continue; // Don't report this line
 			default:
