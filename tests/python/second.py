@@ -22,6 +22,7 @@ def arne_anka():
     planka
 """
     print b
+    jens_anka()
 
 def viktor_anka():
     """Single-line multi-line string"""
