@@ -16,16 +16,16 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-kcov \- Code coverage analysis using DWARF debugging information
+kcov \- Code coverage analysis for compiled programs and Python scripts
 .SH SYNOPSIS
 .B kcov
 .RI [ options ] " outdir executable [ args for executable ]
 .SH DESCRIPTION
 .PP
 This manual page documents briefly the \fBkcov\fP command. \fBkcov\fP is a
-code coverage tester based on bcov by Thomas Neumann. It allows collecting
-code coverage information from executables without special command-line
-arguments, and continuously produces output from long-running applications.
+code coverage tester for ELF binaries and Python scripts. It allows collecting
+code coverage information from executables without special compiler
+directives, and continuously produces output from long-running applications.
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invoke bold face and italics,
 .\" respectively.
@@ -53,13 +53,16 @@ Comma-separated list of paths to include in the report.
 Comma-separated list of paths to exclude from the report.
 .TP
 \fB\-\-include\-pattern\fP=\fIP1\fP[\fI,P2\fP...]
-Comma-separated list of patterns to include in the report.
+Comma-separated list of path patterns to include in the report.
 .TP
 \fB\-\-exclude\-pattern\fP=\fIP1\fP[\fI,P2\fP...]
-Comma-separated list of patterns to exclude from the report.
+Comma-separated list of path patterns to exclude from the report.
 .TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
+.TP
+\fB\-\-python\-parser\fP=\fIPARSER\fP
+The Python parser to use when executing Python scripts (default is python)
 .TP
 \fB\-\-collect\-only
 Only collect coverage data, don't produce HTML/Cobertura output
