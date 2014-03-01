@@ -303,6 +303,10 @@ private:
 			if (s[0] == '#')
 				continue;
 
+			// else: statements are nops
+			if (s.find("else:") != std::string::npos)
+				continue;
+
 			auto idx = multilineIdx(s);
 
 			switch (state)

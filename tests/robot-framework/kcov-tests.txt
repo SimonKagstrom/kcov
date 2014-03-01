@@ -193,8 +193,16 @@ python-coverage
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 11
     Should Contain    ${output}    nocode
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 30
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 31
     Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 38
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 39
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 40
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 41
+    Should Contain    ${output}    1
 
 python-accumulate-data
 	Run								rm -rf ${out}/main

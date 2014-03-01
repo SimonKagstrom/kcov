@@ -4,7 +4,7 @@ def second_fn(arg):
     # This is a comment
     print("Hopp")
     kalle_anka()
-    arne_anka()
+    arne_anka(arg)
 
 def kalle_anka():
     '''
@@ -13,7 +13,7 @@ def kalle_anka():
 '''
     pass
 
-def arne_anka():
+def arne_anka(arg):
     b = """
     satt
     inte
@@ -22,14 +22,20 @@ def arne_anka():
     planka
 """
     print(b)
-    jens_anka()
+    jens_anka(arg)
+    jens_anka(9)
 
 def viktor_anka():
     """Single-line multi-line string"""
 
     return 0
 
-def jens_anka():
+def jens_anka(kalle):
     v = """Single-line multi-line string"""
 
-    return v
+    if kalle > 5:
+        print "Hej"
+    elif kalle > 128:
+        print "Commodore 128"
+    else:
+        print "Hopp"
