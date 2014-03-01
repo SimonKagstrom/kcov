@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">20</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">90.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">18</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #pragma once </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : #include &lt;stdint.h&gt; </span>
+<span class="lineNum">    4</span>              :  </span>
+<span class="lineNum">    5</span>              : &#047;&#047; From http:&#047;&#047;stackoverflow.com&#047;questions&#047;105252&#047;how-do-i-convert-between-big-endian-and-little-endian-values-in-c </span>
+<span class="lineNum">    6</span>              : template &lt;typename T&gt; </span>
+<span class="lineNum">    7</span><span class="lineCov">      2  /   2: T swap_endian(T u) </span>
+<span class="lineNum">    8</span>              : { </span>
+<span class="lineNum">    9</span>              : 	union </span>
+<span class="lineNum">   10</span>              : 	{ </span>
+<span class="lineNum">   11</span>              : 		T u; </span>
+<span class="lineNum">   12</span>              : 		unsigned char u8[sizeof(T)]; </span>
+<span class="lineNum">   13</span>              : 	} source, dest; </span>
+<span class="lineNum">   14</span>              :  </span>
+<span class="lineNum">   15</span><span class="lineCov">      2  /   2: 	source.u = u; </span>
+<span class="lineNum">   16</span>              :  </span>
+<span class="lineNum">   17</span><span class="lineCov">      4  /   4: 	for (size_t k = 0; k &lt; sizeof(T); k++) </span>
+<span class="lineNum">   18</span><span class="lineCov">      2  /   2: 		dest.u8[k] = source.u8[sizeof(T) - k - 1]; </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span><span class="lineCov">      2  /   2: 	return dest.u; </span>
+<span class="lineNum">   21</span><span class="linePartCov">      2  /   4: } </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              :  </span>
+<span class="lineNum">   24</span>              : static bool cpu_is_little_endian() </span>
+<span class="lineNum">   25</span><span class="lineCov">      2  /   2: { </span>
+<span class="lineNum">   26</span>              : 	static uint16_t data = 0x1122; </span>
+<span class="lineNum">   27</span><span class="lineCov">      2  /   2: 	uint8_t *p = (uint8_t *)&amp;data; </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span><span class="lineCov">      2  /   2: 	return p[0] == 0x22; </span>
+<span class="lineNum">   30</span><span class="lineCov">      2  /   2: } </span>
+<span class="lineNum">   31</span>              :  </span>
+<span class="lineNum">   32</span>              : template &lt;typename T&gt; </span>
+<span class="lineNum">   33</span><span class="lineCov">      2  /   2: T to_be(T u) </span>
+<span class="lineNum">   34</span>              : { </span>
+<span class="lineNum">   35</span><span class="lineCov">      2  /   2: 	if (cpu_is_little_endian()) </span>
+<span class="lineNum">   36</span><span class="lineCov">      2  /   2: 		return swap_endian&lt;T&gt;(u); </span>
+<span class="lineNum">   37</span>              : 	else </span>
+<span class="lineNum">   38</span><span class="lineNoCov">      0  /   2: 		return u; </span>
+<span class="lineNum">   39</span><span class="linePartCov">      2  /   4: } </span>
+<span class="lineNum">   40</span>              :  </span>
+<span class="lineNum">   41</span>              : template &lt;typename T&gt; </span>
+<span class="lineNum">   42</span><span class="linePartCov">      1  /   2: T be_to_host(T u) </span>
+<span class="lineNum">   43</span>              : { </span>
+<span class="lineNum">   44</span><span class="lineCov">      2  /   2: 	if (cpu_is_little_endian()) </span>
+<span class="lineNum">   45</span><span class="lineCov">      2  /   2: 		return swap_endian&lt;T&gt;(u); </span>
+<span class="lineNum">   46</span>              : 	else </span>
+<span class="lineNum">   47</span><span class="lineNoCov">      0  /   2: 		return u; </span>
+<span class="lineNum">   48</span><span class="linePartCov">      2  /   4: } </span>
+<span class="lineNum">   49</span>              :  </span>
+<span class="lineNum">   50</span>              : template &lt;typename T&gt; </span>
+<span class="lineNum">   51</span>              : T le_to_host(T u) </span>
+<span class="lineNum">   52</span>              : { </span>
+<span class="lineNum">   53</span>              : 	if (cpu_is_little_endian()) </span>
+<span class="lineNum">   54</span>              : 		return u; </span>
+<span class="lineNum">   55</span>              : 	else </span>
+<span class="lineNum">   56</span>              : 		return swap_endian&lt;T&gt;(u); </span>
+<span class="lineNum">   57</span>              : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

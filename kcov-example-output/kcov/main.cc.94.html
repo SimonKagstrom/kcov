@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">71</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">46.5%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">33</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #include &lt;configuration.hh&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;engine.hh&gt; </span>
+<span class="lineNum">    3</span>              : #include &lt;reporter.hh&gt; </span>
+<span class="lineNum">    4</span>              : #include &lt;writer.hh&gt; </span>
+<span class="lineNum">    5</span>              : #include &lt;collector.hh&gt; </span>
+<span class="lineNum">    6</span>              : #include &lt;output-handler.hh&gt; </span>
+<span class="lineNum">    7</span>              : #include &lt;file-parser.hh&gt; </span>
+<span class="lineNum">    8</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    9</span>              :  </span>
+<span class="lineNum">   10</span>              : #include &lt;string.h&gt; </span>
+<span class="lineNum">   11</span>              : #include &lt;signal.h&gt; </span>
+<span class="lineNum">   12</span>              : #include &lt;sys&#047;types.h&gt; </span>
+<span class="lineNum">   13</span>              : #include &lt;sys&#047;stat.h&gt; </span>
+<span class="lineNum">   14</span>              : #include &lt;unistd.h&gt; </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : #include &quot;html-writer.hh&quot; </span>
+<span class="lineNum">   17</span>              : #include &quot;cobertura-writer.hh&quot; </span>
+<span class="lineNum">   18</span>              :  </span>
+<span class="lineNum">   19</span>              : using namespace kcov; </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span>              : static IEngine *g_engine; </span>
+<span class="lineNum">   22</span>              : static IOutputHandler *g_output; </span>
+<span class="lineNum">   23</span>              : static ICollector *g_collector; </span>
+<span class="lineNum">   24</span>              : static IReporter *g_reporter; </span>
+<span class="lineNum">   25</span>              :  </span>
+<span class="lineNum">   26</span>              : static void ctrlc(int sig) </span>
+<span class="lineNum">   27</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">   28</span><span class="lineNoCov">      0  /   1: 	g_collector-&gt;stop(); </span>
+<span class="lineNum">   29</span><span class="lineNoCov">      0  /   1: 	g_reporter-&gt;stop(); </span>
+<span class="lineNum">   30</span><span class="lineNoCov">      0  /   1: 	g_output-&gt;stop(); </span>
+<span class="lineNum">   31</span><span class="lineNoCov">      0  /   1: 	g_engine-&gt;kill(); </span>
+<span class="lineNum">   32</span><span class="lineNoCov">      0  /   1: 	exit(0); </span>
+<span class="lineNum">   33</span>              : } </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span>              : static void daemonize(void) </span>
+<span class="lineNum">   36</span><span class="lineNoCov">      0  /   1: { </span>
+<span class="lineNum">   37</span>              : 	pid_t child; </span>
+<span class="lineNum">   38</span>              : 	int res; </span>
+<span class="lineNum">   39</span>              :  </span>
+<span class="lineNum">   40</span><span class="lineNoCov">      0  /   1: 	IConfiguration &amp;conf = IConfiguration::getInstance(); </span>
+<span class="lineNum">   41</span><span class="lineNoCov">      0  /   1: 	std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + &quot;&#047;done.fifo&quot;; </span>
+<span class="lineNum">   42</span>              :  </span>
+<span class="lineNum">   43</span><span class="lineNoCov">      0  /   1: 	unlink(fifoName.c_str()); </span>
+<span class="lineNum">   44</span><span class="lineNoCov">      0  /   1: 	res = mkfifo(fifoName.c_str(), 0600); </span>
+<span class="lineNum">   45</span>              :  </span>
+<span class="lineNum">   46</span><span class="lineNoCov">      0  /   1: 	panic_if(res &lt; 0, </span>
+<span class="lineNum">   47</span>              : 			&quot;Can&#039;t create FIFO&quot;); </span>
+<span class="lineNum">   48</span>              :  </span>
+<span class="lineNum">   49</span><span class="lineNoCov">      0  /   1: 	child = fork(); </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span><span class="lineNoCov">      0  /   1: 	if (child &lt; 0) { </span>
+<span class="lineNum">   52</span><span class="lineNoCov">      0  /   1: 		panic(&quot;Fork failed?&#092;n&quot;); </span>
+<span class="lineNum">   53</span><span class="lineNoCov">      0  /   1: 	} else if (child == 0) { </span>
+<span class="lineNum">   54</span><span class="lineNoCov">      0  /   1: 		child = fork(); </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span><span class="lineNoCov">      0  /   1: 		if (child &lt; 0) { </span>
+<span class="lineNum">   57</span><span class="lineNoCov">      0  /   1: 			panic(&quot;Fork failed?&#092;n&quot;); </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   1: 		} else if (child &gt; 0) { </span>
+<span class="lineNum">   59</span>              : 			&#047;&#047; Second parent </span>
+<span class="lineNum">   60</span><span class="lineNoCov">      0  /   1: 			exit(0); </span>
+<span class="lineNum">   61</span>              : 		} </span>
+<span class="lineNum">   62</span>              : 	} else { </span>
+<span class="lineNum">   63</span>              : 		&#047;&#047; Parent </span>
+<span class="lineNum">   64</span>              : 		FILE *fp; </span>
+<span class="lineNum">   65</span>              : 		char buf[255]; </span>
+<span class="lineNum">   66</span>              : 		char *endp; </span>
+<span class="lineNum">   67</span>              : 		char *p; </span>
+<span class="lineNum">   68</span>              : 		unsigned long out; </span>
+<span class="lineNum">   69</span>              :  </span>
+<span class="lineNum">   70</span><span class="lineNoCov">      0  /   1: 		fp = fopen(fifoName.c_str(), &quot;r&quot;); </span>
+<span class="lineNum">   71</span><span class="lineNoCov">      0  /   1: 		panic_if (!fp, </span>
+<span class="lineNum">   72</span>              : 				&quot;Can&#039;t open FIFO&quot;); </span>
+<span class="lineNum">   73</span><span class="lineNoCov">      0  /   1: 		p = fgets(buf, sizeof(buf), fp); </span>
+<span class="lineNum">   74</span><span class="lineNoCov">      0  /   1: 		panic_if (!p, </span>
+<span class="lineNum">   75</span>              : 				&quot;Can&#039;t read FIFO&quot;); </span>
+<span class="lineNum">   76</span>              :  </span>
+<span class="lineNum">   77</span>              :  </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1: 		out = strtoul(p, &amp;endp, 10); </span>
+<span class="lineNum">   79</span><span class="lineNoCov">      0  /   1: 		if (p == endp) </span>
+<span class="lineNum">   80</span><span class="lineNoCov">      0  /   1: 			out = 0; </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span><span class="lineNoCov">      0  /   1: 		exit(out); </span>
+<span class="lineNum">   83</span><span class="lineNoCov">      0  /   1: 	} </span>
+<span class="lineNum">   84</span><span class="lineNoCov">      0  /   1: } </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span>              :  </span>
+<span class="lineNum">   87</span>              : int main(int argc, const char *argv[]) </span>
+<span class="lineNum">   88</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">   89</span><span class="lineCov">      1  /   1: 	IConfiguration &amp;conf = IConfiguration::getInstance(); </span>
+<span class="lineNum">   90</span>              :  </span>
+<span class="lineNum">   91</span><span class="lineCov">      1  /   1: 	if (!conf.parse(argc, argv)) </span>
+<span class="lineNum">   92</span><span class="lineNoCov">      0  /   1: 		return 1; </span>
+<span class="lineNum">   93</span>              :  </span>
+<span class="lineNum">   94</span><span class="lineCov">      1  /   1: 	std::string file = conf.getBinaryPath() + conf.getBinaryName(); </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: 	IFileParser *parser = IParserManager::getInstance().matchParser(file); </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1: 	if (!parser) { </span>
+<span class="lineNum">   97</span><span class="lineNoCov">      0  /   1: 		conf.printUsage(); </span>
+<span class="lineNum">   98</span><span class="lineNoCov">      0  /   1: 		return 1; </span>
+<span class="lineNum">   99</span>              : 	} </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1: 	parser-&gt;addFile(file); </span>
+<span class="lineNum">  101</span>              :  </span>
+<span class="lineNum">  102</span><span class="lineCov">      1  /   1: 	IEngine *engine = IEngineFactory::getInstance().matchEngine(file); </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1: 	if (!engine) { </span>
+<span class="lineNum">  104</span><span class="lineNoCov">      0  /   1: 		conf.printUsage(); </span>
+<span class="lineNum">  105</span><span class="lineNoCov">      0  /   1: 		return 1; </span>
+<span class="lineNum">  106</span>              : 	} </span>
+<span class="lineNum">  107</span>              :  </span>
+<span class="lineNum">  108</span><span class="lineCov">      1  /   1: 	ICollector &amp;collector = ICollector::create(*parser, *engine); </span>
+<span class="lineNum">  109</span><span class="lineCov">      1  /   1: 	IReporter &amp;reporter = IReporter::create(*parser, collector); </span>
+<span class="lineNum">  110</span><span class="lineCov">      1  /   1: 	IOutputHandler &amp;output = IOutputHandler::create(*parser, reporter); </span>
+<span class="lineNum">  111</span>              :  </span>
+<span class="lineNum">  112</span><span class="lineCov">      1  /   1: 	IConfiguration::RunMode_t runningMode = conf.getRunningMode(); </span>
+<span class="lineNum">  113</span>              :  </span>
+<span class="lineNum">  114</span>              : 	&#047;&#047; Register writers </span>
+<span class="lineNum">  115</span><span class="lineCov">      1  /   1: 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) { </span>
+<span class="lineNum">  116</span><span class="lineCov">      1  /   1: 		IWriter &amp;htmlWriter = createHtmlWriter(*parser, reporter, output); </span>
+<span class="lineNum">  117</span><span class="lineCov">      1  /   1: 		IWriter &amp;coberturaWriter = createCoberturaWriter(*parser, reporter, output); </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1: 		output.registerWriter(htmlWriter); </span>
+<span class="lineNum">  119</span><span class="lineCov">      1  /   1: 		output.registerWriter(coberturaWriter); </span>
+<span class="lineNum">  120</span>              : 	} </span>
+<span class="lineNum">  121</span>              :  </span>
+<span class="lineNum">  122</span><span class="lineCov">      1  /   1: 	g_engine = engine; </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1: 	g_output = &amp;output; </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1: 	g_reporter = &amp;reporter; </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 	g_collector = &amp;collector; </span>
+<span class="lineNum">  126</span><span class="lineCov">      1  /   1: 	signal(SIGINT, ctrlc); </span>
+<span class="lineNum">  127</span><span class="lineCov">      1  /   1: 	signal(SIGTERM, ctrlc); </span>
+<span class="lineNum">  128</span>              :  </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1: 	if (conf.getExitFirstProcess()) </span>
+<span class="lineNum">  130</span><span class="lineNoCov">      0  /   1: 		daemonize(); </span>
+<span class="lineNum">  131</span>              :  </span>
+<span class="lineNum">  132</span><span class="lineCov">      1  /   1: 	output.start(); </span>
+<span class="lineNum">  133</span>              :  </span>
+<span class="lineNum">  134</span><span class="lineCov">      1  /   1: 	int ret = 0; </span>
+<span class="lineNum">  135</span>              :  </span>
+<span class="lineNum">  136</span><span class="lineCov">      1  /   1: 	if (runningMode != IConfiguration::MODE_REPORT_ONLY) { </span>
+<span class="lineNum">  137</span><span class="lineCov">      1  /   1: 		ret = collector.run(file); </span>
+<span class="lineNum">  138</span>              : 	} else { </span>
+<span class="lineNum">  139</span><span class="lineNoCov">      0  /   1: 		parser-&gt;parse(); </span>
+<span class="lineNum">  140</span>              : 	} </span>
+<span class="lineNum">  141</span>              :  </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: 	output.stop(); </span>
+<span class="lineNum">  143</span><span class="lineCov">      1  /   1: 	engine-&gt;kill(); </span>
+<span class="lineNum">  144</span>              :  </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: 	return ret; </span>
+<span class="lineNum">  146</span><span class="linePartCov">      1  /   2: } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">61</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">68.9%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">42</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #include &lt;collector.hh&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;file-parser.hh&gt; </span>
+<span class="lineNum">    3</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    4</span>              : #include &lt;engine.hh&gt; </span>
+<span class="lineNum">    5</span>              : #include &lt;output-handler.hh&gt; </span>
+<span class="lineNum">    6</span>              : #include &lt;configuration.hh&gt; </span>
+<span class="lineNum">    7</span>              : #include &lt;filter.hh&gt; </span>
+<span class="lineNum">    8</span>              :  </span>
+<span class="lineNum">    9</span>              : #include &lt;unordered_map&gt; </span>
+<span class="lineNum">   10</span>              : #include &lt;string&gt; </span>
+<span class="lineNum">   11</span>              : #include &lt;list&gt; </span>
+<span class="lineNum">   12</span>              :  </span>
+<span class="lineNum">   13</span>              : using namespace kcov; </span>
+<span class="lineNum">   14</span>              :  </span>
+<span class="lineNum">   15</span><span class="lineNoCov">      0  /   5: class Collector : </span>
+<span class="lineNum">   16</span>              : 		public ICollector, </span>
+<span class="lineNum">   17</span>              : 		public IFileParser::ILineListener, </span>
+<span class="lineNum">   18</span>              : 		public IEngine::IEventListener </span>
+<span class="lineNum">   19</span>              : { </span>
+<span class="lineNum">   20</span>              : public: </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1: 	Collector(IFileParser &amp;fileParser, IEngine &amp;engine) : </span>
+<span class="lineNum">   22</span>              : 		m_fileParser(fileParser), </span>
+<span class="lineNum">   23</span>              : 		m_engine(engine), </span>
+<span class="lineNum">   24</span>              : 		m_exitCode(-1), </span>
+<span class="lineNum">   25</span><span class="linePartCov">      1  /   2: 		m_filter(IFilter::getInstance()) </span>
+<span class="lineNum">   26</span>              : 	{ </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1: 		m_fileParser.registerLineListener(*this); </span>
+<span class="lineNum">   28</span><span class="linePartCov">      2  /   3: 	} </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span><span class="lineCov">      1  /   1: 	void registerListener(ICollector::IListener &amp;listener) </span>
+<span class="lineNum">   31</span>              : 	{ </span>
+<span class="lineNum">   32</span><span class="lineCov">      1  /   1: 		m_listeners.push_back(&amp;listener); </span>
+<span class="lineNum">   33</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1: 	int run(const std::string &amp;filename) </span>
+<span class="lineNum">   36</span>              : 	{ </span>
+<span class="lineNum">   37</span><span class="lineCov">      1  /   1: 		if (!m_engine.start(*this, filename)) { </span>
+<span class="lineNum">   38</span><span class="lineNoCov">      0  /   1: 			error(&quot;Can&#039;t start&#047;attach to %s&quot;, filename.c_str()); </span>
+<span class="lineNum">   39</span><span class="lineNoCov">      0  /   1: 			return -1; </span>
+<span class="lineNum">   40</span>              : 		} </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span><span class="lineCov">      1  /   1: 		IOutputHandler &amp;output = IOutputHandler::getInstance(); </span>
+<span class="lineNum">   43</span><span class="lineCov">      1  /   1: 		unsigned int outputInterval = IConfiguration::getInstance().getOutputInterval(); </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span>              : 		&#047;&#047; This will set all breakpoints </span>
+<span class="lineNum">   46</span><span class="lineCov">      1  /   1: 		m_fileParser.parse(); </span>
+<span class="lineNum">   47</span><span class="lineCov">      1  /   1: 		m_engine.setupAllBreakpoints(); </span>
+<span class="lineNum">   48</span>              :  </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1: 		uint64_t lastTimestamp = get_ms_timestamp(); </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span>              : 		while (1) { </span>
+<span class="lineNum">   52</span><span class="lineCov">      1  /   1: 			bool shouldContinue = m_engine.continueExecution(); </span>
+<span class="lineNum">   53</span>              :  </span>
+<span class="lineNum">   54</span><span class="lineCov">      1  /   1: 			uint64_t now = get_ms_timestamp(); </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span><span class="lineCov">      2  /   2: 			if (outputInterval != 0 &amp;&amp; </span>
+<span class="lineNum">   57</span><span class="lineCov">      1  /   1: 					now - lastTimestamp &gt;= outputInterval) { </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   1: 				lastTimestamp = now; </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span><span class="lineNoCov">      0  /   1: 				output.produce(); </span>
+<span class="lineNum">   61</span>              : 			} </span>
+<span class="lineNum">   62</span>              :  </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1: 			if (!shouldContinue) </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">   65</span>              : 		} </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1: 		return m_exitCode; </span>
+<span class="lineNum">   68</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   69</span>              :  </span>
+<span class="lineNum">   70</span><span class="lineNoCov">      0  /   1: 	virtual void stop() </span>
+<span class="lineNum">   71</span>              : 	{ </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">   73</span>              :  </span>
+<span class="lineNum">   74</span>              : private: </span>
+<span class="lineNum">   75</span>              : 	&#047;&#047; From IEngine </span>
+<span class="lineNum">   76</span><span class="linePartCov">      2  /   3: 	void onEvent(const IEngine::Event &amp;ev) </span>
+<span class="lineNum">   77</span>              : 	{ </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1: 		switch (ev.type) </span>
+<span class="lineNum">   79</span>              : 		{ </span>
+<span class="lineNum">   80</span>              : 		case ev_error: </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1: 			break; </span>
+<span class="lineNum">   82</span>              : 		case ev_signal: </span>
+<span class="lineNum">   83</span><span class="lineNoCov">      0  /   1: 			if (!m_engine.childrenLeft()) </span>
+<span class="lineNum">   84</span><span class="lineNoCov">      0  /   2: 				kcov_debug(STATUS_MSG, &quot;kcov: Process exited with signal %d (%s)&#092;n&quot;, ev.data, m_engine.eventToName(ev).c_str()); </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span><span class="lineNoCov">      0  /   1: 			break; </span>
+<span class="lineNum">   87</span>              :  </span>
+<span class="lineNum">   88</span>              : 		case ev_exit_first_process: </span>
+<span class="lineNum">   89</span><span class="lineCov">      1  /   1: 			if (IConfiguration::getInstance().getExitFirstProcess()) { </span>
+<span class="lineNum">   90</span><span class="lineNoCov">      0  /   1: 				IConfiguration &amp;conf = IConfiguration::getInstance(); </span>
+<span class="lineNum">   91</span><span class="lineNoCov">      0  /   1: 				std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + &quot;&#047;done.fifo&quot;; </span>
+<span class="lineNum">   92</span>              :  </span>
+<span class="lineNum">   93</span><span class="lineNoCov">      0  /   3: 				std::string exitCode = fmt(&quot;%u&quot;, ev.data); </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span><span class="lineNoCov">      0  /   3: 				write_file(exitCode.c_str(), exitCode.size(), &quot;%s&quot;, fifoName.c_str()); </span>
+<span class="lineNum">   96</span>              : 			} </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1: 			m_exitCode = ev.data; </span>
+<span class="lineNum">   98</span><span class="lineCov">      1  /   1: 			break; </span>
+<span class="lineNum">   99</span>              : 		case ev_exit: </span>
+<span class="lineNum">  100</span><span class="lineNoCov">      0  /   1: 			m_exitCode = ev.data; </span>
+<span class="lineNum">  101</span><span class="lineNoCov">      0  /   1: 			break; </span>
+<span class="lineNum">  102</span>              : 		case ev_breakpoint: </span>
+<span class="lineNum">  103</span><span class="lineCov">      2  /   2: 			for (const auto &amp;it : m_listeners) </span>
+<span class="lineNum">  104</span><span class="lineCov">      1  /   1: 				it-&gt;onAddress(ev.addr, 1); </span>
+<span class="lineNum">  105</span>              :  </span>
+<span class="lineNum">  106</span>              : 			&#047;&#047; Disable this breakpoint </span>
+<span class="lineNum">  107</span><span class="lineCov">      1  /   1: 			m_engine.clearBreakpoint(ev.data); </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span><span class="lineCov">      1  /   1: 			break; </span>
+<span class="lineNum">  110</span>              :  </span>
+<span class="lineNum">  111</span>              : 		default: </span>
+<span class="lineNum">  112</span><span class="lineNoCov">      0  /   1: 			panic(&quot;Unknown event %d&quot;, ev.type); </span>
+<span class="lineNum">  113</span>              : 		} </span>
+<span class="lineNum">  114</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  115</span>              :  </span>
+<span class="lineNum">  116</span>              :  </span>
+<span class="lineNum">  117</span>              : 	&#047;&#047; From IFileParser </span>
+<span class="lineNum">  118</span><span class="linePartCov">      2  /   3: 	void onLine(const char *file, unsigned int lineNr, unsigned long addr) </span>
+<span class="lineNum">  119</span>              : 	{ </span>
+<span class="lineNum">  120</span><span class="linePartCov">      1  /   2: 		if (!m_filter.runFilters(file)) </span>
+<span class="lineNum">  121</span>              : 		{ </span>
+<span class="lineNum">  122</span><span class="lineNoCov">      0  /   1: 			return; </span>
+<span class="lineNum">  123</span>              : 		} </span>
+<span class="lineNum">  124</span>              :  </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1: 		if (addr == 0) </span>
+<span class="lineNum">  126</span><span class="lineNoCov">      0  /   1: 			return; </span>
+<span class="lineNum">  127</span>              :  </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1: 		m_engine.registerBreakpoint(addr); </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1: 		m_addrs[addr]++; </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  131</span>              :  </span>
+<span class="lineNum">  132</span>              : 	typedef std::unordered_map&lt;unsigned long, int&gt; AddrMap_t; </span>
+<span class="lineNum">  133</span>              : 	typedef std::list&lt;ICollector::IListener *&gt; ListenerList_t; </span>
+<span class="lineNum">  134</span>              :  </span>
+<span class="lineNum">  135</span>              : 	AddrMap_t m_addrs; </span>
+<span class="lineNum">  136</span>              : 	IFileParser &amp;m_fileParser; </span>
+<span class="lineNum">  137</span>              : 	IEngine &amp;m_engine; </span>
+<span class="lineNum">  138</span>              : 	ListenerList_t m_listeners; </span>
+<span class="lineNum">  139</span>              : 	int m_exitCode; </span>
+<span class="lineNum">  140</span>              :  </span>
+<span class="lineNum">  141</span>              : 	IFilter &amp;m_filter; </span>
+<span class="lineNum">  142</span>              : }; </span>
+<span class="lineNum">  143</span>              :  </span>
+<span class="lineNum">  144</span>              : ICollector &amp;ICollector::create(IFileParser &amp;elf, IEngine &amp;engine) </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: { </span>
+<span class="lineNum">  146</span><span class="lineCov">      1  /   1: 	return *new Collector(elf, engine); </span>
+<span class="lineNum">  147</span><span class="linePartCov">      1  /   2: } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

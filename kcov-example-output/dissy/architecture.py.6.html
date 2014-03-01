@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">54</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">55.6%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">30</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Base-class for architecture handling </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: class Architecture: </span>
+<span class="lineNum">   14</span>              :     &quot;&quot;&quot; </span>
+<span class="lineNum">   15</span>              :     Architecture base class. Inherit this to implement </span>
+<span class="lineNum">   16</span>              :     architecture-specific handling (see intel.py and mips.py) </span>
+<span class="lineNum">   17</span>              :     &quot;&quot;&quot; </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1:     def __init__(self, arch_jumps = [], arch_calls = [], arch_conditionflagsetters = [], </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1:         arch_conditionflagusers = []): </span>
+<span class="lineNum">   20</span><span class="lineCov">      1  /   1:         self.jumps = {} </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1:         self.calls = {} # To handle reverse-engineering </span>
+<span class="lineNum">   22</span><span class="lineCov">      1  /   1:         self.conditionflagsetters = {} </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1:         self.conditionflagusers = {} </span>
+<span class="lineNum">   24</span><span class="lineCov">      1  /   1:         for s in arch_jumps: </span>
+<span class="lineNum">   25</span><span class="lineNoCov">      0  /   1:             self.jumps[s.strip()] = True </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1:         for s in arch_calls: </span>
+<span class="lineNum">   27</span><span class="lineNoCov">      0  /   1:             self.calls[s.strip()] = True </span>
+<span class="lineNum">   28</span><span class="lineCov">      1  /   1:         for s in arch_conditionflagsetters: </span>
+<span class="lineNum">   29</span><span class="lineNoCov">      0  /   1:             self.conditionflagsetters[s.strip()] = True </span>
+<span class="lineNum">   30</span><span class="lineCov">      1  /   1:         for s in arch_conditionflagusers: </span>
+<span class="lineNum">   31</span><span class="lineNoCov">      0  /   1:             self.conditionflagusers[s.strip()] = True </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1:     def isJump(self, insn): </span>
+<span class="lineNum">   34</span><span class="lineNoCov">      0  /   1:         &quot;Returns true if this instruction is a jump&quot; </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1:         return insn in self.jumps </span>
+<span class="lineNum">   36</span>              :  </span>
+<span class="lineNum">   37</span><span class="lineCov">      1  /   1:     def isCall(self, insn): </span>
+<span class="lineNum">   38</span><span class="lineNoCov">      0  /   1:         &quot;Returns true if this instruction is a call&quot; </span>
+<span class="lineNum">   39</span><span class="lineNoCov">      0  /   1:         return insn in self.calls </span>
+<span class="lineNum">   40</span>              :  </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1:     def isConditionFlagSetter(self, insn): </span>
+<span class="lineNum">   42</span><span class="lineNoCov">      0  /   1:         &quot;Returns true if this instruction sets the condition flags&quot; </span>
+<span class="lineNum">   43</span><span class="lineCov">      1  /   1:         return insn in self.conditionflagsetters </span>
+<span class="lineNum">   44</span>              :  </span>
+<span class="lineNum">   45</span><span class="lineCov">      1  /   1:     def isConditionFlagUser(self, insn): </span>
+<span class="lineNum">   46</span><span class="lineNoCov">      0  /   1:         &quot;Returns true if this instruction uses the condition flags&quot; </span>
+<span class="lineNum">   47</span><span class="lineNoCov">      0  /   1:         return insn in self.conditionflagusers </span>
+<span class="lineNum">   48</span>              :  </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1:     def getJumpDestination(self, address, insn, args): </span>
+<span class="lineNum">   50</span>              :         &quot;&quot;&quot;Parse the instruction to return the jump destination. The </span>
+<span class="lineNum">   51</span>              :         base class only tries to convert the argument to a number. See </span>
+<span class="lineNum">   52</span>              :         mips.py for a more advanced translation. </span>
+<span class="lineNum">   53</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">   54</span><span class="lineNoCov">      0  /   1:         try: </span>
+<span class="lineNum">   55</span><span class="lineNoCov">      0  /   1:             return long(args, 16) </span>
+<span class="lineNum">   56</span><span class="lineNoCov">      0  /   1:         except ValueError: </span>
+<span class="lineNum">   57</span><span class="lineNoCov">      0  /   1:             pass </span>
+<span class="lineNum">   58</span><span class="lineNoCov">      0  /   1:         return None </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span><span class="lineCov">      1  /   1: from dissy import mips, intel, ppc, arm, atmel </span>
+<span class="lineNum">   61</span>              :  </span>
+<span class="lineNum">   62</span><span class="lineCov">      1  /   1: def getArchitecture(archStr): </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1:     if archStr == &quot;intel&quot;: </span>
+<span class="lineNum">   64</span><span class="lineNoCov">      0  /   1:         return intel.IntelArchitecture() </span>
+<span class="lineNum">   65</span><span class="lineCov">      1  /   1:     elif archStr == &quot;x86-64&quot;: </span>
+<span class="lineNum">   66</span><span class="lineNoCov">      0  /   1:         return intel.IntelArchitecture() </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1:     elif archStr == &quot;i8086&quot;: </span>
+<span class="lineNum">   68</span><span class="lineNoCov">      0  /   1:         return intel.IntelArchitecture() </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1:     if archStr == &quot;mips&quot;: </span>
+<span class="lineNum">   70</span><span class="lineNoCov">      0  /   1:         return mips.MipsArchitecture() </span>
+<span class="lineNum">   71</span><span class="lineCov">      1  /   1:     if archStr == &quot;ppc&quot;: </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   1:         return ppc.PpcArchitecture() </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1:     if archStr == &quot;powerpc&quot;: </span>
+<span class="lineNum">   74</span><span class="lineNoCov">      0  /   1:         return ppc.PpcArchitecture() </span>
+<span class="lineNum">   75</span><span class="lineCov">      1  /   1:     if archStr == &quot;arm&quot;: </span>
+<span class="lineNum">   76</span><span class="lineNoCov">      0  /   1:         return arm.ArmArchitecture() </span>
+<span class="lineNum">   77</span><span class="lineCov">      1  /   1:     if archStr == &quot;arm26&quot;: </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1:         return arm.ArmArchitecture() </span>
+<span class="lineNum">   79</span><span class="lineCov">      1  /   1:     if archStr == &quot;atmel&quot;: </span>
+<span class="lineNum">   80</span><span class="lineNoCov">      0  /   1:         return atmel.AtmelArchitecture() </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1:     return Architecture([]) </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

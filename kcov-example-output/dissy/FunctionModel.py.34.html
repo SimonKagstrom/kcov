@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">18</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">83.3%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">15</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Display the functions </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: import gtk, gobject </span>
+<span class="lineNum">   14</span>              :  </span>
+<span class="lineNum">   15</span><span class="lineCov">      1  /   1: class InfoModel: </span>
+<span class="lineNum">   16</span>              :     &quot;&quot;&quot; The model class holds the information we want to display &quot;&quot;&quot; </span>
+<span class="lineNum">   17</span>              :  </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1:     def __init__(self, fileContainer): </span>
+<span class="lineNum">   19</span>              :         &quot;&quot;&quot; Sets up and populates our gtk.TreeStore &quot;&quot;&quot; </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1:         self.tree_store = gtk.TreeStore( gobject.TYPE_STRING, </span>
+<span class="lineNum">   22</span><span class="lineCov">      1  /   1:                                          gobject.TYPE_LONG, </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1:                                          gobject.TYPE_STRING, </span>
+<span class="lineNum">   24</span><span class="lineCov">      1  /   1:                                          gobject.TYPE_PYOBJECT </span>
+<span class="lineNum">   25</span><span class="lineNoCov">      0  /   1:                                          ) </span>
+<span class="lineNum">   26</span>              :         # Create the TreeStore </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1:         for item in fileContainer.getFunctions(): </span>
+<span class="lineNum">   28</span>              :             # Insert functions </span>
+<span class="lineNum">   29</span><span class="lineCov">      1  /   1:             item.iter = self.tree_store.append(None, (&quot;0x%08x&quot; % item.address, </span>
+<span class="lineNum">   30</span><span class="lineCov">      1  /   1:                                                       item.getSize(), </span>
+<span class="lineNum">   31</span><span class="lineCov">      1  /   1:                                                       item.getLabel(), </span>
+<span class="lineNum">   32</span><span class="lineCov">      1  /   1:                                                       item </span>
+<span class="lineNum">   33</span><span class="lineNoCov">      0  /   1:                                                       ) ) </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1:     def getModel(self): </span>
+<span class="lineNum">   36</span>              :         &quot;&quot;&quot; Returns the model &quot;&quot;&quot; </span>
+<span class="lineNum">   37</span><span class="lineCov">      1  /   1:         if self.tree_store: </span>
+<span class="lineNum">   38</span><span class="lineCov">      1  /   1:             return self.tree_store </span>
+<span class="lineNum">   39</span>              :         else: </span>
+<span class="lineNum">   40</span><span class="lineNoCov">      0  /   1:             return None </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

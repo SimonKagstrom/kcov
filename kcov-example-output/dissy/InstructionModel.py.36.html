@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">103</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">76.7%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">79</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Instruction models </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: import gtk, gobject </span>
+<span class="lineNum">   14</span><span class="lineCov">      1  /   1: import cgi </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span><span class="lineCov">      1  /   1: from Config import * </span>
+<span class="lineNum">   17</span><span class="lineCov">      1  /   1: from Function import Function </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: from StrEntity import StrEntity </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1: from Instruction import Instruction </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1: def loadFile(fileName): </span>
+<span class="lineNum">   22</span><span class="lineCov">      1  /   1:     for path in pathsToSearch: </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1:         fullPath = &quot;%s&#047;%s&quot; % (path, fileName) </span>
+<span class="lineNum">   24</span><span class="lineCov">      1  /   1:         try: </span>
+<span class="lineNum">   25</span><span class="lineCov">      1  /   1:             return gtk.gdk.pixbuf_new_from_file(fullPath) </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1:         except: </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1:             pass </span>
+<span class="lineNum">   28</span><span class="lineNoCov">      0  /   1:     return None </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span><span class="lineCov">      1  /   1: red_start_down = loadFile(&quot;gfx&#047;red_start_down.png&quot;) </span>
+<span class="lineNum">   32</span><span class="lineCov">      1  /   1: red_line = loadFile(&quot;gfx&#047;red_line.png&quot;) </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1: red_plus = loadFile(&quot;gfx&#047;red_plus.png&quot;) </span>
+<span class="lineNum">   34</span><span class="lineCov">      1  /   1: red_arrow_left = loadFile(&quot;gfx&#047;red_arrow_left.png&quot;) </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1: red_start_up = loadFile(&quot;gfx&#047;red_start_up.png&quot;) </span>
+<span class="lineNum">   36</span><span class="lineCov">      1  /   1: red_arrow_right = loadFile(&quot;gfx&#047;red_arrow_right.png&quot;) </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span><span class="lineCov">      1  /   1: jump_pixmaps_right=[None, red_start_down, red_line, red_arrow_left, red_plus, red_plus] </span>
+<span class="lineNum">   39</span><span class="lineCov">      1  /   1: jump_pixmaps_left=[None, red_start_up, red_line, red_arrow_right, red_plus, red_plus] </span>
+<span class="lineNum">   40</span>              :  </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1: class InfoModel: </span>
+<span class="lineNum">   42</span>              :     &quot;&quot;&quot; The model class holds the information we want to display &quot;&quot;&quot; </span>
+<span class="lineNum">   43</span>              :  </span>
+<span class="lineNum">   44</span><span class="lineCov">      1  /   1:     def __init__(self, function, curInstruction = None, highlighters=[], numJumpCols=3): </span>
+<span class="lineNum">   45</span>              :         &quot;&quot;&quot; Sets up and populates our gtk.TreeStore &quot;&quot;&quot; </span>
+<span class="lineNum">   46</span>              :  </span>
+<span class="lineNum">   47</span><span class="lineCov">      1  /   1:         self.function = function </span>
+<span class="lineNum">   48</span><span class="lineCov">      1  /   1:         self.curInstruction = curInstruction </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1:         self.highlighters = highlighters </span>
+<span class="lineNum">   50</span><span class="lineNoCov">      0  /   1:         cols = [ gobject.TYPE_STRING, ] + &#092; </span>
+<span class="lineNum">   51</span><span class="lineNoCov">      0  /   1:             [gtk.gdk.Pixbuf]*numJumpCols + &#092; </span>
+<span class="lineNum">   52</span><span class="lineNoCov">      0  /   1:             [ gobject.TYPE_STRING, ] + &#092; </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1:             [gtk.gdk.Pixbuf]*numJumpCols + &#092; </span>
+<span class="lineNum">   54</span><span class="lineCov">      1  /   1:             [ gobject.TYPE_STRING, gobject.TYPE_PYOBJECT ] </span>
+<span class="lineNum">   55</span>              :  </span>
+<span class="lineNum">   56</span><span class="lineCov">      1  /   1:         self.COLUMN_ADDR = 0 </span>
+<span class="lineNum">   57</span><span class="lineCov">      1  /   1:         self.COLUMN_STR_REPRESENTATION = 1 + numJumpCols </span>
+<span class="lineNum">   58</span><span class="lineCov">      1  /   1:         self.COLUMN_TARGET = 1 + numJumpCols + 1 + numJumpCols </span>
+<span class="lineNum">   59</span><span class="lineCov">      1  /   1:         self.COLUMN_INSTRUCTION = 1 + numJumpCols + 1 + numJumpCols + 1 </span>
+<span class="lineNum">   60</span><span class="lineCov">      1  /   1:         self.tree_store = gtk.ListStore(*cols) </span>
+<span class="lineNum">   61</span>              :         # Create the TreeStore </span>
+<span class="lineNum">   62</span><span class="lineCov">      1  /   1:         if self.function == None: </span>
+<span class="lineNum">   63</span><span class="lineNoCov">      0  /   1:             return </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1:         self.lazyinitFunction() </span>
+<span class="lineNum">   65</span>              :  </span>
+<span class="lineNum">   66</span><span class="lineCov">      1  /   1:         for insn in self.function.getAll(): </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1:             if isinstance(insn, StrEntity): </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1:                 if config.showHighLevelCode: </span>
+<span class="lineNum">   69</span><span class="lineNoCov">      0  /   1:                     insn.iter = self.tree_store.append( (&quot;&quot;, </span>
+<span class="lineNum">   70</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_left[insn.left_state[2]], </span>
+<span class="lineNum">   71</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_left[insn.left_state[1]], </span>
+<span class="lineNum">   72</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_left[insn.left_state[0]], </span>
+<span class="lineNum">   73</span><span class="lineNoCov">      0  /   1:                                                                &#039;&lt;small&gt;&lt;span foreground=&quot;%s&quot;&gt;%s&lt;&#047;span&gt;&lt;&#047;small&gt;&#092;t&#039; % (config.highLevelCodeFgColor, str(insn)), </span>
+<span class="lineNum">   74</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_right[insn.right_state[0]], </span>
+<span class="lineNum">   75</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_right[insn.right_state[1]], </span>
+<span class="lineNum">   76</span><span class="lineNoCov">      0  /   1:                                                                jump_pixmaps_right[insn.right_state[2]], </span>
+<span class="lineNum">   77</span><span class="lineNoCov">      0  /   1:                                                                &quot;&quot;, </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1:                                                                insn </span>
+<span class="lineNum">   79</span><span class="lineNoCov">      0  /   1:                                                                )) </span>
+<span class="lineNum">   80</span><span class="lineNoCov">      0  /   1:                 continue </span>
+<span class="lineNum">   81</span>              :  </span>
+<span class="lineNum">   82</span><span class="lineCov">      1  /   1:             target = &quot;&quot; </span>
+<span class="lineNum">   83</span><span class="lineCov">      1  /   1:             if isinstance(insn.getOutLink(), Function): </span>
+<span class="lineNum">   84</span><span class="lineNoCov">      0  /   1:                 target = insn.getOutLink().getLabel() </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span><span class="lineCov">      1  /   1:             insnAddr = &quot;0x%08x&quot; % (insn.address) </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1:             insnStr = insn.getOpcode() </span>
+<span class="lineNum">   88</span><span class="lineCov">      1  /   1:             argsStr = insn.getArgs() </span>
+<span class="lineNum">   89</span>              :  </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1:             strRepresentation = &#039;&lt;span foreground=&quot;%s&quot;&gt;%s&lt;&#047;span&gt;&#092;t%s&#039; % (config.insnFgColor, insnStr, argsStr) </span>
+<span class="lineNum">   91</span><span class="lineCov">      1  /   1:             if insn.comment: </span>
+<span class="lineNum">   92</span><span class="lineNoCov">      0  /   1:                 strRepresentation += &#039; &lt;span foreground=&quot;%s&quot;&gt;;%s&lt;&#047;span&gt;&#039; % (config.highLevelCodeFgColor, cgi.escape(insn.comment)) </span>
+<span class="lineNum">   93</span><span class="lineCov">      1  /   1:             insn.iter = self.tree_store.append( (insnAddr, </span>
+<span class="lineNum">   94</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_left[insn.left_state[2]], </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_left[insn.left_state[1]], </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_left[insn.left_state[0]], </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1:                                                        strRepresentation, </span>
+<span class="lineNum">   98</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_right[insn.right_state[0]], </span>
+<span class="lineNum">   99</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_right[insn.right_state[1]], </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1:                                                        jump_pixmaps_right[insn.right_state[2]], </span>
+<span class="lineNum">  101</span><span class="lineCov">      1  /   1:                                                        target, </span>
+<span class="lineNum">  102</span><span class="lineCov">      1  /   1:                                                        insn </span>
+<span class="lineNum">  103</span><span class="lineNoCov">      0  /   1:                                                        )) </span>
+<span class="lineNum">  104</span>              :  </span>
+<span class="lineNum">  105</span><span class="lineCov">      1  /   1:     def refreshModel(self): </span>
+<span class="lineNum">  106</span><span class="lineCov">      1  /   1:         for iter in self.tree_store: </span>
+<span class="lineNum">  107</span><span class="lineCov">      1  /   1:             insn = iter[self.COLUMN_INSTRUCTION] </span>
+<span class="lineNum">  108</span><span class="lineCov">      1  /   1:             if isinstance(insn, Instruction): </span>
+<span class="lineNum">  109</span><span class="lineCov">      1  /   1:                 insnAddr = &quot;0x%08x&quot; % (insn.address) </span>
+<span class="lineNum">  110</span><span class="lineCov">      1  /   1:                 insnStr = insn.getOpcode() </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1:                 argsStr = insn.getArgs() </span>
+<span class="lineNum">  112</span><span class="lineCov">      1  /   1:                 strRepresentation = &#039;&lt;span foreground=&quot;%s&quot;&gt;%s&lt;&#047;span&gt;&#092;t%s&#039; % (config.insnFgColor, insnStr, argsStr) </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1:                 if insn.comment: </span>
+<span class="lineNum">  114</span><span class="lineNoCov">      0  /   1:                     strRepresentation += &#039; &lt;span foreground=&quot;%s&quot;&gt;;%s&lt;&#047;span&gt;&#039; % (config.highLevelCodeFgColor, cgi.escape(insn.comment)) </span>
+<span class="lineNum">  115</span><span class="lineCov">      1  /   1:                 iter[self.COLUMN_STR_REPRESENTATION] = strRepresentation </span>
+<span class="lineNum">  116</span><span class="lineCov">      1  /   1:                 iter[self.COLUMN_ADDR] = insnAddr </span>
+<span class="lineNum">  117</span><span class="lineCov">      1  /   1:                 for highlighter in self.highlighters: </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1:                     highlighter.highlight(iter, self.curInstruction, self) </span>
+<span class="lineNum">  119</span>              :  </span>
+<span class="lineNum">  120</span><span class="lineCov">      1  /   1:     def lazyinitFunction(self): </span>
+<span class="lineNum">  121</span><span class="lineCov">      1  /   1:         if self.function == None: </span>
+<span class="lineNum">  122</span><span class="lineNoCov">      0  /   1:             return </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1:         if self.function.getAll() == []: </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1:             self.function.parse() </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1:             self.function.link() </span>
+<span class="lineNum">  126</span>              :  </span>
+<span class="lineNum">  127</span><span class="lineCov">      1  /   1:     def setCurInstruction(self, curInstruction): </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1:         self.curInstruction = curInstruction </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1:         if self.function == None: </span>
+<span class="lineNum">  130</span><span class="lineNoCov">      0  /   1:             return </span>
+<span class="lineNum">  131</span>              :  </span>
+<span class="lineNum">  132</span><span class="lineCov">      1  /   1:     def getModel(self): </span>
+<span class="lineNum">  133</span>              :         &quot;&quot;&quot; Returns the model &quot;&quot;&quot; </span>
+<span class="lineNum">  134</span><span class="lineCov">      1  /   1:         if self.tree_store: </span>
+<span class="lineNum">  135</span><span class="lineCov">      1  /   1:             return self.tree_store </span>
+<span class="lineNum">  136</span>              :         else: </span>
+<span class="lineNum">  137</span><span class="lineNoCov">      0  /   1:             return None </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

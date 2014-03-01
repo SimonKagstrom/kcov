@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">12</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">75.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">9</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2009,  Mads Chr. Olesen </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Mads Chr. Olesen &lt;mads@mchro.dk&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Infobox using WebKit </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: import gtk </span>
+<span class="lineNum">   14</span><span class="lineCov">      1  /   1: import webkit </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span><span class="lineCov">      1  /   1: class InfoBox(webkit.WebView): </span>
+<span class="lineNum">   17</span>              :  </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1:     def __init__(self): </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1:         webkit.WebView.__init__(self) </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1:     def set_markup(self, markup): </span>
+<span class="lineNum">   22</span>              :         html = &quot;&quot;&quot; </span>
+<span class="lineNum">   23</span>              : &lt;html&gt; </span>
+<span class="lineNum">   24</span>              : &lt;head&gt; </span>
+<span class="lineNum">   25</span>              : &lt;style&gt; </span>
+<span class="lineNum">   26</span>              : table {  </span>
+<span class="lineNum">   27</span>              :     border-collapse: collapse; </span>
+<span class="lineNum">   28</span>              : }  </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span>              : td {  </span>
+<span class="lineNum">   31</span>              :     border: 1px solid black; </span>
+<span class="lineNum">   32</span>              :     padding: 0px 5px 0px 5px; &#047;* pad right and left *&#047; </span>
+<span class="lineNum">   33</span>              : } </span>
+<span class="lineNum">   34</span>              : &lt;&#047;style&gt; </span>
+<span class="lineNum">   35</span>              : &lt;&#047;head&gt; </span>
+<span class="lineNum">   36</span>              : &lt;body&gt; </span>
+<span class="lineNum">   37</span>              : %s </span>
+<span class="lineNum">   38</span>              : &lt;&#047;body&gt;&lt;&#047;html&gt; </span>
+<span class="lineNum">   39</span><span class="lineCov">      1  /   1: &quot;&quot;&quot; % (markup) </span>
+<span class="lineNum">   40</span><span class="lineCov">      1  /   1:         self.load_string(html, &quot;text&#047;html&quot;, &quot;iso-8859-15&quot;, &quot;&quot;) </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span>              :         #Debugging </span>
+<span class="lineNum">   43</span><span class="lineCov">      1  /   1:         if False: </span>
+<span class="lineNum">   44</span><span class="lineNoCov">      0  /   1:             f = open(&#039;&#047;tmp&#047;dissy-infobox.html&#039;, &#039;w&#039;) </span>
+<span class="lineNum">   45</span><span class="lineNoCov">      0  /   1:             f.write(html) </span>
+<span class="lineNum">   46</span><span class="lineNoCov">      0  /   1:             f.close() </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">21</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">81.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">17</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Entity (address, size etc.) </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: class Entity: </span>
+<span class="lineNum">   14</span><span class="lineCov">      1  /   1:     def __init__(self): </span>
+<span class="lineNum">   15</span><span class="lineNoCov">      0  /   1:         pass </span>
+<span class="lineNum">   16</span>              :  </span>
+<span class="lineNum">   17</span>              :  </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: class AddressableEntity(Entity): </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1:     def __init__(self, address=0, baseAddress = 0, endAddress = 0): </span>
+<span class="lineNum">   20</span><span class="lineCov">      1  /   1:         self.label = &quot;&quot; </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1:         self.address = address + baseAddress </span>
+<span class="lineNum">   22</span><span class="lineCov">      1  /   1:         self.baseAddress = baseAddress </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1:         if endAddress == 0: </span>
+<span class="lineNum">   24</span><span class="lineCov">      1  /   1:             self.endAddress = self.address </span>
+<span class="lineNum">   25</span>              :         else: </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1:             self.endAddress = endAddress + baseAddress </span>
+<span class="lineNum">   27</span>              :  </span>
+<span class="lineNum">   28</span><span class="lineCov">      1  /   1:     def getLabel(self): </span>
+<span class="lineNum">   29</span><span class="lineCov">      1  /   1:         return self.label </span>
+<span class="lineNum">   30</span>              :  </span>
+<span class="lineNum">   31</span><span class="lineCov">      1  /   1:     def getExtents(self): </span>
+<span class="lineNum">   32</span><span class="lineNoCov">      0  /   1:         &quot;Return the extents of this function&quot; </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1:         return (self.address - self.baseAddress, self.endAddress - self.baseAddress) </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1:     def setSize(self, size): </span>
+<span class="lineNum">   36</span><span class="lineNoCov">      0  /   1:         &quot;Set the size of this entity&quot; </span>
+<span class="lineNum">   37</span><span class="lineNoCov">      0  /   1:         self.endAddress = self.address + size </span>
+<span class="lineNum">   38</span>              :  </span>
+<span class="lineNum">   39</span><span class="lineCov">      1  /   1:     def getSize(self): </span>
+<span class="lineNum">   40</span><span class="lineCov">      1  /   1:         return self.endAddress - self.address </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

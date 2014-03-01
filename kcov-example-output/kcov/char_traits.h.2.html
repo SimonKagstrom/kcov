@@ -1,0 +1,618 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">4</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">4</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : &#047;&#047; Character Traits for use by standard string and iostream -*- C++ -*- </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : &#047;&#047; Copyright (C) 1997-2013 Free Software Foundation, Inc. </span>
+<span class="lineNum">    4</span>              : &#047;&#047; </span>
+<span class="lineNum">    5</span>              : &#047;&#047; This file is part of the GNU ISO C++ Library.  This library is free </span>
+<span class="lineNum">    6</span>              : &#047;&#047; software; you can redistribute it and&#047;or modify it under the </span>
+<span class="lineNum">    7</span>              : &#047;&#047; terms of the GNU General Public License as published by the </span>
+<span class="lineNum">    8</span>              : &#047;&#047; Free Software Foundation; either version 3, or (at your option) </span>
+<span class="lineNum">    9</span>              : &#047;&#047; any later version. </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : &#047;&#047; This library is distributed in the hope that it will be useful, </span>
+<span class="lineNum">   12</span>              : &#047;&#047; but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">   13</span>              : &#047;&#047; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">   14</span>              : &#047;&#047; GNU General Public License for more details. </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : &#047;&#047; Under Section 7 of GPL version 3, you are granted additional </span>
+<span class="lineNum">   17</span>              : &#047;&#047; permissions described in the GCC Runtime Library Exception, version </span>
+<span class="lineNum">   18</span>              : &#047;&#047; 3.1, as published by the Free Software Foundation. </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span>              : &#047;&#047; You should have received a copy of the GNU General Public License and </span>
+<span class="lineNum">   21</span>              : &#047;&#047; a copy of the GCC Runtime Library Exception along with this program; </span>
+<span class="lineNum">   22</span>              : &#047;&#047; see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see </span>
+<span class="lineNum">   23</span>              : &#047;&#047; &lt;http:&#047;&#047;www.gnu.org&#047;licenses&#047;&gt;. </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : &#047;** @file bits&#047;char_traits.h </span>
+<span class="lineNum">   26</span>              :  *  This is an internal header file, included by other library headers. </span>
+<span class="lineNum">   27</span>              :  *  Do not attempt to use it directly. @headername{string} </span>
+<span class="lineNum">   28</span>              :  *&#047; </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span>              : &#047;&#047; </span>
+<span class="lineNum">   31</span>              : &#047;&#047; ISO C++ 14882: 21  Strings library </span>
+<span class="lineNum">   32</span>              : &#047;&#047; </span>
+<span class="lineNum">   33</span>              :  </span>
+<span class="lineNum">   34</span>              : #ifndef _CHAR_TRAITS_H </span>
+<span class="lineNum">   35</span>              : #define _CHAR_TRAITS_H 1 </span>
+<span class="lineNum">   36</span>              :  </span>
+<span class="lineNum">   37</span>              : #pragma GCC system_header </span>
+<span class="lineNum">   38</span>              :  </span>
+<span class="lineNum">   39</span>              : #include &lt;bits&#047;stl_algobase.h&gt;  &#047;&#047; std::copy, std::fill_n </span>
+<span class="lineNum">   40</span>              : #include &lt;bits&#047;postypes.h&gt;      &#047;&#047; For streampos </span>
+<span class="lineNum">   41</span>              : #include &lt;cwchar&gt;               &#047;&#047; For WEOF, wmemmove, wmemset, etc. </span>
+<span class="lineNum">   42</span>              :  </span>
+<span class="lineNum">   43</span>              : namespace __gnu_cxx _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">   44</span>              : { </span>
+<span class="lineNum">   45</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">   46</span>              :  </span>
+<span class="lineNum">   47</span>              :   &#047;** </span>
+<span class="lineNum">   48</span>              :    *  @brief  Mapping from character type to associated types. </span>
+<span class="lineNum">   49</span>              :    * </span>
+<span class="lineNum">   50</span>              :    *  @note This is an implementation class for the generic version </span>
+<span class="lineNum">   51</span>              :    *  of char_traits.  It defines int_type, off_type, pos_type, and </span>
+<span class="lineNum">   52</span>              :    *  state_type.  By default these are unsigned long, streamoff, </span>
+<span class="lineNum">   53</span>              :    *  streampos, and mbstate_t.  Users who need a different set of </span>
+<span class="lineNum">   54</span>              :    *  types, but who don&#039;t need to change the definitions of any function </span>
+<span class="lineNum">   55</span>              :    *  defined in char_traits, can specialize __gnu_cxx::_Char_types </span>
+<span class="lineNum">   56</span>              :    *  while leaving __gnu_cxx::char_traits alone. *&#047; </span>
+<span class="lineNum">   57</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">   58</span>              :     struct _Char_types </span>
+<span class="lineNum">   59</span>              :     { </span>
+<span class="lineNum">   60</span>              :       typedef unsigned long   int_type; </span>
+<span class="lineNum">   61</span>              :       typedef std::streampos  pos_type; </span>
+<span class="lineNum">   62</span>              :       typedef std::streamoff  off_type; </span>
+<span class="lineNum">   63</span>              :       typedef std::mbstate_t  state_type; </span>
+<span class="lineNum">   64</span>              :     }; </span>
+<span class="lineNum">   65</span>              :  </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span>              :   &#047;** </span>
+<span class="lineNum">   68</span>              :    *  @brief  Base class used to implement std::char_traits. </span>
+<span class="lineNum">   69</span>              :    * </span>
+<span class="lineNum">   70</span>              :    *  @note For any given actual character type, this definition is </span>
+<span class="lineNum">   71</span>              :    *  probably wrong.  (Most of the member functions are likely to be </span>
+<span class="lineNum">   72</span>              :    *  right, but the int_type and state_type typedefs, and the eof() </span>
+<span class="lineNum">   73</span>              :    *  member function, are likely to be wrong.)  The reason this class </span>
+<span class="lineNum">   74</span>              :    *  exists is so users can specialize it.  Classes in namespace std </span>
+<span class="lineNum">   75</span>              :    *  may not be specialized for fundamental types, but classes in </span>
+<span class="lineNum">   76</span>              :    *  namespace __gnu_cxx may be. </span>
+<span class="lineNum">   77</span>              :    * </span>
+<span class="lineNum">   78</span>              :    *  See http:&#047;&#047;gcc.gnu.org&#047;onlinedocs&#047;libstdc++&#047;manual&#047;bk01pt05ch13s03.html </span>
+<span class="lineNum">   79</span>              :    *  for advice on how to make use of this class for @a unusual character </span>
+<span class="lineNum">   80</span>              :    *  types. Also, check out include&#047;ext&#047;pod_char_traits.h.   </span>
+<span class="lineNum">   81</span>              :    *&#047; </span>
+<span class="lineNum">   82</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">   83</span>              :     struct char_traits </span>
+<span class="lineNum">   84</span>              :     { </span>
+<span class="lineNum">   85</span>              :       typedef _CharT                                    char_type; </span>
+<span class="lineNum">   86</span>              :       typedef typename _Char_types&lt;_CharT&gt;::int_type    int_type; </span>
+<span class="lineNum">   87</span>              :       typedef typename _Char_types&lt;_CharT&gt;::pos_type    pos_type; </span>
+<span class="lineNum">   88</span>              :       typedef typename _Char_types&lt;_CharT&gt;::off_type    off_type; </span>
+<span class="lineNum">   89</span>              :       typedef typename _Char_types&lt;_CharT&gt;::state_type  state_type; </span>
+<span class="lineNum">   90</span>              :  </span>
+<span class="lineNum">   91</span>              :       static void </span>
+<span class="lineNum">   92</span>              :       assign(char_type&amp; __c1, const char_type&amp; __c2) </span>
+<span class="lineNum">   93</span>              :       { __c1 = __c2; } </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">   96</span>              :       eq(const char_type&amp; __c1, const char_type&amp; __c2) </span>
+<span class="lineNum">   97</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">   98</span>              :  </span>
+<span class="lineNum">   99</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  100</span>              :       lt(const char_type&amp; __c1, const char_type&amp; __c2) </span>
+<span class="lineNum">  101</span>              :       { return __c1 &lt; __c2; } </span>
+<span class="lineNum">  102</span>              :  </span>
+<span class="lineNum">  103</span>              :       static int </span>
+<span class="lineNum">  104</span>              :       compare(const char_type* __s1, const char_type* __s2, std::size_t __n); </span>
+<span class="lineNum">  105</span>              :  </span>
+<span class="lineNum">  106</span>              :       static std::size_t </span>
+<span class="lineNum">  107</span>              :       length(const char_type* __s); </span>
+<span class="lineNum">  108</span>              :  </span>
+<span class="lineNum">  109</span>              :       static const char_type* </span>
+<span class="lineNum">  110</span>              :       find(const char_type* __s, std::size_t __n, const char_type&amp; __a); </span>
+<span class="lineNum">  111</span>              :  </span>
+<span class="lineNum">  112</span>              :       static char_type* </span>
+<span class="lineNum">  113</span>              :       move(char_type* __s1, const char_type* __s2, std::size_t __n); </span>
+<span class="lineNum">  114</span>              :  </span>
+<span class="lineNum">  115</span>              :       static char_type* </span>
+<span class="lineNum">  116</span>              :       copy(char_type* __s1, const char_type* __s2, std::size_t __n); </span>
+<span class="lineNum">  117</span>              :  </span>
+<span class="lineNum">  118</span>              :       static char_type* </span>
+<span class="lineNum">  119</span>              :       assign(char_type* __s, std::size_t __n, char_type __a); </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span>              :       static _GLIBCXX_CONSTEXPR char_type </span>
+<span class="lineNum">  122</span>              :       to_char_type(const int_type&amp; __c) </span>
+<span class="lineNum">  123</span>              :       { return static_cast&lt;char_type&gt;(__c); } </span>
+<span class="lineNum">  124</span>              :  </span>
+<span class="lineNum">  125</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  126</span>              :       to_int_type(const char_type&amp; __c) </span>
+<span class="lineNum">  127</span>              :       { return static_cast&lt;int_type&gt;(__c); } </span>
+<span class="lineNum">  128</span>              :  </span>
+<span class="lineNum">  129</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  130</span>              :       eq_int_type(const int_type&amp; __c1, const int_type&amp; __c2) </span>
+<span class="lineNum">  131</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  132</span>              :  </span>
+<span class="lineNum">  133</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  134</span>              :       eof() </span>
+<span class="lineNum">  135</span>              :       { return static_cast&lt;int_type&gt;(_GLIBCXX_STDIO_EOF); } </span>
+<span class="lineNum">  136</span>              :  </span>
+<span class="lineNum">  137</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  138</span>              :       not_eof(const int_type&amp; __c) </span>
+<span class="lineNum">  139</span>              :       { return !eq_int_type(__c, eof()) ? __c : to_int_type(char_type()); } </span>
+<span class="lineNum">  140</span>              :     }; </span>
+<span class="lineNum">  141</span>              :  </span>
+<span class="lineNum">  142</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  143</span>              :     int </span>
+<span class="lineNum">  144</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  145</span>              :     compare(const char_type* __s1, const char_type* __s2, std::size_t __n) </span>
+<span class="lineNum">  146</span>              :     { </span>
+<span class="lineNum">  147</span>              :       for (std::size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  148</span>              : 	if (lt(__s1[__i], __s2[__i])) </span>
+<span class="lineNum">  149</span>              : 	  return -1; </span>
+<span class="lineNum">  150</span>              : 	else if (lt(__s2[__i], __s1[__i])) </span>
+<span class="lineNum">  151</span>              : 	  return 1; </span>
+<span class="lineNum">  152</span>              :       return 0; </span>
+<span class="lineNum">  153</span>              :     } </span>
+<span class="lineNum">  154</span>              :  </span>
+<span class="lineNum">  155</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  156</span>              :     std::size_t </span>
+<span class="lineNum">  157</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  158</span>              :     length(const char_type* __p) </span>
+<span class="lineNum">  159</span>              :     { </span>
+<span class="lineNum">  160</span>              :       std::size_t __i = 0; </span>
+<span class="lineNum">  161</span>              :       while (!eq(__p[__i], char_type())) </span>
+<span class="lineNum">  162</span>              :         ++__i; </span>
+<span class="lineNum">  163</span>              :       return __i; </span>
+<span class="lineNum">  164</span>              :     } </span>
+<span class="lineNum">  165</span>              :  </span>
+<span class="lineNum">  166</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  167</span>              :     const typename char_traits&lt;_CharT&gt;::char_type* </span>
+<span class="lineNum">  168</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  169</span>              :     find(const char_type* __s, std::size_t __n, const char_type&amp; __a) </span>
+<span class="lineNum">  170</span>              :     { </span>
+<span class="lineNum">  171</span>              :       for (std::size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  172</span>              :         if (eq(__s[__i], __a)) </span>
+<span class="lineNum">  173</span>              :           return __s + __i; </span>
+<span class="lineNum">  174</span>              :       return 0; </span>
+<span class="lineNum">  175</span>              :     } </span>
+<span class="lineNum">  176</span>              :  </span>
+<span class="lineNum">  177</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  178</span>              :     typename char_traits&lt;_CharT&gt;::char_type* </span>
+<span class="lineNum">  179</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  180</span>              :     move(char_type* __s1, const char_type* __s2, std::size_t __n) </span>
+<span class="lineNum">  181</span>              :     { </span>
+<span class="lineNum">  182</span>              :       return static_cast&lt;_CharT*&gt;(__builtin_memmove(__s1, __s2, </span>
+<span class="lineNum">  183</span>              : 						    __n * sizeof(char_type))); </span>
+<span class="lineNum">  184</span>              :     } </span>
+<span class="lineNum">  185</span>              :  </span>
+<span class="lineNum">  186</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  187</span>              :     typename char_traits&lt;_CharT&gt;::char_type* </span>
+<span class="lineNum">  188</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  189</span>              :     copy(char_type* __s1, const char_type* __s2, std::size_t __n) </span>
+<span class="lineNum">  190</span>              :     { </span>
+<span class="lineNum">  191</span>              :       &#047;&#047; NB: Inline std::copy so no recursive dependencies. </span>
+<span class="lineNum">  192</span>              :       std::copy(__s2, __s2 + __n, __s1); </span>
+<span class="lineNum">  193</span>              :       return __s1; </span>
+<span class="lineNum">  194</span>              :     } </span>
+<span class="lineNum">  195</span>              :  </span>
+<span class="lineNum">  196</span>              :   template&lt;typename _CharT&gt; </span>
+<span class="lineNum">  197</span>              :     typename char_traits&lt;_CharT&gt;::char_type* </span>
+<span class="lineNum">  198</span>              :     char_traits&lt;_CharT&gt;:: </span>
+<span class="lineNum">  199</span>              :     assign(char_type* __s, std::size_t __n, char_type __a) </span>
+<span class="lineNum">  200</span>              :     { </span>
+<span class="lineNum">  201</span>              :       &#047;&#047; NB: Inline std::fill_n so no recursive dependencies. </span>
+<span class="lineNum">  202</span>              :       std::fill_n(__s, __n, __a); </span>
+<span class="lineNum">  203</span>              :       return __s; </span>
+<span class="lineNum">  204</span>              :     } </span>
+<span class="lineNum">  205</span>              :  </span>
+<span class="lineNum">  206</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">  207</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">  208</span>              :  </span>
+<span class="lineNum">  209</span>              : namespace std _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">  210</span>              : { </span>
+<span class="lineNum">  211</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">  212</span>              :  </span>
+<span class="lineNum">  213</span>              :   &#047;&#047; 21.1 </span>
+<span class="lineNum">  214</span>              :   &#047;** </span>
+<span class="lineNum">  215</span>              :    *  @brief  Basis for explicit traits specializations. </span>
+<span class="lineNum">  216</span>              :    * </span>
+<span class="lineNum">  217</span>              :    *  @note  For any given actual character type, this definition is </span>
+<span class="lineNum">  218</span>              :    *  probably wrong.  Since this is just a thin wrapper around </span>
+<span class="lineNum">  219</span>              :    *  __gnu_cxx::char_traits, it is possible to achieve a more </span>
+<span class="lineNum">  220</span>              :    *  appropriate definition by specializing __gnu_cxx::char_traits. </span>
+<span class="lineNum">  221</span>              :    * </span>
+<span class="lineNum">  222</span>              :    *  See http:&#047;&#047;gcc.gnu.org&#047;onlinedocs&#047;libstdc++&#047;manual&#047;bk01pt05ch13s03.html </span>
+<span class="lineNum">  223</span>              :    *  for advice on how to make use of this class for @a unusual character </span>
+<span class="lineNum">  224</span>              :    *  types. Also, check out include&#047;ext&#047;pod_char_traits.h. </span>
+<span class="lineNum">  225</span>              :   *&#047; </span>
+<span class="lineNum">  226</span>              :   template&lt;class _CharT&gt; </span>
+<span class="lineNum">  227</span>              :     struct char_traits : public __gnu_cxx::char_traits&lt;_CharT&gt; </span>
+<span class="lineNum">  228</span>              :     { }; </span>
+<span class="lineNum">  229</span>              :  </span>
+<span class="lineNum">  230</span>              :  </span>
+<span class="lineNum">  231</span>              :   &#047;&#047;&#047; 21.1.3.1  char_traits specializations </span>
+<span class="lineNum">  232</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  233</span>              :     struct char_traits&lt;char&gt; </span>
+<span class="lineNum">  234</span>              :     { </span>
+<span class="lineNum">  235</span>              :       typedef char              char_type; </span>
+<span class="lineNum">  236</span>              :       typedef int               int_type; </span>
+<span class="lineNum">  237</span>              :       typedef streampos         pos_type; </span>
+<span class="lineNum">  238</span>              :       typedef streamoff         off_type; </span>
+<span class="lineNum">  239</span>              :       typedef mbstate_t         state_type; </span>
+<span class="lineNum">  240</span>              :  </span>
+<span class="lineNum">  241</span>              :       static void </span>
+<span class="lineNum">  242</span>              :       assign(char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  243</span>              :       { __c1 = __c2; } </span>
+<span class="lineNum">  244</span>              :  </span>
+<span class="lineNum">  245</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  246</span>              :       eq(const char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  247</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  248</span>              :  </span>
+<span class="lineNum">  249</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  250</span>              :       lt(const char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  251</span>              :       { return __c1 &lt; __c2; } </span>
+<span class="lineNum">  252</span>              :  </span>
+<span class="lineNum">  253</span>              :       static int </span>
+<span class="lineNum">  254</span><span class="lineCov">      1  /   1:       compare(const char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  255</span><span class="linePartCov">      1  /   2:       { return __builtin_memcmp(__s1, __s2, __n); } </span>
+<span class="lineNum">  256</span>              :  </span>
+<span class="lineNum">  257</span>              :       static size_t </span>
+<span class="lineNum">  258</span><span class="lineCov">      1  /   1:       length(const char_type* __s) </span>
+<span class="lineNum">  259</span><span class="linePartCov">      1  /   2:       { return __builtin_strlen(__s); } </span>
+<span class="lineNum">  260</span>              :  </span>
+<span class="lineNum">  261</span>              :       static const char_type* </span>
+<span class="lineNum">  262</span>              :       find(const char_type* __s, size_t __n, const char_type&amp; __a) </span>
+<span class="lineNum">  263</span>              :       { return static_cast&lt;const char_type*&gt;(__builtin_memchr(__s, __a, __n)); } </span>
+<span class="lineNum">  264</span>              :  </span>
+<span class="lineNum">  265</span>              :       static char_type* </span>
+<span class="lineNum">  266</span>              :       move(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  267</span>              :       { return static_cast&lt;char_type*&gt;(__builtin_memmove(__s1, __s2, __n)); } </span>
+<span class="lineNum">  268</span>              :  </span>
+<span class="lineNum">  269</span>              :       static char_type* </span>
+<span class="lineNum">  270</span>              :       copy(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  271</span>              :       { return static_cast&lt;char_type*&gt;(__builtin_memcpy(__s1, __s2, __n)); } </span>
+<span class="lineNum">  272</span>              :  </span>
+<span class="lineNum">  273</span>              :       static char_type* </span>
+<span class="lineNum">  274</span>              :       assign(char_type* __s, size_t __n, char_type __a) </span>
+<span class="lineNum">  275</span>              :       { return static_cast&lt;char_type*&gt;(__builtin_memset(__s, __a, __n)); } </span>
+<span class="lineNum">  276</span>              :  </span>
+<span class="lineNum">  277</span>              :       static _GLIBCXX_CONSTEXPR char_type </span>
+<span class="lineNum">  278</span>              :       to_char_type(const int_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  279</span>              :       { return static_cast&lt;char_type&gt;(__c); } </span>
+<span class="lineNum">  280</span>              :  </span>
+<span class="lineNum">  281</span>              :       &#047;&#047; To keep both the byte 0xff and the eof symbol 0xffffffff </span>
+<span class="lineNum">  282</span>              :       &#047;&#047; from ending up as 0xffffffff. </span>
+<span class="lineNum">  283</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  284</span>              :       to_int_type(const char_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  285</span>              :       { return static_cast&lt;int_type&gt;(static_cast&lt;unsigned char&gt;(__c)); } </span>
+<span class="lineNum">  286</span>              :  </span>
+<span class="lineNum">  287</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  288</span>              :       eq_int_type(const int_type&amp; __c1, const int_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  289</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  290</span>              :  </span>
+<span class="lineNum">  291</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  292</span>              :       eof() _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  293</span>              :       { return static_cast&lt;int_type&gt;(_GLIBCXX_STDIO_EOF); } </span>
+<span class="lineNum">  294</span>              :  </span>
+<span class="lineNum">  295</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  296</span>              :       not_eof(const int_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  297</span>              :       { return (__c == eof()) ? 0 : __c; } </span>
+<span class="lineNum">  298</span>              :   }; </span>
+<span class="lineNum">  299</span>              :  </span>
+<span class="lineNum">  300</span>              :  </span>
+<span class="lineNum">  301</span>              : #ifdef _GLIBCXX_USE_WCHAR_T </span>
+<span class="lineNum">  302</span>              :   &#047;&#047;&#047; 21.1.3.2  char_traits specializations </span>
+<span class="lineNum">  303</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  304</span>              :     struct char_traits&lt;wchar_t&gt; </span>
+<span class="lineNum">  305</span>              :     { </span>
+<span class="lineNum">  306</span>              :       typedef wchar_t           char_type; </span>
+<span class="lineNum">  307</span>              :       typedef wint_t            int_type; </span>
+<span class="lineNum">  308</span>              :       typedef streamoff         off_type; </span>
+<span class="lineNum">  309</span>              :       typedef wstreampos        pos_type; </span>
+<span class="lineNum">  310</span>              :       typedef mbstate_t         state_type; </span>
+<span class="lineNum">  311</span>              :  </span>
+<span class="lineNum">  312</span>              :       static void </span>
+<span class="lineNum">  313</span>              :       assign(char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  314</span>              :       { __c1 = __c2; } </span>
+<span class="lineNum">  315</span>              :  </span>
+<span class="lineNum">  316</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  317</span>              :       eq(const char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  318</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  319</span>              :  </span>
+<span class="lineNum">  320</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  321</span>              :       lt(const char_type&amp; __c1, const char_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  322</span>              :       { return __c1 &lt; __c2; } </span>
+<span class="lineNum">  323</span>              :  </span>
+<span class="lineNum">  324</span>              :       static int </span>
+<span class="lineNum">  325</span>              :       compare(const char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  326</span>              :       { return wmemcmp(__s1, __s2, __n); } </span>
+<span class="lineNum">  327</span>              :  </span>
+<span class="lineNum">  328</span>              :       static size_t </span>
+<span class="lineNum">  329</span>              :       length(const char_type* __s) </span>
+<span class="lineNum">  330</span>              :       { return wcslen(__s); } </span>
+<span class="lineNum">  331</span>              :  </span>
+<span class="lineNum">  332</span>              :       static const char_type* </span>
+<span class="lineNum">  333</span>              :       find(const char_type* __s, size_t __n, const char_type&amp; __a) </span>
+<span class="lineNum">  334</span>              :       { return wmemchr(__s, __a, __n); } </span>
+<span class="lineNum">  335</span>              :  </span>
+<span class="lineNum">  336</span>              :       static char_type* </span>
+<span class="lineNum">  337</span>              :       move(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  338</span>              :       { return wmemmove(__s1, __s2, __n); } </span>
+<span class="lineNum">  339</span>              :  </span>
+<span class="lineNum">  340</span>              :       static char_type* </span>
+<span class="lineNum">  341</span>              :       copy(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  342</span>              :       { return wmemcpy(__s1, __s2, __n); } </span>
+<span class="lineNum">  343</span>              :  </span>
+<span class="lineNum">  344</span>              :       static char_type* </span>
+<span class="lineNum">  345</span>              :       assign(char_type* __s, size_t __n, char_type __a) </span>
+<span class="lineNum">  346</span>              :       { return wmemset(__s, __a, __n); } </span>
+<span class="lineNum">  347</span>              :  </span>
+<span class="lineNum">  348</span>              :       static _GLIBCXX_CONSTEXPR char_type </span>
+<span class="lineNum">  349</span>              :       to_char_type(const int_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  350</span>              :       { return char_type(__c); } </span>
+<span class="lineNum">  351</span>              :  </span>
+<span class="lineNum">  352</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  353</span>              :       to_int_type(const char_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  354</span>              :       { return int_type(__c); } </span>
+<span class="lineNum">  355</span>              :  </span>
+<span class="lineNum">  356</span>              :       static _GLIBCXX_CONSTEXPR bool </span>
+<span class="lineNum">  357</span>              :       eq_int_type(const int_type&amp; __c1, const int_type&amp; __c2) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  358</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  359</span>              :  </span>
+<span class="lineNum">  360</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  361</span>              :       eof() _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  362</span>              :       { return static_cast&lt;int_type&gt;(WEOF); } </span>
+<span class="lineNum">  363</span>              :  </span>
+<span class="lineNum">  364</span>              :       static _GLIBCXX_CONSTEXPR int_type </span>
+<span class="lineNum">  365</span>              :       not_eof(const int_type&amp; __c) _GLIBCXX_NOEXCEPT </span>
+<span class="lineNum">  366</span>              :       { return eq_int_type(__c, eof()) ? 0 : __c; } </span>
+<span class="lineNum">  367</span>              :   }; </span>
+<span class="lineNum">  368</span>              : #endif &#047;&#047;_GLIBCXX_USE_WCHAR_T </span>
+<span class="lineNum">  369</span>              :  </span>
+<span class="lineNum">  370</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">  371</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">  372</span>              :  </span>
+<span class="lineNum">  373</span>              : #if ((__cplusplus &gt;= 201103L) &#092; </span>
+<span class="lineNum">  374</span>              :      &amp;&amp; defined(_GLIBCXX_USE_C99_STDINT_TR1)) </span>
+<span class="lineNum">  375</span>              :  </span>
+<span class="lineNum">  376</span>              : #include &lt;cstdint&gt; </span>
+<span class="lineNum">  377</span>              :  </span>
+<span class="lineNum">  378</span>              : namespace std _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">  379</span>              : { </span>
+<span class="lineNum">  380</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">  381</span>              :  </span>
+<span class="lineNum">  382</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  383</span>              :     struct char_traits&lt;char16_t&gt; </span>
+<span class="lineNum">  384</span>              :     { </span>
+<span class="lineNum">  385</span>              :       typedef char16_t          char_type; </span>
+<span class="lineNum">  386</span>              :       typedef uint_least16_t    int_type; </span>
+<span class="lineNum">  387</span>              :       typedef streamoff         off_type; </span>
+<span class="lineNum">  388</span>              :       typedef u16streampos      pos_type; </span>
+<span class="lineNum">  389</span>              :       typedef mbstate_t         state_type; </span>
+<span class="lineNum">  390</span>              :  </span>
+<span class="lineNum">  391</span>              :       static void </span>
+<span class="lineNum">  392</span>              :       assign(char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  393</span>              :       { __c1 = __c2; } </span>
+<span class="lineNum">  394</span>              :  </span>
+<span class="lineNum">  395</span>              :       static constexpr bool </span>
+<span class="lineNum">  396</span>              :       eq(const char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  397</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  398</span>              :  </span>
+<span class="lineNum">  399</span>              :       static constexpr bool </span>
+<span class="lineNum">  400</span>              :       lt(const char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  401</span>              :       { return __c1 &lt; __c2; } </span>
+<span class="lineNum">  402</span>              :  </span>
+<span class="lineNum">  403</span>              :       static int </span>
+<span class="lineNum">  404</span>              :       compare(const char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  405</span>              :       { </span>
+<span class="lineNum">  406</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  407</span>              : 	  if (lt(__s1[__i], __s2[__i])) </span>
+<span class="lineNum">  408</span>              : 	    return -1; </span>
+<span class="lineNum">  409</span>              : 	  else if (lt(__s2[__i], __s1[__i])) </span>
+<span class="lineNum">  410</span>              : 	    return 1; </span>
+<span class="lineNum">  411</span>              : 	return 0; </span>
+<span class="lineNum">  412</span>              :       } </span>
+<span class="lineNum">  413</span>              :  </span>
+<span class="lineNum">  414</span>              :       static size_t </span>
+<span class="lineNum">  415</span>              :       length(const char_type* __s) </span>
+<span class="lineNum">  416</span>              :       { </span>
+<span class="lineNum">  417</span>              : 	size_t __i = 0; </span>
+<span class="lineNum">  418</span>              : 	while (!eq(__s[__i], char_type())) </span>
+<span class="lineNum">  419</span>              : 	  ++__i; </span>
+<span class="lineNum">  420</span>              : 	return __i; </span>
+<span class="lineNum">  421</span>              :       } </span>
+<span class="lineNum">  422</span>              :  </span>
+<span class="lineNum">  423</span>              :       static const char_type* </span>
+<span class="lineNum">  424</span>              :       find(const char_type* __s, size_t __n, const char_type&amp; __a) </span>
+<span class="lineNum">  425</span>              :       { </span>
+<span class="lineNum">  426</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  427</span>              : 	  if (eq(__s[__i], __a)) </span>
+<span class="lineNum">  428</span>              : 	    return __s + __i; </span>
+<span class="lineNum">  429</span>              : 	return 0; </span>
+<span class="lineNum">  430</span>              :       } </span>
+<span class="lineNum">  431</span>              :  </span>
+<span class="lineNum">  432</span>              :       static char_type* </span>
+<span class="lineNum">  433</span>              :       move(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  434</span>              :       { </span>
+<span class="lineNum">  435</span>              : 	return (static_cast&lt;char_type*&gt; </span>
+<span class="lineNum">  436</span>              : 		(__builtin_memmove(__s1, __s2, __n * sizeof(char_type)))); </span>
+<span class="lineNum">  437</span>              :       } </span>
+<span class="lineNum">  438</span>              :  </span>
+<span class="lineNum">  439</span>              :       static char_type* </span>
+<span class="lineNum">  440</span>              :       copy(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  441</span>              :       { </span>
+<span class="lineNum">  442</span>              : 	return (static_cast&lt;char_type*&gt; </span>
+<span class="lineNum">  443</span>              : 		(__builtin_memcpy(__s1, __s2, __n * sizeof(char_type)))); </span>
+<span class="lineNum">  444</span>              :       } </span>
+<span class="lineNum">  445</span>              :  </span>
+<span class="lineNum">  446</span>              :       static char_type* </span>
+<span class="lineNum">  447</span>              :       assign(char_type* __s, size_t __n, char_type __a) </span>
+<span class="lineNum">  448</span>              :       { </span>
+<span class="lineNum">  449</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  450</span>              : 	  assign(__s[__i], __a); </span>
+<span class="lineNum">  451</span>              : 	return __s; </span>
+<span class="lineNum">  452</span>              :       } </span>
+<span class="lineNum">  453</span>              :  </span>
+<span class="lineNum">  454</span>              :       static constexpr char_type </span>
+<span class="lineNum">  455</span>              :       to_char_type(const int_type&amp; __c) noexcept </span>
+<span class="lineNum">  456</span>              :       { return char_type(__c); } </span>
+<span class="lineNum">  457</span>              :  </span>
+<span class="lineNum">  458</span>              :       static constexpr int_type </span>
+<span class="lineNum">  459</span>              :       to_int_type(const char_type&amp; __c) noexcept </span>
+<span class="lineNum">  460</span>              :       { return int_type(__c); } </span>
+<span class="lineNum">  461</span>              :  </span>
+<span class="lineNum">  462</span>              :       static constexpr bool </span>
+<span class="lineNum">  463</span>              :       eq_int_type(const int_type&amp; __c1, const int_type&amp; __c2) noexcept </span>
+<span class="lineNum">  464</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  465</span>              :  </span>
+<span class="lineNum">  466</span>              :       static constexpr int_type </span>
+<span class="lineNum">  467</span>              :       eof() noexcept </span>
+<span class="lineNum">  468</span>              :       { return static_cast&lt;int_type&gt;(-1); } </span>
+<span class="lineNum">  469</span>              :  </span>
+<span class="lineNum">  470</span>              :       static constexpr int_type </span>
+<span class="lineNum">  471</span>              :       not_eof(const int_type&amp; __c) noexcept </span>
+<span class="lineNum">  472</span>              :       { return eq_int_type(__c, eof()) ? 0 : __c; } </span>
+<span class="lineNum">  473</span>              :     }; </span>
+<span class="lineNum">  474</span>              :  </span>
+<span class="lineNum">  475</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  476</span>              :     struct char_traits&lt;char32_t&gt; </span>
+<span class="lineNum">  477</span>              :     { </span>
+<span class="lineNum">  478</span>              :       typedef char32_t          char_type; </span>
+<span class="lineNum">  479</span>              :       typedef uint_least32_t    int_type; </span>
+<span class="lineNum">  480</span>              :       typedef streamoff         off_type; </span>
+<span class="lineNum">  481</span>              :       typedef u32streampos      pos_type; </span>
+<span class="lineNum">  482</span>              :       typedef mbstate_t         state_type; </span>
+<span class="lineNum">  483</span>              :  </span>
+<span class="lineNum">  484</span>              :       static void </span>
+<span class="lineNum">  485</span>              :       assign(char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  486</span>              :       { __c1 = __c2; } </span>
+<span class="lineNum">  487</span>              :  </span>
+<span class="lineNum">  488</span>              :       static constexpr bool </span>
+<span class="lineNum">  489</span>              :       eq(const char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  490</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  491</span>              :  </span>
+<span class="lineNum">  492</span>              :       static constexpr bool </span>
+<span class="lineNum">  493</span>              :       lt(const char_type&amp; __c1, const char_type&amp; __c2) noexcept </span>
+<span class="lineNum">  494</span>              :       { return __c1 &lt; __c2; } </span>
+<span class="lineNum">  495</span>              :  </span>
+<span class="lineNum">  496</span>              :       static int </span>
+<span class="lineNum">  497</span>              :       compare(const char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  498</span>              :       { </span>
+<span class="lineNum">  499</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  500</span>              : 	  if (lt(__s1[__i], __s2[__i])) </span>
+<span class="lineNum">  501</span>              : 	    return -1; </span>
+<span class="lineNum">  502</span>              : 	  else if (lt(__s2[__i], __s1[__i])) </span>
+<span class="lineNum">  503</span>              : 	    return 1; </span>
+<span class="lineNum">  504</span>              : 	return 0; </span>
+<span class="lineNum">  505</span>              :       } </span>
+<span class="lineNum">  506</span>              :  </span>
+<span class="lineNum">  507</span>              :       static size_t </span>
+<span class="lineNum">  508</span>              :       length(const char_type* __s) </span>
+<span class="lineNum">  509</span>              :       { </span>
+<span class="lineNum">  510</span>              : 	size_t __i = 0; </span>
+<span class="lineNum">  511</span>              : 	while (!eq(__s[__i], char_type())) </span>
+<span class="lineNum">  512</span>              : 	  ++__i; </span>
+<span class="lineNum">  513</span>              : 	return __i; </span>
+<span class="lineNum">  514</span>              :       } </span>
+<span class="lineNum">  515</span>              :  </span>
+<span class="lineNum">  516</span>              :       static const char_type* </span>
+<span class="lineNum">  517</span>              :       find(const char_type* __s, size_t __n, const char_type&amp; __a) </span>
+<span class="lineNum">  518</span>              :       { </span>
+<span class="lineNum">  519</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  520</span>              : 	  if (eq(__s[__i], __a)) </span>
+<span class="lineNum">  521</span>              : 	    return __s + __i; </span>
+<span class="lineNum">  522</span>              : 	return 0; </span>
+<span class="lineNum">  523</span>              :       } </span>
+<span class="lineNum">  524</span>              :  </span>
+<span class="lineNum">  525</span>              :       static char_type* </span>
+<span class="lineNum">  526</span>              :       move(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  527</span>              :       { </span>
+<span class="lineNum">  528</span>              : 	return (static_cast&lt;char_type*&gt; </span>
+<span class="lineNum">  529</span>              : 		(__builtin_memmove(__s1, __s2, __n * sizeof(char_type)))); </span>
+<span class="lineNum">  530</span>              :       } </span>
+<span class="lineNum">  531</span>              :  </span>
+<span class="lineNum">  532</span>              :       static char_type* </span>
+<span class="lineNum">  533</span>              :       copy(char_type* __s1, const char_type* __s2, size_t __n) </span>
+<span class="lineNum">  534</span>              :       {  </span>
+<span class="lineNum">  535</span>              : 	return (static_cast&lt;char_type*&gt; </span>
+<span class="lineNum">  536</span>              : 		(__builtin_memcpy(__s1, __s2, __n * sizeof(char_type)))); </span>
+<span class="lineNum">  537</span>              :       } </span>
+<span class="lineNum">  538</span>              :  </span>
+<span class="lineNum">  539</span>              :       static char_type* </span>
+<span class="lineNum">  540</span>              :       assign(char_type* __s, size_t __n, char_type __a) </span>
+<span class="lineNum">  541</span>              :       { </span>
+<span class="lineNum">  542</span>              : 	for (size_t __i = 0; __i &lt; __n; ++__i) </span>
+<span class="lineNum">  543</span>              : 	  assign(__s[__i], __a); </span>
+<span class="lineNum">  544</span>              : 	return __s; </span>
+<span class="lineNum">  545</span>              :       } </span>
+<span class="lineNum">  546</span>              :  </span>
+<span class="lineNum">  547</span>              :       static constexpr char_type </span>
+<span class="lineNum">  548</span>              :       to_char_type(const int_type&amp; __c) noexcept </span>
+<span class="lineNum">  549</span>              :       { return char_type(__c); } </span>
+<span class="lineNum">  550</span>              :  </span>
+<span class="lineNum">  551</span>              :       static constexpr int_type </span>
+<span class="lineNum">  552</span>              :       to_int_type(const char_type&amp; __c) noexcept </span>
+<span class="lineNum">  553</span>              :       { return int_type(__c); } </span>
+<span class="lineNum">  554</span>              :  </span>
+<span class="lineNum">  555</span>              :       static constexpr bool </span>
+<span class="lineNum">  556</span>              :       eq_int_type(const int_type&amp; __c1, const int_type&amp; __c2) noexcept </span>
+<span class="lineNum">  557</span>              :       { return __c1 == __c2; } </span>
+<span class="lineNum">  558</span>              :  </span>
+<span class="lineNum">  559</span>              :       static constexpr int_type </span>
+<span class="lineNum">  560</span>              :       eof() noexcept </span>
+<span class="lineNum">  561</span>              :       { return static_cast&lt;int_type&gt;(-1); } </span>
+<span class="lineNum">  562</span>              :  </span>
+<span class="lineNum">  563</span>              :       static constexpr int_type </span>
+<span class="lineNum">  564</span>              :       not_eof(const int_type&amp; __c) noexcept </span>
+<span class="lineNum">  565</span>              :       { return eq_int_type(__c, eof()) ? 0 : __c; } </span>
+<span class="lineNum">  566</span>              :     }; </span>
+<span class="lineNum">  567</span>              :  </span>
+<span class="lineNum">  568</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">  569</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">  570</span>              :  </span>
+<span class="lineNum">  571</span>              : #endif  </span>
+<span class="lineNum">  572</span>              :  </span>
+<span class="lineNum">  573</span>              : #endif &#047;&#047; _CHAR_TRAITS_H </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

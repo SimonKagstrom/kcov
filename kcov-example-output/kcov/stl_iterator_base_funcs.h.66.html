@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">10</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftLo" width="15%">0.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">0</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : &#047;&#047; Functions used by iterators -*- C++ -*- </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : &#047;&#047; Copyright (C) 2001-2013 Free Software Foundation, Inc. </span>
+<span class="lineNum">    4</span>              : &#047;&#047; </span>
+<span class="lineNum">    5</span>              : &#047;&#047; This file is part of the GNU ISO C++ Library.  This library is free </span>
+<span class="lineNum">    6</span>              : &#047;&#047; software; you can redistribute it and&#047;or modify it under the </span>
+<span class="lineNum">    7</span>              : &#047;&#047; terms of the GNU General Public License as published by the </span>
+<span class="lineNum">    8</span>              : &#047;&#047; Free Software Foundation; either version 3, or (at your option) </span>
+<span class="lineNum">    9</span>              : &#047;&#047; any later version. </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : &#047;&#047; This library is distributed in the hope that it will be useful, </span>
+<span class="lineNum">   12</span>              : &#047;&#047; but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">   13</span>              : &#047;&#047; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">   14</span>              : &#047;&#047; GNU General Public License for more details. </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : &#047;&#047; Under Section 7 of GPL version 3, you are granted additional </span>
+<span class="lineNum">   17</span>              : &#047;&#047; permissions described in the GCC Runtime Library Exception, version </span>
+<span class="lineNum">   18</span>              : &#047;&#047; 3.1, as published by the Free Software Foundation. </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span>              : &#047;&#047; You should have received a copy of the GNU General Public License and </span>
+<span class="lineNum">   21</span>              : &#047;&#047; a copy of the GCC Runtime Library Exception along with this program; </span>
+<span class="lineNum">   22</span>              : &#047;&#047; see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see </span>
+<span class="lineNum">   23</span>              : &#047;&#047; &lt;http:&#047;&#047;www.gnu.org&#047;licenses&#047;&gt;. </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : &#047;* </span>
+<span class="lineNum">   26</span>              :  * </span>
+<span class="lineNum">   27</span>              :  * Copyright (c) 1994 </span>
+<span class="lineNum">   28</span>              :  * Hewlett-Packard Company </span>
+<span class="lineNum">   29</span>              :  * </span>
+<span class="lineNum">   30</span>              :  * Permission to use, copy, modify, distribute and sell this software </span>
+<span class="lineNum">   31</span>              :  * and its documentation for any purpose is hereby granted without fee, </span>
+<span class="lineNum">   32</span>              :  * provided that the above copyright notice appear in all copies and </span>
+<span class="lineNum">   33</span>              :  * that both that copyright notice and this permission notice appear </span>
+<span class="lineNum">   34</span>              :  * in supporting documentation.  Hewlett-Packard Company makes no </span>
+<span class="lineNum">   35</span>              :  * representations about the suitability of this software for any </span>
+<span class="lineNum">   36</span>              :  * purpose.  It is provided &quot;as is&quot; without express or implied warranty. </span>
+<span class="lineNum">   37</span>              :  * </span>
+<span class="lineNum">   38</span>              :  * </span>
+<span class="lineNum">   39</span>              :  * Copyright (c) 1996-1998 </span>
+<span class="lineNum">   40</span>              :  * Silicon Graphics Computer Systems, Inc. </span>
+<span class="lineNum">   41</span>              :  * </span>
+<span class="lineNum">   42</span>              :  * Permission to use, copy, modify, distribute and sell this software </span>
+<span class="lineNum">   43</span>              :  * and its documentation for any purpose is hereby granted without fee, </span>
+<span class="lineNum">   44</span>              :  * provided that the above copyright notice appear in all copies and </span>
+<span class="lineNum">   45</span>              :  * that both that copyright notice and this permission notice appear </span>
+<span class="lineNum">   46</span>              :  * in supporting documentation.  Silicon Graphics makes no </span>
+<span class="lineNum">   47</span>              :  * representations about the suitability of this software for any </span>
+<span class="lineNum">   48</span>              :  * purpose.  It is provided &quot;as is&quot; without express or implied warranty. </span>
+<span class="lineNum">   49</span>              :  *&#047; </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span>              : &#047;** @file bits&#047;stl_iterator_base_funcs.h </span>
+<span class="lineNum">   52</span>              :  *  This is an internal header file, included by other library headers. </span>
+<span class="lineNum">   53</span>              :  *  Do not attempt to use it directly. @headername{iterator} </span>
+<span class="lineNum">   54</span>              :  * </span>
+<span class="lineNum">   55</span>              :  *  This file contains all of the general iterator-related utility </span>
+<span class="lineNum">   56</span>              :  *  functions, such as distance() and advance(). </span>
+<span class="lineNum">   57</span>              :  *&#047; </span>
+<span class="lineNum">   58</span>              :  </span>
+<span class="lineNum">   59</span>              : #ifndef _STL_ITERATOR_BASE_FUNCS_H </span>
+<span class="lineNum">   60</span>              : #define _STL_ITERATOR_BASE_FUNCS_H 1 </span>
+<span class="lineNum">   61</span>              :  </span>
+<span class="lineNum">   62</span>              : #pragma GCC system_header </span>
+<span class="lineNum">   63</span>              :  </span>
+<span class="lineNum">   64</span>              : #include &lt;bits&#047;concept_check.h&gt; </span>
+<span class="lineNum">   65</span>              : #include &lt;debug&#047;debug.h&gt; </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span>              : namespace std _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">   68</span>              : { </span>
+<span class="lineNum">   69</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">   70</span>              :  </span>
+<span class="lineNum">   71</span>              :   template&lt;typename _InputIterator&gt; </span>
+<span class="lineNum">   72</span>              :     inline typename iterator_traits&lt;_InputIterator&gt;::difference_type </span>
+<span class="lineNum">   73</span><span class="lineNoCov">      0  /   1:     __distance(_InputIterator __first, _InputIterator __last, </span>
+<span class="lineNum">   74</span>              :                input_iterator_tag) </span>
+<span class="lineNum">   75</span>              :     { </span>
+<span class="lineNum">   76</span>              :       &#047;&#047; concept requirements </span>
+<span class="lineNum">   77</span>              :       __glibcxx_function_requires(_InputIteratorConcept&lt;_InputIterator&gt;) </span>
+<span class="lineNum">   78</span>              :  </span>
+<span class="lineNum">   79</span><span class="lineNoCov">      0  /   1:       typename iterator_traits&lt;_InputIterator&gt;::difference_type __n = 0; </span>
+<span class="lineNum">   80</span><span class="lineNoCov">      0  /   2:       while (__first != __last) </span>
+<span class="lineNum">   81</span>              : 	{ </span>
+<span class="lineNum">   82</span><span class="lineNoCov">      0  /   1: 	  ++__first; </span>
+<span class="lineNum">   83</span><span class="lineNoCov">      0  /   1: 	  ++__n; </span>
+<span class="lineNum">   84</span>              : 	} </span>
+<span class="lineNum">   85</span><span class="lineNoCov">      0  /   1:       return __n; </span>
+<span class="lineNum">   86</span><span class="lineNoCov">      0  /   2:     } </span>
+<span class="lineNum">   87</span>              :  </span>
+<span class="lineNum">   88</span>              :   template&lt;typename _RandomAccessIterator&gt; </span>
+<span class="lineNum">   89</span>              :     inline typename iterator_traits&lt;_RandomAccessIterator&gt;::difference_type </span>
+<span class="lineNum">   90</span>              :     __distance(_RandomAccessIterator __first, _RandomAccessIterator __last, </span>
+<span class="lineNum">   91</span>              :                random_access_iterator_tag) </span>
+<span class="lineNum">   92</span>              :     { </span>
+<span class="lineNum">   93</span>              :       &#047;&#047; concept requirements </span>
+<span class="lineNum">   94</span>              :       __glibcxx_function_requires(_RandomAccessIteratorConcept&lt; </span>
+<span class="lineNum">   95</span>              : 				  _RandomAccessIterator&gt;) </span>
+<span class="lineNum">   96</span>              :       return __last - __first; </span>
+<span class="lineNum">   97</span>              :     } </span>
+<span class="lineNum">   98</span>              :  </span>
+<span class="lineNum">   99</span>              :   &#047;** </span>
+<span class="lineNum">  100</span>              :    *  @brief A generalization of pointer arithmetic. </span>
+<span class="lineNum">  101</span>              :    *  @param  __first  An input iterator. </span>
+<span class="lineNum">  102</span>              :    *  @param  __last  An input iterator. </span>
+<span class="lineNum">  103</span>              :    *  @return  The distance between them. </span>
+<span class="lineNum">  104</span>              :    * </span>
+<span class="lineNum">  105</span>              :    *  Returns @c n such that __first + n == __last.  This requires </span>
+<span class="lineNum">  106</span>              :    *  that @p __last must be reachable from @p __first.  Note that @c </span>
+<span class="lineNum">  107</span>              :    *  n may be negative. </span>
+<span class="lineNum">  108</span>              :    * </span>
+<span class="lineNum">  109</span>              :    *  For random access iterators, this uses their @c + and @c - operations </span>
+<span class="lineNum">  110</span>              :    *  and are constant time.  For other %iterator classes they are linear time. </span>
+<span class="lineNum">  111</span>              :   *&#047; </span>
+<span class="lineNum">  112</span>              :   template&lt;typename _InputIterator&gt; </span>
+<span class="lineNum">  113</span>              :     inline typename iterator_traits&lt;_InputIterator&gt;::difference_type </span>
+<span class="lineNum">  114</span><span class="lineNoCov">      0  /   1:     distance(_InputIterator __first, _InputIterator __last) </span>
+<span class="lineNum">  115</span>              :     { </span>
+<span class="lineNum">  116</span>              :       &#047;&#047; concept requirements -- taken care of in __distance </span>
+<span class="lineNum">  117</span>              :       return std::__distance(__first, __last, </span>
+<span class="lineNum">  118</span><span class="lineNoCov">      0  /   1: 			     std::__iterator_category(__first)); </span>
+<span class="lineNum">  119</span><span class="lineNoCov">      0  /   2:     } </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span>              :   template&lt;typename _InputIterator, typename _Distance&gt; </span>
+<span class="lineNum">  122</span>              :     inline void </span>
+<span class="lineNum">  123</span>              :     __advance(_InputIterator&amp; __i, _Distance __n, input_iterator_tag) </span>
+<span class="lineNum">  124</span>              :     { </span>
+<span class="lineNum">  125</span>              :       &#047;&#047; concept requirements </span>
+<span class="lineNum">  126</span>              :       __glibcxx_function_requires(_InputIteratorConcept&lt;_InputIterator&gt;) </span>
+<span class="lineNum">  127</span>              :       _GLIBCXX_DEBUG_ASSERT(__n &gt;= 0); </span>
+<span class="lineNum">  128</span>              :       while (__n--) </span>
+<span class="lineNum">  129</span>              : 	++__i; </span>
+<span class="lineNum">  130</span>              :     } </span>
+<span class="lineNum">  131</span>              :  </span>
+<span class="lineNum">  132</span>              :   template&lt;typename _BidirectionalIterator, typename _Distance&gt; </span>
+<span class="lineNum">  133</span>              :     inline void </span>
+<span class="lineNum">  134</span>              :     __advance(_BidirectionalIterator&amp; __i, _Distance __n, </span>
+<span class="lineNum">  135</span>              : 	      bidirectional_iterator_tag) </span>
+<span class="lineNum">  136</span>              :     { </span>
+<span class="lineNum">  137</span>              :       &#047;&#047; concept requirements </span>
+<span class="lineNum">  138</span>              :       __glibcxx_function_requires(_BidirectionalIteratorConcept&lt; </span>
+<span class="lineNum">  139</span>              : 				  _BidirectionalIterator&gt;) </span>
+<span class="lineNum">  140</span>              :       if (__n &gt; 0) </span>
+<span class="lineNum">  141</span>              :         while (__n--) </span>
+<span class="lineNum">  142</span>              : 	  ++__i; </span>
+<span class="lineNum">  143</span>              :       else </span>
+<span class="lineNum">  144</span>              :         while (__n++) </span>
+<span class="lineNum">  145</span>              : 	  --__i; </span>
+<span class="lineNum">  146</span>              :     } </span>
+<span class="lineNum">  147</span>              :  </span>
+<span class="lineNum">  148</span>              :   template&lt;typename _RandomAccessIterator, typename _Distance&gt; </span>
+<span class="lineNum">  149</span>              :     inline void </span>
+<span class="lineNum">  150</span>              :     __advance(_RandomAccessIterator&amp; __i, _Distance __n, </span>
+<span class="lineNum">  151</span>              :               random_access_iterator_tag) </span>
+<span class="lineNum">  152</span>              :     { </span>
+<span class="lineNum">  153</span>              :       &#047;&#047; concept requirements </span>
+<span class="lineNum">  154</span>              :       __glibcxx_function_requires(_RandomAccessIteratorConcept&lt; </span>
+<span class="lineNum">  155</span>              : 				  _RandomAccessIterator&gt;) </span>
+<span class="lineNum">  156</span>              :       __i += __n; </span>
+<span class="lineNum">  157</span>              :     } </span>
+<span class="lineNum">  158</span>              :  </span>
+<span class="lineNum">  159</span>              :   &#047;** </span>
+<span class="lineNum">  160</span>              :    *  @brief A generalization of pointer arithmetic. </span>
+<span class="lineNum">  161</span>              :    *  @param  __i  An input iterator. </span>
+<span class="lineNum">  162</span>              :    *  @param  __n  The @a delta by which to change @p __i. </span>
+<span class="lineNum">  163</span>              :    *  @return  Nothing. </span>
+<span class="lineNum">  164</span>              :    * </span>
+<span class="lineNum">  165</span>              :    *  This increments @p i by @p n.  For bidirectional and random access </span>
+<span class="lineNum">  166</span>              :    *  iterators, @p __n may be negative, in which case @p __i is decremented. </span>
+<span class="lineNum">  167</span>              :    * </span>
+<span class="lineNum">  168</span>              :    *  For random access iterators, this uses their @c + and @c - operations </span>
+<span class="lineNum">  169</span>              :    *  and are constant time.  For other %iterator classes they are linear time. </span>
+<span class="lineNum">  170</span>              :   *&#047; </span>
+<span class="lineNum">  171</span>              :   template&lt;typename _InputIterator, typename _Distance&gt; </span>
+<span class="lineNum">  172</span>              :     inline void </span>
+<span class="lineNum">  173</span>              :     advance(_InputIterator&amp; __i, _Distance __n) </span>
+<span class="lineNum">  174</span>              :     { </span>
+<span class="lineNum">  175</span>              :       &#047;&#047; concept requirements -- taken care of in __advance </span>
+<span class="lineNum">  176</span>              :       typename iterator_traits&lt;_InputIterator&gt;::difference_type __d = __n; </span>
+<span class="lineNum">  177</span>              :       std::__advance(__i, __d, std::__iterator_category(__i)); </span>
+<span class="lineNum">  178</span>              :     } </span>
+<span class="lineNum">  179</span>              :  </span>
+<span class="lineNum">  180</span>              : #if __cplusplus &gt;= 201103L </span>
+<span class="lineNum">  181</span>              :  </span>
+<span class="lineNum">  182</span>              :   template&lt;typename _ForwardIterator&gt; </span>
+<span class="lineNum">  183</span>              :     inline _ForwardIterator </span>
+<span class="lineNum">  184</span>              :     next(_ForwardIterator __x, typename </span>
+<span class="lineNum">  185</span>              : 	 iterator_traits&lt;_ForwardIterator&gt;::difference_type __n = 1) </span>
+<span class="lineNum">  186</span>              :     { </span>
+<span class="lineNum">  187</span>              :       std::advance(__x, __n); </span>
+<span class="lineNum">  188</span>              :       return __x; </span>
+<span class="lineNum">  189</span>              :     } </span>
+<span class="lineNum">  190</span>              :  </span>
+<span class="lineNum">  191</span>              :   template&lt;typename _BidirectionalIterator&gt; </span>
+<span class="lineNum">  192</span>              :     inline _BidirectionalIterator </span>
+<span class="lineNum">  193</span>              :     prev(_BidirectionalIterator __x, typename </span>
+<span class="lineNum">  194</span>              : 	 iterator_traits&lt;_BidirectionalIterator&gt;::difference_type __n = 1)  </span>
+<span class="lineNum">  195</span>              :     { </span>
+<span class="lineNum">  196</span>              :       std::advance(__x, -__n); </span>
+<span class="lineNum">  197</span>              :       return __x; </span>
+<span class="lineNum">  198</span>              :     } </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span>              : #endif &#047;&#047; C++11 </span>
+<span class="lineNum">  201</span>              :  </span>
+<span class="lineNum">  202</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">  203</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">  204</span>              :  </span>
+<span class="lineNum">  205</span>              : #endif &#047;* _STL_ITERATOR_BASE_FUNCS_H *&#047; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

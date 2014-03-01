@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">8</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">8</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : &#047;&#047; &lt;utility&gt; -*- C++ -*- </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : &#047;&#047; Copyright (C) 2001-2013 Free Software Foundation, Inc. </span>
+<span class="lineNum">    4</span>              : &#047;&#047; </span>
+<span class="lineNum">    5</span>              : &#047;&#047; This file is part of the GNU ISO C++ Library.  This library is free </span>
+<span class="lineNum">    6</span>              : &#047;&#047; software; you can redistribute it and&#047;or modify it under the </span>
+<span class="lineNum">    7</span>              : &#047;&#047; terms of the GNU General Public License as published by the </span>
+<span class="lineNum">    8</span>              : &#047;&#047; Free Software Foundation; either version 3, or (at your option) </span>
+<span class="lineNum">    9</span>              : &#047;&#047; any later version. </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : &#047;&#047; This library is distributed in the hope that it will be useful, </span>
+<span class="lineNum">   12</span>              : &#047;&#047; but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">   13</span>              : &#047;&#047; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">   14</span>              : &#047;&#047; GNU General Public License for more details. </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : &#047;&#047; Under Section 7 of GPL version 3, you are granted additional </span>
+<span class="lineNum">   17</span>              : &#047;&#047; permissions described in the GCC Runtime Library Exception, version </span>
+<span class="lineNum">   18</span>              : &#047;&#047; 3.1, as published by the Free Software Foundation. </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span>              : &#047;&#047; You should have received a copy of the GNU General Public License and </span>
+<span class="lineNum">   21</span>              : &#047;&#047; a copy of the GCC Runtime Library Exception along with this program; </span>
+<span class="lineNum">   22</span>              : &#047;&#047; see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see </span>
+<span class="lineNum">   23</span>              : &#047;&#047; &lt;http:&#047;&#047;www.gnu.org&#047;licenses&#047;&gt;. </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : &#047;* </span>
+<span class="lineNum">   26</span>              :  * </span>
+<span class="lineNum">   27</span>              :  * Copyright (c) 1994 </span>
+<span class="lineNum">   28</span>              :  * Hewlett-Packard Company </span>
+<span class="lineNum">   29</span>              :  * </span>
+<span class="lineNum">   30</span>              :  * Permission to use, copy, modify, distribute and sell this software </span>
+<span class="lineNum">   31</span>              :  * and its documentation for any purpose is hereby granted without fee, </span>
+<span class="lineNum">   32</span>              :  * provided that the above copyright notice appear in all copies and </span>
+<span class="lineNum">   33</span>              :  * that both that copyright notice and this permission notice appear </span>
+<span class="lineNum">   34</span>              :  * in supporting documentation.  Hewlett-Packard Company makes no </span>
+<span class="lineNum">   35</span>              :  * representations about the suitability of this software for any </span>
+<span class="lineNum">   36</span>              :  * purpose.  It is provided &quot;as is&quot; without express or implied warranty. </span>
+<span class="lineNum">   37</span>              :  * </span>
+<span class="lineNum">   38</span>              :  * </span>
+<span class="lineNum">   39</span>              :  * Copyright (c) 1996,1997 </span>
+<span class="lineNum">   40</span>              :  * Silicon Graphics Computer Systems, Inc. </span>
+<span class="lineNum">   41</span>              :  * </span>
+<span class="lineNum">   42</span>              :  * Permission to use, copy, modify, distribute and sell this software </span>
+<span class="lineNum">   43</span>              :  * and its documentation for any purpose is hereby granted without fee, </span>
+<span class="lineNum">   44</span>              :  * provided that the above copyright notice appear in all copies and </span>
+<span class="lineNum">   45</span>              :  * that both that copyright notice and this permission notice appear </span>
+<span class="lineNum">   46</span>              :  * in supporting documentation.  Silicon Graphics makes no </span>
+<span class="lineNum">   47</span>              :  * representations about the suitability of this software for any </span>
+<span class="lineNum">   48</span>              :  * purpose.  It is provided &quot;as is&quot; without express or implied warranty. </span>
+<span class="lineNum">   49</span>              :  *&#047; </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span>              : &#047;** @file include&#047;utility </span>
+<span class="lineNum">   52</span>              :  *  This is a Standard C++ Library header.  </span>
+<span class="lineNum">   53</span>              :  *&#047; </span>
+<span class="lineNum">   54</span>              :  </span>
+<span class="lineNum">   55</span>              : #ifndef _GLIBCXX_UTILITY </span>
+<span class="lineNum">   56</span>              : #define _GLIBCXX_UTILITY 1 </span>
+<span class="lineNum">   57</span>              :  </span>
+<span class="lineNum">   58</span>              : #pragma GCC system_header </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span>              : &#047;** </span>
+<span class="lineNum">   61</span>              :  * @defgroup utilities Utilities </span>
+<span class="lineNum">   62</span>              :  * </span>
+<span class="lineNum">   63</span>              :  * Components deemed generally useful. Includes pair, tuple, </span>
+<span class="lineNum">   64</span>              :  * forward&#047;move helpers, ratio, function object, metaprogramming and </span>
+<span class="lineNum">   65</span>              :  * type traits, time, date, and memory functions. </span>
+<span class="lineNum">   66</span>              :  *&#047; </span>
+<span class="lineNum">   67</span>              :  </span>
+<span class="lineNum">   68</span>              : #include &lt;bits&#047;c++config.h&gt; </span>
+<span class="lineNum">   69</span>              : #include &lt;bits&#047;stl_relops.h&gt; </span>
+<span class="lineNum">   70</span>              : #include &lt;bits&#047;stl_pair.h&gt; </span>
+<span class="lineNum">   71</span>              :  </span>
+<span class="lineNum">   72</span>              : #if __cplusplus &gt;= 201103L </span>
+<span class="lineNum">   73</span>              : #include &lt;bits&#047;move.h&gt; </span>
+<span class="lineNum">   74</span>              : #include &lt;initializer_list&gt; </span>
+<span class="lineNum">   75</span>              :  </span>
+<span class="lineNum">   76</span>              : namespace std _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">   77</span>              : { </span>
+<span class="lineNum">   78</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">   79</span>              :  </span>
+<span class="lineNum">   80</span>              :   template&lt;class _Tp&gt; </span>
+<span class="lineNum">   81</span>              :     class tuple_size; </span>
+<span class="lineNum">   82</span>              :  </span>
+<span class="lineNum">   83</span>              :   template&lt;std::size_t _Int, class _Tp&gt; </span>
+<span class="lineNum">   84</span>              :     class tuple_element; </span>
+<span class="lineNum">   85</span>              :  </span>
+<span class="lineNum">   86</span>              :    &#047;&#047; Various functions which give std::pair a tuple-like interface. </span>
+<span class="lineNum">   87</span>              :   template&lt;class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">   88</span>              :     struct tuple_size&lt;std::pair&lt;_Tp1, _Tp2&gt;&gt; </span>
+<span class="lineNum">   89</span>              :     : public integral_constant&lt;std::size_t, 2&gt; { }; </span>
+<span class="lineNum">   90</span>              :  </span>
+<span class="lineNum">   91</span>              :   template&lt;class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">   92</span>              :     struct tuple_element&lt;0, std::pair&lt;_Tp1, _Tp2&gt;&gt; </span>
+<span class="lineNum">   93</span>              :     { typedef _Tp1 type; }; </span>
+<span class="lineNum">   94</span>              :   </span>
+<span class="lineNum">   95</span>              :   template&lt;class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">   96</span>              :     struct tuple_element&lt;1, std::pair&lt;_Tp1, _Tp2&gt;&gt; </span>
+<span class="lineNum">   97</span>              :     { typedef _Tp2 type; }; </span>
+<span class="lineNum">   98</span>              :  </span>
+<span class="lineNum">   99</span>              :   template&lt;std::size_t _Int&gt; </span>
+<span class="lineNum">  100</span>              :     struct __pair_get; </span>
+<span class="lineNum">  101</span>              :  </span>
+<span class="lineNum">  102</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  103</span>              :     struct __pair_get&lt;0&gt; </span>
+<span class="lineNum">  104</span>              :     { </span>
+<span class="lineNum">  105</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  106</span>              :         static constexpr _Tp1&amp; </span>
+<span class="lineNum">  107</span><span class="linePartCov">      7  /  10:         __get(std::pair&lt;_Tp1, _Tp2&gt;&amp; __pair) noexcept </span>
+<span class="lineNum">  108</span><span class="linePartCov">      7  /  20:         { return __pair.first; } </span>
+<span class="lineNum">  109</span>              :  </span>
+<span class="lineNum">  110</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  111</span>              :         static constexpr _Tp1&amp;&amp; </span>
+<span class="lineNum">  112</span>              :         __move_get(std::pair&lt;_Tp1, _Tp2&gt;&amp;&amp; __pair) noexcept </span>
+<span class="lineNum">  113</span>              :         { return std::forward&lt;_Tp1&gt;(__pair.first); } </span>
+<span class="lineNum">  114</span>              :  </span>
+<span class="lineNum">  115</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  116</span>              :         static constexpr const _Tp1&amp; </span>
+<span class="lineNum">  117</span><span class="linePartCov">      3  /   6:         __const_get(const std::pair&lt;_Tp1, _Tp2&gt;&amp; __pair) noexcept </span>
+<span class="lineNum">  118</span><span class="linePartCov">      3  /  12:         { return __pair.first; } </span>
+<span class="lineNum">  119</span>              :     }; </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span>              :   template&lt;&gt; </span>
+<span class="lineNum">  122</span>              :     struct __pair_get&lt;1&gt; </span>
+<span class="lineNum">  123</span>              :     { </span>
+<span class="lineNum">  124</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  125</span>              :         static constexpr _Tp2&amp; </span>
+<span class="lineNum">  126</span>              :         __get(std::pair&lt;_Tp1, _Tp2&gt;&amp; __pair) noexcept </span>
+<span class="lineNum">  127</span>              :         { return __pair.second; } </span>
+<span class="lineNum">  128</span>              :  </span>
+<span class="lineNum">  129</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  130</span>              :         static constexpr _Tp2&amp;&amp; </span>
+<span class="lineNum">  131</span>              :         __move_get(std::pair&lt;_Tp1, _Tp2&gt;&amp;&amp; __pair) noexcept </span>
+<span class="lineNum">  132</span>              :         { return std::forward&lt;_Tp2&gt;(__pair.second); } </span>
+<span class="lineNum">  133</span>              :  </span>
+<span class="lineNum">  134</span>              :       template&lt;typename _Tp1, typename _Tp2&gt; </span>
+<span class="lineNum">  135</span>              :         static constexpr const _Tp2&amp; </span>
+<span class="lineNum">  136</span>              :         __const_get(const std::pair&lt;_Tp1, _Tp2&gt;&amp; __pair) noexcept </span>
+<span class="lineNum">  137</span>              :         { return __pair.second; } </span>
+<span class="lineNum">  138</span>              :     }; </span>
+<span class="lineNum">  139</span>              :  </span>
+<span class="lineNum">  140</span>              :   template&lt;std::size_t _Int, class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">  141</span>              :     constexpr typename tuple_element&lt;_Int, std::pair&lt;_Tp1, _Tp2&gt;&gt;::type&amp; </span>
+<span class="lineNum">  142</span><span class="linePartCov">      7  /  10:     get(std::pair&lt;_Tp1, _Tp2&gt;&amp; __in) noexcept </span>
+<span class="lineNum">  143</span><span class="linePartCov">      7  /  20:     { return __pair_get&lt;_Int&gt;::__get(__in); } </span>
+<span class="lineNum">  144</span>              :  </span>
+<span class="lineNum">  145</span>              :   template&lt;std::size_t _Int, class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">  146</span>              :     constexpr typename tuple_element&lt;_Int, std::pair&lt;_Tp1, _Tp2&gt;&gt;::type&amp;&amp; </span>
+<span class="lineNum">  147</span>              :     get(std::pair&lt;_Tp1, _Tp2&gt;&amp;&amp; __in) noexcept </span>
+<span class="lineNum">  148</span>              :     { return __pair_get&lt;_Int&gt;::__move_get(std::move(__in)); } </span>
+<span class="lineNum">  149</span>              :  </span>
+<span class="lineNum">  150</span>              :   template&lt;std::size_t _Int, class _Tp1, class _Tp2&gt; </span>
+<span class="lineNum">  151</span>              :     constexpr const typename tuple_element&lt;_Int, std::pair&lt;_Tp1, _Tp2&gt;&gt;::type&amp; </span>
+<span class="lineNum">  152</span><span class="linePartCov">      3  /   6:     get(const std::pair&lt;_Tp1, _Tp2&gt;&amp; __in) noexcept </span>
+<span class="lineNum">  153</span><span class="linePartCov">      3  /  12:     { return __pair_get&lt;_Int&gt;::__const_get(__in); } </span>
+<span class="lineNum">  154</span>              :  </span>
+<span class="lineNum">  155</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">  156</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">  157</span>              :  </span>
+<span class="lineNum">  158</span>              : #endif </span>
+<span class="lineNum">  159</span>              :  </span>
+<span class="lineNum">  160</span>              : #endif &#047;* _GLIBCXX_UTILITY *&#047; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

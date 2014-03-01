@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">164</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">57.9%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">95</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Mads Chr. Olesen &lt;mchro@cs.aau.dk&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   ATMEL AVR 8-bit arch specific stuff </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: import sys, architecture </span>
+<span class="lineNum">   14</span><span class="lineCov">      1  /   1: from dissy.architecture import Architecture </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              :  </span>
+<span class="lineNum">   17</span><span class="lineCov">      1  /   1: atmel_calls = [&#039;rcall&#039;, &#039;icall&#039;, &#039;call&#039;, &#039;eicall&#039;] </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: atmel_conditionflag_setters = [&#039;cp&#039;, &#039;cpi&#039;, &#039;cpc&#039;] </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1: atmel_conditionflag_users = [&#039;&#039;] </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1: atmel_instr_descriptions = { </span>
+<span class="lineNum">   22</span>              :     &#039;ld&#039;: &quot;&quot;&quot;Load Indirect </span>
+<span class="lineNum">   23</span>              : Note that: </span>
+<span class="lineNum">   24</span>              : X = r26:r27 </span>
+<span class="lineNum">   25</span>              : Y = r28:r29 </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1:     &#039;ldi&#039;: &#039;Load Immediate&#039;, </span>
+<span class="lineNum">   28</span>              :     &#039;ldd&#039;: &quot;&quot;&quot;Load Indirect with Displacement </span>
+<span class="lineNum">   29</span>              : Note that: </span>
+<span class="lineNum">   30</span>              : X = r26:r27 </span>
+<span class="lineNum">   31</span>              : Y = r28:r29 </span>
+<span class="lineNum">   32</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1:     &#039;lds&#039;: &#039;Load Indirect from Data Space&#039;, </span>
+<span class="lineNum">   34</span>              :  </span>
+<span class="lineNum">   35</span>              :     &#039;st&#039;: &quot;&quot;&quot;Store Indirect </span>
+<span class="lineNum">   36</span>              : Note that: </span>
+<span class="lineNum">   37</span>              : X = r26:r27 </span>
+<span class="lineNum">   38</span>              : Y = r28:r29 </span>
+<span class="lineNum">   39</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   40</span>              :     &#039;std&#039;: &quot;&quot;&quot;Store Indirect with Displacement </span>
+<span class="lineNum">   41</span>              : Note that: </span>
+<span class="lineNum">   42</span>              : X = r26:r27 </span>
+<span class="lineNum">   43</span>              : Y = r28:r29 </span>
+<span class="lineNum">   44</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   45</span><span class="lineCov">      1  /   1:     &#039;sts&#039;: &#039;Store Direct to Data Space&#039;, </span>
+<span class="lineNum">   46</span>              :  </span>
+<span class="lineNum">   47</span>              :     &#039;in&#039;: &quot;&quot;&quot;In from I&#047;O Location </span>
+<span class="lineNum">   48</span>              :  </span>
+<span class="lineNum">   49</span>              : Note that: </span>
+<span class="lineNum">   50</span>              : 0x3d = Stack pointer low byte </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1: 0x3e = Stack pointer high byte&quot;&quot;&quot;, </span>
+<span class="lineNum">   52</span>              :     &#039;out&#039;: &quot;&quot;&quot;Out to I&#047;O Location </span>
+<span class="lineNum">   53</span>              :  </span>
+<span class="lineNum">   54</span>              : Note that: </span>
+<span class="lineNum">   55</span>              : 0x3d = Stack pointer low byte </span>
+<span class="lineNum">   56</span>              : 0x3e = Stack pointer high byte </span>
+<span class="lineNum">   57</span><span class="lineCov">      1  /   1: 0x3f = Status register accumulator&quot;&quot;&quot;, </span>
+<span class="lineNum">   58</span>              :     &#039;rcall&#039;: &quot;&quot;&quot;Relative Call Subroutine </span>
+<span class="lineNum">   59</span>              :  </span>
+<span class="lineNum">   60</span>              : Note on &lt;tt&gt;rcall .+0&lt;&#047;tt&gt;: this is sometimes used to atomically decrement the stack pointer, &#092; </span>
+<span class="lineNum">   61</span><span class="lineCov">      1  /   1: in order to allocate space on the stack for later use.&quot;&quot;&quot;, </span>
+<span class="lineNum">   62</span><span class="lineCov">      1  /   1:     &#039;ret&#039;: &#039;Subroutine return&#039;, </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1:     &#039;rjmp&#039;: &#039;Relative Jump&#039;, </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1:     &#039;sbrc&#039;: &#039;Skip if Bit in Register Cleared&#039;, </span>
+<span class="lineNum">   65</span><span class="lineCov">      1  /   1:     &#039;sbrs&#039;: &#039;Skip if Bit in Register Set&#039;, </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1:     &#039;add&#039;: &#039;Add without Carry&#039;, </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1:     &#039;adc&#039;: &#039;Add with Carry&#039;, </span>
+<span class="lineNum">   69</span>              :     &#039;adiw&#039;: &quot;&quot;&quot;Add Immediate to Word </span>
+<span class="lineNum">   70</span>              : Only possible for the register pairs: </span>
+<span class="lineNum">   71</span>              :     r24:r25 </span>
+<span class="lineNum">   72</span>              : X = r26:r27 </span>
+<span class="lineNum">   73</span>              : Y = r28:r29 </span>
+<span class="lineNum">   74</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   75</span><span class="lineCov">      1  /   1:     &#039;inc&#039;: &#039;Increment&#039;, </span>
+<span class="lineNum">   76</span>              :  </span>
+<span class="lineNum">   77</span><span class="lineCov">      1  /   1:     &#039;sub&#039;: &#039;Subtract without Carry&#039;, </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1:     &#039;sbc&#039;: &#039;Subtract with Carry&#039;, </span>
+<span class="lineNum">   79</span><span class="lineCov">      1  /   1:     &#039;subi&#039;: &#039;Subtract Immediate&#039;, </span>
+<span class="lineNum">   80</span><span class="lineCov">      1  /   1:     &#039;sbci&#039;: &#039;Subtract Immediate with Carry&#039;, </span>
+<span class="lineNum">   81</span>              :     &#039;sbiw&#039;: &quot;&quot;&quot;Subtract Immediate from Word </span>
+<span class="lineNum">   82</span>              : Only possible for the register pairs: </span>
+<span class="lineNum">   83</span>              :     r24:r25 </span>
+<span class="lineNum">   84</span>              : X = r26:r27 </span>
+<span class="lineNum">   85</span>              : Y = r28:r29 </span>
+<span class="lineNum">   86</span><span class="lineCov">      1  /   1: Z = r30:r31&quot;&quot;&quot;, </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1:     &#039;dec&#039;: &#039;Decrement&#039;, </span>
+<span class="lineNum">   88</span>              :  </span>
+<span class="lineNum">   89</span><span class="lineCov">      1  /   1:     &#039;lsl&#039;: &#039;Logical Shift Left&#039;, </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1:     &#039;lsr&#039;: &#039;Logical Shift Right&#039;, </span>
+<span class="lineNum">   91</span><span class="lineCov">      1  /   1:     &#039;rol&#039;: &#039;Rotate Left Through Carry&#039;, </span>
+<span class="lineNum">   92</span><span class="lineCov">      1  /   1:     &#039;ror&#039;: &#039;Rotate Right Through Carry&#039;, </span>
+<span class="lineNum">   93</span><span class="lineCov">      1  /   1:     &#039;asr&#039;: &#039;Arithmetic Shift Right&#039;, </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1:     &#039;and&#039;: &#039;Logical AND&#039;, </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1:     &#039;andi&#039;: &#039;Logical AND with Immediate&#039;, </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1:     &#039;or&#039;: &#039;Logical OR&#039;, </span>
+<span class="lineNum">   98</span><span class="lineCov">      1  /   1:     &#039;ori&#039;: &#039;Logical ORwith Immediate&#039;, </span>
+<span class="lineNum">   99</span><span class="lineCov">      1  /   1:     &#039;eor&#039;: &#039;Exclusive OR&#039;, </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1:     &#039;com&#039;: &#039;One&#092;&#039;s Complement&#039;, </span>
+<span class="lineNum">  101</span><span class="lineCov">      1  /   1:     &#039;neg&#039;: &#039;Two&#092;&#039;s Complement&#039;, </span>
+<span class="lineNum">  102</span>              :  </span>
+<span class="lineNum">  103</span><span class="lineCov">      1  /   1:     &#039;cp&#039;: &#039;Compare&#039;, </span>
+<span class="lineNum">  104</span>              :     &#039;cpc&#039;: &quot;&quot;&quot;Compare with Carry </span>
+<span class="lineNum">  105</span><span class="lineCov">      1  /   1: Compares two registers, also taking the previously set carry bit into account.&quot;&quot;&quot;, </span>
+<span class="lineNum">  106</span><span class="lineCov">      1  /   1:     &#039;cpi&#039;: &#039;Compare with Immediate&#039;, </span>
+<span class="lineNum">  107</span>              :  </span>
+<span class="lineNum">  108</span><span class="lineCov">      1  /   1:     &#039;mov&#039;: &#039;Copy Register&#039;, </span>
+<span class="lineNum">  109</span><span class="lineCov">      1  /   1:     &#039;swap&#039;: &#039;Swap Nibbles&#039;, </span>
+<span class="lineNum">  110</span><span class="lineCov">      1  /   1:     &#039;bst&#039;: &#039;Bit Store from Register to T&#039;, </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1:     &#039;bld&#039;: &#039;Bit Load from T to Register&#039;, </span>
+<span class="lineNum">  112</span>              :  </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1:     &#039;push&#039;: &#039;Push Register on Stack&#039;, </span>
+<span class="lineNum">  114</span><span class="lineCov">      1  /   1:     &#039;pop&#039;: &#039;Pop Register from Stack&#039;, </span>
+<span class="lineNum">  115</span>              :  </span>
+<span class="lineNum">  116</span><span class="lineCov">      1  /   1:     &#039;sec&#039;: &#039;Set Carry&#039;, </span>
+<span class="lineNum">  117</span>              :  </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1:     &#039;cli&#039;: &#039;Global Interrupt Disable&#039;, </span>
+<span class="lineNum">  119</span><span class="lineNoCov">      0  /   1:     } </span>
+<span class="lineNum">  120</span>              :  </span>
+<span class="lineNum">  121</span><span class="lineCov">      1  /   1: atmel_conditions = { </span>
+<span class="lineNum">  122</span><span class="lineCov">      1  /   1:     &#039;eq&#039;: &#039;Equal&#039;, </span>
+<span class="lineNum">  123</span><span class="lineCov">      1  /   1:     &#039;ne&#039;: &#039;Not Equal&#039;, </span>
+<span class="lineNum">  124</span><span class="lineCov">      1  /   1:     &#039;ge&#039;: &#039;Greater or Equal, Signed&#039;, </span>
+<span class="lineNum">  125</span><span class="lineCov">      1  /   1:     &#039;lt&#039;: &#039;Less Than, Signed&#039;, </span>
+<span class="lineNum">  126</span><span class="lineCov">      1  /   1:     &#039;pl&#039;: &#039;Positive (Plus)&#039;, </span>
+<span class="lineNum">  127</span><span class="lineCov">      1  /   1:     &#039;mi&#039;: &#039;Negative (Minus)&#039;, </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1:     &#039;tc&#039;: &#039;T Flag Cleared&#039;, </span>
+<span class="lineNum">  129</span><span class="lineCov">      1  /   1:     &#039;ts&#039;: &#039;T Flag Set&#039;, </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1:     &#039;cs&#039;: &#039;Carry Set&#039;, </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1:     &#039;cc&#039;: &#039;Carry Cleared&#039;, </span>
+<span class="lineNum">  132</span><span class="lineNoCov">      0  /   1:     } </span>
+<span class="lineNum">  133</span>              :  </span>
+<span class="lineNum">  134</span><span class="lineCov">      1  /   1: def crossproduct(s1, s2): </span>
+<span class="lineNum">  135</span><span class="lineCov">      1  /   1:     ans = [] </span>
+<span class="lineNum">  136</span><span class="lineCov">      1  /   1:     for a in s1: </span>
+<span class="lineNum">  137</span><span class="lineCov">      1  /   1:         for b in s2: </span>
+<span class="lineNum">  138</span><span class="lineCov">      1  /   1:             ans += [a + b] </span>
+<span class="lineNum">  139</span><span class="lineCov">      1  /   1:     return ans </span>
+<span class="lineNum">  140</span>              :  </span>
+<span class="lineNum">  141</span><span class="lineCov">      1  /   1: atmel_lists_inited = False </span>
+<span class="lineNum">  142</span><span class="lineCov">      1  /   1: if not atmel_lists_inited: </span>
+<span class="lineNum">  143</span><span class="lineCov">      1  /   1:     conditional_instructions = { </span>
+<span class="lineNum">  144</span>              :         &#039;br&#039;: &quot;&quot;&quot;Branch if %s </span>
+<span class="lineNum">  145</span><span class="lineCov">      1  /   1: PC := PC + k + 2&quot;&quot;&quot;, </span>
+<span class="lineNum">  146</span><span class="lineNoCov">      0  /   1:         } </span>
+<span class="lineNum">  147</span>              :  </span>
+<span class="lineNum">  148</span><span class="lineCov">      1  /   1:     for i in conditional_instructions: </span>
+<span class="lineNum">  149</span><span class="lineCov">      1  /   1:         for c in atmel_conditions: </span>
+<span class="lineNum">  150</span><span class="lineCov">      1  /   1:             atmel_instr_descriptions[i + c] = conditional_instructions[i] % (atmel_conditions[c]) </span>
+<span class="lineNum">  151</span><span class="lineCov">      1  /   1:             atmel_conditionflag_users += [i + c] </span>
+<span class="lineNum">  152</span><span class="lineCov">      1  /   1:     atmel_lists_inited = True </span>
+<span class="lineNum">  153</span>              :  </span>
+<span class="lineNum">  154</span><span class="lineNoCov">      0  /   1: atmel_jumps = [&#039;rjmp&#039;, &#039;jmp&#039;] + list(crossproduct([&#039;br&#039;], atmel_conditions.keys())) + &#092; </span>
+<span class="lineNum">  155</span><span class="lineCov">      1  /   1:     atmel_calls + [&#039;sbrc&#039;, &#039;sbrs&#039;, &#039;sbic&#039;, &#039;sbis&#039;] </span>
+<span class="lineNum">  156</span>              :  </span>
+<span class="lineNum">  157</span><span class="lineCov">      1  /   1: atmel_branches = list(crossproduct([&#039;br&#039;], atmel_conditions.keys()) + &#092; </span>
+<span class="lineNum">  158</span><span class="lineCov">      1  /   1:     [&#039;sbrc&#039;, &#039;sbrs&#039;, &#039;sbic&#039;, &#039;sbis&#039;]) </span>
+<span class="lineNum">  159</span>              :  </span>
+<span class="lineNum">  160</span><span class="lineCov">      1  /   1: class AtmelArchitecture(architecture.Architecture): </span>
+<span class="lineNum">  161</span><span class="lineCov">      1  /   1:     def __init__(self): </span>
+<span class="lineNum">  162</span><span class="lineNoCov">      0  /   1:         architecture.Architecture.__init__(self, atmel_jumps, atmel_calls, </span>
+<span class="lineNum">  163</span><span class="lineNoCov">      0  /   1:             atmel_conditionflag_setters, atmel_conditionflag_users) </span>
+<span class="lineNum">  164</span>              :  </span>
+<span class="lineNum">  165</span><span class="lineCov">      1  /   1:     def getJumpDestination(self, address, insn, args): </span>
+<span class="lineNum">  166</span>              :         #example: </span>
+<span class="lineNum">  167</span>              :         #address = 84L </span>
+<span class="lineNum">  168</span>              :         #insn = &#039;brge&#039; </span>
+<span class="lineNum">  169</span>              :         #args = &#039;.+6     &#039; </span>
+<span class="lineNum">  170</span>              :  </span>
+<span class="lineNum">  171</span><span class="lineNoCov">      0  /   1:         if insn in [&#039;sbrc&#039;, &#039;sbrs&#039;]: #skip instructions </span>
+<span class="lineNum">  172</span>              :             #TODO XXX: this depends on the size of the instruction skipped! </span>
+<span class="lineNum">  173</span>              :             # (can be 16 or 32 bits (jmp, call, lds, sts)) </span>
+<span class="lineNum">  174</span><span class="lineNoCov">      0  /   1:             return long(address + 4) </span>
+<span class="lineNum">  175</span><span class="lineNoCov">      0  /   1:         if args[0] == &#039;.&#039;: #relative jump </span>
+<span class="lineNum">  176</span><span class="lineNoCov">      0  /   1:             offset = long(args[1:]) </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   1:             return long(address + offset + 2) </span>
+<span class="lineNum">  178</span>              :         else: #absolute jump? </span>
+<span class="lineNum">  179</span><span class="lineNoCov">      0  /   1:             return Architecture.getJumpDestination(self, address, insn, args) </span>
+<span class="lineNum">  180</span>              :  </span>
+<span class="lineNum">  181</span><span class="lineCov">      1  /   1:     def getInstructionInfo(self, instruction): </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1:         opcode = instruction.opcode </span>
+<span class="lineNum">  183</span><span class="lineNoCov">      0  /   1:         args = str(instruction.getArgs()) </span>
+<span class="lineNum">  184</span>              :  </span>
+<span class="lineNum">  185</span><span class="lineNoCov">      0  /   1:         args_list = args.split(&quot;, &quot;) </span>
+<span class="lineNum">  186</span><span class="lineNoCov">      0  /   1:         args_dict = dict( </span>
+<span class="lineNum">  187</span><span class="lineNoCov">      0  /   1:             zip([&#039;arg&#039; + str(i) for i in range(1, len(args_list)+1)], </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   1:                 args_list)) </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   1:         description = atmel_instr_descriptions.get(instruction.opcode, &#039;&#039;) </span>
+<span class="lineNum">  190</span>              :  </span>
+<span class="lineNum">  191</span><span class="lineNoCov">      0  /   1:         return {&#039;shortinfo&#039;: opcode + &quot; &quot; + args, </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1:                 &#039;description&#039;: description % args_dict, </span>
+<span class="lineNum">  193</span><span class="lineNoCov">      0  /   1:                 } </span>
+<span class="lineNum">  194</span>              :  </span>
+<span class="lineNum">  195</span><span class="lineCov">      1  /   1:     def isReturn(self, insn): </span>
+<span class="lineNum">  196</span><span class="lineNoCov">      0  /   1:         if insn.opcode == &#039;ret&#039;: </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   1:             return True </span>
+<span class="lineNum">  198</span><span class="lineNoCov">      0  /   1:         return False </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="lineCov">      1  /   1:     def isBranch(self, insn): </span>
+<span class="lineNum">  201</span>              :         &quot;&quot;&quot;Returns true if this instruction is a branch, that is it can either </span>
+<span class="lineNum">  202</span>              :         be taken or not be taken.&quot;&quot;&quot; </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   1:         return insn.opcode in atmel_branches </span>
+<span class="lineNum">  204</span>              :  </span>
+<span class="lineNum">  205</span><span class="lineCov">      1  /   1:     parseArguments_opcodelook = {} </span>
+<span class="lineNum">  206</span><span class="lineCov">      1  /   1:     def parseArguments(self, instr): </span>
+<span class="lineNum">  207</span>              :         &quot;&quot;&quot;Parses an argument string, into a tuple, containing: </span>
+<span class="lineNum">  208</span>              :             * A list of the registers read in this instruction </span>
+<span class="lineNum">  209</span>              :             * A list of the registers written to in this instruction </span>
+<span class="lineNum">  210</span>              :             * A list of the values used in this instruction&quot;&quot;&quot; </span>
+<span class="lineNum">  211</span>              :         #XXX </span>
+<span class="lineNum">  212</span><span class="lineNoCov">      0  /   1:         return ([], [], []) </span>
+<span class="lineNum">  213</span>              :  </span>
+<span class="lineNum">  214</span><span class="lineCov">      1  /   1:     def getInstructionEffect(self, ins, func): </span>
+<span class="lineNum">  215</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  216</span>              :         Returns a string describing the effects on the registers, of this </span>
+<span class="lineNum">  217</span>              :         instruction. An example of such a string is: </span>
+<span class="lineNum">  218</span>              :         &quot;r1 = 5 ; r2 = r3 + r4 ; r7 = top&quot; </span>
+<span class="lineNum">  219</span>              :  </span>
+<span class="lineNum">  220</span>              :         Used for the value analysis. </span>
+<span class="lineNum">  221</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  222</span>              :         #XXX </span>
+<span class="lineNum">  223</span><span class="lineNoCov">      0  /   1:         return &quot;&quot; </span>
+<span class="lineNum">  224</span>              :  </span>
+<span class="lineNum">  225</span><span class="lineCov">      1  /   1:     def getInstructionStackEffect(self, ins, func): </span>
+<span class="lineNum">  226</span>              :         #XXX, can only push&#047;pop one reg. </span>
+<span class="lineNum">  227</span><span class="lineNoCov">      0  /   1:         opc = ins.opcode </span>
+<span class="lineNum">  228</span><span class="lineNoCov">      0  /   1:         if opc == &#039;push&#039;: </span>
+<span class="lineNum">  229</span><span class="lineNoCov">      0  /   1:             (regsread, regswrite, values) = self.parseArguments(ins) </span>
+<span class="lineNum">  230</span><span class="lineNoCov">      0  /   1:             return &quot;push &quot; + &quot; ; &quot;.join([self.normalize_regname(a) for a in regsread if a != &#039;sp&#039;]) </span>
+<span class="lineNum">  231</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;pop&#039;: </span>
+<span class="lineNum">  232</span><span class="lineNoCov">      0  /   1:             (regsread, regswrite, values) = self.parseArguments(ins) </span>
+<span class="lineNum">  233</span><span class="lineNoCov">      0  /   1:             regstopop = [self.normalize_regname(a) for a in regswrite if a != &#039;sp&#039;] </span>
+<span class="lineNum">  234</span><span class="lineNoCov">      0  /   1:             regstopop.reverse() </span>
+<span class="lineNum">  235</span><span class="lineNoCov">      0  /   1:             return &quot;pop &quot; + &quot; ; &quot;.join(regstopop) </span>
+<span class="lineNum">  236</span><span class="lineNoCov">      0  /   1:         return &quot;&quot; </span>
+<span class="lineNum">  237</span>              :  </span>
+<span class="lineNum">  238</span><span class="lineCov">      1  /   1:     def get_ins_type(self, opcode): </span>
+<span class="lineNum">  239</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  240</span>              :         Returns the type of instruction. </span>
+<span class="lineNum">  241</span>              :         One of: XXX TODO </span>
+<span class="lineNum">  242</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  243</span><span class="lineNoCov">      0  /   1:         if opcode in [&#039;sts&#039;, &#039;st&#039;, &#039;std&#039;]: </span>
+<span class="lineNum">  244</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_STORE&#039; </span>
+<span class="lineNum">  245</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;lds&#039;, &#039;ld&#039;, &#039;ldd&#039;]: </span>
+<span class="lineNum">  246</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_LOAD&#039; </span>
+<span class="lineNum">  247</span><span class="lineNoCov">      0  /   1:         elif opcode == &#039;push&#039;: </span>
+<span class="lineNum">  248</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_PUSH&#039; </span>
+<span class="lineNum">  249</span><span class="lineNoCov">      0  /   1:         elif opcode == &#039;pop&#039;: </span>
+<span class="lineNum">  250</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_POP&#039; </span>
+<span class="lineNum">  251</span>              :         #&quot;common&quot; instructions </span>
+<span class="lineNum">  252</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;add&#039;, &#039;adc&#039;, &#039;sub&#039;, &#039;subi&#039;, &#039;sbc&#039;, &#039;sbci&#039;, &#039;and&#039;, &#039;andi&#039;, &#039;or&#039;, </span>
+<span class="lineNum">  253</span><span class="lineNoCov">      0  /   1:             &#039;ori&#039;, &#039;eor&#039;, &#039;com&#039;, &#039;neg&#039;, &#039;sbr&#039;, &#039;cbr&#039;, &#039;inc&#039;, &#039;dec&#039;, &#039;tst&#039;, &#039;clr&#039;, &#039;ser&#039;, </span>
+<span class="lineNum">  254</span><span class="lineNoCov">      0  /   1:             &#039;cp&#039;, &#039;cpc&#039;, &#039;cpi&#039;, </span>
+<span class="lineNum">  255</span><span class="lineNoCov">      0  /   1:             &#039;mov&#039;, &#039;movw&#039;, &#039;ldi&#039;, &#039;lsl&#039;, &#039;lsr&#039;, &#039;rol&#039;, &#039;ror&#039;, &#039;asr&#039;, &#039;swap&#039;, &#039;sbi&#039;, &#039;cbi&#039;, </span>
+<span class="lineNum">  256</span><span class="lineNoCov">      0  /   1:             &#039;sec&#039;, &#039;bst&#039;, &#039;bld&#039;, &#039;cli&#039;, &#039;in&#039;, &#039;out&#039;]: </span>
+<span class="lineNum">  257</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_OTHER&quot; </span>
+<span class="lineNum">  258</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;sbiw&#039;, &#039;adiw&#039;, &#039;mul&#039;, &#039;muls&#039;, &#039;mulsu&#039;, &#039;fmul&#039;, &#039;fmuls&#039;, &#039;fmulsu&#039;]: </span>
+<span class="lineNum">  259</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_WORD_ARITH&quot; </span>
+<span class="lineNum">  260</span>              :         #branches to static locations </span>
+<span class="lineNum">  261</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;rjmp&#039;]: </span>
+<span class="lineNum">  262</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_JUMP&quot; </span>
+<span class="lineNum">  263</span><span class="lineNoCov">      0  /   1:         elif opcode in list(crossproduct([&#039;br&#039;], atmel_conditions.keys())) + &#092; </span>
+<span class="lineNum">  264</span><span class="lineNoCov">      0  /   1:             [&#039;sbrc&#039;, &#039;sbrs&#039;, &#039;sbic&#039;, &#039;sbis&#039;]: </span>
+<span class="lineNum">  265</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_BRANCH&quot; </span>
+<span class="lineNum">  266</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;rcall&#039;]: </span>
+<span class="lineNum">  267</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_RCALL&quot; </span>
+<span class="lineNum">  268</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;call&#039;]: </span>
+<span class="lineNum">  269</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_CALL&quot; </span>
+<span class="lineNum">  270</span><span class="lineNoCov">      0  /   1:         elif opcode in [&#039;ret&#039;]: </span>
+<span class="lineNum">  271</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_RET&quot; </span>
+<span class="lineNum">  272</span>              :         else: </span>
+<span class="lineNum">  273</span><span class="lineNoCov">      0  /   1:             print &quot;Unhandled opcode &#039;&quot; + opcode + &quot;&#039;&quot; </span>
+<span class="lineNum">  274</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_OTHER&quot; </span>
+<span class="lineNum">  275</span>              :  </span>
+<span class="lineNum">  276</span><span class="lineCov">      1  /   1:     def normalize_regname(self, regname): </span>
+<span class="lineNum">  277</span>              :         #XXX </span>
+<span class="lineNum">  278</span><span class="lineNoCov">      0  /   1:         return regname </span>
+<span class="lineNum">  279</span>              :  </span>
+<span class="lineNum">  280</span><span class="lineCov">      1  /   1:     def denormalize_regname(self, regname): </span>
+<span class="lineNum">  281</span>              :         #XXX </span>
+<span class="lineNum">  282</span><span class="lineNoCov">      0  /   1:         return regname </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

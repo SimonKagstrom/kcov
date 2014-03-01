@@ -2,7 +2,7 @@
 <BODY>
 <H1>Kcov - code coverage</H1>
 
-Kcov is a code coverage tester based on <A HREF="http://bcov.sf.net">bcov</A> by Thomas Neumann. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications. If you use and like kcov, feel free to make a small donation:
+Kcov is a code coverage tester for compiled programs and Python scripts. It allows collecting code coverage information from executables without special command-line arguments, and continuosly produces output from long-running applications. If you use and like kcov, feel free to make a small donation:
 <P>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 <input type="hidden" name="cmd" value="_s-xclick">
@@ -35,10 +35,10 @@ Using kcov is as simple as
 </UL>
 
 <P>
-You can see some <A HREF="kcov-example-output/index.html">example kcov coverage output</A> for <A HREF="http://frodo-wii.googlecode.com">C64-network.org</A> and kcov itself here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A> and more information on the implementation can be found <A HREF="http://simonkagstrom.livejournal.com/50380.html">in this blog post</A>.
+You can see some <A HREF="kcov-example-output/index.html">example kcov coverage output</A> for kcov itself and python scripts here. Source code for Kcov <A HREF="http://github.com/SimonKagstrom/kcov">is available at github</A> and more information on the implementation can be found <A HREF="http://simonkagstrom.livejournal.com/50380.html">in this blog post</A>.
 
 <P>
-Code coverage can be useful to find bugs. Let's say you, by mistake, managed to add an extra <tt>goto fail;</tt> in your code - that shows up quite well in the coverage report:a
+Code coverage can be useful to find bugs. Let's say you, by mistake, managed to add an extra <tt>goto fail;</tt> in your code - that shows up quite well in the coverage report:
 
 <P>
 <IMG SRC="kcov.png">
@@ -50,10 +50,12 @@ When using kcov together with Jenkins, you get reports like these:
 
 <P>A running Jenkins instance with kcov coverage can be <A HREF="http://www.c64-network.org/jenkins/job/kcov_unit_tests/">found here</A> (covering kcov itself).</P>
 
+<P>kcov is based on <A HREF="http://bcov.sf.net">bcov</A> by Thomas Neumann.</P>
+
 <H2>Download</H2>
 The latest version is available here:
 <P>
-<A HREF="http://simonkagstrom.github.io/kcov/kcov-14.tar.gz">kcov-14.tar.gz</A>
+<A HREF="http://simonkagstrom.github.io/kcov/kcov-15.tar.gz">kcov-15.tar.gz</A>
 
 <P>
 Author: <A HREF="mailto:simon.kagstrom@gmail.com">Simon Kagstrom</A>

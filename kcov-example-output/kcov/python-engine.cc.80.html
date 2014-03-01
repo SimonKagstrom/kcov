@@ -1,0 +1,478 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">207</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">87.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">180</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #include &lt;file-parser.hh&gt; </span>
+<span class="lineNum">    2</span>              : #include &lt;engine.hh&gt; </span>
+<span class="lineNum">    3</span>              : #include &lt;configuration.hh&gt; </span>
+<span class="lineNum">    4</span>              : #include &lt;output-handler.hh&gt; </span>
+<span class="lineNum">    5</span>              : #include &lt;lineid.hh&gt; </span>
+<span class="lineNum">    6</span>              : #include &lt;utils.hh&gt; </span>
+<span class="lineNum">    7</span>              : #include &lt;zlib.h&gt; </span>
+<span class="lineNum">    8</span>              :  </span>
+<span class="lineNum">    9</span>              : #include &lt;stdlib.h&gt; </span>
+<span class="lineNum">   10</span>              : #include &lt;unistd.h&gt; </span>
+<span class="lineNum">   11</span>              : #include &lt;sys&#047;types.h&gt; </span>
+<span class="lineNum">   12</span>              : #include &lt;sys&#047;stat.h&gt; </span>
+<span class="lineNum">   13</span>              : #include &lt;sys&#047;wait.h&gt; </span>
+<span class="lineNum">   14</span>              : #include &lt;signal.h&gt; </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : #include &lt;list&gt; </span>
+<span class="lineNum">   17</span>              : #include &lt;unordered_map&gt; </span>
+<span class="lineNum">   18</span>              :  </span>
+<span class="lineNum">   19</span>              : #include &quot;..&#047;swap-endian.hh&quot; </span>
+<span class="lineNum">   20</span>              :  </span>
+<span class="lineNum">   21</span>              : using namespace kcov; </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span>              : extern &quot;C&quot; size_t python_helper_data_size; </span>
+<span class="lineNum">   24</span>              : extern &quot;C&quot; uint8_t python_helper_data[]; </span>
+<span class="lineNum">   25</span>              :  </span>
+<span class="lineNum">   26</span>              :  </span>
+<span class="lineNum">   27</span>              : const uint64_t COVERAGE_MAGIC = 0x6d6574616c6c6775ULL; &#047;&#047; &quot;metallgut&quot; </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : &#047;* Should be 8-byte aligned *&#047; </span>
+<span class="lineNum">   30</span>              : struct coverage_data </span>
+<span class="lineNum">   31</span>              : { </span>
+<span class="lineNum">   32</span>              : 	uint64_t magic; </span>
+<span class="lineNum">   33</span>              : 	uint32_t size; </span>
+<span class="lineNum">   34</span>              : 	uint32_t line; </span>
+<span class="lineNum">   35</span>              : 	const char filename[]; </span>
+<span class="lineNum">   36</span>              : }; </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span><span class="linePartCov">      2  /   8: class PythonEngine : public IEngine, public IFileParser </span>
+<span class="lineNum">   39</span>              : { </span>
+<span class="lineNum">   40</span>              : public: </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1: 	PythonEngine() : </span>
+<span class="lineNum">   42</span>              : 		m_child(0), </span>
+<span class="lineNum">   43</span>              : 		m_running(false), </span>
+<span class="lineNum">   44</span>              : 		m_pipe(NULL), </span>
+<span class="lineNum">   45</span>              : 		m_listener(NULL), </span>
+<span class="lineNum">   46</span><span class="linePartCov">      1  /   2: 		m_currentAddress(1) &#047;&#047; 0 is an invalid address </span>
+<span class="lineNum">   47</span>              : 	{ </span>
+<span class="lineNum">   48</span><span class="lineCov">      1  /   1: 		IEngineFactory::getInstance().registerEngine(*this); </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1: 		IParserManager::getInstance().registerParser(*this); </span>
+<span class="lineNum">   50</span><span class="linePartCov">      2  /   3: 	} </span>
+<span class="lineNum">   51</span>              :  </span>
+<span class="lineNum">   52</span>              : 	&#047;&#047; From IEngine </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1: 	int registerBreakpoint(unsigned long addr) </span>
+<span class="lineNum">   54</span>              : 	{ </span>
+<span class="lineNum">   55</span>              : 		&#047;&#047; No breakpoints </span>
+<span class="lineNum">   56</span><span class="lineCov">      1  /   1: 		return 0; </span>
+<span class="lineNum">   57</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   58</span>              :  </span>
+<span class="lineNum">   59</span><span class="lineCov">      1  /   1: 	void setupAllBreakpoints() </span>
+<span class="lineNum">   60</span>              : 	{ </span>
+<span class="lineNum">   61</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   62</span>              :  </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1: 	bool clearBreakpoint(int id) </span>
+<span class="lineNum">   64</span>              : 	{ </span>
+<span class="lineNum">   65</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">   66</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">   67</span>              :  </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1: 	bool start(IEventListener &amp;listener, const std::string &amp;executable) </span>
+<span class="lineNum">   69</span>              : 	{ </span>
+<span class="lineNum">   70</span>              : 		std::string kcov_python_pipe_path = </span>
+<span class="lineNum">   71</span><span class="lineCov">      1  /   1: 				IOutputHandler::getInstance().getOutDirectory() + &quot;kcov-python.pipe&quot;; </span>
+<span class="lineNum">   72</span>              : 		std::string kcov_python_path = </span>
+<span class="lineNum">   73</span><span class="linePartCov">      2  /   3: 				IOutputHandler::getInstance().getBaseDirectory() + &quot;python-helper.py&quot;; </span>
+<span class="lineNum">   74</span>              :  </span>
+<span class="lineNum">   75</span><span class="lineCov">      1  /   1: 		if (write_file(python_helper_data, python_helper_data_size, kcov_python_path.c_str()) &lt; 0) { </span>
+<span class="lineNum">   76</span><span class="lineNoCov">      0  /   1: 				error(&quot;Can&#039;t write python helper at %s&quot;, kcov_python_path.c_str()); </span>
+<span class="lineNum">   77</span>              :  </span>
+<span class="lineNum">   78</span><span class="lineNoCov">      0  /   1: 				return false; </span>
+<span class="lineNum">   79</span>              : 		} </span>
+<span class="lineNum">   80</span>              :  </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1: 		m_listener = &amp;listener; </span>
+<span class="lineNum">   82</span>              :  </span>
+<span class="lineNum">   83</span><span class="linePartCov">      2  /   3: 		std::string kcov_python_env = &quot;KCOV_PYTHON_PIPE_PATH=&quot; + kcov_python_pipe_path; </span>
+<span class="lineNum">   84</span><span class="lineCov">      1  /   1: 		unlink(kcov_python_pipe_path.c_str()); </span>
+<span class="lineNum">   85</span><span class="lineCov">      1  /   1: 		mkfifo(kcov_python_pipe_path.c_str(), 0600); </span>
+<span class="lineNum">   86</span>              :  </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1: 		char *envString = (char *)xmalloc(kcov_python_env.size() + 1); </span>
+<span class="lineNum">   88</span><span class="lineCov">      1  /   1: 		strcpy(envString, kcov_python_env.c_str()); </span>
+<span class="lineNum">   89</span>              :  </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1: 		putenv(envString); </span>
+<span class="lineNum">   91</span>              :  </span>
+<span class="lineNum">   92</span>              : 		&#047;* Launch the python helper *&#047; </span>
+<span class="lineNum">   93</span><span class="lineCov">      1  /   1: 		m_child = fork(); </span>
+<span class="lineNum">   94</span><span class="lineCov">      1  /   1: 		if (m_child == 0) { </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: 			auto &amp;conf = IConfiguration::getInstance(); </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1: 			const char **argv = conf.getArgv(); </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1: 			unsigned int argc = conf.getArgc(); </span>
+<span class="lineNum">   98</span>              :  </span>
+<span class="lineNum">   99</span>              : 			std::string s = fmt(&quot;%s %s &quot;, </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1: 					conf.getPythonCommand().c_str(), </span>
+<span class="lineNum">  101</span><span class="lineCov">      2  /   2: 					kcov_python_path.c_str()); </span>
+<span class="lineNum">  102</span><span class="lineCov">      2  /   2: 			for (unsigned int i = 0; i &lt; argc; i++) </span>
+<span class="lineNum">  103</span><span class="linePartCov">      1  /   2: 				s += std::string(argv[i]) + &quot; &quot;; </span>
+<span class="lineNum">  104</span>              :  </span>
+<span class="lineNum">  105</span>              : 			int res; </span>
+<span class="lineNum">  106</span>              :  </span>
+<span class="lineNum">  107</span><span class="lineCov">      1  /   1: 			res = system(s.c_str()); </span>
+<span class="lineNum">  108</span><span class="lineCov">      1  /   1: 			panic_if (res &lt; 0, </span>
+<span class="lineNum">  109</span>              : 					&quot;Can&#039;t execute python helper&quot;); </span>
+<span class="lineNum">  110</span>              :  </span>
+<span class="lineNum">  111</span><span class="linePartCov">      1  /   2: 			exit(WEXITSTATUS(res)); </span>
+<span class="lineNum">  112</span><span class="lineCov">      1  /   1: 		} else if (m_child &lt; 0) { </span>
+<span class="lineNum">  113</span><span class="lineNoCov">      0  /   1: 			perror(&quot;fork&quot;); </span>
+<span class="lineNum">  114</span>              :  </span>
+<span class="lineNum">  115</span><span class="lineNoCov">      0  /   1: 			return false; </span>
+<span class="lineNum">  116</span>              : 		} </span>
+<span class="lineNum">  117</span><span class="lineCov">      1  /   1: 		m_running = true; </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1: 		m_pipe = fopen(kcov_python_pipe_path.c_str(), &quot;r&quot;); </span>
+<span class="lineNum">  119</span><span class="lineCov">      1  /   1: 		panic_if (!m_pipe, </span>
+<span class="lineNum">  120</span>              : 				&quot;Can&#039;t open python pipe %s&quot;, kcov_python_pipe_path.c_str()); </span>
+<span class="lineNum">  121</span>              :  </span>
+<span class="lineNum">  122</span><span class="linePartCov">      2  /   3: 		return true; </span>
+<span class="lineNum">  123</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  124</span>              :  </span>
+<span class="lineNum">  125</span><span class="lineNoCov">      0  /   1: 	bool checkEvents() </span>
+<span class="lineNum">  126</span>              : 	{ </span>
+<span class="lineNum">  127</span>              : 		uint8_t buf[8192]; </span>
+<span class="lineNum">  128</span>              : 		size_t sz; </span>
+<span class="lineNum">  129</span>              : 		struct coverage_data *p; </span>
+<span class="lineNum">  130</span>              :  </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1: 		p = readCoverageDatum(buf, sizeof(buf), sz); </span>
+<span class="lineNum">  132</span>              :  </span>
+<span class="lineNum">  133</span><span class="lineCov">      1  /   1: 		if (!p) { </span>
+<span class="lineNum">  134</span><span class="lineCov">      1  /   1: 			reportEvent(ev_error, -1); </span>
+<span class="lineNum">  135</span>              :  </span>
+<span class="lineNum">  136</span><span class="lineCov">      1  /   1: 			return false; </span>
+<span class="lineNum">  137</span>              : 		} </span>
+<span class="lineNum">  138</span>              :  </span>
+<span class="lineNum">  139</span><span class="linePartCov">      1  /   2: 		if (!m_reportedFiles[p-&gt;filename]) { </span>
+<span class="lineNum">  140</span><span class="linePartCov">      1  /   2: 			m_reportedFiles[p-&gt;filename] = true; </span>
+<span class="lineNum">  141</span>              :  </span>
+<span class="lineNum">  142</span><span class="lineCov">      2  /   2: 			for (const auto &amp;it : m_fileListeners) </span>
+<span class="lineNum">  143</span><span class="lineCov">      1  /   1: 				it-&gt;onFile(p-&gt;filename, IFileParser::FLG_NONE); </span>
+<span class="lineNum">  144</span>              :  </span>
+<span class="lineNum">  145</span><span class="linePartCov">      1  /   2: 			parseFile(p-&gt;filename); </span>
+<span class="lineNum">  146</span>              : 		} </span>
+<span class="lineNum">  147</span>              :  </span>
+<span class="lineNum">  148</span><span class="lineCov">      1  /   1: 		if (m_listener) { </span>
+<span class="lineNum">  149</span><span class="lineCov">      1  /   1: 			uint64_t address = 0; </span>
+<span class="lineNum">  150</span><span class="lineCov">      1  /   1: 			Event ev; </span>
+<span class="lineNum">  151</span>              :  </span>
+<span class="lineNum">  152</span><span class="linePartCov">      1  /   2: 			auto it = m_lineIdToAddress.find(LineId(p-&gt;filename, p-&gt;line)); </span>
+<span class="lineNum">  153</span><span class="lineCov">      1  /   1: 			if (it != m_lineIdToAddress.end()) </span>
+<span class="lineNum">  154</span><span class="lineCov">      1  /   1: 				address = it-&gt;second; </span>
+<span class="lineNum">  155</span>              :  </span>
+<span class="lineNum">  156</span><span class="lineCov">      1  /   1: 			ev.type = ev_breakpoint; </span>
+<span class="lineNum">  157</span><span class="lineCov">      1  /   1: 			ev.addr = address; </span>
+<span class="lineNum">  158</span><span class="lineCov">      1  /   1: 			ev.data = 1; </span>
+<span class="lineNum">  159</span>              :  </span>
+<span class="lineNum">  160</span><span class="lineCov">      1  /   1: 			m_listener-&gt;onEvent(ev); </span>
+<span class="lineNum">  161</span>              : 		} </span>
+<span class="lineNum">  162</span>              :  </span>
+<span class="lineNum">  163</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">  164</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  165</span>              :  </span>
+<span class="lineNum">  166</span><span class="lineCov">      1  /   1: 	bool continueExecution() </span>
+<span class="lineNum">  167</span>              : 	{ </span>
+<span class="lineNum">  168</span><span class="lineCov">      1  /   1: 		if (checkEvents()) </span>
+<span class="lineNum">  169</span><span class="lineCov">      1  /   1: 			return true; </span>
+<span class="lineNum">  170</span>              :  </span>
+<span class="lineNum">  171</span>              :  </span>
+<span class="lineNum">  172</span>              : 		&#047;&#047; Otherwise wait for child </span>
+<span class="lineNum">  173</span>              : 		int status; </span>
+<span class="lineNum">  174</span>              : 		int rv; </span>
+<span class="lineNum">  175</span>              :  </span>
+<span class="lineNum">  176</span><span class="lineCov">      1  /   1: 		rv = waitpid(m_child, &amp;status, WNOHANG); </span>
+<span class="lineNum">  177</span><span class="lineCov">      1  /   1: 		if (rv != m_child) </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   1: 			return true; </span>
+<span class="lineNum">  179</span>              :  </span>
+<span class="lineNum">  180</span><span class="lineCov">      1  /   1: 		if (WIFEXITED(status)) { </span>
+<span class="lineNum">  181</span><span class="lineCov">      1  /   1: 			reportEvent(ev_exit_first_process, WEXITSTATUS(status)); </span>
+<span class="lineNum">  182</span>              : 		} else { </span>
+<span class="lineNum">  183</span><span class="lineNoCov">      0  /   1: 			warning(&quot;Other status: 0x%x&#092;n&quot;, status); </span>
+<span class="lineNum">  184</span><span class="lineNoCov">      0  /   1: 			reportEvent(ev_error, -1); </span>
+<span class="lineNum">  185</span>              : 		} </span>
+<span class="lineNum">  186</span>              :  </span>
+<span class="lineNum">  187</span><span class="lineCov">      1  /   1: 		return false; </span>
+<span class="lineNum">  188</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  189</span>              :  </span>
+<span class="lineNum">  190</span><span class="lineNoCov">      0  /   1: 	bool childrenLeft() </span>
+<span class="lineNum">  191</span>              : 	{ </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1: 		return m_running; </span>
+<span class="lineNum">  193</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  194</span>              :  </span>
+<span class="lineNum">  195</span><span class="lineNoCov">      0  /   1: 	std::string eventToName(Event ev) </span>
+<span class="lineNum">  196</span>              : 	{ </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   1: 		return &quot;&quot;; </span>
+<span class="lineNum">  198</span><span class="lineNoCov">      0  /   2: 	} </span>
+<span class="lineNum">  199</span>              :  </span>
+<span class="lineNum">  200</span><span class="lineCov">      1  /   1: 	void kill() </span>
+<span class="lineNum">  201</span>              : 	{ </span>
+<span class="lineNum">  202</span><span class="lineCov">      1  /   1: 		if (m_child == 0) </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   1: 			return; </span>
+<span class="lineNum">  204</span>              :  </span>
+<span class="lineNum">  205</span>              : 		&#047;&#047; Bye-bye </span>
+<span class="lineNum">  206</span><span class="lineCov">      1  /   1: 		::kill(m_child, SIGKILL); </span>
+<span class="lineNum">  207</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  208</span>              :  </span>
+<span class="lineNum">  209</span><span class="lineCov">      1  /   1: 	unsigned int matchFile(const std::string &amp;filename, uint8_t *data, size_t dataSize) </span>
+<span class="lineNum">  210</span>              : 	{ </span>
+<span class="lineNum">  211</span><span class="lineCov">      1  /   1: 		return matchParser(filename, data, dataSize); </span>
+<span class="lineNum">  212</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  213</span>              :  </span>
+<span class="lineNum">  214</span>              :  </span>
+<span class="lineNum">  215</span>              : 	&#047;&#047; From IFileParser </span>
+<span class="lineNum">  216</span><span class="linePartCov">      2  /   3: 	bool addFile(const std::string &amp;filename, struct phdr_data_entry *phdr_data) </span>
+<span class="lineNum">  217</span>              : 	{ </span>
+<span class="lineNum">  218</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">  219</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  220</span>              :  </span>
+<span class="lineNum">  221</span><span class="linePartCov">      2  /   3: 	void registerLineListener(ILineListener &amp;listener) </span>
+<span class="lineNum">  222</span>              : 	{ </span>
+<span class="lineNum">  223</span><span class="lineCov">      1  /   1: 		m_lineListeners.push_back(&amp;listener); </span>
+<span class="lineNum">  224</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  225</span>              :  </span>
+<span class="lineNum">  226</span><span class="linePartCov">      2  /   3: 	void registerFileListener(IFileListener &amp;listener) </span>
+<span class="lineNum">  227</span>              : 	{ </span>
+<span class="lineNum">  228</span><span class="lineCov">      1  /   1: 		m_fileListeners.push_back(&amp;listener); </span>
+<span class="lineNum">  229</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  230</span>              :  </span>
+<span class="lineNum">  231</span><span class="linePartCov">      2  /   3: 	bool parse() </span>
+<span class="lineNum">  232</span>              : 	{ </span>
+<span class="lineNum">  233</span><span class="lineCov">      1  /   1: 		return true; </span>
+<span class="lineNum">  234</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  235</span>              :  </span>
+<span class="lineNum">  236</span><span class="linePartCov">      2  /   3: 	uint64_t getChecksum() </span>
+<span class="lineNum">  237</span>              : 	{ </span>
+<span class="lineNum">  238</span><span class="lineCov">      1  /   1: 		return 0; </span>
+<span class="lineNum">  239</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  240</span>              :  </span>
+<span class="lineNum">  241</span><span class="linePartCov">      2  /   3: 	unsigned int matchParser(const std::string &amp;filename, uint8_t *data, size_t dataSize) </span>
+<span class="lineNum">  242</span>              : 	{ </span>
+<span class="lineNum">  243</span><span class="lineCov">      1  /   1: 		std::string s((const char *)data, 80); </span>
+<span class="lineNum">  244</span>              :  </span>
+<span class="lineNum">  245</span><span class="linePartCov">      1  /   2: 		if (filename.substr(filename.size() - 3, filename.size()) == &quot;.py&quot;) </span>
+<span class="lineNum">  246</span><span class="lineNoCov">      0  /   1: 			return 200; </span>
+<span class="lineNum">  247</span>              :  </span>
+<span class="lineNum">  248</span><span class="lineCov">      1  /   1: 		if (s.find(&quot;python&quot;) != std::string::npos) </span>
+<span class="lineNum">  249</span><span class="lineCov">      1  /   1: 			return 100; </span>
+<span class="lineNum">  250</span>              :  </span>
+<span class="lineNum">  251</span><span class="lineNoCov">      0  /   2: 		return match_none; </span>
+<span class="lineNum">  252</span><span class="lineCov">      1  /   1: 	} </span>
+<span class="lineNum">  253</span>              :  </span>
+<span class="lineNum">  254</span>              : private: </span>
+<span class="lineNum">  255</span><span class="lineCov">      1  /   1: 	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0) </span>
+<span class="lineNum">  256</span>              : 	{ </span>
+<span class="lineNum">  257</span><span class="lineCov">      1  /   1: 		if (!m_listener) </span>
+<span class="lineNum">  258</span><span class="linePartCov">      1  /   2: 			return; </span>
+<span class="lineNum">  259</span>              :  </span>
+<span class="lineNum">  260</span><span class="lineCov">      1  /   1: 		m_listener-&gt;onEvent(Event(type, data, address)); </span>
+<span class="lineNum">  261</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  262</span>              :  </span>
+<span class="lineNum">  263</span><span class="lineCov">      1  /   1: 	void unmarshalCoverageData(struct coverage_data *p) </span>
+<span class="lineNum">  264</span>              : 	{ </span>
+<span class="lineNum">  265</span><span class="lineCov">      1  /   1: 		p-&gt;magic = be_to_host&lt;uint64_t&gt;(p-&gt;magic); </span>
+<span class="lineNum">  266</span><span class="lineCov">      1  /   1: 		p-&gt;size = be_to_host&lt;uint32_t&gt;(p-&gt;size); </span>
+<span class="lineNum">  267</span><span class="lineCov">      1  /   1: 		p-&gt;line = be_to_host&lt;uint32_t&gt;(p-&gt;line); </span>
+<span class="lineNum">  268</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  269</span>              :  </span>
+<span class="lineNum">  270</span>              : 	&#047;&#047; Sweep through lines in a file to determine what is valid code </span>
+<span class="lineNum">  271</span><span class="lineNoCov">      0  /   1: 	void parseFile(const std::string &amp;filename) </span>
+<span class="lineNum">  272</span>              : 	{ </span>
+<span class="lineNum">  273</span><span class="lineCov">      1  /   1: 		if (!m_listener) </span>
+<span class="lineNum">  274</span><span class="lineNoCov">      0  /   1: 			return; </span>
+<span class="lineNum">  275</span>              :  </span>
+<span class="lineNum">  276</span>              : 		size_t sz; </span>
+<span class="lineNum">  277</span><span class="lineCov">      1  /   1: 		char *p = (char *)read_file(&amp;sz, &quot;%s&quot;, filename.c_str()); </span>
+<span class="lineNum">  278</span>              :  </span>
+<span class="lineNum">  279</span>              : 		&#047;&#047; Can&#039;t handle this file </span>
+<span class="lineNum">  280</span><span class="lineCov">      1  /   1: 		if (!p) </span>
+<span class="lineNum">  281</span><span class="lineNoCov">      0  /   1: 			return; </span>
+<span class="lineNum">  282</span><span class="lineCov">      1  /   1: 		std::string fileData(p, sz); </span>
+<span class="lineNum">  283</span>              :  </span>
+<span class="lineNum">  284</span>              : 		&#047;&#047; Compute crc32 for this file </span>
+<span class="lineNum">  285</span><span class="lineCov">      1  /   1: 		uint32_t crc = crc32(0, (unsigned char *)p, sz); </span>
+<span class="lineNum">  286</span>              :  </span>
+<span class="lineNum">  287</span><span class="lineCov">      1  /   1: 		free((void*)p); </span>
+<span class="lineNum">  288</span>              :  </span>
+<span class="lineNum">  289</span><span class="linePartCov">      2  /   3: 		const auto &amp;stringList = split_string(fileData, &quot;&#092;n&quot;); </span>
+<span class="lineNum">  290</span><span class="lineCov">      1  /   1: 		unsigned int lineNo = 0; </span>
+<span class="lineNum">  291</span><span class="lineCov">      1  /   1: 		enum { start, multiline_active } state = start; </span>
+<span class="lineNum">  292</span><span class="lineCov">      1  /   1: 		bool multiLineStartLine = false; </span>
+<span class="lineNum">  293</span>              :  </span>
+<span class="lineNum">  294</span><span class="lineCov">      2  /   2: 		for (const auto &amp;it : stringList) { </span>
+<span class="lineNum">  295</span><span class="lineCov">      1  /   1: 			const auto &amp;s = trim_string(it); </span>
+<span class="lineNum">  296</span>              :  </span>
+<span class="lineNum">  297</span><span class="lineCov">      1  /   1: 			lineNo++; </span>
+<span class="lineNum">  298</span>              : 			&#047;&#047; Empty line, ignore </span>
+<span class="lineNum">  299</span><span class="lineCov">      1  /   1: 			if (s == &quot;&quot;) </span>
+<span class="lineNum">  300</span><span class="lineCov">      1  /   1: 				continue; </span>
+<span class="lineNum">  301</span>              :  </span>
+<span class="lineNum">  302</span>              : 			&#047;&#047; Non-empty, but comment </span>
+<span class="lineNum">  303</span><span class="lineCov">      1  /   1: 			if (s[0] == &#039;#&#039;) </span>
+<span class="lineNum">  304</span><span class="lineCov">      1  /   1: 				continue; </span>
+<span class="lineNum">  305</span>              :  </span>
+<span class="lineNum">  306</span>              : 			&#047;&#047; else: statements are nops </span>
+<span class="lineNum">  307</span><span class="lineCov">      1  /   1: 			if (s.find(&quot;else:&quot;) != std::string::npos) </span>
+<span class="lineNum">  308</span><span class="lineCov">      1  /   1: 				continue; </span>
+<span class="lineNum">  309</span>              :  </span>
+<span class="lineNum">  310</span><span class="lineCov">      1  /   1: 			auto idx = multilineIdx(s); </span>
+<span class="lineNum">  311</span>              :  </span>
+<span class="lineNum">  312</span><span class="lineCov">      1  /   1: 			switch (state) </span>
+<span class="lineNum">  313</span>              : 			{ </span>
+<span class="lineNum">  314</span>              : 			case start: </span>
+<span class="lineNum">  315</span><span class="lineCov">      1  /   1: 				if (idx != std::string::npos) { </span>
+<span class="lineNum">  316</span><span class="lineCov">      1  /   1: 					kcov_debug(PTRACE_MSG, &quot;python multiline ON  %3d: %s&#092;n&quot;, lineNo, s.c_str()); </span>
+<span class="lineNum">  317</span>              :  </span>
+<span class="lineNum">  318</span><span class="lineCov">      1  /   1: 					std::string s2 = s.substr(idx + 3, std::string::npos); </span>
+<span class="lineNum">  319</span>              :  </span>
+<span class="lineNum">  320</span><span class="lineCov">      1  /   1: 					if (multilineIdx(s2) == std::string::npos) </span>
+<span class="lineNum">  321</span><span class="lineCov">      1  /   1: 						state = multiline_active; </span>
+<span class="lineNum">  322</span>              :  </span>
+<span class="lineNum">  323</span>              : 					&#047;&#047; E.g., a = &#039;&#039;&#039;yadayada [...]&#039;&#039;&#039; </span>
+<span class="lineNum">  324</span><span class="lineCov">      1  /   1: 					if (idx &gt; 0) </span>
+<span class="lineNum">  325</span><span class="lineCov">      1  /   1: 						multiLineStartLine = true; </span>
+<span class="lineNum">  326</span>              :  </span>
+<span class="lineNum">  327</span>              : 					&#047;&#047; Don&#039;t report this line </span>
+<span class="lineNum">  328</span><span class="linePartCov">      1  /   2: 					continue; </span>
+<span class="lineNum">  329</span>              : 				} </span>
+<span class="lineNum">  330</span><span class="lineCov">      1  /   1: 				break; </span>
+<span class="lineNum">  331</span>              : 			case multiline_active: </span>
+<span class="lineNum">  332</span><span class="lineCov">      1  /   1: 				if (idx != std::string::npos) { </span>
+<span class="lineNum">  333</span><span class="lineCov">      1  /   1: 					kcov_debug(PTRACE_MSG, &quot;python multiline OFF %3d: %s&#092;n&quot;, lineNo, s.c_str()); </span>
+<span class="lineNum">  334</span><span class="lineCov">      1  /   1: 					state = start; </span>
+<span class="lineNum">  335</span>              :  </span>
+<span class="lineNum">  336</span>              : 					&#047;&#047; The last line of a multi-line string will get reported by the </span>
+<span class="lineNum">  337</span>              : 					&#047;&#047; python helper, so add this as a line if there was an assignment </span>
+<span class="lineNum">  338</span>              : 					&#047;&#047; above </span>
+<span class="lineNum">  339</span><span class="lineCov">      1  /   1: 					if (multiLineStartLine) { </span>
+<span class="lineNum">  340</span><span class="lineCov">      1  /   1: 						fileLineFound(crc, filename, lineNo); </span>
+<span class="lineNum">  341</span><span class="lineCov">      1  /   1: 						multiLineStartLine = false; </span>
+<span class="lineNum">  342</span>              : 					} </span>
+<span class="lineNum">  343</span>              : 				} </span>
+<span class="lineNum">  344</span><span class="lineCov">      1  /   1: 				continue; &#047;&#047; Don&#039;t report this line </span>
+<span class="lineNum">  345</span>              : 			default: </span>
+<span class="lineNum">  346</span><span class="lineNoCov">      0  /   1: 				panic(&quot;Unknown state %u&quot;, state); </span>
+<span class="lineNum">  347</span>              : 				break; </span>
+<span class="lineNum">  348</span>              : 			} </span>
+<span class="lineNum">  349</span>              :  </span>
+<span class="lineNum">  350</span><span class="lineCov">      1  /   1: 			fileLineFound(crc, filename, lineNo); </span>
+<span class="lineNum">  351</span><span class="linePartCov">      2  /   4: 		} </span>
+<span class="lineNum">  352</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  353</span>              :  </span>
+<span class="lineNum">  354</span><span class="lineCov">      1  /   1: 	void fileLineFound(uint32_t crc, const std::string &amp;filename, unsigned int lineNo) </span>
+<span class="lineNum">  355</span>              : 	{ </span>
+<span class="lineNum">  356</span><span class="lineCov">      1  /   1: 		LineId id(filename, lineNo); </span>
+<span class="lineNum">  357</span><span class="lineCov">      1  /   1: 		uint64_t address = m_currentAddress ^ crc; </span>
+<span class="lineNum">  358</span>              :  </span>
+<span class="lineNum">  359</span><span class="lineCov">      1  /   1: 		m_lineIdToAddress[id] = address; </span>
+<span class="lineNum">  360</span>              :  </span>
+<span class="lineNum">  361</span><span class="lineCov">      2  /   2: 		for (const auto &amp;lit : m_lineListeners) </span>
+<span class="lineNum">  362</span><span class="lineCov">      1  /   1: 			lit-&gt;onLine(filename.c_str(), lineNo, address); </span>
+<span class="lineNum">  363</span>              :  </span>
+<span class="lineNum">  364</span><span class="lineCov">      1  /   1: 		m_currentAddress++; </span>
+<span class="lineNum">  365</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  366</span>              :  </span>
+<span class="lineNum">  367</span><span class="lineCov">      1  /   1: 	size_t multilineIdx(const std::string &amp;s) </span>
+<span class="lineNum">  368</span>              : 	{ </span>
+<span class="lineNum">  369</span><span class="lineCov">      1  /   1: 		auto idx = s.find(&quot;&#039;&#039;&#039;&quot;); </span>
+<span class="lineNum">  370</span>              :  </span>
+<span class="lineNum">  371</span><span class="lineCov">      1  /   1: 		if (idx == std::string::npos) </span>
+<span class="lineNum">  372</span><span class="lineCov">      1  /   1: 			idx = s.find(&quot;&#092;&quot;&#092;&quot;&#092;&quot;&quot;); </span>
+<span class="lineNum">  373</span>              :  </span>
+<span class="lineNum">  374</span><span class="lineCov">      1  /   1: 		return idx; </span>
+<span class="lineNum">  375</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  376</span>              :  </span>
+<span class="lineNum">  377</span>              :  </span>
+<span class="lineNum">  378</span>              :  </span>
+<span class="lineNum">  379</span><span class="lineCov">      1  /   1: 	struct coverage_data *readCoverageDatum(uint8_t *buf, size_t totalSize, size_t &amp;outSz) </span>
+<span class="lineNum">  380</span>              : 	{ </span>
+<span class="lineNum">  381</span><span class="lineCov">      1  /   1: 		struct coverage_data *p = (struct coverage_data *)buf; </span>
+<span class="lineNum">  382</span>              : 		ssize_t rv; </span>
+<span class="lineNum">  383</span>              :  </span>
+<span class="lineNum">  384</span><span class="lineCov">      1  /   1: 		rv = fread(buf, 1, sizeof(struct coverage_data), m_pipe); </span>
+<span class="lineNum">  385</span><span class="lineCov">      1  /   1: 		if (rv == 0) </span>
+<span class="lineNum">  386</span><span class="lineCov">      1  /   1: 			return NULL; &#047;&#047; Not an error </span>
+<span class="lineNum">  387</span><span class="lineCov">      1  /   1: 		if (rv &lt; (int)sizeof(struct coverage_data)) { </span>
+<span class="lineNum">  388</span><span class="lineNoCov">      0  /   1: 			error(&quot;Read too little %zd&quot;, rv); </span>
+<span class="lineNum">  389</span>              :  </span>
+<span class="lineNum">  390</span><span class="lineNoCov">      0  /   1: 			return NULL; </span>
+<span class="lineNum">  391</span>              : 		} </span>
+<span class="lineNum">  392</span><span class="lineCov">      1  /   1: 		unmarshalCoverageData(p); </span>
+<span class="lineNum">  393</span>              :  </span>
+<span class="lineNum">  394</span><span class="lineCov">      2  /   2: 		if (p-&gt;magic != COVERAGE_MAGIC || </span>
+<span class="lineNum">  395</span><span class="lineCov">      1  /   1: 				p-&gt;size &gt; totalSize - sizeof(struct coverage_data)) { </span>
+<span class="lineNum">  396</span><span class="lineNoCov">      0  /   1: 			error(&quot;Data magic wrong or size too large: magic 0x%llx, size %u (%zu left)&#092;n&quot;, </span>
+<span class="lineNum">  397</span>              : 					(unsigned long long)p-&gt;magic, </span>
+<span class="lineNum">  398</span>              : 					(unsigned int)p-&gt;size, </span>
+<span class="lineNum">  399</span>              : 					totalSize); </span>
+<span class="lineNum">  400</span>              :  </span>
+<span class="lineNum">  401</span><span class="lineNoCov">      0  /   1: 			return NULL; </span>
+<span class="lineNum">  402</span>              : 		} </span>
+<span class="lineNum">  403</span>              :  </span>
+<span class="lineNum">  404</span><span class="lineCov">      1  /   1: 		size_t remainder = p-&gt;size - sizeof(struct coverage_data); </span>
+<span class="lineNum">  405</span><span class="lineCov">      1  /   1: 		rv = fread(buf + sizeof(struct coverage_data), 1, remainder, m_pipe); </span>
+<span class="lineNum">  406</span><span class="lineCov">      1  /   1: 		if (rv &lt; (ssize_t)remainder) { </span>
+<span class="lineNum">  407</span><span class="lineNoCov">      0  /   1: 			error(&quot;Read too little %zd vs %zu&quot;, rv, remainder); </span>
+<span class="lineNum">  408</span>              :  </span>
+<span class="lineNum">  409</span><span class="lineNoCov">      0  /   1: 			return NULL; </span>
+<span class="lineNum">  410</span>              : 		} </span>
+<span class="lineNum">  411</span>              :  </span>
+<span class="lineNum">  412</span><span class="lineCov">      1  /   1: 		return p; </span>
+<span class="lineNum">  413</span><span class="linePartCov">      1  /   2: 	} </span>
+<span class="lineNum">  414</span>              :  </span>
+<span class="lineNum">  415</span>              : 	typedef std::list&lt;ILineListener *&gt; LineListenerList_t; </span>
+<span class="lineNum">  416</span>              : 	typedef std::list&lt;IFileListener *&gt; FileListenerList_t; </span>
+<span class="lineNum">  417</span>              : 	typedef std::unordered_map&lt;std::string, bool&gt; ReportedFileMap_t; </span>
+<span class="lineNum">  418</span>              : 	typedef std::unordered_map&lt;LineId, uint64_t, LineIdHash&gt; LineIdToAddressMap_t; </span>
+<span class="lineNum">  419</span>              :  </span>
+<span class="lineNum">  420</span>              : 	pid_t m_child; </span>
+<span class="lineNum">  421</span>              : 	bool m_running; </span>
+<span class="lineNum">  422</span>              : 	FILE *m_pipe; </span>
+<span class="lineNum">  423</span>              :  </span>
+<span class="lineNum">  424</span>              : 	LineListenerList_t m_lineListeners; </span>
+<span class="lineNum">  425</span>              : 	FileListenerList_t m_fileListeners; </span>
+<span class="lineNum">  426</span>              : 	ReportedFileMap_t m_reportedFiles; </span>
+<span class="lineNum">  427</span>              : 	LineIdToAddressMap_t m_lineIdToAddress; </span>
+<span class="lineNum">  428</span>              :  </span>
+<span class="lineNum">  429</span>              : 	IEventListener *m_listener; </span>
+<span class="lineNum">  430</span>              : 	uint64_t m_currentAddress; </span>
+<span class="lineNum">  431</span>              : }; </span>
+<span class="lineNum">  432</span>              :  </span>
+<span class="lineNum">  433</span><span class="linePartCov">      4  /   5: static PythonEngine g_instance; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftHi" width="15%">100.0%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">1</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : &#047;&#047; Standard iostream objects -*- C++ -*- </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : &#047;&#047; Copyright (C) 1997-2013 Free Software Foundation, Inc. </span>
+<span class="lineNum">    4</span>              : &#047;&#047; </span>
+<span class="lineNum">    5</span>              : &#047;&#047; This file is part of the GNU ISO C++ Library.  This library is free </span>
+<span class="lineNum">    6</span>              : &#047;&#047; software; you can redistribute it and&#047;or modify it under the </span>
+<span class="lineNum">    7</span>              : &#047;&#047; terms of the GNU General Public License as published by the </span>
+<span class="lineNum">    8</span>              : &#047;&#047; Free Software Foundation; either version 3, or (at your option) </span>
+<span class="lineNum">    9</span>              : &#047;&#047; any later version. </span>
+<span class="lineNum">   10</span>              :  </span>
+<span class="lineNum">   11</span>              : &#047;&#047; This library is distributed in the hope that it will be useful, </span>
+<span class="lineNum">   12</span>              : &#047;&#047; but WITHOUT ANY WARRANTY; without even the implied warranty of </span>
+<span class="lineNum">   13</span>              : &#047;&#047; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the </span>
+<span class="lineNum">   14</span>              : &#047;&#047; GNU General Public License for more details. </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              : &#047;&#047; Under Section 7 of GPL version 3, you are granted additional </span>
+<span class="lineNum">   17</span>              : &#047;&#047; permissions described in the GCC Runtime Library Exception, version </span>
+<span class="lineNum">   18</span>              : &#047;&#047; 3.1, as published by the Free Software Foundation. </span>
+<span class="lineNum">   19</span>              :  </span>
+<span class="lineNum">   20</span>              : &#047;&#047; You should have received a copy of the GNU General Public License and </span>
+<span class="lineNum">   21</span>              : &#047;&#047; a copy of the GCC Runtime Library Exception along with this program; </span>
+<span class="lineNum">   22</span>              : &#047;&#047; see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see </span>
+<span class="lineNum">   23</span>              : &#047;&#047; &lt;http:&#047;&#047;www.gnu.org&#047;licenses&#047;&gt;. </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span>              : &#047;** @file include&#047;iostream </span>
+<span class="lineNum">   26</span>              :  *  This is a Standard C++ Library header. </span>
+<span class="lineNum">   27</span>              :  *&#047; </span>
+<span class="lineNum">   28</span>              :  </span>
+<span class="lineNum">   29</span>              : &#047;&#047; </span>
+<span class="lineNum">   30</span>              : &#047;&#047; ISO C++ 14882: 27.3  Standard iostream objects </span>
+<span class="lineNum">   31</span>              : &#047;&#047; </span>
+<span class="lineNum">   32</span>              :  </span>
+<span class="lineNum">   33</span>              : #ifndef _GLIBCXX_IOSTREAM </span>
+<span class="lineNum">   34</span>              : #define _GLIBCXX_IOSTREAM 1 </span>
+<span class="lineNum">   35</span>              :  </span>
+<span class="lineNum">   36</span>              : #pragma GCC system_header </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span>              : #include &lt;bits&#047;c++config.h&gt; </span>
+<span class="lineNum">   39</span>              : #include &lt;ostream&gt; </span>
+<span class="lineNum">   40</span>              : #include &lt;istream&gt; </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span>              : namespace std _GLIBCXX_VISIBILITY(default) </span>
+<span class="lineNum">   43</span>              : { </span>
+<span class="lineNum">   44</span>              : _GLIBCXX_BEGIN_NAMESPACE_VERSION </span>
+<span class="lineNum">   45</span>              :  </span>
+<span class="lineNum">   46</span>              :   &#047;** </span>
+<span class="lineNum">   47</span>              :    *  @name Standard Stream Objects </span>
+<span class="lineNum">   48</span>              :    * </span>
+<span class="lineNum">   49</span>              :    *  The &amp;lt;iostream&amp;gt; header declares the eight &lt;em&gt;standard stream </span>
+<span class="lineNum">   50</span>              :    *  objects&lt;&#047;em&gt;.  For other declarations, see </span>
+<span class="lineNum">   51</span>              :    *  http:&#047;&#047;gcc.gnu.org&#047;onlinedocs&#047;libstdc++&#047;manual&#047;bk01pt11ch24.html </span>
+<span class="lineNum">   52</span>              :    *  and the @link iosfwd I&#047;O forward declarations @endlink </span>
+<span class="lineNum">   53</span>              :    * </span>
+<span class="lineNum">   54</span>              :    *  They are required by default to cooperate with the global C </span>
+<span class="lineNum">   55</span>              :    *  library&#039;s @c FILE streams, and to be available during program </span>
+<span class="lineNum">   56</span>              :    *  startup and termination. For more information, see the HOWTO </span>
+<span class="lineNum">   57</span>              :    *  linked to above. </span>
+<span class="lineNum">   58</span>              :   *&#047; </span>
+<span class="lineNum">   59</span>              :   &#047;&#047;@{ </span>
+<span class="lineNum">   60</span>              :   extern istream cin;		&#047;&#047;&#047; Linked to standard input </span>
+<span class="lineNum">   61</span>              :   extern ostream cout;		&#047;&#047;&#047; Linked to standard output </span>
+<span class="lineNum">   62</span>              :   extern ostream cerr;		&#047;&#047;&#047; Linked to standard error (unbuffered) </span>
+<span class="lineNum">   63</span>              :   extern ostream clog;		&#047;&#047;&#047; Linked to standard error (buffered) </span>
+<span class="lineNum">   64</span>              :  </span>
+<span class="lineNum">   65</span>              : #ifdef _GLIBCXX_USE_WCHAR_T </span>
+<span class="lineNum">   66</span>              :   extern wistream wcin;		&#047;&#047;&#047; Linked to standard input </span>
+<span class="lineNum">   67</span>              :   extern wostream wcout;	&#047;&#047;&#047; Linked to standard output </span>
+<span class="lineNum">   68</span>              :   extern wostream wcerr;	&#047;&#047;&#047; Linked to standard error (unbuffered) </span>
+<span class="lineNum">   69</span>              :   extern wostream wclog;	&#047;&#047;&#047; Linked to standard error (buffered) </span>
+<span class="lineNum">   70</span>              : #endif </span>
+<span class="lineNum">   71</span>              :   &#047;&#047;@} </span>
+<span class="lineNum">   72</span>              :  </span>
+<span class="lineNum">   73</span>              :   &#047;&#047; For construction of filebuffers for cout, cin, cerr, clog et. al. </span>
+<span class="lineNum">   74</span><span class="lineCov">      1  /   1:   static ios_base::Init __ioinit; </span>
+<span class="lineNum">   75</span>              :  </span>
+<span class="lineNum">   76</span>              : _GLIBCXX_END_NAMESPACE_VERSION </span>
+<span class="lineNum">   77</span>              : } &#047;&#047; namespace </span>
+<span class="lineNum">   78</span>              :  </span>
+<span class="lineNum">   79</span>              : #endif &#047;* _GLIBCXX_IOSTREAM *&#047; </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

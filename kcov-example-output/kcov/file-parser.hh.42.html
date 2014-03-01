@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - kcov</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>kcov</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:11:51</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">8</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">62.5%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">5</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : #pragma once </span>
+<span class="lineNum">    2</span>              :  </span>
+<span class="lineNum">    3</span>              : #include &lt;manager.hh&gt; </span>
+<span class="lineNum">    4</span>              :  </span>
+<span class="lineNum">    5</span>              : #include &lt;sys&#047;types.h&gt; </span>
+<span class="lineNum">    6</span>              : #include &lt;stdint.h&gt; </span>
+<span class="lineNum">    7</span>              :  </span>
+<span class="lineNum">    8</span>              : #include &lt;string&gt; </span>
+<span class="lineNum">    9</span>              :  </span>
+<span class="lineNum">   10</span>              : struct phdr_data_entry; </span>
+<span class="lineNum">   11</span>              :  </span>
+<span class="lineNum">   12</span>              : namespace kcov </span>
+<span class="lineNum">   13</span>              : { </span>
+<span class="lineNum">   14</span><span class="linePartCov">      2  /   3: 	class IFileParser </span>
+<span class="lineNum">   15</span>              : 	{ </span>
+<span class="lineNum">   16</span>              : 	public: </span>
+<span class="lineNum">   17</span>              : 		enum FileFlags </span>
+<span class="lineNum">   18</span>              : 		{ </span>
+<span class="lineNum">   19</span>              : 			FLG_NONE = 0, </span>
+<span class="lineNum">   20</span>              : 			FLG_TYPE_SOLIB = 1, </span>
+<span class="lineNum">   21</span>              : 		}; </span>
+<span class="lineNum">   22</span>              :  </span>
+<span class="lineNum">   23</span><span class="linePartCov">      2  /   3: 		class ILineListener </span>
+<span class="lineNum">   24</span>              : 		{ </span>
+<span class="lineNum">   25</span>              : 		public: </span>
+<span class="lineNum">   26</span>              : 			virtual void onLine(const char *file, unsigned int lineNr, </span>
+<span class="lineNum">   27</span>              : 					unsigned long addr) = 0; </span>
+<span class="lineNum">   28</span>              : 		}; </span>
+<span class="lineNum">   29</span>              :  </span>
+<span class="lineNum">   30</span><span class="linePartCov">      2  /   3: 		class IFileListener </span>
+<span class="lineNum">   31</span>              : 		{ </span>
+<span class="lineNum">   32</span>              : 		public: </span>
+<span class="lineNum">   33</span>              : 			virtual void onFile(const char *file, enum FileFlags flags) = 0; </span>
+<span class="lineNum">   34</span>              : 		}; </span>
+<span class="lineNum">   35</span>              :  </span>
+<span class="lineNum">   36</span>              : 		virtual bool addFile(const std::string &amp;filename, struct phdr_data_entry *phdr_data = 0) = 0; </span>
+<span class="lineNum">   37</span>              :  </span>
+<span class="lineNum">   38</span><span class="linePartCov">      2  /   5: 		virtual ~IFileParser() {} </span>
+<span class="lineNum">   39</span>              :  </span>
+<span class="lineNum">   40</span>              : 		virtual void registerLineListener(ILineListener &amp;listener) = 0; </span>
+<span class="lineNum">   41</span>              :  </span>
+<span class="lineNum">   42</span>              : 		virtual void registerFileListener(IFileListener &amp;listener) = 0; </span>
+<span class="lineNum">   43</span>              :  </span>
+<span class="lineNum">   44</span>              : 		virtual bool parse() = 0; </span>
+<span class="lineNum">   45</span>              :  </span>
+<span class="lineNum">   46</span>              : 		virtual uint64_t getChecksum() = 0; </span>
+<span class="lineNum">   47</span>              :  </span>
+<span class="lineNum">   48</span>              : 		virtual unsigned int matchParser(const std::string &amp;filename, uint8_t *data, size_t dataSize) = 0; </span>
+<span class="lineNum">   49</span>              : 	}; </span>
+<span class="lineNum">   50</span>              :  </span>
+<span class="lineNum">   51</span>              :  </span>
+<span class="lineNum">   52</span>              : 	&#047;** </span>
+<span class="lineNum">   53</span>              : 	 * Manager class for getting one of multiple parsers, which can </span>
+<span class="lineNum">   54</span>              : 	 * match different file types. </span>
+<span class="lineNum">   55</span>              : 	 *&#047; </span>
+<span class="lineNum">   56</span><span class="linePartCov">      2  /   3: 	class IParserManager </span>
+<span class="lineNum">   57</span>              : 	{ </span>
+<span class="lineNum">   58</span>              : 	public: </span>
+<span class="lineNum">   59</span><span class="lineNoCov">      0  /   2: 		virtual ~IParserManager() </span>
+<span class="lineNum">   60</span><span class="lineNoCov">      0  /   1: 		{ </span>
+<span class="lineNum">   61</span><span class="lineNoCov">      0  /   3: 		} </span>
+<span class="lineNum">   62</span>              :  </span>
+<span class="lineNum">   63</span>              : 		virtual void registerParser(IFileParser &amp;parser) = 0; </span>
+<span class="lineNum">   64</span>              :  </span>
+<span class="lineNum">   65</span>              : 		virtual IFileParser *matchParser(const std::string &amp;file) = 0; </span>
+<span class="lineNum">   66</span>              :  </span>
+<span class="lineNum">   67</span>              : 		static IParserManager &amp;getInstance(); </span>
+<span class="lineNum">   68</span>              : 	}; </span>
+<span class="lineNum">   69</span>              : } </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>

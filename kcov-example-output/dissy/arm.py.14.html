@@ -1,0 +1,549 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Coverage - dissy</title>
+  <link rel="stylesheet" type="text/css" href="bcov.css"/>
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="title">Coverage Report</td></tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr>
+    <td width="100%">
+      <table cellpadding="1" border="0" width="100%">
+        <tr>
+          <td class="headerItem" width="20%">Command:</td>
+          <td class="headerValue" width="80%" colspan=6>dissy</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Date:</td>
+          <td class="headerValue" width="15%">2014-03-01 10:23:30</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Instrumented&nbsp;lines:</td>
+          <td class="headerValue" width="10%">389</td>
+        </tr>
+        <tr>
+          <td class="headerItem" width="20%">Code&nbsp;covered:</td>
+          <td class="coverPerLeftMed" width="15%">25.4%</td>
+          <td width="5%"></td>
+          <td class="headerItem" width="20%">Executed&nbsp;lines:</td>
+          <td class="headerValue" width="10%">99</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+</table>
+<pre class="source">
+<span class="lineNum">    1</span>              : ###################################################################### </span>
+<span class="lineNum">    2</span>              : ## </span>
+<span class="lineNum">    3</span>              : ## Copyright (C) 2006,  Blekinge Institute of Technology </span>
+<span class="lineNum">    4</span>              : ## </span>
+<span class="lineNum">    5</span>              : ## Author:        Simon Kagstrom &lt;simon.kagstrom@gmail.com&gt; </span>
+<span class="lineNum">    6</span>              : ## Description:   Arm arch specific stuff </span>
+<span class="lineNum">    7</span>              : ## </span>
+<span class="lineNum">    8</span>              : ## Licensed under the terms of GNU General Public License version 2 </span>
+<span class="lineNum">    9</span>              : ## (or later, at your option). See COPYING file distributed with Dissy </span>
+<span class="lineNum">   10</span>              : ## for full text of the license. </span>
+<span class="lineNum">   11</span>              : ## </span>
+<span class="lineNum">   12</span>              : ###################################################################### </span>
+<span class="lineNum">   13</span><span class="lineCov">      1  /   1: import sys, architecture </span>
+<span class="lineNum">   14</span><span class="lineCov">      1  /   1: from dissy.architecture import Architecture </span>
+<span class="lineNum">   15</span>              :  </span>
+<span class="lineNum">   16</span>              :  </span>
+<span class="lineNum">   17</span><span class="lineCov">      1  /   1: arm_calls = [&#039;bl&#039;] </span>
+<span class="lineNum">   18</span><span class="lineCov">      1  /   1: arm_conditionflag_setters = [&#039;cmp&#039;, &#039;cmn&#039;, &#039;tst&#039;] + &#092; </span>
+<span class="lineNum">   19</span><span class="lineCov">      1  /   1:     [i + &quot;s&quot; for i in </span>
+<span class="lineNum">   20</span><span class="lineCov">      1  /   1:     [&#039;asr&#039;, &#039;lsl&#039;, &#039;lsr&#039;, &#039;mla&#039;, &#039;mov&#039;, &#039;mul&#039;, &#039;mvn&#039;, &#039;ror&#039;, &#039;rrx&#039;, &#039;smlal&#039;, </span>
+<span class="lineNum">   21</span><span class="lineCov">      1  /   1:      &#039;smull&#039;, &#039;umlal&#039;, &#039;umull&#039;] </span>
+<span class="lineNum">   22</span><span class="lineNoCov">      0  /   1:     ] </span>
+<span class="lineNum">   23</span><span class="lineCov">      1  /   1: arm_conditionflag_users = [&#039;&#039;] </span>
+<span class="lineNum">   24</span>              :  </span>
+<span class="lineNum">   25</span><span class="lineCov">      1  /   1: arm_instr_descriptions = { </span>
+<span class="lineNum">   26</span><span class="lineCov">      1  /   1:     &#039;adc&#039;: &#039;Add with carry&#039;, </span>
+<span class="lineNum">   27</span><span class="lineCov">      1  /   1:     &#039;add&#039;: &#039;Add&#039;, </span>
+<span class="lineNum">   28</span><span class="lineCov">      1  /   1:     &#039;and&#039;: &#039;Logical and&#039;, </span>
+<span class="lineNum">   29</span><span class="lineCov">      1  /   1:     &#039;asr&#039;: &#039;Arithmetic Shift Right&#039;, </span>
+<span class="lineNum">   30</span><span class="lineCov">      1  /   1:     &#039;asrs&#039;: &#039;Arithmetic Shift Right and set condition flags&#039;, </span>
+<span class="lineNum">   31</span><span class="lineCov">      1  /   1:     &#039;bal&#039;: &#039;Unconditional Branch&#039;, </span>
+<span class="lineNum">   32</span><span class="lineCov">      1  /   1:     &#039;bic&#039;: &#039;Bit Clear&#039;, </span>
+<span class="lineNum">   33</span><span class="lineCov">      1  /   1:     &#039;blal&#039;: &#039;Unconditional Branch and Link&#039;, </span>
+<span class="lineNum">   34</span>              :     &#039;bl&#039;: &quot;&quot;&quot;Branch with Link </span>
+<span class="lineNum">   35</span><span class="lineCov">      1  /   1: LR := Address of next instruction, PC := label&quot;&quot;&quot;, </span>
+<span class="lineNum">   36</span>              :     &#039;bx&#039;: &quot;&quot;&quot;Branch and eXchange </span>
+<span class="lineNum">   37</span><span class="lineCov">      1  /   1: PC := Rm&quot;&quot;&quot;, </span>
+<span class="lineNum">   38</span><span class="lineCov">      1  /   1:     &#039;cmn&#039;: &#039;Compare (negative) two values and set condition flags&#039;, </span>
+<span class="lineNum">   39</span><span class="lineCov">      1  /   1:     &#039;cmp&#039;: &#039;Compare two values and set condition flags&#039;, </span>
+<span class="lineNum">   40</span><span class="lineCov">      1  /   1:     &#039;eor&#039;: &#039;Bitwise Exclusive OR&#039;, </span>
+<span class="lineNum">   41</span><span class="lineCov">      1  /   1:     &#039;eors&#039;: &#039;Bitwise Exclusive OR and set condition flags&#039;, </span>
+<span class="lineNum">   42</span><span class="lineCov">      1  /   1:     &#039;ldm&#039;: &#039;Load Multiple&#039;, </span>
+<span class="lineNum">   43</span><span class="lineCov">      1  /   1:     &#039;ldr&#039;: &#039;Load Register&#039;, </span>
+<span class="lineNum">   44</span><span class="lineCov">      1  /   1:     &#039;ldrb&#039;: &#039;Load Register Byte&#039;, </span>
+<span class="lineNum">   45</span><span class="lineCov">      1  /   1:     &#039;ldrh&#039;: &#039;Load Register Halfword&#039;, </span>
+<span class="lineNum">   46</span><span class="lineCov">      1  /   1:     &#039;ldrsh&#039;: &#039;Load Register Halfword and set condition flags&#039;, </span>
+<span class="lineNum">   47</span><span class="lineCov">      1  /   1:     &#039;lsl&#039;: &#039;Logical Shift Left&#039;, </span>
+<span class="lineNum">   48</span><span class="lineCov">      1  /   1:     &#039;lsls&#039;: &#039;Logical Shift Left and set condition flags&#039;, </span>
+<span class="lineNum">   49</span><span class="lineCov">      1  /   1:     &#039;lsr&#039;: &#039;Logical Shift Right&#039;, </span>
+<span class="lineNum">   50</span><span class="lineCov">      1  /   1:     &#039;lsrs&#039;: &#039;Logical Shift Right and set condition flags&#039;, </span>
+<span class="lineNum">   51</span><span class="lineCov">      1  /   1:     &#039;mla&#039;: &#039;Multiply and Accumulate&#039;, </span>
+<span class="lineNum">   52</span><span class="lineCov">      1  /   1:     &#039;mls&#039;: &#039;Multiply and Subtract&#039;, </span>
+<span class="lineNum">   53</span><span class="lineCov">      1  /   1:     &#039;mov&#039;: &#039;Move&#039;, </span>
+<span class="lineNum">   54</span><span class="lineCov">      1  /   1:     &#039;mul&#039;: &#039;Multiply&#039;, </span>
+<span class="lineNum">   55</span><span class="lineCov">      1  /   1:     &#039;muls&#039;: &#039;Multiply and set condition flags&#039;, </span>
+<span class="lineNum">   56</span><span class="lineCov">      1  /   1:     &#039;mvn&#039;: &#039;Move and negate (XOR 0xFFFFFFFF)&#039;, </span>
+<span class="lineNum">   57</span><span class="lineCov">      1  /   1:     &#039;orr&#039;: &#039;Bitwise OR&#039;, </span>
+<span class="lineNum">   58</span><span class="lineCov">      1  /   1:     &#039;orrs&#039;: &#039;Bitwise OR and set condition flags&#039;, </span>
+<span class="lineNum">   59</span>              :     &#039;pop&#039;: &quot;&quot;&quot;Pop from the stack. </span>
+<span class="lineNum">   60</span><span class="lineCov">      1  /   1: Canonical form of &quot;ldm SP!, &amp;lt;reglist&amp;gt;&#092;&quot;&quot;&quot;&quot;, </span>
+<span class="lineNum">   61</span>              :     &#039;push&#039;: &quot;&quot;&quot;Push on the stack. </span>
+<span class="lineNum">   62</span><span class="lineCov">      1  /   1: Canonical form of &quot;stmdb SP!, &amp;lt;reglist&amp;gt;&#092;&quot;&quot;&quot;&quot;, </span>
+<span class="lineNum">   63</span><span class="lineCov">      1  /   1:     &#039;rsb&#039;: &#039;Reverse Subtract&#039;, </span>
+<span class="lineNum">   64</span><span class="lineCov">      1  /   1:     &#039;rsbs&#039;: &#039;Reverse Subtract and set condition flags&#039;, </span>
+<span class="lineNum">   65</span>              :     &#039;smull&#039;: &quot;&quot;&quot;Signed Multiply Long </span>
+<span class="lineNum">   66</span><span class="lineCov">      1  /   1: %(arg1)s,%(arg2)s := signed(%(arg3)s * %(arg4)s)&quot;&quot;&quot;, </span>
+<span class="lineNum">   67</span><span class="lineCov">      1  /   1:     &#039;stm&#039;: &#039;Store Multiple&#039;, </span>
+<span class="lineNum">   68</span><span class="lineCov">      1  /   1:     &#039;str&#039;: &#039;Store Register&#039;, </span>
+<span class="lineNum">   69</span><span class="lineCov">      1  /   1:     &#039;strb&#039;: &#039;Store Register Byte&#039;, </span>
+<span class="lineNum">   70</span><span class="lineCov">      1  /   1:     &#039;strh&#039;: &#039;Store Register Halfword&#039;, </span>
+<span class="lineNum">   71</span><span class="lineCov">      1  /   1:     &#039;strsh&#039;: &#039;Store Register Halfword and set condition flags&#039;, </span>
+<span class="lineNum">   72</span><span class="lineCov">      1  /   1:     &#039;sub&#039;: &#039;Subtract&#039;, </span>
+<span class="lineNum">   73</span><span class="lineCov">      1  /   1:     &#039;tst&#039;: &#039;Test&#039; </span>
+<span class="lineNum">   74</span><span class="lineNoCov">      0  /   1:     } </span>
+<span class="lineNum">   75</span>              :  </span>
+<span class="lineNum">   76</span><span class="lineCov">      1  /   1: arm_conditions = { </span>
+<span class="lineNum">   77</span><span class="lineCov">      1  /   1:     &#039;cc&#039;: &#039;Carry Clear&#039;, </span>
+<span class="lineNum">   78</span><span class="lineCov">      1  /   1:     &#039;cs&#039;: &#039;Carry Set&#039;, </span>
+<span class="lineNum">   79</span><span class="lineCov">      1  /   1:     &#039;eq&#039;: &#039;Equal (Zero Set)&#039;, </span>
+<span class="lineNum">   80</span><span class="lineCov">      1  /   1:     &#039;ge&#039;: &#039;Signed Greater than or Equal&#039;, </span>
+<span class="lineNum">   81</span><span class="lineCov">      1  /   1:     &#039;gt&#039;: &#039;Signed Greater Than&#039;, </span>
+<span class="lineNum">   82</span><span class="lineCov">      1  /   1:     &#039;hi&#039;: &#039;Unsigned Higher Than&#039;, </span>
+<span class="lineNum">   83</span><span class="lineCov">      1  /   1:     &#039;hs&#039;: &#039;Unsigned Higher or Same&#039;, </span>
+<span class="lineNum">   84</span><span class="lineCov">      1  /   1:     &#039;le&#039;: &#039;Signed Less than or Equal&#039;, </span>
+<span class="lineNum">   85</span><span class="lineCov">      1  /   1:     &#039;lo&#039;: &#039;Unsigned Lower Than&#039;, </span>
+<span class="lineNum">   86</span><span class="lineCov">      1  /   1:     &#039;ls&#039;: &#039;Unsigned Lower or Same&#039;, </span>
+<span class="lineNum">   87</span><span class="lineCov">      1  /   1:     &#039;lt&#039;: &#039;Signed Less Than&#039;, </span>
+<span class="lineNum">   88</span><span class="lineCov">      1  /   1:     &#039;mi&#039;: &#039;Minus (Negative)&#039;, </span>
+<span class="lineNum">   89</span><span class="lineCov">      1  /   1:     &#039;ne&#039;: &#039;Not Equal (Zero Clear)&#039;, </span>
+<span class="lineNum">   90</span><span class="lineCov">      1  /   1:     &#039;pl&#039;: &#039;Plus (Positive)&#039;, </span>
+<span class="lineNum">   91</span><span class="lineCov">      1  /   1:     &#039;vc&#039;: &#039;Overflow Clear&#039;, </span>
+<span class="lineNum">   92</span><span class="lineCov">      1  /   1:     &#039;vs&#039;: &#039;Overflow Set&#039; </span>
+<span class="lineNum">   93</span><span class="lineNoCov">      0  /   1:     } </span>
+<span class="lineNum">   94</span>              :  </span>
+<span class="lineNum">   95</span><span class="lineCov">      1  /   1: arm_lists_inited = False </span>
+<span class="lineNum">   96</span><span class="lineCov">      1  /   1: if not arm_lists_inited: </span>
+<span class="lineNum">   97</span><span class="lineCov">      1  /   1:     conditional_instructions = { </span>
+<span class="lineNum">   98</span>              :         &#039;add&#039;: &quot;&quot;&quot;Add on %s&quot;&quot;&quot;, </span>
+<span class="lineNum">   99</span>              :         &#039;b&#039;: &quot;&quot;&quot;Branch on %s </span>
+<span class="lineNum">  100</span><span class="lineCov">      1  /   1: PC := label, label is this instruction +&#047;-32Mb&quot;&quot;&quot;, </span>
+<span class="lineNum">  101</span>              :         &#039;bl&#039;: &quot;&quot;&quot;Branch and Link on %s&quot;&quot;&quot;, </span>
+<span class="lineNum">  102</span>              :         &#039;bx&#039;: &quot;&quot;&quot;Branch and eXchange on %s </span>
+<span class="lineNum">  103</span>              : PC := Rm </span>
+<span class="lineNum">  104</span><span class="lineCov">      1  /   1: Change to Thumb mode if Rm[0] is 1, change to ARM mode if Rm[0] is 0&quot;&quot;&quot;, </span>
+<span class="lineNum">  105</span>              :         &#039;eor&#039;: &quot;&quot;&quot;Bitwise Exclusive OR on %s&quot;&quot;&quot;, </span>
+<span class="lineNum">  106</span>              :         &#039;mov&#039;: &quot;&quot;&quot;Move on %s&quot;&quot;&quot;, </span>
+<span class="lineNum">  107</span>              :         &#039;orr&#039;: &quot;&quot;&quot;Bitwise OR on %s&quot;&quot;&quot;, </span>
+<span class="lineNum">  108</span>              :         &#039;sub&#039;: &quot;&quot;&quot;Subtract on %s&quot;&quot;&quot; </span>
+<span class="lineNum">  109</span><span class="lineNoCov">      0  /   1:         } </span>
+<span class="lineNum">  110</span>              :  </span>
+<span class="lineNum">  111</span><span class="lineCov">      1  /   1:     for i in conditional_instructions: </span>
+<span class="lineNum">  112</span><span class="lineCov">      1  /   1:         for c in arm_conditions: </span>
+<span class="lineNum">  113</span><span class="lineCov">      1  /   1:             arm_instr_descriptions[i + c] = conditional_instructions[i] % (arm_conditions[c]) </span>
+<span class="lineNum">  114</span><span class="lineCov">      1  /   1:             arm_conditionflag_users += [i + c] </span>
+<span class="lineNum">  115</span><span class="lineCov">      1  /   1:     arm_lists_inited = True </span>
+<span class="lineNum">  116</span>              :  </span>
+<span class="lineNum">  117</span><span class="lineCov">      1  /   1: def crossproduct(s1, s2): </span>
+<span class="lineNum">  118</span><span class="lineCov">      1  /   1:     ans = [] </span>
+<span class="lineNum">  119</span><span class="lineCov">      1  /   1:     for a in s1: </span>
+<span class="lineNum">  120</span><span class="lineCov">      1  /   1:         for b in s2: </span>
+<span class="lineNum">  121</span><span class="lineCov">      1  /   1:             ans += [a + b] </span>
+<span class="lineNum">  122</span><span class="lineCov">      1  /   1:     return ans </span>
+<span class="lineNum">  123</span>              :  </span>
+<span class="lineNum">  124</span>              :  </span>
+<span class="lineNum">  125</span>              :  </span>
+<span class="lineNum">  126</span><span class="lineCov">      1  /   1: arm_jumps = list(crossproduct([&#039;b&#039;, &#039;bl&#039;], arm_conditions.keys() + [&#039;&#039;])) </span>
+<span class="lineNum">  127</span>              :  </span>
+<span class="lineNum">  128</span><span class="lineCov">      1  /   1: arm_branches = list(crossproduct([&#039;b&#039;, &#039;bl&#039;], arm_conditions.keys())) </span>
+<span class="lineNum">  129</span>              :  </span>
+<span class="lineNum">  130</span><span class="lineCov">      1  /   1: class ArmArchitecture(architecture.Architecture): </span>
+<span class="lineNum">  131</span><span class="lineCov">      1  /   1:     def __init__(self): </span>
+<span class="lineNum">  132</span><span class="lineNoCov">      0  /   1:         architecture.Architecture.__init__(self, arm_jumps, arm_calls, </span>
+<span class="lineNum">  133</span><span class="lineNoCov">      0  /   1:             arm_conditionflag_setters, arm_conditionflag_users) </span>
+<span class="lineNum">  134</span>              :  </span>
+<span class="lineNum">  135</span><span class="lineCov">      1  /   1:     def getInstructionInfo(self, instruction): </span>
+<span class="lineNum">  136</span><span class="lineNoCov">      0  /   1:         opcode = instruction.opcode </span>
+<span class="lineNum">  137</span><span class="lineNoCov">      0  /   1:         args = str(instruction.getArgs()) </span>
+<span class="lineNum">  138</span>              :  </span>
+<span class="lineNum">  139</span><span class="lineNoCov">      0  /   1:         args_list = args.split(&quot;, &quot;) </span>
+<span class="lineNum">  140</span><span class="lineNoCov">      0  /   1:         args_dict = dict( </span>
+<span class="lineNum">  141</span><span class="lineNoCov">      0  /   1:             zip([&#039;arg&#039; + str(i) for i in range(1, len(args_list)+1)], </span>
+<span class="lineNum">  142</span><span class="lineNoCov">      0  /   1:                 args_list)) </span>
+<span class="lineNum">  143</span><span class="lineNoCov">      0  /   1:         description = arm_instr_descriptions.get(instruction.opcode, &#039;&#039;) </span>
+<span class="lineNum">  144</span>              :  </span>
+<span class="lineNum">  145</span><span class="lineNoCov">      0  /   1:         return {&#039;shortinfo&#039;: opcode + &quot; &quot; + args, </span>
+<span class="lineNum">  146</span><span class="lineNoCov">      0  /   1:                 &#039;description&#039;: description % args_dict, </span>
+<span class="lineNum">  147</span><span class="lineNoCov">      0  /   1:                 } </span>
+<span class="lineNum">  148</span>              :  </span>
+<span class="lineNum">  149</span><span class="lineCov">      1  /   1:     def isReturn(self, insn): </span>
+<span class="lineNum">  150</span><span class="lineNoCov">      0  /   1:         if insn.opcode == &#039;bx&#039; and insn.getArgs() == &#039;lr&#039;: </span>
+<span class="lineNum">  151</span><span class="lineNoCov">      0  /   1:             return True </span>
+<span class="lineNum">  152</span><span class="lineNoCov">      0  /   1:         return False </span>
+<span class="lineNum">  153</span>              :  </span>
+<span class="lineNum">  154</span><span class="lineCov">      1  /   1:     def isBranch(self, insn): </span>
+<span class="lineNum">  155</span>              :         &quot;&quot;&quot;Returns true if this instruction is a branch, that is it can either </span>
+<span class="lineNum">  156</span><span class="lineNoCov">      0  /   1:         be taken or not be taken.&quot;&quot;&quot; </span>
+<span class="lineNum">  157</span><span class="lineNoCov">      0  /   1:         return insn.opcode in arm_branches </span>
+<span class="lineNum">  158</span>              :  </span>
+<span class="lineNum">  159</span><span class="lineCov">      1  /   1:     parseArguments_opcodelook = {} </span>
+<span class="lineNum">  160</span><span class="lineCov">      1  /   1:     def parseArguments(self, instr): </span>
+<span class="lineNum">  161</span>              :         &quot;&quot;&quot;Parses an argument string, into a tuple, containing: </span>
+<span class="lineNum">  162</span>              :             * A list of the registers read in this instruction </span>
+<span class="lineNum">  163</span>              :             * A list of the registers written to in this instruction </span>
+<span class="lineNum">  164</span>              :             * A list of the values used in this instruction&quot;&quot;&quot; </span>
+<span class="lineNum">  165</span>              :  </span>
+<span class="lineNum">  166</span><span class="lineNoCov">      0  /   1:         def parseComSepList(lstr): </span>
+<span class="lineNum">  167</span><span class="lineNoCov">      0  /   1:             if not &#039;[&#039; in lstr and not &#039;{&#039; in lstr: </span>
+<span class="lineNum">  168</span><span class="lineNoCov">      0  /   1:                 return lstr.replace(&#039; &#039;, &#039;&#039;).split(&#039;,&#039;) </span>
+<span class="lineNum">  169</span><span class="lineNoCov">      0  /   1:             ret = [] </span>
+<span class="lineNum">  170</span><span class="lineNoCov">      0  /   1:             tmp = &quot;&quot; </span>
+<span class="lineNum">  171</span><span class="lineNoCov">      0  /   1:             stack = [] </span>
+<span class="lineNum">  172</span><span class="lineNoCov">      0  /   1:             for c in lstr: </span>
+<span class="lineNum">  173</span><span class="lineNoCov">      0  /   1:                 if c in &quot;{[&quot;: </span>
+<span class="lineNum">  174</span><span class="lineNoCov">      0  /   1:                     stack += [c] </span>
+<span class="lineNum">  175</span><span class="lineNoCov">      0  /   1:                     tmp += c </span>
+<span class="lineNum">  176</span><span class="lineNoCov">      0  /   1:                 elif c in &quot;]}&quot;: </span>
+<span class="lineNum">  177</span><span class="lineNoCov">      0  /   1:                     tmp += c </span>
+<span class="lineNum">  178</span><span class="lineNoCov">      0  /   1:                     c2 = stack.pop() </span>
+<span class="lineNum">  179</span><span class="lineNoCov">      0  /   1:                     if c == &quot;]&quot; and c2 == &quot;[&quot; or &#092; </span>
+<span class="lineNum">  180</span><span class="lineNoCov">      0  /   1:                         c == &quot;}&quot; and c2 == &quot;{&quot;: </span>
+<span class="lineNum">  181</span><span class="lineNoCov">      0  /   1:                         ret += [tmp] </span>
+<span class="lineNum">  182</span><span class="lineNoCov">      0  /   1:                         tmp = &quot;&quot; </span>
+<span class="lineNum">  183</span>              :                     else: </span>
+<span class="lineNum">  184</span><span class="lineNoCov">      0  /   1:                         raise ValueError(&quot;unbalanced parenthesis&quot;) </span>
+<span class="lineNum">  185</span><span class="lineNoCov">      0  /   1:                 elif c == &#039; &#039;: </span>
+<span class="lineNum">  186</span><span class="lineNoCov">      0  /   1:                     pass </span>
+<span class="lineNum">  187</span><span class="lineNoCov">      0  /   1:                 elif stack == [] and c == &#039;,&#039;: </span>
+<span class="lineNum">  188</span><span class="lineNoCov">      0  /   1:                     if tmp != &#039;&#039;: </span>
+<span class="lineNum">  189</span><span class="lineNoCov">      0  /   1:                         ret += [tmp] </span>
+<span class="lineNum">  190</span><span class="lineNoCov">      0  /   1:                     tmp = &quot;&quot; </span>
+<span class="lineNum">  191</span><span class="lineNoCov">      0  /   1:                 elif stack == []: </span>
+<span class="lineNum">  192</span><span class="lineNoCov">      0  /   1:                     tmp += c </span>
+<span class="lineNum">  193</span>              :                 else: </span>
+<span class="lineNum">  194</span><span class="lineNoCov">      0  /   1:                     tmp += c </span>
+<span class="lineNum">  195</span><span class="lineNoCov">      0  /   1:             if tmp: </span>
+<span class="lineNum">  196</span><span class="lineNoCov">      0  /   1:                 ret += [tmp] </span>
+<span class="lineNum">  197</span><span class="lineNoCov">      0  /   1:             return ret </span>
+<span class="lineNum">  198</span><span class="lineNoCov">      0  /   1:         def isRegister(s): </span>
+<span class="lineNum">  199</span><span class="lineNoCov">      0  /   1:             if s != &quot;&quot; and s[0] == &#039;r&#039; and s[1:].isdigit(): #r0..r15 </span>
+<span class="lineNum">  200</span><span class="lineNoCov">      0  /   1:                 return True </span>
+<span class="lineNum">  201</span><span class="lineNoCov">      0  /   1:             if s in [&#039;sl&#039;, #r10 = gcc &quot;got pointer&quot;? </span>
+<span class="lineNum">  202</span><span class="lineNoCov">      0  /   1:                     &#039;fp&#039;, #r11 = gcc frame pointer </span>
+<span class="lineNum">  203</span><span class="lineNoCov">      0  /   1:                     &#039;ip&#039;, #r12 = gcc &quot;scratch register&quot;? </span>
+<span class="lineNum">  204</span><span class="lineNoCov">      0  /   1:                     &#039;sp&#039;, #r13, stack pointer </span>
+<span class="lineNum">  205</span><span class="lineNoCov">      0  /   1:                     &#039;lr&#039;, #r14, link register </span>
+<span class="lineNum">  206</span><span class="lineNoCov">      0  /   1:                     &#039;pc&#039;]: #r15, program counter </span>
+<span class="lineNum">  207</span><span class="lineNoCov">      0  /   1:                 return True </span>
+<span class="lineNum">  208</span><span class="lineNoCov">      0  /   1:             return False </span>
+<span class="lineNum">  209</span><span class="lineNoCov">      0  /   1:         def isValue(s): </span>
+<span class="lineNum">  210</span><span class="lineNoCov">      0  /   1:             if s != &quot;&quot; and s[0] == &#039;#&#039; and s[1:].isdigit(): </span>
+<span class="lineNum">  211</span><span class="lineNoCov">      0  /   1:                 return True </span>
+<span class="lineNum">  212</span><span class="lineNoCov">      0  /   1:             return False </span>
+<span class="lineNum">  213</span><span class="lineNoCov">      0  /   1:         regwrite = [] </span>
+<span class="lineNum">  214</span><span class="lineNoCov">      0  /   1:         regread = [] </span>
+<span class="lineNum">  215</span><span class="lineNoCov">      0  /   1:         values = [] </span>
+<span class="lineNum">  216</span><span class="lineNoCov">      0  /   1:         args = parseComSepList(instr.args) </span>
+<span class="lineNum">  217</span><span class="lineNoCov">      0  /   1:         values = [int(a[1:]) for a in args if isValue(a)] </span>
+<span class="lineNum">  218</span>              :  </span>
+<span class="lineNum">  219</span>              :         #Lazy init </span>
+<span class="lineNum">  220</span><span class="lineNoCov">      0  /   1:         if not self.parseArguments_opcodelook: </span>
+<span class="lineNum">  221</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;b&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  222</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;b&#039; </span>
+<span class="lineNum">  223</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;bl&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  224</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;bl&#039; </span>
+<span class="lineNum">  225</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;bx&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  226</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;bx&#039; </span>
+<span class="lineNum">  227</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;blx&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  228</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;blx&#039; </span>
+<span class="lineNum">  229</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;ldr&#039;, &#039;ldrb&#039;, &#039;ldrh&#039;, &#039;ldrsh&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  230</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;ldr&#039; </span>
+<span class="lineNum">  231</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;ldm&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  232</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;ldm&#039; </span>
+<span class="lineNum">  233</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;str&#039;, &#039;strb&#039;, &#039;strh&#039;, &#039;strsh&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  234</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;str&#039; </span>
+<span class="lineNum">  235</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;stm&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  236</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;stm&#039; </span>
+<span class="lineNum">  237</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;push&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  238</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;push&#039; </span>
+<span class="lineNum">  239</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;pop&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  240</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;pop&#039; </span>
+<span class="lineNum">  241</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;stmia&#039;, &#039;stmib&#039;, &#039;stmda&#039;, &#039;stmdb&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  242</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;stm_nonstandard&#039; </span>
+<span class="lineNum">  243</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;ldmia&#039;, &#039;ldmib&#039;, &#039;ldmda&#039;, &#039;ldmdb&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  244</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;ldm_nonstandard&#039; </span>
+<span class="lineNum">  245</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;smull&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  246</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;smull&#039; </span>
+<span class="lineNum">  247</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;mla&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  248</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;mla&#039; </span>
+<span class="lineNum">  249</span><span class="lineNoCov">      0  /   1:             for opcode in crossproduct([&#039;mul&#039;, &#039;muls&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  250</span><span class="lineNoCov">      0  /   1:                 self.parseArguments_opcodelook[opcode] = &#039;mul&#039; </span>
+<span class="lineNum">  251</span>              :  </span>
+<span class="lineNum">  252</span><span class="lineNoCov">      0  /   1:         opcode = instr.opcode </span>
+<span class="lineNum">  253</span><span class="lineNoCov">      0  /   1:         opcodetype = self.parseArguments_opcodelook.get(opcode, opcode) </span>
+<span class="lineNum">  254</span><span class="lineNoCov">      0  /   1:         if opcode[:3] in [&#039;cmp&#039;, &#039;cmn&#039;, &#039;tst&#039;, &#039;teq&#039;]: </span>
+<span class="lineNum">  255</span><span class="lineNoCov">      0  /   1:             regread = [a for a in args if isRegister(a)] </span>
+<span class="lineNum">  256</span><span class="lineNoCov">      0  /   1:         elif opcode[:3] in [&#039;add&#039;, &#039;and&#039;, &#039;asr&#039;, &#039;eor&#039;, &#039;lsl&#039;, </span>
+<span class="lineNum">  257</span><span class="lineNoCov">      0  /   1:                                        &#039;lsr&#039;, &#039;mov&#039;, &#039;mvn&#039;, &#039;orr&#039;, &#039;rsb&#039;, </span>
+<span class="lineNum">  258</span><span class="lineNoCov">      0  /   1:                                        &#039;sub&#039;]: </span>
+<span class="lineNum">  259</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  260</span><span class="lineNoCov">      0  /   1:             regread = [a for a in args[1:] if isRegister(a)] </span>
+<span class="lineNum">  261</span>              :         #branches </span>
+<span class="lineNum">  262</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;b&#039;: </span>
+<span class="lineNum">  263</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;pc&#039;] </span>
+<span class="lineNum">  264</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;bl&#039;: </span>
+<span class="lineNum">  265</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;pc&#039;, &#039;lr&#039;] </span>
+<span class="lineNum">  266</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;bx&#039;: </span>
+<span class="lineNum">  267</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;pc&#039;] </span>
+<span class="lineNum">  268</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] </span>
+<span class="lineNum">  269</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;blx&#039;: </span>
+<span class="lineNum">  270</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;pc&#039;] </span>
+<span class="lineNum">  271</span><span class="lineNoCov">      0  /   1:             regread = isRegister(args[0]) and [args[0]] or [] </span>
+<span class="lineNum">  272</span>              :         #load </span>
+<span class="lineNum">  273</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;ldr&#039;: </span>
+<span class="lineNum">  274</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  275</span><span class="lineNoCov">      0  /   1:             if args[1].startswith(&#039;[&#039;): </span>
+<span class="lineNum">  276</span><span class="lineNoCov">      0  /   1:                 offsetl = parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  277</span><span class="lineNoCov">      0  /   1:                 regread = [r for r in offsetl if isRegister(r)] </span>
+<span class="lineNum">  278</span><span class="lineNoCov">      0  /   1:                 values = [int(r[1:]) for r in offsetl if r[0] == &#039;#&#039;] </span>
+<span class="lineNum">  279</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;ldm&#039;: </span>
+<span class="lineNum">  280</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] </span>
+<span class="lineNum">  281</span><span class="lineNoCov">      0  /   1:             regwrite = parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  282</span>              :         #store </span>
+<span class="lineNum">  283</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;str&#039;: </span>
+<span class="lineNum">  284</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] </span>
+<span class="lineNum">  285</span><span class="lineNoCov">      0  /   1:             if args[1].startswith(&#039;[&#039;): </span>
+<span class="lineNum">  286</span><span class="lineNoCov">      0  /   1:                 offsetl = parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  287</span><span class="lineNoCov">      0  /   1:                 regread += [r for r in offsetl if isRegister(r)] </span>
+<span class="lineNum">  288</span>              :             #postindexing </span>
+<span class="lineNum">  289</span><span class="lineNoCov">      0  /   1:             if len(args) == 3: </span>
+<span class="lineNum">  290</span><span class="lineNoCov">      0  /   1:                 regwrite += [regread[1]] </span>
+<span class="lineNum">  291</span><span class="lineNoCov">      0  /   1:                 if isRegister(args[2]): </span>
+<span class="lineNum">  292</span><span class="lineNoCov">      0  /   1:                     regread += [args[2]] </span>
+<span class="lineNum">  293</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;stm&#039;: </span>
+<span class="lineNum">  294</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] + parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  295</span>              :         #push </span>
+<span class="lineNum">  296</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;push&#039;: </span>
+<span class="lineNum">  297</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;sp&#039;] </span>
+<span class="lineNum">  298</span><span class="lineNoCov">      0  /   1:             regread = [&#039;sp&#039;] </span>
+<span class="lineNum">  299</span><span class="lineNoCov">      0  /   1:             reglist = parseComSepList(args[0][1:-1]) </span>
+<span class="lineNum">  300</span><span class="lineNoCov">      0  /   1:             regread += reglist </span>
+<span class="lineNum">  301</span>              :         #pop </span>
+<span class="lineNum">  302</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;pop&#039;: </span>
+<span class="lineNum">  303</span><span class="lineNoCov">      0  /   1:             regwrite = [&#039;sp&#039;] </span>
+<span class="lineNum">  304</span><span class="lineNoCov">      0  /   1:             regread = [&#039;sp&#039;] </span>
+<span class="lineNum">  305</span><span class="lineNoCov">      0  /   1:             reglist = parseComSepList(args[0][1:-1]) </span>
+<span class="lineNum">  306</span><span class="lineNoCov">      0  /   1:             regwrite += reglist </span>
+<span class="lineNum">  307</span>              :         #store multiple </span>
+<span class="lineNum">  308</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;stm_nonstandard&#039;: </span>
+<span class="lineNum">  309</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  310</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] </span>
+<span class="lineNum">  311</span><span class="lineNoCov">      0  /   1:             reglist = parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  312</span><span class="lineNoCov">      0  /   1:             regread += reglist </span>
+<span class="lineNum">  313</span>              :         #load multiple </span>
+<span class="lineNum">  314</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;ldm_nonstandard&#039;: </span>
+<span class="lineNum">  315</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  316</span><span class="lineNoCov">      0  /   1:             regread = [args[0]] </span>
+<span class="lineNum">  317</span><span class="lineNoCov">      0  /   1:             reglist = parseComSepList(args[1][1:-1]) </span>
+<span class="lineNum">  318</span><span class="lineNoCov">      0  /   1:             regwrite += reglist </span>
+<span class="lineNum">  319</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;smull&#039;: </span>
+<span class="lineNum">  320</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0], args[1]] </span>
+<span class="lineNum">  321</span><span class="lineNoCov">      0  /   1:             regread = [args[2], args[3]] </span>
+<span class="lineNum">  322</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;mla&#039;: </span>
+<span class="lineNum">  323</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  324</span><span class="lineNoCov">      0  /   1:             regread = args[1:] </span>
+<span class="lineNum">  325</span><span class="lineNoCov">      0  /   1:         elif opcodetype == &#039;mul&#039;: </span>
+<span class="lineNum">  326</span><span class="lineNoCov">      0  /   1:             regwrite = [args[0]] </span>
+<span class="lineNum">  327</span><span class="lineNoCov">      0  /   1:             regread = [args[1], args[2]] </span>
+<span class="lineNum">  328</span><span class="lineNoCov">      0  /   1:         elif opcode == &#039;.word&#039;: </span>
+<span class="lineNum">  329</span><span class="lineNoCov">      0  /   1:             return ([], [], []) </span>
+<span class="lineNum">  330</span>              :         else: </span>
+<span class="lineNum">  331</span><span class="lineNoCov">      0  /   1:             raise ValueError(&quot;Unknown instruction opcode: &quot; + str(instr)) </span>
+<span class="lineNum">  332</span>              :  </span>
+<span class="lineNum">  333</span><span class="lineNoCov">      0  /   1:         return (regread, regwrite, values) </span>
+<span class="lineNum">  334</span>              :  </span>
+<span class="lineNum">  335</span><span class="lineCov">      1  /   1:     def getInstructionEffect(self, ins, func): </span>
+<span class="lineNum">  336</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  337</span>              :         Returns a string describing the effects on the registers, of this </span>
+<span class="lineNum">  338</span>              :         instruction. An example of such a string is: </span>
+<span class="lineNum">  339</span>              :         &quot;r1 = 5 ; r2 = r3 + r4 ; r7 = top&quot; </span>
+<span class="lineNum">  340</span>              :  </span>
+<span class="lineNum">  341</span>              :         Used for the value analysis. </span>
+<span class="lineNum">  342</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  343</span><span class="lineNoCov">      0  /   1:         opc = ins.opcode </span>
+<span class="lineNum">  344</span><span class="lineNoCov">      0  /   1:         (regsread, regswrite, values) = self.parseArguments(ins) </span>
+<span class="lineNum">  345</span>              :  </span>
+<span class="lineNum">  346</span><span class="lineNoCov">      0  /   1:         if opc == &quot;ldr&quot;: </span>
+<span class="lineNum">  347</span>              :             #PC relative load </span>
+<span class="lineNum">  348</span><span class="lineNoCov">      0  /   1:             if regsread == [&#039;pc&#039;] and len(values) == 1: </span>
+<span class="lineNum">  349</span>              :                 #Calculate address (+8 to account for pipeline) </span>
+<span class="lineNum">  350</span><span class="lineNoCov">      0  /   1:                 addr = ins.address + 8 + values[0] </span>
+<span class="lineNum">  351</span>              :                 #Find data </span>
+<span class="lineNum">  352</span><span class="lineNoCov">      0  /   1:                 data = func.lookup(addr) </span>
+<span class="lineNum">  353</span><span class="lineNoCov">      0  /   1:                 assert data.opcode == &#039;.word&#039; </span>
+<span class="lineNum">  354</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + str(int(data.getArgs(), 16)) </span>
+<span class="lineNum">  355</span>              :                 #print func.getAll() </span>
+<span class="lineNum">  356</span><span class="lineNoCov">      0  /   1:         elif opc in [&#039;mov&#039;, &#039;movs&#039;]: </span>
+<span class="lineNum">  357</span>              :             #mov rX, value </span>
+<span class="lineNum">  358</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and regsread == [] and len(values) == 1: </span>
+<span class="lineNum">  359</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + str(values[0])  </span>
+<span class="lineNum">  360</span>              :             #mov rX, rY </span>
+<span class="lineNum">  361</span><span class="lineNoCov">      0  /   1:             elif len(regswrite) == 1 and len(regsread) == 1 and len(values) == 0: </span>
+<span class="lineNum">  362</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + self.normalize_regname(regsread[0])  </span>
+<span class="lineNum">  363</span><span class="lineNoCov">      0  /   1:         elif opc in [&#039;add&#039;, &#039;adds&#039;]: </span>
+<span class="lineNum">  364</span>              :             #add rX, rY, value </span>
+<span class="lineNum">  365</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and len(regsread) == 1 and len(values) == 1: </span>
+<span class="lineNum">  366</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  367</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; + &quot; + str(values[0]) </span>
+<span class="lineNum">  368</span>              :             #add rX, rY, rZ </span>
+<span class="lineNum">  369</span><span class="lineNoCov">      0  /   1:             elif len(regswrite) == 1 and len(regsread) == 2 and len(values) == 0: </span>
+<span class="lineNum">  370</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  371</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; + &quot; + &#092; </span>
+<span class="lineNum">  372</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[1]) </span>
+<span class="lineNum">  373</span><span class="lineNoCov">      0  /   1:         elif opc in [&#039;sub&#039;, &#039;subs&#039;]: </span>
+<span class="lineNum">  374</span>              :             #sub rX, rY, value </span>
+<span class="lineNum">  375</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and len(regsread) == 1 and len(values) == 1: </span>
+<span class="lineNum">  376</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  377</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; - &quot; + str(values[0]) </span>
+<span class="lineNum">  378</span>              :             #sub rX, rY, rZ </span>
+<span class="lineNum">  379</span><span class="lineNoCov">      0  /   1:             elif len(regswrite) == 1 and len(regsread) == 2 and len(values) == 0: </span>
+<span class="lineNum">  380</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  381</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; - &quot; + &#092; </span>
+<span class="lineNum">  382</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[1]) </span>
+<span class="lineNum">  383</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;rsb&#039;: </span>
+<span class="lineNum">  384</span>              :             #rsb rX, rY, value   (rX = value - rY) </span>
+<span class="lineNum">  385</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and len(regsread) == 1 and len(values) == 1: </span>
+<span class="lineNum">  386</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  387</span><span class="lineNoCov">      0  /   1:                     str(values[0]) + &quot; - &quot; + self.normalize_regname(regsread[0]) </span>
+<span class="lineNum">  388</span>              :             #rsb rX, rY, rZ </span>
+<span class="lineNum">  389</span><span class="lineNoCov">      0  /   1:             elif len(regswrite) == 1 and len(regsread) == 2 and len(values) == 0: </span>
+<span class="lineNum">  390</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  391</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[1]) + &quot; - &quot; + &#092; </span>
+<span class="lineNum">  392</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) </span>
+<span class="lineNum">  393</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;lsl&#039;: </span>
+<span class="lineNum">  394</span>              :             #TODO XXX - is this totally correct? See  </span>
+<span class="lineNum">  395</span>              :             #http:&#047;&#047;en.wikipedia.org&#047;wiki&#047;Arithmetic_shift and </span>
+<span class="lineNum">  396</span>              :             #http:&#047;&#047;en.wikipedia.org&#047;wiki&#047;Logical_shift </span>
+<span class="lineNum">  397</span>              :  </span>
+<span class="lineNum">  398</span>              :             #lsl rX, rY, value </span>
+<span class="lineNum">  399</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and len(regsread) == 1 and len(values) == 1: </span>
+<span class="lineNum">  400</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  401</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; &lt;&lt; &quot; + str(values[0]) </span>
+<span class="lineNum">  402</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;asr&#039;: </span>
+<span class="lineNum">  403</span>              :             #asr rX, rY, value </span>
+<span class="lineNum">  404</span><span class="lineNoCov">      0  /   1:             if len(regswrite) == 1 and len(regsread) == 1 and len(values) == 1: </span>
+<span class="lineNum">  405</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  406</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regsread[0]) + &quot; &gt;&gt; &quot; + str(values[0]) </span>
+<span class="lineNum">  407</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;push&#039;: </span>
+<span class="lineNum">  408</span><span class="lineNoCov">      0  /   1:             dataregs = [a for a in regsread if a != &#039;sp&#039;] </span>
+<span class="lineNum">  409</span><span class="lineNoCov">      0  /   1:             return self.normalize_regname(&#039;sp&#039;) + &quot; = &quot; + self.normalize_regname(&#039;sp&#039;) + &quot; - &quot; + &#092; </span>
+<span class="lineNum">  410</span><span class="lineNoCov">      0  /   1:                 str(len(dataregs) * 4) </span>
+<span class="lineNum">  411</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;pop&#039;: </span>
+<span class="lineNum">  412</span><span class="lineNoCov">      0  /   1:             dataregs = [a for a in regswrite if a != &#039;sp&#039;] </span>
+<span class="lineNum">  413</span><span class="lineNoCov">      0  /   1:             return &quot;&quot;.join(map(lambda x: self.normalize_regname(x) + &quot; = top ; &quot;, dataregs))+ &#092; </span>
+<span class="lineNum">  414</span><span class="lineNoCov">      0  /   1:                 self.normalize_regname(&#039;sp&#039;) + &quot; = &quot; + self.normalize_regname(&#039;sp&#039;) + &quot; + &quot; + &#092; </span>
+<span class="lineNum">  415</span><span class="lineNoCov">      0  /   1:                 str(len(dataregs) * 4) </span>
+<span class="lineNum">  416</span>              :         #store with postindexing </span>
+<span class="lineNum">  417</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;str&#039; and len(regswrite) == 1: </span>
+<span class="lineNum">  418</span>              :             #register offset </span>
+<span class="lineNum">  419</span><span class="lineNoCov">      0  /   1:             if len(regsread) == 3 and len(values) == 0: </span>
+<span class="lineNum">  420</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  421</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regswrite[0]) + &quot; + &quot; + self.normalize_regname(regsread[2]) </span>
+<span class="lineNum">  422</span>              :             #immediate offset </span>
+<span class="lineNum">  423</span><span class="lineNoCov">      0  /   1:             if len(regsread) == 2 and len(values) == 1: </span>
+<span class="lineNum">  424</span><span class="lineNoCov">      0  /   1:                 return self.normalize_regname(regswrite[0]) + &quot;=&quot; + &#092; </span>
+<span class="lineNum">  425</span><span class="lineNoCov">      0  /   1:                     self.normalize_regname(regswrite[0]) + &quot; + &quot; + str(values[0]) </span>
+<span class="lineNum">  426</span>              :          </span>
+<span class="lineNum">  427</span>              :         #unknown effect </span>
+<span class="lineNum">  428</span><span class="lineNoCov">      0  /   1:         if len(regswrite) &gt; 0: </span>
+<span class="lineNum">  429</span><span class="lineNoCov">      0  /   1:             return &quot;&quot;.join(map(lambda x: self.normalize_regname(x) + &quot; = top ; &quot;, regswrite)) </span>
+<span class="lineNum">  430</span>              :  </span>
+<span class="lineNum">  431</span>              :         #No effect </span>
+<span class="lineNum">  432</span><span class="lineNoCov">      0  /   1:         return &quot;&quot; </span>
+<span class="lineNum">  433</span>              :  </span>
+<span class="lineNum">  434</span><span class="lineCov">      1  /   1:     def getInstructionStackEffect(self, ins, func): </span>
+<span class="lineNum">  435</span><span class="lineNoCov">      0  /   1:         opc = ins.opcode </span>
+<span class="lineNum">  436</span><span class="lineNoCov">      0  /   1:         if opc == &#039;push&#039;: </span>
+<span class="lineNum">  437</span><span class="lineNoCov">      0  /   1:             (regsread, regswrite, values) = self.parseArguments(ins) </span>
+<span class="lineNum">  438</span><span class="lineNoCov">      0  /   1:             return &quot;push &quot; + &quot; ; &quot;.join([self.normalize_regname(a) for a in regsread if a != &#039;sp&#039;]) </span>
+<span class="lineNum">  439</span><span class="lineNoCov">      0  /   1:         elif opc == &#039;pop&#039;: </span>
+<span class="lineNum">  440</span><span class="lineNoCov">      0  /   1:             (regsread, regswrite, values) = self.parseArguments(ins) </span>
+<span class="lineNum">  441</span><span class="lineNoCov">      0  /   1:             regstopop = [self.normalize_regname(a) for a in regswrite if a != &#039;sp&#039;] </span>
+<span class="lineNum">  442</span><span class="lineNoCov">      0  /   1:             regstopop.reverse() </span>
+<span class="lineNum">  443</span><span class="lineNoCov">      0  /   1:             return &quot;pop &quot; + &quot; ; &quot;.join(regstopop) </span>
+<span class="lineNum">  444</span><span class="lineNoCov">      0  /   1:         return &quot;&quot; </span>
+<span class="lineNum">  445</span>              :  </span>
+<span class="lineNum">  446</span><span class="lineCov">      1  /   1:     def get_ins_type(self, opcode): </span>
+<span class="lineNum">  447</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  448</span>              :         Returns the type of instruction. </span>
+<span class="lineNum">  449</span>              :         One of: XXX TODO </span>
+<span class="lineNum">  450</span>              :         &quot;&quot;&quot; </span>
+<span class="lineNum">  451</span>              :         #XXX - this can be optimized _greatly_ by lazy initing the crossproducts, </span>
+<span class="lineNum">  452</span>              :         #instead of constructing them each time. </span>
+<span class="lineNum">  453</span><span class="lineNoCov">      0  /   1:         if opcode in crossproduct([&#039;stm&#039;, &#039;stmda&#039;, &#039;stmdb&#039;, &#039;stmia&#039;, &#039;stmib&#039;, </span>
+<span class="lineNum">  454</span><span class="lineNoCov">      0  /   1:                                    &#039;str&#039;, &#039;strb&#039;, &#039;strh&#039;, &#039;strsh&#039;], </span>
+<span class="lineNum">  455</span><span class="lineNoCov">      0  /   1:                                   arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  456</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_STORE&#039; </span>
+<span class="lineNum">  457</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;ldm&#039;, &#039;ldmda&#039;, &#039;ldmdb&#039;, &#039;ldmia&#039;, &#039;ldmib&#039;, </span>
+<span class="lineNum">  458</span><span class="lineNoCov">      0  /   1:                                      &#039;ldr&#039;, &#039;ldreq&#039;, &#039;ldrls&#039;], </span>
+<span class="lineNum">  459</span><span class="lineNoCov">      0  /   1:                                     arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  460</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_LOAD&#039; </span>
+<span class="lineNum">  461</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;ldrb&#039;, &#039;ldrh&#039;, &#039;ldrsh&#039;], </span>
+<span class="lineNum">  462</span><span class="lineNoCov">      0  /   1:                                     arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  463</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_LOADROTATE&#039; </span>
+<span class="lineNum">  464</span><span class="lineNoCov">      0  /   1:         elif opcode == &#039;push&#039;: </span>
+<span class="lineNum">  465</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_PUSH&#039; </span>
+<span class="lineNum">  466</span><span class="lineNoCov">      0  /   1:         elif opcode == &#039;pop&#039;: </span>
+<span class="lineNum">  467</span><span class="lineNoCov">      0  /   1:             return &#039;INSTR_POP&#039; </span>
+<span class="lineNum">  468</span>              :         #&quot;common&quot; instructions </span>
+<span class="lineNum">  469</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;add&#039;, &#039;adds&#039;, &#039;and&#039;, &#039;asr&#039;, &#039;asrs&#039;, &#039;cmn&#039;, </span>
+<span class="lineNum">  470</span><span class="lineNoCov">      0  /   1:                                      &#039;cmp&#039;, &#039;eor&#039;, &#039;eors&#039;, &#039;lsl&#039;, &#039;lsls&#039;, &#039;lsr&#039;, </span>
+<span class="lineNum">  471</span><span class="lineNoCov">      0  /   1:                                      &#039;lsrs&#039;, &#039;mov&#039;, &#039;mvn&#039;, &#039;orr&#039;, &#039;orrs&#039;, &#039;rsb&#039;, </span>
+<span class="lineNum">  472</span><span class="lineNoCov">      0  /   1:                                      &#039;rsbs&#039;, &#039;sub&#039;, &#039;subs&#039;, &#039;tst&#039;, &#039;movs&#039;, &#039;teq&#039;], </span>
+<span class="lineNum">  473</span><span class="lineNoCov">      0  /   1:                                      arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  474</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_OTHER&quot; </span>
+<span class="lineNum">  475</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;mul&#039;, &#039;mla&#039;, &#039;muls&#039;], </span>
+<span class="lineNum">  476</span><span class="lineNoCov">      0  /   1:                                     arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  477</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_MUL1&quot; </span>
+<span class="lineNum">  478</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;smull&#039;, &#039;umull&#039;, &#039;smlal&#039;, &#039;umlal&#039;], </span>
+<span class="lineNum">  479</span><span class="lineNoCov">      0  /   1:                                     arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  480</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_MUL2&quot; </span>
+<span class="lineNum">  481</span>              :         #branches to static locations </span>
+<span class="lineNum">  482</span><span class="lineNoCov">      0  /   1:         elif opcode in crossproduct([&#039;b&#039;, &#039;bl&#039;, &#039;bx&#039;], arm_conditions.keys() + [&#039;&#039;]): </span>
+<span class="lineNum">  483</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_OTHER&quot; </span>
+<span class="lineNum">  484</span>              :         else: </span>
+<span class="lineNum">  485</span>              :             #print &quot;Unhandled opcode &#039;&quot; + opcode + &quot;&#039;&quot; </span>
+<span class="lineNum">  486</span><span class="lineNoCov">      0  /   1:             return &quot;INSTR_OTHER&quot; </span>
+<span class="lineNum">  487</span>              :  </span>
+<span class="lineNum">  488</span><span class="lineCov">      1  /   1:     def normalize_regname(self, regname): </span>
+<span class="lineNum">  489</span><span class="lineNoCov">      0  /   1:         return {&#039;sl&#039;: &#039;r10&#039;,  </span>
+<span class="lineNum">  490</span><span class="lineNoCov">      0  /   1:                 &#039;fp&#039;: &#039;r11&#039;,  </span>
+<span class="lineNum">  491</span><span class="lineNoCov">      0  /   1:                 &#039;ip&#039;: &#039;r12&#039;,  </span>
+<span class="lineNum">  492</span><span class="lineNoCov">      0  /   1:                 &#039;sp&#039;: &#039;r13&#039;, </span>
+<span class="lineNum">  493</span><span class="lineNoCov">      0  /   1:                 &#039;lr&#039;: &#039;r14&#039;, </span>
+<span class="lineNum">  494</span>              :                 #&#039;pc&#039;: &#039;r15&#039; </span>
+<span class="lineNum">  495</span><span class="lineNoCov">      0  /   1:                 }.get(regname, regname) </span>
+<span class="lineNum">  496</span>              :  </span>
+<span class="lineNum">  497</span><span class="lineCov">      1  /   1:     def denormalize_regname(self, regname): </span>
+<span class="lineNum">  498</span><span class="lineNoCov">      0  /   1:         return {&#039;r10&#039;: &#039;sl&#039;,  </span>
+<span class="lineNum">  499</span><span class="lineNoCov">      0  /   1:                 &#039;r11&#039;: &#039;fp&#039;,  </span>
+<span class="lineNum">  500</span><span class="lineNoCov">      0  /   1:                 &#039;r12&#039;: &#039;ip&#039;,  </span>
+<span class="lineNum">  501</span><span class="lineNoCov">      0  /   1:                 &#039;r13&#039;: &#039;sp&#039;, </span>
+<span class="lineNum">  502</span><span class="lineNoCov">      0  /   1:                 &#039;r14&#039;: &#039;lr&#039;, </span>
+<span class="lineNum">  503</span>              :                 #&#039;r15&#039;: &#039;pc&#039; </span>
+<span class="lineNum">  504</span><span class="lineNoCov">      0  /   1:                 }.get(regname, regname) </span>
+</pre>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td class="ruler"><img src="glass.png" width="3" height="3" alt=""/></td></tr>
+  <tr><td class="versionInfo">Generated by: <a href="http://simonkagstrom.github.com/kcov/index.html">Kcov</a></td></tr>
+</table>
+<br/>
+</body>
+</html>
