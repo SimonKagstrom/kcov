@@ -91,10 +91,13 @@ public:
 		/* Launch the python helper */
 		m_child = fork();
 		if (m_child == 0) {
-			const char **argv = IConfiguration::getInstance().getArgv();
-			unsigned int argc = IConfiguration::getInstance().getArgc();
+			auto &conf = IConfiguration::getInstance();
+			const char **argv = conf.getArgv();
+			unsigned int argc = conf.getArgc();
 
-			std::string s = fmt("python %s ", kcov_python_path.c_str());
+			std::string s = fmt("%s %s ",
+					conf.getPythonCommand().c_str(),
+					kcov_python_path.c_str());
 			for (unsigned int i = 0; i < argc; i++)
 				s += std::string(argv[i]) + " ";
 

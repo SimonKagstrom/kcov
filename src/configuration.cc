@@ -18,6 +18,7 @@ public:
 	{
 		m_outDirectory = "";
 		m_binaryName = "";
+		m_pythonCommand = "python";
 		m_lowLimit = 25;
 		m_highLimit = 75;
 		m_pathStripLevel = 2;
@@ -63,6 +64,9 @@ public:
 				" --replace-src-path=path replace the string found before the : with the string \n"
 				"                         found after the :\n"
 				"\n"
+				" --python-parser=cmd     Python parser to use (for python script coverave),\n"
+				"                         default: %s"
+				"\n"
 				"Examples:\n"
 				"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
 				"  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
@@ -71,7 +75,9 @@ public:
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
 				"",
-				m_lowLimit, m_highLimit, m_outputInterval, m_pathStripLevel);
+				m_lowLimit, m_highLimit, m_outputInterval, m_pathStripLevel,
+				m_pythonCommand.c_str());
+
 		return false;
 	}
 
@@ -100,6 +106,7 @@ public:
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
+				{"python-parser", required_argument, 0, 'P'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -190,6 +197,9 @@ public:
 				break;
 			case 'i':
 				m_onlyIncludePattern = getCommaSeparatedList(std::string(optarg));
+				break;
+			case 'P':
+				m_pythonCommand = optarg;
 				break;
 			case 'x':
 				m_excludePattern = getCommaSeparatedList(std::string(optarg));
@@ -289,6 +299,11 @@ public:
 	std::string &getBinaryPath()
 	{
 		return m_binaryPath;
+	}
+
+	const std::string &getPythonCommand() const
+	{
+		return m_pythonCommand;
 	}
 
 	unsigned int getAttachPid()
@@ -475,6 +490,7 @@ public:
 	std::string m_outDirectory;
 	std::string m_binaryName;
 	std::string m_binaryPath;
+	std::string m_pythonCommand;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;
