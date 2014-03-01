@@ -421,7 +421,8 @@ public:
 				if (it != m_addrToBreakpointMap.end())
 					out.data = it->second;
 
-				kcov_debug(PTRACE_MSG, "PT BP at 0x%lx:%d for %d\n", out.addr, out.data, m_activeChild);
+				kcov_debug(PTRACE_MSG, "PT BP at 0x%llx:%d for %d\n",
+						(unsigned long long)out.addr, out.data, m_activeChild);
 				if (out.data != -1)
 					singleStep();
 
@@ -432,12 +433,13 @@ public:
 
 				return out;
 			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
-				kcov_debug(PTRACE_MSG, "PT clone at 0x%lx for %d\n", out.addr, m_activeChild);
+				kcov_debug(PTRACE_MSG, "PT clone at 0x%llx for %d\n",
+						(unsigned long long)out.addr, m_activeChild);
 				out.data = 0;
 			}
 
-			kcov_debug(PTRACE_MSG, "PT signal %d at 0x%lx for %d\n",
-					WSTOPSIG(status), out.addr, m_activeChild);
+			kcov_debug(PTRACE_MSG, "PT signal %d at 0x%llx for %d\n",
+					WSTOPSIG(status), (unsigned long long)out.addr, m_activeChild);
 		} else if (WIFSIGNALED(status)) {
 			// Crashed/killed
 			int sig = WTERMSIG(status);
@@ -445,14 +447,14 @@ public:
 			out.type = ev_signal;
 			out.data = sig;
 
-			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%lx for %d\n",
-					sig, out.addr, m_activeChild);
+			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
+					sig, (unsigned long long)out.addr, m_activeChild);
 			m_children.erase(who);
 		} else if (WIFEXITED(status)) {
 			int exitStatus = WEXITSTATUS(status);
 
-			kcov_debug(PTRACE_MSG, "PT exit %d at 0x%lx for %d%s\n",
-					exitStatus, out.addr, m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
+			kcov_debug(PTRACE_MSG, "PT exit %d at 0x%llx for %d%s\n",
+					exitStatus, (unsigned long long)out.addr, m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
 
 			m_children.erase(who);
 
@@ -508,7 +510,7 @@ public:
 		switch (ev.type)
 		{
 		case ev_breakpoint:
-			return std::string("breakpoint at 0x%lx", ev.addr);
+			return fmt("breakpoint at 0x%llx", (unsigned long long)ev.addr);
 		case ev_exit:
 			return fmt("exit code %d", ev.data);
 		case ev_signal:
