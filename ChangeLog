@@ -1,4 +1,7 @@
 Kcov (15):
+	* Workaround a shared-library issue where kcov would sometimes hang on
+	  the malloc. The workaround uses a static memory buffer instead.
+
 	* Implemented support for collecting Python code coverage! Usage is the
 	  same as for compiled code.
 
