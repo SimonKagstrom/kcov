@@ -40,6 +40,8 @@ void phdr_data_add(struct phdr_data *p, struct dl_phdr_info *info);
 
 void *phdr_data_marshal(struct phdr_data *p, size_t *out_sz);
 
+void phdr_data_free(struct phdr_data *p);
+
 struct phdr_data *phdr_data_unmarshal(void *p);
 
 #ifdef __cplusplus

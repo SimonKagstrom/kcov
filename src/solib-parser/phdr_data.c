@@ -12,9 +12,14 @@
 #define KCOV_MAGIC         0x6b636f76 /* "kcov" */
 #define KCOV_SOLIB_VERSION 2
 
+uint8_t data_area[4 * 1024 * 1024];
+
 struct phdr_data *phdr_data_new(size_t allocSize)
 {
-	struct phdr_data *p = malloc(allocSize);
+	struct phdr_data *p = (struct phdr_data *)data_area;
+
+	if (allocSize > sizeof(data_area))
+		return NULL;
 
 	p->magic = KCOV_MAGIC;
 	p->version = KCOV_SOLIB_VERSION;
@@ -22,6 +27,11 @@ struct phdr_data *phdr_data_new(size_t allocSize)
 
 	return p;
 }
+
+void phdr_data_free(struct phdr_data *p)
+{
+}
+
 
 void phdr_data_add(struct phdr_data *p, struct dl_phdr_info *info)
 {

@@ -17,7 +17,6 @@
 
 static struct phdr_data *phdr_data;
 
-
 static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 {
 	phdr_data_add(phdr_data, info);
@@ -47,12 +46,6 @@ void  __attribute__((constructor))at_startup(void)
 	if (!kcov_solib_path)
 		return;
 
-	fd = open(kcov_solib_path, O_WRONLY);
-	if (fd < 0) {
-		fprintf(stderr, "kcov-solib: Can't open %s\n", kcov_solib_path);
-		return;
-	}
-
 	allocSize = sizeof(struct phdr_data);
 	dl_iterate_phdr(phdrSizeCallback, &allocSize);
 
@@ -66,12 +59,18 @@ void  __attribute__((constructor))at_startup(void)
 	dl_iterate_phdr(phdrCallback, NULL);
 
 	p = phdr_data_marshal(phdr_data, &sz);
+
+	fd = open(kcov_solib_path, O_WRONLY);
+	if (fd < 0) {
+		fprintf(stderr, "kcov-solib: Can't open %s\n", kcov_solib_path);
+		return;
+	}
 	written = write(fd, p, sz);
 
 	if (written != sz)
 		fprintf(stderr, "kcov-solib: Can't write to solib FIFO (%zu)\n", written);
 
-	free(p);
+	phdr_data_free(p);
 
 	close(fd);
 
