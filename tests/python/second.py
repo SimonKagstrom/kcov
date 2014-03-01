@@ -1,8 +1,8 @@
 def second_fn(arg):
     if arg > 5: # Comment here, but valid line
-        print "Yep"
+        print("Yep")
     # This is a comment
-    print "Hopp"
+    print("Hopp")
     kalle_anka()
     arne_anka()
 
@@ -21,7 +21,7 @@ def arne_anka():
     en
     planka
 """
-    print b
+    print(b)
     jens_anka()
 
 def viktor_anka():

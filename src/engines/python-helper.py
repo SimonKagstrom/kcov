@@ -10,7 +10,13 @@ import struct
 
 fifo_file = None
 
-def report_trace(file, line):
+def report_trace3(file, line):
+    size = len(file) + 1 + 8 + 4 + 4
+    data = struct.pack(">QLL%dsb" % len(file), 0x6d6574616c6c6775, size, int(line), bytes(file, 'utf-8'), 0)
+
+    fifo_file.write(data)
+
+def report_trace2(file, line):
     size = len(file) + 1 + 8 + 4 + 4
     data = struct.pack(">QLL%dsb" % len(file), 0x6d6574616c6c6775, size, int(line), file, 0)
 
@@ -40,11 +46,16 @@ def runctx(cmd, globals=None, locals=None):
     if locals is None: locals = {}
     sys.settrace(trace_calls)
     try:
-        exec cmd in globals, locals
+        exec(cmd, globals, locals)
     finally:
         sys.settrace(None)
 
 if __name__ == "__main__":
+    if sys.version_info >= (3, 0):
+        report_trace = report_trace3
+    else:
+        report_trace = report_trace2
+
     prog_argv = sys.argv[1:]
 
     sys.argv = prog_argv
@@ -56,7 +67,7 @@ if __name__ == "__main__":
         sys.stderr.write("the KCOV_PYTHON_PIPE_PATH environment variable is not set")
         sys.exit(127)
     try:
-        fifo_file = open(fifo_path, "w")
+        fifo_file = open(fifo_path, "wb")
     except:
         sys.stderr.write("Can't open fifo file")
         sys.exit(127)
@@ -72,6 +83,6 @@ if __name__ == "__main__":
                 '__cached__': None,
             }
             runctx(code, globs, globs)
-    except IOError, err:
-        sys.stderr.write("Cannot run file %r because: %s" % (sys.argv[0], err))
+    except IOError:
+        sys.stderr.write("Cannot run file %r" % (sys.argv[0]))
         sys.exit(127)
