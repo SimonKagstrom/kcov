@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #include <list>
 #include <unordered_map>
@@ -198,6 +199,11 @@ public:
 
 	void kill()
 	{
+		if (m_child == 0)
+			return;
+
+		// Bye-bye
+		::kill(m_child, SIGKILL);
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
