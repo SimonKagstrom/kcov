@@ -208,3 +208,8 @@ python-accumulate-data
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 19
     Should Contain    ${output}    1
+
+#python-select-parser
+#	Run								rm -rf ${out}/main
+#    ${rc}=    Run and return RC    ${kcov} --python-parser=${kcov_path}/tests/tools/dummy-python.sh ${out} ${kcov_path}/tests/python/main 5
+#    Should be equal as integers    ${rc}   99
