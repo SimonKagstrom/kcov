@@ -358,7 +358,7 @@ private:
 		m_lineIdToAddress[id] = address;
 
 		for (const auto &lit : m_lineListeners)
-			lit->onLine(filename.c_str(), lineNo, address);
+			lit->onLine(get_real_path(filename).c_str(), lineNo, address);
 
 		m_currentAddress++;
 	}
