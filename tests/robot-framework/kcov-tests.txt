@@ -17,6 +17,7 @@ wrong-arguments
     Should be equal as integers    ${rc}    1
 
 fork-no-wait
+    Run                            rm -rf ${out}/fork_no_wait
     ${no_kcov_rc}=    Run and return RC    ./fork_no_wait
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork_no_wait
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -28,6 +29,7 @@ fork-no-wait
     Should Contain    ${output}    1
 
 fork
+    Run                            rm -rf ${out}/fork
     ${no_kcov_rc}=    Run and return RC    ./fork
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -43,6 +45,7 @@ fork
     Should Contain    ${output}    1
 
 shared-library
+    Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test
     ${rc}=    Run and return RC    ${kcov} ${out} ./shared_library_test
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -52,6 +55,7 @@ shared-library
     Should Contain    ${output}    1
 
 shared-library-filter-out
+    Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test
     ${rc}=    Run and return RC    ${kcov} --exclude-pattern=solib ${out} ./shared_library_test
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -61,6 +65,7 @@ shared-library-filter-out
     Should Contain    ${output}    nocode
 
 main-test
+    Run                            rm -rf ${out}/main-tests
     ${no_kcov_rc}=    Run and return RC    ./main-tests
     ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -93,6 +98,7 @@ accumulate-data
     Should Contain    ${output}    1
 
 popen-test
+    Run                            rm -rf ${out}/test_popen
     ${no_kcov_rc}=    Run and return RC    ./test_popen
     ${rc}=    Run and return RC    ${kcov} ${out} ./test_popen
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -100,6 +106,7 @@ popen-test
     Should Contain    ${output}    popen OK
 
 global-constructors-test
+    Run                            rm -rf ${out}/global-constructors
     ${no_kcov_rc}=    Run and return RC    ./global-constructors
     ${rc}=    Run and return RC    ${kcov} ${out} ./global-constructors
     Should be equal as integers    ${rc}    ${no_kcov_rc}
@@ -127,7 +134,7 @@ daemon-no-wait-for-last-child-test
     Should Contain    ${output}    1
     
 signals
-	Run                            rm -rf ${out}/signals/cobertura.xml
+    Run                            rm -rf ${out}/signals
     ${no_kcov_rc}=    Run and return RC    ./signals hup
     ${rc}=    Run and return RC    ${kcov} ${out} ./signals hup
     Should be equal as integers    ${no_kcov_rc}    ${rc}
@@ -154,7 +161,7 @@ signals
     ${output}=    Run    ${xml_lookup} ${out}/signals/cobertura.xml test_signals_c 89
 
 signals-self
-	Run								rm -rf ${out}/signals/cobertura.xml
+	Run								rm -rf ${out}/signals/
     ${output}=   Run				${kcov} ${out} ./signals segv self
 	Should Contain					${output}	kcov: Process exited with signal 11
     ${output}=   Run				${kcov} ${out} ./signals abrt self
