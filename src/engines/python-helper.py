@@ -9,18 +9,26 @@ import os
 import struct
 
 fifo_file = None
+report_trace_real = None
 
 def report_trace3(file, line):
     size = len(file) + 1 + 8 + 4 + 4
     data = struct.pack(">QLL%dsb" % len(file), 0x6d6574616c6c6775, size, int(line), bytes(file, 'utf-8'), 0)
 
-    fifo_file.write(data)
+    fifo_file.write("")
 
 def report_trace2(file, line):
     size = len(file) + 1 + 8 + 4 + 4
     data = struct.pack(">QLL%dsb" % len(file), 0x6d6574616c6c6775, size, int(line), file, 0)
 
     fifo_file.write(data)
+
+def report_trace(file, line):
+    try:
+        report_trace_real(file, line)
+    except:
+        # Ignore errors
+        pass
 
 def trace_lines(frame, event, arg):
     if event != 'line':
@@ -52,9 +60,9 @@ def runctx(cmd, globals=None, locals=None):
 
 if __name__ == "__main__":
     if sys.version_info >= (3, 0):
-        report_trace = report_trace3
+        report_trace_real = report_trace3
     else:
-        report_trace = report_trace2
+        report_trace_real = report_trace2
 
     prog_argv = sys.argv[1:]
 
