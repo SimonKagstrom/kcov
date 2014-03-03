@@ -15,7 +15,7 @@ def report_trace3(file, line):
     size = len(file) + 1 + 8 + 4 + 4
     data = struct.pack(">QLL%dsb" % len(file), 0x6d6574616c6c6775, size, int(line), bytes(file, 'utf-8'), 0)
 
-    fifo_file.write("")
+    fifo_file.write(data)
 
 def report_trace2(file, line):
     size = len(file) + 1 + 8 + 4 + 4
