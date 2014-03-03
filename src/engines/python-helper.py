@@ -26,6 +26,7 @@ def report_trace2(file, line):
 def report_trace(file, line):
     try:
         report_trace_real(file, line)
+        fifo_file.flush()
     except:
         # Ignore errors
         pass
