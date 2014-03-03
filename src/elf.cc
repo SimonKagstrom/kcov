@@ -245,8 +245,8 @@ out_open:
 
 				if (line_nr && is_code) {
 					const char *const *src_dirs;
-					const char *full_file_path;
-					const char *file_path = line_source;
+					std::string full_file_path;
+					std::string file_path = line_source;
 					size_t ndirs = 0;
 
 					/* Lookup the compilation path */
@@ -261,36 +261,33 @@ out_open:
 
 					/* Use the full compilation path unless the source already
 					 * has an absolute path */
-					full_file_path = dir_concat(src_dirs[0], line_source);
+					std::string dir = src_dirs[0] == nullptr ? "" : src_dirs[0];
+					full_file_path = dir_concat(dir, line_source);
 					if (line_source[0] != '/')
 						file_path = full_file_path;
 
 					/******** replace the path information found in the debug symbols with *********/
 					/******** the value from in the newRoot variable.         *********/
-					char *rp = 0;
+					std::string rp;
 					if (origRoot.length() > 0 && newRoot.length() > 0) {
  					  std::string dwarfPath = file_path;
 					  size_t dwIndex = dwarfPath.find(origRoot);
 					  if (dwIndex != std::string::npos) {
 					    dwarfPath.replace(dwIndex, origRoot.length(), newRoot);
-					    rp = ::realpath(dwarfPath.c_str(), nullptr);
-
+					    rp = get_real_path(dwarfPath);
 					  }
 					}
 					else {
-					  rp = ::realpath(file_path, nullptr);
+					  rp = get_real_path(file_path);
 					}
-					if (rp)
-					{
-						free((void *)full_file_path);
-						file_path = full_file_path = rp;
 
+					if (rp != "")
+					{
+						file_path = full_file_path = rp;
 					}
 
 					for (const auto &it : m_lineListeners)
-						it->onLine(file_path, line_nr, adjustAddressBySegment(addr));
-
-					free((void *)full_file_path);
+						it->onLine(file_path.c_str(), line_nr, adjustAddressBySegment(addr));
 				}
 			}
 		}

@@ -79,7 +79,7 @@ extern int write_file(const void *data, size_t len, const char *fmt, ...);
 
 extern void *read_file(size_t *out_size, const char *fmt, ...);
 
-extern const char *dir_concat(const char *dir, const char *filename);
+extern std::string dir_concat(const std::string &dir, const std::string &filename);
 
 #define xwrite_file(data, len, dir...) do { \
 	int r = write_file(data, len, dir); \
@@ -120,6 +120,8 @@ bool machine_is_64bit(void);
 std::list<std::string> split_string(const std::string &s, const char *delims);
 
 std::string trim_string(const std::string &strIn);
+
+std::string get_real_path(const std::string &path);
 
 class Semaphore
 {

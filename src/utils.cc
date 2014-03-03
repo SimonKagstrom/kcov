@@ -1,3 +1,4 @@
+
 #include <sched.h>
 #include <sys/types.h>
 #include <string.h>
@@ -8,6 +9,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <limits.h>
 #include <time.h>
 
 #include "utils.hh"
@@ -80,20 +82,12 @@ int write_file(const void *data, size_t len, const char *fmt, ...)
 	return ret;
 }
 
-const char *dir_concat(const char *dir, const char *filename)
+std::string dir_concat(const std::string &dir, const std::string &filename)
 {
-	size_t len;
-	char *out;
+	if (dir == "")
+		return filename;
 
-	if (dir == NULL)
-		return xstrdup(filename);
-
-	len = strlen(dir) + strlen(filename) + 4;
-	out = (char *)xmalloc(len);
-
-	xsnprintf(out, len, "%s/%s", dir, filename);
-
-	return out;
+	return fmt("%s/%s", dir.c_str(), filename.c_str());
 }
 
 const char *get_home(void)
@@ -254,4 +248,19 @@ std::string trim_string(const std::string &strIn)
 		str = "";
 
 	return str;
+}
+
+std::string get_real_path(const std::string &path)
+{
+	char *rp = NULL;
+
+	rp = ::realpath(path.c_str(), nullptr);
+
+	if (!rp)
+		return path;
+
+	std::string out(rp);
+	free(rp);
+
+	return out;
 }
