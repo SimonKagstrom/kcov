@@ -12,7 +12,7 @@
 #define KCOV_MAGIC         0x6b636f76 /* "kcov" */
 #define KCOV_SOLIB_VERSION 2
 
-uint8_t data_area[4 * 1024 * 1024];
+static uint8_t data_area[4 * 1024 * 1024];
 
 struct phdr_data *phdr_data_new(size_t allocSize)
 {
