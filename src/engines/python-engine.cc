@@ -125,10 +125,9 @@ public:
 	bool checkEvents()
 	{
 		uint8_t buf[8192];
-		size_t sz;
 		struct coverage_data *p;
 
-		p = readCoverageDatum(buf, sizeof(buf), sz);
+		p = readCoverageDatum(buf, sizeof(buf));
 
 		if (!p) {
 			reportEvent(ev_error, -1);
@@ -376,14 +375,18 @@ private:
 
 
 
-	struct coverage_data *readCoverageDatum(uint8_t *buf, size_t totalSize, size_t &outSz)
+	struct coverage_data *readCoverageDatum(uint8_t *buf, size_t totalSize)
 	{
 		struct coverage_data *p = (struct coverage_data *)buf;
 		ssize_t rv;
 
+		if (feof(m_pipe))
+			return NULL; // Not an error
+
 		rv = fread(buf, 1, sizeof(struct coverage_data), m_pipe);
 		if (rv == 0)
 			return NULL; // Not an error
+
 		if (rv < (int)sizeof(struct coverage_data)) {
 			error("Read too little %zd", rv);
 
@@ -391,12 +394,17 @@ private:
 		}
 		unmarshalCoverageData(p);
 
-		if (p->magic != COVERAGE_MAGIC ||
-				p->size > totalSize - sizeof(struct coverage_data)) {
-			error("Data magic wrong or size too large: magic 0x%llx, size %u (%zu left)\n",
-					(unsigned long long)p->magic,
-					(unsigned int)p->size,
-					totalSize);
+		bool valid = p->magic == COVERAGE_MAGIC && p->size < totalSize;
+
+		kcov_debug(PTRACE_MSG, "datum: 0x%16llx, size %u, line %u (%svalid)\n",
+				(unsigned long long)p->magic, (unsigned int)p->size,
+				(unsigned int)p->line, valid ? "" : "in");
+
+		if (!valid) {
+			uint32_t *p32 = (uint32_t *)buf;
+
+			error("Data magic wrong or size too large: %08x %08x %08x %08x\n",
+					p32[0], p32[1], p32[2], p32[3]);
 
 			return NULL;
 		}
