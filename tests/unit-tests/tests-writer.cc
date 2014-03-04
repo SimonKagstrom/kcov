@@ -124,6 +124,8 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 		.WillOnce(Return(true))
 		;
 
+	res = elf->addFile(filename);
+	ASSERT_TRUE(res == true);
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
 	output.start();
@@ -187,6 +189,8 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 
 	output.registerWriter(writer);
 
+	res = elf->addFile(filename);
+	ASSERT_TRUE(res == true);
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
 	output.start();

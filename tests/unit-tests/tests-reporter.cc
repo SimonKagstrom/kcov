@@ -80,6 +80,9 @@ TEST(reporter)
 	ASSERT_TRUE(summary.m_lines == 0U);
 	ASSERT_TRUE(summary.m_executedLines == 0U);
 
+	res = elf->addFile(filename);
+	ASSERT_TRUE(res);
+
 	res = elf->parse();
 	ASSERT_TRUE(res);
 

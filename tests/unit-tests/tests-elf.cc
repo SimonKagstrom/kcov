@@ -55,6 +55,8 @@ TEST(elf, DEADLINE_REALTIME_MS(30000))
 
 	elf->registerLineListener(listener);
 
+	res = elf->addFile(filename);
+	ASSERT_TRUE(res == true);
 	res = elf->parse();
 	ASSERT_TRUE(res == true);
 
