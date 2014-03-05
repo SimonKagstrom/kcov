@@ -34,8 +34,8 @@ def jens_anka(kalle):
     v = """Single-line multi-line string"""
 
     if kalle > 5:
-        print "Hej"
+        print("Hej")
     elif kalle > 128:
-        print "Commodore 128"
+        print("Commodore 128")
     else:
-        print "Hopp"
+        print("Hopp")
