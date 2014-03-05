@@ -224,6 +224,21 @@ python-accumulate-data
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 19
     Should Contain    ${output}    1
 
+python-coverage-python3
+    Run                            rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov}  --python-parser=python3 ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 22
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 2
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 4
+    Should Contain    ${output}    nocode
+
+
 #python-select-parser
 #	Run								rm -rf ${out}/main
 #    ${rc}=    Run and return RC    ${kcov} --python-parser=${kcov_path}/tests/tools/dummy-python.sh ${out} ${kcov_path}/tests/python/main 5
