@@ -40,6 +40,8 @@ namespace kcov
 
 		virtual std::string &getBinaryPath() = 0;
 
+		virtual const std::string &getKernelCoveragePath() = 0;
+
 		virtual const std::string &getPythonCommand() const = 0;
 
 		virtual enum SortType getSortType() = 0;

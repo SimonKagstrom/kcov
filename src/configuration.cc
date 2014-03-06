@@ -19,6 +19,7 @@ public:
 		m_outDirectory = "";
 		m_binaryName = "";
 		m_pythonCommand = "python";
+		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_lowLimit = 25;
 		m_highLimit = 75;
 		m_pathStripLevel = 2;
@@ -301,6 +302,11 @@ public:
 		return m_binaryPath;
 	}
 
+	const std::string &getKernelCoveragePath()
+	{
+		return m_kernelCoveragePath;
+	}
+
 	const std::string &getPythonCommand() const
 	{
 		return m_pythonCommand;
@@ -491,6 +497,7 @@ public:
 	std::string m_binaryName;
 	std::string m_binaryPath;
 	std::string m_pythonCommand;
+	std::string m_kernelCoveragePath;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;
