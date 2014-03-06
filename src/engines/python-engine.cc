@@ -191,11 +191,6 @@ public:
 		return m_running;
 	}
 
-	std::string eventToName(Event ev)
-	{
-		return "";
-	}
-
 	void kill()
 	{
 		if (m_child == 0)

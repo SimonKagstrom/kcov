@@ -77,10 +77,7 @@ namespace kcov
 
 		virtual bool childrenLeft() = 0;
 
-		virtual std::string eventToName(Event ev) = 0;
-
 		virtual void kill() = 0;
-
 
 		virtual unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 	};

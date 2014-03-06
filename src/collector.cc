@@ -5,6 +5,7 @@
 #include <output-handler.hh>
 #include <configuration.hh>
 #include <filter.hh>
+#include <signal.h>
 
 #include <unordered_map>
 #include <string>
@@ -72,6 +73,42 @@ public:
 	}
 
 private:
+
+	std::string eventToName(IEngine::Event ev)
+	{
+		switch (ev.type)
+		{
+		case ev_breakpoint:
+			return fmt("breakpoint at 0x%llx", (unsigned long long)ev.addr);
+		case ev_exit:
+			return fmt("exit code %d", ev.data);
+		case ev_signal:
+		{
+			if (ev.data == SIGABRT)
+				return std::string("SIGABRT");
+			if (ev.data == SIGSEGV)
+				return std::string("SIGSEGV");
+			if (ev.data == SIGILL)
+				return std::string("SIGILL");
+			if (ev.data == SIGTERM)
+				return std::string("SIGTERM");
+			if (ev.data == SIGBUS)
+				return std::string("SIGBUS");
+			if (ev.data == SIGFPE)
+				return std::string("SIGFPE");
+
+			return fmt("unknown signal %d", ev.data);
+		}
+		case ev_error:
+			return std::string("error");
+		default:
+			break;
+		}
+
+		return std::string("unknown");
+	}
+
+
 	// From IEngine
 	void onEvent(const IEngine::Event &ev)
 	{
@@ -81,7 +118,8 @@ private:
 			break;
 		case ev_signal:
 			if (!m_engine.childrenLeft())
-				kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n", ev.data, m_engine.eventToName(ev).c_str());
+				kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n",
+						ev.data, eventToName(ev).c_str());
 
 			break;
 

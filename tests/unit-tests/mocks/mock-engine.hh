@@ -21,7 +21,6 @@ public:
 	MOCK_METHOD2(start, bool(IEventListener &listener, const std::string &executable));
 	MOCK_METHOD0(childrenLeft, bool());
 	MOCK_METHOD0(continueExecution, bool());
-	MOCK_METHOD1(eventToName, std::string(Event ev));
 	MOCK_METHOD0(kill, void());
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)

@@ -505,40 +505,6 @@ public:
 		return true;
 	}
 
-	std::string eventToName(Event ev)
-	{
-		switch (ev.type)
-		{
-		case ev_breakpoint:
-			return fmt("breakpoint at 0x%llx", (unsigned long long)ev.addr);
-		case ev_exit:
-			return fmt("exit code %d", ev.data);
-		case ev_signal:
-		{
-			if (ev.data == SIGABRT)
-				return std::string("SIGABRT");
-			if (ev.data == SIGSEGV)
-				return std::string("SIGSEGV");
-			if (ev.data == SIGILL)
-				return std::string("SIGILL");
-			if (ev.data == SIGTERM)
-				return std::string("SIGTERM");
-			if (ev.data == SIGBUS)
-				return std::string("SIGBUS");
-			if (ev.data == SIGFPE)
-				return std::string("SIGFPE");
-
-			return fmt("unknown signal %d", ev.data);
-		}
-		case ev_error:
-			return std::string("error");
-		default:
-			break;
-		}
-
-		return std::string("unknown");
-	}
-
 	void kill()
 	{
 		ptrace(PTRACE_KILL, m_activeChild, 0, 0);
