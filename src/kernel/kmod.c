@@ -258,24 +258,18 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 		size_t count, loff_t *off)
 {
 	struct kprobe_coverage *kpc = file->private_data;
-	ssize_t to_copy;
 	ssize_t out = 0;
 	char *line;
 	char *buf;
 	char *p;
 
-	buf = (char *)__get_free_page(GFP_KERNEL);
+	/* Assure it's NULL terminated */
+	buf = (char *)vzalloc(count + 1);
 	if (!buf)
 		return -ENOMEM;
 
-	/* Assure it's NULL-terminated */
-	to_copy = min(count, (size_t)PAGE_SIZE - 1);
-	memset(buf, 0, PAGE_SIZE);
-
-	memcpy(buf, user_buf, to_copy);
-
 	if (copy_from_user(buf, user_buf, out)) {
-		free_page((unsigned long) buf);
+		vfree(buf);
 		return -EFAULT;
 	}
 	p = buf;
@@ -312,7 +306,7 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 		kpc_add_probe(kpc, module, addr);
 	}
 
-	free_page((unsigned long)buf);
+	vfree(buf);
 	*off += out;
 
 	return out;
