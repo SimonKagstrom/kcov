@@ -326,7 +326,7 @@ static const struct file_operations kpc_show_fops =
 	.read = kpc_show_read,
 };
 
-static int __init kpc_init_one(struct kprobe_coverage *kpc)
+static int __init kpc_init(struct kprobe_coverage *kpc)
 {
 	/* Create debugfs entries */
 	kpc->debugfs_root = debugfs_create_dir("kprobe-coverage", NULL);
@@ -356,7 +356,7 @@ out_files:
 }
 
 static struct kprobe_coverage *global_kpc;
-static int __init kpc_init(void)
+static int __init kpc_init_module(void)
 {
 	int out;
 
@@ -365,14 +365,14 @@ static int __init kpc_init(void)
 		return -ENOMEM;
 	memset(global_kpc, 0, sizeof(*global_kpc));
 
-	out = kpc_init_one(global_kpc);
+	out = kpc_init(global_kpc);
 	if (out < 0)
 		vfree(global_kpc);
 
 	return out;
 }
 
-static void __exit kpc_exit(void)
+static void __exit kpc_exit_module(void)
 {
 	debugfs_remove_recursive(global_kpc->debugfs_root);
 	kpc_clear(global_kpc);
@@ -381,8 +381,8 @@ static void __exit kpc_exit(void)
 	global_kpc = NULL;
 }
 
-module_init(kpc_init);
-module_exit(kpc_exit);
+module_init(kpc_init_module);
+module_exit(kpc_exit_module);
 MODULE_AUTHOR("Simon Kagstrom <simon.kagstrom@gmail.com>");
 MODULE_DESCRIPTION("Code coverage through kprobes and debugfs");
 MODULE_LICENSE("GPL");
