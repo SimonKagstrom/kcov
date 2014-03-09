@@ -13,6 +13,7 @@ pkg_check_modules(LIBZ REQUIRED zlib)
 project (kcov)
 set (KCOV kcov)
 set (KCOV_PROFILER kcov-profiler)
+set (LINE2ADDR line2addr)
 #set (CMAKE_EXE_LINKER_FLAGS "-static")
 
 set (SOLIB kcov_sowrapper)
@@ -55,6 +56,14 @@ set (${KCOV_PROFILER}_SRCS
     writer-base.cc
     )
 
+set (${LINE2ADDR}_SRCS
+	configuration.cc
+	elf.cc
+	line2addr.cc
+	parser-manager.cc
+	utils.cc
+	)
+
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
 
@@ -85,9 +94,20 @@ add_custom_command(
 
 
 add_executable (${KCOV} ${${KCOV}_SRCS} library.c python-helper.c)
+add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 #add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 
 target_link_libraries(${KCOV}
+	${LIBDWARF_LIBRARIES}
+	${LIBELF_LIBRARIES}
+	stdc++
+	dl
+	pthread
+	m
+	${LIBZ_LIBRARIES})
+
+
+target_link_libraries(${LINE2ADDR}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	stdc++
