@@ -123,6 +123,10 @@ std::string trim_string(const std::string &strIn);
 
 std::string get_real_path(const std::string &path);
 
+bool string_is_integer(const std::string &str, unsigned base = 0);
+
+int64_t string_to_integer(const std::string &str, unsigned base = 0);
+
 class Semaphore
 {
 private:

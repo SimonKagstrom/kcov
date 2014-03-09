@@ -15,6 +15,8 @@
 #include "utils.hh"
 
 #include <sstream>
+#include <stdexcept>
+#include <algorithm>
 
 int g_kcov_debug_mask = STATUS_MSG;
 
@@ -263,4 +265,32 @@ std::string get_real_path(const std::string &path)
 	free(rp);
 
 	return out;
+}
+
+
+bool string_is_integer(const std::string &str, unsigned base)
+{
+	size_t pos;
+
+	try
+	{
+		stoull(str, &pos, base);
+	}
+	catch(std::invalid_argument &e)
+	{
+		return false;
+	}
+	catch(std::out_of_range &e)
+	{
+		return false;
+	}
+
+	return pos == str.size();
+}
+
+int64_t string_to_integer(const std::string &str, unsigned base)
+{
+	size_t pos;
+
+	return (int64_t)stoull(str, &pos, base);
 }
