@@ -193,14 +193,16 @@ static void kpc_clear_list(struct kprobe_coverage *kpc,
 		struct list_head *list, int do_unregister)
 {
 	struct list_head *iter;
+	struct list_head *tmp;
 
-	list_for_each(iter, list) {
+	list_for_each_safe(iter, tmp, list) {
 		struct kprobe_coverage_entry *entry;
 
 		entry = (struct kprobe_coverage_entry *)container_of(iter,
 				struct kprobe_coverage_entry, lh);
 		if (do_unregister)
 			unregister_kprobe(&entry->kp);
+		list_del(&entry->lh);
 		kpc_free_entry(entry);
 	}
 }
@@ -304,7 +306,7 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 	if (!buf)
 		return -ENOMEM;
 
-	if (copy_from_user(buf, user_buf, out)) {
+	if (copy_from_user(buf, user_buf, count)) {
 		vfree(buf);
 		return -EFAULT;
 	}
