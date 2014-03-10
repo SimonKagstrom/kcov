@@ -179,10 +179,10 @@ static void kpc_add_probe(struct kprobe_coverage *kpc, const char *module_name,
 	 *
 	 * 3. loaded module - module_name and module is !NULL: Instrument directly
 	 */
-	if (module_name && module == NULL)
-		rv = kpc_enable_probe(kpc, entry);
-	else
+	if (module_name && !module)
 		kpc_defer_probe(kpc, entry);
+	else
+		rv = kpc_enable_probe(kpc, entry);
 
 	/* Probe enabling might fail, just free the entry */
 	if (rv < 0)
