@@ -20,72 +20,24 @@
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 
-/*
- * The sequence iterator functions.  We simply use the count of the
- * next line as our internal position.
- */
-static void *ct_seq_start(struct seq_file *s, loff_t *pos)
+static int hz_show(struct seq_file *m, void *v)
 {
-	loff_t *spos = kmalloc(sizeof(loff_t), GFP_KERNEL);
-	if (! spos)
-		return NULL;
-	*spos = *pos;
-	return spos;
+    seq_printf(m, "%d\n", HZ);
+
+    return 0;
 }
 
-static void *ct_seq_next(struct seq_file *s, void *v, loff_t *pos)
+static int hz_open(struct inode *inode, struct file *file)
 {
-	loff_t *spos = (loff_t *) v;
-	*pos = ++(*spos);
-	return spos;
+    return single_open(file, hz_show, NULL);
 }
 
-static void ct_seq_stop(struct seq_file *s, void *v)
-{
-	kfree (v);
-}
-
-/*
- * The show function.
- */
-static int ct_seq_show(struct seq_file *s, void *v)
-{
-	loff_t *spos = (loff_t *) v;
-	seq_printf(s, "%Ld\n", *spos);
-	return 0;
-}
-
-/*
- * Tie them all together into a set of seq_operations.
- */
-static struct seq_operations ct_seq_ops = {
-	.start = ct_seq_start,
-	.next  = ct_seq_next,
-	.stop  = ct_seq_stop,
-	.show  = ct_seq_show
-};
-
-
-/*
- * Time to set up the file operations for our /proc file.  In this case,
- * all we need is an open function which sets up the sequence ops.
- */
-
-static int ct_open(struct inode *inode, struct file *file)
-{
-	return seq_open(file, &ct_seq_ops);
-};
-
-/*
- * The file operations structure contains our open function along with
- * set of the canned seq_ ops.
- */
-static struct file_operations ct_file_ops = {
-	.owner   = THIS_MODULE,
-	.open    = ct_open,
-	.read    = seq_read,
-	.llseek  = seq_lseek,
-	.release = seq_release
+static const struct file_operations ct_file_ops = {
+    .owner	= THIS_MODULE,
+    .open	= hz_open,
+    .read	= seq_read,
+    .llseek	= seq_lseek,
+    .release = single_release,
 };
 
 static int __init test_init(void)
@@ -102,7 +54,7 @@ static int __init test_init(void)
 
 static void __exit test_exit(void)
 {
-	printk(KERN_INFO "Exiting test module!\n");
+	remove_proc_entry("test_module", NULL);
 }
 
 module_init(test_init);
