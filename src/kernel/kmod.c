@@ -278,7 +278,7 @@ static ssize_t kpc_show_read(struct file *file, char __user *user_buf,
 	/* Write it out to the user buffer */
 	addr = (unsigned long)entry->kp.addr - entry->base_addr;
 
-	n = snprintf(buf, sizeof(buf), "0x%08x:0x%16lx\n",
+	n = snprintf(buf, sizeof(buf), "0x%08x:0x%016lx\n",
 			entry->module_checksum, addr);
 	/* Should never happen if snprintf works correctly */
 	if (n >= sizeof(buf))
