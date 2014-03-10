@@ -39,6 +39,7 @@ public:
 				"Control file not open???");
 
 		fprintf(m_control, "%s", s.c_str());
+		fflush(m_control);
 
 		return 0;
 	}
