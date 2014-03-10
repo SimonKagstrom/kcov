@@ -368,6 +368,8 @@ static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
 
 		/* Move the deferred entry to the pending list and enable */
 		list_del(&entry->lh);
+		entry->base_addr = (unsigned long)mod->module_core;
+		entry->kp.addr += entry->base_addr;
 
 		if (kpc_enable_probe(kpc, entry) < 0)
 			kpc_free_entry(entry);
