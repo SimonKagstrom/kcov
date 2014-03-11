@@ -19,8 +19,8 @@
 #include <linux/spinlock.h>
 #include <linux/fs.h>
 #include <linux/vmalloc.h>
+#include <linux/slab.h>
 #include <linux/uaccess.h>
-#include <linux/crc32.h>
 
 struct kprobe_coverage
 {
@@ -36,35 +36,62 @@ struct kprobe_coverage
 
 	spinlock_t pending_hit_lock;
 	struct mutex deferred_lock;
+
+	const char *module_names[32];
+	unsigned int name_count;
 };
 
 struct kprobe_coverage_entry
 {
 	struct kprobe kp;
-	u32 module_checksum; /* 0 for the kernel, otherwise the module name crc32 */
+	int name_index; /* an index into the name table above (0 is always the kernel */
 	unsigned long base_addr;
 
 	struct list_head lh;
 	struct work_struct work;
 };
 
-struct kprobe_coverage_module
-{
-	const char *module_name; /* NULL for the kernel itself */
-};
-
 static struct kprobe_coverage *global_kpc;
 
-
-static u32 get_name_checksum(const char *name)
+static int kpc_module_name_to_index(struct kprobe_coverage *kpc,
+		const char *module_name)
 {
-	/* for vmlinux */
-	if (name == NULL)
+	int i;
+
+	/* The first is always the kernel (NULL) */
+	if (module_name == NULL)
 		return 0;
 
-	return crc32(0, name, strlen(name));
+	for (i = 1; i < kpc->name_count; i++) {
+		if (strcmp(kpc->module_names[i], module_name) == 0)
+			return i;
+	}
+
+	return -1;
 }
 
+static int kpc_allocate_module_name_index(struct kprobe_coverage *kpc,
+		const char *module_name)
+{
+	int index;
+
+	index = kpc_module_name_to_index(kpc, module_name);
+	if (index >= 0)
+		return index;
+
+	/* Not found, allocate a new entry */
+	index = kpc->name_count;
+
+	/* Out of bounds? */
+	if (index >= ARRAY_SIZE(kpc->module_names))
+		return -1;
+
+	kpc->module_names[index] = kstrdup(module_name, GFP_KERNEL);
+	kpc->name_count++;
+
+	return index;
+
+}
 
 static int kpc_pre_handler(struct kprobe *kp, struct pt_regs *regs)
 {
@@ -116,7 +143,7 @@ static struct kprobe_coverage_entry *kpc_new_entry(struct kprobe_coverage *kpc,
 	if (mod)
 		base_addr = (unsigned long)mod->module_core;
 
-	out->module_checksum = get_name_checksum(module_name);
+	out->name_index = kpc_allocate_module_name_index(kpc, module_name);
 	out->base_addr = base_addr;
 	out->kp.addr = (void *)(base_addr + where);
 	out->kp.pre_handler = kpc_pre_handler;
@@ -209,6 +236,8 @@ static void kpc_clear_list(struct kprobe_coverage *kpc,
 
 static void kpc_clear(struct kprobe_coverage *kpc)
 {
+	int i;
+
 	/* Free everything on the lists */
 	mutex_lock(&kpc->deferred_lock);
 
@@ -227,6 +256,14 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 	INIT_LIST_HEAD(&kpc->hit_list);
 
 	spin_unlock(&kpc->pending_hit_lock);
+
+	for (i = 0; i < kpc->name_count; i++) {
+		kfree(kpc->module_names[i]);
+
+		kpc->module_names[i] = NULL;
+	}
+	/* Kernel is still at 0 */
+	kpc->name_count = 1;
 }
 
 static void *kpc_unlink_next(struct kprobe_coverage *kpc)
@@ -266,8 +303,9 @@ static ssize_t kpc_show_read(struct file *file, char __user *user_buf,
 {
 	struct kprobe_coverage *kpc = file->private_data;
 	struct kprobe_coverage_entry *entry;
+	const char *module_name;
 	unsigned long addr;
-	char buf[64];
+	char buf[MODULE_NAME_LEN + 20];
 	int n;
 
 	/* Wait for an entry */
@@ -275,19 +313,24 @@ static ssize_t kpc_show_read(struct file *file, char __user *user_buf,
 	if (!entry)
 		return 0;
 
+	module_name = kpc->module_names[entry->name_index];
+
 	/* Write it out to the user buffer */
 	addr = (unsigned long)entry->kp.addr - entry->base_addr;
 
-	n = snprintf(buf, sizeof(buf), "0x%08x:0x%016lx\n",
-			entry->module_checksum, addr);
+	n = snprintf(buf, sizeof(buf), "%s%s0x%016lx\n",
+			module_name ? module_name : "",
+			module_name ? ":" : "",
+			addr);
+
+	kpc_free_entry(entry);
+
 	/* Should never happen if snprintf works correctly */
 	if (n >= sizeof(buf))
 		return -EINVAL;
 
 	if (copy_to_user(user_buf + *off, buf, n))
 		n = -EFAULT;
-
-	kpc_free_entry(entry);
 
 	return n;
 }
@@ -363,7 +406,7 @@ static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
 		entry = (struct kprobe_coverage_entry *)container_of(iter,
 				struct kprobe_coverage_entry, lh);
 
-		if (get_name_checksum(mod->name) != entry->module_checksum)
+		if (kpc_module_name_to_index(kpc, mod->name) != entry->name_index)
 			continue;
 
 		/* Move the deferred entry to the pending list and enable */
@@ -390,7 +433,7 @@ static void kpc_handle_going_module(struct kprobe_coverage *kpc,
 		entry = (struct kprobe_coverage_entry *)container_of(iter,
 				struct kprobe_coverage_entry, lh);
 
-		if (get_name_checksum(mod->name) != entry->module_checksum)
+		if (kpc_module_name_to_index(kpc, mod->name) != entry->name_index)
 			continue;
 
 		/* Remove pending entries for the current module */
@@ -459,6 +502,9 @@ static int __init kpc_init(struct kprobe_coverage *kpc)
 	init_waitqueue_head(&kpc->wq);
 	spin_lock_init(&kpc->pending_hit_lock);
 	mutex_init(&kpc->deferred_lock);
+
+	/* The kernel is always index 0 */
+	kpc->name_count = 1;
 
 	return 0;
 
