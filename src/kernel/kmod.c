@@ -486,9 +486,9 @@ static int __init kpc_init_module(void)
 
 static void __exit kpc_exit_module(void)
 {
-	debugfs_remove_recursive(global_kpc->debugfs_root);
 	kpc_clear(global_kpc);
 
+	debugfs_remove_recursive(global_kpc->debugfs_root);
 	unregister_module_notifier(&kpc_module_notifier_block);
 
 	vfree(global_kpc);
