@@ -24,7 +24,8 @@ class KernelEngine : public IEngine
 public:
 	KernelEngine() :
 		m_control(NULL),
-		m_show(NULL)
+		m_show(NULL),
+		m_listener(NULL)
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 	}
@@ -59,6 +60,8 @@ public:
 		auto control = path + "/control";
 		auto show = path + "/show";
 
+		m_listener = &listener;
+
 		// Open kprobe-coverage files
 		m_control = fopen(control.c_str(), "w");
 		m_show = fopen(show.c_str(), "r");
@@ -83,7 +86,9 @@ public:
 			return false;
 
 		buf[sizeof(buf) - 1] = '\0';
-		printf("XXX: Got %s\n", buf);
+		buf[strlen(buf) - 1] = '\0'; // Remove the \n
+
+		parseOneLine(buf);
 
 		return true;
 	}
@@ -126,8 +131,34 @@ public:
 	}
 
 private:
+	void parseOneLine(const std::string &line)
+	{
+		std::string moduleName;
+		std::string addr;
+
+		auto pos = line.find(":");
+
+		if (pos != std::string::npos) {
+			moduleName = line.substr(0, pos);
+			addr = line.substr(pos + 1);
+		} else {
+			addr = line;
+		}
+
+		// Invalid?
+		if (!string_is_integer(addr, 16))
+			return;
+
+		uint64_t value = string_to_integer(addr, 16);
+
+		kcov_debug(PTRACE_MSG, "KNRL BP at 0x%llx\n", (unsigned long long)value);
+
+		m_listener->onEvent(Event(ev_breakpoint, 0, value));
+	}
+
 	FILE *m_control;
 	FILE *m_show;
+	IEventListener *m_listener;
 
 	std::string m_module;
 };
