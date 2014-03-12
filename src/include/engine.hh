@@ -16,6 +16,7 @@ namespace kcov
 		ev_signal      =  2,
 		ev_exit        =  3,
 		ev_exit_first_process = 4,
+		ev_signal_exit =  5,
 	};
 
 	class IEngine
@@ -74,8 +75,6 @@ namespace kcov
 		 */
 		virtual bool continueExecution() = 0;
 
-
-		virtual bool childrenLeft() = 0;
 
 		virtual void kill() = 0;
 

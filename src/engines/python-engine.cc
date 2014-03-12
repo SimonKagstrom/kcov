@@ -40,7 +40,6 @@ class PythonEngine : public IEngine, public IFileParser
 public:
 	PythonEngine() :
 		m_child(0),
-		m_running(false),
 		m_pipe(NULL),
 		m_listener(NULL),
 		m_currentAddress(1) // 0 is an invalid address
@@ -114,7 +113,6 @@ public:
 
 			return false;
 		}
-		m_running = true;
 		m_pipe = fopen(kcov_python_pipe_path.c_str(), "r");
 		panic_if (!m_pipe,
 				"Can't open python pipe %s", kcov_python_pipe_path.c_str());
@@ -184,11 +182,6 @@ public:
 		}
 
 		return false;
-	}
-
-	bool childrenLeft()
-	{
-		return m_running;
 	}
 
 	void kill()
@@ -421,7 +414,6 @@ private:
 	typedef std::unordered_map<LineId, uint64_t, LineIdHash> LineIdToAddressMap_t;
 
 	pid_t m_child;
-	bool m_running;
 	FILE *m_pipe;
 
 	LineListenerList_t m_lineListeners;

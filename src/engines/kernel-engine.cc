@@ -93,11 +93,6 @@ public:
 		return true;
 	}
 
-	bool childrenLeft()
-	{
-		return true;
-	}
-
 	void kill()
 	{
 		if (m_control) {

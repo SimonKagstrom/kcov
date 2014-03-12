@@ -450,6 +450,10 @@ public:
 			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
 					sig, (unsigned long long)out.addr, m_activeChild);
 			m_children.erase(who);
+
+			if (!childrenLeft())
+				out.type = ev_signal_exit;
+
 		} else if (WIFEXITED(status)) {
 			int exitStatus = WEXITSTATUS(status);
 

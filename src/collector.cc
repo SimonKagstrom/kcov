@@ -117,9 +117,10 @@ private:
 		case ev_error:
 			break;
 		case ev_signal:
-			if (!m_engine.childrenLeft())
-				kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n",
-						ev.data, eventToName(ev).c_str());
+			break;
+		case ev_signal_exit:
+			kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n",
+					ev.data, eventToName(ev).c_str());
 
 			break;
 
