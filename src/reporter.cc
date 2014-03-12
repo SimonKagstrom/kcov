@@ -197,7 +197,7 @@ private:
 	}
 
 	/* Called when the file is parsed */
-	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
+	void onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
 	{
 		if (!m_filter.runFilters(file))
 			return;

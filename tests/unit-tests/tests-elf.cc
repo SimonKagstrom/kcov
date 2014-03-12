@@ -12,16 +12,17 @@ class FunctionListener : public IFileParser::ILineListener
 {
 public:
 
-	virtual void onLine(const char *file, unsigned int lineNr,
+	virtual void onLine(const std::string &file, unsigned int lineNr,
 			unsigned long addr)
 	{
 		m_lineMap[constructString(file, lineNr)]++;
 	}
 
-	static std::string constructString(const char *file, int nr)
+	static std::string constructString(const std::string &file, int nr)
 	{
-		char *c_str = (char *)xmalloc(strlen(file) + 20);
-		const char *name = strrchr(file, '/');
+		const char *p = file.c_str();
+		char *c_str = (char *)xmalloc(file.size() + 20);
+		const char *name = strrchr(p, '/');
 
 		ASSERT_TRUE(name);
 

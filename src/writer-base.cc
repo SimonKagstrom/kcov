@@ -22,7 +22,7 @@ WriterBase::WriterBase(IFileParser &parser, IReporter &reporter, IOutputHandler 
 		m_fileParser.registerLineListener(*this);
 }
 
-WriterBase::File::File(const char *filename) :
+WriterBase::File::File(const std::string &filename) :
 						m_name(filename), m_codeLines(0), m_executedLines(0), m_lastLineNr(0)
 {
 	size_t pos = m_name.rfind('/');
@@ -39,12 +39,12 @@ WriterBase::File::File(const char *filename) :
 	readFile(filename);
 }
 
-void WriterBase::File::readFile(const char *filename)
+void WriterBase::File::readFile(const std::string &filename)
 {
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = fopen(filename.c_str(), "r");
 	unsigned int lineNr = 1;
 
-	panic_if(!fp, "Can't open %s", filename);
+	panic_if(!fp, "Can't open %s", filename.c_str());
 
 	while (1)
 	{
@@ -67,24 +67,24 @@ void WriterBase::File::readFile(const char *filename)
 }
 
 
-void WriterBase::onLine(const char *file, unsigned int lineNr, unsigned long addr)
+void WriterBase::onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
 {
 	if (!m_filter.runFilters(file))
 		return;
 
 
-	if (m_files.find(std::string(file)) != m_files.end())
+	if (m_files.find(file) != m_files.end())
 		return;
 
-	if (m_nonExistingFiles.find(std::string(file)) != m_nonExistingFiles.end())
+	if (m_nonExistingFiles.find(file) != m_nonExistingFiles.end())
 		return;
 
-	if (!file_exists(file)) {
-		m_nonExistingFiles[std::string(file)] = nullptr;
+	if (!file_exists(file.c_str())) {
+		m_nonExistingFiles[file] = nullptr;
 		return;
 	}
 
-	m_files[std::string(file)] = new File(file);
+	m_files[file] = new File(file);
 }
 
 

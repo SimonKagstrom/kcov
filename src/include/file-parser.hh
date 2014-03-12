@@ -23,7 +23,7 @@ namespace kcov
 		class ILineListener
 		{
 		public:
-			virtual void onLine(const char *file, unsigned int lineNr,
+			virtual void onLine(const std::string &file, unsigned int lineNr,
 					unsigned long addr) = 0;
 		};
 

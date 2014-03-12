@@ -40,12 +40,16 @@ public:
 class ElfListener : public IFileParser::ILineListener
 {
 public:
-	void onLine(const char *file, unsigned int lineNr, unsigned long addr)
+	virtual ~ElfListener()
+	{
+	}
+
+	void onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
 	{
 		// Just store the lastest to have something
 		m_lineToAddr[lineNr] = addr;
 		if (m_file == "")
-			m_file = std::string(file);
+			m_file = file;
 	}
 
 	std::string m_file;

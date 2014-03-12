@@ -24,7 +24,7 @@ namespace kcov
 		public:
 			typedef std::unordered_map<unsigned int, std::string> LineMap_t;
 
-			File(const char *filename);
+			File(const std::string &filename);
 
 			std::string m_name;
 			std::string m_fileName;
@@ -37,14 +37,14 @@ namespace kcov
 			static int fileNameCount;
 
 		private:
-			void readFile(const char *filename);
+			void readFile(const std::string &filename);
 		};
 
 		typedef std::unordered_map<std::string, File *> FileMap_t;
 
 
 		/* Called when the ELF is parsed */
-		void onLine(const char *file, unsigned int lineNr, unsigned long addr);
+		void onLine(const std::string &file, unsigned int lineNr, unsigned long addr);
 
 
 		void *marshalSummary(IReporter::ExecutionSummary &summary,

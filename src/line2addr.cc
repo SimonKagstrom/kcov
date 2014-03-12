@@ -18,12 +18,10 @@ public:
 	{
 	}
 
-	void onLine(const char *file, unsigned int lineNr,
+	void onLine(const std::string &file, unsigned int lineNr,
 			unsigned long addr)
 	{
-		std::string cur(file);
-
-		if (cur.find(m_filePattern) != std::string::npos) {
+		if (file.find(m_filePattern) != std::string::npos) {
 			if (m_lineNr < 0 || lineNr == (unsigned int)m_lineNr)
 				report(addr);
 		}
