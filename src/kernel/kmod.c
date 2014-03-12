@@ -110,10 +110,11 @@ static void kpc_probe_work(struct work_struct *work)
 					container_of(work, struct kprobe_coverage_entry, work);
 	struct kprobe_coverage *kpc = global_kpc;
 
+	unregister_kprobe(&entry->kp);
+
 	/* Move from pending list to the hit list */
 	spin_lock(&kpc->pending_hit_lock);
 
-	unregister_kprobe(&entry->kp);
 	list_del(&entry->lh);
 	list_add_tail(&entry->lh, &kpc->hit_list);
 
