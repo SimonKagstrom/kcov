@@ -30,7 +30,7 @@ namespace kcov
 		class IFileListener
 		{
 		public:
-			virtual void onFile(const char *file, enum FileFlags flags) = 0;
+			virtual void onFile(const std::string &file, enum FileFlags flags) = 0;
 		};
 
 		virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data = 0) = 0;

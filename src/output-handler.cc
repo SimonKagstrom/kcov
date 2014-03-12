@@ -51,7 +51,7 @@ namespace kcov
 		}
 
 		// From IElf::IFileListener
-		void onFile(const char *file, enum IFileParser::FileFlags flags)
+		void onFile(const std::string &file, enum IFileParser::FileFlags flags)
 		{
 			// Only unmarshal the main file
 			if (flags & IFileParser::FLG_TYPE_SOLIB)
