@@ -84,11 +84,11 @@ private:
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
 			std::string line = file->m_lineMap[n];
 
-			if (!m_reporter.lineIsCode(file->m_name.c_str(), n))
+			if (!m_reporter.lineIsCode(file->m_name, n))
 					continue;
 
 			IReporter::LineExecutionCount cnt =
-					m_reporter.getLineExecutionCount(file->m_name.c_str(), n);
+					m_reporter.getLineExecutionCount(file->m_name, n);
 
 			nExecutedLines += !!cnt.m_hits;
 			nCodeLines++;

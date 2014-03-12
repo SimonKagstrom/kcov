@@ -22,10 +22,10 @@ class MockReporter : public IReporter
 {
 public:
 	MOCK_METHOD2(lineIsCode,
-			bool(const char *file, unsigned int lineNr));
+			bool(const std::string &file, unsigned int lineNr));
 
 	MOCK_METHOD2(getLineExecutionCount,
-			LineExecutionCount(const char *file, unsigned int lineNr));
+			LineExecutionCount(const std::string &file, unsigned int lineNr));
 
 	MOCK_METHOD0(getExecutionSummary,
 			ExecutionSummary());

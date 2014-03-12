@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <stddef.h>
 
 namespace kcov
@@ -40,9 +42,9 @@ namespace kcov
 
 		virtual ~IReporter() {}
 
-		virtual bool lineIsCode(const char *file, unsigned int lineNr) = 0;
+		virtual bool lineIsCode(const std::string &file, unsigned int lineNr) = 0;
 
-		virtual LineExecutionCount getLineExecutionCount(const char *file, unsigned int lineNr) = 0;
+		virtual LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr) = 0;
 
 		virtual ExecutionSummary getExecutionSummary() = 0;
 

@@ -146,7 +146,7 @@ private:
 
 			s += "<span class=\"lineNum\">" + fmt("%5u", n) + "</span>";
 
-			if (!m_reporter.lineIsCode(file->m_name.c_str(), n)) {
+			if (!m_reporter.lineIsCode(file->m_name, n)) {
 				if (type == IConfiguration::OUTPUT_COVERAGE)
 					s += "              : " + escapeHtml(line) + "</span>\n";
 				else
@@ -155,7 +155,7 @@ private:
 			}
 
 			IReporter::LineExecutionCount cnt =
-					m_reporter.getLineExecutionCount(file->m_name.c_str(), n);
+					m_reporter.getLineExecutionCount(file->m_name, n);
 
 			std::string lineClass = "lineNoCov";
 

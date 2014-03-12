@@ -33,7 +33,7 @@ public:
 		m_collector.registerListener(*this);
 	}
 
-	bool lineIsCode(const char *file, unsigned int lineNr)
+	bool lineIsCode(const std::string &file, unsigned int lineNr)
 	{
 		bool out;
 
@@ -42,7 +42,7 @@ public:
 		return out;
 	}
 
-	LineExecutionCount getLineExecutionCount(const char *file, unsigned int lineNr)
+	LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr)
 	{
 		unsigned int hits = 0;
 		unsigned int possibleHits = 0;
