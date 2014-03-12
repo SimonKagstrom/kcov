@@ -10,10 +10,10 @@ namespace kcov
 		class Handler
 		{
 		public:
-			virtual bool includeFile(std::string file) = 0;
+			virtual bool includeFile(const std::string &file) = 0;
 		};
 
-		virtual bool runFilters(std::string file) = 0;
+		virtual bool runFilters(const std::string &file) = 0;
 
 
 		static IFilter &getInstance();

@@ -31,7 +31,7 @@ public:
 		m_pathHandler = new PathHandler();
 	}
 
-	bool runFilters(std::string file)
+	bool runFilters(const std::string &file)
 	{
 		if (m_pathHandler->isSetup())
 			return m_pathHandler->includeFile(file);
@@ -104,7 +104,7 @@ private:
 			return !(m_includePaths.size() == 0 && m_excludePaths.size() == 0);
 		}
 
-		bool includeFile(std::string file)
+		bool includeFile(const std::string &file)
 		{
 			if (m_includePaths.size() == 0 && m_excludePaths.size() == 0)
 				return true;
