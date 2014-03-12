@@ -22,9 +22,9 @@ namespace kcov
 		virtual void produce() = 0;
 
 
-		virtual std::string getBaseDirectory() = 0;
+		virtual const std::string &getBaseDirectory() = 0;
 
-		virtual std::string getOutDirectory() = 0;
+		virtual const std::string &getOutDirectory() = 0;
 
 		static IOutputHandler &create(IFileParser &parser, IReporter &reporter);
 

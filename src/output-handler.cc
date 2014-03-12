@@ -34,13 +34,13 @@ namespace kcov
 			parser.registerFileListener(*this);
 		}
 
-		std::string getBaseDirectory()
+		const std::string &getBaseDirectory()
 		{
 			return m_baseDirectory;
 		}
 
 
-		std::string getOutDirectory()
+		const std::string &getOutDirectory()
 		{
 			return m_outDirectory;
 		}
