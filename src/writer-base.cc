@@ -89,7 +89,7 @@ void WriterBase::onLine(const std::string &file, unsigned int lineNr, unsigned l
 
 
 void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary,
-		std::string &name, size_t *sz)
+		const std::string &name, size_t *sz)
 {
 	struct summaryStruct *p;
 

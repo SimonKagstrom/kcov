@@ -287,17 +287,17 @@ public:
 		return true;
 	}
 
-	std::string &getOutDirectory()
+	const std::string &getOutDirectory()
 	{
 		return m_outDirectory;
 	}
 
-	std::string &getBinaryName()
+	const std::string &getBinaryName()
 	{
 		return m_binaryName;
 	}
 
-	std::string &getBinaryPath()
+	const std::string &getBinaryPath()
 	{
 		return m_binaryPath;
 	}

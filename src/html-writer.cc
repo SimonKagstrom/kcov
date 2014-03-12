@@ -558,7 +558,7 @@ private:
 		return dst + len;
 	}
 
-	std::string escapeHtml(std::string &str)
+	std::string escapeHtml(const std::string &str)
 	{
 		const char *s = str.c_str();
 		char buf[4096];

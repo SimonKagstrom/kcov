@@ -48,7 +48,7 @@ namespace kcov
 
 
 		void *marshalSummary(IReporter::ExecutionSummary &summary,
-				std::string &name, size_t *sz);
+				const std::string &name, size_t *sz);
 
 		bool unMarshalSummary(void *data, size_t sz,
 				IReporter::ExecutionSummary &summary,
