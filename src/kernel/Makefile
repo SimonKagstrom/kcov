@@ -1,9 +1,9 @@
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 
-CFLAGS_kmod.o += -g3
+CFLAGS_kprobe-coverage.o += -g3
 
-obj-m += kmod.o
+obj-m += kprobe-coverage.o
 
 default:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
