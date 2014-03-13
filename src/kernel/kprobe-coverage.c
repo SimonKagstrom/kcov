@@ -125,7 +125,7 @@ static void kpc_probe_work(struct work_struct *work)
 
 static void kpc_free_entry(struct kprobe_coverage_entry *entry)
 {
-	vfree(entry);
+	kfree(entry);
 }
 
 static struct kprobe_coverage_entry *kpc_new_entry(struct kprobe_coverage *kpc,
@@ -134,7 +134,7 @@ static struct kprobe_coverage_entry *kpc_new_entry(struct kprobe_coverage *kpc,
 	struct kprobe_coverage_entry *out;
 	unsigned long base_addr = 0;
 
-	out = vzalloc(sizeof(*out));
+	out = kzalloc(sizeof(*out), GFP_KERNEL);
 	if (!out)
 		return NULL;
 
@@ -340,12 +340,12 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 	char *p;
 
 	/* Assure it's NULL terminated */
-	buf = (char *)vzalloc(count + 1);
+	buf = (char *)kzalloc(count + 1, GFP_KERNEL);
 	if (!buf)
 		return -ENOMEM;
 
 	if (copy_from_user(buf, user_buf, count)) {
-		vfree(buf);
+		kfree(buf);
 		return -EFAULT;
 	}
 	p = buf;
@@ -382,7 +382,7 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 		kpc_add_probe(kpc, module, addr);
 	}
 
-	vfree(buf);
+	kfree(buf);
 	*off += out;
 
 	return out;
@@ -512,14 +512,16 @@ static int __init kpc_init_module(void)
 {
 	int out;
 
-	global_kpc = vmalloc(sizeof(*global_kpc));
+	global_kpc = kzalloc(sizeof(*global_kpc), GFP_KERNEL);
 	if (!global_kpc)
 		return -ENOMEM;
-	memset(global_kpc, 0, sizeof(*global_kpc));
 
 	out = kpc_init(global_kpc);
-	if (out < 0)
-		vfree(global_kpc);
+	if (out < 0) {
+		kfree(global_kpc);
+
+		global_kpc = NULL;
+	}
 
 	return out;
 }
@@ -531,7 +533,7 @@ static void __exit kpc_exit_module(void)
 	debugfs_remove_recursive(global_kpc->debugfs_root);
 	unregister_module_notifier(&kpc_module_notifier_block);
 
-	vfree(global_kpc);
+	kfree(global_kpc);
 	global_kpc = NULL;
 }
 
