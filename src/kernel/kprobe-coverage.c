@@ -1,7 +1,7 @@
 /*
  * lib/kprobe-coverage.c
  *
- * Copyright (C) 2012 Simon Kagstrom
+ * Copyright (C) 2014 Simon Kagstrom
  *
  * Author: Simon Kagstrom <simon.kagstrom@gmail.com>
  *
@@ -116,10 +116,10 @@ static void kpc_probe_work(struct work_struct *work)
 	list_del(&entry->lh);
 	list_add_tail(&entry->lh, &kpc->hit_list);
 
-	mutex_unlock(&kpc->lock);
-
 	/* Wake up the listener */
 	wake_up(&kpc->wq);
+
+	mutex_unlock(&kpc->lock);
 }
 
 
