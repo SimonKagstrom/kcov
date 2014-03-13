@@ -33,10 +33,10 @@ struct kprobe_coverage
 	struct list_head pending_list;  /* Probes which has not yet triggered */
 	struct list_head hit_list;      /* Triggered probes awaiting readout */
 
-	struct mutex list_lock;
-
 	const char *module_names[32];
 	unsigned int name_count;
+
+	struct mutex lock;
 };
 
 struct kprobe_coverage_entry
@@ -51,7 +51,9 @@ struct kprobe_coverage_entry
 
 static struct kprobe_coverage *global_kpc;
 
-static int kpc_module_name_to_index(struct kprobe_coverage *kpc,
+/* Return index into module name vector. Should be called with
+ * mutex held. */
+static int module_name_to_index(struct kprobe_coverage *kpc,
 		const char *module_name)
 {
 	int i;
@@ -73,19 +75,17 @@ static int kpc_allocate_module_name_index(struct kprobe_coverage *kpc,
 {
 	int index;
 
-	index = kpc_module_name_to_index(kpc, module_name);
-	if (index >= 0)
-		return index;
+	mutex_lock(&kpc->lock);
+	index = module_name_to_index(kpc, module_name);
 
-	/* Not found, allocate a new entry */
-	index = kpc->name_count;
+	/* Not found? If so allocate new entry unless vector is full */
+	if (index < 0 && kpc->name_count < ARRAY_SIZE(kpc->module_names)) {
+		index = kpc->name_count;
 
-	/* Out of bounds? */
-	if (index >= ARRAY_SIZE(kpc->module_names))
-		return -1;
-
-	kpc->module_names[index] = kstrdup(module_name, GFP_KERNEL);
-	kpc->name_count++;
+		kpc->module_names[index] = kstrdup(module_name, GFP_KERNEL);
+		kpc->name_count++;
+	}
+	mutex_unlock(&kpc->lock);
 
 	return index;
 
@@ -111,12 +111,12 @@ static void kpc_probe_work(struct work_struct *work)
 	unregister_kprobe(&entry->kp);
 
 	/* Move from pending list to the hit list */
-	mutex_lock(&kpc->list_lock);
+	mutex_lock(&kpc->lock);
 
 	list_del(&entry->lh);
 	list_add_tail(&entry->lh, &kpc->hit_list);
 
-	mutex_unlock(&kpc->list_lock);
+	mutex_unlock(&kpc->lock);
 
 	/* Wake up the listener */
 	wake_up(&kpc->wq);
@@ -151,7 +151,8 @@ static struct kprobe_coverage_entry *kpc_new_entry(struct kprobe_coverage *kpc,
 	return out;
 }
 
-static int kpc_enable_probe(struct kprobe_coverage *kpc,
+/* Called with the lock held */
+static int enable_probe(struct kprobe_coverage *kpc,
 		struct kprobe_coverage_entry *entry)
 {
 	int err;
@@ -159,9 +160,7 @@ static int kpc_enable_probe(struct kprobe_coverage *kpc,
 	if ( (err = register_kprobe(&entry->kp)) < 0)
 		return -EINVAL;
 
-	mutex_lock(&kpc->list_lock);
 	list_add(&entry->lh, &kpc->pending_list);
-	mutex_unlock(&kpc->list_lock);
 
 	if (enable_kprobe(&entry->kp) < 0) {
 		unregister_kprobe(&entry->kp);
@@ -172,12 +171,11 @@ static int kpc_enable_probe(struct kprobe_coverage *kpc,
 	return 0;
 }
 
-static void kpc_defer_probe(struct kprobe_coverage *kpc,
+/* Called with the lock held */
+static void defer_probe(struct kprobe_coverage *kpc,
 		struct kprobe_coverage_entry *entry)
 {
-	mutex_lock(&kpc->list_lock);
 	list_add(&entry->lh, &kpc->deferred_list);
-	mutex_unlock(&kpc->list_lock);
 }
 
 static void kpc_add_probe(struct kprobe_coverage *kpc, const char *module_name,
@@ -205,17 +203,20 @@ static void kpc_add_probe(struct kprobe_coverage *kpc, const char *module_name,
 	 *
 	 * 3. loaded module - module_name and module is !NULL: Instrument directly
 	 */
+	mutex_lock(&kpc->lock);
 	if (module_name && !module)
-		kpc_defer_probe(kpc, entry);
+		defer_probe(kpc, entry);
 	else
-		rv = kpc_enable_probe(kpc, entry);
+		rv = enable_probe(kpc, entry);
+	mutex_unlock(&kpc->lock);
 
 	/* Probe enabling might fail, just free the entry */
 	if (rv < 0)
 		kpc_free_entry(entry);
 }
 
-static void kpc_clear_list(struct kprobe_coverage *kpc,
+/* Called with lock held */
+static void clear_list(struct kprobe_coverage *kpc,
 		struct list_head *list, int do_unregister)
 {
 	struct list_head *iter;
@@ -238,18 +239,18 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 	int i;
 
 	/* Free everything on the lists */
-	mutex_lock(&kpc->list_lock);
+	mutex_lock(&kpc->lock);
 
-	kpc_clear_list(kpc, &kpc->deferred_list, 0);
+	clear_list(kpc, &kpc->deferred_list, 0);
 	INIT_LIST_HEAD(&kpc->deferred_list);
 
-	kpc_clear_list(kpc, &kpc->hit_list, 1);
-	kpc_clear_list(kpc, &kpc->pending_list, 1);
+	clear_list(kpc, &kpc->hit_list, 1);
+	clear_list(kpc, &kpc->pending_list, 1);
 
 	INIT_LIST_HEAD(&kpc->pending_list);
 	INIT_LIST_HEAD(&kpc->hit_list);
 
-	mutex_unlock(&kpc->list_lock);
+	mutex_unlock(&kpc->lock);
 
 	for (i = 0; i < kpc->name_count; i++) {
 		kfree(kpc->module_names[i]);
@@ -269,10 +270,10 @@ static void *kpc_unlink_next(struct kprobe_coverage *kpc)
 	err = wait_event_interruptible(kpc->wq, !list_empty(&kpc->hit_list));
 	if (err < 0)
 		return NULL;
-	mutex_lock(&kpc->list_lock);
+	mutex_lock(&kpc->lock);
 	entry = list_first_entry(&kpc->hit_list, struct kprobe_coverage_entry, lh);
 	list_del(&entry->lh);
-	mutex_unlock(&kpc->list_lock);
+	mutex_unlock(&kpc->lock);
 
 	return entry;
 }
@@ -393,14 +394,14 @@ static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
 	struct list_head *iter;
 	struct list_head *tmp;
 
-	mutex_lock(&kpc->list_lock);
+	mutex_lock(&kpc->lock);
 	list_for_each_safe(iter, tmp, &kpc->deferred_list) {
 		struct kprobe_coverage_entry *entry;
 
 		entry = (struct kprobe_coverage_entry *)container_of(iter,
 				struct kprobe_coverage_entry, lh);
 
-		if (kpc_module_name_to_index(kpc, mod->name) != entry->name_index)
+		if (module_name_to_index(kpc, mod->name) != entry->name_index)
 			continue;
 
 		/* Move the deferred entry to the pending list and enable */
@@ -408,10 +409,10 @@ static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
 		entry->base_addr = (unsigned long)mod->module_core;
 		entry->kp.addr += entry->base_addr;
 
-		if (kpc_enable_probe(kpc, entry) < 0)
+		if (enable_probe(kpc, entry) < 0)
 			kpc_free_entry(entry);
 	}
-	mutex_unlock(&kpc->list_lock);
+	mutex_unlock(&kpc->lock);
 }
 
 static void kpc_handle_going_module(struct kprobe_coverage *kpc,
@@ -420,21 +421,21 @@ static void kpc_handle_going_module(struct kprobe_coverage *kpc,
 	struct list_head *iter;
 	struct list_head *tmp;
 
-	mutex_lock(&kpc->list_lock);
+	mutex_lock(&kpc->lock);
 	list_for_each_safe(iter, tmp, &kpc->pending_list) {
 		struct kprobe_coverage_entry *entry;
 
 		entry = (struct kprobe_coverage_entry *)container_of(iter,
 				struct kprobe_coverage_entry, lh);
 
-		if (kpc_module_name_to_index(kpc, mod->name) != entry->name_index)
+		if (module_name_to_index(kpc, mod->name) != entry->name_index)
 			continue;
 
 		/* Remove pending entries for the current module */
 		unregister_kprobe(&entry->kp);
 		list_del(&entry->lh);
 	}
-	mutex_unlock(&kpc->list_lock);
+	mutex_unlock(&kpc->lock);
 }
 
 static int kpc_module_notifier(struct notifier_block *nb,
@@ -494,14 +495,14 @@ static int __init kpc_init(struct kprobe_coverage *kpc)
 	INIT_LIST_HEAD(&kpc->deferred_list);
 
 	init_waitqueue_head(&kpc->wq);
-	mutex_init(&kpc->list_lock);
+	mutex_init(&kpc->lock);
 
 	/* The kernel is always index 0 */
 	kpc->name_count = 1;
 
 	return 0;
 
-	out_files:
+out_files:
 	debugfs_remove_recursive(kpc->debugfs_root);
 
 	return -EINVAL;
