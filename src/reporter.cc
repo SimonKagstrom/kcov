@@ -114,10 +114,6 @@ public:
 
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
-		// Should already be 0, but anyway
-		for (const auto &it : m_addrToLine)
-			it.second->clearHits();
-
 		for (size_t i = 0; i < n; i++) {
 			unsigned long addr;
 			unsigned int hits;
