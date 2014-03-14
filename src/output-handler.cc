@@ -19,7 +19,8 @@ namespace kcov
 	class OutputHandler : public IOutputHandler, IFileParser::IFileListener
 	{
 	public:
-		OutputHandler(IFileParser &parser, IReporter &reporter) : m_reporter(reporter)
+		OutputHandler(IFileParser &parser, IReporter &reporter) : m_reporter(reporter),
+			m_unmarshalled(false)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
@@ -53,8 +54,8 @@ namespace kcov
 		// From IElf::IFileListener
 		void onFile(const std::string &file, enum IFileParser::FileFlags flags)
 		{
-			// Only unmarshal the main file
-			if (flags & IFileParser::FLG_TYPE_SOLIB)
+			// Only unmarshal once
+			if (m_unmarshalled)
 				return;
 
 			size_t sz;
@@ -67,10 +68,14 @@ namespace kcov
 			}
 
 			free(data);
+
+			m_unmarshalled = true;
 		}
 
 		void start()
 		{
+			m_unmarshalled = false;
+
 			for (const auto &it : m_writers)
 				it->onStartup();
 		}
@@ -109,6 +114,8 @@ namespace kcov
 		std::string m_summaryDbFileName;
 
 		WriterList_t m_writers;
+
+		bool m_unmarshalled;
 	};
 
 	static OutputHandler *instance;
