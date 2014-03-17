@@ -98,6 +98,16 @@ extern int concat_files(const char *dst, const char *file_a, const char *file_b)
 
 extern const char *get_home();
 
+/**
+ * Return true if a FILE * is readable without blocking.
+ *
+ * @param fp the file to read
+ * @param ms the number of milliseconds to wait
+ *
+ * @return true if the file can be read without blocking, false otherwise
+ */
+bool file_readable(FILE *fp, unsigned int ms);
+
 unsigned long get_aligned(unsigned long addr);
 
 unsigned long get_aligned_4b(unsigned long addr);

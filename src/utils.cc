@@ -97,6 +97,24 @@ const char *get_home(void)
 	return getenv("HOME");
 }
 
+bool file_readable(FILE *fp, unsigned int ms)
+{
+	fd_set rfds;
+	struct timeval tv;
+	int rv;
+
+	int fd = fileno(fp);
+
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+
+	tv.tv_sec = ms / 1000;
+	tv.tv_usec = (ms % 1000) * 1000;
+
+	rv = select(fd + 1, &rfds, NULL, NULL, &tv);
+
+	return rv > 0;
+}
 
 int file_exists(const char *path)
 {
