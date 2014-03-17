@@ -19,7 +19,10 @@ namespace kcov
 	class OutputHandler : public IOutputHandler, IFileParser::IFileListener
 	{
 	public:
-		OutputHandler(IFileParser &parser, IReporter &reporter) : m_reporter(reporter)
+		OutputHandler(IFileParser &parser, IReporter &reporter) :
+			m_reporter(reporter),
+			m_unmarshalSize(0),
+			m_unmarshalData(NULL)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
@@ -32,6 +35,11 @@ namespace kcov
 			mkdir(m_outDirectory.c_str(), 0755);
 
 			parser.registerFileListener(*this);
+		}
+
+		~OutputHandler()
+		{
+			free(m_unmarshalData);
 		}
 
 		const std::string &getBaseDirectory()
@@ -57,16 +65,13 @@ namespace kcov
 			if (flags & IFileParser::FLG_TYPE_SOLIB)
 				return;
 
-			size_t sz;
+			if (!m_unmarshalData)
+				m_unmarshalData = read_file(&m_unmarshalSize, m_dbFileName.c_str());
 
-			void *data = read_file(&sz, m_dbFileName.c_str());
-
-			if (data) {
-				if (!m_reporter.unMarshal(data, sz))
+			if (m_unmarshalData) {
+				if (!m_reporter.unMarshal(m_unmarshalData, m_unmarshalSize))
 					kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
 			}
-
-			free(data);
 		}
 
 		void start()
@@ -109,6 +114,9 @@ namespace kcov
 		std::string m_summaryDbFileName;
 
 		WriterList_t m_writers;
+
+		size_t m_unmarshalSize;
+		void *m_unmarshalData;
 	};
 
 	static OutputHandler *instance;
