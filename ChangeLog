@@ -1,3 +1,23 @@
+Kcov (16):
+	* kernel-engine: Implement an engine to handle kernel code coverage
+	  collection (not finished)
+
+	* kprobe-coverage: Refactor the kernel module so that it basically
+	  works now
+
+	* Code refactoring and more C++11-izing
+
+	* Python: Report absolute paths so that output filtering works
+
+	* Python: Catch exceptions in the python helper to avoid EOF etc
+	  being propagated upwards (and coverage collection to fail)
+
+	* Python: Fix a case where the engine would simply hang on waiting
+	  for more data
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
+
 Kcov (15):
 	* Workaround a shared-library issue where kcov would sometimes hang on
 	  the malloc. The workaround uses a static memory buffer instead.
