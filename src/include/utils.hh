@@ -148,6 +148,11 @@ public:
 		sem_init(&m_sem, 0, 0);
 	}
 
+	~Semaphore()
+	{
+		sem_destroy(&m_sem);
+	}
+
 	void notify()
 	{
 		sem_post(&m_sem);
