@@ -371,6 +371,10 @@ private:
 		if (feof(m_pipe))
 			return NULL; // Not an error
 
+		// No data?
+		if (!file_readable(m_pipe, 100))
+			return NULL;
+
 		rv = fread(buf, 1, sizeof(struct coverage_data), m_pipe);
 		if (rv == 0)
 			return NULL; // Not an error
