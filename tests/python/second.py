@@ -39,3 +39,32 @@ def jens_anka(kalle):
         print("Commodore 128")
     else:
         print("Hopp")
+    sven_anka()
+
+def sven_anka():
+    'single-quoted line'
+    pass
+
+def mats_anka():
+    "single-quoted line"
+    pass
+
+dict = {
+    2 : [ 1, 2, 3],
+    3 : [ 4,
+         5, 6
+        ],
+    5 :
+        {
+         9 : 1,
+         },
+    6 :
+        { },
+    7 :
+        { 1 : 2
+         },
+    8 :
+        [
+         1, 2
+         ]
+}
