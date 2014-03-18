@@ -244,6 +244,20 @@ python-coverage-python3
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 4
     Should Contain    ${output}    nocode
 
+python-tricky-single-line-string-assignment
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
+    Should Contain    ${output}    1
+
+python-tricky-single-dict-assignment
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 57
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 61
+    Should Contain    ${output}    1
+
 
 #python-select-parser
 #	Run								rm -rf ${out}/main
