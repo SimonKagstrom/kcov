@@ -306,6 +306,10 @@ private:
 			if (s.find("else:") != std::string::npos)
 				continue;
 
+			// Single-line python strings (e.g., 'description of the function')
+			if (isPythonString(s))
+				continue;
+
 			auto idx = multilineIdx(s);
 
 			switch (state)
@@ -373,6 +377,37 @@ private:
 		return idx;
 	}
 
+	bool isStringDelimiter(char c)
+	{
+		return c == '\'' || c == '"';
+	}
+
+	bool isPythonString(const std::string &s)
+	{
+		if (s.size() < 2)
+			return false;
+
+		char first = s[0];
+		char last = s[s.size() - 1];
+
+		if (!isStringDelimiter(first))
+			return false;
+
+		// Can be multi-line string, handled elsewhere
+		if (!isStringDelimiter(last))
+			return false;
+
+		unsigned i;
+		for (i = 0; i < s.size(); i++) {
+			if (!isStringDelimiter(s[i]))
+				break;
+		}
+		// Only string characters
+		if (i == s.size())
+			return false;
+
+		return true;
+	}
 
 
 	struct coverage_data *readCoverageDatum(uint8_t *buf, size_t totalSize)
