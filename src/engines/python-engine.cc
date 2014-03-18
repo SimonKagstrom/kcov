@@ -290,6 +290,18 @@ private:
 			if (s[0] == '#')
 				continue;
 
+			// Dict endings generate no code
+			if (s == "}" || s == "},")
+				continue;
+
+			// Ditto for list ends
+			if (s == "]" || s == "],")
+				continue;
+
+			// ... And starts
+			if (s == "[")
+				continue;
+
 			// else: statements are nops
 			if (s.find("else:") != std::string::npos)
 				continue;
