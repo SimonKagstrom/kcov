@@ -7,6 +7,9 @@ Kcov (16):
 
 	* Code refactoring and more C++11-izing
 
+	* Python: Filter out some false negatives (i.e., non-executable
+	  lines marked as red)
+
 	* Python: Report absolute paths so that output filtering works
 
 	* Python: Catch exceptions in the python helper to avoid EOF etc
