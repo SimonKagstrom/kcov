@@ -18,7 +18,7 @@ Kcov (16):
 	* Python: Fix a case where the engine would simply hang on waiting
 	  for more data
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Mar 21 16:38:28 CET 2014
 
 
 Kcov (15):
