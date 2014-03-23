@@ -19,6 +19,7 @@
 #include <linux/fs.h>
 #include <linux/vmalloc.h>
 #include <linux/slab.h>
+#include <linux/seq_file.h>
 #include <linux/uaccess.h>
 
 struct kprobe_coverage
@@ -263,72 +264,89 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 
 static void *kpc_unlink_next(struct kprobe_coverage *kpc)
 {
-	struct kprobe_coverage_entry *entry;
-	int err;
+	struct kprobe_coverage_entry *entry = NULL;
 
-	/* Wait for something to arrive on the hit list, abort on signal */
-	err = wait_event_interruptible(kpc->wq, !list_empty(&kpc->hit_list));
-	if (err < 0)
-		return NULL;
+	/* Remove the next entry, if any */
 	mutex_lock(&kpc->lock);
-	entry = list_first_entry(&kpc->hit_list, struct kprobe_coverage_entry, lh);
-	list_del(&entry->lh);
+	if (!list_empty(&kpc->hit_list)) {
+		entry = list_first_entry(&kpc->hit_list, struct kprobe_coverage_entry, lh);
+		list_del(&entry->lh);
+	}
 	mutex_unlock(&kpc->lock);
 
 	return entry;
 }
 
-
-static int kpc_control_open(struct inode *inode, struct file *file)
+static void *kpc_seq_start(struct seq_file *s, loff_t *pos)
 {
-	file->private_data = inode->i_private; /* kpc */
+	struct kprobe_coverage *kpc = s->private;
+	int rv;
 
-	return 0;
+	 /* Wait for something to arrive on the hit list, abort on signal */
+	rv = wait_event_interruptible(kpc->wq, !list_empty(&kpc->hit_list));
+	if (rv< 0)
+		return NULL;
+
+	return kpc_unlink_next(kpc);
 }
 
-static int kpc_show_open(struct inode *inode, struct file *file)
+static void *kpc_seq_next(struct seq_file *s, void *v, loff_t *pos)
 {
-	file->private_data = inode->i_private;
+	struct kprobe_coverage *kpc = s->private;
 
-	return 0;
+	/* Returns NULL if there is nothing more to handle */
+	return kpc_unlink_next(kpc);
 }
 
-static ssize_t kpc_show_read(struct file *file, char __user *user_buf,
-		size_t count, loff_t *off)
+static void kpc_seq_stop(struct seq_file *s, void *v)
 {
-	struct kprobe_coverage *kpc = file->private_data;
-	struct kprobe_coverage_entry *entry;
+}
+
+static int kpc_seq_show(struct seq_file *s, void *v)
+{
+	struct kprobe_coverage *kpc = s->private;
+	struct kprobe_coverage_entry *entry = v;
 	const char *module_name;
 	unsigned long addr;
-	char buf[MODULE_NAME_LEN + 20];
-	int n;
 
-	/* Wait for an entry */
-	entry = kpc_unlink_next(kpc);
-	if (!entry)
-		return 0;
-
+	/* Lookup the module name from the module table */
 	module_name = kpc->module_names[entry->name_index];
-
-	/* Write it out to the user buffer */
 	addr = (unsigned long)entry->kp.addr - entry->base_addr;
 
-	n = snprintf(buf, sizeof(buf), "%s%s0x%016lx\n",
+	seq_printf(s, "%s%s0x%016lx\n",
 			module_name ? module_name : "",
 			module_name ? ":" : "",
 			addr);
 
 	kpc_free_entry(entry);
 
-	/* Should never happen if snprintf works correctly */
-	if (n >= sizeof(buf))
-		return -EINVAL;
-
-	if (copy_to_user(user_buf + *off, buf, n))
-		n = -EFAULT;
-
-	return n;
+	return 0;
 }
+
+static struct seq_operations kpc_seq_ops =
+{
+	.start = kpc_seq_start,
+	.next  = kpc_seq_next,
+	.stop  = kpc_seq_stop,
+	.show  = kpc_seq_show
+};
+
+static int kpc_show_open(struct inode *inode, struct file *file)
+{
+	struct kprobe_coverage *kpc = inode->i_private;
+	int rv;
+
+	rv = seq_open(file, &kpc_seq_ops);
+
+	if (rv == 0) {
+		struct seq_file *s = file->private_data;
+
+		s->private = kpc;
+	}
+
+	return rv;
+}
+
 
 static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 		size_t count, loff_t *off)
@@ -386,6 +404,13 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 	*off += out;
 
 	return out;
+}
+
+static int kpc_control_open(struct inode *inode, struct file *file)
+{
+	file->private_data = inode->i_private; /* kpc */
+
+	return 0;
 }
 
 static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
@@ -463,8 +488,12 @@ static const struct file_operations kpc_show_fops =
 {
 	.owner = THIS_MODULE,
 	.open = kpc_show_open,
-	.read = kpc_show_read,
+	.read = seq_read,
+	.llseek = seq_lseek,
+	.release = seq_release,
 };
+
+
 
 static struct notifier_block kpc_module_notifier_block =
 {
