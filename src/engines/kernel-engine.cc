@@ -108,7 +108,9 @@ public:
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
-		// FIXME! Only works for kernel modules
+		if (filename.find("vmlinux") != std::string::npos)
+			return match_perfect;
+
 		if (filename.find(".ko") == std::string::npos)
 			return match_none;
 
