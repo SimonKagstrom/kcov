@@ -357,6 +357,9 @@ static ssize_t kpc_control_write(struct file *file, const char __user *user_buf,
 	char *buf;
 	char *p;
 
+	if (count > PAGE_SIZE)
+		return -E2BIG;
+
 	/* Assure it's NULL terminated */
 	buf = (char *)kzalloc(count + 1, GFP_KERNEL);
 	if (!buf)
