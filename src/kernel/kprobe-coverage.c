@@ -246,11 +246,10 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 	mutex_lock(&kpc->lock);
 
 	clear_list(kpc, &kpc->deferred_list, 0);
-	INIT_LIST_HEAD(&kpc->deferred_list);
-
 	clear_list(kpc, &kpc->hit_list, 1);
 	clear_list(kpc, &kpc->pending_list, 1);
 
+	INIT_LIST_HEAD(&kpc->deferred_list);
 	INIT_LIST_HEAD(&kpc->pending_list);
 	INIT_LIST_HEAD(&kpc->hit_list);
 
