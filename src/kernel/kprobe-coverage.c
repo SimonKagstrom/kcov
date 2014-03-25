@@ -59,6 +59,8 @@ static int module_name_to_index(struct kprobe_coverage *kpc,
 {
 	int i;
 
+	BUG_ON(!mutex_is_locked(&kpc->lock));
+
 	/* The first is always the kernel (NULL) */
 	if (module_name == NULL)
 		return 0;
@@ -158,6 +160,8 @@ static int enable_probe(struct kprobe_coverage *kpc,
 {
 	int err;
 
+	BUG_ON(!mutex_is_locked(&kpc->lock));
+
 	if ( (err = register_kprobe(&entry->kp)) < 0)
 		return -EINVAL;
 
@@ -225,6 +229,8 @@ static void clear_list(struct kprobe_coverage *kpc,
 {
 	struct list_head *iter;
 	struct list_head *tmp;
+
+	BUG_ON(!mutex_is_locked(&kpc->lock));
 
 	list_for_each_safe(iter, tmp, list) {
 		struct kprobe_coverage_entry *entry;
