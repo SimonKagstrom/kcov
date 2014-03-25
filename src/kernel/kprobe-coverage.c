@@ -465,6 +465,7 @@ static void kpc_handle_going_module(struct kprobe_coverage *kpc,
 		/* Remove pending entries for the current module */
 		unregister_kprobe(&entry->kp);
 		list_del(&entry->lh);
+		kpc_free_entry(entry);
 	}
 	mutex_unlock(&kpc->lock);
 }
