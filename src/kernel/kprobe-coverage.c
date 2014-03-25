@@ -161,10 +161,13 @@ static int enable_probe(struct kprobe_coverage *kpc,
 	if ( (err = register_kprobe(&entry->kp)) < 0)
 		return -EINVAL;
 
+	/* Done before enable_kprobe so that it's really on the list if
+	 * triggered */
 	list_add(&entry->lh, &kpc->pending_list);
 
 	if (enable_kprobe(&entry->kp) < 0) {
 		unregister_kprobe(&entry->kp);
+		list_del(&entry->lh);
 
 		return -EINVAL;
 	}
