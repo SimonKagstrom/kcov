@@ -26,7 +26,8 @@ struct kprobe_coverage
 {
 	struct dentry *debugfs_root;
 
-	wait_queue_head_t wq;
+	struct workqueue_struct *workqueue;
+	wait_queue_head_t wait_queue;
 
 	/* Each coverage entry is on exactly one of these lists */
 	struct list_head deferred_list; /* Probes for not-yet-loaded-modules */
@@ -100,7 +101,7 @@ static int kpc_pre_handler(struct kprobe *kp, struct pt_regs *regs)
 					container_of(kp, struct kprobe_coverage_entry, kp);
 
 	/* Schedule it for removal */
-	schedule_work(&entry->work);
+	queue_work(global_kpc->workqueue, &entry->work);
 
 	return 0;
 }
@@ -120,7 +121,7 @@ static void kpc_probe_work(struct work_struct *work)
 	list_add_tail(&entry->lh, &kpc->hit_list);
 
 	/* Wake up the listener */
-	wake_up(&kpc->wq);
+	wake_up(&kpc->wait_queue);
 
 	mutex_unlock(&kpc->lock);
 }
@@ -286,7 +287,7 @@ static void *kpc_seq_start(struct seq_file *s, loff_t *pos)
 	int rv;
 
 	 /* Wait for something to arrive on the hit list, abort on signal */
-	rv = wait_event_interruptible(kpc->wq, !list_empty(&kpc->hit_list));
+	rv = wait_event_interruptible(kpc->wait_queue, !list_empty(&kpc->hit_list));
 	if (rv< 0)
 		return NULL;
 
@@ -509,11 +510,16 @@ static struct notifier_block kpc_module_notifier_block =
 
 static int __init kpc_init(struct kprobe_coverage *kpc)
 {
+	kpc->workqueue = create_singlethread_workqueue("kprobe-coverage");
+
+	if (!kpc->workqueue)
+		return -ENODEV;
+
 	/* Create debugfs entries */
 	kpc->debugfs_root = debugfs_create_dir("kprobe-coverage", NULL);
 	if (!kpc->debugfs_root) {
 		printk(KERN_ERR "kprobe-coverage: creating root dir failed\n");
-		return -ENODEV;
+		goto out_workqueue;
 	}
 	if (!debugfs_create_file("control", 0200, kpc->debugfs_root, kpc,
 			&kpc_control_fops))
@@ -530,7 +536,7 @@ static int __init kpc_init(struct kprobe_coverage *kpc)
 	INIT_LIST_HEAD(&kpc->hit_list);
 	INIT_LIST_HEAD(&kpc->deferred_list);
 
-	init_waitqueue_head(&kpc->wq);
+	init_waitqueue_head(&kpc->wait_queue);
 	mutex_init(&kpc->lock);
 
 	/* The kernel is always index 0 */
@@ -540,6 +546,8 @@ static int __init kpc_init(struct kprobe_coverage *kpc)
 
 out_files:
 	debugfs_remove_recursive(kpc->debugfs_root);
+out_workqueue:
+	destroy_workqueue(kpc->workqueue);
 
 	return -EINVAL;
 }
@@ -568,6 +576,7 @@ static void __exit kpc_exit_module(void)
 
 	debugfs_remove_recursive(global_kpc->debugfs_root);
 	unregister_module_notifier(&kpc_module_notifier_block);
+	destroy_workqueue(global_kpc->workqueue);
 
 	kfree(global_kpc);
 	global_kpc = NULL;
