@@ -27,11 +27,12 @@ set (${TGT}_SRCS
     ../../src/writer-base.cc
     main.cc
     tests-collector.cc
+    tests-configuration.cc
     tests-elf.cc
     tests-filter.cc
     tests-reporter.cc
+    tests-utils.cc
     tests-writer.cc
-    tests-configuration.cc
     )
 set (CMAKE_BUILD_TYPE debug)
 
