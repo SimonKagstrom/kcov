@@ -35,7 +35,7 @@ public:
 	{
 		std::string s = fmt("%s0x%llx\n", m_module.c_str(), (unsigned long long)addr);
 
-		printf("%s", s.c_str());
+		kcov_debug(PTRACE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long)addr);
 		panic_if (!m_control,
 				"Control file not open???");
 
