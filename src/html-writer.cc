@@ -148,9 +148,9 @@ private:
 
 			if (!m_reporter.lineIsCode(file->m_name, n)) {
 				if (type == IConfiguration::OUTPUT_COVERAGE)
-					s += "              : " + escapeHtml(line) + "</span>\n";
+					s += "              : " + escape_html(line) + "</span>\n";
 				else
-					s += "                : " + escapeHtml(line) + "</span>\n";
+					s += "                : " + escape_html(line) + "</span>\n";
 				continue;
 			}
 
@@ -173,7 +173,7 @@ private:
 			if (type == IConfiguration::OUTPUT_COVERAGE) {
 				s += "<span class=\"" + lineClass + "\">    " +
 						fmt("%3u", cnt.m_hits) + "  / " + fmt("%3u", cnt.m_possibleHits) + ": " +
-						escapeHtml(line) +
+						escape_html(line) +
 						"</span>\n";
 			} else {
 				double percentage = 0;
@@ -200,7 +200,7 @@ private:
 				s += "<span style=\"background-color:" + fmt("#%02x%02x%02x", red, green, blue) + "\">" +
 						fmt("%8u", cnt.m_hits) + " / " + fmt("%3u%%", (unsigned int)percentage) + " </span>: " +
 						"<span>" +
-						escapeHtml(line) +
+						escape_html(line) +
 						"</span>\n";
 			}
 		}
@@ -487,13 +487,13 @@ private:
 		std::string commandStr = "";
 		if (includeCommand)
 			commandStr = "          <td class=\"headerItem\" width=\"20%\">Command:</td>\n"
-					"          <td class=\"headerValue\" width=\"80%\" colspan=6>" + escapeHtml(conf.getBinaryName()) + "</td>\n";
+					"          <td class=\"headerValue\" width=\"80%\" colspan=6>" + escape_html(conf.getBinaryName()) + "</td>\n";
 
 		return std::string(
 				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 				"<html>\n"
 				"<head>\n"
-				"  <title>Coverage - " + escapeHtml(conf.getBinaryName()) + "</title>\n"
+				"  <title>Coverage - " + escape_html(conf.getBinaryName()) + "</title>\n"
 				"  <link rel=\"stylesheet\" type=\"text/css\" href=\"bcov.css\"/>\n"
 				"</head>\n"
 				"<body>\n"
@@ -508,7 +508,7 @@ private:
 				"        </tr>\n"
 				"        <tr>\n"
 				"          <td class=\"headerItem\" width=\"20%\">Date:</td>\n"
-				"          <td class=\"headerValue\" width=\"15%\">" + escapeHtml(date) + "</td>\n"
+				"          <td class=\"headerValue\" width=\"15%\">" + escape_html(date) + "</td>\n"
 				"          <td width=\"5%\"></td>\n"
 				"          <td class=\"headerItem\" width=\"20%\">Instrumented&nbsp;lines:</td>\n"
 				"          <td class=\"headerValue\" width=\"10%\">" + instrumentedLines + "</td>\n"
@@ -545,72 +545,6 @@ private:
 		xsnprintf(buf, sizeof(buf),
 				"<img src=\"%s\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/><img src=\"snow.png\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/>",
 				color, width, percent, 100 - width, percent);
-
-		return std::string(buf);
-	}
-
-	char *escapeHelper(char *dst, const char *what)
-	{
-		int len = strlen(what);
-
-		strcpy(dst, what);
-
-		return dst + len;
-	}
-
-	std::string escapeHtml(const std::string &str)
-	{
-		const char *s = str.c_str();
-		char buf[4096];
-		char *dst = buf;
-		size_t len = strlen(s);
-		bool truncated = false;
-		size_t i;
-
-		// Truncate long lines (or entries)
-		if (len > 512) {
-			len = 512;
-			truncated = true;
-		}
-
-		memset(buf, 0, sizeof(buf));
-		for (i = 0; i < len; i++) {
-			char c = s[i];
-
-			switch (c) {
-			case '<':
-				dst = escapeHelper(dst, "&lt;");
-				break;
-			case '>':
-				dst = escapeHelper(dst, "&gt;");
-				break;
-			case '&':
-				dst = escapeHelper(dst, "&amp;");
-				break;
-			case '\"':
-				dst = escapeHelper(dst, "&quot;");
-				break;
-			case '\'':
-				dst = escapeHelper(dst, "&#039;");
-				break;
-			case '/':
-				dst = escapeHelper(dst, "&#047;");
-				break;
-			case '\\':
-				dst = escapeHelper(dst, "&#092;");
-				break;
-			case '\n': case '\r':
-				dst = escapeHelper(dst, " ");
-				break;
-			default:
-				*dst = c;
-				dst++;
-				break;
-			}
-		}
-
-		if (truncated)
-			return std::string(buf) + "...";
 
 		return std::string(buf);
 	}

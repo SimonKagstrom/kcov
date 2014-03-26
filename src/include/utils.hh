@@ -137,6 +137,8 @@ bool string_is_integer(const std::string &str, unsigned base = 0);
 
 int64_t string_to_integer(const std::string &str, unsigned base = 0);
 
+std::string escape_html(const std::string &str);
+
 class Semaphore
 {
 private:

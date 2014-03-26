@@ -312,3 +312,71 @@ int64_t string_to_integer(const std::string &str, unsigned base)
 
 	return (int64_t)stoull(str, &pos, base);
 }
+
+
+
+static char *escape_helper(char *dst, const char *what)
+{
+	int len = strlen(what);
+
+	strcpy(dst, what);
+
+	return dst + len;
+}
+
+std::string escape_html(const std::string &str)
+{
+	const char *s = str.c_str();
+	char buf[4096];
+	char *dst = buf;
+	size_t len = strlen(s);
+	bool truncated = false;
+	size_t i;
+
+	// Truncate long lines (or entries)
+	if (len > 512) {
+		len = 512;
+		truncated = true;
+	}
+
+	memset(buf, 0, sizeof(buf));
+	for (i = 0; i < len; i++) {
+		char c = s[i];
+
+		switch (c) {
+		case '<':
+			dst = escape_helper(dst, "&lt;");
+			break;
+		case '>':
+			dst = escape_helper(dst, "&gt;");
+			break;
+		case '&':
+			dst = escape_helper(dst, "&amp;");
+			break;
+		case '\"':
+			dst = escape_helper(dst, "&quot;");
+			break;
+		case '\'':
+			dst = escape_helper(dst, "&#039;");
+			break;
+		case '/':
+			dst = escape_helper(dst, "&#047;");
+			break;
+		case '\\':
+			dst = escape_helper(dst, "&#092;");
+			break;
+		case '\n': case '\r':
+			dst = escape_helper(dst, " ");
+			break;
+		default:
+			*dst = c;
+			dst++;
+			break;
+		}
+	}
+
+	if (truncated)
+		return std::string(buf) + "...";
+
+	return std::string(buf);
+}
