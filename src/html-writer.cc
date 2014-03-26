@@ -564,7 +564,13 @@ private:
 		char buf[4096];
 		char *dst = buf;
 		size_t len = strlen(s);
+		bool truncated = false;
 		size_t i;
+
+		// Truncate long lines (or entries)
+		if (len > 512) {
+			len = 512;
+		}
 
 		memset(buf, 0, sizeof(buf));
 		for (i = 0; i < len; i++) {
@@ -601,6 +607,9 @@ private:
 				break;
 			}
 		}
+
+		if (truncated)
+			return std::string(buf) + "...";
 
 		return std::string(buf);
 	}
