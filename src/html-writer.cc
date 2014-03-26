@@ -570,6 +570,7 @@ private:
 		// Truncate long lines (or entries)
 		if (len > 512) {
 			len = 512;
+			truncated = true;
 		}
 
 		memset(buf, 0, sizeof(buf));
