@@ -127,12 +127,12 @@ static void kpc_probe_work(struct work_struct *work)
 }
 
 
-static void kpc_free_entry(struct kprobe_coverage_entry *entry)
+static void free_entry(struct kprobe_coverage_entry *entry)
 {
 	kfree(entry);
 }
 
-static struct kprobe_coverage_entry *kpc_new_entry(struct kprobe_coverage *kpc,
+static struct kprobe_coverage_entry *new_entry(struct kprobe_coverage *kpc,
 		const char *module_name, struct module *mod, unsigned long where)
 {
 	struct kprobe_coverage_entry *out;
@@ -196,7 +196,7 @@ static void kpc_add_probe(struct kprobe_coverage *kpc, const char *module_name,
 		preempt_enable();
 	}
 
-	entry = kpc_new_entry(kpc, module_name, module, where);
+	entry = new_entry(kpc, module_name, module, where);
 
 	/* Three cases:
 	 *
@@ -216,7 +216,7 @@ static void kpc_add_probe(struct kprobe_coverage *kpc, const char *module_name,
 
 	/* Probe enabling might fail, just free the entry */
 	if (rv < 0)
-		kpc_free_entry(entry);
+		free_entry(entry);
 }
 
 /* Called with lock held */
@@ -236,7 +236,7 @@ static void clear_list(struct kprobe_coverage *kpc,
 		if (do_unregister)
 			unregister_kprobe(&entry->kp);
 		list_del(&entry->lh);
-		kpc_free_entry(entry);
+		free_entry(entry);
 	}
 }
 
@@ -322,7 +322,7 @@ static int kpc_seq_show(struct seq_file *s, void *v)
 			module_name ? ":" : "",
 			addr);
 
-	kpc_free_entry(entry);
+	free_entry(entry);
 
 	return 0;
 }
@@ -442,7 +442,7 @@ static void kpc_handle_coming_module(struct kprobe_coverage *kpc,
 		entry->kp.addr += entry->base_addr;
 
 		if (enable_probe(kpc, entry) < 0)
-			kpc_free_entry(entry);
+			free_entry(entry);
 	}
 	mutex_unlock(&kpc->lock);
 }
@@ -466,7 +466,7 @@ static void kpc_handle_going_module(struct kprobe_coverage *kpc,
 		/* Remove pending entries for the current module */
 		unregister_kprobe(&entry->kp);
 		list_del(&entry->lh);
-		kpc_free_entry(entry);
+		free_entry(entry);
 	}
 	mutex_unlock(&kpc->lock);
 }
