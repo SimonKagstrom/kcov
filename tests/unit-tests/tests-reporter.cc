@@ -170,12 +170,5 @@ TEST(reporter)
 	res = reporter.unMarshal(data, sz);
 	ASSERT_FALSE(res);
 
-	// Unmarshal resets this
-	summary = reporter.getExecutionSummary();
-	ASSERT_TRUE(summary.m_executedLines == 2U);
-
-	lc = reporter.getLineExecutionCount(elfListener.m_file.c_str(), 17);
-	ASSERT_TRUE(lc.m_hits == 0U);
-
 	free(data);
 }
