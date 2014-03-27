@@ -255,8 +255,6 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 	INIT_LIST_HEAD(&kpc->pending_list);
 	INIT_LIST_HEAD(&kpc->hit_list);
 
-	mutex_unlock(&kpc->lock);
-
 	for (i = 0; i < kpc->name_count; i++) {
 		kfree(kpc->module_names[i]);
 
@@ -264,6 +262,8 @@ static void kpc_clear(struct kprobe_coverage *kpc)
 	}
 	/* Kernel is still at 0 */
 	kpc->name_count = 1;
+
+	mutex_unlock(&kpc->lock);
 }
 
 static void *kpc_unlink_next(struct kprobe_coverage *kpc)
