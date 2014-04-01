@@ -33,6 +33,12 @@ public:
 	// From IEngine
 	int registerBreakpoint(unsigned long addr)
 	{
+		// Don't register the same BP twice
+		if (m_addresses.find(addr) != m_addresses.end())
+			return 0;
+
+		m_addresses[addr] = true;
+
 		std::string s = fmt("%s0x%llx\n", m_module.c_str(), (unsigned long long)addr);
 
 		kcov_debug(PTRACE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long)addr);
@@ -156,6 +162,8 @@ private:
 	FILE *m_control;
 	FILE *m_show;
 	IEventListener *m_listener;
+
+	std::unordered_map<unsigned long, bool> m_addresses;
 
 	std::string m_module;
 };
