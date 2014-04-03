@@ -61,8 +61,10 @@ namespace kcov
 		IFileParser &m_fileParser;
 		IReporter &m_reporter;
 		FileMap_t m_files;
-		FileMap_t m_nonExistingFiles;
 		std::string m_commonPath;
+
+	private:
 		IFilter &m_filter;
+		FileMap_t m_nonExistingFiles;
 	};
 }
