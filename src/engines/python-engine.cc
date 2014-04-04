@@ -16,7 +16,7 @@
 #include <list>
 #include <unordered_map>
 
-#include "../swap-endian.hh"
+#include <swap-endian.hh>
 
 using namespace kcov;
 

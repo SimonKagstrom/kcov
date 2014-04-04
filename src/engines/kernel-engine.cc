@@ -15,8 +15,6 @@
 #include <list>
 #include <unordered_map>
 
-#include "../swap-endian.hh"
-
 using namespace kcov;
 
 class KernelEngine : public IEngine
