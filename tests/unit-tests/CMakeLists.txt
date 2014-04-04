@@ -30,6 +30,7 @@ set (${TGT}_SRCS
     tests-configuration.cc
     tests-elf.cc
     tests-filter.cc
+    tests-merge-parser.cc
     tests-reporter.cc
     tests-utils.cc
     tests-writer.cc
