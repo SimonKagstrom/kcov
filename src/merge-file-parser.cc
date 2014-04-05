@@ -14,6 +14,9 @@
 
 using namespace kcov;
 
+#define MERGE_MAGIC   0x4d6f6172 // "Moar"
+#define MERGE_VERSION 1
+
 struct line_entry
 {
 	uint32_t line;
@@ -86,15 +89,23 @@ public:
 
 
 	// From IFileParser::ILineListener
-	void onLine(const std::string &file, unsigned int lineNr,
+	void onLine(const std::string &filename, unsigned int lineNr,
 					unsigned long addr)
 	{
-		LineId key(file, lineNr);
+		LineId key(filename, lineNr);
+		File *file;
 
+		file = m_files[filename];
+		if (!file) {
+			file = new File(filename);
+			m_files[filename] = file;
+		}
+
+		file->addLine(lineNr, addr);
 		m_localEntries[key][addr]++;
 
 		for (const auto &it : m_listeners)
-			it->onLine(file, lineNr, addr);
+			it->onLine(filename, lineNr, addr);
 	}
 
 	// From IFileParser::IFileListener
@@ -123,17 +134,68 @@ public:
 
 
 private:
-	const file_data *marshalFile(const std::string &name)
+	const struct file_data *marshalFile(const std::string &filename)
 	{
-		return NULL;
+		File *file = m_files[filename];
+
+		if (!file)
+			return nullptr;
+
+		// Header + each line + the filename
+		struct file_data *out = (struct file_data *)xmalloc(sizeof(*out) +
+				file->m_lines.size() * sizeof(struct line_entry) +
+				file->m_filename.size() + 1);
+
+		out->magic = to_be<uint32_t>(MERGE_MAGIC);
+		out->version = to_be<uint32_t>(MERGE_VERSION);
+		out->checksum = to_be<uint32_t>(0); // FIXME!
+		out->n_entries = to_be<uint32_t>(file->m_lines.size());
+
+		struct line_entry *p = out->entries;
+
+		for (auto it = file->m_lines.begin();
+				it != file->m_lines.end();
+				++it) {
+			p->line = to_be<uint32_t>(it->first);
+			// FIXME! The number of hits, should probably be a bitmask
+			p->hits = to_be<uint32_t>(it->second.size());
+
+			p++;
+		}
+
+		char *p_name = (char *)p;
+		// Allocated with the terminator above
+		strcpy(p_name, file->m_filename.c_str());
+		out->file_name_offset = to_be<uint32_t>(p_name - (char *)out);
+
+		return out;
 	}
 
-
 	typedef std::map<unsigned long, unsigned int> AddrMap_t;
+	typedef std::map<unsigned int, AddrMap_t> LineAddrMap_t;
+
+	class File
+	{
+	public:
+		File(const std::string &filename) :
+			m_filename(filename)
+		{
+		}
+
+		void addLine(unsigned int lineNr, unsigned long addr)
+		{
+			m_lines[lineNr][addr]++;
+		}
+
+		std::string m_filename;
+		LineAddrMap_t m_lines;
+	};
 
 	// Entries for this particular coverage session, and for all globally
 	std::unordered_map<LineId, AddrMap_t, LineIdHash> m_localEntries;
 	std::unordered_map<LineId, unsigned int, LineIdHash> m_globalEntries;
+
+	std::unordered_map<std::string, File *> m_files;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
 };

@@ -33,6 +33,7 @@ TESTSUITE(merge_parser)
 
 		ASSERT_TRUE(parser.m_localEntries.empty());
 		parser.onLine("a", 1, 2);
+		parser.onLine("a", 2, 3);
 		ASSERT_TRUE(parser.m_localEntries.find(LineId("a", 1)) != parser.m_localEntries.end());
 
 		const struct file_data *p;
@@ -44,5 +45,14 @@ TESTSUITE(merge_parser)
 		// But this one does
 		p = parser.marshalFile("a");
 		ASSERT_TRUE(p);
+
+		ASSERT_TRUE(be_to_host<uint32_t>(p->magic) == MERGE_MAGIC);
+		ASSERT_TRUE(be_to_host<uint32_t>(p->version) == MERGE_VERSION);
+		ASSERT_TRUE(be_to_host<uint32_t>(p->n_entries) == 2);
+
+		char *name = ((char *)p) + be_to_host<uint32_t>(p->file_name_offset);
+		ASSERT_TRUE(std::string(name) == "a");
+
+		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].line) == 1);
 	}
 }
