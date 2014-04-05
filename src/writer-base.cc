@@ -76,13 +76,8 @@ void WriterBase::onLine(const std::string &file, unsigned int lineNr, unsigned l
 	if (m_files.find(file) != m_files.end())
 		return;
 
-	if (m_nonExistingFiles.find(file) != m_nonExistingFiles.end())
+	if (!file_exists(file.c_str()))
 		return;
-
-	if (!file_exists(file.c_str())) {
-		m_nonExistingFiles[file] = nullptr;
-		return;
-	}
 
 	m_files[file] = new File(file);
 }

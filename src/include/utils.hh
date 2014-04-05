@@ -92,7 +92,7 @@ extern std::string dir_concat(const std::string &dir, const std::string &filenam
 } while(0)
 
 
-extern int file_exists(const char *path);
+extern bool file_exists(const std::string &path);
 
 extern int concat_files(const char *dst, const char *file_a, const char *file_b);
 

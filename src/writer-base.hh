@@ -65,6 +65,5 @@ namespace kcov
 
 	private:
 		IFilter &m_filter;
-		FileMap_t m_nonExistingFiles;
 	};
 }

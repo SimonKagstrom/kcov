@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <unordered_map>
 
 int g_kcov_debug_mask = STATUS_MSG;
 
@@ -116,11 +117,21 @@ bool file_readable(FILE *fp, unsigned int ms)
 	return rv > 0;
 }
 
-int file_exists(const char *path)
+static std::unordered_map<std::string, bool> nonExistingFiles;
+
+bool file_exists(const std::string &path)
 {
+	if (nonExistingFiles.find(path) != nonExistingFiles.end())
+		return 0;
+
 	struct stat st;
 
-	return lstat(path, &st) == 0;
+	bool out = lstat(path.c_str(), &st) == 0;
+
+	if (out == false)
+		nonExistingFiles[path] = true;
+
+	return out;
 }
 
 static void read_write(FILE *dst, FILE *src)
