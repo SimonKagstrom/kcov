@@ -103,6 +103,8 @@ extern std::string dir_concat(const std::string &dir, const std::string &filenam
 
 extern bool file_exists(const std::string &path);
 
+extern uint64_t get_file_timestamp(const std::string &path);
+
 extern int concat_files(const char *dst, const char *file_a, const char *file_b);
 
 extern const char *get_home();
@@ -176,3 +178,12 @@ public:
 		sem_wait(&m_sem);
 	}
 };
+
+// Unit test stuff
+void mock_read_file(void *(*callback)(size_t *out_size, const char *path));
+
+void mock_write_file(int (*callback)(const void *data, size_t size, const char *path));
+
+void mock_file_exists(bool (*callback)(const std::string &path));
+
+void mock_get_file_timestamp(uint64_t (*callback)(const std::string &path));

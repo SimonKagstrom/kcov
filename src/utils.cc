@@ -22,6 +22,8 @@
 int g_kcov_debug_mask = STATUS_MSG;
 static void* (*mocked_read_callback)(size_t* out_size, const char* path);
 static int (*mocked_write_callback)(const void* data, size_t size, const char* path);
+static bool (*mocked_file_exists_callback)(const std::string &path);
+static uint64_t (*mocked_get_file_timestamp_callback)(const std::string &path);
 
 void msleep(uint64_t ms)
 {
@@ -211,6 +213,9 @@ static std::unordered_map<std::string, bool> nonExistingFiles;
 
 bool file_exists(const std::string &path)
 {
+	if (mocked_file_exists_callback)
+		return mocked_file_exists_callback(path);
+
 	if (nonExistingFiles.find(path) != nonExistingFiles.end())
 		return 0;
 
@@ -222,6 +227,31 @@ bool file_exists(const std::string &path)
 		nonExistingFiles[path] = true;
 
 	return out;
+}
+
+void mock_file_exists(bool (*callback)(const std::string &path))
+{
+	mocked_file_exists_callback = callback;
+}
+
+
+void mock_get_file_timestamp(uint64_t (*callback)(const std::string &path))
+{
+	mocked_get_file_timestamp_callback = callback;
+}
+
+uint64_t get_file_timestamp(const std::string &path)
+{
+	if (mocked_get_file_timestamp_callback)
+		return mocked_get_file_timestamp_callback(path);
+
+	struct stat st;
+
+	// "Fail"
+	if (lstat(path.c_str(), &st) != 0)
+		return 0;
+
+	return st.st_mtim.tv_sec;
 }
 
 static void read_write(FILE *dst, FILE *src)
