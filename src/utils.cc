@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <time.h>
+#include <zlib.h>
 
 #include "utils.hh"
 
@@ -510,4 +511,9 @@ std::string escape_html(const std::string &str)
 		return std::string(buf) + "...";
 
 	return std::string(buf);
+}
+
+uint32_t crc32(const uint8_t *buf, size_t len)
+{
+	return crc32(0, buf, len);
 }

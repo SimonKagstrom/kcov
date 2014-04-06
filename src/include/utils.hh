@@ -187,3 +187,6 @@ void mock_write_file(int (*callback)(const void *data, size_t size, const char *
 void mock_file_exists(bool (*callback)(const std::string &path));
 
 void mock_get_file_timestamp(uint64_t (*callback)(const std::string &path));
+
+uint32_t crc32(const uint8_t *buf, size_t len);
+

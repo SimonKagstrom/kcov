@@ -4,7 +4,6 @@
 #include <output-handler.hh>
 #include <lineid.hh>
 #include <utils.hh>
-#include <zlib.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -269,7 +268,7 @@ private:
 		std::string fileData(p, sz);
 
 		// Compute crc32 for this file
-		uint32_t crc = crc32(0, (unsigned char *)p, sz);
+		uint32_t crc = crc32((const uint8_t *)p, sz);
 
 		free((void*)p);
 
