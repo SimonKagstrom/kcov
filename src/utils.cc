@@ -230,6 +230,16 @@ bool file_exists(const std::string &path)
 	return out;
 }
 
+void mock_read_file(void *(*callback)(size_t *out_size, const char *path))
+{
+	mocked_read_callback = callback;
+}
+
+void mock_write_file(int (*callback)(const void *data, size_t size, const char *path))
+{
+	mocked_write_callback = callback;
+}
+
 void mock_file_exists(bool (*callback)(const std::string &path))
 {
 	mocked_file_exists_callback = callback;
@@ -513,7 +523,7 @@ std::string escape_html(const std::string &str)
 	return std::string(buf);
 }
 
-uint32_t crc32(const uint8_t *buf, size_t len)
+uint32_t crc32(const void *buf, size_t len)
 {
-	return crc32(0, buf, len);
+	return crc32(0, (const Bytef *)buf, len);
 }
