@@ -60,6 +60,7 @@ target_link_libraries(${TGT}
 	${LIBDWARF_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
+	z
 	pthread)
 
 add_executable (same-name-test

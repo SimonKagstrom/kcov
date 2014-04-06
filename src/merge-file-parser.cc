@@ -151,7 +151,7 @@ private:
 
 		out->magic = to_be<uint32_t>(MERGE_MAGIC);
 		out->version = to_be<uint32_t>(MERGE_VERSION);
-		out->checksum = to_be<uint32_t>(0); // FIXME!
+		out->checksum = to_be<uint32_t>(file->m_checksum);
 		out->n_entries = to_be<uint32_t>(file->m_lines.size());
 
 		struct line_entry *p = out->entries;
@@ -183,6 +183,17 @@ private:
 		File(const std::string &filename) :
 			m_filename(filename)
 		{
+			void *data;
+			size_t size;
+
+			uint64_t ts = get_file_timestamp(filename.c_str());
+
+			data = read_file(&size, "%s", filename.c_str());
+			panic_if(!data,
+					"File %s exists, but can't be read???", filename.c_str());
+			m_checksum = crc32(data, size) ^ crc32((const void *)&ts, sizeof(ts));
+
+			free((void *)data);
 		}
 
 		void addLine(unsigned int lineNr, unsigned long addr)
@@ -192,6 +203,7 @@ private:
 
 		std::string m_filename;
 		LineAddrMap_t m_lines;
+		uint32_t m_checksum;
 	};
 
 	// All files in the current coverage session
