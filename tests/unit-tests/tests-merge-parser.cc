@@ -16,6 +16,11 @@ public:
 	MOCK_METHOD3(matchParser, unsigned int(const std::string &filename, uint8_t *data, size_t dataSize));
 };
 
+static bool mocked_file_exists(const std::string &path)
+{
+	return true;
+}
+
 TESTSUITE(merge_parser)
 {
 	TEST(marshal)
@@ -31,10 +36,10 @@ TESTSUITE(merge_parser)
 
 		MergeParser parser(mockParser);
 
-		ASSERT_TRUE(parser.m_localEntries.empty());
+		mock_file_exists(mocked_file_exists);
+
 		parser.onLine("a", 1, 2);
 		parser.onLine("a", 2, 3);
-		ASSERT_TRUE(parser.m_localEntries.find(LineId("a", 1)) != parser.m_localEntries.end());
 
 		const struct file_data *p;
 

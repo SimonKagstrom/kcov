@@ -92,6 +92,10 @@ public:
 	void onLine(const std::string &filename, unsigned int lineNr,
 					unsigned long addr)
 	{
+		// Nothing to do in that case
+		if (!file_exists(filename))
+			return;
+
 		LineId key(filename, lineNr);
 		File *file;
 
@@ -102,7 +106,6 @@ public:
 		}
 
 		file->addLine(lineNr, addr);
-		m_localEntries[key][addr]++;
 
 		for (const auto &it : m_listeners)
 			it->onLine(filename, lineNr, addr);
@@ -191,10 +194,7 @@ private:
 		LineAddrMap_t m_lines;
 	};
 
-	// Entries for this particular coverage session, and for all globally
-	std::unordered_map<LineId, AddrMap_t, LineIdHash> m_localEntries;
-	std::unordered_map<LineId, unsigned int, LineIdHash> m_globalEntries;
-
+	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
