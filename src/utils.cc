@@ -20,15 +20,88 @@
 #include <unordered_map>
 
 int g_kcov_debug_mask = STATUS_MSG;
+static void* (*mocked_read_callback)(size_t* out_size, const char* path);
+static int (*mocked_write_callback)(const void* data, size_t size, const char* path);
+
+void msleep(uint64_t ms)
+{
+	struct timespec ts;
+	uint64_t ns = ms * 1000 * 1000;
+
+	ts.tv_sec = ns / (1000 * 1000 * 1000);
+	ts.tv_nsec = ns % (1000 * 1000 * 1000);
+
+	nanosleep(&ts, NULL);
+}
+
+static void *read_file_int(size_t *out_size, uint64_t timeout, const char *path)
+{
+	uint8_t *data = NULL;
+	int fd;
+	size_t pos = 0;
+	const size_t chunk = 1024;
+	fd_set rfds;
+	struct timeval tv;
+	int ret;
+	int n;
+
+	if (mocked_read_callback)
+		return mocked_read_callback(out_size, path);
+
+	fd = open(path, O_RDONLY | O_NONBLOCK);
+	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK)) {
+		msleep(timeout);
+
+		fd = open(path, O_RDONLY | O_NONBLOCK);
+	}
+
+	if (fd < 0)
+		return NULL;
+
+	tv.tv_sec = timeout / 1000;
+	tv.tv_usec = (timeout % 1000) * 10;
+
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+
+	do {
+		ret = select(fd + 1, &rfds, NULL, NULL, &tv);
+		if (ret == -1) {
+			close(fd);
+			free(data);
+
+			return NULL;
+		} else if (ret == 0) { // Timeout
+			close(fd);
+			free(data);
+
+			return NULL;
+		}
+		data = (uint8_t *)xrealloc(data, pos + chunk);
+		memset(data + pos, 0, chunk);
+
+		n = read(fd, data + pos, chunk);
+		if (n < 0) {
+			close(fd);
+			free(data);
+
+			return NULL;
+		}
+
+		pos += n;
+	} while (n == (int)chunk);
+
+	*out_size = pos;
+
+	close(fd);
+
+	return data;
+}
 
 void *read_file(size_t *out_size, const char *fmt, ...)
 {
-	struct stat buf;
 	char path[2048];
 	va_list ap;
-	void *data;
-	size_t size;
-	FILE *f;
 	int r;
 
 	/* Create the filename */
@@ -39,51 +112,68 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 	panic_if (r >= 2048,
 			"Too long string!");
 
-	if (lstat(path, &buf) < 0)
-		return NULL;
+	return read_file_int(out_size, 0, path);
+}
 
-	size = buf.st_size;
-	data = xmalloc(size + 2); /* NULL-terminate, if used as string */
-	f = fopen(path, "r");
-	if (!f)
-	{
-		free(data);
-		return NULL;
+static int write_file_int(const void *data, size_t len, uint64_t timeout, const char *path)
+{
+	int fd;
+	fd_set wfds;
+	struct timeval tv;
+	int ret = 0;
+
+	tv.tv_sec = timeout / 1000;
+	tv.tv_usec = (timeout % 1000) * 10;
+
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR);
+	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK)) {
+		msleep(timeout);
+
+		fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR);
+		if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK))
+			return -2;
 	}
-	if (fread(data, 1, size, f) != size)
-	{
-		free(data);
-		data = NULL;
+	if (fd < 0)
+		return fd;
+
+	FD_ZERO(&wfds);
+	FD_SET(fd, &wfds);
+
+	ret = select(fd + 1, NULL, &wfds, NULL, &tv);
+	if (ret == -1) {
+		close(fd);
+
+		return ret;
+	} else if (ret == 0) { // Timeout
+		close(fd);
+
+		return -2;
 	}
-	fclose(f);
 
-	*out_size = size;
+	if (write(fd, data, len) != (int)len)
+		return -3;
 
-	return data;
+	close(fd);
+
+	return 0;
 }
 
 int write_file(const void *data, size_t len, const char *fmt, ...)
 {
 	char path[2048];
 	va_list ap;
-	FILE *fp;
-	int ret = 0;
 
 	/* Create the filename */
 	va_start(ap, fmt);
 	vsnprintf(path, 2048, fmt, ap);
 	va_end(ap);
 
-	fp = fopen(path, "w");
-	if (!fp)
-		return -1;
+	if (mocked_write_callback)
+		return mocked_write_callback(data, len, path);
 
-	if (fwrite(data, sizeof(uint8_t), len, fp) != len)
-		ret = -1;
-	fclose(fp);
-
-	return ret;
+	return write_file_int(data, len, 0, path);
 }
+
 
 std::string dir_concat(const std::string &dir, const std::string &filename)
 {

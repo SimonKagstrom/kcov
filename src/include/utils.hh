@@ -75,6 +75,15 @@ static inline void *xmalloc(size_t sz)
   return out;
 }
 
+static inline void *xrealloc(void *p, size_t sz)
+{
+  void *out = realloc(p, sz);
+
+  panic_if(!out, "realloc failed");
+
+  return out;
+}
+
 extern int write_file(const void *data, size_t len, const char *fmt, ...);
 
 extern void *read_file(size_t *out_size, const char *fmt, ...);
@@ -138,6 +147,8 @@ bool string_is_integer(const std::string &str, unsigned base = 0);
 int64_t string_to_integer(const std::string &str, unsigned base = 0);
 
 std::string escape_html(const std::string &str);
+
+void msleep(uint64_t ms);
 
 class Semaphore
 {
