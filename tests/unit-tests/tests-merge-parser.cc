@@ -47,13 +47,13 @@ TESTSUITE(merge_parser)
 		MockParser mockParser;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
-			.Times(Exactly(1))
+			.Times(Exactly(2))
 		;
 		EXPECT_CALL(mockParser, registerLineListener(_))
-			.Times(Exactly(1))
+			.Times(Exactly(2))
 		;
 
-		mock_data = {'a', '\n', 'b', '\n'};
+		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
 		MergeParser parser(mockParser);
@@ -64,6 +64,8 @@ TESTSUITE(merge_parser)
 
 		parser.onLine("a", 1, 2);
 		parser.onLine("a", 2, 3);
+
+		parser.onLine("c", 2, 3);
 
 		const struct file_data *p;
 
@@ -83,5 +85,43 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(std::string(name) == "a");
 
 		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].line) == 1);
+
+
+		MergeParser parser2(mockParser);
+
+		parser2.onLine("c", 4, 1);
+		// New timestamp for the "a" file
+		mocked_ts = 2;
+		parser2.onLine("a", 1, 2);
+
+		const struct file_data *p2;
+
+		// Test that the checksum changes on new TS
+		p2 = parser2.marshalFile("a");
+		ASSERT_TRUE(p2);
+
+		ASSERT_TRUE(p->checksum != p2->checksum);
+
+
+		// ... but is the same with the old TS
+		p = parser.marshalFile("c");
+		p2 = parser2.marshalFile("c");
+		ASSERT_TRUE(p);
+		ASSERT_TRUE(p2);
+
+		// Should be the same
+		ASSERT_TRUE(p->checksum == p2->checksum);
+
+		// Same timestamp, different data
+		parser.onLine("d", 9, 1);
+		mock_data = {'a', '\n', 'b', 'c', '\n', '\0'};
+		parser2.onLine("d", 9, 1);
+
+		p = parser.marshalFile("d");
+		p2 = parser2.marshalFile("d");
+		ASSERT_TRUE(p);
+		ASSERT_TRUE(p2);
+
+		ASSERT_TRUE(p->checksum != p2->checksum);
 	}
 }
