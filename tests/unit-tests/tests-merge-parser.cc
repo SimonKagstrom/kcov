@@ -56,7 +56,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser);
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -86,8 +86,8 @@ TESTSUITE(merge_parser)
 
 		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].line) == 1);
 
-
-		MergeParser parser2(mockParser);
+		// No output
+		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
 
 		parser2.onLine("c", 4, 1);
 		// New timestamp for the "a" file

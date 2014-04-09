@@ -52,9 +52,11 @@ class MergeParser : public IFileParser,
 public:
 	friend class merge_parser::marshal;
 
-	MergeParser(IFileParser &localParser) :
-		m_baseDirectory("/tmp"), // FIXME!
-		m_outputDirectory(m_baseDirectory + "/" + "kalle") // FIXME!
+	MergeParser(IFileParser &localParser,
+			const std::string &baseDirectory,
+			const std::string &outputDirectory) :
+		m_baseDirectory(baseDirectory),
+		m_outputDirectory(outputDirectory)
 	{
 		localParser.registerFileListener(*this);
 		localParser.registerLineListener(*this);
