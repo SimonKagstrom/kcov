@@ -10,6 +10,9 @@
 #include <unordered_map>
 #include <map>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <swap-endian.hh>
 
 using namespace kcov;
@@ -28,6 +31,7 @@ struct file_data
 	uint32_t magic;
 	uint32_t version;
 	uint32_t checksum;
+	uint32_t size;
 	uint32_t n_entries;
 	uint32_t file_name_offset;
 
@@ -48,7 +52,9 @@ class MergeParser : public IFileParser,
 public:
 	friend class merge_parser::marshal;
 
-	MergeParser(IFileParser &localParser)
+	MergeParser(IFileParser &localParser) :
+		m_baseDirectory("/tmp"), // FIXME!
+		m_outputDirectory(m_baseDirectory + "/" + "kalle") // FIXME!
 	{
 		localParser.registerFileListener(*this);
 		localParser.registerLineListener(*this);
@@ -120,6 +126,8 @@ public:
 	// From IWriter
 	void onStartup()
 	{
+		mkdir(m_baseDirectory.c_str(), 0755);
+		mkdir(m_outputDirectory.c_str(), 0755);
 	}
 
 	void onStop()
@@ -128,6 +136,25 @@ public:
 
 	void write()
 	{
+		/* Produce something like
+		 *
+		 *   /tmp/kcov/calc/metadata/4f332bca
+		 *   /tmp/kcov/calc/metadata/cd9932a1
+		 *
+		 * For all the files we've covered. The output filename comes from a hash of
+		 * the input filename.
+		 */
+		for (const auto &it : m_files) {
+			const struct file_data *fd = marshalFile(it.second->m_filename);
+			uint32_t crc = crc32((const void *)it.second->m_filename.c_str(), it.second->m_filename.size());
+			std::string name = fmt("%08x", crc);
+
+			write_file((const void *)fd, be_to_host<uint32_t>(fd->size), "%s/metadata/%s",
+					m_outputDirectory.c_str(), name.c_str()
+					);
+
+			free((void *)fd);
+		}
 	}
 
 
@@ -145,13 +172,15 @@ private:
 			return nullptr;
 
 		// Header + each line + the filename
-		struct file_data *out = (struct file_data *)xmalloc(sizeof(*out) +
+		size_t size = sizeof(struct file_data) +
 				file->m_lines.size() * sizeof(struct line_entry) +
-				file->m_filename.size() + 1);
+				file->m_filename.size() + 1;
+		struct file_data *out = (struct file_data *)xmalloc(size);
 
 		out->magic = to_be<uint32_t>(MERGE_MAGIC);
 		out->version = to_be<uint32_t>(MERGE_VERSION);
 		out->checksum = to_be<uint32_t>(file->m_checksum);
+		out->size = to_be<uint32_t>(size);
 		out->n_entries = to_be<uint32_t>(file->m_lines.size());
 
 		struct line_entry *p = out->entries;
@@ -210,4 +239,6 @@ private:
 	std::unordered_map<std::string, File *> m_files;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
+	const std::string &m_baseDirectory;
+	const std::string &m_outputDirectory;
 };

@@ -14,7 +14,7 @@ project (kcov)
 set (KCOV kcov)
 set (KCOV_PROFILER kcov-profiler)
 set (LINE2ADDR line2addr)
-#set (CMAKE_EXE_LINKER_FLAGS "-static")
+set (CMAKE_EXE_LINKER_FLAGS "-static")
 
 set (SOLIB kcov_sowrapper)
 
