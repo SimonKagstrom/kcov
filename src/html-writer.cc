@@ -113,7 +113,7 @@ public:
 		WriterBase(parser, reporter)
 	{
 		m_indexDirectory = indexDirectory;
-		m_outDirectory = indexDirectory;
+		m_outDirectory = outDirectory;
 		m_summaryDbFileName = m_outDirectory + "summary.db";
 	}
 
