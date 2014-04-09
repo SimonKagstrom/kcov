@@ -34,6 +34,14 @@ static void *mocked_read_file(size_t *out_size, const char *path)
 	return p;
 }
 
+static std::unordered_map<std::string, std::string> path_to_data;
+static int mocked_write_file(const void *data, size_t size, const char *path)
+{
+	path_to_data[path] = std::string((const char *)data);
+
+	return 0;
+}
+
 static uint64_t mocked_ts;
 static uint64_t mocked_get_timestamp(const std::string &filename)
 {
@@ -123,5 +131,38 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(p2);
 
 		ASSERT_TRUE(p->checksum != p2->checksum);
+	}
+
+	TEST(output)
+	{
+		MockParser mockParser;
+
+		EXPECT_CALL(mockParser, registerFileListener(_))
+			.Times(Exactly(1))
+		;
+		EXPECT_CALL(mockParser, registerLineListener(_))
+			.Times(Exactly(1))
+		;
+
+		mock_data = {'a', '\n', 'b', '\n', '\0'};
+		mocked_ts = 1;
+
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
+
+		mock_file_exists(mocked_file_exists);
+		mock_read_file(mocked_read_file);
+		mock_write_file(mocked_write_file);
+		mock_get_file_timestamp(mocked_get_timestamp);
+
+		parser.onLine("a", 1, 2);
+		parser.onLine("b", 2, 3);
+
+		parser.write();
+
+		std::string p0 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("a", 1));
+		std::string p1 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("b", 1));
+
+		ASSERT_TRUE(path_to_data.find(p0) != path_to_data.end());
+		ASSERT_TRUE(path_to_data.find(p1) != path_to_data.end());
 	}
 }

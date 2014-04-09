@@ -42,6 +42,7 @@ struct file_data
 namespace merge_parser
 {
 	class marshal;
+	class output;
 }
 
 class MergeParser : public IFileParser,
@@ -51,6 +52,7 @@ class MergeParser : public IFileParser,
 {
 public:
 	friend class merge_parser::marshal;
+	friend class merge_parser::output;
 
 	MergeParser(IFileParser &localParser,
 			const std::string &baseDirectory,
@@ -130,6 +132,7 @@ public:
 	{
 		mkdir(m_baseDirectory.c_str(), 0755);
 		mkdir(m_outputDirectory.c_str(), 0755);
+		mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
 	}
 
 	void onStop()
