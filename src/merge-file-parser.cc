@@ -241,6 +241,6 @@ private:
 	std::unordered_map<std::string, File *> m_files;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
-	const std::string &m_baseDirectory;
-	const std::string &m_outputDirectory;
+	const std::string m_baseDirectory;
+	const std::string m_outputDirectory;
 };
