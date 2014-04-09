@@ -113,8 +113,10 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 		;
 
 	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
-	IWriter &writer = createHtmlWriter(*elf, reporter, output);
-	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter, output);
+	IWriter &writer = createHtmlWriter(*elf, reporter,
+			output.getBaseDirectory(), output.getOutDirectory());
+	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter,
+			output.getBaseDirectory(), output.getOutDirectory());
 
 	output.registerWriter(writer);
 	output.registerWriter(coberturaWriter);
@@ -185,7 +187,8 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 		;
 
 	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
-	IWriter &writer = createHtmlWriter(*elf, reporter, output);
+	IWriter &writer = createHtmlWriter(*elf, reporter,
+			output.getBaseDirectory(), output.getOutDirectory());
 
 	output.registerWriter(writer);
 

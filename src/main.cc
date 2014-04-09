@@ -113,8 +113,10 @@ int main(int argc, const char *argv[])
 
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
-		IWriter &htmlWriter = createHtmlWriter(*parser, reporter, output);
-		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter, output);
+		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
+				output.getBaseDirectory(), output.getOutDirectory());
+		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
+				output.getBaseDirectory(), output.getOutDirectory());
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
 	}

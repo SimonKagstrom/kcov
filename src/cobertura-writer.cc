@@ -5,7 +5,6 @@ namespace std { class type_info; }
 #include <configuration.hh>
 #include <writer.hh>
 #include <utils.hh>
-#include <output-handler.hh>
 
 #include <string>
 #include <list>
@@ -18,9 +17,10 @@ using namespace kcov;
 class CoberturaWriter : public WriterBase
 {
 public:
-	CoberturaWriter(IFileParser &parser, IReporter &reporter, IOutputHandler &output) :
-		WriterBase(parser, reporter, output),
-		m_output(output)
+	CoberturaWriter(IFileParser &parser, IReporter &reporter,
+			const std::string &outDirectory) :
+		WriterBase(parser, reporter),
+		m_outDirectory(outDirectory)
 	{
 	}
 
@@ -52,7 +52,7 @@ public:
 		str = getHeader(nTotalCodeLines, nTotalExecutedLines) + str + getFooter();
 
 		write_file((void *)str.c_str(), str.size(),
-				(m_output.getOutDirectory() + "cobertura.xml").c_str());
+				(m_outDirectory + "cobertura.xml").c_str());
 	}
 
 private:
@@ -164,13 +164,15 @@ private:
 	}
 
 
-	IOutputHandler &m_output;
+	std::string m_outDirectory;
 };
 
 namespace kcov
 {
-	IWriter &createCoberturaWriter(IFileParser &parser, IReporter &reporter, IOutputHandler &output)
+	IWriter &createCoberturaWriter(IFileParser &parser, IReporter &reporter,
+			const std::string &indexDirectory,
+			const std::string &outDirectory)
 	{
-		return *new CoberturaWriter(parser, reporter, output);
+		return *new CoberturaWriter(parser, reporter, outDirectory);
 	}
 }

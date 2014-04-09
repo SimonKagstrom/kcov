@@ -3,7 +3,6 @@
 #include <configuration.hh>
 #include <writer.hh>
 #include <utils.hh>
-#include <output-handler.hh>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -108,11 +107,13 @@ static const char css_text[] = "/* Based upon the lcov CSS style, style files ca
 class HtmlWriter : public WriterBase
 {
 public:
-	HtmlWriter(IFileParser &parser, IReporter &reporter, IOutputHandler &output) :
-		WriterBase(parser, reporter, output)
+	HtmlWriter(IFileParser &parser, IReporter &reporter,
+			const std::string &indexDirectory,
+			const std::string &outDirectory) :
+		WriterBase(parser, reporter)
 	{
-		m_indexDirectory = output.getBaseDirectory();
-		m_outDirectory = output.getOutDirectory();
+		m_indexDirectory = indexDirectory;
+		m_outDirectory = indexDirectory;
 		m_summaryDbFileName = m_outDirectory + "summary.db";
 	}
 
@@ -573,8 +574,10 @@ private:
 
 namespace kcov
 {
-	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter, IOutputHandler &output)
+	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter,
+			const std::string &indexDirectory,
+			const std::string &outDirectory)
 	{
-		return *new HtmlWriter(parser, reporter, output);
+		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory);
 	}
 }

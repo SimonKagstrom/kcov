@@ -6,5 +6,7 @@ namespace kcov
 	class IReporter;
 	class IOutputHandler;
 
-	IWriter &createHtmlWriter(IFileParser &elf, IReporter &reporter, IOutputHandler &output);
+	IWriter &createHtmlWriter(IFileParser &elf, IReporter &reporter,
+			const std::string &indexDirectory,
+			const std::string &outDirectory);
 }

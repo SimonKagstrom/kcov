@@ -12,12 +12,11 @@ namespace kcov
 {
 	class IFileParser;
 	class IReporter;
-	class IOutputHandler;
 
 	class WriterBase : public IFileParser::ILineListener, public IWriter
 	{
 	protected:
-		WriterBase(IFileParser &elf, IReporter &reporter, IOutputHandler &output);
+		WriterBase(IFileParser &elf, IReporter &reporter);
 
 		class File
 		{

@@ -14,7 +14,7 @@ struct summaryStruct
 
 int WriterBase::File::fileNameCount;
 
-WriterBase::WriterBase(IFileParser &parser, IReporter &reporter, IOutputHandler &output) :
+WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
 		m_fileParser(parser), m_reporter(reporter),
 		m_filter(IFilter::getInstance())
 {
