@@ -114,6 +114,9 @@ public:
 		if (!file) {
 			file = new File(filename);
 			m_files[filename] = file;
+
+			// This should be part of the merged data
+			m_fileHashes[file->m_checksum] = file->m_filename;
 		}
 
 		file->addLine(lineNr, addr);
@@ -204,6 +207,15 @@ private:
 		for (de = readdir(dir); de; de = readdir(dir)) {
 			std::string curFile = de->d_name;
 			size_t size;
+
+			// Not as hash?
+			if (!string_is_integer(curFile, 16))
+				continue;
+
+			// We don't have this file, or the file is older/newer
+			if (m_fileHashes.find(string_to_integer(curFile, 16)) == m_fileHashes.end())
+				continue;
+
 
 			struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
 					metadataDirName.c_str(), curFile.c_str());
@@ -297,6 +309,7 @@ private:
 
 	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
+	std::unordered_map<uint32_t, std::string> m_fileHashes;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
 	const std::string m_baseDirectory;
