@@ -44,6 +44,7 @@ namespace merge_parser
 {
 	class marshal;
 	class output;
+	class input;
 }
 
 class MergeParser : public IFileParser,
@@ -54,6 +55,7 @@ class MergeParser : public IFileParser,
 public:
 	friend class merge_parser::marshal;
 	friend class merge_parser::output;
+	friend class merge_parser::input;
 
 	MergeParser(IFileParser &localParser,
 			const std::string &baseDirectory,
@@ -117,6 +119,7 @@ public:
 
 			// This should be part of the merged data
 			m_fileHashes[file->m_checksum] = file->m_filename;
+			m_fileHashes[file->m_checksum] = true;
 		}
 
 		file->addLine(lineNr, addr);
@@ -204,31 +207,36 @@ private:
 			return;
 
 		// Read all metadata from the directory
-		for (de = readdir(dir); de; de = readdir(dir)) {
-			std::string curFile = de->d_name;
-			size_t size;
+		for (de = readdir(dir); de; de = readdir(dir))
+			parseOne(metadataDirName, de->d_name);
 
-			// Not as hash?
-			if (!string_is_integer(curFile, 16))
-				continue;
-
-			// We don't have this file, or the file is older/newer
-			if (m_fileHashes.find(string_to_integer(curFile, 16)) == m_fileHashes.end())
-				continue;
-
-
-			struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
-					metadataDirName.c_str(), curFile.c_str());
-			if (!fd)
-				continue;
-
-			if (unMarshalFile(fd)) {
-				// Do something
-			}
-
-			free(fd);
-		}
 		closedir(dir);
+	}
+
+	void parseOne(const std::string &metadataDirName,
+			const std::string &curFile)
+	{
+		size_t size;
+
+		// Not as hash?
+		if (!string_is_integer(curFile, 16))
+			return;
+
+		// We don't have this file, or the file is older/newer
+		if (m_fileHashes.find(string_to_integer(curFile, 16)) == m_fileHashes.end())
+			return;
+
+
+		struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
+				metadataDirName.c_str(), curFile.c_str());
+		if (!fd)
+			return;
+
+		if (unMarshalFile(fd)) {
+			// Do something
+		}
+
+		free(fd);
 	}
 
 	const struct file_data *marshalFile(const std::string &filename)

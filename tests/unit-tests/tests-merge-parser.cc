@@ -165,4 +165,36 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(path_to_data.find(p0) != path_to_data.end());
 		ASSERT_TRUE(path_to_data.find(p1) != path_to_data.end());
 	}
+
+	TEST(input)
+	{
+		MockParser mockParser;
+
+		EXPECT_CALL(mockParser, registerFileListener(_))
+			.Times(Exactly(1))
+		;
+		EXPECT_CALL(mockParser, registerLineListener(_))
+			.Times(Exactly(1))
+		;
+
+		mock_data = {'a', '\n', 'b', '\n', '\0'};
+		mocked_ts = 1;
+
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
+
+		mock_file_exists(mocked_file_exists);
+		mock_read_file(mocked_read_file);
+		mock_write_file(mocked_write_file);
+		mock_get_file_timestamp(mocked_get_timestamp);
+
+		parser.onLine("a", 1, 2);
+		parser.onLine("b", 2, 3);
+
+		// Non-existing
+		parser.parseOne("/tmp/kalle/df/", "12345678");
+
+		// Existing (but fake, anyway)
+		parser.parseOne("/tmp/kalle/df/",
+				fmt("0x%08x", parser.m_files["a"]->m_checksum));
+	}
 }
