@@ -12,6 +12,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 #include <swap-endian.hh>
 
@@ -133,6 +134,25 @@ public:
 		mkdir(m_baseDirectory.c_str(), 0755);
 		mkdir(m_outputDirectory.c_str(), 0755);
 		mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
+
+		DIR *dir;
+		struct dirent *de;
+
+		dir = opendir(m_baseDirectory.c_str());
+		panic_if(!dir,
+				"Can't open directory %s\n", m_baseDirectory.c_str());
+
+		// Unmarshal and parse all metadata
+		for (de = readdir(dir); de; de = readdir(dir)) {
+			std::string cur = m_baseDirectory + de->d_name;
+
+			// ... except for the current coveree
+			if (cur == m_outputDirectory)
+				continue;
+
+			parseDirectory(cur);
+		}
+		closedir(dir);
 	}
 
 	void onStop()
@@ -169,6 +189,36 @@ public:
 
 
 private:
+	void parseDirectory(const std::string &dirName)
+	{
+		DIR *dir;
+		struct dirent *de;
+		std::string metadataDirName = dirName + "/metadata";
+
+		dir = opendir(metadataDirName.c_str());
+		// Can occur naturally
+		if(!dir)
+			return;
+
+		// Read all metadata from the directory
+		for (de = readdir(dir); de; de = readdir(dir)) {
+			std::string curFile = de->d_name;
+			size_t size;
+
+			struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
+					metadataDirName.c_str(), curFile.c_str());
+			if (!fd)
+				continue;
+
+			if (unMarshalFile(fd)) {
+				// Do something
+			}
+
+			free(fd);
+		}
+		closedir(dir);
+	}
+
 	const struct file_data *marshalFile(const std::string &filename)
 	{
 		File *file = m_files[filename];
@@ -206,6 +256,11 @@ private:
 		out->file_name_offset = to_be<uint32_t>(p_name - (char *)out);
 
 		return out;
+	}
+
+	bool unMarshalFile(struct file_data *fd)
+	{
+		return false;
 	}
 
 	typedef std::map<unsigned long, unsigned int> AddrMap_t;
