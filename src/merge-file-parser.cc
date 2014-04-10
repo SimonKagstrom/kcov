@@ -272,7 +272,26 @@ private:
 
 	bool unMarshalFile(struct file_data *fd)
 	{
-		return false;
+		fd->magic = be_to_host<uint32_t>(fd->magic);
+		fd->version = be_to_host<uint32_t>(fd->version);
+		fd->checksum = be_to_host<uint32_t>(fd->checksum);
+		fd->size = be_to_host<uint32_t>(fd->size);
+		fd->n_entries = be_to_host<uint32_t>(fd->n_entries);
+
+		if (fd->magic != MERGE_MAGIC)
+			return false;
+
+		if (fd->version != MERGE_VERSION)
+			return false;
+
+		struct line_entry *p = fd->entries;
+
+		for (unsigned i = 0; i < fd->n_entries; i++) {
+			p->line = be_to_host<uint32_t>(p->line);
+			p->hits = be_to_host<uint32_t>(p->hits);
+		}
+
+		return true;
 	}
 
 	typedef std::map<unsigned long, unsigned int> AddrMap_t;
