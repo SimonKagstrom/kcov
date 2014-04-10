@@ -128,11 +128,11 @@ static int write_file_int(const void *data, size_t len, uint64_t timeout, const 
 	tv.tv_sec = timeout / 1000;
 	tv.tv_usec = (timeout % 1000) * 10;
 
-	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR);
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK)) {
 		msleep(timeout);
 
-		fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR);
+		fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
 		if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK))
 			return -2;
 	}
