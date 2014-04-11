@@ -190,6 +190,9 @@ TESTSUITE(merge_parser)
 		parser.onLine("a", 1, 2);
 		parser.onLine("b", 2, 3);
 
+		// Non-hash file
+		parser.parseOne("/tmp/kalle/df/", "some-other-file");
+
 		// Non-existing
 		parser.parseOne("/tmp/kalle/df/", "12345678");
 
