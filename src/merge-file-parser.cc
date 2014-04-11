@@ -141,24 +141,7 @@ public:
 		mkdir(m_outputDirectory.c_str(), 0755);
 		mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
 
-		DIR *dir;
-		struct dirent *de;
-
-		dir = opendir(m_baseDirectory.c_str());
-		panic_if(!dir,
-				"Can't open directory %s\n", m_baseDirectory.c_str());
-
-		// Unmarshal and parse all metadata
-		for (de = readdir(dir); de; de = readdir(dir)) {
-			std::string cur = m_baseDirectory + de->d_name;
-
-			// ... except for the current coveree
-			if (cur == m_outputDirectory)
-				continue;
-
-			parseDirectory(cur);
-		}
-		closedir(dir);
+		parseStoredData();
 	}
 
 	void onStop()
@@ -167,6 +150,8 @@ public:
 
 	void write()
 	{
+		parseStoredData();
+
 		/* Produce something like
 		 *
 		 *   /tmp/kcov/calc/metadata/4f332bca
@@ -195,6 +180,28 @@ public:
 
 
 private:
+	void parseStoredData()
+	{
+		DIR *dir;
+		struct dirent *de;
+
+		dir = opendir(m_baseDirectory.c_str());
+		panic_if(!dir,
+				"Can't open directory %s\n", m_baseDirectory.c_str());
+
+		// Unmarshal and parse all metadata
+		for (de = readdir(dir); de; de = readdir(dir)) {
+			std::string cur = m_baseDirectory + de->d_name;
+
+			// ... except for the current coveree
+			if (cur == m_outputDirectory)
+				continue;
+
+			parseDirectory(cur);
+		}
+		closedir(dir);
+	}
+
 	void parseDirectory(const std::string &dirName)
 	{
 		DIR *dir;
