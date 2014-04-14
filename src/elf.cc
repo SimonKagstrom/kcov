@@ -72,6 +72,9 @@ public:
 			/******* Swap debug source root with runtime source root *****/
 			m_origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
 			m_newRoot  = IConfiguration::getInstance().getNewPathPrefix();
+
+			m_fixedAddresses = IConfiguration::getInstance().getFixedBreakpoints();
+
 			panic_if(elf_version(EV_CURRENT) == EV_NONE,
 					"ELF version failed\n");
 			m_initialized = true;
@@ -152,6 +155,13 @@ out_open:
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
+
+		// One-time setup of fixed breakpoints
+		for (const auto &it : m_fixedAddresses) {
+			for (const auto &itL : m_lineListeners)
+				itL->onLine("", 0, it);
+		}
+		m_fixedAddresses.clear();
 
 		return true;
 	}
@@ -484,6 +494,7 @@ private:
 	bool m_isMainFile;
 	uint64_t m_checksum;
 	bool m_initialized;
+	std::list<uint64_t> m_fixedAddresses;
 
 	/***** Add strings to update path information. *******/
 	std::string m_origRoot;
