@@ -100,6 +100,7 @@ public:
 				{"report-only", no_argument, 0, 'r'},
 				{"python-parser", required_argument, 0, 'P'},
 				{"uncommon-options", no_argument, 0, 'U'},
+				{"set-breakpoint", required_argument, 0, 'b'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -216,6 +217,18 @@ public:
 			case 'r':
 				m_runMode = IConfiguration::MODE_REPORT_ONLY;
 				break;
+			case 'b': {
+				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
+
+				for (auto it : vec) {
+					if (!string_is_integer(it.second, 16))
+						continue;
+
+					m_fixedBreakpoints.push_back(string_to_integer(it.second, 16));
+				}
+
+				break;
+			}
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
@@ -310,6 +323,11 @@ public:
 	const std::string &getPythonCommand() const
 	{
 		return m_pythonCommand;
+	}
+
+	std::list<uint64_t> getFixedBreakpoints()
+	{
+		return m_fixedBreakpoints;
 	}
 
 	unsigned int getAttachPid()
@@ -433,6 +451,7 @@ public:
 				"                         only output when kcov terminates, default %u)\n"
 				"\n"
 				" --debug=X               set kcov debugging level (max 15, default 0)\n"
+				" --set-breakpoint=A[,..] manually set breakpoints\n"
 				"\n"
 				" --python-parser=cmd     Python parser to use (for python script coverave),\n"
 				"                         default: %s",
@@ -536,6 +555,7 @@ public:
 	unsigned int m_outputInterval;
 	RunMode_t m_runMode;
 	bool m_printUncommon;
+	std::list<uint64_t> m_fixedBreakpoints;
 };
 
 
