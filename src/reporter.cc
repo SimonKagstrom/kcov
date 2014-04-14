@@ -198,6 +198,7 @@ private:
 		if (!m_filter.runFilters(file))
 			return;
 
+		kcov_debug(INFO_MSG, "REPORT %s:%u\n", file.c_str(), lineNr);
 		LineId key(file, lineNr);
 
 		LineMap_t::iterator it = m_lines.find(key);
@@ -223,6 +224,7 @@ private:
 		if (it != m_addrToLine.end()) {
 			Line *line = it->second;
 
+			kcov_debug(INFO_MSG, "REPORT hit at 0x%lx\n", addr);
 			line->registerHit(addr, hits);
 		}
 	}
