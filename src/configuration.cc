@@ -505,9 +505,9 @@ public:
 			std::string cur = str.substr(lastPos, pos - lastPos);
 
 			out[n++] = cur;
-			lastPos = pos;
+			lastPos = pos + 1;
 		}
-		out[n] = str.substr(lastPos + 1, str.size() - lastPos);
+		out[n] = str.substr(lastPos, str.size() - lastPos);
 
 		return out;
 	}
