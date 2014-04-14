@@ -39,10 +39,6 @@ public:
 		m_isMainFile = true;
 		m_initialized = false;
 
-		/******* Swap debug source root with runtime source root *****/
-		m_origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
-		m_newRoot  = IConfiguration::getInstance().getNewPathPrefix();
-
 		IParserManager::getInstance().registerParser(*this);
 	}
 
@@ -73,6 +69,9 @@ public:
 	bool addFile(const std::string &filename, struct phdr_data_entry *data)
 	{
 		if (!m_initialized) {
+			/******* Swap debug source root with runtime source root *****/
+			m_origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
+			m_newRoot  = IConfiguration::getInstance().getNewPathPrefix();
 			panic_if(elf_version(EV_CURRENT) == EV_NONE,
 					"ELF version failed\n");
 			m_initialized = true;
