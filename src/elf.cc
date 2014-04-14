@@ -40,8 +40,8 @@ public:
 		m_initialized = false;
 
 		/******* Swap debug source root with runtime source root *****/
-		origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
-		newRoot  = IConfiguration::getInstance().getNewPathPrefix();
+		m_origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
+		m_newRoot  = IConfiguration::getInstance().getNewPathPrefix();
 
 		IParserManager::getInstance().registerParser(*this);
 	}
@@ -269,11 +269,11 @@ out_open:
 					/******** replace the path information found in the debug symbols with *********/
 					/******** the value from in the newRoot variable.         *********/
 					std::string rp;
-					if (origRoot.length() > 0 && newRoot.length() > 0) {
+					if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
  					  std::string dwarfPath = file_path;
-					  size_t dwIndex = dwarfPath.find(origRoot);
+					  size_t dwIndex = dwarfPath.find(m_origRoot);
 					  if (dwIndex != std::string::npos) {
-					    dwarfPath.replace(dwIndex, origRoot.length(), newRoot);
+					    dwarfPath.replace(dwIndex, m_origRoot.length(), m_newRoot);
 					    rp = get_real_path(dwarfPath);
 					  }
 					}
@@ -487,9 +487,8 @@ private:
 	bool m_initialized;
 
 	/***** Add strings to update path information. *******/
-	std::string origRoot;
-	std::string newRoot;
-
+	std::string m_origRoot;
+	std::string m_newRoot;
 };
 
 static ElfInstance g_instance;
