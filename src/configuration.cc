@@ -34,6 +34,7 @@ public:
 		m_exitFirstProcess = false;
 		m_outputInterval = 1000;
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
+		m_printUncommon = false;
 	}
 
 	bool usage(void)
@@ -47,13 +48,7 @@ public:
 				" -s, --sort-type=type    how to sort files: f[ilename] (default), p[ercent],\n"
 				"                         r[everse-percent], u[ncovered-lines], l[ines]\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
-				" -t, --title=title       title for the coverage (default: filename)\n"
-				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
-				"                         only output when kcov terminates, default %u)\n"
-				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
-				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
-				"                         behavior of daemons (default: wait until last)\n"
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
 				"                         Cobertura output)\n"
 				" --report-only           Produce output from stored databases, don't collect\n"
@@ -62,11 +57,7 @@ public:
 				" --include-pattern=pat   comma-separated path patterns to include in the report\n"
 				" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
 				"                         report\n"
-				" --replace-src-path=path replace the string found before the : with the string \n"
-				"                         found after the :\n"
-				"\n"
-				" --python-parser=cmd     Python parser to use (for python script coverave),\n"
-				"                         default: %s"
+				"%s"
 				"\n"
 				"Examples:\n"
 				"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
@@ -76,8 +67,8 @@ public:
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
 				"",
-				m_lowLimit, m_highLimit, m_outputInterval, m_pathStripLevel,
-				m_pythonCommand.c_str());
+				m_lowLimit, m_highLimit,
+				uncommonOptions().c_str());
 
 		return false;
 	}
@@ -108,6 +99,7 @@ public:
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
 				{"python-parser", required_argument, 0, 'P'},
+				{"uncommon-options", no_argument, 0, 'U'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -132,6 +124,8 @@ public:
 				break;
 		}
 
+		bool printUsage = false;
+
 		/* Hooray for reentrancy... */
 		optind = 0;
 		optarg = 0;
@@ -150,7 +144,10 @@ public:
 			case 0:
 				break;
 			case 'h':
-				return usage();
+				printUsage = true;
+			case 'U':
+				m_printUncommon = true;
+				break;
 			case 'L':
 				m_parseSolibs = false;
 				break;
@@ -263,6 +260,9 @@ public:
 				return usage();
 			}
 		}
+
+		if (printUsage)
+			return usage();
 
 		afterOpts = optind;
 
@@ -417,6 +417,29 @@ public:
 	typedef std::map<unsigned int, std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
 
+	std::string uncommonOptions()
+	{
+		if (!m_printUncommon)
+			return " --uncommon-options      print uncommon options for --help\n";
+
+		return fmt(
+				" -t, --title=title       title for the coverage (default: filename)\n"
+				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
+				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
+				"                         behavior of daemons (default: wait until last)\n"
+				" --replace-src-path=path replace the string found before the : with the string \n"
+				"                         found after the :\n"
+				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
+				"                         only output when kcov terminates, default %u)\n"
+				"\n"
+				" --debug=X               set kcov debugging level (max 15, default 0)\n"
+				"\n"
+				" --python-parser=cmd     Python parser to use (for python script coverave),\n"
+				"                         default: %s",
+				m_pathStripLevel, m_outputInterval, m_pythonCommand.c_str()
+				);
+	}
+
 	bool isInteger(std::string str)
 	{
 		size_t pos;
@@ -512,6 +535,7 @@ public:
 	enum OutputType m_outputType;
 	unsigned int m_outputInterval;
 	RunMode_t m_runMode;
+	bool m_printUncommon;
 };
 
 
