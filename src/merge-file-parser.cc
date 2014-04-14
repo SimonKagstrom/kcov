@@ -239,7 +239,10 @@ private:
 		if (!fd)
 			return;
 
-		if (unMarshalFile(fd)) {
+		if (size >= sizeof(struct file_data) &&
+				unMarshalFile(fd)) {
+			std::string name((const char *)fd + fd->file_name_offset);
+
 			// Do something
 		}
 
