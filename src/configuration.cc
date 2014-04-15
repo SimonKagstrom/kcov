@@ -48,10 +48,11 @@ public:
 				" -s, --sort-type=type    how to sort files: f[ilename] (default), p[ercent],\n"
 				"                         r[everse-percent], u[ncovered-lines], l[ines]\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
-				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
+				"\n"
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
 				"                         Cobertura output)\n"
 				" --report-only           Produce output from stored databases, don't collect\n"
+				"\n"
 				" --include-path=path     comma-separated paths to include in the coverage report\n"
 				" --exclude-path=path     comma-separated paths to exclude from the coverage\n"
 				"                         report\n"
@@ -444,19 +445,21 @@ public:
 			return " --uncommon-options      print uncommon options for --help\n";
 
 		return fmt(
-				" -t, --title=title       title for the coverage (default: filename)\n"
-				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
-				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
-				"                         behavior of daemons (default: wait until last)\n"
 				" --replace-src-path=path replace the string found before the : with the string \n"
 				"                         found after the :\n"
+				" -t, --title=title       title for the coverage (default: filename)\n"
+				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
+				"\n"
+				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
+				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
+				"                         behavior of daemons (default: wait until last)\n"
 				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
 				"                         only output when kcov terminates, default %u)\n"
 				"\n"
-				" --debug=X               set kcov debugging level (max 15, default 0)\n"
+				" --debug=X               set kcov debugging level (max 31, default 0)\n"
 				" --set-breakpoint=A[,..] manually set breakpoints\n"
 				"\n"
-				" --python-parser=cmd     Python parser to use (for python script coverave),\n"
+				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
 				"                         default: %s",
 				m_pathStripLevel, m_outputInterval, m_pythonCommand.c_str()
 				);
