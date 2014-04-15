@@ -118,7 +118,6 @@ public:
 
 			// This should be part of the merged data
 			m_fileHashes[file->m_checksum] = file->m_filename;
-			m_fileHashes[file->m_checksum] = true;
 		}
 
 		// Mark as a local file
