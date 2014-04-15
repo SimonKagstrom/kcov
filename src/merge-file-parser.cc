@@ -109,7 +109,6 @@ public:
 		if (!file_exists(filename))
 			return;
 
-		LineId key(filename, lineNr);
 		File *file;
 
 		file = m_files[filename];
