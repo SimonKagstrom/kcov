@@ -245,12 +245,43 @@ private:
 
 		if (size >= sizeof(struct file_data) &&
 				unMarshalFile(fd)) {
-			std::string name((const char *)fd + fd->file_name_offset);
-
-			// Do something
+			parseFileData(fd);
 		}
 
 		free(fd);
+	}
+
+	void parseFileData(struct file_data *fd)
+	{
+		std::string filename((const char *)fd + fd->file_name_offset);
+
+		// Do something
+
+		File *file;
+
+		file = m_files[filename];
+		if (!file) {
+			file = new File(filename);
+			m_files[filename] = file;
+
+			// This should be part of the merged data
+			m_fileHashes[file->m_checksum] = file->m_filename;
+		} else {
+			// Checksum doesn't match, ignore this file
+			if (file->m_local &&
+					file->m_checksum != fd->checksum)
+				return;
+		}
+
+		for (unsigned i = 0; i < fd->n_entries; i++) {
+			uint32_t lineNr = fd->entries[i].line;
+			uint32_t addr = fd->entries[i].hits;
+
+			file->addLine(lineNr, addr); // FIXME!
+
+			for (const auto &it : m_listeners)
+				it->onLine(filename, lineNr, addr);
+		}
 	}
 
 	const struct file_data *marshalFile(const std::string &filename)
