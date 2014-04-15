@@ -91,6 +91,7 @@ TESTSUITE(merge_parser)
 
 		char *name = ((char *)p) + be_to_host<uint32_t>(p->file_name_offset);
 		ASSERT_TRUE(std::string(name) == "a");
+		ASSERT_TRUE(name + strlen(name) + 1 - (char *)p == be_to_host<uint32_t>(p->size));
 
 		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].line) == 1);
 
@@ -199,5 +200,21 @@ TESTSUITE(merge_parser)
 		// Existing (but fake, anyway)
 		parser.parseOne("/tmp/kalle/df/",
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
+
+		const struct file_data *p;
+		p = parser.marshalFile("a");
+		ASSERT_TRUE(p);
+
+		mock_data.clear();
+
+		uint8_t *b = (uint8_t *)p;
+		for (unsigned int i = 0; i < be_to_host<uint32_t>(p->size); i++)
+			mock_data.push_back(b[i]);
+
+		// Valid file and data
+		parser.parseOne("/tmp/kalle/df/",
+				fmt("0x%08x", parser.m_files["a"]->m_checksum));
+
+		free((void *)p);
 	}
 }
