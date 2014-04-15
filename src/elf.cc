@@ -11,7 +11,7 @@
 #include <dwarf.h>
 #include <elfutils/libdw.h>
 #include <map>
-#include <list>
+#include <vector>
 #include <string>
 #include <configuration.hh>
 #ifndef _GNU_SOURCE
@@ -455,9 +455,9 @@ private:
 		size_t m_size;
 	};
 
-	typedef std::list<Segment> SegmentList_t;
-	typedef std::list<ILineListener *> LineListenerList_t;
-	typedef std::list<IFileListener *> FileListenerList_t;
+	typedef std::vector<Segment> SegmentList_t;
+	typedef std::vector<ILineListener *> LineListenerList_t;
+	typedef std::vector<IFileListener *> FileListenerList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{

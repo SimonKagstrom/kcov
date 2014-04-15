@@ -9,7 +9,7 @@
 
 #include <unordered_map>
 #include <string>
-#include <list>
+#include <vector>
 
 using namespace kcov;
 
@@ -169,7 +169,7 @@ private:
 	}
 
 	typedef std::unordered_map<unsigned long, int> AddrMap_t;
-	typedef std::list<ICollector::IListener *> ListenerList_t;
+	typedef std::vector<ICollector::IListener *> ListenerList_t;
 
 	AddrMap_t m_addrs;
 	IFileParser &m_fileParser;
