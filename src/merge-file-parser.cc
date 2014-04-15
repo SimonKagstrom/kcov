@@ -330,6 +330,7 @@ private:
 		fd->checksum = be_to_host<uint32_t>(fd->checksum);
 		fd->size = be_to_host<uint32_t>(fd->size);
 		fd->n_entries = be_to_host<uint32_t>(fd->n_entries);
+		fd->file_name_offset = be_to_host<uint32_t>(fd->file_name_offset);
 
 		if (fd->magic != MERGE_MAGIC)
 			return false;
