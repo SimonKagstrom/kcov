@@ -146,6 +146,7 @@ public:
 				break;
 			case 'h':
 				printUsage = true;
+				break;
 			case 'U':
 				m_printUncommon = true;
 				break;
