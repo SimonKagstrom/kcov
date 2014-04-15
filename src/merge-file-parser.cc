@@ -122,6 +122,8 @@ public:
 			m_fileHashes[file->m_checksum] = true;
 		}
 
+		// Mark as a local file
+		file->setLocal();
 		file->addLine(lineNr, addr);
 
 		for (const auto &it : m_listeners)
@@ -161,6 +163,10 @@ public:
 		 * the input filename.
 		 */
 		for (const auto &it : m_files) {
+			// Only marshal local files
+			if (!it.second->m_local)
+				continue;
+
 			const struct file_data *fd = marshalFile(it.second->m_filename);
 			uint32_t crc = crc32((const void *)it.second->m_filename.c_str(), it.second->m_filename.size());
 			std::string name = fmt("%08x", crc);
@@ -319,7 +325,8 @@ private:
 	{
 	public:
 		File(const std::string &filename) :
-			m_filename(filename)
+			m_filename(filename),
+			m_local(false)
 		{
 			void *data;
 			size_t size;
@@ -334,6 +341,11 @@ private:
 			free((void *)data);
 		}
 
+		void setLocal()
+		{
+			m_local = true;
+		}
+
 		void addLine(unsigned int lineNr, unsigned long addr)
 		{
 			m_lines[lineNr][addr]++;
@@ -342,6 +354,7 @@ private:
 		std::string m_filename;
 		LineAddrMap_t m_lines;
 		uint32_t m_checksum;
+		bool m_local;
 	};
 
 	// All files in the current coverage session
