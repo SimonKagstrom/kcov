@@ -128,5 +128,20 @@ TESTSUITE(configuration)
 		res = runParse(fmt("--debug=7 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 		ASSERT_TRUE(g_kcov_debug_mask == 7);
-		}
+
+		res = runParse(fmt("--exclude-pattern=a /tmp/vobb %s", filename.c_str()));
+		ASSERT_TRUE(res);
+
+		auto ep = conf->getExcludePattern();
+		ASSERT_TRUE(ep.size() == 1);
+		ASSERT_TRUE(ep[0] == "a");
+
+		res = runParse(fmt("--include-pattern=a,b,c /tmp/vobb %s", filename.c_str()));
+		ASSERT_TRUE(res);
+		ep = conf->getOnlyIncludePattern();
+		ASSERT_TRUE(ep.size() == 3);
+		ASSERT_TRUE(ep[0] == "a");
+		ASSERT_TRUE(ep[1] == "b");
+		ASSERT_TRUE(ep[2] == "c");
+	}
 }
