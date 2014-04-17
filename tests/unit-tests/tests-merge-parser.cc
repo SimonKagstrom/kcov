@@ -48,6 +48,24 @@ static uint64_t mocked_get_timestamp(const std::string &filename)
 	return mocked_ts;
 }
 
+class LineListenerFixture : public IFileParser::ILineListener
+{
+public:
+	virtual ~LineListenerFixture()
+	{
+	}
+
+	void onLine(const std::string &file, unsigned int lineNr,
+			unsigned long addr)
+	{
+		m_lineToAddr[lineNr] = addr;
+	}
+
+protected:
+	std::unordered_map<unsigned int, unsigned long> m_lineToAddr;
+};
+
+
 TESTSUITE(merge_parser)
 {
 	TEST(marshal)
@@ -71,9 +89,10 @@ TESTSUITE(merge_parser)
 		mock_get_file_timestamp(mocked_get_timestamp);
 
 		parser.onLine("a", 1, 2);
+		parser.onLine("a", 1, 3); // Two addresses on the same line
 		parser.onLine("a", 2, 3);
 
-		parser.onLine("c", 2, 3);
+		parser.onLine("c", 2, 5);
 
 		const struct file_data *p;
 
@@ -94,6 +113,12 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(name + strlen(name) + 1 - (char *)p == be_to_host<uint32_t>(p->size));
 
 		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].line) == 1);
+		ASSERT_TRUE(be_to_host<uint32_t>(p->entries[0].n_addresses) == 2);
+
+		uint64_t *addressTable = (uint64_t *)((char *)p + be_to_host<uint32_t>(p->address_table_offset));
+		uint32_t start = be_to_host<uint32_t>(p->entries[0].address_start);
+		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start]) == 2);
+		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start + 1]) == 3);
 
 		// No output
 		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
@@ -167,7 +192,7 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(path_to_data.find(p1) != path_to_data.end());
 	}
 
-	TEST(input)
+	TEST(input, LineListenerFixture)
 	{
 		MockParser mockParser;
 
@@ -189,7 +214,12 @@ TESTSUITE(merge_parser)
 		mock_get_file_timestamp(mocked_get_timestamp);
 
 		parser.onLine("a", 1, 2);
+		parser.onLine("a", 3, 9);
+		parser.onLine("a", 4, 72);
 		parser.onLine("b", 2, 3);
+
+		// Register afterwards to get everything on parse below...
+		parser.registerLineListener(*this);
 
 		// Non-hash file
 		parser.parseOne("/tmp/kalle/df/", "some-other-file");
@@ -212,8 +242,12 @@ TESTSUITE(merge_parser)
 			mock_data.push_back(b[i]);
 
 		// Valid file and data
+		ASSERT_TRUE(m_lineToAddr.size() == 0);
 		parser.parseOne("/tmp/kalle/df/",
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
+		ASSERT_TRUE(m_lineToAddr.size() == 3);
+		ASSERT_TRUE(m_lineToAddr[1] == 2);
+		ASSERT_TRUE(m_lineToAddr[3] == 9);
 
 		free((void *)p);
 	}

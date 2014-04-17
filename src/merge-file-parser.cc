@@ -24,7 +24,8 @@ using namespace kcov;
 struct line_entry
 {
 	uint32_t line;
-	uint32_t hits;
+	uint32_t address_start;
+	uint32_t n_addresses;
 };
 
 struct file_data
@@ -34,6 +35,7 @@ struct file_data
 	uint32_t checksum;
 	uint32_t size;
 	uint32_t n_entries;
+	uint32_t address_table_offset;
 	uint32_t file_name_offset;
 
 	struct line_entry entries[];
@@ -122,7 +124,7 @@ public:
 
 		// Mark as a local file
 		file->setLocal();
-		file->addLine(lineNr, addr);
+		file->addLine(lineNr, addr & ~(1ULL << 63));
 
 		for (const auto &it : m_listeners)
 			it->onLine(filename, lineNr, addr);
@@ -273,14 +275,21 @@ private:
 				return;
 		}
 
+		uint64_t *addrTable = (uint64_t *)((char *)fd + fd->address_table_offset);
 		for (unsigned i = 0; i < fd->n_entries; i++) {
 			uint32_t lineNr = fd->entries[i].line;
-			uint32_t addr = fd->entries[i].hits;
 
-			file->addLine(lineNr, addr); // FIXME!
+			for (unsigned ia = 0; ia < fd->entries[i].n_addresses; ia++) {
+				uint64_t addr = addrTable[fd->entries[i].address_start + ia];
+				bool hit = (addr & (1ULL << 63));
 
-			for (const auto &it : m_listeners)
-				it->onLine(filename, lineNr, addr);
+				file->addLine(lineNr, addr);
+
+				for (const auto &it : m_listeners)
+					it->onLine(filename, lineNr, addr & ~(1ULL << 63));
+
+				(void)hit; // FIXME! Register hit
+			}
 		}
 	}
 
@@ -291,9 +300,17 @@ private:
 		if (!file)
 			return nullptr;
 
+		uint32_t n_addrs = 0;
+		for (auto it = file->m_lines.begin();
+				it != file->m_lines.end();
+				++it) {
+			n_addrs += it->second.size();
+		}
+
 		// Header + each line + the filename
 		size_t size = sizeof(struct file_data) +
 				file->m_lines.size() * sizeof(struct line_entry) +
+				n_addrs * sizeof(uint64_t) +
 				file->m_filename.size() + 1;
 		struct file_data *out = (struct file_data *)xmalloc(size);
 
@@ -305,17 +322,29 @@ private:
 
 		struct line_entry *p = out->entries;
 
+		// Point to address table
+		uint64_t *addrTable = (uint64_t *)((char *)p + sizeof(struct line_entry) * file->m_lines.size());
+		uint32_t tableOffset = 0;
+
 		for (auto it = file->m_lines.begin();
 				it != file->m_lines.end();
 				++it) {
 			p->line = to_be<uint32_t>(it->first);
-			// FIXME! The number of hits, should probably be a bitmask
-			p->hits = to_be<uint32_t>(it->second.size());
+
+			p->address_start = to_be<uint32_t>(tableOffset);
+			p->n_addresses = to_be<uint32_t>(it->second.size());
+			for (const auto &itAddr : it->second) {
+				addrTable[tableOffset] = to_be<uint64_t>(itAddr.first);
+				tableOffset++;
+			}
 
 			p++;
 		}
 
-		char *p_name = (char *)p;
+		uint32_t tableStart = (uint32_t)((char *)addrTable - (char *)out);
+		out->address_table_offset = to_be<uint32_t>(tableStart);
+		char *p_name = (char *)out + tableStart + tableOffset * sizeof(uint64_t);
+
 		// Allocated with the terminator above
 		strcpy(p_name, file->m_filename.c_str());
 		out->file_name_offset = to_be<uint32_t>(p_name - (char *)out);
@@ -331,6 +360,7 @@ private:
 		fd->size = be_to_host<uint32_t>(fd->size);
 		fd->n_entries = be_to_host<uint32_t>(fd->n_entries);
 		fd->file_name_offset = be_to_host<uint32_t>(fd->file_name_offset);
+		fd->address_table_offset = be_to_host<uint32_t>(fd->address_table_offset);
 
 		if (fd->magic != MERGE_MAGIC)
 			return false;
@@ -340,10 +370,21 @@ private:
 
 		struct line_entry *p = fd->entries;
 
+		// Unmarshal entries...
 		for (unsigned i = 0; i < fd->n_entries; i++) {
 			p->line = be_to_host<uint32_t>(p->line);
-			p->hits = be_to_host<uint32_t>(p->hits);
+			p->n_addresses = be_to_host<uint32_t>(p->n_addresses);
+			p->address_start = be_to_host<uint32_t>(p->address_start);
+
+			p++;
 		}
+
+		// ... and the address table
+		uint64_t *addressTable = (uint64_t *)((char *)fd + fd->address_table_offset);
+		for (unsigned i = 0;
+				i < (fd->file_name_offset - fd->address_table_offset) / sizeof(uint64_t);
+				i++)
+			addressTable[i] = be_to_host<uint64_t>(addressTable[i]);
 
 		return true;
 	}
@@ -376,7 +417,7 @@ private:
 			m_local = true;
 		}
 
-		void addLine(unsigned int lineNr, unsigned long addr)
+		void addLine(unsigned int lineNr, uint64_t addr)
 		{
 			m_lines[lineNr][addr]++;
 		}
