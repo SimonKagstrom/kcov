@@ -52,6 +52,7 @@ namespace merge_parser
 class MergeParser : public IFileParser,
 	public IFileParser::ILineListener,
 	public IFileParser::IFileListener,
+	public ICollector::IListener,
 	public IWriter
 {
 public:
@@ -102,6 +103,16 @@ public:
 		return match_none;
 	}
 
+	// From ICollector::IListener
+	void onAddress(unsigned long addr, unsigned long hits)
+	{
+		File *file = m_filesByAddress[addr];
+
+		if (!file)
+			return;
+
+		file->registerHits(addr, hits);
+	}
 
 	// From IFileParser::ILineListener
 	void onLine(const std::string &filename, unsigned int lineNr,
@@ -126,8 +137,12 @@ public:
 		file->setLocal();
 		file->addLine(lineNr, addr & ~(1ULL << 63));
 
-		for (const auto &it : m_listeners)
+		for (const auto &it : m_listeners) {
 			it->onLine(filename, lineNr, addr);
+
+			// Record this for the collector hits
+			m_filesByAddress[addr] = file;
+		}
 	}
 
 	// From IFileParser::IFileListener
@@ -284,11 +299,11 @@ private:
 				bool hit = (addr & (1ULL << 63));
 
 				file->addLine(lineNr, addr);
+				if (hit)
+					file->registerHits(lineNr, 1);
 
 				for (const auto &it : m_listeners)
 					it->onLine(filename, lineNr, addr & ~(1ULL << 63));
-
-				(void)hit; // FIXME! Register hit
 			}
 		}
 	}
@@ -329,12 +344,19 @@ private:
 		for (auto it = file->m_lines.begin();
 				it != file->m_lines.end();
 				++it) {
-			p->line = to_be<uint32_t>(it->first);
+			uint32_t line = it->first;
+			p->line = to_be<uint32_t>(line);
 
 			p->address_start = to_be<uint32_t>(tableOffset);
 			p->n_addresses = to_be<uint32_t>(it->second.size());
 			for (const auto &itAddr : it->second) {
-				addrTable[tableOffset] = to_be<uint64_t>(itAddr.first);
+				uint64_t addr = itAddr.first;
+
+				if (file->m_addrHits[addr])
+					addr |= (1ULL << 63);
+
+				addrTable[tableOffset] = to_be<uint64_t>(addr);
+
 				tableOffset++;
 			}
 
@@ -422,8 +444,14 @@ private:
 			m_lines[lineNr][addr]++;
 		}
 
+		void registerHits(uint64_t addr, unsigned int hits)
+		{
+			m_addrHits[addr] += hits;
+		}
+
 		std::string m_filename;
 		LineAddrMap_t m_lines;
+		AddrMap_t m_addrHits;
 		uint32_t m_checksum;
 		bool m_local;
 	};
@@ -431,6 +459,7 @@ private:
 	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
 	std::unordered_map<uint32_t, std::string> m_fileHashes;
+	std::unordered_map<unsigned long, File *> m_filesByAddress;
 
 	std::list<IFileParser::ILineListener *> m_listeners;
 	const std::string m_baseDirectory;
