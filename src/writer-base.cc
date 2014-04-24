@@ -139,7 +139,3 @@ void WriterBase::setupCommonPaths()
 		}
 	}
 }
-
-void WriterBase::stop()
-{
-}

@@ -55,8 +55,6 @@ namespace kcov
 
 		void setupCommonPaths();
 
-		void stop();
-
 		IFileParser &m_fileParser;
 		IReporter &m_reporter;
 		FileMap_t m_files;

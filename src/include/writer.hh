@@ -15,8 +15,5 @@ namespace kcov
 		virtual void onStop() = 0;
 
 		virtual void write() = 0;
-
-
-		virtual void stop() = 0;
 	};
 }
