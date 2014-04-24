@@ -47,6 +47,11 @@ public:
 		IParserManager::getInstance().registerParser(*this);
 	}
 
+	~PythonEngine()
+	{
+		kill();
+	}
+
 	// From IEngine
 	int registerBreakpoint(unsigned long addr)
 	{
@@ -236,6 +241,15 @@ public:
 
 		return match_none;
 	}
+
+	class Ctor
+	{
+	public:
+		Ctor()
+		{
+			new PythonEngine();
+		}
+	};
 
 private:
 	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0)
@@ -475,4 +489,4 @@ private:
 	uint64_t m_currentAddress;
 };
 
-static PythonEngine g_instance;
+static PythonEngine::Ctor g_pythonEngine;

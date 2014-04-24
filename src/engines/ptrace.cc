@@ -142,6 +142,12 @@ public:
 		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
+	~Ptrace()
+	{
+		kill();
+	}
+
+
 	bool readMemory(unsigned long *dst, unsigned long addr)
 	{
 		*dst = peekWord(addr);
@@ -527,6 +533,14 @@ public:
 		return 1;
 	}
 
+	class Ctor
+	{
+	public:
+		Ctor()
+		{
+			new Ptrace();
+		}
+	};
 
 private:
 	bool forkChild(const char *executable)
@@ -676,4 +690,4 @@ private:
 	unsigned long m_signal;
 };
 
-static Ptrace g_ptrace;
+static Ptrace::Ctor g_ptraceEngine;

@@ -28,6 +28,11 @@ public:
 		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
+	~KernelEngine()
+	{
+		kill();
+	}
+
 	// From IEngine
 	int registerBreakpoint(unsigned long addr)
 	{
@@ -131,6 +136,15 @@ public:
 		return match_perfect;
 	}
 
+	class Ctor
+	{
+	public:
+		Ctor()
+		{
+			new KernelEngine();
+		}
+	};
+
 private:
 	void parseOneLine(const std::string &line)
 	{
@@ -166,4 +180,4 @@ private:
 	std::string m_module;
 };
 
-static KernelEngine g_instance;
+static KernelEngine::Ctor g_kernelEngine;

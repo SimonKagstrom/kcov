@@ -23,12 +23,18 @@ static IOutputHandler *g_output;
 static ICollector *g_collector;
 static IReporter *g_reporter;
 
+static void do_cleanup()
+{
+	delete g_engine;
+	delete g_collector;
+	delete g_output;
+	delete g_reporter;
+}
+
 static void ctrlc(int sig)
 {
-	g_collector->stop();
-	g_reporter->stop();
-	g_output->stop();
-	g_engine->kill();
+	do_cleanup();
+
 	exit(0);
 }
 
@@ -141,8 +147,7 @@ int main(int argc, const char *argv[])
 		parser->parse();
 	}
 
-	output.stop();
-	engine->kill();
+	do_cleanup();
 
 	return ret;
 }

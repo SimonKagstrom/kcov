@@ -52,8 +52,6 @@ namespace kcov
 
 		virtual bool unMarshal(void *data, size_t sz) = 0;
 
-		virtual void stop() = 0;
-
 		static IReporter &create(IFileParser &elf, ICollector &collector);
 	};
 }

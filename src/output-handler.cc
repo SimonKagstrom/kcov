@@ -39,6 +39,7 @@ namespace kcov
 
 		~OutputHandler()
 		{
+			stop();
 			free(m_unmarshalData);
 		}
 

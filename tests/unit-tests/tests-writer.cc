@@ -139,14 +139,13 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
-	output.stop();
+	output.produce();
 
 	ASSERT_TRUE(filePatternInDir((outDir + "/test-binary").c_str(), "test-source.c") == 1);
 	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
 	output.start();
 	output.produce();
-	output.stop();
 }
 
 
@@ -205,7 +204,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
-	output.stop();
+	output.produce();
 
 	int cnt = filePatternInDir((outDir + "/same-name-test").c_str(), "html");
 	ASSERT_TRUE(cnt == 4); // index.html + 3 source files

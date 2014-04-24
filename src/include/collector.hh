@@ -23,8 +23,6 @@ namespace kcov
 
 		virtual int run(const std::string &filename) = 0;
 
-		virtual void stop() = 0;
-
 		virtual ~ICollector() {};
 	};
 }

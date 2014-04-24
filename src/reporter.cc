@@ -33,6 +33,11 @@ public:
 		m_collector.registerListener(*this);
 	}
 
+	~Reporter()
+	{
+		stop();
+	}
+
 	bool lineIsCode(const std::string &file, unsigned int lineNr)
 	{
 		bool out;

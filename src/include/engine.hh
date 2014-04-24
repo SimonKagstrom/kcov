@@ -76,8 +76,6 @@ namespace kcov
 		virtual bool continueExecution() = 0;
 
 
-		virtual void kill() = 0;
-
 		virtual unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 	};
 
