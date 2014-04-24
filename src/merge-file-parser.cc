@@ -53,6 +53,7 @@ class MergeParser : public IFileParser,
 	public IFileParser::ILineListener,
 	public IFileParser::IFileListener,
 	public ICollector::IListener,
+	public ICollector,
 	public IWriter
 {
 public:
@@ -78,7 +79,7 @@ public:
 
 	virtual void registerLineListener(IFileParser::ILineListener &listener)
 	{
-		m_listeners.push_back(&listener);
+		m_lineListeners.push_back(&listener);
 	}
 
 
@@ -112,6 +113,10 @@ public:
 			return;
 
 		file->registerHits(addr, hits);
+
+		for (const auto &it : m_collectorListeners) {
+			it->onAddress(addr, hits);
+		}
 	}
 
 	// From IFileParser::ILineListener
@@ -137,7 +142,7 @@ public:
 		file->setLocal();
 		file->addLine(lineNr, addr & ~(1ULL << 63));
 
-		for (const auto &it : m_listeners) {
+		for (const auto &it : m_lineListeners) {
 			it->onLine(filename, lineNr, addr);
 
 			// Record this for the collector hits
@@ -195,8 +200,18 @@ public:
 	}
 
 
-	void stop()
+	// From ICollector
+	virtual void registerListener(ICollector::IListener &listener)
 	{
+		m_collectorListeners.push_back(&listener);
+	}
+
+	virtual int run(const std::string &filename)
+	{
+		// Not used
+		panic("Should not call run here");
+
+		return 0;
 	}
 
 
@@ -299,11 +314,17 @@ private:
 				bool hit = (addr & (1ULL << 63));
 
 				file->addLine(lineNr, addr);
-				if (hit)
+
+				for (const auto &it : m_lineListeners)
+					it->onLine(filename, lineNr, addr & ~(1ULL << 63));
+
+				// Register and report the hit
+				if (hit) {
 					file->registerHits(lineNr, 1);
 
-				for (const auto &it : m_listeners)
-					it->onLine(filename, lineNr, addr & ~(1ULL << 63));
+					for (const auto &itC : m_collectorListeners)
+						itC->onAddress(addr, 1);
+				}
 			}
 		}
 	}
@@ -461,7 +482,9 @@ private:
 	std::unordered_map<uint32_t, std::string> m_fileHashes;
 	std::unordered_map<unsigned long, File *> m_filesByAddress;
 
-	std::list<IFileParser::ILineListener *> m_listeners;
+	std::vector<IFileParser::ILineListener *> m_lineListeners;
 	const std::string m_baseDirectory;
 	const std::string m_outputDirectory;
+
+	std::vector<ICollector::IListener *> m_collectorListeners;
 };
