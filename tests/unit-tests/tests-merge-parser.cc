@@ -257,6 +257,19 @@ TESTSUITE(merge_parser)
 		const struct file_data *p;
 		p = parser.marshalFile("a");
 		ASSERT_TRUE(p);
+
+		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
+		parser2.registerLineListener(*this);
+		parser2.registerListener(*this);
+
+		// Valid file and data
+		ASSERT_TRUE(m_lineToAddr.size() == 0);
+		ASSERT_TRUE(m_addrToHits[72] == 0);
+
+		// See to it that we "know of" file "a"
+		parser2.onLine("a", 4, 72);
+
+		// Mark all entries as executed in the table (should yield hits below)
 		uint64_t *table = (uint64_t*)((const char *)p + be_to_host<uint32_t>(p->address_table_offset));
 
 		for (unsigned int i = 0; i < 4; i++)
@@ -268,18 +281,10 @@ TESTSUITE(merge_parser)
 		for (unsigned int i = 0; i < be_to_host<uint32_t>(p->size); i++)
 			mock_data.push_back(b[i]);
 
-		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
-		parser2.registerLineListener(*this);
-		parser2.registerListener(*this);
 
-		// Valid file and data
-		ASSERT_TRUE(m_lineToAddr.size() == 0);
-		ASSERT_TRUE(m_addrToHits[72] == 0);
-
-		parser2.onLine("a", 4, 72);
 		parser2.parseOne("/tmp/kalle/df/",
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
-		ASSERT_TRUE(m_lineToAddr.size() == 1);
+		ASSERT_TRUE(m_lineToAddr.size() == 3);
 		ASSERT_TRUE(m_lineToAddr[1] == 2);
 		ASSERT_TRUE(m_addrToHits[72] == 1);
 
