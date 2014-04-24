@@ -142,12 +142,11 @@ public:
 		file->setLocal();
 		file->addLine(lineNr, addr & ~(1ULL << 63));
 
-		for (const auto &it : m_lineListeners) {
-			it->onLine(filename, lineNr, addr);
+		// Record this for the collector hits
+		m_filesByAddress[addr] = file;
 
-			// Record this for the collector hits
-			m_filesByAddress[addr] = file;
-		}
+		for (const auto &it : m_lineListeners)
+			it->onLine(filename, lineNr, addr);
 	}
 
 	// From IFileParser::IFileListener
@@ -268,7 +267,6 @@ private:
 		// We don't have this file, or the file is older/newer
 		if (m_fileHashes.find(string_to_integer(curFile, 16)) == m_fileHashes.end())
 			return;
-
 
 		struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
 				metadataDirName.c_str(), curFile.c_str());

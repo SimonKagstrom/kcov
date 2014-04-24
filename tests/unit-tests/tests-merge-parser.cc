@@ -65,6 +65,22 @@ protected:
 	std::unordered_map<unsigned int, unsigned long> m_lineToAddr;
 };
 
+class AddressListenerFixture : public ICollector::IListener
+{
+public:
+	virtual ~AddressListenerFixture()
+	{
+	}
+
+	void onAddress(unsigned long addr, unsigned long hits)
+	{
+		m_addrToHits[addr] = hits;
+	}
+
+protected:
+	std::unordered_map<unsigned int, unsigned long> m_addrToHits;
+};
+
 
 TESTSUITE(merge_parser)
 {
@@ -192,15 +208,15 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(path_to_data.find(p1) != path_to_data.end());
 	}
 
-	TEST(input, LineListenerFixture)
+	TEST(input, LineListenerFixture, AddressListenerFixture)
 	{
 		MockParser mockParser;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
-			.Times(Exactly(1))
+			.Times(Exactly(2))
 		;
 		EXPECT_CALL(mockParser, registerLineListener(_))
-			.Times(Exactly(1))
+			.Times(Exactly(2))
 		;
 
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
@@ -213,10 +229,17 @@ TESTSUITE(merge_parser)
 		mock_write_file(mocked_write_file);
 		mock_get_file_timestamp(mocked_get_timestamp);
 
+		// Register the collector address listener
+		parser.registerListener(*this);
+
 		parser.onLine("a", 1, 2);
 		parser.onLine("a", 3, 9);
 		parser.onLine("a", 4, 72);
 		parser.onLine("b", 2, 3);
+
+		ASSERT_TRUE(m_addrToHits[3] == 0);
+		parser.onAddress(3, 2);
+		ASSERT_TRUE(m_addrToHits[3] == 2);
 
 		// Register afterwards to get everything on parse below...
 		parser.registerLineListener(*this);
@@ -234,6 +257,10 @@ TESTSUITE(merge_parser)
 		const struct file_data *p;
 		p = parser.marshalFile("a");
 		ASSERT_TRUE(p);
+		uint64_t *table = (uint64_t*)((const char *)p + be_to_host<uint32_t>(p->address_table_offset));
+
+		for (unsigned int i = 0; i < 4; i++)
+			table[i] = to_be<uint64_t>((be_to_host<uint64_t>(table[i]) | (1ULL << 63)));
 
 		mock_data.clear();
 
@@ -241,13 +268,20 @@ TESTSUITE(merge_parser)
 		for (unsigned int i = 0; i < be_to_host<uint32_t>(p->size); i++)
 			mock_data.push_back(b[i]);
 
+		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
+		parser2.registerLineListener(*this);
+		parser2.registerListener(*this);
+
 		// Valid file and data
 		ASSERT_TRUE(m_lineToAddr.size() == 0);
-		parser.parseOne("/tmp/kalle/df/",
+		ASSERT_TRUE(m_addrToHits[72] == 0);
+
+		parser2.onLine("a", 4, 72);
+		parser2.parseOne("/tmp/kalle/df/",
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
-		ASSERT_TRUE(m_lineToAddr.size() == 3);
+		ASSERT_TRUE(m_lineToAddr.size() == 1);
 		ASSERT_TRUE(m_lineToAddr[1] == 2);
-		ASSERT_TRUE(m_lineToAddr[3] == 9);
+		ASSERT_TRUE(m_addrToHits[72] == 1);
 
 		free((void *)p);
 	}
