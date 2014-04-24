@@ -25,9 +25,9 @@ static IReporter *g_reporter;
 
 static void do_cleanup()
 {
-	delete g_engine;
 	delete g_collector;
 	delete g_output;
+	delete g_engine;
 	delete g_reporter;
 }
 
