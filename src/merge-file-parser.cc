@@ -32,14 +32,15 @@ struct file_data
 {
 	uint32_t magic;
 	uint32_t version;
-	uint32_t checksum;
 	uint32_t size;
+	uint32_t checksum;
+	uint64_t timestamp;
 	uint32_t n_entries;
 	uint32_t address_table_offset;
 	uint32_t file_name_offset;
 
 	struct line_entry entries[];
-};
+} __attribute__((packed));
 
 // Unit test stuff
 namespace merge_parser
@@ -132,10 +133,8 @@ public:
 		file = m_files[filename];
 		if (!file) {
 			file = new File(filename);
-			m_files[filename] = file;
 
-			// This should be part of the merged data
-			m_fileHashes[file->m_checksum] = file->m_fileTimestamp;
+			m_files[filename] = file;
 		}
 
 		// Mark as a local file
@@ -264,12 +263,6 @@ private:
 		if (!string_is_integer(curFile, 16))
 			return;
 
-		int64_t hash = string_to_integer(curFile, 16);
-
-		// We don't have this file, or the file is older/newer
-		if (m_fileHashes.find(hash) == m_fileHashes.end())
-			return;
-
 		struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
 				metadataDirName.c_str(), curFile.c_str());
 		if (!fd)
@@ -294,14 +287,12 @@ private:
 		file = m_files[filename];
 		if (!file) {
 			file = new File(filename);
-			m_files[filename] = file;
 
-			// This should be part of the merged data
-			m_fileHashes[file->m_checksum] = file->m_fileTimestamp;
+			m_files[filename] = file;
 		} else {
 			// Checksum doesn't match, ignore this file
 			if (file->m_local &&
-					file->m_checksum != fd->checksum)
+					(file->m_checksum != fd->checksum || file->m_fileTimestamp != fd->timestamp))
 				return;
 		}
 
@@ -352,7 +343,8 @@ private:
 
 		out->magic = to_be<uint32_t>(MERGE_MAGIC);
 		out->version = to_be<uint32_t>(MERGE_VERSION);
-		out->checksum = to_be<uint32_t>(file->m_checksum ^ file->m_fileTimestamp);
+		out->checksum = to_be<uint32_t>(file->m_checksum);
+		out->timestamp = to_be<uint64_t>(file->m_fileTimestamp);
 		out->size = to_be<uint32_t>(size);
 		out->n_entries = to_be<uint32_t>(file->m_lines.size());
 
@@ -400,6 +392,7 @@ private:
 		fd->magic = be_to_host<uint32_t>(fd->magic);
 		fd->version = be_to_host<uint32_t>(fd->version);
 		fd->checksum = be_to_host<uint32_t>(fd->checksum);
+		fd->timestamp = be_to_host<uint64_t>(fd->timestamp);
 		fd->size = be_to_host<uint32_t>(fd->size);
 		fd->n_entries = be_to_host<uint32_t>(fd->n_entries);
 		fd->file_name_offset = be_to_host<uint32_t>(fd->file_name_offset);
@@ -479,7 +472,6 @@ private:
 
 	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
-	std::unordered_map<uint32_t, uint64_t> m_fileHashes;
 	std::unordered_map<unsigned long, File *> m_filesByAddress;
 
 	std::vector<IFileParser::ILineListener *> m_lineListeners;

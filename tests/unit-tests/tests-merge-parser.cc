@@ -150,8 +150,8 @@ TESTSUITE(merge_parser)
 		p2 = parser2.marshalFile("a");
 		ASSERT_TRUE(p2);
 
-		ASSERT_TRUE(p->checksum != p2->checksum);
-
+		ASSERT_TRUE(p->checksum == p2->checksum);
+		ASSERT_TRUE(p->timestamp != p2->timestamp);
 
 		// ... but is the same with the old TS
 		p = parser.marshalFile("c");
@@ -161,6 +161,7 @@ TESTSUITE(merge_parser)
 
 		// Should be the same
 		ASSERT_TRUE(p->checksum == p2->checksum);
+		ASSERT_TRUE(p->timestamp == p2->timestamp);
 
 		// Same timestamp, different data
 		parser.onLine("d", 9, 1);
@@ -172,6 +173,7 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(p);
 		ASSERT_TRUE(p2);
 
+		ASSERT_TRUE(p->timestamp == p2->timestamp);
 		ASSERT_TRUE(p->checksum != p2->checksum);
 	}
 
