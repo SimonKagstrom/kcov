@@ -135,7 +135,7 @@ public:
 			m_files[filename] = file;
 
 			// This should be part of the merged data
-			m_fileHashes[file->m_checksum] = file->m_filename;
+			m_fileHashes[file->m_checksum] = file->m_fileTimestamp;
 		}
 
 		// Mark as a local file
@@ -264,8 +264,10 @@ private:
 		if (!string_is_integer(curFile, 16))
 			return;
 
+		int64_t hash = string_to_integer(curFile, 16);
+
 		// We don't have this file, or the file is older/newer
-		if (m_fileHashes.find(string_to_integer(curFile, 16)) == m_fileHashes.end())
+		if (m_fileHashes.find(hash) == m_fileHashes.end())
 			return;
 
 		struct file_data *fd = (struct file_data *)read_file(&size, "%s/%s",
@@ -295,7 +297,7 @@ private:
 			m_files[filename] = file;
 
 			// This should be part of the merged data
-			m_fileHashes[file->m_checksum] = file->m_filename;
+			m_fileHashes[file->m_checksum] = file->m_fileTimestamp;
 		} else {
 			// Checksum doesn't match, ignore this file
 			if (file->m_local &&
@@ -350,7 +352,7 @@ private:
 
 		out->magic = to_be<uint32_t>(MERGE_MAGIC);
 		out->version = to_be<uint32_t>(MERGE_VERSION);
-		out->checksum = to_be<uint32_t>(file->m_checksum);
+		out->checksum = to_be<uint32_t>(file->m_checksum ^ file->m_fileTimestamp);
 		out->size = to_be<uint32_t>(size);
 		out->n_entries = to_be<uint32_t>(file->m_lines.size());
 
@@ -443,12 +445,11 @@ private:
 			void *data;
 			size_t size;
 
-			uint64_t ts = get_file_timestamp(filename.c_str());
-
 			data = read_file(&size, "%s", filename.c_str());
 			panic_if(!data,
 					"File %s exists, but can't be read???", filename.c_str());
-			m_checksum = crc32(data, size) ^ crc32((const void *)&ts, sizeof(ts));
+			m_checksum = crc32(data, size);
+			m_fileTimestamp = get_file_timestamp(filename.c_str());
 
 			free((void *)data);
 		}
@@ -469,6 +470,7 @@ private:
 		}
 
 		std::string m_filename;
+		uint64_t m_fileTimestamp;
 		LineAddrMap_t m_lines;
 		AddrMap_t m_addrHits;
 		uint32_t m_checksum;
@@ -477,7 +479,7 @@ private:
 
 	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
-	std::unordered_map<uint32_t, std::string> m_fileHashes;
+	std::unordered_map<uint32_t, uint64_t> m_fileHashes;
 	std::unordered_map<unsigned long, File *> m_filesByAddress;
 
 	std::vector<IFileParser::ILineListener *> m_lineListeners;
