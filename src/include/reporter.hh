@@ -27,17 +27,18 @@ namespace kcov
 		class ExecutionSummary
 		{
 		public:
-			ExecutionSummary() : m_lines(0), m_executedLines(0)
+			ExecutionSummary() : m_lines(0), m_executedLines(0), m_includeInTotals(true)
 			{
 			}
 
 			ExecutionSummary(unsigned int lines, unsigned int executedLines) :
-				m_lines(lines), m_executedLines(executedLines)
+				m_lines(lines), m_executedLines(executedLines), m_includeInTotals(true)
 			{
 			}
 
 			unsigned int m_lines;
 			unsigned int m_executedLines;
+			unsigned int m_includeInTotals;
 		};
 
 		virtual ~IReporter() {}

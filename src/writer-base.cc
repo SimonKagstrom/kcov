@@ -8,12 +8,13 @@
 using namespace kcov;
 
 #define SUMMARY_MAGIC   0x456d696c
-#define SUMMARY_VERSION 1
+#define SUMMARY_VERSION 2
 
 struct summaryStruct
 {
 	uint32_t magic;
 	uint32_t version;
+	uint32_t includeInTotals;
 	uint32_t nLines;
 	uint32_t nExecutedLines;
 	char name[256];
@@ -23,9 +24,9 @@ int WriterBase::File::fileNameCount;
 
 WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
 		m_fileParser(parser), m_reporter(reporter),
+		m_commonPath("not set"),
 		m_filter(IFilter::getInstance())
 {
-		m_commonPath = "not set";
 		m_fileParser.registerLineListener(*this);
 }
 
@@ -100,6 +101,7 @@ void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary,
 
 	p->magic = to_be<uint32_t>(SUMMARY_MAGIC);
 	p->version = to_be<uint32_t>(SUMMARY_VERSION);
+	p->includeInTotals = to_be<uint32_t>(summary.m_includeInTotals);
 	p->nLines = to_be<uint32_t>(summary.m_lines);
 	p->nExecutedLines = to_be<uint32_t>(summary.m_executedLines);
 	strncpy(p->name, name.c_str(), sizeof(p->name) - 1);
@@ -126,6 +128,7 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 
 	summary.m_lines = be_to_host<uint32_t>(p->nLines);
 	summary.m_executedLines = be_to_host<uint32_t>(p->nExecutedLines);
+	summary.m_includeInTotals = be_to_host<uint32_t>(p->includeInTotals);
 	name = std::string(p->name);
 
 	return true;
