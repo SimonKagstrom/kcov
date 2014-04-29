@@ -1,12 +1,19 @@
 #include "writer-base.hh"
 #include <utils.hh>
 
+#include <swap-endian.hh>
+
 #include <stdio.h>
 
 using namespace kcov;
 
+#define SUMMARY_MAGIC   0x456d696c
+#define SUMMARY_VERSION 1
+
 struct summaryStruct
 {
+	uint32_t magic;
+	uint32_t version;
 	uint32_t nLines;
 	uint32_t nExecutedLines;
 	char name[256];
@@ -91,8 +98,10 @@ void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary,
 	p = (struct summaryStruct *)xmalloc(sizeof(struct summaryStruct));
 	memset(p, 0, sizeof(*p));
 
-	p->nLines = summary.m_lines;
-	p->nExecutedLines = summary.m_executedLines;
+	p->magic = to_be<uint32_t>(SUMMARY_MAGIC);
+	p->version = to_be<uint32_t>(SUMMARY_VERSION);
+	p->nLines = to_be<uint32_t>(summary.m_lines);
+	p->nExecutedLines = to_be<uint32_t>(summary.m_executedLines);
 	strncpy(p->name, name.c_str(), sizeof(p->name) - 1);
 
 	*sz = sizeof(*p);
@@ -109,8 +118,14 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 	if (sz != sizeof(*p))
 		return false;
 
-	summary.m_lines = p->nLines;
-	summary.m_executedLines = p->nExecutedLines;
+	if (be_to_host<uint32_t>(p->magic) != SUMMARY_MAGIC)
+		return false;
+
+	if (be_to_host<uint32_t>(p->version) != SUMMARY_VERSION)
+		return false;
+
+	summary.m_lines = be_to_host<uint32_t>(p->nLines);
+	summary.m_executedLines = be_to_host<uint32_t>(p->nExecutedLines);
 	name = std::string(p->name);
 
 	return true;
