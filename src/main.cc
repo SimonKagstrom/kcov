@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "merge-parser.hh"
 #include "html-writer.hh"
 #include "cobertura-writer.hh"
 
@@ -119,10 +120,26 @@ int main(int argc, const char *argv[])
 
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
+		const std::string &base = output.getBaseDirectory();
+		const std::string &out = output.getOutDirectory();
+
 		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
-				output.getBaseDirectory(), output.getOutDirectory());
+				base, out, conf.getBinaryName());
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
-				output.getBaseDirectory(), output.getOutDirectory());
+				base, out);
+
+		// The merge parser is both a parser, a writer and a collector (!)
+		IMergeParser &mergeParser = createMergeParser(*parser,
+				base, out);
+		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser);
+		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
+				base, base + "/merged", "[merged]", false);
+		mkdir(fmt("%s/merged", base.c_str()).c_str(), 0755);
+
+		collector.registerListener(mergeParser);
+
+		output.registerWriter(mergeParser);
+		output.registerWriter(mergeHtmlWriter);
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
 	}

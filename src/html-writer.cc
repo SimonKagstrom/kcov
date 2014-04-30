@@ -110,11 +110,13 @@ public:
 	HtmlWriter(IFileParser &parser, IReporter &reporter,
 			const std::string &indexDirectory,
 			const std::string &outDirectory,
+			const std::string &name,
 			bool includeInTotals) :
 		WriterBase(parser, reporter),
-		m_outDirectory(outDirectory),
-		m_indexDirectory(indexDirectory),
-		m_summaryDbFileName(outDirectory + "summary.db"),
+		m_outDirectory(outDirectory + "/"),
+		m_indexDirectory(indexDirectory + "/"),
+		m_summaryDbFileName(outDirectory + "/summary.db"),
+		m_name(name),
 		m_includeInTotals(includeInTotals)
 	{
 	}
@@ -334,7 +336,7 @@ private:
 		size_t sz;
 
 		void *data = marshalSummary(summary,
-				IConfiguration::getInstance().getBinaryName(), &sz);
+				m_name, &sz);
 
 		if (data)
 			write_file(data, sz, "%s", m_summaryDbFileName.c_str());
@@ -576,6 +578,7 @@ private:
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
 	std::string m_summaryDbFileName;
+	std::string m_name;
 	bool m_includeInTotals;
 };
 
@@ -584,8 +587,10 @@ namespace kcov
 	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter,
 			const std::string &indexDirectory,
 			const std::string &outDirectory,
+			const std::string &name,
 			bool includeInTotals)
 	{
-		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory, includeInTotals);
+		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory,
+				name, includeInTotals);
 	}
 }

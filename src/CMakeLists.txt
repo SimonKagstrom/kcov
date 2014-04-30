@@ -35,6 +35,7 @@ set (${KCOV}_SRCS
     filter.cc
     html-writer.cc
     main.cc
+    merge-file-parser.cc
     output-handler.cc
     parser-manager.cc
     reporter.cc

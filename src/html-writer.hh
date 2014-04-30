@@ -9,5 +9,6 @@ namespace kcov
 	IWriter &createHtmlWriter(IFileParser &elf, IReporter &reporter,
 			const std::string &indexDirectory,
 			const std::string &outDirectory,
+			const std::string &name,
 			bool includeInTotals = true);
 }
