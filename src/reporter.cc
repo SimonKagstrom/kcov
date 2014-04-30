@@ -203,7 +203,8 @@ private:
 		if (!m_filter.runFilters(file))
 			return;
 
-		kcov_debug(INFO_MSG, "REPORT %s:%u\n", file.c_str(), lineNr);
+		kcov_debug(INFO_MSG, "REPORT %s:%u at 0x%lx\n",
+				file.c_str(), lineNr, (unsigned long)addr);
 		LineId key(file, lineNr);
 
 		LineMap_t::iterator it = m_lines.find(key);
