@@ -28,8 +28,8 @@ namespace kcov
 
 			m_baseDirectory = conf.getOutDirectory();
 			m_outDirectory = m_baseDirectory + conf.getBinaryName() + "/";
-			m_dbFileName = m_outDirectory + "coverage.db";
-			m_summaryDbFileName = m_outDirectory + "summary.db";
+			m_dbFileName = m_outDirectory + "/coverage.db";
+			m_summaryDbFileName = m_outDirectory + "/summary.db";
 
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
