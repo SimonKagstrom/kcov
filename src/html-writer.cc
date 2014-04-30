@@ -109,12 +109,14 @@ class HtmlWriter : public WriterBase
 public:
 	HtmlWriter(IFileParser &parser, IReporter &reporter,
 			const std::string &indexDirectory,
-			const std::string &outDirectory) :
-		WriterBase(parser, reporter)
+			const std::string &outDirectory,
+			bool includeInTotals) :
+		WriterBase(parser, reporter),
+		m_outDirectory(outDirectory),
+		m_indexDirectory(indexDirectory),
+		m_summaryDbFileName(outDirectory + "summary.db"),
+		m_includeInTotals(includeInTotals)
 	{
-		m_indexDirectory = indexDirectory;
-		m_outDirectory = outDirectory;
-		m_summaryDbFileName = m_outDirectory + "summary.db";
 	}
 
 	void onStop()
@@ -328,6 +330,7 @@ private:
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
+		summary.m_includeInTotals = m_includeInTotals;
 		size_t sz;
 
 		void *data = marshalSummary(summary,
@@ -371,13 +374,15 @@ private:
 			if (!res)
 				continue;
 
-
 			double percent = 0;
 
 			if (summary.m_lines != 0)
 				percent = (summary.m_executedLines / (double)summary.m_lines) * 100;
-			nTotalCodeLines += summary.m_lines;
-			nTotalExecutedLines += summary.m_executedLines;
+			// Skip entries (merged ones) that shouldn't be included in the totals
+			if (summary.m_includeInTotals) {
+				nTotalCodeLines += summary.m_lines;
+				nTotalExecutedLines += summary.m_executedLines;
+			}
 
 			std::string coverPer = strFromPercentage(percent);
 
@@ -408,7 +413,8 @@ private:
 
 		writeIndex();
 
-		writeGlobalIndex();
+		if (m_includeInTotals)
+			writeGlobalIndex();
 	}
 
 	std::string strFromPercentage(double percent)
@@ -570,14 +576,16 @@ private:
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
 	std::string m_summaryDbFileName;
+	bool m_includeInTotals;
 };
 
 namespace kcov
 {
 	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter,
 			const std::string &indexDirectory,
-			const std::string &outDirectory)
+			const std::string &outDirectory,
+			bool includeInTotals)
 	{
-		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory);
+		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory, includeInTotals);
 	}
 }
