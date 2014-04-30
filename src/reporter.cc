@@ -248,7 +248,8 @@ private:
 
 		void addAddress(unsigned long addr)
 		{
-			m_addrs[addr] = 0;
+			if (m_addrs.find(addr) == m_addrs.end())
+				m_addrs[addr] = 0;
 		}
 
 		unsigned int registerHit(unsigned long addr, unsigned long hits)
