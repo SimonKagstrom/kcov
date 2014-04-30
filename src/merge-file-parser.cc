@@ -5,6 +5,7 @@
 #include <writer.hh>
 #include <lineid.hh>
 
+#include <vector>
 #include <string>
 #include <list>
 #include <unordered_map>
@@ -15,6 +16,8 @@
 #include <dirent.h>
 
 #include <swap-endian.hh>
+
+#include "merge-parser.hh"
 
 using namespace kcov;
 
@@ -50,12 +53,10 @@ namespace merge_parser
 	class input;
 }
 
-class MergeParser : public IFileParser,
+class MergeParser :
+	public IMergeParser,
 	public IFileParser::ILineListener,
-	public IFileParser::IFileListener,
-	public ICollector::IListener,
-	public ICollector,
-	public IWriter
+	public IFileParser::IFileListener
 {
 public:
 	friend class merge_parser::marshal;
@@ -480,3 +481,13 @@ private:
 
 	std::vector<ICollector::IListener *> m_collectorListeners;
 };
+
+namespace kcov
+{
+	IMergeParser &createMergeParser(IFileParser &localParser,
+			const std::string &baseDirectory,
+			const std::string &outputDirectory)
+	{
+		return *new MergeParser(localParser, baseDirectory, outputDirectory);
+	}
+}
