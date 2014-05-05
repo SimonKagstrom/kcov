@@ -133,8 +133,9 @@ TESTSUITE(merge_parser)
 
 		uint64_t *addressTable = (uint64_t *)((char *)p + be_to_host<uint32_t>(p->address_table_offset));
 		uint32_t start = be_to_host<uint32_t>(p->entries[0].address_start);
-		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start]) == 2);
-		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start + 1]) == 3);
+
+		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start]) == parser.hashAddress("a", 1, 2));
+		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start + 1]) == parser.hashAddress("a", 1, 3) + 1);
 
 		// No output
 		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
@@ -239,9 +240,9 @@ TESTSUITE(merge_parser)
 		parser.onLine("a", 4, 72);
 		parser.onLine("b", 2, 3);
 
-		ASSERT_TRUE(m_addrToHits[3] == 0);
+		ASSERT_TRUE(m_addrToHits[parser.hashAddress("b", 2, 3)] == 0);
 		parser.onAddress(3, 2);
-		ASSERT_TRUE(m_addrToHits[3] == 2);
+		ASSERT_TRUE(m_addrToHits[parser.hashAddress("b", 2, 3)] == 2);
 
 		// Register afterwards to get everything on parse below...
 		parser.registerLineListener(*this);
@@ -266,7 +267,7 @@ TESTSUITE(merge_parser)
 
 		// Valid file and data
 		ASSERT_TRUE(m_lineToAddr.size() == 0);
-		ASSERT_TRUE(m_addrToHits[72] == 0);
+		ASSERT_TRUE(m_addrToHits[parser.hashAddress("a", 4, 72)] == 0);
 
 		// See to it that we "know of" file "a"
 		parser2.onLine("a", 4, 72);
@@ -287,8 +288,8 @@ TESTSUITE(merge_parser)
 		parser2.parseOne("/tmp/kalle/df/",
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
 		ASSERT_TRUE(m_lineToAddr.size() == 3);
-		ASSERT_TRUE(m_lineToAddr[1] == 2);
-		ASSERT_TRUE(m_addrToHits[72] == 1);
+		ASSERT_TRUE(m_lineToAddr[1] == parser.hashAddress("a", 1, 2));
+		ASSERT_TRUE(m_addrToHits[parser.hashAddress("a", 4, 72)] == 1);
 
 		free((void *)p);
 	}

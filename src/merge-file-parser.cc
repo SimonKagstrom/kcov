@@ -22,7 +22,7 @@
 using namespace kcov;
 
 #define MERGE_MAGIC   0x4d6f6172 // "Moar"
-#define MERGE_VERSION 1
+#define MERGE_VERSION 2
 
 struct line_entry
 {
@@ -109,6 +109,10 @@ public:
 	// From ICollector::IListener
 	void onAddress(unsigned long addr, unsigned long hits)
 	{
+		if (m_fileLineByAddress.find(addr) == m_fileLineByAddress.end())
+			return;
+		addr = m_fileLineByAddress[addr];
+
 		File *file = m_filesByAddress[addr];
 
 		if (!file)
@@ -137,6 +141,13 @@ public:
 
 			m_files[filename] = file;
 		}
+
+
+		uint64_t addrHash = hashAddressUnique(filename, lineNr, addr);
+
+		m_addressByFileLine[addrHash] = addr;
+		m_fileLineByAddress[addr] = addrHash;
+		addr = addrHash;
 
 		// Mark as a local file
 		file->setLocal();
@@ -215,6 +226,25 @@ public:
 
 
 private:
+	uint64_t hashAddress(const std::string &filename, unsigned int lineNr, uint64_t addr)
+	{
+		// Convert address into a suitable format for the merge parser
+		uint64_t addrHash = crc32(filename.c_str(), filename.size()) ^ crc32(&lineNr, sizeof(lineNr));
+
+		return addrHash;
+	}
+
+	uint64_t hashAddressUnique(const std::string &filename, unsigned int lineNr, uint64_t addr)
+	{
+		auto addrHash = hashAddress(filename, lineNr, addr);
+
+		// Find some unique position (if there are multiple addresses for this line)
+		while (m_addressByFileLine.find(addrHash) != m_addressByFileLine.end())
+			addrHash++;
+
+		return addrHash;
+	}
+
 	void parseStoredData()
 	{
 		DIR *dir;
@@ -308,7 +338,7 @@ private:
 				file->addLine(lineNr, addr);
 
 				for (const auto &it : m_lineListeners)
-					it->onLine(filename, lineNr, addr & ~(1ULL << 63));
+						it->onLine(filename, lineNr, addr & ~(1ULL << 63));
 
 				// Register and report the hit
 				if (hit) {
@@ -474,6 +504,8 @@ private:
 	// All files in the current coverage session
 	std::unordered_map<std::string, File *> m_files;
 	std::unordered_map<unsigned long, File *> m_filesByAddress;
+	std::unordered_map<unsigned long, uint64_t> m_fileLineByAddress;
+	std::unordered_map<uint64_t, unsigned long> m_addressByFileLine;
 
 	std::vector<IFileParser::ILineListener *> m_lineListeners;
 	const std::string m_baseDirectory;
