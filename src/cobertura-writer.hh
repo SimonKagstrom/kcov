@@ -7,6 +7,5 @@ namespace kcov
 	class IOutputHandler;
 
 	IWriter &createCoberturaWriter(IFileParser &elf, IReporter &reporter,
-			const std::string &indexDirectory,
-			const std::string &outDirectory);
+			const std::string &outFile);
 }

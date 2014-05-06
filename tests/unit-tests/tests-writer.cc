@@ -116,7 +116,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	IWriter &writer = createHtmlWriter(*elf, reporter,
 			output.getBaseDirectory(), output.getOutDirectory(), "kalle");
 	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter,
-			output.getBaseDirectory(), output.getOutDirectory());
+			output.getOutDirectory() + "/cobertura.xml");
 
 	output.registerWriter(writer);
 	output.registerWriter(coberturaWriter);

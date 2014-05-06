@@ -126,7 +126,7 @@ int main(int argc, const char *argv[])
 		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
 				base, out, conf.getBinaryName());
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
-				base, out);
+				out + "/cobertura.xml");
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(*parser,

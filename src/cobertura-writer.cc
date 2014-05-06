@@ -18,9 +18,9 @@ class CoberturaWriter : public WriterBase
 {
 public:
 	CoberturaWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &outDirectory) :
+			const std::string &outFile) :
 		WriterBase(parser, reporter),
-		m_outDirectory(outDirectory)
+		m_outFile(outFile)
 	{
 	}
 
@@ -52,7 +52,7 @@ public:
 		str = getHeader(nTotalCodeLines, nTotalExecutedLines) + str + getFooter();
 
 		write_file((void *)str.c_str(), str.size(),
-				(m_outDirectory + "cobertura.xml").c_str());
+				"%s", m_outFile.c_str());
 	}
 
 private:
@@ -164,15 +164,14 @@ private:
 	}
 
 
-	std::string m_outDirectory;
+	std::string m_outFile;
 };
 
 namespace kcov
 {
 	IWriter &createCoberturaWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &indexDirectory,
-			const std::string &outDirectory)
+			const std::string &outFile)
 	{
-		return *new CoberturaWriter(parser, reporter, outDirectory);
+		return *new CoberturaWriter(parser, reporter, outFile);
 	}
 }
