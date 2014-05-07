@@ -134,7 +134,7 @@ int main(int argc, const char *argv[])
 		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", "[merged]", false);
-		IWriter &mergeCoberturaWriter = createCoberturaWriter(*parser, reporter,
+		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/cobertura.xml");
 		mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
