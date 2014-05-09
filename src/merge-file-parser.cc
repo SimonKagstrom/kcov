@@ -333,7 +333,10 @@ private:
 
 			for (unsigned ia = 0; ia < fd->entries[i].n_addresses; ia++) {
 				uint64_t addr = addrTable[fd->entries[i].address_start + ia];
+
+				// Check if this was a hit (and remove the hit bit from the address)
 				bool hit = (addr & (1ULL << 63));
+				addr &= ~(1ULL << 63);
 
 				file->addLine(lineNr, addr);
 
