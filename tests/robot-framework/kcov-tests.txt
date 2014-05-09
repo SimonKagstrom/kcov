@@ -263,3 +263,17 @@ python-tricky-single-dict-assignment
 #	Run								rm -rf ${out}/main
 #    ${rc}=    Run and return RC    ${kcov} --python-parser=${kcov_path}/tests/tools/dummy-python.sh ${out} ${kcov_path}/tests/python/main 5
 #    Should be equal as integers    ${rc}   99
+
+
+merge-basic
+	Run								rm -rf ${out}
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml main 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
