@@ -145,7 +145,8 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
 	output.start();
-	output.produce();
+
+	delete &output; // UGLY!
 }
 
 
@@ -208,4 +209,6 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 
 	int cnt = filePatternInDir((outDir + "/same-name-test").c_str(), "html");
 	ASSERT_TRUE(cnt == 4); // index.html + 3 source files
+
+	delete &output; // UGLY!
 }
