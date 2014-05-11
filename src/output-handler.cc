@@ -83,8 +83,6 @@ namespace kcov
 
 		void stop()
 		{
-			produce();
-
 			size_t sz;
 			void *data = m_reporter.marshal(&sz);
 
@@ -95,6 +93,9 @@ namespace kcov
 
 			for (const auto &it : m_writers)
 				it->onStop();
+
+			// Produce output after stop if anyone yields new data in onStop()
+			produce();
 		}
 
 		void produce()
