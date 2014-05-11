@@ -303,3 +303,29 @@ merge-same-file-in-multiple-binaries
     ${rc}=    Run and return RC    ${kcov} ${out} ./multi_1 1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 3
     Should Contain    ${output}    1
+
+merge-changed-file
+    Run								rm -rf ${out} file.c file.o main_1.o main_2.o
+    ${rc}=    Run and return RC    	cp ${kcov_path}/tests/merge-tests/file.c .
+    Should be equal as integers		${rc}    0
+    ${rc}=    Run and return RC    	gcc -c -g -o file.o file.c
+    ${rc}=    Run and return RC    	gcc -c -g -o main_1.o ${kcov_path}/tests/merge-tests/main_1.c
+    ${rc}=    Run and return RC    	gcc -o multi_3 main_1.o file.o
+    ${rc}=    Run and return RC    ${kcov} ${out} ./multi_3 9
+    ${output}=    Run    ${xml_lookup} ${out}/multi_3/cobertura.xml file_c 3
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/multi_3/cobertura.xml file_c 8
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/multi_3/cobertura.xml file_c 10
+    Should Contain    ${output}    nocode
+    ${rc}=    Run and return RC    	echo "int kalle(void) { return 129; }" >> file.c
+    ${rc}=    Run and return RC    	gcc -c -g -o file.o file.c
+    ${rc}=    Run and return RC    	gcc -c -g -o main_2.o ${kcov_path}/tests/merge-tests/main_2.c
+    ${rc}=    Run and return RC    	gcc -o multi_4 main_2.o file.o
+    ${rc}=    Run and return RC    	${kcov} ${out} ./multi_4 9
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 3
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 8
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 10
+    Should Contain    ${output}    0
