@@ -172,15 +172,9 @@ public:
 		mkdir(m_baseDirectory.c_str(), 0755);
 		mkdir(m_outputDirectory.c_str(), 0755);
 		mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
-
-		parseStoredData();
 	}
 
 	void onStop()
-	{
-	}
-
-	void write()
 	{
 		parseStoredData();
 
@@ -207,6 +201,10 @@ public:
 
 			free((void *)fd);
 		}
+	}
+
+	void write()
+	{
 	}
 
 
