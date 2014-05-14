@@ -202,7 +202,7 @@ TESTSUITE(merge_parser)
 		parser.onLine("a", 1, 2);
 		parser.onLine("b", 2, 3);
 
-		parser.write();
+		parser.onStop();
 
 		std::string p0 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("a", 1));
 		std::string p1 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("b", 1));
