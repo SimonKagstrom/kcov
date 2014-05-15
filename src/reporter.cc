@@ -73,6 +73,10 @@ public:
 		for (const auto &it : m_lines) {
 			Line *cur = it.second;
 
+			// Don't include non-existing files in summary
+			if (!file_exists(cur->m_file))
+				continue;
+
 			if (!m_filter.runFilters(cur->m_file))
 				continue;
 
