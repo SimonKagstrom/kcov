@@ -83,6 +83,7 @@ private:
 		case ev_exit:
 			return fmt("exit code %d", ev.data);
 		case ev_signal:
+		case ev_signal_exit:
 		{
 			if (ev.data == SIGABRT)
 				return std::string("SIGABRT");
