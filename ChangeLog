@@ -1,13 +1,17 @@
 Kcov (17):
-	* Output: Implement a merged mode, which shows a combination of all
-	  covered programs under the [merged] link
+	* Issue #19: Fix bug where kcov would let children which called
+	  setpgid live even after terminating kcov itself (Oliver)
+
+	* Issue #16: Output: Implement a merged mode, which shows a
+	  combination of all covered programs under the [merged] link
 
 	* Fix an HTML output bug introduced in kcov 14 where the summary
 	  counts in the index page would be wrong.
 
-	* Fix a crash when source lines are > ~2000 characters long
+	* Issue #15: Fix a crash when source lines are > ~2000 characters long
 
-	* Fix parsing of multiple include/exclude patterns (Jamie Kirkpatrick)
+	* Issue #17: Fix parsing of multiple include/exclude patterns
+	  (Jamie Kirkpatrick)
 
 	* Split usage in common/uncommon options
 
