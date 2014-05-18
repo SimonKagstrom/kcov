@@ -144,7 +144,7 @@ public:
 
 	~Ptrace()
 	{
-		kill();
+		kill(SIGTERM);
 	}
 
 
@@ -515,10 +515,12 @@ public:
 		return true;
 	}
 
-	void kill()
+	void kill(int signal)
 	{
-		ptrace(PTRACE_KILL, m_activeChild, 0, 0);
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
+		::kill(m_activeChild, signal);
+		msleep(10);
+		::kill(m_activeChild, SIGKILL);
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)

@@ -69,6 +69,13 @@ namespace kcov
 		virtual bool start(IEventListener &listener, const std::string &executable) = 0;
 
 		/**
+		 * Kill child with signal
+		 *
+		 * @param sig the signal to send to the child
+		 */
+		virtual void kill(int sig) = 0;
+
+		/**
 		 * Continue execution with an event
 		 *
 		 * @return true if the process should continue, false otherwise

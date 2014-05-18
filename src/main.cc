@@ -34,6 +34,7 @@ static void do_cleanup()
 
 static void ctrlc(int sig)
 {
+	g_engine->kill(sig);
 	do_cleanup();
 
 	exit(0);

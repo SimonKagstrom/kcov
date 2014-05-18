@@ -20,7 +20,7 @@ public:
 	MOCK_METHOD0(clearAllBreakpoints, void());
 	MOCK_METHOD2(start, bool(IEventListener &listener, const std::string &executable));
 	MOCK_METHOD0(continueExecution, bool());
-	MOCK_METHOD0(kill, void());
+	MOCK_METHOD1(kill, void(int));
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{

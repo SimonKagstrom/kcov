@@ -49,7 +49,7 @@ public:
 
 	~PythonEngine()
 	{
-		kill();
+		kill(SIGTERM);
 	}
 
 	// From IEngine
@@ -188,11 +188,13 @@ public:
 		return false;
 	}
 
-	void kill()
+	void kill(int signal)
 	{
 		if (m_child == 0)
 			return;
 
+		::kill(m_child, signal);
+		msleep(10);
 		// Bye-bye
 		::kill(m_child, SIGKILL);
 	}

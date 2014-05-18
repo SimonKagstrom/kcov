@@ -30,7 +30,7 @@ public:
 
 	~KernelEngine()
 	{
-		kill();
+		kill(0);
 	}
 
 	// From IEngine
@@ -78,7 +78,7 @@ public:
 		if (!m_control || !m_show) {
 			error("Can't open kprobe-coverage files. Is the kprobe-coverage module loaded?");
 
-			kill();
+			kill(0);
 			return false;
 		}
 
@@ -102,7 +102,7 @@ public:
 		return true;
 	}
 
-	void kill()
+	void kill(int sig)
 	{
 		if (m_control) {
 			fprintf(m_control, "clear\n");
