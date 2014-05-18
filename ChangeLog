@@ -19,7 +19,7 @@ Kcov (17):
 
 	* Various work on the kernel-engine and general refactoring
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun May 18 19:24:14 CEST 2014
 
 Kcov (16):
 	* kernel-engine: Implement an engine to handle kernel code coverage
