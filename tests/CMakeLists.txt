@@ -4,7 +4,9 @@ project (kcov-tests)
 
 include_directories(
 	${CMAKE_BINARY_DIR}
+	../src/include
 )
+set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
 add_custom_command (OUTPUT multi-fork-generated.c
   COMMAND ${CMAKE_SOURCE_DIR}/multi-fork/generate-functions.py ${CMAKE_SOURCE_DIR}/multi-fork/code-template.c 1024 > ${CMAKE_BINARY_DIR}/multi-fork-generated.c
@@ -91,12 +93,15 @@ add_executable(global-constructors ${global_constructors_SRCS})
 add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
+add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
 
 target_link_libraries(shared_library_test shared_library)
 target_link_libraries(global-constructors shared_library)
 
 target_link_libraries(multi_fork
 	m)
+target_link_libraries(setpgid-kill
+	z)
 
 
 add_custom_target(tests-stripped ALL
