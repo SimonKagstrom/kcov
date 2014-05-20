@@ -144,6 +144,7 @@ public:
 
 	~Ptrace()
 	{
+		pthread_kill(m_solibThread, SIGKILL);
 		kill(SIGTERM);
 	}
 
