@@ -94,8 +94,28 @@ add_custom_command(
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
+add_custom_command(
+   OUTPUT html-data-files.c
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png icon_glass
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/emerald.png icon_emerald
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/ruby.png icon_ruby
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/snow.png icon_snow
+   > html-data-files.c
+   DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/emerald.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/ruby.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/snow.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   )
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.c python-helper.c)
+
+add_executable (${KCOV} ${${KCOV}_SRCS} library.c python-helper.c html-data-files.c)
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 #add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 
