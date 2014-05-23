@@ -194,9 +194,6 @@ public:
 			return;
 
 		::kill(m_child, signal);
-		msleep(10);
-		// Bye-bye
-		::kill(m_child, SIGKILL);
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)

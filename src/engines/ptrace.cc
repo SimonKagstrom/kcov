@@ -150,6 +150,7 @@ public:
 
 		pthread_join(m_solibThread, &rv);
 		kill(SIGTERM);
+		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 	}
 
 
@@ -523,10 +524,7 @@ public:
 
 	void kill(int signal)
 	{
-		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 		::kill(m_activeChild, signal);
-		msleep(10);
-		::kill(m_activeChild, SIGKILL);
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)

@@ -34,10 +34,8 @@ static void do_cleanup()
 
 static void ctrlc(int sig)
 {
+	// Forward the signal to the traced program
 	g_engine->kill(sig);
-	do_cleanup();
-
-	exit(0);
 }
 
 static void daemonize(void)
