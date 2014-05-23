@@ -146,6 +146,7 @@ public:
 	{
 		void *rv;
 
+		unlink(m_solibPath.c_str());
 		close(m_solibFd);
 
 		/*
