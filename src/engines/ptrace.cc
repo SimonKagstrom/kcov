@@ -148,6 +148,12 @@ public:
 
 		close(m_solibFd);
 
+		/*
+		 * First kill the solib thread if it's stuck in open (i.e., before
+		 * the tracee has started), then wait for it to terminate for maximum
+		 * niceness.
+		 */
+		pthread_kill(m_solibThread, SIGTERM);
 		pthread_join(m_solibThread, &rv);
 		kill(SIGTERM);
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
