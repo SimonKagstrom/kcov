@@ -93,6 +93,8 @@ private:
 				return std::string("SIGILL");
 			if (ev.data == SIGTERM)
 				return std::string("SIGTERM");
+			if (ev.data == SIGINT)
+				return std::string("SIGINT");
 			if (ev.data == SIGBUS)
 				return std::string("SIGBUS");
 			if (ev.data == SIGFPE)
