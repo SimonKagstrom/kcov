@@ -144,7 +144,11 @@ public:
 
 	~Ptrace()
 	{
-		pthread_kill(m_solibThread, SIGKILL);
+		void *rv;
+
+		close(m_solibFd);
+
+		pthread_join(m_solibThread, &rv);
 		kill(SIGTERM);
 	}
 
@@ -256,20 +260,21 @@ public:
 	void solibThreadMain()
 	{
 		uint8_t buf[1024 * 1024];
-		int fd;
 
-		fd = open(m_solibPath.c_str(), O_RDONLY);
+		m_solibFd = open(m_solibPath.c_str(), O_RDONLY);
 
-		if (fd < 0)
+		if (m_solibFd < 0)
 			return;
 
 		m_solibFileOpen = true;
 
 		while (1) {
-			int r = read(fd, buf, sizeof(buf));
+			int r = read(m_solibFd, buf, sizeof(buf));
 
+			// The destructor will close m_solibFd, so we'll exit here in that case
 			if (r <= 0)
 				break;
+
 			panic_if ((unsigned)r >= sizeof(buf),
 					"Too much solib data read");
 
@@ -289,7 +294,7 @@ public:
 		}
 
 		m_solibDataReadSemaphore.notify();
-		close(fd);
+		close(m_solibFd);
 	}
 
 	static void *threadStatic(void *pThis)
@@ -687,6 +692,7 @@ private:
 	int m_parentCpu;
 
 	bool m_solibFileOpen;
+	int m_solibFd;
 
 	IFileParser *m_elf;
 	IEventListener *m_listener;
