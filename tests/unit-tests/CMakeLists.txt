@@ -40,6 +40,26 @@ set (CMAKE_BUILD_TYPE debug)
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP")
 
 
+add_custom_command(
+   OUTPUT html-data-files.c
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../src/bin-to-c-source.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bcov.css css_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/amber.png icon_amber
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/glass.png icon_glass
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png icon_emerald
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png icon_ruby
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png icon_snow
+   > html-data-files.c
+   DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bcov.css
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/amber.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/glass.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/bin-to-c-source.py
+   )
+
 include_directories(
 	../../src/include/
 	${GMOCK_INCLUDE_DIRS}
@@ -51,7 +71,7 @@ include_directories(
 
 link_directories (/home/ska/local/lib)
 
-add_executable (${TGT} ${${TGT}_SRCS})
+add_executable (${TGT} ${${TGT}_SRCS} html-data-files.c)
 
 target_link_libraries(${TGT}
 	${LIBCRPCUT_LIBRARIES}
