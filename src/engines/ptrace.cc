@@ -531,7 +531,9 @@ public:
 
 	void kill(int signal)
 	{
-		::kill(m_activeChild, signal);
+		// Don't kill kcov itself (PID 0)
+		if (m_activeChild != 0)
+			::kill(m_activeChild, signal);
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
