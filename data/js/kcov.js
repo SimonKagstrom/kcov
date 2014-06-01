@@ -7,6 +7,7 @@ window.onload = function () {
 	elem.innerHTML = ((header.covered / header.instrumented) * 100).toFixed(1) + "%";	    
 
 	document.getElementById('header-command').innerHTML = header.command;
+	document.getElementById('window-title').innerHTML = "Coverage report - " + header.command;
 	document.getElementById('header-date').innerHTML = header.date;
 	document.getElementById('header-covered').innerHTML = header.covered
 	document.getElementById('header-instrumented').innerHTML = header.instrumented
