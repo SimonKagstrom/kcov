@@ -523,6 +523,34 @@ std::string escape_html(const std::string &str)
 	return std::string(buf);
 }
 
+std::string escape_json(const std::string &str)
+{
+	size_t n_escapes = 0;
+
+	for (unsigned i = 0; i < str.size(); i++) {
+		if (str[i] == '\'' || str[i] == '\\')
+			n_escapes++;
+	}
+
+	std::string out;
+	out.resize(str.size() + n_escapes);
+	unsigned cur = 0;
+
+	for (unsigned i = 0; i < str.size(); i++) {
+		out[cur] = str[i];
+
+		// Quote single-quotes and backslashes
+		if (str[i] == '\'' || str[i] == '\\') {
+			out[cur] = '\\';
+			cur++;
+			out[cur] = str[i];
+		}
+		cur++;
+	}
+
+	return out;
+}
+
 uint32_t crc32(const void *buf, size_t len)
 {
 	return crc32(0, (const Bytef *)buf, len);

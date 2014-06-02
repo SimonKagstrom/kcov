@@ -18,4 +18,22 @@ TESTSUITE(utils)
 
 		ASSERT_TRUE(s.find("&amp;") != std::string::npos);
 	}
+
+	TEST(escapeJson)
+	{
+		std::string a = "var kalle=1;";
+		std::string b = "var kalle='1';";
+		std::string c = "var a='\\hej';";
+
+		std::string s;
+
+		s = escape_json(a);
+		ASSERT_TRUE(s == a);
+
+		s = escape_json(b);
+		ASSERT_TRUE(s == "var kalle=\\'1\\';");
+
+		s = escape_json(c);
+		ASSERT_TRUE(s == "var a=\\'\\\\hej\\';");
+	}
 }
