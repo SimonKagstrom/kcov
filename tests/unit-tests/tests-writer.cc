@@ -141,7 +141,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 	output.produce();
 
-	ASSERT_TRUE(filePatternInDir((outDir + "/test-binary").c_str(), "test-source.c") == 1);
+	ASSERT_TRUE(filePatternInDir((outDir + "/test-binary").c_str(), "test-source.c") >= 1);
 	ASSERT_TRUE(file_exists((outDir + "/test-binary/cobertura.xml").c_str()));
 
 	output.start();

@@ -23,6 +23,10 @@ extern uint8_t icon_glass_data[];
 extern uint8_t icon_emerald_data[];
 extern uint8_t icon_ruby_data[];
 extern uint8_t icon_snow_data[];
+extern uint8_t source_file_text_data[];
+extern uint8_t index_text_data[];
+extern uint8_t tempo_text_data[];
+extern uint8_t kcov_text_data[];
 
 extern size_t css_text_data_size;
 extern size_t icon_amber_data_size;
@@ -30,6 +34,10 @@ extern size_t icon_glass_data_size;
 extern size_t icon_emerald_data_size;
 extern size_t icon_ruby_data_size;
 extern size_t icon_snow_data_size;
+extern size_t source_file_text_data_size;
+extern size_t index_text_data_size;
+extern size_t tempo_text_data_size;
+extern size_t kcov_text_data_size;
 
 
 class HtmlWriter : public WriterBase
@@ -57,138 +65,107 @@ private:
 
 	void writeOne(File *file)
 	{
-		enum IConfiguration::OutputType type = IConfiguration::getInstance().getOutputType();
-		std::string outName = m_outDirectory + "/" + file->m_outFileName;
-		uint64_t nTotalExecutedAddresses = 0;
+		auto &conf = IConfiguration::getInstance();
+		std::string jsonOutName = m_outDirectory + "/" + file->m_jsonOutFileName;
+		std::string htmlOutName = m_outDirectory + "/" + file->m_outFileName;
 		unsigned int nExecutedLines = 0;
 		unsigned int nCodeLines = 0;
 
-		std::string s =
-				"<pre class=\"source\">\n";
-		if (type == IConfiguration::OUTPUT_PROFILER) {
-			for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
-				IReporter::LineExecutionCount cnt =
-						m_reporter.getLineExecutionCount(file->m_name.c_str(), n);
+		std::string json;
 
-				nTotalExecutedAddresses += cnt.m_hits;
-			}
-		}
-
+		// Produce each line in the file
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
-			std::string line = file->m_lineMap[n];
-
-			s += "<span class=\"lineNum\">" + fmt("%5u", n) + "</span>";
-
-			if (!m_reporter.lineIsCode(file->m_name, n)) {
-				if (type == IConfiguration::OUTPUT_COVERAGE)
-					s += "              : " + escape_html(line) + "</span>\n";
-				else
-					s += "                : " + escape_html(line) + "</span>\n";
-				continue;
-			}
+			const auto &line = file->m_lineMap[n];
 
 			IReporter::LineExecutionCount cnt =
 					m_reporter.getLineExecutionCount(file->m_name, n);
 
 			std::string lineClass = "lineNoCov";
 
-			if (type == IConfiguration::OUTPUT_COVERAGE)
-				nExecutedLines += !!cnt.m_hits;
-			else
-				nExecutedLines += cnt.m_hits;
-			nCodeLines++;
+			nExecutedLines += !!cnt.m_hits;
 
 			if (cnt.m_hits == cnt.m_possibleHits)
 				lineClass = "lineCov";
 			else if (cnt.m_hits)
 				lineClass = "linePartCov";
 
-			if (type == IConfiguration::OUTPUT_COVERAGE) {
-				s += "<span class=\"" + lineClass + "\">    " +
-						fmt("%3u", cnt.m_hits) + "  / " + fmt("%3u", cnt.m_possibleHits) + ": " +
-						escape_html(line) +
-						"</span>\n";
+			// Update the execution count
+			file->m_executedLines = nExecutedLines;
+			file->m_codeLines = nCodeLines;
+
+			json += fmt(
+					"{'lineNum':'%5u',"
+					"'line':'%s'",
+					n,
+					escape_json(line).c_str()
+					);
+
+			if (m_reporter.lineIsCode(file->m_name, n)) {
+				json += fmt(
+					",'class':'%s',"
+					"'coverage':'%3u / %3u  : ',",
+					lineClass.c_str(),
+					cnt.m_hits, cnt.m_possibleHits);
+
+				nCodeLines++;
 			} else {
-				double percentage = 0;
-
-				if (nTotalExecutedAddresses != 0)
-					percentage = ((double)cnt.m_hits / (double)nTotalExecutedAddresses) * 100;
-
-				unsigned int red = 21;
-				unsigned int green = 129;
-				unsigned int blue = 148;
-
-				if (percentage > 0 && percentage < 5) {
-					red = 71; green = 157; blue = 117;
-				} else if (percentage >= 5 && percentage < 15) {
-					red = 123; green = 195; blue = 73;
-				} else if (percentage >= 15 && percentage < 30) {
-					red = 209; green = 214; blue = 0;
-				} else if (percentage >= 30 && percentage < 45) {
-					red = 240; green = 151; blue = 0;
-				} else if (percentage >= 45) {
-					red = 252; green = 107; blue = 0;
-				}
-
-				s += "<span style=\"background-color:" + fmt("#%02x%02x%02x", red, green, blue) + "\">" +
-						fmt("%8u", cnt.m_hits) + " / " + fmt("%3u%%", (unsigned int)percentage) + " </span>: " +
-						"<span>" +
-						escape_html(line) +
-						"</span>\n";
+				json += ",'coverage':'           : ',";
 			}
+			json += "},\n";
+
 		}
-		s += "</pre>\n";
 
-		s = getHeader(nCodeLines, nExecutedLines) + s + getFooter(file);
+		// Add the header
+		json =  fmt(
+				"var percent_low = %d;"
+				"var percent_high = %d;"
+				"\n"
+				"var header = {"
+				" 'command' : '%s',"
+				" 'date' : '%s',"
+				" 'instrumented' : %d,"
+				" 'covered' : %d,"
+				"};"
+				"\n"
+				"var data = [\n",
+				conf.getLowLimit(),
+				conf.getHighLimit(),
+				escape_json(conf.getBinaryName()).c_str(),
+				getDateNow().c_str(),
+				nCodeLines,
+				nExecutedLines
+				) + json + "];";
 
-		write_file((void *)s.c_str(), s.size(), outName.c_str());
+		// Produce HTML outfile
+		std::string html = fmt(
+				"<script type=\"text/javascript\" src=\"%s\"></script>\n",
+				file->m_jsonOutFileName.c_str());
+		html += std::string((const char *)source_file_text_data, source_file_text_data_size);
 
-		// Update the execution count
-		file->m_executedLines = nExecutedLines;
-		file->m_codeLines = nCodeLines;
+		// .. And write both files to disk
+		write_file((void *)json.c_str(), json.size(), jsonOutName.c_str());
+		write_file((void *)html.c_str(), html.size(), htmlOutName.c_str());
 	}
 
 	void writeIndex()
 	{
-		enum IConfiguration::OutputType type = IConfiguration::getInstance().getOutputType();
+		auto &conf = IConfiguration::getInstance();
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
-		uint64_t nTotalExecutedAddresses = 0;
-		std::string s;
 
-		std::multimap<double, std::string> fileListByPercent;
-		std::multimap<double, std::string> fileListByUncoveredLines;
-		std::multimap<double, std::string> fileListByFileLength;
-		std::map<std::string, std::string> fileListByName;
+		std::string json; // Not really json, but anyway
 
-		if (type == IConfiguration::OUTPUT_PROFILER) {
-			for (const auto &it : m_files) {
-				auto file = it.second;
-
-				nTotalExecutedAddresses += file->m_executedLines;
-			}
-		}
 		for (const auto &it : m_files) {
 			auto file = it.second;
 			unsigned int nExecutedLines = file->m_executedLines;
 			unsigned int nCodeLines = file->m_codeLines;
 			double percent = 0;
 
-			if (type == IConfiguration::OUTPUT_COVERAGE) {
-				if (nCodeLines != 0)
-					percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
+			if (nCodeLines != 0)
+				percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
 
-				nTotalCodeLines += nCodeLines;
-				nTotalExecutedLines += nExecutedLines;
-			} else {
-				if (nExecutedLines == 0)
-					continue;
-
-				// Profiler
-				percent = ((double)nExecutedLines / (double)nTotalExecutedAddresses) * 100;
-			}
-
-			std::string coverPer = strFromPercentage(percent);
+			nTotalCodeLines += nCodeLines;
+			nTotalExecutedLines += nExecutedLines;
 
 			std::string listName = file->m_name;
 
@@ -213,50 +190,62 @@ private:
 				listName = prefix + listName.substr(pathToRemove.size());
 			}
 
-			std::string cur =
-				"    <tr>\n"
-				"      <td class=\"coverFile\"><a href=\"" + file->m_outFileName + "\" title=\"" + file->m_fileName + "\">" + listName + "</a></td>\n"
-				"      <td class=\"coverBar\" align=\"center\">\n"
-				"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">" + constructBar(percent) + "</td></tr></table>\n"
-				"      </td>\n";
-			if (type == IConfiguration::OUTPUT_COVERAGE)
-				cur += "      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
-				"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", nExecutedLines) + "&nbsp;/&nbsp;" + fmt("%u", nCodeLines) + "&nbsp;lines</td>\n"
-				"    </tr>\n";
-			else
-				cur += "      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
-				"    </tr>\n";
+			int width = (int)(percent+0.5);
 
-			fileListByName[file->m_name] = cur;
-			fileListByPercent.insert(std::pair<double, std::string>(percent, cur));
-			fileListByUncoveredLines.insert(std::pair<double, std::string>(nCodeLines - nExecutedLines, cur));
-			fileListByFileLength.insert(std::pair<double, std::string>(nCodeLines, cur));
-		}
-
-		if (IConfiguration::getInstance().getSortType() == IConfiguration::PERCENTAGE) {
-			for (const auto &it : fileListByPercent)
-				s = s + it.second;
-		}
-		else if (IConfiguration::getInstance().getSortType() == IConfiguration::REVERSE_PERCENTAGE) {
-			for (const auto &it : fileListByPercent)
-				s = it.second + s;
-		}
-		else if (IConfiguration::getInstance().getSortType() == IConfiguration::UNCOVERED_LINES) {
-			for (const auto &it : fileListByUncoveredLines)
-				s = it.second + s; // Sort backwards
-		}
-		else if (IConfiguration::getInstance().getSortType() == IConfiguration::FILE_LENGTH) {
-			for (const auto &it : fileListByFileLength)
-				s = it.second + s; // Ditto
-		}
-		else {
-			for (const auto &it : fileListByName)
-				s = s + it.second;
+			json += fmt(
+					"{'link':'%s',"
+					"'title':'%s',"
+					"'summary_name':'%s',"
+					"'coverage_perc':'coverPer%s',"
+					"'coverage_num':'coverNum%s',"
+					"'covered_img':'%s',"
+					"'covered_width':'%d',"
+					"'uncovered_width':'%d',"
+					"'covered':'%.1f',"
+					"'covered_lines':'%d',"
+					"'total_lines' : '%d'},\n",
+					file->m_outFileName.c_str(),
+					file->m_fileName.c_str(),
+					listName.c_str(),
+					strFromPercentage(percent).c_str(),
+					strFromPercentage(percent).c_str(),
+					imageFromPercent(percent).c_str(),
+					width,
+					100 - width,
+					percent,
+					nExecutedLines,
+					nCodeLines
+					);
 		}
 
-		s = getHeader(nTotalCodeLines, nTotalExecutedLines) + getIndexHeader() + s + getFooter(nullptr);
 
-		write_file((void *)s.c_str(), s.size(), (m_outDirectory + "index.html").c_str());
+		// Add the header
+		json =  fmt(
+				"var percent_low = %d;"
+				"var percent_high = %d;"
+				"\n"
+				"var header = {"
+				" 'command' : '%s',"
+				" 'date' : '%s',"
+				" 'instrumented' : %d,"
+				" 'covered' : %d,"
+				"};"
+				"\n"
+				"var data = [\n",
+				conf.getLowLimit(),
+				conf.getHighLimit(),
+				escape_json(conf.getBinaryName()).c_str(),
+				getDateNow().c_str(),
+				nTotalCodeLines,
+				nTotalExecutedLines
+				) + json + "];";
+
+		// Produce HTML outfile
+		auto html = std::string((const char *)index_text_data, index_text_data_size);
+
+		// .. And write both files to disk
+		write_file((void *)json.c_str(), json.size(), (m_outDirectory + "index.json").c_str());
+		write_file((void *)html.c_str(), html.size(), (m_outDirectory + "index.html").c_str());
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
@@ -274,6 +263,7 @@ private:
 
 	void writeGlobalIndex()
 	{
+		auto &conf = IConfiguration::getInstance();
 		DIR *dir;
 		struct dirent *de;
 		std::string idx = m_indexDirectory.c_str();
@@ -283,6 +273,8 @@ private:
 
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
+
+		std::string json;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
 			std::string cur = idx + de->d_name + "/summary.db";
@@ -314,25 +306,62 @@ private:
 				nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			std::string coverPer = strFromPercentage(percent);
-
-			s +=
-					"    <tr>\n"
-					"      <td class=\"coverFile\"><a href=\"" + std::string(de->d_name) + "/index.html\" title=\"" + name + "\">" + name + "</a></td>\n"
-					"      <td class=\"coverBar\" align=\"center\">\n"
-					"        <table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td class=\"coverBarOutline\">" + constructBar(percent) + "</td></tr></table>\n"
-					"      </td>\n"
-					"      <td class=\"coverPer" + coverPer + "\">" + fmt("%.1f", percent) + "&nbsp;%</td>\n"
-					"      <td class=\"coverNum" + coverPer + "\">" + fmt("%u", summary.m_executedLines) + "&nbsp;/&nbsp;" + fmt("%u", summary.m_lines) + "&nbsp;lines</td>\n"
-					"    </tr>\n";
-
+			int width = (int)(percent+0.5);
+			json += fmt(
+					"{'link':'%s/index.html',"
+					"'title':'%s',"
+					"'summary_name':'%s',"
+					"'coverage_perc':'coverPer%s',"
+					"'coverage_num':'coverNum%s',"
+					"'covered_img':'%s',"
+					"'covered_width':'%d',"
+					"'uncovered_width':'%d',"
+					"'covered':'%.1f',"
+					"'covered_lines':'%d',"
+					"'total_lines' : '%d'},\n",
+					de->d_name,
+					name.c_str(),
+					name.c_str(),
+					strFromPercentage(percent).c_str(),
+					strFromPercentage(percent).c_str(),
+					imageFromPercent(percent).c_str(),
+					width,
+					100 - width,
+					percent,
+					summary.m_executedLines,
+					summary.m_lines
+			);
 		}
-		s = getHeader(nTotalCodeLines, nTotalExecutedLines, false) + getIndexHeader() + s + getFooter(nullptr);
 
-		write_file((void *)s.c_str(), s.size(), (m_indexDirectory + "index.html").c_str());
+		// Add the header
+		json =  fmt(
+				"var percent_low = %d;"
+				"var percent_high = %d;"
+				"\n"
+				"var header = {"
+				" 'command' : '%s',"
+				" 'date' : '%s',"
+				" 'instrumented' : %d,"
+				" 'covered' : %d,"
+				"};"
+				"\n"
+				"var data = [\n",
+				conf.getLowLimit(),
+				conf.getHighLimit(),
+				escape_json(conf.getBinaryName()).c_str(),
+				getDateNow().c_str(),
+				nTotalCodeLines,
+				nTotalExecutedLines
+				) + json + "];";
+
+		// Produce HTML outfile
+		auto html = std::string((const char *)index_text_data, index_text_data_size);
+
+		// .. And write both files to disk
+		write_file((void *)json.c_str(), json.size(), (m_indexDirectory + "index.json").c_str());
+		write_file((void *)html.c_str(), html.size(), (m_indexDirectory + "index.html").c_str());
 		closedir(dir);
 	}
-
 
 	void write()
 	{
@@ -359,131 +388,31 @@ private:
 
 		return coverPer;
 	}
-
-	std::string getIndexHeader()
+	std::string imageFromPercent(double percent)
 	{
-		return std::string(
-				"<center>\n"
-				"  <table width=\"80%\" cellpadding=\"2\" cellspacing=\"1\" border=\"0\">\n"
-				"    <tr>\n"
-				"      <td width=\"50%\"><br/></td>\n"
-				"      <td width=\"15%\"></td>\n"
-				"      <td width=\"15%\"></td>\n"
-				"      <td width=\"20%\"></td>\n"
-				"    </tr>\n"
-				"    <tr>\n"
-				"      <td class=\"tableHead\">Filename</td>\n"
-				"      <td class=\"tableHead\" colspan=\"3\">Coverage</td>\n"
-				"    </tr>\n"
-		);
+		auto &conf = IConfiguration::getInstance();
+
+		if (percent >= conf.getHighLimit())
+			return "emerald.png";
+		else if (percent > conf.getLowLimit())
+			return "amber.png";
+		else if (percent <= 1)
+			return "snow.png";
+
+		return "ruby.png";
 	}
 
-	std::string getFooter(File *file)
+	std::string getDateNow()
 	{
-		return std::string(
-				"<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n"
-				"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
-				"  <tr><td class=\"versionInfo\">Generated by: <a href=\"http://simonkagstrom.github.com/kcov/index.html\">Kcov</a></td></tr>\n"
-				"</table>\n"
-				"<br/>\n"
-				"</body>\n"
-				"</html>\n"
-				);
-	}
-
-	std::string getHeader(unsigned int nCodeLines, unsigned int nExecutedLines,
-			bool includeCommand = true)
-	{
-		IConfiguration &conf = IConfiguration::getInstance();
-		std::string percentage_text = "Lo";
-		double percentage = 0;
-		char date_buf[80];
 		time_t t;
 		struct tm *tm;
-
-		if (nCodeLines != 0)
-			percentage = ((double)nExecutedLines / (double)nCodeLines) * 100;
-
-		if (percentage > conf.getLowLimit() && percentage < conf.getHighLimit())
-			percentage_text = "Med";
-		else if (percentage >= conf.getHighLimit())
-			percentage_text = "Hi";
+		char date_buf[128];
 
 		t = time(nullptr);
 		tm = localtime(&t);
 		strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", tm);
 
-		std::string date(date_buf);
-		std::string instrumentedLines = fmt("%u", nCodeLines);
-		std::string lines = fmt("%u", nExecutedLines);
-		std::string covered = fmt("%.1f%%", percentage);
-
-		if (conf.getOutputType() == IConfiguration::OUTPUT_PROFILER)
-			covered = fmt("%u samples", nExecutedLines);
-
-		std::string commandStr = "";
-		if (includeCommand)
-			commandStr = "          <td class=\"headerItem\" width=\"20%\">Command:</td>\n"
-					"          <td class=\"headerValue\" width=\"80%\" colspan=6>" + escape_html(conf.getBinaryName()) + "</td>\n";
-
-		return std::string(
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
-				"<html>\n"
-				"<head>\n"
-				"  <title>Coverage - " + escape_html(conf.getBinaryName()) + "</title>\n"
-				"  <link rel=\"stylesheet\" type=\"text/css\" href=\"bcov.css\"/>\n"
-				"</head>\n"
-				"<body>\n"
-				"<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n"
-				"  <tr><td class=\"title\">Coverage Report</td></tr>\n"
-				"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
-				"  <tr>\n"
-				"    <td width=\"100%\">\n"
-				"      <table cellpadding=\"1\" border=\"0\" width=\"100%\">\n"
-				"        <tr>\n" +
-				commandStr +
-				"        </tr>\n"
-				"        <tr>\n"
-				"          <td class=\"headerItem\" width=\"20%\">Date:</td>\n"
-				"          <td class=\"headerValue\" width=\"15%\">" + escape_html(date) + "</td>\n"
-				"          <td width=\"5%\"></td>\n"
-				"          <td class=\"headerItem\" width=\"20%\">Instrumented&nbsp;lines:</td>\n"
-				"          <td class=\"headerValue\" width=\"10%\">" + instrumentedLines + "</td>\n"
-				"        </tr>\n"
-				"        <tr>\n"
-				"          <td class=\"headerItem\" width=\"20%\">Code&nbsp;covered:</td>\n"
-				"          <td class=\"coverPerLeft" + percentage_text + "\" width=\"15%\">" + covered + "</td>\n"
-				"          <td width=\"5%\"></td>\n"
-				"          <td class=\"headerItem\" width=\"20%\">Executed&nbsp;lines:</td>\n"
-				"          <td class=\"headerValue\" width=\"10%\">" + lines + "</td>\n"
-				"        </tr>\n"
-				"      </table>\n"
-				"    </td>\n"
-				"  </tr>\n"
-				"  <tr><td class=\"ruler\"><img src=\"glass.png\" width=\"3\" height=\"3\" alt=\"\"/></td></tr>\n"
-				"</table>\n"
-				);
-	}
-
-	std::string constructBar(double percent)
-	{
-		const char* color = "ruby.png";
-		char buf[1024];
-		int width = (int)(percent+0.5);
-		IConfiguration &conf = IConfiguration::getInstance();
-
-		if (percent >= conf.getHighLimit())
-			color = "emerald.png";
-		else if (percent > conf.getLowLimit())
-			color = "amber.png";
-		else if (percent <= 1)
-			color = "snow.png";
-
-		xsnprintf(buf, sizeof(buf),
-				"<img src=\"%s\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/><img src=\"snow.png\" width=\"%d\" height=\"10\" alt=\"%.1f%%\"/>",
-				color, width, percent, 100 - width, percent);
-
-		return std::string(buf);
+		return std::string(date_buf);
 	}
 
 	void writeHelperFiles(std::string dir)
@@ -494,6 +423,17 @@ private:
 		write_file(icon_snow_data, icon_snow_data_size, "%s/snow.png", dir.c_str());
 		write_file(icon_glass_data, icon_glass_data_size, "%s/glass.png", dir.c_str());
 		write_file(css_text_data, css_text_data_size, "%s/bcov.css", dir.c_str());
+
+		mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
+		mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
+		write_file(icon_ruby_data, icon_ruby_data_size, "%s/data/ruby.png", dir.c_str());
+		write_file(icon_amber_data, icon_amber_data_size, "%s/data/amber.png", dir.c_str());
+		write_file(icon_emerald_data, icon_emerald_data_size, "%s/data/emerald.png", dir.c_str());
+		write_file(icon_snow_data, icon_snow_data_size, "%s/data/snow.png", dir.c_str());
+		write_file(icon_glass_data, icon_glass_data_size, "%s/data/glass.png", dir.c_str());
+		write_file(css_text_data, css_text_data_size, "%s/data/bcov.css", dir.c_str());
+		write_file(tempo_text_data, tempo_text_data_size, "%s/data/js/tempo.min.js", dir.c_str());
+		write_file(kcov_text_data, kcov_text_data_size, "%s/data/js/kcov.js", dir.c_str());
 	}
 
 	void onStartup()

@@ -49,6 +49,10 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png icon_emerald
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png icon_ruby
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png icon_snow
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html source_file_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html index_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js tempo_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/kcov.js kcov_text
    > html-data-files.c
    DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bcov.css
@@ -57,6 +61,10 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/kcov.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/bin-to-c-source.py
    )
 

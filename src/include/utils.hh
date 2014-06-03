@@ -151,6 +151,8 @@ int64_t string_to_integer(const std::string &str, unsigned base = 0);
 
 std::string escape_html(const std::string &str);
 
+std::string escape_json(const std::string &str);
+
 void msleep(uint64_t ms);
 
 class Semaphore

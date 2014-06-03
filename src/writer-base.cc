@@ -42,6 +42,7 @@ WriterBase::File::File(const std::string &filename) :
 
 	// Make this name unique (we might have several files with the same name)
 	m_outFileName = fmt("%s.%d.html", m_fileName.c_str(), fileNameCount);
+	m_jsonOutFileName = fmt("%s.%d.json", m_fileName.c_str(), fileNameCount);
 	fileNameCount++;
 
 	readFile(filename);
@@ -63,7 +64,9 @@ void WriterBase::File::readFile(const std::string &filename)
 		res = getline(&lineptr, &n, fp);
 		if (res < 0)
 			break;
-		m_lineMap[lineNr] = std::string(lineptr);
+		std::string s(lineptr);
+		s.erase(s.find_last_not_of(" \n\r\t")+1);
+		m_lineMap[lineNr] = s;
 
 		free((void *)lineptr);
 		lineNr++;
