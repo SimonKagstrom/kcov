@@ -9,15 +9,6 @@ namespace kcov
 	class IConfiguration
 	{
 	public:
-		enum SortType
-		{
-			PERCENTAGE,
-			REVERSE_PERCENTAGE,
-			FILENAME,
-			FILE_LENGTH,
-			UNCOVERED_LINES
-		};
-
 		enum OutputType
 		{
 			OUTPUT_COVERAGE,
@@ -46,8 +37,6 @@ namespace kcov
 		virtual const std::string &getPythonCommand() const = 0;
 
 		virtual std::list<uint64_t> getFixedBreakpoints() = 0;
-
-		virtual enum SortType getSortType() = 0;
 
 		virtual unsigned int getAttachPid() = 0;
 

@@ -11,6 +11,8 @@ window.onload = function () {
 	document.getElementById('header-date').innerHTML = header.date;
 	document.getElementById('header-covered').innerHTML = header.covered
 	document.getElementById('header-instrumented').innerHTML = header.instrumented
+
+	$('.tablesorter').trigger('update');
 }
 
 function toCoverPercentString (covered, instrumented) {

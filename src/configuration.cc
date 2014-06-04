@@ -26,7 +26,6 @@ public:
 		m_ptracePid = 0;
 		m_programArgs = NULL;
 		m_argc = 0;
-		m_sortType = FILENAME;
 		m_outputType = OUTPUT_COVERAGE;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
@@ -45,8 +44,6 @@ public:
 				" -h, --help              this text\n"
 				" -p, --pid=PID           trace PID instead of executing in-file,\n"
 				"                         in-file is optional in this case\n"
-				" -s, --sort-type=type    how to sort files: f[ilename] (default), p[ercent],\n"
-				"                         r[everse-percent], u[ncovered-lines], l[ines]\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
 				"\n"
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
@@ -86,7 +83,6 @@ public:
 		static const struct option long_options[] = {
 				{"help", no_argument, 0, 'h'},
 				{"pid", required_argument, 0, 'p'},
-				{"sort-type", required_argument, 0, 's'},
 				{"limits", required_argument, 0, 'l'},
 				{"output-interval", required_argument, 0, 'O'},
 				{"title", required_argument, 0, 't'},
@@ -164,18 +160,6 @@ public:
 					return usage();
 				m_ptracePid = stoul(std::string(optarg));
 				extraNeeded = 1;
-				break;
-			case 's':
-				if (*optarg == 'p' || *optarg == 'P')
-					m_sortType = PERCENTAGE;
-				else if (*optarg == 'r' || *optarg == 'R')
-					m_sortType = REVERSE_PERCENTAGE;
-				else if (*optarg == 'u' || *optarg == 'U')
-					m_sortType = UNCOVERED_LINES;
-				else if (*optarg == 'l' || *optarg == 'L')
-					m_sortType = FILE_LENGTH;
-				else if (*optarg != 'f' && *optarg != 'F')
-					return usage();
 				break;
 			case 't':
 				m_title = optarg;
@@ -359,12 +343,6 @@ public:
 		return m_argc;
 	}
 
-
-	enum SortType getSortType()
-	{
-		return m_sortType;
-	}
-
 	std::map<unsigned int, std::string> &getExcludePattern()
 	{
 		return m_excludePattern;
@@ -539,7 +517,6 @@ public:
 	unsigned int m_lowLimit;
 	unsigned int m_highLimit;
 	unsigned int m_pathStripLevel;
-	enum SortType m_sortType;
 	unsigned int m_ptracePid;
 	std::string m_outDirectory;
 	std::string m_binaryName;

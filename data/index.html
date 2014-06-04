@@ -2,13 +2,24 @@
 <html>
 <head>
   <title id="window-title">???</title>
+  <link rel="stylesheet" href="/tmp/themes/blue/style.css" type="text/css" id="" media="print, projection, 
+screen" />
   <link rel="stylesheet" type="text/css" href="data/bcov.css"/>
 </head>
 <body>
-<!-- Import Tempo -->
+
+<!-- Import Tempo etc -->
 <script type="text/javascript" src="index.json"></script>
+<script type="text/javascript" src="data/js/jquery.min.js"></script>
+<script type="text/javascript" src="data/js/tablesorter.min.js"></script>
 <script type="text/javascript" src="data/js/tempo.min.js"></script>
 <script type="text/javascript" src="data/js/kcov.js"></script>
+<script type="text/javascript">
+$(document).ready(function()
+		{
+			$("#index-table").tablesorter();
+		});
+</script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="title">Coverage Report</td></tr>
@@ -41,17 +52,20 @@
 </table>
 
 <center id="source-code">
-  <table width="80%" cellpadding="2" cellspacing="1" border="0">
-    <tr>
-      <td width="50%"><br/></td>
-      <td width="15%"></td>
-      <td width="15%"></td>
-      <td width="20%"></td>
-    </tr>
+  <table width="80%" cellpadding="2" cellspacing="1" border="0" id="index-table" class="tablesorter">
+	<thead>
     <tr>
       <td class="tableHead">Filename</td>
-      <td class="tableHead" colspan="3">Coverage</td>
+      <td class="tableHead" colspan=3>Coverage</td>
     </tr>
+    <tr>
+      <th width="50%">a</th>
+      <th width="15%">b</th>
+      <th width="15%">c</th>
+      <th width="20%">d</th>
+    </tr>
+    </thead>
+    <tbody>
     <tr data-template>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="coverBar" align="center">
@@ -60,6 +74,7 @@
       <td class="{{coverage_perc}}">{{covered}}%</td>
       <td class="{{coverage_num}}">{{covered_lines}}/{{total_lines}}</td>
     </tr>
+    </tbody>
   </table>
 </center>
 <br>

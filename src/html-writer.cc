@@ -27,6 +27,8 @@ extern uint8_t source_file_text_data[];
 extern uint8_t index_text_data[];
 extern uint8_t tempo_text_data[];
 extern uint8_t kcov_text_data[];
+extern uint8_t jquery_text_data[];
+extern uint8_t tablesorter_text_data[];
 
 extern size_t css_text_data_size;
 extern size_t icon_amber_data_size;
@@ -38,6 +40,8 @@ extern size_t source_file_text_data_size;
 extern size_t index_text_data_size;
 extern size_t tempo_text_data_size;
 extern size_t kcov_text_data_size;
+extern size_t jquery_text_data_size;
+extern size_t tablesorter_text_data_size;
 
 
 class HtmlWriter : public WriterBase
@@ -434,6 +438,8 @@ private:
 		write_file(css_text_data, css_text_data_size, "%s/data/bcov.css", dir.c_str());
 		write_file(tempo_text_data, tempo_text_data_size, "%s/data/js/tempo.min.js", dir.c_str());
 		write_file(kcov_text_data, kcov_text_data_size, "%s/data/js/kcov.js", dir.c_str());
+		write_file(jquery_text_data, jquery_text_data_size, "%s/data/js/jquery.min.js", dir.c_str());
+		write_file(tablesorter_text_data, tablesorter_text_data_size, "%s/data/js/tablesorter.min.js", dir.c_str());
 	}
 
 	void onStartup()

@@ -60,36 +60,32 @@ TESTSUITE(configuration)
 		res = runParse("-s vbb");
 		ASSERT_FALSE(res);
 
-		ASSERT_TRUE(conf->getSortType() == IConfiguration::FILENAME);
 		ASSERT_TRUE(conf->m_lowLimit == 25U);
 		ASSERT_TRUE(conf->m_highLimit == 75U);
 
-		res = runParse(fmt("-l 30,60 /tmp/vobb --sort-type=p %s", filename.c_str()));
+		res = runParse(fmt("-l 30,60 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 
-		ASSERT_TRUE(conf->getSortType() == IConfiguration::PERCENTAGE);
 		ASSERT_TRUE(conf->m_lowLimit == 30U);
 		ASSERT_TRUE(conf->m_highLimit == 60U);
 
-		res = runParse(fmt("-l 20 /tmp/vobb --sort-type=p %s", filename.c_str()));
+		res = runParse(fmt("-l 20 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(!res);
 
-		res = runParse(fmt("-l 40,50,90 /tmp/vobb --sort-type=p %s", filename.c_str()));
+		res = runParse(fmt("-l 40,50,90 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(!res);
 
-		res = runParse(fmt("-l 35,hej /tmp/vobb --sort-type=p %s", filename.c_str()));
+		res = runParse(fmt("-l 35,hej /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(!res);
 
-		res = runParse(fmt("-l yo,89 /tmp/vobb --sort-type=p %s", filename.c_str()));
+		res = runParse(fmt("-l yo,89 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(!res);
 
-		res = runParse(fmt("/tmp/vobb --sort-type=u %s", filename.c_str()));
+		res = runParse(fmt("/tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
-		ASSERT_TRUE(conf->getSortType() == IConfiguration::UNCOVERED_LINES);
 
-		res = runParse(fmt("/tmp/vobb --sort-type=l %s", filename.c_str()));
+		res = runParse(fmt("/tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
-		ASSERT_TRUE(conf->getSortType() == IConfiguration::FILE_LENGTH);
 
 		res = runParse(fmt("--path-strip-level=ejNummer /tmp/vobb, %s", filename.c_str()));
 		ASSERT_FALSE(res);

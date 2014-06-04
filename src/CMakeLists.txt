@@ -107,6 +107,8 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html index_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/tempo.min.js tempo_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js kcov_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js jquery_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js tablesorter_text
    > html-data-files.c
    DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
@@ -119,6 +121,8 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/tempo.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
