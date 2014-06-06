@@ -49,6 +49,9 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png icon_emerald
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png icon_ruby
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png icon_snow
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/asc.gif icon_asc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bg.gif icon_bg
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/desc.gif icon_desc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html source_file_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html index_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js tempo_text
@@ -64,6 +67,9 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/emerald.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/ruby.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/snow.png
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/asc.gif
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bg.gif
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/desc.gif
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js

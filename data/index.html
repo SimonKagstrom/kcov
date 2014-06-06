@@ -2,8 +2,7 @@
 <html>
 <head>
   <title id="window-title">???</title>
-  <link rel="stylesheet" href="data/tablesorter-theme.css" type="text/css" id="" media="print, projection, 
-screen" />
+  <link rel="stylesheet" href="data/tablesorter-theme.css" type="text/css" id="" media="print, projection, screen" />
   <link rel="stylesheet" type="text/css" href="data/bcov.css"/>
 </head>
 <body>
@@ -17,7 +16,14 @@ screen" />
 <script type="text/javascript">
 $(document).ready(function()
 		{
-			$("#index-table").tablesorter();
+			$("#index-table").tablesorter({
+				headers : {
+					1 : {
+						// Disable sorting on the graphical column
+						sorter : false
+					},
+				}
+			});
 		});
 </script>
 
@@ -55,14 +61,11 @@ $(document).ready(function()
   <table width="80%" cellpadding="2" cellspacing="1" border="0" id="index-table" class="tablesorter">
 	<thead>
     <tr>
-      <td class="tableHead">Filename</td>
-      <td class="tableHead" colspan=3>Coverage</td>
-    </tr>
-    <tr>
-      <th width="50%">a</th>
-      <th width="15%">b</th>
-      <th width="15%">c</th>
-      <th width="20%">d</th>
+      <th class="tableHead" width="60%">Filename</th>
+      <th width="10%"></th>
+      <th width="10%">Coverage percent</th>
+      <th width="10%">Covered</th>
+      <th width="10%">Executable lines</th>
     </tr>
     </thead>
     <tbody>
@@ -72,7 +75,8 @@ $(document).ready(function()
         <table border="0" cellspacing="0" cellpadding="1"><tr><td class="coverBarOutline"><img src="data/{{covered_img}}" width="{{covered_width}}" height="10"/><img src="data/snow.png" width="{{uncovered_width}}" height="10"/></td></tr></table>
       </td>
       <td class="{{coverage_perc}}">{{covered}}%</td>
-      <td class="{{coverage_num}}">{{covered_lines}}/{{total_lines}}</td>
+      <td class="{{coverage_num}}">{{covered_lines}}</td>
+      <td class="{{coverage_num}}">{{total_lines}}</td>
     </tr>
     </tbody>
   </table>
