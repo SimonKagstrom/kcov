@@ -73,15 +73,6 @@ private:
 			IReporter::LineExecutionCount cnt =
 					m_reporter.getLineExecutionCount(file->m_name, n);
 
-			std::string lineClass = "lineNoCov";
-
-			nExecutedLines += !!cnt.m_hits;
-
-			if (cnt.m_hits == cnt.m_possibleHits)
-				lineClass = "lineCov";
-			else if (cnt.m_hits)
-				lineClass = "linePartCov";
-
 			// Update the execution count
 			file->m_executedLines = nExecutedLines;
 			file->m_codeLines = nCodeLines;
@@ -94,12 +85,20 @@ private:
 					);
 
 			if (m_reporter.lineIsCode(file->m_name, n)) {
+				std::string lineClass = "lineNoCov";
+
+				if (cnt.m_hits == cnt.m_possibleHits)
+					lineClass = "lineCov";
+				else if (cnt.m_hits)
+					lineClass = "linePartCov";
+
 				json += fmt(
 					",'class':'%s',"
 					"'coverage':'%3u / %3u  : ',",
 					lineClass.c_str(),
 					cnt.m_hits, cnt.m_possibleHits);
 
+				nExecutedLines += !!cnt.m_hits;
 				nCodeLines++;
 			} else {
 				json += ",'coverage':'           : ',";
