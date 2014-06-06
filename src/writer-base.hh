@@ -3,7 +3,6 @@
 #include <writer.hh>
 #include <reporter.hh>
 #include <file-parser.hh>
-#include <filter.hh>
 
 #include <string>
 #include <unordered_map>
@@ -60,8 +59,5 @@ namespace kcov
 		IReporter &m_reporter;
 		FileMap_t m_files;
 		std::string m_commonPath;
-
-	private:
-		IFilter &m_filter;
 	};
 }

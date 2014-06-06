@@ -24,8 +24,7 @@ int WriterBase::File::fileNameCount;
 
 WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
 		m_fileParser(parser), m_reporter(reporter),
-		m_commonPath("not set"),
-		m_filter(IFilter::getInstance())
+		m_commonPath("not set")
 {
 		m_fileParser.registerLineListener(*this);
 }
@@ -80,10 +79,6 @@ void WriterBase::File::readFile(const std::string &filename)
 
 void WriterBase::onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
 {
-	if (!m_filter.runFilters(file))
-		return;
-
-
 	if (m_files.find(file) != m_files.end())
 		return;
 
