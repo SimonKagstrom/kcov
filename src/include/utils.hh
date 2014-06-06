@@ -85,9 +85,9 @@ static inline void *xrealloc(void *p, size_t sz)
   return out;
 }
 
-extern int write_file(const void *data, size_t len, const char *fmt, ...);
+extern int write_file(const void *data, size_t len, const char *fmt, ...) __attribute__((format(printf,3,4)));
 
-extern void *read_file(size_t *out_size, const char *fmt, ...);
+extern void *read_file(size_t *out_size, const char *fmt, ...) __attribute__((format(printf,2,3)));
 
 extern std::string dir_concat(const std::string &dir, const std::string &filename);
 
@@ -125,7 +125,7 @@ unsigned long get_aligned(unsigned long addr);
 unsigned long get_aligned_4b(unsigned long addr);
 
 
-std::string fmt(const char *fmt, ...);
+std::string fmt(const char *fmt, ...) __attribute__((format(printf,1,2)));
 
 int coin_get_current_cpu(void);
 
