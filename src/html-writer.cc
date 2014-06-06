@@ -299,8 +299,8 @@ private:
 					"'summary_name':'%s',"
 					"'coverage_perc':'coverPer%s',"
 					"'coverage_num':'coverNum%s',"
-					"'covered':'%.1f',"
 					"'covered_color':'%s',"
+					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
 					"'total_lines' : '%d'},\n",
 					de->d_name,
