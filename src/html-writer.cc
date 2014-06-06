@@ -187,7 +187,7 @@ private:
 					"{'link':'%s',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
-					"'covered_color':'%s',"
+					"'covered_class':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
 					"'uncovered_lines':'%d',"
@@ -295,7 +295,7 @@ private:
 					"{'link':'%s/index.html',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
-					"'covered_color':'%s',"
+					"'covered_class':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
 					"'uncovered_lines':'%d',"
@@ -359,11 +359,11 @@ private:
 		auto &conf = IConfiguration::getInstance();
 
 		if (percent >= conf.getHighLimit())
-			return "#CAD7FE";
+			return "lineCov";
 		else if (percent > conf.getLowLimit())
-			return "#FFEA20";
+			return "linePartCov";
 
-		return "#FF6230";
+		return "lineNoCov";
 	}
 
 	std::string getDateNow()
