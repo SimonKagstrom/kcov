@@ -1,4 +1,18 @@
 Kcov (17):
+	* Coloring improvements (?) of the HTML output
+
+	* Refactor HTML output completely to use javascript-based pages.
+	  This allows selecting how to sort directly from the web page,
+	  and greatly simplifies the generating C++ code
+
+	* Correct filtering bug in the merged output, where the last
+	  run would filter out data from the previous runs
+
+	* Issue #20: Fix hanging-on-killed-by-signal
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
+Kcov (17):
 	* Issue #19: Fix bug where kcov would let children which called
 	  setpgid live even after terminating kcov itself (Oliver)
 
