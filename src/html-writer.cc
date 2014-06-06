@@ -30,6 +30,7 @@ extern std::vector<uint8_t> tempo_text_data;
 extern std::vector<uint8_t> kcov_text_data;
 extern std::vector<uint8_t> jquery_text_data;
 extern std::vector<uint8_t> tablesorter_text_data;
+extern std::vector<uint8_t> tablesorter_widgets_text_data;
 extern std::vector<uint8_t> tablesorter_theme_text_data;
 
 
@@ -186,8 +187,6 @@ private:
 					"{'link':'%s',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
-					"'coverage_perc':'coverPer%s',"
-					"'coverage_num':'coverNum%s',"
 					"'covered_color':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
@@ -196,8 +195,6 @@ private:
 					file->m_outFileName.c_str(),
 					file->m_fileName.c_str(),
 					listName.c_str(),
-					strFromPercentage(percent).c_str(),
-					strFromPercentage(percent).c_str(),
 					colorFromPercent(percent).c_str(),
 					percent,
 					nExecutedLines,
@@ -298,8 +295,6 @@ private:
 					"{'link':'%s/index.html',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
-					"'coverage_perc':'coverPer%s',"
-					"'coverage_num':'coverNum%s',"
 					"'covered_color':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
@@ -308,8 +303,6 @@ private:
 					de->d_name,
 					name.c_str(),
 					name.c_str(),
-					strFromPercentage(percent).c_str(),
-					strFromPercentage(percent).c_str(),
 					colorFromPercent(percent).c_str(),
 					percent,
 					summary.m_lines - summary.m_executedLines,
@@ -361,19 +354,6 @@ private:
 			writeGlobalIndex();
 	}
 
-	std::string strFromPercentage(double percent)
-	{
-		IConfiguration &conf = IConfiguration::getInstance();
-		std::string coverPer = "Med";
-
-		if (percent >= conf.getHighLimit())
-			coverPer = "Hi";
-		else if (percent < conf.getLowLimit())
-			coverPer = "Lo";
-
-		return coverPer;
-	}
-
 	std::string colorFromPercent(double percent)
 	{
 		auto &conf = IConfiguration::getInstance();
@@ -408,15 +388,13 @@ private:
 		mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
 		mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
-		write_file(icon_asc_data.data(), icon_asc_data.size(), "%s/data/asc.gif", dir.c_str());
-		write_file(icon_bg_data.data(), icon_bg_data.size(), "%s/data/bg.gif", dir.c_str());
-		write_file(icon_desc_data.data(), icon_desc_data.size(), "%s/data/desc.gif", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/data/glass.png", dir.c_str());
 		write_file(css_text_data.data(), css_text_data.size(), "%s/data/bcov.css", dir.c_str());
 		write_file(tempo_text_data.data(), tempo_text_data.size(), "%s/data/js/tempo.min.js", dir.c_str());
 		write_file(kcov_text_data.data(), kcov_text_data.size(), "%s/data/js/kcov.js", dir.c_str());
 		write_file(jquery_text_data.data(), jquery_text_data.size(), "%s/data/js/jquery.min.js", dir.c_str());
 		write_file(tablesorter_text_data.data(), tablesorter_text_data.size(), "%s/data/js/tablesorter.min.js", dir.c_str());
+		write_file(tablesorter_widgets_text_data.data(), tablesorter_widgets_text_data.size(), "%s/data/js/jquery.tablesorter.widgets.min.js", dir.c_str());
 		write_file(tablesorter_theme_text_data.data(), tablesorter_theme_text_data.size(), "%s/data/tablesorter-theme.css", dir.c_str());
 	}
 

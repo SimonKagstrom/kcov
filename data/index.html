@@ -2,7 +2,7 @@
 <html>
 <head>
   <title id="window-title">???</title>
-  <link rel="stylesheet" href="data/tablesorter-theme.css" type="text/css" id="" media="print, projection, screen" />
+  <link rel="stylesheet" href="data/tablesorter-theme.css">
   <link rel="stylesheet" type="text/css" href="data/bcov.css"/>
 </head>
 <body>
@@ -11,6 +11,7 @@
 <script type="text/javascript" src="index.json"></script>
 <script type="text/javascript" src="data/js/jquery.min.js"></script>
 <script type="text/javascript" src="data/js/tablesorter.min.js"></script>
+<script type="text/javascript" src="data/js/jquery.tablesorter.widgets.min.js"></script>
 <script type="text/javascript" src="data/js/tempo.min.js"></script>
 <script type="text/javascript" src="data/js/kcov.js"></script>
 
@@ -58,10 +59,10 @@
     <tbody>
     <tr data-template>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
-      <td class="{{coverage_perc}}"><span style='background-color:{{covered_color}};display:block;width:{{covered}}%'>{{covered}}%</td>
-      <td class="{{coverage_num}}">{{covered_lines}}</td>
-      <td class="{{coverage_num}}">{{uncovered_lines}}</td>
-      <td class="{{coverage_num}}">{{total_lines}}</td>
+      <td class="coverPer"><span style='background-color:{{covered_color}};display:block;width:{{covered}}%'>{{covered}}%</td>
+      <td class="coverPerNum">{{covered_lines}}</td>
+      <td class="coverPerNum">{{uncovered_lines}}</td>
+      <td class="coverPerNum">{{total_lines}}</td>
     </tr>
     </tbody>
   </table>

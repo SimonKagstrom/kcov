@@ -100,30 +100,26 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png icon_glass
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/asc.gif icon_asc
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bg.gif icon_bg
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/desc.gif icon_desc
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html source_file_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html index_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/tempo.min.js tempo_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js kcov_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js jquery_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js tablesorter_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js tablesorter_widgets_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css tablesorter_theme_text
    > html-data-files.cc
    DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/asc.gif
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bg.gif
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/desc.gif
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/tempo.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css
     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
