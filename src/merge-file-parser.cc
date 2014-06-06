@@ -67,7 +67,8 @@ public:
 			const std::string &baseDirectory,
 			const std::string &outputDirectory) :
 		m_baseDirectory(baseDirectory),
-		m_outputDirectory(outputDirectory)
+		m_outputDirectory(outputDirectory),
+		m_filter(IFilter::getInstance())
 	{
 		localParser.registerFileListener(*this);
 		localParser.registerLineListener(*this);
@@ -129,6 +130,11 @@ public:
 	void onLine(const std::string &filename, unsigned int lineNr,
 					unsigned long addr)
 	{
+		if (!m_filter.runFilters(filename))
+		{
+			return;
+		}
+
 		// Nothing to do in that case
 		if (!file_exists(filename))
 			return;
@@ -513,6 +519,7 @@ private:
 	const std::string m_outputDirectory;
 
 	std::vector<ICollector::IListener *> m_collectorListeners;
+	IFilter &m_filter;
 };
 
 namespace kcov
