@@ -19,11 +19,11 @@ class Collector :
 		public IEngine::IEventListener
 {
 public:
-	Collector(IFileParser &fileParser, IEngine &engine) :
+	Collector(IFileParser &fileParser, IEngine &engine, IFilter &filter) :
 		m_fileParser(fileParser),
 		m_engine(engine),
 		m_exitCode(-1),
-		m_filter(IFilter::getInstance())
+		m_filter(filter)
 	{
 		m_fileParser.registerLineListener(*this);
 	}
@@ -183,7 +183,7 @@ private:
 	IFilter &m_filter;
 };
 
-ICollector &ICollector::create(IFileParser &elf, IEngine &engine)
+ICollector &ICollector::create(IFileParser &elf, IEngine &engine, IFilter &filter)
 {
-	return *new Collector(elf, engine);
+	return *new Collector(elf, engine, filter);
 }

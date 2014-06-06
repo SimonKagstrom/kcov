@@ -26,8 +26,8 @@ struct marshalHeaderStruct
 class Reporter : public IReporter, public IFileParser::ILineListener, public ICollector::IListener
 {
 public:
-	Reporter(IFileParser &fileParser, ICollector &collector) :
-		m_fileParser(fileParser), m_collector(collector), m_filter(IFilter::getInstance())
+	Reporter(IFileParser &fileParser, ICollector &collector, IFilter &filter) :
+		m_fileParser(fileParser), m_collector(collector), m_filter(filter)
 	{
 		m_fileParser.registerLineListener(*this);
 		m_collector.registerListener(*this);
@@ -326,7 +326,7 @@ private:
 	IFilter &m_filter;
 };
 
-IReporter &IReporter::create(IFileParser &parser, ICollector &collector)
+IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)
 {
-	return *new Reporter(parser, collector);
+	return *new Reporter(parser, collector, filter);
 }

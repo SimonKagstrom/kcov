@@ -3,6 +3,7 @@
 #include <reporter.hh>
 #include <writer.hh>
 #include <collector.hh>
+#include <filter.hh>
 #include <output-handler.hh>
 #include <file-parser.hh>
 #include <utils.hh>
@@ -157,8 +158,10 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	ICollector &collector = ICollector::create(*parser, *engine);
-	IReporter &reporter = IReporter::create(*parser, collector);
+	IFilter &filter = IFilter::getInstance();
+
+	ICollector &collector = ICollector::create(*parser, *engine, filter);
+	IReporter &reporter = IReporter::create(*parser, collector, filter);
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter);
 
 	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
@@ -175,8 +178,8 @@ int main(int argc, const char *argv[])
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(*parser,
-				base, out);
-		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser);
+				base, out, filter);
+		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, filter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", "[merged]", false);
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,

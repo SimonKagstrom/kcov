@@ -8,6 +8,7 @@ namespace kcov
 {
 	class IFileParser;
 	class ICollector;
+	class IFilter;
 
 	class IReporter
 	{
@@ -53,6 +54,6 @@ namespace kcov
 
 		virtual bool unMarshal(void *data, size_t sz) = 0;
 
-		static IReporter &create(IFileParser &elf, ICollector &collector);
+		static IReporter &create(IFileParser &elf, ICollector &collector, IFilter &filter);
 	};
 }

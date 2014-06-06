@@ -6,6 +6,7 @@ namespace kcov
 {
 	class IFileParser;
 	class IEngine;
+	class IFilter;
 
 	class ICollector
 	{
@@ -16,7 +17,7 @@ namespace kcov
 			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
 		};
 
-		static ICollector &create(IFileParser &elf, IEngine &engine);
+		static ICollector &create(IFileParser &elf, IEngine &engine, IFilter &filter);
 
 		virtual void registerListener(IListener &listener) = 0;
 

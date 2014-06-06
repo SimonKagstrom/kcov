@@ -65,10 +65,11 @@ public:
 
 	MergeParser(IFileParser &localParser,
 			const std::string &baseDirectory,
-			const std::string &outputDirectory) :
+			const std::string &outputDirectory,
+			IFilter &filter) :
 		m_baseDirectory(baseDirectory),
 		m_outputDirectory(outputDirectory),
-		m_filter(IFilter::getInstance())
+		m_filter(filter)
 	{
 		localParser.registerFileListener(*this);
 		localParser.registerLineListener(*this);
@@ -526,8 +527,9 @@ namespace kcov
 {
 	IMergeParser &createMergeParser(IFileParser &localParser,
 			const std::string &baseDirectory,
-			const std::string &outputDirectory)
+			const std::string &outputDirectory,
+			IFilter &filter)
 	{
-		return *new MergeParser(localParser, baseDirectory, outputDirectory);
+		return *new MergeParser(localParser, baseDirectory, outputDirectory, filter);
 	}
 }
