@@ -48,9 +48,10 @@
   <table width="80%" cellpadding="2" cellspacing="1" border="0" id="index-table" class="tablesorter">
 	<thead>
     <tr>
-      <th class="tableHead" width="60%">Filename</th>
+      <th class="tableHead" width="50%">Filename</th>
       <th width="20%">Coverage percent</th>
-      <th width="10%">Covered</th>
+      <th width="10%">Covered lines</th>
+      <th width="10%">Uncovered lines</th>
       <th width="10%">Executable lines</th>
     </tr>
     </thead>
@@ -59,6 +60,7 @@
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="{{coverage_perc}}"><span style='background-color:{{covered_color}};display:block;width:{{covered}}%'>{{covered}}%</td>
       <td class="{{coverage_num}}">{{covered_lines}}</td>
+      <td class="{{coverage_num}}">{{uncovered_lines}}</td>
       <td class="{{coverage_num}}">{{total_lines}}</td>
     </tr>
     </tbody>

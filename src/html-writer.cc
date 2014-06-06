@@ -192,6 +192,7 @@ private:
 					"'covered_color':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
+					"'uncovered_lines':'%d',"
 					"'total_lines' : '%d'},\n",
 					file->m_outFileName.c_str(),
 					file->m_fileName.c_str(),
@@ -201,6 +202,7 @@ private:
 					colorFromPercent(percent).c_str(),
 					percent,
 					nExecutedLines,
+					nCodeLines - nExecutedLines,
 					nCodeLines
 					);
 		}
@@ -302,6 +304,7 @@ private:
 					"'covered_color':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
+					"'uncovered_lines':'%d',"
 					"'total_lines' : '%d'},\n",
 					de->d_name,
 					name.c_str(),
@@ -310,6 +313,7 @@ private:
 					strFromPercentage(percent).c_str(),
 					colorFromPercent(percent).c_str(),
 					percent,
+					summary.m_lines - summary.m_executedLines,
 					summary.m_executedLines,
 					summary.m_lines
 			);
