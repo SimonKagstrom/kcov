@@ -100,9 +100,6 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png icon_glass
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/emerald.png icon_emerald
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/ruby.png icon_ruby
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/snow.png icon_snow
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/asc.gif icon_asc
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bg.gif icon_bg
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/desc.gif icon_desc
@@ -118,9 +115,6 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/emerald.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/ruby.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/snow.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/asc.gif
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bg.gif
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/desc.gif

@@ -21,9 +21,6 @@ using namespace kcov;
 extern std::vector<uint8_t> css_text_data;
 extern std::vector<uint8_t> icon_amber_data;
 extern std::vector<uint8_t> icon_glass_data;
-extern std::vector<uint8_t> icon_emerald_data;
-extern std::vector<uint8_t> icon_ruby_data;
-extern std::vector<uint8_t> icon_snow_data;
 extern std::vector<uint8_t> icon_asc_data;
 extern std::vector<uint8_t> icon_bg_data;
 extern std::vector<uint8_t> icon_desc_data;
@@ -186,17 +183,13 @@ private:
 				listName = prefix + listName.substr(pathToRemove.size());
 			}
 
-			int width = (int)(percent+0.5);
-
 			json += fmt(
 					"{'link':'%s',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
 					"'coverage_perc':'coverPer%s',"
 					"'coverage_num':'coverNum%s',"
-					"'covered_img':'%s',"
-					"'covered_width':'%d',"
-					"'uncovered_width':'%d',"
+					"'covered_color':'%s',"
 					"'covered':'%.1f',"
 					"'covered_lines':'%d',"
 					"'total_lines' : '%d'},\n",
@@ -205,9 +198,7 @@ private:
 					listName.c_str(),
 					strFromPercentage(percent).c_str(),
 					strFromPercentage(percent).c_str(),
-					imageFromPercent(percent).c_str(),
-					width,
-					100 - width,
+					colorFromPercent(percent).c_str(),
 					percent,
 					nExecutedLines,
 					nCodeLines
@@ -302,17 +293,14 @@ private:
 				nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			int width = (int)(percent+0.5);
-			json += fmt(
+		json += fmt(
 					"{'link':'%s/index.html',"
 					"'title':'%s',"
 					"'summary_name':'%s',"
 					"'coverage_perc':'coverPer%s',"
 					"'coverage_num':'coverNum%s',"
-					"'covered_img':'%s',"
-					"'covered_width':'%d',"
-					"'uncovered_width':'%d',"
 					"'covered':'%.1f',"
+					"'covered_color':'%s',"
 					"'covered_lines':'%d',"
 					"'total_lines' : '%d'},\n",
 					de->d_name,
@@ -320,9 +308,7 @@ private:
 					name.c_str(),
 					strFromPercentage(percent).c_str(),
 					strFromPercentage(percent).c_str(),
-					imageFromPercent(percent).c_str(),
-					width,
-					100 - width,
+					colorFromPercent(percent).c_str(),
 					percent,
 					summary.m_executedLines,
 					summary.m_lines
@@ -384,18 +370,17 @@ private:
 
 		return coverPer;
 	}
-	std::string imageFromPercent(double percent)
+
+	std::string colorFromPercent(double percent)
 	{
 		auto &conf = IConfiguration::getInstance();
 
 		if (percent >= conf.getHighLimit())
-			return "emerald.png";
+			return "#CAD7FE";
 		else if (percent > conf.getLowLimit())
-			return "amber.png";
-		else if (percent <= 1)
-			return "snow.png";
+			return "#FFEA20";
 
-		return "ruby.png";
+		return "#FF6230";
 	}
 
 	std::string getDateNow()
@@ -413,19 +398,13 @@ private:
 
 	void writeHelperFiles(std::string dir)
 	{
-		write_file(icon_ruby_data.data(), icon_ruby_data.size(), "%s/ruby.png", dir.c_str());
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/amber.png", dir.c_str());
-		write_file(icon_emerald_data.data(), icon_emerald_data.size(), "%s/emerald.png", dir.c_str());
-		write_file(icon_snow_data.data(), icon_snow_data.size(), "%s/snow.png", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/glass.png", dir.c_str());
 		write_file(css_text_data.data(), css_text_data.size(), "%s/bcov.css", dir.c_str());
 
 		mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
 		mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
-		write_file(icon_ruby_data.data(), icon_ruby_data.size(), "%s/data/ruby.png", dir.c_str());
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
-		write_file(icon_emerald_data.data(), icon_emerald_data.size(), "%s/data/emerald.png", dir.c_str());
-		write_file(icon_snow_data.data(), icon_snow_data.size(), "%s/data/snow.png", dir.c_str());
 		write_file(icon_asc_data.data(), icon_asc_data.size(), "%s/data/asc.gif", dir.c_str());
 		write_file(icon_bg_data.data(), icon_bg_data.size(), "%s/data/bg.gif", dir.c_str());
 		write_file(icon_desc_data.data(), icon_desc_data.size(), "%s/data/desc.gif", dir.c_str());

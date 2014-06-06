@@ -12,7 +12,7 @@ window.onload = function () {
 	document.getElementById('header-covered').innerHTML = header.covered
 	document.getElementById('header-instrumented').innerHTML = header.instrumented
 
-	$('.tablesorter').trigger('update');
+	$("#index-table").tablesorter({sortList : [[1,0]]});
 }
 
 function toCoverPercentString (covered, instrumented) {

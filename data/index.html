@@ -13,19 +13,6 @@
 <script type="text/javascript" src="data/js/tablesorter.min.js"></script>
 <script type="text/javascript" src="data/js/tempo.min.js"></script>
 <script type="text/javascript" src="data/js/kcov.js"></script>
-<script type="text/javascript">
-$(document).ready(function()
-		{
-			$("#index-table").tablesorter({
-				headers : {
-					1 : {
-						// Disable sorting on the graphical column
-						sorter : false
-					},
-				}
-			});
-		});
-</script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="title">Coverage Report</td></tr>
@@ -62,8 +49,7 @@ $(document).ready(function()
 	<thead>
     <tr>
       <th class="tableHead" width="60%">Filename</th>
-      <th width="10%"></th>
-      <th width="10%">Coverage percent</th>
+      <th width="20%">Coverage percent</th>
       <th width="10%">Covered</th>
       <th width="10%">Executable lines</th>
     </tr>
@@ -71,10 +57,7 @@ $(document).ready(function()
     <tbody>
     <tr data-template>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
-      <td class="coverBar" align="center">
-        <table border="0" cellspacing="0" cellpadding="1"><tr><td class="coverBarOutline"><img src="data/{{covered_img}}" width="{{covered_width}}" height="10"/><img src="data/snow.png" width="{{uncovered_width}}" height="10"/></td></tr></table>
-      </td>
-      <td class="{{coverage_perc}}">{{covered}}%</td>
+      <td class="{{coverage_perc}}"><span style='background-color:{{covered_color}};display:block;width:{{covered}}%'>{{covered}}%</td>
       <td class="{{coverage_num}}">{{covered_lines}}</td>
       <td class="{{coverage_num}}">{{total_lines}}</td>
     </tr>
