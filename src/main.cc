@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <unistd.h>
 
 #include "merge-parser.hh"
@@ -89,6 +90,51 @@ static void daemonize(void)
 	}
 }
 
+// Return the number of metadata directories in the kcov output path
+unsigned int countMetadata()
+{
+	IConfiguration &conf = IConfiguration::getInstance();
+	std::string base = conf.getOutDirectory();
+	DIR *dir;
+	struct dirent *de;
+
+	dir = ::opendir(base.c_str());
+	if (!dir)
+		return 0;
+
+	unsigned int out = 0;
+
+	// Count metadata directories
+	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+		std::string cur = base + de->d_name + "/metadata";
+
+		// ... except for the current coveree
+		if (de->d_name == conf.getBinaryName())
+			continue;
+
+		DIR *metadataDir;
+		struct dirent *de2;
+
+		metadataDir = ::opendir(cur.c_str());
+		if (!metadataDir)
+			continue;
+
+		// Count metadata files
+		unsigned int datum = 0;
+		for (de2 = ::readdir(metadataDir); de2; de2 = ::readdir(metadataDir)) {
+			if (de2->d_name[0] == '.')
+				continue;
+
+			datum++;
+		}
+		out += !!datum;
+		::closedir(metadataDir);
+	}
+	::closedir(dir);
+
+	return out;
+}
+
 
 int main(int argc, const char *argv[])
 {
@@ -140,7 +186,8 @@ int main(int argc, const char *argv[])
 		collector.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
-		output.registerWriter(mergeHtmlWriter);
+		if (countMetadata() > 0)
+			output.registerWriter(mergeHtmlWriter);
 		output.registerWriter(mergeCoberturaWriter);
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
