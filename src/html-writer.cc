@@ -59,7 +59,6 @@ private:
 
 	void writeOne(File *file)
 	{
-		auto &conf = IConfiguration::getInstance();
 		std::string jsonOutName = m_outDirectory + "/" + file->m_jsonOutFileName;
 		std::string htmlOutName = m_outDirectory + "/" + file->m_outFileName;
 		unsigned int nExecutedLines = 0;
@@ -109,25 +108,7 @@ private:
 		}
 
 		// Add the header
-		json =  fmt(
-				"var percent_low = %d;"
-				"var percent_high = %d;"
-				"\n"
-				"var header = {"
-				" 'command' : '%s',"
-				" 'date' : '%s',"
-				" 'instrumented' : %d,"
-				" 'covered' : %d,"
-				"};"
-				"\n"
-				"var data = [\n",
-				conf.getLowLimit(),
-				conf.getHighLimit(),
-				escape_json(conf.getBinaryName()).c_str(),
-				getDateNow().c_str(),
-				nCodeLines,
-				nExecutedLines
-				) + json + "];";
+		json = getHeader(nCodeLines, nExecutedLines) + json + "];";
 
 		// Produce HTML outfile
 		std::string html = fmt(
@@ -152,10 +133,6 @@ private:
 			auto file = it.second;
 			unsigned int nExecutedLines = file->m_executedLines;
 			unsigned int nCodeLines = file->m_codeLines;
-			double percent = 0;
-
-			if (nCodeLines != 0)
-				percent = ((double)nExecutedLines / (double)nCodeLines) * 100;
 
 			nTotalCodeLines += nCodeLines;
 			nTotalExecutedLines += nExecutedLines;
@@ -183,24 +160,7 @@ private:
 				listName = prefix + listName.substr(pathToRemove.size());
 			}
 
-			json += fmt(
-					"{'link':'%s',"
-					"'title':'%s',"
-					"'summary_name':'%s',"
-					"'covered_class':'%s',"
-					"'covered':'%.1f',"
-					"'covered_lines':'%d',"
-					"'uncovered_lines':'%d',"
-					"'total_lines' : '%d'},\n",
-					file->m_outFileName.c_str(),
-					file->m_fileName.c_str(),
-					listName.c_str(),
-					colorFromPercent(percent).c_str(),
-					percent,
-					nExecutedLines,
-					nCodeLines - nExecutedLines,
-					nCodeLines
-					);
+			json += getIndexHeader(file->m_outFileName, file->m_fileName, listName, nCodeLines, nExecutedLines);
 		}
 
 
@@ -248,7 +208,6 @@ private:
 
 	void writeGlobalIndex()
 	{
-		auto &conf = IConfiguration::getInstance();
 		DIR *dir;
 		struct dirent *de;
 		std::string idx = m_indexDirectory.c_str();
@@ -281,56 +240,17 @@ private:
 			if (!res)
 				continue;
 
-			double percent = 0;
-
-			if (summary.m_lines != 0)
-				percent = (summary.m_executedLines / (double)summary.m_lines) * 100;
 			// Skip entries (merged ones) that shouldn't be included in the totals
 			if (summary.m_includeInTotals) {
 				nTotalCodeLines += summary.m_lines;
 				nTotalExecutedLines += summary.m_executedLines;
 			}
 
-		json += fmt(
-					"{'link':'%s/index.html',"
-					"'title':'%s',"
-					"'summary_name':'%s',"
-					"'covered_class':'%s',"
-					"'covered':'%.1f',"
-					"'covered_lines':'%d',"
-					"'uncovered_lines':'%d',"
-					"'total_lines' : '%d'},\n",
-					de->d_name,
-					name.c_str(),
-					name.c_str(),
-					colorFromPercent(percent).c_str(),
-					percent,
-					summary.m_lines - summary.m_executedLines,
-					summary.m_executedLines,
-					summary.m_lines
-			);
+			json += getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines, summary.m_executedLines);
 		}
 
 		// Add the header
-		json =  fmt(
-				"var percent_low = %d;"
-				"var percent_high = %d;"
-				"\n"
-				"var header = {"
-				" 'command' : '%s',"
-				" 'date' : '%s',"
-				" 'instrumented' : %d,"
-				" 'covered' : %d,"
-				"};"
-				"\n"
-				"var data = [\n",
-				conf.getLowLimit(),
-				conf.getHighLimit(),
-				escape_json(conf.getBinaryName()).c_str(),
-				getDateNow().c_str(),
-				nTotalCodeLines,
-				nTotalExecutedLines
-				) + json + "];";
+		json = getHeader(nTotalCodeLines, nTotalExecutedLines) + json + "];";
 
 		// Produce HTML outfile
 		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
@@ -352,6 +272,59 @@ private:
 
 		if (m_includeInTotals)
 			writeGlobalIndex();
+	}
+
+
+	std::string getHeader(unsigned int lines, unsigned int executedLines)
+	{
+		auto &conf = IConfiguration::getInstance();
+
+		return fmt(
+				"var percent_low = %d;"
+				"var percent_high = %d;"
+				"\n"
+				"var header = {"
+				" 'command' : '%s',"
+				" 'date' : '%s',"
+				" 'instrumented' : %d,"
+				" 'covered' : %d,"
+				"};"
+				"\n"
+				"var data = [\n",
+				conf.getLowLimit(),
+				conf.getHighLimit(),
+				escape_json(conf.getBinaryName()).c_str(),
+				getDateNow().c_str(),
+				lines,
+				executedLines);
+	}
+
+	// Return a header for index-type JSON files
+	std::string getIndexHeader(const std::string &linkName, const std::string titleName,
+			const std::string summaryName, unsigned int lines, unsigned int executedLines)
+	{
+		double percent = 0;
+
+		if (lines != 0)
+			percent = (executedLines / (double)lines) * 100;
+
+		return fmt(
+				"{'link':'%s',"
+				"'title':'%s',"
+				"'summary_name':'%s',"
+				"'covered_class':'%s',"
+				"'covered':'%.1f',"
+				"'covered_lines':'%d',"
+				"'uncovered_lines':'%d',"
+				"'total_lines' : '%d'},\n",
+				linkName.c_str(),
+				titleName.c_str(),
+				summaryName.c_str(),
+				colorFromPercent(percent).c_str(),
+				percent,
+				executedLines,
+				lines - executedLines,
+				lines);
 	}
 
 	std::string colorFromPercent(double percent)
