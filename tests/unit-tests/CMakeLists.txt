@@ -41,7 +41,7 @@ set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP")
 
 
 add_custom_command(
-   OUTPUT html-data-files.c
+   OUTPUT html-data-files.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../src/bin-to-c-source.py
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bcov.css css_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/amber.png icon_amber
@@ -56,7 +56,7 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.min.js jquery_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.tablesorter.min.js tablesorter_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/tablesorter-theme.css tablesorter_theme_text
-   > html-data-files.c
+   > html-data-files.cc
    DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/bcov.css
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/amber.png
@@ -85,7 +85,7 @@ include_directories(
 
 link_directories (/home/ska/local/lib)
 
-add_executable (${TGT} ${${TGT}_SRCS} html-data-files.c)
+add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
 	${LIBCRPCUT_LIBRARIES}

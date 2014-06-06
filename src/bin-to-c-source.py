@@ -3,8 +3,8 @@
 import sys, struct
 
 def generate(data_in, base_name):
-	print "size_t %s_data_size = 0x%x;" % (base_name, len(data))
-	print "uint8_t %s_data[] = {" % (base_name)
+	print "#include <vector>"
+	print "std::vector<uint8_t> %s_data = {" % (base_name)
 
 	for i in range(0, len(data), 20):
 		line = data[i:i+20]

@@ -83,19 +83,19 @@ link_directories (/home/ska/local/lib)
 add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 
 add_custom_command(
-   OUTPUT library.c
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.c
+   OUTPUT library.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.cc
    DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
 add_custom_command(
-   OUTPUT python-helper.c
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py  python_helper > python-helper.c
+   OUTPUT python-helper.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py  python_helper > python-helper.cc
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
 add_custom_command(
-   OUTPUT html-data-files.c
+   OUTPUT html-data-files.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
@@ -110,7 +110,7 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js jquery_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js tablesorter_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css tablesorter_theme_text
-   > html-data-files.c
+   > html-data-files.cc
    DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
@@ -129,7 +129,7 @@ add_custom_command(
    )
 
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.c python-helper.c html-data-files.c)
+add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc html-data-files.cc)
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 #add_executable (${KCOV_PROFILER} ${${KCOV_PROFILER}_SRCS})
 

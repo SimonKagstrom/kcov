@@ -14,13 +14,13 @@
 
 #include <list>
 #include <unordered_map>
+#include <vector>
 
 #include <swap-endian.hh>
 
 using namespace kcov;
 
-extern "C" size_t python_helper_data_size;
-extern "C" uint8_t python_helper_data[];
+extern std::vector<uint8_t> python_helper_data;
 
 
 const uint64_t COVERAGE_MAGIC = 0x6d6574616c6c6775ULL; // "metallgut"
@@ -75,7 +75,7 @@ public:
 		std::string kcov_python_path =
 				IOutputHandler::getInstance().getBaseDirectory() + "python-helper.py";
 
-		if (write_file(python_helper_data, python_helper_data_size, kcov_python_path.c_str()) < 0) {
+		if (write_file(python_helper_data.data(), python_helper_data.size(), kcov_python_path.c_str()) < 0) {
 				error("Can't write python helper at %s", kcov_python_path.c_str());
 
 				return false;

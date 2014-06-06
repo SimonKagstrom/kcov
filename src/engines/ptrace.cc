@@ -20,8 +20,9 @@
 #include <unordered_map>
 #include <list>
 #include <mutex>
+#include <vector>
 
-#include "../library-binary.h"
+extern std::vector<uint8_t> __library_data;
 
 using namespace kcov;
 
@@ -192,7 +193,7 @@ public:
 				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
 
-		write_file(__library_data, __library_data_size, kcov_solib_path.c_str());
+		write_file(__library_data.data(), __library_data.size(), kcov_solib_path.c_str());
 
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;

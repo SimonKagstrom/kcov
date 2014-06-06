@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string>
 #include <list>
+#include <vector>
 #include <unordered_map>
 
 #include "writer-base.hh"
@@ -17,33 +18,19 @@
 using namespace kcov;
 
 // Generated
-extern uint8_t css_text_data[];
-extern uint8_t icon_amber_data[];
-extern uint8_t icon_glass_data[];
-extern uint8_t icon_emerald_data[];
-extern uint8_t icon_ruby_data[];
-extern uint8_t icon_snow_data[];
-extern uint8_t source_file_text_data[];
-extern uint8_t index_text_data[];
-extern uint8_t tempo_text_data[];
-extern uint8_t kcov_text_data[];
-extern uint8_t jquery_text_data[];
-extern uint8_t tablesorter_text_data[];
-extern uint8_t tablesorter_theme_text_data[];
-
-extern size_t css_text_data_size;
-extern size_t icon_amber_data_size;
-extern size_t icon_glass_data_size;
-extern size_t icon_emerald_data_size;
-extern size_t icon_ruby_data_size;
-extern size_t icon_snow_data_size;
-extern size_t source_file_text_data_size;
-extern size_t index_text_data_size;
-extern size_t tempo_text_data_size;
-extern size_t kcov_text_data_size;
-extern size_t jquery_text_data_size;
-extern size_t tablesorter_text_data_size;
-extern size_t tablesorter_theme_text_data_size;
+extern std::vector<uint8_t> css_text_data;
+extern std::vector<uint8_t> icon_amber_data;
+extern std::vector<uint8_t> icon_glass_data;
+extern std::vector<uint8_t> icon_emerald_data;
+extern std::vector<uint8_t> icon_ruby_data;
+extern std::vector<uint8_t> icon_snow_data;
+extern std::vector<uint8_t> source_file_text_data;
+extern std::vector<uint8_t> index_text_data;
+extern std::vector<uint8_t> tempo_text_data;
+extern std::vector<uint8_t> kcov_text_data;
+extern std::vector<uint8_t> jquery_text_data;
+extern std::vector<uint8_t> tablesorter_text_data;
+extern std::vector<uint8_t> tablesorter_theme_text_data;
 
 
 class HtmlWriter : public WriterBase
@@ -146,7 +133,7 @@ private:
 		std::string html = fmt(
 				"<script type=\"text/javascript\" src=\"%s\"></script>\n",
 				file->m_jsonOutFileName.c_str());
-		html += std::string((const char *)source_file_text_data, source_file_text_data_size);
+		html += std::string((const char *)source_file_text_data.data(), source_file_text_data.size());
 
 		// .. And write both files to disk
 		write_file((void *)json.c_str(), json.size(), jsonOutName.c_str());
@@ -247,7 +234,7 @@ private:
 				) + json + "];";
 
 		// Produce HTML outfile
-		auto html = std::string((const char *)index_text_data, index_text_data_size);
+		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
 		write_file((void *)json.c_str(), json.size(), (m_outDirectory + "index.json").c_str());
@@ -361,7 +348,7 @@ private:
 				) + json + "];";
 
 		// Produce HTML outfile
-		auto html = std::string((const char *)index_text_data, index_text_data_size);
+		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
 		write_file((void *)json.c_str(), json.size(), (m_indexDirectory + "index.json").c_str());
@@ -423,26 +410,26 @@ private:
 
 	void writeHelperFiles(std::string dir)
 	{
-		write_file(icon_ruby_data, icon_ruby_data_size, "%s/ruby.png", dir.c_str());
-		write_file(icon_amber_data, icon_amber_data_size, "%s/amber.png", dir.c_str());
-		write_file(icon_emerald_data, icon_emerald_data_size, "%s/emerald.png", dir.c_str());
-		write_file(icon_snow_data, icon_snow_data_size, "%s/snow.png", dir.c_str());
-		write_file(icon_glass_data, icon_glass_data_size, "%s/glass.png", dir.c_str());
-		write_file(css_text_data, css_text_data_size, "%s/bcov.css", dir.c_str());
+		write_file(icon_ruby_data.data(), icon_ruby_data.size(), "%s/ruby.png", dir.c_str());
+		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/amber.png", dir.c_str());
+		write_file(icon_emerald_data.data(), icon_emerald_data.size(), "%s/emerald.png", dir.c_str());
+		write_file(icon_snow_data.data(), icon_snow_data.size(), "%s/snow.png", dir.c_str());
+		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/glass.png", dir.c_str());
+		write_file(css_text_data.data(), css_text_data.size(), "%s/bcov.css", dir.c_str());
 
 		mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
 		mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
-		write_file(icon_ruby_data, icon_ruby_data_size, "%s/data/ruby.png", dir.c_str());
-		write_file(icon_amber_data, icon_amber_data_size, "%s/data/amber.png", dir.c_str());
-		write_file(icon_emerald_data, icon_emerald_data_size, "%s/data/emerald.png", dir.c_str());
-		write_file(icon_snow_data, icon_snow_data_size, "%s/data/snow.png", dir.c_str());
-		write_file(icon_glass_data, icon_glass_data_size, "%s/data/glass.png", dir.c_str());
-		write_file(css_text_data, css_text_data_size, "%s/data/bcov.css", dir.c_str());
-		write_file(tempo_text_data, tempo_text_data_size, "%s/data/js/tempo.min.js", dir.c_str());
-		write_file(kcov_text_data, kcov_text_data_size, "%s/data/js/kcov.js", dir.c_str());
-		write_file(jquery_text_data, jquery_text_data_size, "%s/data/js/jquery.min.js", dir.c_str());
-		write_file(tablesorter_text_data, tablesorter_text_data_size, "%s/data/js/tablesorter.min.js", dir.c_str());
-		write_file(tablesorter_theme_text_data, tablesorter_theme_text_data_size, "%s/data/tablesorter-theme.css", dir.c_str());
+		write_file(icon_ruby_data.data(), icon_ruby_data.size(), "%s/data/ruby.png", dir.c_str());
+		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
+		write_file(icon_emerald_data.data(), icon_emerald_data.size(), "%s/data/emerald.png", dir.c_str());
+		write_file(icon_snow_data.data(), icon_snow_data.size(), "%s/data/snow.png", dir.c_str());
+		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/data/glass.png", dir.c_str());
+		write_file(css_text_data.data(), css_text_data.size(), "%s/data/bcov.css", dir.c_str());
+		write_file(tempo_text_data.data(), tempo_text_data.size(), "%s/data/js/tempo.min.js", dir.c_str());
+		write_file(kcov_text_data.data(), kcov_text_data.size(), "%s/data/js/kcov.js", dir.c_str());
+		write_file(jquery_text_data.data(), jquery_text_data.size(), "%s/data/js/jquery.min.js", dir.c_str());
+		write_file(tablesorter_text_data.data(), tablesorter_text_data.size(), "%s/data/js/tablesorter.min.js", dir.c_str());
+		write_file(tablesorter_theme_text_data.data(), tablesorter_theme_text_data.size(), "%s/data/tablesorter-theme.css", dir.c_str());
 	}
 
 	void onStartup()
