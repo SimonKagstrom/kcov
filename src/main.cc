@@ -158,7 +158,8 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	IFilter &filter = IFilter::getInstance();
+	IFilter &filter = IFilter::create();
+	IFilter &dummyFilter = IFilter::createDummy();
 
 	ICollector &collector = ICollector::create(*parser, *engine, filter);
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
@@ -179,7 +180,7 @@ int main(int argc, const char *argv[])
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(*parser,
 				base, out, filter);
-		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, filter);
+		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", "[merged]", false);
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,

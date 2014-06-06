@@ -7,6 +7,24 @@
 
 using namespace kcov;
 
+class DummyFilter : public IFilter
+{
+public:
+	DummyFilter()
+	{
+	}
+
+	~DummyFilter()
+	{
+	}
+
+	// Allow anything
+	bool runFilters(const std::string &file)
+	{
+		return true;
+	}
+};
+
 class Filter : public IFilter
 {
 public:
@@ -148,12 +166,12 @@ private:
 };
 
 
-IFilter &IFilter::getInstance()
+IFilter &IFilter::create()
 {
-	static Filter *g_instance;
+	return *new Filter();
+}
 
-	if (!g_instance)
-		g_instance = new Filter();
-
-	return *g_instance;
+IFilter &IFilter::createDummy()
+{
+	return *new DummyFilter();
 }

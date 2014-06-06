@@ -87,6 +87,7 @@ TESTSUITE(merge_parser)
 	TEST(marshal)
 	{
 		MockParser mockParser;
+		auto &filter = IFilter::create();
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
 			.Times(Exactly(2))
@@ -98,7 +99,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -138,7 +139,7 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start + 1]) == parser.hashAddress("a", 1, 3) + 1);
 
 		// No output
-		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
+		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle", filter);
 
 		parser2.onLine("c", 4, 1);
 		// New timestamp for the "a" file
@@ -180,6 +181,7 @@ TESTSUITE(merge_parser)
 
 	TEST(output)
 	{
+		auto &filter = IFilter::create();
 		MockParser mockParser;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
@@ -192,7 +194,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -213,6 +215,7 @@ TESTSUITE(merge_parser)
 
 	TEST(input, LineListenerFixture, AddressListenerFixture)
 	{
+		auto &filter = IFilter::create();
 		MockParser mockParser;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
@@ -225,7 +228,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle");
+		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -261,7 +264,7 @@ TESTSUITE(merge_parser)
 		p = parser.marshalFile("a");
 		ASSERT_TRUE(p);
 
-		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle");
+		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle", filter);
 		parser2.registerLineListener(*this);
 		parser2.registerListener(*this);
 

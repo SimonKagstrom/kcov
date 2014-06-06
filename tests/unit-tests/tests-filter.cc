@@ -10,7 +10,7 @@ TEST(filter)
 	std::string filename = std::string(crpcut::get_start_dir()) + "/test-binary";
 
 	IConfiguration &conf = IConfiguration::getInstance();
-	Filter &filter = (Filter &)IFilter::getInstance();
+	Filter &filter = (Filter &)IFilter::create();
 	bool res;
 	const char *argv[] = {NULL, "/tmp/vobb", filename.c_str(), "tjena"};
 	res = conf.parse(4, argv);

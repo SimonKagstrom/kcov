@@ -3,6 +3,7 @@
 
 #include <file-parser.hh>
 #include <collector.hh>
+#include <filter.hh>
 #include <utils.hh>
 
 #include <string>
@@ -27,7 +28,7 @@ DISABLED_TEST(collector)
 	elf = IParserManager::getInstance().matchParser(filename);
 	ASSERT_TRUE(elf);
 
-	ICollector &collector = ICollector::create(*elf, engine);
+	ICollector &collector = ICollector::create(*elf, engine, IFilter::create());
 
 	collector.registerListener(listener);
 

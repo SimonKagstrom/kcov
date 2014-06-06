@@ -3,6 +3,7 @@
 #include <file-parser.hh>
 #include <collector.hh>
 #include <reporter.hh>
+#include <filter.hh>
 #include <utils.hh>
 
 #include <string>
@@ -77,7 +78,7 @@ TEST(reporter)
 		;
 
 
-	IReporter &reporter = IReporter::create(*elf, collector);
+	IReporter &reporter = IReporter::create(*elf, collector, IFilter::create());
 
 	IReporter::ExecutionSummary summary =
 			reporter.getExecutionSummary();

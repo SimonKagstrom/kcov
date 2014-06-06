@@ -16,7 +16,9 @@ namespace kcov
 		virtual bool runFilters(const std::string &file) = 0;
 
 
-		static IFilter &getInstance();
+		static IFilter &create();
+
+		static IFilter &createDummy();
 
 
 		virtual ~IFilter() {}
