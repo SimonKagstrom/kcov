@@ -412,8 +412,14 @@ std::string trim_string(const std::string &strIn)
 	return str;
 }
 
-std::string get_real_path(const std::string &path)
+// Cache for ::realpath - it's apparently one of the reasons why kcov is slow
+static std::unordered_map<std::string, std::string> realPathCache;
+const std::string &get_real_path(const std::string &path)
 {
+	const auto &it = realPathCache.find(path);
+	if (it != realPathCache.end())
+		return it->second;
+
 	char *rp = NULL;
 
 	rp = ::realpath(path.c_str(), nullptr);
@@ -421,10 +427,9 @@ std::string get_real_path(const std::string &path)
 	if (!rp)
 		return path;
 
-	std::string out(rp);
-	free(rp);
+	realPathCache[path] = rp;
 
-	return out;
+	return realPathCache[path];
 }
 
 

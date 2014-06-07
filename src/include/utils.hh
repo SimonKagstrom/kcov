@@ -143,7 +143,7 @@ std::list<std::string> split_string(const std::string &s, const char *delims);
 
 std::string trim_string(const std::string &strIn);
 
-std::string get_real_path(const std::string &path);
+const std::string &get_real_path(const std::string &path);
 
 bool string_is_integer(const std::string &str, unsigned base = 0);
 
