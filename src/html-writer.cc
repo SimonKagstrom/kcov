@@ -101,11 +101,10 @@ private:
 				json += ",'coverage':'           : ',";
 			}
 			json += "},\n";
-
 		}
 
 		// Add the header
-		json = getHeader(nCodeLines, nExecutedLines) + json + "];";
+		json = getHeader(nCodeLines, nExecutedLines) + json + "];\n" + "var merged_data = [];\n";
 
 		// Produce HTML outfile
 		std::string html = fmt(
@@ -180,7 +179,8 @@ private:
 				getDateNow().c_str(),
 				nTotalCodeLines,
 				nTotalExecutedLines
-				) + json + "];";
+				) + json + "];\n" +
+				"var merged_data = [];\n";
 
 		// Produce HTML outfile
 		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
@@ -216,6 +216,7 @@ private:
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
 
 		std::string json;
+		std::string merged;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
 			std::string cur = idx + de->d_name + "/summary.db";
@@ -243,11 +244,18 @@ private:
 				nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			json += getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines, summary.m_executedLines);
+			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines, summary.m_executedLines);
+
+			if (name == "[merged]")
+				merged += datum;
+			else
+				json += datum;
 		}
 
+		merged = "var merged_data = [" + merged + "];";
+
 		// Add the header
-		json = getHeader(nTotalCodeLines, nTotalExecutedLines) + json + "];";
+		json = getHeader(nTotalCodeLines, nTotalExecutedLines) + json + "];\n" + merged;
 
 		// Produce HTML outfile
 		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());

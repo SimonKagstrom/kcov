@@ -1,7 +1,9 @@
 Kcov (17):
-	* Coloring improvements (?) of the HTML output
+	* HTML: Always put merged results last and don't include them in sorting
 
-	* Refactor HTML output completely to use javascript-based pages.
+	* HTML: Coloring improvements (?) of the HTML output
+
+	* HTML: Refactor HTML output completely to use javascript-based pages.
 	  This allows selecting how to sort directly from the web page,
 	  and greatly simplifies the generating C++ code
 

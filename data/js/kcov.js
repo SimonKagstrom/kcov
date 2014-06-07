@@ -1,5 +1,6 @@
 window.onload = function () {
-	Tempo.prepare('source-code').render(data);
+	Tempo.prepare('main-data').render(data);
+	Tempo.prepare('merged-data').render(merged_data);
 
 	elem = document.getElementById('header-percent-covered')
 
@@ -15,6 +16,7 @@ window.onload = function () {
 	$("#index-table").tablesorter({
 		theme : 'blue',
 		sortList : [[1,0]],
+		cssInfoBlock : "tablesorter-no-sort",
 		widgets: ["saveSort"],
 	});
 }

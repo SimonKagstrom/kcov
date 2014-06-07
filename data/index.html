@@ -45,7 +45,7 @@
   <tr><td class="ruler"><img src="data/glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 
-<center id="source-code">
+<center>
   <table width="80%" cellpadding="2" cellspacing="1" border="0" id="index-table" class="tablesorter">
 	<thead>
     <tr>
@@ -56,7 +56,16 @@
       <th width="10%">Executable lines</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody id="main-data">
+    <tr data-template>
+      <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
+      <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
+      <td class="coverNum">{{covered_lines}}</td>
+      <td class="coverNum">{{uncovered_lines}}</td>
+      <td class="coverNum">{{total_lines}}</td>
+    </tr>
+    </tbody>
+    <tbody tablesorter-no-sort id="merged-data">
     <tr data-template>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
