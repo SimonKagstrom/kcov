@@ -38,6 +38,11 @@ public:
 		stop();
 	}
 
+	bool fileIsIncluded(const std::string &file)
+	{
+		return m_filter.runFilters(file);
+	}
+
 	bool lineIsCode(const std::string &file, unsigned int lineNr)
 	{
 		bool out;

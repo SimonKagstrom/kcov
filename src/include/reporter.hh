@@ -44,6 +44,15 @@ namespace kcov
 
 		virtual ~IReporter() {}
 
+		/**
+		 * Return if a file path should be included in the output.
+		 *
+		 * @param file the file path to check
+		 *
+		 * @return true if the file should be included in the output
+		 */
+		virtual bool fileIsIncluded(const std::string &file) = 0;
+
 		virtual bool lineIsCode(const std::string &file, unsigned int lineNr) = 0;
 
 		virtual LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr) = 0;

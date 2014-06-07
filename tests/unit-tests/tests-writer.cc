@@ -21,6 +21,9 @@ using namespace kcov;
 class MockReporter : public IReporter
 {
 public:
+	MOCK_METHOD1(fileIsIncluded,
+			bool(const std::string &file));
+
 	MOCK_METHOD2(lineIsCode,
 			bool(const std::string &file, unsigned int lineNr));
 
@@ -87,6 +90,10 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(res);
 
 	EXPECT_CALL(reporter, lineIsCode(_,_))
+		.Times(AtLeast(1))
+		.WillRepeatedly(Return(true))
+		;
+	EXPECT_CALL(reporter, fileIsIncluded(_))
 		.Times(AtLeast(1))
 		.WillRepeatedly(Return(true))
 		;
@@ -173,6 +180,10 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	ASSERT_TRUE(res);
 
 	EXPECT_CALL(reporter, lineIsCode(_,_))
+		.Times(AtLeast(1))
+		.WillRepeatedly(Return(true))
+		;
+	EXPECT_CALL(reporter, fileIsIncluded(_))
 		.Times(AtLeast(1))
 		.WillRepeatedly(Return(true))
 		;
