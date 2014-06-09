@@ -1,4 +1,6 @@
-Kcov (17):
+Kcov (18):
+	* Performance: Improve performance by cacheing realpath()
+
 	* HTML: Always put merged results last and don't include them in sorting
 
 	* HTML: Coloring improvements (?) of the HTML output
@@ -12,7 +14,7 @@ Kcov (17):
 
 	* Issue #20: Fix hanging-on-killed-by-signal
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jun  9 19:12:38 CEST 2014
 
 Kcov (17):
 	* Issue #19: Fix bug where kcov would let children which called
