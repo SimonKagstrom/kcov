@@ -193,7 +193,7 @@ public:
 				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
 
-		write_file(__library_data.data(), __library_data.size(), kcov_solib_path.c_str());
+		write_file(__library_data.data(), __library_data.size(), "%s", kcov_solib_path.c_str());
 
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;

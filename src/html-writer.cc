@@ -113,8 +113,8 @@ private:
 		html += std::string((const char *)source_file_text_data.data(), source_file_text_data.size());
 
 		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), jsonOutName.c_str());
-		write_file((void *)html.c_str(), html.size(), htmlOutName.c_str());
+		write_file((void *)json.c_str(), json.size(), "%s", jsonOutName.c_str());
+		write_file((void *)html.c_str(), html.size(), "%s", htmlOutName.c_str());
 	}
 
 	void writeIndex()
@@ -186,8 +186,8 @@ private:
 		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), (m_outDirectory + "index.json").c_str());
-		write_file((void *)html.c_str(), html.size(), (m_outDirectory + "index.html").c_str());
+		write_file((void *)json.c_str(), json.size(), "%s", (m_outDirectory + "index.json").c_str());
+		write_file((void *)html.c_str(), html.size(), "%s", (m_outDirectory + "index.html").c_str());
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
@@ -261,8 +261,8 @@ private:
 		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), (m_indexDirectory + "index.json").c_str());
-		write_file((void *)html.c_str(), html.size(), (m_indexDirectory + "index.html").c_str());
+		write_file((void *)json.c_str(), json.size(), "%s", (m_indexDirectory + "index.json").c_str());
+		write_file((void *)html.c_str(), html.size(), "%s", (m_indexDirectory + "index.html").c_str());
 		closedir(dir);
 	}
 

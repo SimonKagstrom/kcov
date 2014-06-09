@@ -67,7 +67,7 @@ namespace kcov
 				return;
 
 			if (!m_unmarshalData)
-				m_unmarshalData = read_file(&m_unmarshalSize, m_dbFileName.c_str());
+				m_unmarshalData = read_file(&m_unmarshalSize, "%s", m_dbFileName.c_str());
 
 			if (m_unmarshalData) {
 				if (!m_reporter.unMarshal(m_unmarshalData, m_unmarshalSize))
@@ -87,7 +87,7 @@ namespace kcov
 			void *data = m_reporter.marshal(&sz);
 
 			if (data)
-				write_file(data, sz, m_dbFileName.c_str());
+				write_file(data, sz, "%s", m_dbFileName.c_str());
 
 			free(data);
 

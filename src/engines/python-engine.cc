@@ -75,7 +75,8 @@ public:
 		std::string kcov_python_path =
 				IOutputHandler::getInstance().getBaseDirectory() + "python-helper.py";
 
-		if (write_file(python_helper_data.data(), python_helper_data.size(), kcov_python_path.c_str()) < 0) {
+		if (write_file(python_helper_data.data(), python_helper_data.size(),
+				"%s", kcov_python_path.c_str()) < 0) {
 				error("Can't write python helper at %s", kcov_python_path.c_str());
 
 				return false;
