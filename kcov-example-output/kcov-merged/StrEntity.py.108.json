@@ -1,0 +1,29 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 9, 'covered' : 5,};
+var data = [
+{'lineNum':'    1','line':'######################################################################','coverage':'           : ',},
+{'lineNum':'    2','line':'##','coverage':'           : ',},
+{'lineNum':'    3','line':'## Copyright (C) 2006,  Blekinge Institute of Technology','coverage':'           : ',},
+{'lineNum':'    4','line':'##','coverage':'           : ',},
+{'lineNum':'    5','line':'## Author:        Simon Kagstrom <simon.kagstrom@gmail.com>','coverage':'           : ',},
+{'lineNum':'    6','line':'## Description:   String entity','coverage':'           : ',},
+{'lineNum':'    7','line':'##','coverage':'           : ',},
+{'lineNum':'    8','line':'## Licensed under the terms of GNU General Public License version 2','coverage':'           : ',},
+{'lineNum':'    9','line':'## (or later, at your option). See COPYING file distributed with Dissy','coverage':'           : ',},
+{'lineNum':'   10','line':'## for full text of the license.','coverage':'           : ',},
+{'lineNum':'   11','line':'##','coverage':'           : ',},
+{'lineNum':'   12','line':'######################################################################','coverage':'           : ',},
+{'lineNum':'   13','line':'from dissy.Entity import Entity','class':'lineCov','coverage':'  1 /   1  : ',},
+{'lineNum':'   14','line':'','coverage':'           : ',},
+{'lineNum':'   15','line':'class StrEntity(Entity):','class':'lineCov','coverage':'  1 /   1  : ',},
+{'lineNum':'   16','line':'    def __init__(self, fn, string):','class':'lineCov','coverage':'  1 /   1  : ',},
+{'lineNum':'   17','line':'        self.string = string','class':'lineNoCov','coverage':'  0 /   1  : ',},
+{'lineNum':'   18','line':'        self.function = fn','class':'lineNoCov','coverage':'  0 /   1  : ',},
+{'lineNum':'   19','line':'','coverage':'           : ',},
+{'lineNum':'   20','line':'    def getFunction(self):','class':'lineCov','coverage':'  1 /   1  : ',},
+{'lineNum':'   21','line':'        return self.function','class':'lineNoCov','coverage':'  0 /   1  : ',},
+{'lineNum':'   22','line':'','coverage':'           : ',},
+{'lineNum':'   23','line':'    def __str__(self):','class':'lineCov','coverage':'  1 /   1  : ',},
+{'lineNum':'   24','line':'        return self.string','class':'lineNoCov','coverage':'  0 /   1  : ',},
+];
+var merged_data = [];

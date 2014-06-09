@@ -1,0 +1,31 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 2, 'covered' : 1,};
+var data = [
+{'lineNum':'    1','line':'#pragma once','coverage':'           : ',},
+{'lineNum':'    2','line':'','coverage':'           : ',},
+{'lineNum':'    3','line':'#include <string>','coverage':'           : ',},
+{'lineNum':'    4','line':'','coverage':'           : ',},
+{'lineNum':'    5','line':'namespace kcov','coverage':'           : ',},
+{'lineNum':'    6','line':'{','coverage':'           : ',},
+{'lineNum':'    7','line':'	class IFilter','class':'linePartCov','coverage':'  2 /   3  : ',},
+{'lineNum':'    8','line':'	{','coverage':'           : ',},
+{'lineNum':'    9','line':'	public:','coverage':'           : ',},
+{'lineNum':'   10','line':'		class Handler','coverage':'           : ',},
+{'lineNum':'   11','line':'		{','coverage':'           : ',},
+{'lineNum':'   12','line':'		public:','coverage':'           : ',},
+{'lineNum':'   13','line':'			virtual bool includeFile(const std::string &file) = 0;','coverage':'           : ',},
+{'lineNum':'   14','line':'		};','coverage':'           : ',},
+{'lineNum':'   15','line':'','coverage':'           : ',},
+{'lineNum':'   16','line':'		virtual bool runFilters(const std::string &file) = 0;','coverage':'           : ',},
+{'lineNum':'   17','line':'','coverage':'           : ',},
+{'lineNum':'   18','line':'','coverage':'           : ',},
+{'lineNum':'   19','line':'		static IFilter &create();','coverage':'           : ',},
+{'lineNum':'   20','line':'','coverage':'           : ',},
+{'lineNum':'   21','line':'		static IFilter &createDummy();','coverage':'           : ',},
+{'lineNum':'   22','line':'','coverage':'           : ',},
+{'lineNum':'   23','line':'','coverage':'           : ',},
+{'lineNum':'   24','line':'		virtual ~IFilter() {}','class':'lineNoCov','coverage':'  0 /   5  : ',},
+{'lineNum':'   25','line':'	};','coverage':'           : ',},
+{'lineNum':'   26','line':'}','coverage':'           : ',},
+];
+var merged_data = [];

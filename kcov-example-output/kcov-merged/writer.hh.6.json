@@ -1,0 +1,24 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 2, 'covered' : 2,};
+var data = [
+{'lineNum':'    1','line':'#pragma once','coverage':'           : ',},
+{'lineNum':'    2','line':'','coverage':'           : ',},
+{'lineNum':'    3','line':'namespace kcov','coverage':'           : ',},
+{'lineNum':'    4','line':'{','coverage':'           : ',},
+{'lineNum':'    5','line':'	class IFileParser;','coverage':'           : ',},
+{'lineNum':'    6','line':'	class IReporter;','coverage':'           : ',},
+{'lineNum':'    7','line':'','coverage':'           : ',},
+{'lineNum':'    8','line':'	class IWriter','class':'linePartCov','coverage':'  2 /   6  : ',},
+{'lineNum':'    9','line':'	{','coverage':'           : ',},
+{'lineNum':'   10','line':'	public:','coverage':'           : ',},
+{'lineNum':'   11','line':'		virtual ~IWriter() {}','class':'linePartCov','coverage':'  3 /  20  : ',},
+{'lineNum':'   12','line':'','coverage':'           : ',},
+{'lineNum':'   13','line':'		virtual void onStartup() = 0;','coverage':'           : ',},
+{'lineNum':'   14','line':'','coverage':'           : ',},
+{'lineNum':'   15','line':'		virtual void onStop() = 0;','coverage':'           : ',},
+{'lineNum':'   16','line':'','coverage':'           : ',},
+{'lineNum':'   17','line':'		virtual void write() = 0;','coverage':'           : ',},
+{'lineNum':'   18','line':'	};','coverage':'           : ',},
+{'lineNum':'   19','line':'}','coverage':'           : ',},
+];
+var merged_data = [];

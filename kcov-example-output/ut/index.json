@@ -1,0 +1,32 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 1901, 'covered' : 602,};
+var data = [
+{'link':'html-data-files.cc.104.html','title':'html-data-files.cc','summary_name':'[...]/ska/projects/build/kcov/unit-tests/html-data-files.cc','covered_class':'lineCov','covered':'100.0','covered_lines':'11','uncovered_lines':'0','total_lines' : '11'},
+{'link':'merge-parser.hh.100.html','title':'merge-parser.hh','summary_name':'[...]/ska/projects/kcov/src/merge-parser.hh','covered_class':'lineCov','covered':'100.0','covered_lines':'1','uncovered_lines':'0','total_lines' : '1'},
+{'link':'merge-file-parser.cc.96.html','title':'merge-file-parser.cc','summary_name':'[...]/ska/projects/kcov/src/merge-file-parser.cc','covered_class':'lineCov','covered':'81.4','covered_lines':'188','uncovered_lines':'43','total_lines' : '231'},
+{'link':'filter.hh.92.html','title':'filter.hh','summary_name':'[...]/ska/projects/kcov/src/include/filter.hh','covered_class':'linePartCov','covered':'50.0','covered_lines':'1','uncovered_lines':'1','total_lines' : '2'},
+{'link':'filter.cc.88.html','title':'filter.cc','summary_name':'[...]/ska/projects/kcov/src/filter.cc','covered_class':'lineCov','covered':'76.1','covered_lines':'67','uncovered_lines':'21','total_lines' : '88'},
+{'link':'utils.cc.72.html','title':'utils.cc','summary_name':'[...]/ska/projects/kcov/src/utils.cc','covered_class':'linePartCov','covered':'34.6','covered_lines':'101','uncovered_lines':'191','total_lines' : '292'},
+{'link':'collector.cc.16.html','title':'collector.cc','summary_name':'[...]/ska/projects/kcov/src/collector.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'82','total_lines' : '82'},
+{'link':'output-handler.cc.48.html','title':'output-handler.cc','summary_name':'[...]/ska/projects/kcov/src/output-handler.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'59','total_lines' : '59'},
+{'link':'file-parser.hh.24.html','title':'file-parser.hh','summary_name':'[...]/ska/projects/kcov/src/include/file-parser.hh','covered_class':'linePartCov','covered':'62.5','covered_lines':'5','uncovered_lines':'3','total_lines' : '8'},
+{'link':'elf.cc.32.html','title':'elf.cc','summary_name':'[...]/ska/projects/kcov/src/elf.cc','covered_class':'lineNoCov','covered':'5.4','covered_lines':'13','uncovered_lines':'228','total_lines' : '241'},
+{'link':'writer.hh.4.html','title':'writer.hh','summary_name':'[...]/ska/projects/kcov/src/include/writer.hh','covered_class':'lineCov','covered':'100.0','covered_lines':'2','uncovered_lines':'0','total_lines' : '2'},
+{'link':'cobertura-writer.cc.0.html','title':'cobertura-writer.cc','summary_name':'[...]/ska/projects/kcov/src/cobertura-writer.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'86','total_lines' : '86'},
+{'link':'reporter.cc.64.html','title':'reporter.cc','summary_name':'[...]/ska/projects/kcov/src/reporter.cc','covered_class':'lineNoCov','covered':'0.6','covered_lines':'1','uncovered_lines':'156','total_lines' : '157'},
+{'link':'collector.hh.20.html','title':'collector.hh','summary_name':'[...]/ska/projects/kcov/src/include/collector.hh','covered_class':'lineCov','covered':'100.0','covered_lines':'3','uncovered_lines':'0','total_lines' : '3'},
+{'link':'lineid.hh.68.html','title':'lineid.hh','summary_name':'[...]/ska/projects/kcov/src/include/lineid.hh','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'10','total_lines' : '10'},
+{'link':'utils.hh.12.html','title':'utils.hh','summary_name':'[...]/ska/projects/kcov/src/include/utils.hh','covered_class':'linePartCov','covered':'35.3','covered_lines':'6','uncovered_lines':'11','total_lines' : '17'},
+{'link':'writer-base.cc.76.html','title':'writer-base.cc','summary_name':'[...]/ska/projects/kcov/src/writer-base.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'80','total_lines' : '80'},
+{'link':'reporter.hh.44.html','title':'reporter.hh','summary_name':'[...]/ska/projects/kcov/src/include/reporter.hh','covered_class':'linePartCov','covered':'70.0','covered_lines':'7','uncovered_lines':'3','total_lines' : '10'},
+{'link':'engine.hh.28.html','title':'engine.hh','summary_name':'[...]/ska/projects/kcov/src/include/engine.hh','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'10','total_lines' : '10'},
+{'link':'writer-base.hh.8.html','title':'writer-base.hh','summary_name':'[...]/ska/projects/kcov/src/writer-base.hh','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'1','total_lines' : '1'},
+{'link':'configuration.cc.80.html','title':'configuration.cc','summary_name':'[...]/ska/projects/kcov/src/configuration.cc','covered_class':'linePartCov','covered':'61.5','covered_lines':'161','uncovered_lines':'101','total_lines' : '262'},
+{'link':'configuration.hh.84.html','title':'configuration.hh','summary_name':'[...]/ska/projects/kcov/src/include/configuration.hh','covered_class':'linePartCov','covered':'50.0','covered_lines':'1','uncovered_lines':'1','total_lines' : '2'},
+{'link':'engine-factory.cc.36.html','title':'engine-factory.cc','summary_name':'[...]/ska/projects/kcov/src/engine-factory.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'22','total_lines' : '22'},
+{'link':'parser-manager.cc.56.html','title':'parser-manager.cc','summary_name':'[...]/ska/projects/kcov/src/parser-manager.cc','covered_class':'linePartCov','covered':'57.1','covered_lines':'16','uncovered_lines':'12','total_lines' : '28'},
+{'link':'output-handler.hh.52.html','title':'output-handler.hh','summary_name':'[...]/ska/projects/kcov/src/include/output-handler.hh','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'2','total_lines' : '2'},
+{'link':'html-writer.cc.40.html','title':'html-writer.cc','summary_name':'[...]/ska/projects/kcov/src/html-writer.cc','covered_class':'lineNoCov','covered':'0.0','covered_lines':'0','uncovered_lines':'174','total_lines' : '174'},
+{'link':'swap-endian.hh.60.html','title':'swap-endian.hh','summary_name':'[...]/ska/projects/kcov/src/include/swap-endian.hh','covered_class':'lineCov','covered':'90.0','covered_lines':'18','uncovered_lines':'2','total_lines' : '20'},
+];
+var merged_data = [];

@@ -1,0 +1,26 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 1, 'covered' : 1,};
+var data = [
+{'lineNum':'    1','line':'#pragma once','coverage':'           : ',},
+{'lineNum':'    2','line':'','coverage':'           : ',},
+{'lineNum':'    3','line':'#include <string>','coverage':'           : ',},
+{'lineNum':'    4','line':'','coverage':'           : ',},
+{'lineNum':'    5','line':'namespace kcov','coverage':'           : ',},
+{'lineNum':'    6','line':'{','coverage':'           : ',},
+{'lineNum':'    7','line':'	class IFileParser;','coverage':'           : ',},
+{'lineNum':'    8','line':'','coverage':'           : ',},
+{'lineNum':'    9','line':'	class IMergeParser :','class':'linePartCov','coverage':'  5 /  12  : ',},
+{'lineNum':'   10','line':'		public IFileParser,','coverage':'           : ',},
+{'lineNum':'   11','line':'		public ICollector::IListener,','coverage':'           : ',},
+{'lineNum':'   12','line':'		public IWriter,','coverage':'           : ',},
+{'lineNum':'   13','line':'		public ICollector','coverage':'           : ',},
+{'lineNum':'   14','line':'	{','coverage':'           : ',},
+{'lineNum':'   15','line':'	};','coverage':'           : ',},
+{'lineNum':'   16','line':'','coverage':'           : ',},
+{'lineNum':'   17','line':'	IMergeParser &createMergeParser(IFileParser &localParser,','coverage':'           : ',},
+{'lineNum':'   18','line':'			const std::string &baseDirectory,','coverage':'           : ',},
+{'lineNum':'   19','line':'			const std::string &outputDirectory,','coverage':'           : ',},
+{'lineNum':'   20','line':'			IFilter &filter);','coverage':'           : ',},
+{'lineNum':'   21','line':'}','coverage':'           : ',},
+];
+var merged_data = [];

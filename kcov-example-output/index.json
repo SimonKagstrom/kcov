@@ -1,0 +1,8 @@
+var percent_low = 25;var percent_high = 75;
+var header = { 'command' : 'ut', 'date' : '2014-06-09 19:19:23', 'instrumented' : 4146, 'covered' : 1482,};
+var data = [
+{'link':'ut/index.html','title':'ut','summary_name':'ut','covered_class':'linePartCov','covered':'31.8','covered_lines':'608','uncovered_lines':'1303','total_lines' : '1911'},
+{'link':'dissy/index.html','title':'dissy','summary_name':'dissy','covered_class':'linePartCov','covered':'39.1','covered_lines':'874','uncovered_lines':'1361','total_lines' : '2235'},
+];
+var merged_data = [{'link':'kcov-merged/index.html','title':'[merged]','summary_name':'[merged]','covered_class':'linePartCov','covered':'35.7','covered_lines':'1482','uncovered_lines':'2664','total_lines' : '4146'},
+];
