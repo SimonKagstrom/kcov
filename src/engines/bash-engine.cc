@@ -320,6 +320,9 @@ private:
 			// Non-empty, but comment
 			if (s[0] == '#')
 				continue;
+			if (s.size() >= 2 &&
+					s[0] == ';' && s[1] == ';')
+				continue;
 
 			// Empty braces
 			if (s[0] == '{' || s[0] == '}')
