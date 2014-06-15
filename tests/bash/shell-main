@@ -1,0 +1,62 @@
+#!/bin/sh
+
+function fn0() {
+    echo "fn0 $1"
+}
+
+fn1() # Other fn syntax
+{
+    echo "fn1: Are we really executing this?"
+}
+
+function fn2 { # Yet another
+    echo fn2
+}
+
+function fn3
+{ # Yet yet another
+    echo fn3
+}
+
+
+fn0
+
+if [ $# -eq 1 ] ; then
+	fn1
+fi
+
+A=5
+while [ $A -gt 0 ] ; do
+	A=$(($A - 1))
+	echo $A
+done 
+
+# Comment
+case $# in
+    1)
+      	echo "1 args"
+        ;;
+    2)
+      	echo "2 args" ;;# Comment
+    'sorry mister')
+        echo "This is very much dead code!"
+        ;;
+    "SORRY")
+    	echo "and more of that here"
+        ;;
+    *)
+      	echo "else args $#"
+        ;;
+esac
+
+for idx in 1 \
+    2 \
+    3 \
+    4 ; do
+    echo "IDX: $idx"
+done
+
+cat <<EOF
+here document
+is here
+EOF
