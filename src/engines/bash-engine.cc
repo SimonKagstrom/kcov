@@ -141,15 +141,17 @@ public:
 		std::string cur(curLine);
 		// Line markers always start with kcov@
 
-		if (cur.find("kcov@") != 0)
+		auto kcovStr = cur.find("kcov@");
+		if (kcovStr == std::string::npos)
 			return true;
-		auto parts = split_string(cur, "@");
+		auto parts = split_string(cur.substr(kcovStr), "@");
 
 		// kcov@FILENAME@LINENO@...
 		if (parts.size() < 3)
 			return true;
 
-		const auto &filename = parts[1];
+		// Resolve filename (might be relative)
+		const auto &filename = get_real_path(parts[1]);
 		const auto &lineNo = parts[2];
 
 		if (!string_is_integer(lineNo)) {
@@ -339,7 +341,7 @@ private:
 		m_lineIdToAddress[id] = address;
 
 		for (const auto &lit : m_lineListeners)
-			lit->onLine(get_real_path(filename).c_str(), lineNo, address);
+			lit->onLine(filename.c_str(), lineNo, address);
 
 		m_currentAddress++;
 	}
