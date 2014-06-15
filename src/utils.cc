@@ -372,8 +372,8 @@ bool machine_is_64bit(void)
 
 
 // http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-static std::list<std::string> &split(const std::string &s, char delim,
-		std::list<std::string> &elems)
+static std::vector<std::string> &split(const std::string &s, char delim,
+		std::vector<std::string> &elems)
 {
     std::stringstream ss(s);
     std::string item;
@@ -386,9 +386,9 @@ static std::list<std::string> &split(const std::string &s, char delim,
 }
 
 
-std::list<std::string> split_string(const std::string &s, const char *delims)
+std::vector<std::string> split_string(const std::string &s, const char *delims)
 {
-    std::list<std::string> elems;
+    std::vector<std::string> elems;
     split(s, *delims, elems);
 
     return elems;

@@ -8,6 +8,7 @@
 #include <semaphore.h>
 
 #include <string>
+#include <vector>
 #include <list>
 
 #define error(x...) do \
@@ -139,7 +140,7 @@ uint64_t get_ms_timestamp(void);
 
 bool machine_is_64bit(void);
 
-std::list<std::string> split_string(const std::string &s, const char *delims);
+std::vector<std::string> split_string(const std::string &s, const char *delims);
 
 std::string trim_string(const std::string &strIn);
 
