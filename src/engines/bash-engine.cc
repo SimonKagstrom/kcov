@@ -328,6 +328,14 @@ private:
 			if (s[0] == '{' || s[0] == '}')
 				continue;
 
+			// While, if, switch endings
+			if (s == "esac")
+				continue;
+			if (s == "fi")
+				continue;
+			if (s == "done")
+				continue;
+
 			// Functions
 			if (s.find("function") == 0)
 				continue;
