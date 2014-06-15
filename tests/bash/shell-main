@@ -60,3 +60,5 @@ cat <<EOF
 here document
 is here
 EOF
+
+. `dirname $0`/other.sh
