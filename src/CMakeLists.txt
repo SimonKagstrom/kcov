@@ -29,6 +29,7 @@ set (${KCOV}_SRCS
     configuration.cc
     elf.cc
     engine-factory.cc
+    engines/bash-engine.cc
     engines/kernel-engine.cc
     engines/ptrace.cc
     engines/python-engine.cc
