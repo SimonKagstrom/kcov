@@ -346,8 +346,8 @@ private:
 		m_currentAddress++;
 	}
 
-	typedef std::list<ILineListener *> LineListenerList_t;
-	typedef std::list<IFileListener *> FileListenerList_t;
+	typedef std::vector<ILineListener *> LineListenerList_t;
+	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
 	typedef std::unordered_map<LineId, uint64_t, LineIdHash> LineIdToAddressMap_t;
 
