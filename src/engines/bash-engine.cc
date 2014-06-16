@@ -329,11 +329,11 @@ private:
 				continue;
 
 			// While, if, switch endings
-			if (s == "esac")
-				continue;
-			if (s == "fi")
-				continue;
-			if (s == "done")
+			if (s == "esac" ||
+					s == "fi" ||
+					s == "done" ||
+					s == "else" ||
+					s == "then")
 				continue;
 
 			// Functions
