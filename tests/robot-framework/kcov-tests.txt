@@ -271,6 +271,33 @@ python-tricky-single-dict-assignment
 #    ${rc}=    Run and return RC    ${kcov} --python-parser=${kcov_path}/tests/tools/dummy-python.sh ${out} ${kcov_path}/tests/python/main 5
 #    Should be equal as integers    ${rc}   99
 
+bash-exit-status
+	Run								rm -rf ${out}/main
+    ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    Should be equal as integers    ${rc}   ${no_kcov_rc}
+
+bash-coverage
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 3
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 4
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 13
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 26
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 34
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 38
+    Should Contain    ${output}    nocode
+
+bash-coverage-tricky
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 36
+    Should Contain    ${output}    nocode
 
 merge-basic
 	Run								rm -rf ${out}

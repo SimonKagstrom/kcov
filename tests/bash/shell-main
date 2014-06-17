@@ -62,3 +62,8 @@ is here
 EOF
 
 . `dirname $0`/other.sh
+
+if [ $# -gt 0 ]
+then
+	exit $1
+fi
