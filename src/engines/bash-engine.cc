@@ -308,6 +308,7 @@ private:
 
 		const auto &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
+		enum { none, backslash } state = none;
 
 		for (const auto &it : stringList) {
 			const auto &s = trim_string(it);
@@ -339,6 +340,15 @@ private:
 			// Functions
 			if (s.find("function") == 0)
 				continue;
+
+			// Handle backslashes - only the first line is code
+			if (state == backslash) {
+				if (s[s.size() - 1] != '\\')
+					state = none;
+				continue;
+			}
+			if (s[s.size() - 1] == '\\')
+				state = backslash;
 
 			fileLineFound(crc, filename, lineNo);
 		}
