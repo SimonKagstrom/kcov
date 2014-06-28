@@ -308,7 +308,8 @@ private:
 
 		const auto &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
-		enum { none, backslash } state = none;
+		enum { none, backslash, heredoc } state = none;
+		std::string heredocMarker;
 
 		for (const auto &it : stringList) {
 			const auto &s = trim_string(it);
@@ -341,14 +342,32 @@ private:
 			if (s.find("function") == 0)
 				continue;
 
+
 			// Handle backslashes - only the first line is code
 			if (state == backslash) {
 				if (s[s.size() - 1] != '\\')
 					state = none;
 				continue;
 			}
-			if (s[s.size() - 1] == '\\')
+			// HERE documents
+			if (state == heredoc) {
+				if (s == heredocMarker)
+					state = none;
+				continue;
+			}
+
+			if (s[s.size() - 1] == '\\') {
 				state = backslash;
+			} else {
+				auto heredocStart = s.find("<<");
+
+				if (heredocStart != std::string::npos) {
+					// Skip << and remove spaces before and after "EOF"
+					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
+
+					state = heredoc;
+				}
+			}
 
 			fileLineFound(crc, filename, lineNo);
 		}
