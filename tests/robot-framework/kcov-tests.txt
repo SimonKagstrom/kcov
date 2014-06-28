@@ -293,6 +293,22 @@ bash-coverage
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 38
     Should Contain    ${output}    nocode
 
+bash-coverage-heredoc-backslashes
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 52
+    Should Contain    ${output}    1
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 53
+    Should Contain    ${output}    nocode
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 55
+    Should Contain    ${output}    nocode
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 59
+    Should Contain    ${output}    1
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 61
+    Should Contain    ${output}    nocode
+	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 62
+    Should Contain    ${output}    nocode
+
 bash-coverage-tricky
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
