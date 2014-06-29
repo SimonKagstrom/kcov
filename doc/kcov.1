@@ -23,9 +23,9 @@ kcov \- Code coverage analysis for compiled programs and Python scripts
 .SH DESCRIPTION
 .PP
 This manual page documents briefly the \fBkcov\fP command. \fBkcov\fP is a
-code coverage tester for ELF binaries and Python scripts. It allows collecting
-code coverage information from executables without special compiler
-directives, and continuously produces output from long-running applications.
+code coverage tester for ELF binaries, Python scripts and shell scripts. It
+allows collecting code coverage information from executables without special
+compiler directives, and continuously produces output from long-running applications.
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invoke bold face and italics,
 .\" respectively.
@@ -72,6 +72,9 @@ is to return to the console when the last process exits.
 \fB\-\-python\-parser\fP=\fIPARSER\fP
 Set the python parser to use for Python programs (the default is python). Can be used to
 run with Python 3 on systems where Python 2 is the default.
+.TP
+\fB\-\-bash\-parser\fP=\fIPARSER\fP
+Set the bash parser to use for shell scripts (the default is /bin/bash).
 .TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
