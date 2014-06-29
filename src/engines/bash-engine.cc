@@ -309,6 +309,7 @@ private:
 		const auto &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { none, backslash, heredoc } state = none;
+		bool caseActive = false;
 		std::string heredocMarker;
 
 		for (const auto &it : stringList) {
@@ -377,6 +378,18 @@ private:
 
 					state = heredoc;
 				}
+			}
+
+			if (s.find("case") == 0)
+				caseActive = true;
+			else if (s.find("esac") == 0)
+				caseActive = false;
+
+			// Case switches are nocode
+			if (caseActive && s[s.size() - 1] == ')') {
+				// But let functions be
+				if (s.find("(") == std::string::npos)
+					continue;
 			}
 
 			fileLineFound(crc, filename, lineNo);
