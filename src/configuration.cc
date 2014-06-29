@@ -19,6 +19,7 @@ public:
 		m_outDirectory = "";
 		m_binaryName = "";
 		m_pythonCommand = "python";
+		m_bashCommand = "/bin/bash";
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_lowLimit = 25;
 		m_highLimit = 75;
@@ -98,6 +99,7 @@ public:
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
 				{"python-parser", required_argument, 0, 'P'},
+				{"bash-parser", required_argument, 0, 'B'},
 				{"uncommon-options", no_argument, 0, 'U'},
 				{"set-breakpoint", required_argument, 0, 'b'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
@@ -187,6 +189,9 @@ public:
 				break;
 			case 'P':
 				m_pythonCommand = optarg;
+				break;
+			case 'B':
+				m_bashCommand = optarg;
 				break;
 			case 'x':
 				m_excludePattern = getCommaSeparatedList(std::string(optarg));
@@ -311,6 +316,11 @@ public:
 	const std::string &getPythonCommand() const
 	{
 		return m_pythonCommand;
+	}
+
+	const std::string &getBashCommand() const
+	{
+		return m_bashCommand;
 	}
 
 	std::list<uint64_t> getFixedBreakpoints()
@@ -438,8 +448,10 @@ public:
 				" --set-breakpoint=A[,..] manually set breakpoints\n"
 				"\n"
 				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
-				"                         default: %s",
-				m_pathStripLevel, m_outputInterval, m_pythonCommand.c_str()
+				"                         default: %s\n"
+				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
+				"                         default: %s\n",
+				m_pathStripLevel, m_outputInterval, m_pythonCommand.c_str(), m_bashCommand.c_str()
 				);
 	}
 
@@ -522,6 +534,7 @@ public:
 	std::string m_binaryName;
 	std::string m_binaryPath;
 	std::string m_pythonCommand;
+	std::string m_bashCommand;
 	std::string m_kernelCoveragePath;
 	const char **m_programArgs;
 	unsigned int m_argc;
