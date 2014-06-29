@@ -17,10 +17,10 @@ set (TGT ut)
 set (${TGT}_SRCS
     ../../src/cobertura-writer.cc
     ../../src/collector.cc
-    ../../src/elf.cc
     ../../src/engine-factory.cc
     ../../src/html-writer.cc
     ../../src/output-handler.cc
+    ../../src/parsers/elf-parser.cc
     ../../src/parser-manager.cc
     ../../src/reporter.cc
     ../../src/utils.cc

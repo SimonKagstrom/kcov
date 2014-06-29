@@ -27,7 +27,6 @@ set (${KCOV}_SRCS
     cobertura-writer.cc
     collector.cc
     configuration.cc
-    elf.cc
     engine-factory.cc
     engines/bash-engine.cc
     engines/kernel-engine.cc
@@ -38,6 +37,7 @@ set (${KCOV}_SRCS
     main.cc
     merge-file-parser.cc
     output-handler.cc
+    parsers/elf-parser.cc
     parser-manager.cc
     reporter.cc
     solib-parser/phdr_data.c
@@ -45,24 +45,10 @@ set (${KCOV}_SRCS
     writer-base.cc
     )
 
-set (${KCOV_PROFILER}_SRCS
-    cobertura-writer.cc
-    configuration.cc
-    elf.cc
-    filter.cc
-    html-writer.cc
-    output-handler.cc
-    profiler-collector.cc
-    profiler-main.cc
-    reporter.cc
-    utils.cc
-    writer-base.cc
-    )
-
 set (${LINE2ADDR}_SRCS
 	configuration.cc
-	elf.cc
 	line2addr.cc
+	parsers/elf-parser.cc
 	parser-manager.cc
 	utils.cc
 	)
