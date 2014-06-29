@@ -313,16 +313,21 @@ private:
 		std::string heredocMarker;
 
 		for (const auto &it : stringList) {
-			const auto &s = trim_string(it);
+			auto s = trim_string(it);
 
 			lineNo++;
+
+			// Remove comments
+			auto comment = s.find("#");
+			if (comment != std::string::npos) {
+				s = s.substr(0, comment);
+				s = trim_string(s);
+			}
+
 			// Empty line, ignore
 			if (s == "")
 				continue;
 
-			// Non-empty, but comment
-			if (s[0] == '#')
-				continue;
 			if (s.size() >= 2 &&
 					s[0] == ';' && s[1] == ';')
 				continue;
