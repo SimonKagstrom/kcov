@@ -70,10 +70,6 @@ private:
 			IReporter::LineExecutionCount cnt =
 					m_reporter.getLineExecutionCount(file->m_name, n);
 
-			// Update the execution count
-			file->m_executedLines = nExecutedLines;
-			file->m_codeLines = nCodeLines;
-
 			json += fmt(
 					"{'lineNum':'%5u',"
 					"'line':'%s'",
@@ -101,6 +97,10 @@ private:
 				json += ",'coverage':'           : ',";
 			}
 			json += "},\n";
+
+			// Update the execution count
+			file->m_executedLines = nExecutedLines;
+			file->m_codeLines = nCodeLines;
 		}
 
 		// Add the header
