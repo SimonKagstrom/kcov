@@ -342,6 +342,16 @@ private:
 			if (s.find("function") == 0)
 				continue;
 
+			// fn() { .... Yes, regexes would have been better
+			auto fnPos = s.find("()");
+			if (fnPos != std::string::npos) {
+				auto substr = s.substr(0, fnPos);
+
+				// Should be a single word (the function name)
+				if (substr.find(" ") == std::string::npos)
+					continue;
+			}
+
 
 			// Handle backslashes - only the first line is code
 			if (state == backslash) {
