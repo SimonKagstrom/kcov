@@ -334,6 +334,7 @@ private:
 			// While, if, switch endings
 			if (s == "esac" ||
 					s == "fi" ||
+					s == "do" ||
 					s == "done" ||
 					s == "else" ||
 					s == "then")
