@@ -1,3 +1,13 @@
+Kcov (19):
+	* bash coverage: Implemented support for collecting shell script
+	  (sh/bash) coverage! Loosely based on shcov, which is now deprecated
+	  because of this
+
+	* html-writer: Correct executable lines/covered lines in the summary
+	  (was wrong in some cases)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (18):
 	* Performance: Improve performance by cacheing realpath()
 
