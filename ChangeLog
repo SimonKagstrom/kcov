@@ -6,7 +6,7 @@ Kcov (19):
 	* html-writer: Correct executable lines/covered lines in the summary
 	  (was wrong in some cases)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jun 30 18:30:37 CEST 2014
 
 Kcov (18):
 	* Performance: Improve performance by cacheing realpath()
