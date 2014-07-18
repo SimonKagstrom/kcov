@@ -8,6 +8,7 @@
 #include <list>
 #include <string>
 #include <stdexcept>
+#include <unordered_map>
 #include <iostream>
 using namespace kcov;
 
@@ -355,22 +356,22 @@ public:
 		return m_argc;
 	}
 
-	std::map<unsigned int, std::string> &getExcludePattern()
+	std::unordered_map<unsigned int, std::string> &getExcludePattern()
 	{
 		return m_excludePattern;
 	}
 
-	std::map<unsigned int, std::string> &getOnlyIncludePattern()
+	std::unordered_map<unsigned int, std::string> &getOnlyIncludePattern()
 	{
 		return m_onlyIncludePattern;
 	}
 
-	std::map<unsigned int, std::string> &getOnlyIncludePath()
+	std::unordered_map<unsigned int, std::string> &getOnlyIncludePath()
 	{
 		return m_onlyIncludePath;
 	}
 
-	std::map<unsigned int, std::string> &getExcludePath()
+	std::unordered_map<unsigned int, std::string> &getExcludePath()
 	{
 		return m_excludePath;
 	}
@@ -426,7 +427,7 @@ public:
 	}
 
 	// "private", but we ignore that in the unit test
-	typedef std::map<unsigned int, std::string> StrVecMap_t;
+	typedef std::unordered_map<unsigned int, std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
 
 	std::string uncommonOptions()

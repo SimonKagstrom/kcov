@@ -107,7 +107,7 @@ private:
 			return out;
 		}
 	private:
-		typedef std::map<unsigned int, std::string> PatternMap_t;
+		typedef std::unordered_map<unsigned int, std::string> PatternMap_t;
 
 		PatternMap_t &m_includePatterns;
 		PatternMap_t &m_excludePatterns;
@@ -166,7 +166,7 @@ private:
 			return out;
 		}
 	private:
-		typedef std::map<unsigned int, std::string> PathMap_t;
+		typedef std::unordered_map<unsigned int, std::string> PathMap_t;
 
 		PathMap_t &m_includePaths;
 		PathMap_t &m_excludePaths;
