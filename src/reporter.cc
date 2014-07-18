@@ -75,8 +75,10 @@ public:
 		unsigned int executedLines = 0;
 		unsigned int nrLines = 0;
 
-		for (const auto &it : m_lines) {
-			Line *cur = it.second;
+		for (LineMap_t::const_iterator it = m_lines.begin();
+				it != m_lines.end();
+				++it) {
+			Line *cur = it->second;
 
 			// Don't include non-existing files in summary
 			if (!file_exists(cur->m_file))
@@ -104,8 +106,10 @@ public:
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
-		for (const auto &it : m_lines) {
-			Line *cur = it.second;
+		for (LineMap_t::const_iterator it = m_lines.begin();
+				it != m_lines.end();
+				++it) {
+			Line *cur = it->second;
 
 			p = cur->marshal(p);
 		}
@@ -169,8 +173,10 @@ private:
 	{
 		size_t out = 0;
 
-		for (const auto &it : m_lines) {
-			Line *cur = it.second;
+		for (LineMap_t::const_iterator it = m_lines.begin();
+				it != m_lines.end();
+				++it) {
+			Line *cur = it->second;
 
 			out += cur->m_addrs.size();
 		}
@@ -272,16 +278,20 @@ private:
 
 		void clearHits()
 		{
-			for (auto &it : m_addrs)
-				it.second = 0;
+			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
+					it != m_addrs.end();
+					++it)
+				it->second = 0;
 		}
 
 		unsigned int hits()
 		{
 			unsigned int out = 0;
 
-			for (const auto &it : m_addrs)
-				out += it.second;
+			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
+					it != m_addrs.end();
+					++it)
+				out += it->second;
 
 			return out;
 		}
@@ -295,10 +305,12 @@ private:
 		{
 			uint64_t *data = (uint64_t *)start;
 
-			for (const auto &it : m_addrs) {
+			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
+					it != m_addrs.end();
+					++it) {
 				// Address and number of hits
-				*data++ = to_be<uint64_t>(it.first);
-				*data++ = to_be<uint64_t>(it.second);
+				*data++ = to_be<uint64_t>(it->first);
+				*data++ = to_be<uint64_t>(it->second);
 			}
 
 			return (uint8_t *)data;

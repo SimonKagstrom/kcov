@@ -137,8 +137,10 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 
 void WriterBase::setupCommonPaths()
 {
-	for (const auto & it : m_files) {
-		File *file = it.second;
+	for (FileMap_t::const_iterator it = m_files.begin();
+			it != m_files.end();
+			++it) {
+		File *file = it->second;
 
 		if (m_commonPath == "not set")
 			m_commonPath = file->m_name;

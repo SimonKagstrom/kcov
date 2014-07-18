@@ -256,7 +256,10 @@ public:
 
 	void setupAllBreakpoints()
 	{
-		for (const auto addr : m_pendingBreakpoints) {
+		for (PendingBreakpointList_t::const_iterator addrIt = m_pendingBreakpoints.begin();
+				addrIt != m_pendingBreakpoints.end();
+				++addrIt) {
+			unsigned long addr = *addrIt;
 			unsigned long cur_data = peekWord(addr);
 
 			// Set the breakpoint
@@ -318,8 +321,10 @@ public:
 
 	void clearAllBreakpoints()
 	{
-		for (const auto &it : m_breakpointToAddrMap)
-			clearBreakpoint(it.first);
+		for (breakpointToAddrMap_t::const_iterator it = m_breakpointToAddrMap.begin();
+				it != m_breakpointToAddrMap.end();
+				++it)
+			clearBreakpoint(it->first);
 
 		m_addrToBreakpointMap.clear();
 		m_addrToBreakpointMap.clear();

@@ -213,11 +213,13 @@ public:
 			case 'b': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
-				for (auto it : vec) {
-					if (!string_is_integer(it.second, 16))
+				for (StrVecMap_t::const_iterator it = vec.begin();
+						it != vec.end();
+						++it) {
+					if (!string_is_integer(it->second, 16))
 						continue;
 
-					m_fixedBreakpoints.push_back(string_to_integer(it.second, 16));
+					m_fixedBreakpoints.push_back(string_to_integer(it->second, 16));
 				}
 
 				break;
@@ -473,12 +475,14 @@ public:
 
 	void expandPath(StrVecMap_t &paths)
 	{
-		for (auto &it : paths) {
-			std::string &s = it.second;
+		for (StrVecMap_t::iterator it = paths.begin();
+				it != paths.end();
+				++it) {
+			std::string &s = it->second;
 
 			if (s[0] == '~')
 				s = get_home() + s.substr(1, s.size());
-			it.second = s;
+			it->second = s;
 		}
 	}
 

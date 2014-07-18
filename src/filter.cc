@@ -86,15 +86,19 @@ private:
 			if (m_includePatterns.size() != 0)
 				out = false;
 
-			for (const auto &it : m_includePatterns) {
-				const auto &pattern = it.second;
+			for (PatternMap_t::const_iterator it = m_includePatterns.begin();
+					it != m_includePatterns.end();
+					++it) {
+				const std::string &pattern = it->second;
 
 				if (file.find(pattern) != std::string::npos)
 					out = true;
 			}
 
-			for (const auto &it : m_excludePatterns) {
-				const auto &pattern = it.second;
+			for (PatternMap_t::const_iterator it = m_excludePatterns.begin();
+					it != m_excludePatterns.end();
+					++it) {
+				const std::string &pattern = it->second;
 
 				if (file.find(pattern) != std::string::npos)
 					out = false;
@@ -103,8 +107,10 @@ private:
 			return out;
 		}
 	private:
-		std::map<unsigned int, std::string> &m_includePatterns;
-		std::map<unsigned int, std::string> &m_excludePatterns;
+		typedef std::map<unsigned int, std::string> PatternMap_t;
+
+		PatternMap_t &m_includePatterns;
+		PatternMap_t &m_excludePatterns;
 	};
 
 
@@ -139,15 +145,19 @@ private:
 			std::string pathStr(path);
 			free(path);
 
-			for (const auto &it : m_includePaths) {
-				const auto &pathPattern = it.second;
+			for (PathMap_t::const_iterator it = m_includePaths.begin();
+					it != m_includePaths.end();
+					++it) {
+				const std::string &pathPattern = it->second;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = true;
 			}
 
-			for (const auto &it : m_excludePaths) {
-				const auto &pathPattern = it.second;
+			for (PathMap_t::const_iterator it = m_excludePaths.begin();
+					it != m_excludePaths.end();
+					++it) {
+				const std::string &pathPattern = it->second;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = false;
@@ -156,8 +166,10 @@ private:
 			return out;
 		}
 	private:
-		std::map<unsigned int, std::string> &m_includePaths;
-		std::map<unsigned int, std::string> &m_excludePaths;
+		typedef std::map<unsigned int, std::string> PathMap_t;
+
+		PathMap_t &m_includePaths;
+		PathMap_t &m_excludePaths;
 	};
 
 

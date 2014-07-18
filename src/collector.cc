@@ -142,8 +142,10 @@ private:
 			m_exitCode = ev.data;
 			break;
 		case ev_breakpoint:
-			for (const auto &it : m_listeners)
-				it->onAddress(ev.addr, 1);
+			for (ListenerList_t::const_iterator it = m_listeners.begin();
+					it != m_listeners.end();
+					++it)
+				(*it)->onAddress(ev.addr, 1);
 
 			// Disable this breakpoint
 			m_engine.clearBreakpoint(ev.data);

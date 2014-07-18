@@ -24,12 +24,14 @@ public:
 
 		uint8_t *data = (uint8_t *)read_file(&sz, "%s", fileName.c_str());
 
-		for (const auto &it : m_engines) {
+		for (EngineList_t::const_iterator it = m_engines.begin();
+				it != m_engines.end();
+				++it) {
 			if (!best)
-				best = it;
+				best = *it;
 
-			if (it->matchFile(fileName, data, sz) > best->matchFile(fileName, data, sz))
-				best = it;
+			if ((*it)->matchFile(fileName, data, sz) > best->matchFile(fileName, data, sz))
+				best = *it;
 		}
 		free((void *)data);
 

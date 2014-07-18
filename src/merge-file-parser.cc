@@ -122,8 +122,10 @@ public:
 
 		file->registerHits(addr, hits);
 
-		for (const auto &it : m_collectorListeners) {
-			it->onAddress(addr, hits);
+		for (CollectorListenerList_t::const_iterator it = m_collectorListeners.begin();
+				it != m_collectorListeners.end();
+				++it) {
+			(*it)->onAddress(addr, hits);
 		}
 	}
 
@@ -163,8 +165,10 @@ public:
 		// Record this for the collector hits
 		m_filesByAddress[addr] = file;
 
-		for (const auto &it : m_lineListeners)
-			it->onLine(filename, lineNr, addr);
+		for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
+				it != m_lineListeners.end();
+				++it)
+			(*it)->onLine(filename, lineNr, addr);
 	}
 
 	// From IFileParser::IFileListener
@@ -193,13 +197,15 @@ public:
 		 * For all the files we've covered. The output filename comes from a hash of
 		 * the input filename.
 		 */
-		for (const auto &it : m_files) {
+		for (FileByNameMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
 			// Only marshal local files
-			if (!it.second->m_local)
+			if (!it->second->m_local)
 				continue;
 
-			const struct file_data *fd = marshalFile(it.second->m_filename);
-			uint32_t crc = crc32((const void *)it.second->m_filename.c_str(), it.second->m_filename.size());
+			const struct file_data *fd = marshalFile(it->second->m_filename);
+			uint32_t crc = crc32((const void *)it->second->m_filename.c_str(), it->second->m_filename.size());
 			std::string name = fmt("%08x", crc);
 
 			write_file((const void *)fd, be_to_host<uint32_t>(fd->size), "%s/metadata/%s",
@@ -241,7 +247,7 @@ private:
 
 	uint64_t hashAddressUnique(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
-		auto addrHash = hashAddress(filename, lineNr, addr);
+		uint64_t addrHash = hashAddress(filename, lineNr, addr);
 
 		// Find some unique position (if there are multiple addresses for this line)
 		while (m_addressByFileLine.find(addrHash) != m_addressByFileLine.end())
@@ -345,15 +351,19 @@ private:
 
 				file->addLine(lineNr, addr);
 
-				for (const auto &it : m_lineListeners)
-						it->onLine(filename, lineNr, addr & ~(1ULL << 63));
+				for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
+						it != m_lineListeners.end();
+						++it)
+						(*it)->onLine(filename, lineNr, addr & ~(1ULL << 63));
 
 				// Register and report the hit
 				if (hit) {
 					file->registerHits(lineNr, 1);
 
-					for (const auto &itC : m_collectorListeners)
-						itC->onAddress(addr, 1);
+					for (CollectorListenerList_t::const_iterator itC = m_collectorListeners.begin();
+							itC != m_collectorListeners.end();
+							++itC)
+						(*itC)->onAddress(addr, 1);
 				}
 			}
 		}
@@ -367,7 +377,7 @@ private:
 			return nullptr;
 
 		uint32_t n_addrs = 0;
-		for (auto it = file->m_lines.begin();
+		for (LineAddrMap_t::const_iterator it = file->m_lines.begin();
 				it != file->m_lines.end();
 				++it) {
 			n_addrs += it->second.size();
@@ -393,7 +403,7 @@ private:
 		uint64_t *addrTable = (uint64_t *)((char *)p + sizeof(struct line_entry) * file->m_lines.size());
 		uint32_t tableOffset = 0;
 
-		for (auto it = file->m_lines.begin();
+		for (LineAddrMap_t::const_iterator it = file->m_lines.begin();
 				it != file->m_lines.end();
 				++it) {
 			uint32_t line = it->first;
@@ -401,8 +411,10 @@ private:
 
 			p->address_start = to_be<uint32_t>(tableOffset);
 			p->n_addresses = to_be<uint32_t>(it->second.size());
-			for (const auto &itAddr : it->second) {
-				uint64_t addr = itAddr.first;
+			for (AddrMap_t::const_iterator itAddr = it->second.begin();
+					itAddr != it->second.end();
+					++itAddr) {
+				uint64_t addr = itAddr->first;
 
 				if (file->m_addrHits[addr])
 					addr |= (1ULL << 63);
@@ -509,17 +521,25 @@ private:
 		bool m_local;
 	};
 
-	// All files in the current coverage session
-	std::unordered_map<std::string, File *> m_files;
-	std::unordered_map<unsigned long, File *> m_filesByAddress;
-	std::unordered_map<unsigned long, uint64_t> m_fileLineByAddress;
-	std::unordered_map<uint64_t, unsigned long> m_addressByFileLine;
 
-	std::vector<IFileParser::ILineListener *> m_lineListeners;
+	typedef std::vector<ICollector::IListener *> CollectorListenerList_t;
+	typedef std::unordered_map<std::string, File *> FileByNameMap_t;
+	typedef std::unordered_map<unsigned long, File *> FileByAddressMap_t;
+	typedef std::unordered_map<unsigned long, uint64_t> FileLineByAddress_t;
+	typedef std::unordered_map<uint64_t, unsigned long> AddressByFileLine_t;
+	typedef std::vector<IFileParser::ILineListener *> LineListenerList_t;
+
+	// All files in the current coverage session
+	FileByNameMap_t m_files;
+	FileByAddressMap_t m_filesByAddress;
+	FileLineByAddress_t m_fileLineByAddress;
+	AddressByFileLine_t m_addressByFileLine;
+
+	LineListenerList_t m_lineListeners;
 	const std::string m_baseDirectory;
 	const std::string m_outputDirectory;
 
-	std::vector<ICollector::IListener *> m_collectorListeners;
+	CollectorListenerList_t m_collectorListeners;
 	IFilter &m_filter;
 };
 

@@ -77,8 +77,10 @@ namespace kcov
 
 		void start()
 		{
-			for (const auto &it : m_writers)
-				it->onStartup();
+			for (WriterList_t::const_iterator it = m_writers.begin();
+					it != m_writers.end();
+					++it)
+				(*it)->onStartup();
 		}
 
 		void stop()
@@ -91,8 +93,10 @@ namespace kcov
 
 			free(data);
 
-			for (const auto &it : m_writers)
-				it->onStop();
+			for (WriterList_t::const_iterator it = m_writers.begin();
+					it != m_writers.end();
+					++it)
+				(*it)->onStop();
 
 			// Produce output after stop if anyone yields new data in onStop()
 			produce();
@@ -100,8 +104,10 @@ namespace kcov
 
 		void produce()
 		{
-			for (const auto &it : m_writers)
-				it->write();
+			for (WriterList_t::const_iterator it = m_writers.begin();
+					it != m_writers.end();
+					++it)
+				(*it)->write();
 		}
 
 

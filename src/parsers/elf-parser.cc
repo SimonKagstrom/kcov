@@ -150,16 +150,22 @@ out_open:
 		parseOneElf();
 		parseOneDwarf();
 
-		for (const auto &it : m_fileListeners)
-			it->onFile(m_filename.c_str(), m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
+		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
+				it != m_fileListeners.end();
+				++it)
+			(*it)->onFile(m_filename.c_str(), m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
 
 		// One-time setup of fixed breakpoints
-		for (const auto &it : m_fixedAddresses) {
-			for (const auto &itL : m_lineListeners)
-				itL->onLine("", 0, it);
+		for (FixedAddressList_t::const_iterator it = m_fixedAddresses.begin();
+				it != m_fixedAddresses.end();
+				++it) {
+			for (LineListenerList_t::const_iterator itL = m_lineListeners.begin();
+					itL != m_lineListeners.end();
+					++itL)
+				(*itL)->onLine("", 0, *it);
 		}
 		m_fixedAddresses.clear();
 
@@ -295,8 +301,10 @@ out_open:
 						file_path = full_file_path = rp;
 					}
 
-					for (const auto &it : m_lineListeners)
-						it->onLine(file_path.c_str(), line_nr, adjustAddressBySegment(addr));
+					for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
+							it != m_lineListeners.end();
+							++it)
+						(*it)->onLine(file_path.c_str(), line_nr, adjustAddressBySegment(addr));
 				}
 			}
 		}
@@ -458,11 +466,14 @@ private:
 	typedef std::vector<Segment> SegmentList_t;
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
+	typedef std::list<uint64_t> FixedAddressList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{
-		for (const auto &it : m_executableSegments) {
-			if (addr >= it.m_paddr && addr < it.m_paddr + it.m_size) {
+		for (SegmentList_t::const_iterator it = m_executableSegments.begin();
+				it != m_executableSegments.end();
+				++it) {
+			if (addr >= it->m_paddr && addr < it->m_paddr + it->m_size) {
 				return true;
 			}
 		}
@@ -472,9 +483,11 @@ private:
 
 	uint64_t adjustAddressBySegment(uint64_t addr)
 	{
-		for (const auto &it : m_curSegments) {
-			if (addr >= it.m_paddr && addr < it.m_paddr + it.m_size) {
-				addr = (addr - it.m_paddr + it.m_vaddr);
+		for (SegmentList_t::const_iterator it = m_curSegments.begin();
+				it != m_curSegments.end();
+				++it) {
+			if (addr >= it->m_paddr && addr < it->m_paddr + it->m_size) {
+				addr = (addr - it->m_paddr + it->m_vaddr);
 				break;
 			}
 		}
@@ -494,7 +507,7 @@ private:
 	bool m_isMainFile;
 	uint64_t m_checksum;
 	bool m_initialized;
-	std::list<uint64_t> m_fixedAddresses;
+	FixedAddressList_t m_fixedAddresses;
 
 	/***** Add strings to update path information. *******/
 	std::string m_origRoot;

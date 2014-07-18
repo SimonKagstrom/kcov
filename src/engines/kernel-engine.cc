@@ -66,8 +66,8 @@ public:
 	bool start(IEventListener &listener, const std::string &executable)
 	{
 		std::string path = IConfiguration::getInstance().getKernelCoveragePath();
-		auto control = path + "/control";
-		auto show = path + "/show";
+		std::string control = path + "/control";
+		std::string show = path + "/show";
 
 		m_listener = &listener;
 
@@ -124,7 +124,7 @@ public:
 			return match_none;
 
 		m_module = filename;
-		auto slashPos = m_module.rfind("/");
+		size_t slashPos = m_module.rfind("/");
 		if (slashPos == std::string::npos)
 			slashPos = 0;
 		else
@@ -151,7 +151,7 @@ private:
 		std::string moduleName;
 		std::string addr;
 
-		auto pos = line.find(":");
+		size_t pos = line.find(":");
 
 		if (pos != std::string::npos) {
 			moduleName = line.substr(0, pos);

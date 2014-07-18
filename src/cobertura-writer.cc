@@ -41,8 +41,10 @@ public:
 
 		setupCommonPaths();
 
-		for (const auto &it : m_files) {
-			auto file = it.second;
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
+			File *file = it->second;
 
 			str = str + writeOne(file);
 			nTotalCodeLines += file->m_codeLines;

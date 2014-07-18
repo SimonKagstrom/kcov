@@ -96,7 +96,7 @@ public:
 		/* Launch the python helper */
 		m_child = fork();
 		if (m_child == 0) {
-			auto &conf = IConfiguration::getInstance();
+			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
@@ -141,8 +141,10 @@ public:
 		if (!m_reportedFiles[p->filename]) {
 			m_reportedFiles[p->filename] = true;
 
-			for (const auto &it : m_fileListeners)
-				it->onFile(p->filename, IFileParser::FLG_NONE);
+			for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
+					it != m_fileListeners.end();
+					++it)
+				(*it)->onFile(p->filename, IFileParser::FLG_NONE);
 
 			parseFile(p->filename);
 		}
@@ -151,7 +153,7 @@ public:
 			uint64_t address = 0;
 			Event ev;
 
-			auto it = m_lineIdToAddress.find(LineId(p->filename, p->line));
+			LineIdToAddressMap_t::const_iterator it = m_lineIdToAddress.find(LineId(p->filename, p->line));
 			if (it != m_lineIdToAddress.end())
 				address = it->second;
 
@@ -286,13 +288,15 @@ private:
 
 		free((void*)p);
 
-		const auto &stringList = split_string(fileData, "\n");
+		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { start, multiline_active } state = start;
 		bool multiLineStartLine = false;
 
-		for (const auto &it : stringList) {
-			const auto &s = trim_string(it);
+		for (std::vector<std::string>::const_iterator it = stringList.begin();
+				it != stringList.end();
+				++it) {
+			const std::string &s = trim_string(*it);
 
 			lineNo++;
 			// Empty line, ignore
@@ -323,7 +327,7 @@ private:
 			if (isPythonString(s))
 				continue;
 
-			auto idx = multilineIdx(s);
+			size_t idx = multilineIdx(s);
 
 			switch (state)
 			{
@@ -374,15 +378,17 @@ private:
 
 		m_lineIdToAddress[id] = address;
 
-		for (const auto &lit : m_lineListeners)
-			lit->onLine(get_real_path(filename).c_str(), lineNo, address);
+		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
+				lit != m_lineListeners.end();
+				++lit)
+			(*lit)->onLine(get_real_path(filename).c_str(), lineNo, address);
 
 		m_currentAddress++;
 	}
 
 	size_t multilineIdx(const std::string &s)
 	{
-		auto idx = s.find("'''");
+		size_t idx = s.find("'''");
 
 		if (idx == std::string::npos)
 			idx = s.find("\"\"\"");

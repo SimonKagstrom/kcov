@@ -81,7 +81,7 @@ public:
 			}
 
 		} else if (m_child == 0) {
-			auto &conf = IConfiguration::getInstance();
+			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
@@ -141,18 +141,18 @@ public:
 		std::string cur(curLine);
 		// Line markers always start with kcov@
 
-		auto kcovStr = cur.find("kcov@");
+		size_t kcovStr = cur.find("kcov@");
 		if (kcovStr == std::string::npos)
 			return true;
-		auto parts = split_string(cur.substr(kcovStr), "@");
+		std::vector<std::string> parts = split_string(cur.substr(kcovStr), "@");
 
 		// kcov@FILENAME@LINENO@...
 		if (parts.size() < 3)
 			return true;
 
 		// Resolve filename (might be relative)
-		const auto &filename = get_real_path(parts[1]);
-		const auto &lineNo = parts[2];
+		const std::string &filename = get_real_path(parts[1]);
+		const std::string &lineNo = parts[2];
 
 		if (!string_is_integer(lineNo)) {
 			error("%s is not an integer", lineNo.c_str());
@@ -163,8 +163,10 @@ public:
 		if (!m_reportedFiles[filename]) {
 			m_reportedFiles[filename] = true;
 
-			for (const auto &it : m_fileListeners)
-				it->onFile(filename, IFileParser::FLG_NONE);
+			for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
+					it != m_fileListeners.end();
+					++it)
+				(*it)->onFile(filename, IFileParser::FLG_NONE);
 
 			parseFile(filename);
 		}
@@ -173,7 +175,7 @@ public:
 			uint64_t address = 0;
 			Event ev;
 
-			auto it = m_lineIdToAddress.find(LineId(filename, string_to_integer(lineNo)));
+			LineIdToAddressMap_t::iterator it = m_lineIdToAddress.find(LineId(filename, string_to_integer(lineNo)));
 			if (it != m_lineIdToAddress.end())
 				address = it->second;
 
@@ -306,19 +308,21 @@ private:
 
 		free((void*)p);
 
-		const auto &stringList = split_string(fileData, "\n");
+		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { none, backslash, heredoc } state = none;
 		bool caseActive = false;
 		std::string heredocMarker;
 
-		for (const auto &it : stringList) {
-			auto s = trim_string(it);
+		for (std::vector<std::string>::const_iterator it = stringList.begin();
+				it != stringList.end();
+				++it) {
+			std::string s = trim_string(*it);
 
 			lineNo++;
 
 			// Remove comments
-			auto comment = s.find("#");
+			size_t comment = s.find("#");
 			if (comment != std::string::npos) {
 				s = s.substr(0, comment);
 				s = trim_string(s);
@@ -350,9 +354,9 @@ private:
 				continue;
 
 			// fn() { .... Yes, regexes would have been better
-			auto fnPos = s.find("()");
+			size_t fnPos = s.find("()");
 			if (fnPos != std::string::npos) {
-				auto substr = s.substr(0, fnPos);
+				std::string substr = s.substr(0, fnPos);
 
 				// Should be a single word (the function name)
 				if (substr.find(" ") == std::string::npos)
@@ -376,7 +380,7 @@ private:
 			if (s[s.size() - 1] == '\\') {
 				state = backslash;
 			} else {
-				auto heredocStart = s.find("<<");
+				size_t heredocStart = s.find("<<");
 
 				if (heredocStart != std::string::npos) {
 					// Skip << and remove spaces before and after "EOF"
@@ -409,8 +413,10 @@ private:
 
 		m_lineIdToAddress[id] = address;
 
-		for (const auto &lit : m_lineListeners)
-			lit->onLine(filename.c_str(), lineNo, address);
+		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
+				lit != m_lineListeners.end();
+				++lit)
+			(*lit)->onLine(filename.c_str(), lineNo, address);
 
 		m_currentAddress++;
 	}

@@ -65,7 +65,7 @@ private:
 
 		// Produce each line in the file
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
-			const auto &line = file->m_lineMap[n];
+			const std::string &line = file->m_lineMap[n];
 
 			IReporter::LineExecutionCount cnt =
 					m_reporter.getLineExecutionCount(file->m_name, n);
@@ -119,14 +119,16 @@ private:
 
 	void writeIndex()
 	{
-		auto &conf = IConfiguration::getInstance();
+		IConfiguration &conf = IConfiguration::getInstance();
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
 		std::string json; // Not really json, but anyway
 
-		for (const auto &it : m_files) {
-			auto file = it.second;
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
+			File *file = it->second;
 			unsigned int nExecutedLines = file->m_executedLines;
 			unsigned int nCodeLines = file->m_codeLines;
 
@@ -183,7 +185,7 @@ private:
 				"var merged_data = [];\n";
 
 		// Produce HTML outfile
-		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
+		std::string html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
 		write_file((void *)json.c_str(), json.size(), "%s", (m_outDirectory + "index.json").c_str());
@@ -258,7 +260,7 @@ private:
 		json = getHeader(nTotalCodeLines, nTotalExecutedLines) + json + "];\n" + merged;
 
 		// Produce HTML outfile
-		auto html = std::string((const char *)index_text_data.data(), index_text_data.size());
+		std::string html = std::string((const char *)index_text_data.data(), index_text_data.size());
 
 		// .. And write both files to disk
 		write_file((void *)json.c_str(), json.size(), "%s", (m_indexDirectory + "index.json").c_str());
@@ -268,8 +270,10 @@ private:
 
 	void write()
 	{
-		for (const auto &it : m_files)
-			writeOne(it.second);
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it)
+			writeOne(it->second);
 
 		setupCommonPaths();
 
@@ -282,7 +286,7 @@ private:
 
 	std::string getHeader(unsigned int lines, unsigned int executedLines)
 	{
-		auto &conf = IConfiguration::getInstance();
+		IConfiguration &conf = IConfiguration::getInstance();
 
 		return fmt(
 				"var percent_low = %d;"
@@ -334,7 +338,7 @@ private:
 
 	std::string colorFromPercent(double percent)
 	{
-		auto &conf = IConfiguration::getInstance();
+		IConfiguration &conf = IConfiguration::getInstance();
 
 		if (percent >= conf.getHighLimit())
 			return "lineCov";
