@@ -677,7 +677,7 @@ private:
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
 	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
-	typedef std::list<unsigned long> PendingBreakpointList_t;
+	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
 	typedef std::list<struct phdr_data *> PhdrList_t;
 
