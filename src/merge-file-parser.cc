@@ -476,8 +476,8 @@ private:
 		return true;
 	}
 
-	typedef std::map<unsigned long, unsigned int> AddrMap_t;
-	typedef std::map<unsigned int, AddrMap_t> LineAddrMap_t;
+	typedef std::unordered_map<unsigned long, unsigned int> AddrMap_t;
+	typedef std::unordered_map<unsigned int, AddrMap_t> LineAddrMap_t;
 
 	class File
 	{
