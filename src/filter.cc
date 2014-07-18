@@ -138,7 +138,7 @@ private:
 			if (m_includePaths.size() != 0)
 				out = false;
 
-			char *path = realpath(file.c_str(), nullptr);
+			char *path = realpath(file.c_str(), NULL);
 			// Can't show something which doesn't exist, so filter it out
 			if (!path)
 				return false;

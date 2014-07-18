@@ -354,7 +354,7 @@ private:
 		struct tm *tm;
 		char date_buf[128];
 
-		t = time(nullptr);
+		t = time(NULL);
 		tm = localtime(&t);
 		strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", tm);
 

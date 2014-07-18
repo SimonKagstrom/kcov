@@ -56,7 +56,7 @@ void WriterBase::File::readFile(const std::string &filename)
 
 	while (1)
 	{
-		char *lineptr = nullptr;
+		char *lineptr = NULL;
 		ssize_t res;
 		size_t n;
 

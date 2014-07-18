@@ -32,7 +32,7 @@ class ElfInstance : public IFileParser
 public:
 	ElfInstance()
 	{
-		m_elf = nullptr;
+		m_elf = NULL;
 		m_filename = "";
 		m_checksum = 0;
 		m_elfIs32Bit = true;
@@ -108,7 +108,7 @@ public:
 				return false;
 		}
 
-		if (!(elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
+		if (!(elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
 				error("elf_begin failed on %s\n", m_filename.c_str());
 				out = false;
 				goto out_open;
@@ -224,7 +224,7 @@ out_open:
 			Dwarf_Die die;
 			unsigned int i;
 
-			if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == nullptr)
+			if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == NULL)
 				goto out_err;
 
 			last_offset = offset;
@@ -276,7 +276,7 @@ out_open:
 
 					/* Use the full compilation path unless the source already
 					 * has an absolute path */
-					std::string dir = src_dirs[0] == nullptr ? "" : src_dirs[0];
+					std::string dir = src_dirs[0] == NULL ? "" : src_dirs[0];
 					full_file_path = dir_concat(dir, line_source);
 					if (line_source[0] != '/')
 						file_path = full_file_path;
@@ -321,7 +321,7 @@ out_err:
 
 	bool parseOneElf()
 	{
-		Elf_Scn *scn = nullptr;
+		Elf_Scn *scn = NULL;
 		size_t shstrndx;
 		bool ret = false;
 		bool setupSegments = false;
@@ -334,7 +334,7 @@ out_err:
 				return false;
 		}
 
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
+		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
 				error("elf_begin failed on %s\n", m_filename.c_str());
 				goto out_open;
 		}
@@ -345,7 +345,7 @@ out_err:
 		}
 
 		setupSegments = m_curSegments.size() == 0;
-		while ( (scn = elf_nextscn(m_elf, scn)) != nullptr )
+		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
 		{
 			uint64_t sh_type;
 			uint64_t sh_addr;
@@ -376,7 +376,7 @@ out_err:
 				sh_name = shdr64->sh_name;
 			}
 
-			Elf_Data *data = elf_getdata(scn, nullptr);
+			Elf_Data *data = elf_getdata(scn, NULL);
 
 			name = elf_strptr(m_elf, shstrndx, sh_name);
 			if(!data) {
@@ -424,7 +424,7 @@ out_err:
 			m_executableSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 		}
 		elf_end(m_elf);
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, nullptr)) ) {
+		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
 			error("elf_begin failed on %s\n", m_filename.c_str());
 			goto out_open;
 		}

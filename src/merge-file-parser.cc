@@ -374,7 +374,7 @@ private:
 		File *file = m_files[filename];
 
 		if (!file)
-			return nullptr;
+			return NULL;
 
 		uint32_t n_addrs = 0;
 		for (LineAddrMap_t::const_iterator it = file->m_lines.begin();

@@ -423,7 +423,7 @@ const std::string &get_real_path(const std::string &path)
 
 	char *rp = NULL;
 
-	rp = ::realpath(path.c_str(), nullptr);
+	rp = ::realpath(path.c_str(), NULL);
 
 	if (!rp)
 		return path;

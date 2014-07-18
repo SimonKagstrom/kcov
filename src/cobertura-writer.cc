@@ -132,7 +132,7 @@ private:
 		struct tm *tm;
 		char date_buf[80];
 
-		t = time(nullptr);
+		t = time(NULL);
 		tm = localtime(&t);
 		strftime(date_buf, sizeof(date_buf), "%s", tm);
 

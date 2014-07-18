@@ -102,7 +102,7 @@ public:
 
 		start = malloc(sz);
 		if (!start)
-			return nullptr;
+			return NULL;
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
@@ -201,13 +201,13 @@ private:
 		struct marshalHeaderStruct *hdr = (struct marshalHeaderStruct *)p;
 
 		if (be_to_host<uint32_t>(hdr->magic) != KCOV_MAGIC)
-			return nullptr;
+			return NULL;
 
 		if (be_to_host<uint32_t>(hdr->db_version) != KCOV_DB_VERSION)
-			return nullptr;
+			return NULL;
 
 		if (be_to_host<uint64_t>(hdr->checksum) != m_fileParser.getChecksum())
-			return nullptr;
+			return NULL;
 
 		return p + sizeof(struct marshalHeaderStruct);
 	}
