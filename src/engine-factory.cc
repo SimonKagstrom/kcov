@@ -1,7 +1,7 @@
 #include <engine.hh>
 #include <utils.hh>
 
-#include <list>
+#include <vector>
 
 using namespace kcov;
 
@@ -39,7 +39,7 @@ public:
 	}
 
 private:
-	typedef std::list<IEngine *> EngineList_t;
+	typedef std::vector<IEngine *> EngineList_t;
 
 	EngineList_t m_engines;
 };

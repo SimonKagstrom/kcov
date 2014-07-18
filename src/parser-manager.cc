@@ -1,7 +1,7 @@
 #include <file-parser.hh>
 #include <utils.hh>
 
-#include <list>
+#include <vector>
 
 using namespace kcov;
 
@@ -49,7 +49,7 @@ public:
 	}
 
 private:
-	typedef std::list<IFileParser *> ParserList_t;
+	typedef std::vector<IFileParser *> ParserList_t;
 
 	ParserList_t m_parsers;
 };

@@ -112,7 +112,7 @@ namespace kcov
 
 
 	private:
-		typedef std::list<IWriter *> WriterList_t;
+		typedef std::vector<IWriter *> WriterList_t;
 
 		IReporter &m_reporter;
 
