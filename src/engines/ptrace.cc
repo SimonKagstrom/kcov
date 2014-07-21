@@ -443,7 +443,7 @@ public:
 				out.data = -1;
 
 				// Breakpoint id
-				addrToBreakpointMap_t::iterator it = m_addrToBreakpointMap.find(out.addr);
+				AddrToBreakpointMap_t::iterator it = m_addrToBreakpointMap.find(out.addr);
 				if (it != m_addrToBreakpointMap.end())
 					out.data = it->second;
 
@@ -675,7 +675,7 @@ private:
 	}
 
 	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
-	typedef std::unordered_map<unsigned long, int> addrToBreakpointMap_t;
+	typedef std::unordered_map<unsigned long, int> AddrToBreakpointMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
 	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
@@ -685,7 +685,7 @@ private:
 
 	instructionMap_t m_instructionMap;
 	breakpointToAddrMap_t m_breakpointToAddrMap;
-	addrToBreakpointMap_t m_addrToBreakpointMap;
+	AddrToBreakpointMap_t m_addrToBreakpointMap;
 	PendingBreakpointList_t m_pendingBreakpoints;
 	PhdrList_t m_phdrs;
 	std::mutex m_phdrListMutex;
