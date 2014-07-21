@@ -10,7 +10,7 @@ namespace kcov
 	class LineId
 	{
 	public:
-		LineId(const std::string &fileName, int nr) :
+		LineId(const std::string &fileName, unsigned int nr) :
 			m_file(fileName), m_lineNr(nr)
 		{
 		}
