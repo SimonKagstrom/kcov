@@ -1,3 +1,12 @@
+Kcov (20):
+	* Replace std::list/std::map with std::list/std::unordered_map where possible
+	  (slight performance improvement)
+
+	* Remove C++11 constructs (auto, nullptr, range-based for-loops) to allow
+	  building with older compilers
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (19):
 	* bash coverage: Implemented support for collecting shell script
 	  (sh/bash) coverage! Loosely based on shcov, which is now deprecated
