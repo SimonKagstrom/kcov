@@ -47,7 +47,7 @@ public:
 	{
 		bool out;
 
-		out =  m_lines.find(LineId(file, lineNr)) != m_lines.end();
+		out = m_lines.find(LineId(file, lineNr)) != m_lines.end();
 
 		return out;
 	}
@@ -226,7 +226,7 @@ private:
 		Line *line;
 
 		if (it == m_lines.end()) {
-			line = new Line(key);
+			line = new Line(file, lineNr);
 
 			m_lines[key] = line;
 		} else {
@@ -255,8 +255,9 @@ private:
 	public:
 		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
 
-		Line(LineId id) : m_file(id.m_file),
-				m_lineNr(id.m_lineNr)
+		Line(const std::string &file, unsigned int lineNr) :
+			m_file(file),
+			m_lineNr(lineNr)
 
 		{
 		}
