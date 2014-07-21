@@ -153,7 +153,7 @@ public:
 			uint64_t address = 0;
 			Event ev;
 
-			LineIdToAddressMap_t::const_iterator it = m_lineIdToAddress.find(LineId(p->filename, p->line));
+			LineIdToAddressMap_t::const_iterator it = m_lineIdToAddress.find(getLineId(p->filename, p->line));
 			if (it != m_lineIdToAddress.end())
 				address = it->second;
 
@@ -373,7 +373,7 @@ private:
 
 	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
-		LineId id(filename, lineNo);
+		size_t id = getLineId(filename, lineNo);
 		uint64_t address = m_currentAddress ^ crc;
 
 		m_lineIdToAddress[id] = address;
@@ -481,7 +481,7 @@ private:
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
-	typedef std::unordered_map<LineId, uint64_t, LineIdHash> LineIdToAddressMap_t;
+	typedef std::unordered_map<size_t, uint64_t> LineIdToAddressMap_t;
 
 	pid_t m_child;
 	FILE *m_pipe;

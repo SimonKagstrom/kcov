@@ -47,7 +47,7 @@ public:
 	{
 		bool out;
 
-		out = m_lines.find(LineId(file, lineNr)) != m_lines.end();
+		out = m_lines.find(getLineId(file, lineNr)) != m_lines.end();
 
 		return out;
 	}
@@ -57,7 +57,7 @@ public:
 		unsigned int hits = 0;
 		unsigned int possibleHits = 0;
 
-		LineMap_t::iterator it = m_lines.find(LineId(file, lineNr));
+		LineMap_t::iterator it = m_lines.find(getLineId(file, lineNr));
 
 		if (it != m_lines.end()) {
 			Line *line = it->second;
@@ -220,7 +220,7 @@ private:
 
 		kcov_debug(INFO_MSG, "REPORT %s:%u at 0x%lx\n",
 				file.c_str(), lineNr, (unsigned long)addr);
-		LineId key(file, lineNr);
+		size_t key = getLineId(file, lineNr);
 
 		LineMap_t::iterator it = m_lines.find(key);
 		Line *line;
@@ -333,7 +333,7 @@ private:
 		AddrToHitsMap_t m_addrs;
 	};
 
-	typedef std::unordered_map<LineId, Line *, LineIdHash> LineMap_t;
+	typedef std::unordered_map<size_t, Line *> LineMap_t;
 	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
 
 	LineMap_t m_lines;

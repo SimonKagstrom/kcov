@@ -7,29 +7,8 @@
 
 namespace kcov
 {
-	class LineId
+	static size_t getLineId(const std::string &fileName, unsigned int nr)
 	{
-	public:
-		LineId(const std::string &fileName, unsigned int nr) :
-			m_hash(std::hash<std::string>()(fileName) ^ std::hash<unsigned int>()(nr))
-		{
-		}
-
-		bool operator==(const LineId &other) const
-		{
-			return m_hash == other.m_hash;
-		}
-
-		const size_t m_hash;
-	};
-
-	class LineIdHash
-	{
-	public:
-		size_t operator()(const LineId &obj) const
-		{
-			return obj.m_hash;
-		}
-	};
-
+		return std::hash<std::string>()(fileName) ^ std::hash<unsigned int>()(nr);
+	}
 }

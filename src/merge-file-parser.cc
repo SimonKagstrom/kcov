@@ -3,7 +3,6 @@
 #include <utils.hh>
 #include <filter.hh>
 #include <writer.hh>
-#include <lineid.hh>
 
 #include <vector>
 #include <string>
