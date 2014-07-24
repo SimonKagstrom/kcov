@@ -133,7 +133,7 @@ public:
 		m_ldPreloadString(NULL),
 		m_envString(NULL),
 		m_parentCpu(0),
-		m_solibFileOpen(false),
+		m_solibThreadValid(false),
 		m_elf(NULL),
 		m_listener(NULL),
 		m_signal(0)
@@ -154,9 +154,13 @@ public:
 		 * First kill the solib thread if it's stuck in open (i.e., before
 		 * the tracee has started), then wait for it to terminate for maximum
 		 * niceness.
+		 *
+		 * Only do this if it has been started, naturally
 		 */
-		pthread_kill(m_solibThread, SIGTERM);
-		pthread_join(m_solibThread, &rv);
+		if (m_solibThreadValid) {
+			pthread_kill(m_solibThread, SIGTERM);
+			pthread_join(m_solibThread, &rv);
+		}
 		kill(SIGTERM);
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 	}
@@ -218,6 +222,7 @@ public:
 		m_solibPath = kcov_solib_pipe_path;
 		pthread_create(&m_solibThread, NULL,
 				Ptrace::threadStatic, (void *)this);
+		m_solibThreadValid = true;
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
 		bool res = false;
@@ -278,7 +283,7 @@ public:
 		if (m_solibFd < 0)
 			return;
 
-		m_solibFileOpen = true;
+		m_solibThreadValid = true;
 
 		while (1) {
 			int r = read(m_solibFd, buf, sizeof(buf));
@@ -452,7 +457,7 @@ public:
 				if (out.data != -1)
 					singleStep();
 
-				if (m_solibFileOpen && m_firstBreakpoint) {
+				if (m_solibThreadValid && m_firstBreakpoint) {
 					m_solibDataReadSemaphore.wait();
 					m_firstBreakpoint = false;
 				}
@@ -704,7 +709,7 @@ private:
 
 	int m_parentCpu;
 
-	bool m_solibFileOpen;
+	bool m_solibThreadValid;
 	int m_solibFd;
 
 	IFileParser *m_elf;
