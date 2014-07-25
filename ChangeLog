@@ -5,6 +5,10 @@ Kcov (20):
 	* Remove C++11 constructs (auto, nullptr, range-based for-loops) to allow
 	  building with older compilers
 
+	* Correct bug in --report-only (crash in ptrace upon termination)
+
+	* Slight performance improvement and simplification in the lineid code
+
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
 Kcov (19):
