@@ -13,14 +13,14 @@
 
 #define error(x...) do \
 { \
-	fprintf(stderr, "Error: "); \
+	fprintf(stderr, "kcov: error: "); \
 	fprintf(stderr, x); \
 	fprintf(stderr, "\n"); \
 } while(0)
 
 #define warning(x...) do \
 { \
-	fprintf(stderr, "Warning: "); \
+	fprintf(stderr, "kcov: warning: "); \
 	fprintf(stderr, x); \
 	fprintf(stderr, "\n"); \
 } while(0)
