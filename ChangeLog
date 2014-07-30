@@ -1,4 +1,6 @@
 Kcov (20):
+	* Issue #23: Warn if a binary has no debug symbols
+
 	* Replace std::list/std::map with std::list/std::unordered_map where possible
 	  (slight performance improvement)
 
