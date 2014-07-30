@@ -201,8 +201,10 @@ out_open:
 			fd = ::open(debug_file.c_str(), O_RDONLY, 0);
 			if (fd < 0) {
 				// Some shared libraries have neither symbols nor build-id files
-				if (m_isMainFile)
-					error("Cannot open %s\n", debug_file.c_str());
+				if (m_isMainFile) {
+					warning("Cannot open %s", debug_file.c_str());
+					warning("kcov requires binaries built with -g/-ggdb or a build-id file.");
+				}
 				return false;
 			}
 
