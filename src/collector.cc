@@ -56,9 +56,10 @@ public:
 
 			if (outputInterval != 0 &&
 					now - lastTimestamp >= outputInterval) {
-				lastTimestamp = now;
-
 				output.produce();
+
+				// Take a new timestamp since producing might take a long time
+				lastTimestamp = get_ms_timestamp();
 			}
 
 			if (!shouldContinue)
