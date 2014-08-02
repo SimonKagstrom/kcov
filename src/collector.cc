@@ -123,8 +123,15 @@ private:
 		case ev_signal:
 			break;
 		case ev_signal_exit:
-			kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s)\n",
-					ev.data, eventToName(ev).c_str());
+			kcov_debug(STATUS_MSG, "kcov: Process exited with signal %d (%s) at 0x%llx\n",
+					ev.data, eventToName(ev).c_str(), (unsigned long long)ev.addr);
+
+			if (ev.data == SIGILL)
+				kcov_debug(STATUS_MSG,
+						"\nkcov: Illegal instructions are sometimes caused by some GCC versions\n"
+						"kcov: miscompiling C++ headers. If the problem is persistent, try running\n"
+						"kcov: with --exclude-pattern=/usr/include. For more information, see\n"
+						"kcov: http://github.com/SimonKagstrom/kcov/issues/18\n");
 
 			break;
 
