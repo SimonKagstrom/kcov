@@ -411,6 +411,7 @@ public:
 
 	const Event waitEvent()
 	{
+		static uint64_t lastSignalAddress;
 		Event out;
 		int status;
 		int who;
@@ -471,12 +472,14 @@ public:
 
 			kcov_debug(PTRACE_MSG, "PT signal %d at 0x%llx for %d\n",
 					WSTOPSIG(status), (unsigned long long)out.addr, m_activeChild);
+			lastSignalAddress = out.addr;
 		} else if (WIFSIGNALED(status)) {
 			// Crashed/killed
 			int sig = WTERMSIG(status);
 
 			out.type = ev_signal;
 			out.data = sig;
+			out.addr = lastSignalAddress;
 
 			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
 					sig, (unsigned long long)out.addr, m_activeChild);
