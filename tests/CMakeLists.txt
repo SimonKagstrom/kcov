@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project (kcov-tests)
 
+enable_language(ASM)
+
 include_directories(
 	${CMAKE_BINARY_DIR}
 	../src/include
@@ -94,6 +96,11 @@ add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
+
+
+add_custom_target (illegal-insn ALL
+  COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_BINARY_DIR}/illegal-insn
+)
 
 target_link_libraries(shared_library_test shared_library)
 target_link_libraries(global-constructors shared_library)
