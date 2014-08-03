@@ -1,4 +1,10 @@
 Kcov (20):
+	* Fix starvation bug where long report generation time could starve the actual
+	  application. The bug was caused by a timestamp issue.
+
+	* Issue #18: Provide explanation and possible workaround for SIGILL problems
+	  with GCC 4.1.2
+
 	* Issue #23: Warn if a binary has no debug symbols
 
 	* Replace std::list/std::map with std::list/std::unordered_map where possible
