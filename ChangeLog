@@ -1,6 +1,6 @@
 Kcov (20):
-	* Fix starvation bug where long report generation time could starve the actual
-	  application. The bug was caused by a timestamp issue.
+	* Issue #25: Fix starvation bug where long report generation time could starve
+	  the actual application. The bug was caused by a timestamp issue.
 
 	* Issue #18: Provide explanation and possible workaround for SIGILL problems
 	  with GCC 4.1.2
@@ -17,7 +17,7 @@ Kcov (20):
 
 	* Slight performance improvement and simplification in the lineid code
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Aug  4 12:57:19 CEST 2014
 
 Kcov (19):
 	* bash coverage: Implemented support for collecting shell script
