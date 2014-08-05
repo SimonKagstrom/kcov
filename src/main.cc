@@ -190,9 +190,11 @@ int main(int argc, const char *argv[])
 		collector.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
-		if (countMetadata() > 0)
+		// Only one covered binary? No need for merging writers then
+		if (countMetadata() > 0) {
 			output.registerWriter(mergeHtmlWriter);
-		output.registerWriter(mergeCoberturaWriter);
+			output.registerWriter(mergeCoberturaWriter);
+		}
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
 	}
