@@ -210,22 +210,24 @@ bool file_readable(FILE *fp, unsigned int ms)
 	return rv > 0;
 }
 
-static std::unordered_map<std::string, bool> nonExistingFiles;
+static std::unordered_map<std::string, bool> statCache;
 
 bool file_exists(const std::string &path)
 {
 	if (mocked_file_exists_callback)
 		return mocked_file_exists_callback(path);
 
-	if (nonExistingFiles.find(path) != nonExistingFiles.end())
-		return 0;
+	bool out;
 
-	struct stat st;
+	if (statCache.find(path) == statCache.end()) {
+		struct stat st;
 
-	bool out = lstat(path.c_str(), &st) == 0;
+		out = lstat(path.c_str(), &st) == 0;
 
-	if (out == false)
-		nonExistingFiles[path] = true;
+		statCache[path] = out;
+	} else {
+		out = statCache[path];
+	}
 
 	return out;
 }
