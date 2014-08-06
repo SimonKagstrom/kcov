@@ -278,11 +278,10 @@ public:
 		uint8_t buf[1024 * 1024];
 
 		m_solibFd = open(m_solibPath.c_str(), O_RDONLY);
+		m_solibThreadValid = true;
 
 		if (m_solibFd < 0)
 			return;
-
-		m_solibThreadValid = true;
 
 		while (1) {
 			int r = read(m_solibFd, buf, sizeof(buf));
