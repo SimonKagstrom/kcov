@@ -222,7 +222,6 @@ public:
 		m_solibPath = kcov_solib_pipe_path;
 		pthread_create(&m_solibThread, NULL,
 				Ptrace::threadStatic, (void *)this);
-		m_solibThreadValid = true;
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
 		bool res = false;
