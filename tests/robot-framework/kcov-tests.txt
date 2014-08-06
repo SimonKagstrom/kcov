@@ -48,6 +48,22 @@ fork
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 46
     Should Contain    ${output}    1
 
+fork-32
+    Run                            rm -rf ${out}/fork-32
+    ${no_kcov_rc}=    Run and return RC    ./fork-32
+    ${rc}=    Run and return RC    ${kcov} ${out} ./fork-32
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 21
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 26
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 34
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 37
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 46
+    Should Contain    ${output}    1
+
 shared-library
     Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test

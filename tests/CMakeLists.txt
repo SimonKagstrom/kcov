@@ -102,6 +102,10 @@ add_custom_target (illegal-insn ALL
   COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_BINARY_DIR}/illegal-insn
 )
 
+add_custom_target (fork-32 ALL
+  COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_BINARY_DIR}/fork-32
+)
+
 target_link_libraries(shared_library_test shared_library)
 target_link_libraries(global-constructors shared_library)
 
