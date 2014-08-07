@@ -1,3 +1,13 @@
+Kcov (21):
+	* Fix regression for coverage-of-32-bit-binaries-on-64-bit-systems introduced
+	  in kcov 20
+
+	* Slightly better file stat caching (slight performance improvement)
+
+	* Avoid outputting merged cobertura output for single coverage runs
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Aug  7 20:00:20 CEST 2014
+
 Kcov (20):
 	* Issue #25: Fix starvation bug where long report generation time could starve
 	  the actual application. The bug was caused by a timestamp issue.
