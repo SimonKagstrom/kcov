@@ -252,6 +252,10 @@ public:
 		return 0;
 	}
 
+	void setupParser(IFilter *filter)
+	{
+	}
+
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		std::string s((const char *)data, 80);

@@ -19,6 +19,8 @@
 #endif
 #include <link.h>
 
+#include <filter.hh>
+
 using namespace kcov;
 
 enum SymbolType
@@ -38,6 +40,7 @@ public:
 		m_elfIs32Bit = true;
 		m_isMainFile = true;
 		m_initialized = false;
+		m_filter = NULL;
 
 		IParserManager::getInstance().registerParser(*this);
 	}
@@ -54,6 +57,11 @@ public:
 	bool elfIs64Bit()
 	{
 		return !m_elfIs32Bit;
+	}
+
+	void setupParser(IFilter *filter)
+	{
+		m_filter = filter;
 	}
 
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
@@ -239,6 +247,21 @@ out_open:
 			if (dwarf_getsrcfiles(&die, &file_buffer, &file_count) != 0)
 				continue;
 
+			const char *const *src_dirs;
+			size_t ndirs = 0;
+
+			/* Lookup the compilation path */
+			if (dwarf_getsrcdirs(file_buffer, &src_dirs, &ndirs) != 0)
+				continue;
+
+			if (ndirs == 0)
+				continue;
+
+			// Filter early
+			std::string curDir(src_dirs[0] == NULL ? "" : src_dirs[0]);
+			if (m_filter && !m_filter->runFilters(curDir))
+				continue;
+
 			/* Store them */
 			for (i = 0; i < line_count; i++) {
 				Dwarf_Line *line;
@@ -261,17 +284,8 @@ out_open:
 					goto out_err;
 
 				if (line_nr && is_code) {
-					const char *const *src_dirs;
 					std::string full_file_path;
 					std::string file_path = line_source;
-					size_t ndirs = 0;
-
-					/* Lookup the compilation path */
-					if (dwarf_getsrcdirs(file_buffer, &src_dirs, &ndirs) != 0)
-						continue;
-
-					if (ndirs == 0)
-						continue;
 
 					if (!addressIsValid(addr))
 						continue;
@@ -514,6 +528,8 @@ private:
 	/***** Add strings to update path information. *******/
 	std::string m_origRoot;
 	std::string m_newRoot;
+
+	IFilter *m_filter;
 };
 
 static ElfInstance g_instance;

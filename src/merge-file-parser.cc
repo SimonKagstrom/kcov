@@ -101,6 +101,10 @@ public:
 		return 0;
 	}
 
+	void setupParser(IFilter *filter)
+	{
+	}
+
 	// ... to here
 	virtual unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{

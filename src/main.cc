@@ -209,6 +209,7 @@ int main(int argc, const char *argv[])
 	if (conf.getExitFirstProcess())
 		daemonize();
 
+	parser->setupParser(&filter);
 	output.start();
 
 	int ret = 0;

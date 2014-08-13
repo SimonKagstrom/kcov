@@ -136,7 +136,8 @@ public:
 		m_solibThreadValid(false),
 		m_elf(NULL),
 		m_listener(NULL),
-		m_signal(0)
+		m_signal(0),
+		m_filter(NULL)
 	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
@@ -716,6 +717,8 @@ private:
 	IFileParser *m_elf;
 	IEventListener *m_listener;
 	unsigned long m_signal;
+
+	IFilter *m_filter;
 };
 
 static Ptrace::Ctor g_ptraceEngine;

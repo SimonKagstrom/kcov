@@ -11,6 +11,8 @@ struct phdr_data_entry;
 
 namespace kcov
 {
+	class IFilter;
+
 	class IFileParser
 	{
 	public:
@@ -46,6 +48,9 @@ namespace kcov
 		virtual uint64_t getChecksum() = 0;
 
 		virtual unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
+
+		// Setup once the parser has been chosen
+		virtual void setupParser(IFilter *filter) = 0;
 	};
 
 

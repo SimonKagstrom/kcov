@@ -46,6 +46,7 @@ set (${KCOV}_SRCS
 
 set (${LINE2ADDR}_SRCS
 	configuration.cc
+	filter.cc
 	line2addr.cc
 	parsers/elf-parser.cc
 	parser-manager.cc
