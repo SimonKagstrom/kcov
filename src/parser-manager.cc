@@ -19,8 +19,12 @@ public:
 
 	IFileParser *matchParser(const std::string &fileName)
 	{
-		IFileParser *best = NULL;
+		static IFileParser *best = NULL;
 		size_t sz;
+
+		// Cache chosen
+		if (best)
+			return best;
 
 		uint8_t *data = (uint8_t *)read_file(&sz, "%s", fileName.c_str());
 
