@@ -58,7 +58,7 @@ namespace kcov
 
 		virtual void setupAllBreakpoints() = 0;
 
-		virtual bool clearBreakpoint(int id) = 0;
+		virtual bool clearBreakpoint(const Event &ev) = 0;
 
 
 		/**

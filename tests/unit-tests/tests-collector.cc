@@ -60,7 +60,7 @@ DISABLED_TEST(collector)
 		.Times(Exactly(1))
 		;
 
-	EXPECT_CALL(engine, clearBreakpoint(evOnce.data))
+	EXPECT_CALL(engine, clearBreakpoint(_))
 		.Times(Exactly(1))
 		;
 

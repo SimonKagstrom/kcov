@@ -156,7 +156,7 @@ private:
 				(*it)->onAddress(ev.addr, 1);
 
 			// Disable this breakpoint
-			m_engine.clearBreakpoint(ev.data);
+			m_engine.clearBreakpoint(ev);
 
 			break;
 

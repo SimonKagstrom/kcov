@@ -183,8 +183,6 @@ public:
 		m_parentCpu = kcov_get_current_cpu();
 		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
 
-		m_breakpointToAddrMap.clear();
-		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
 
 		/* Basic check first */
@@ -238,25 +236,20 @@ public:
 	int registerBreakpoint(unsigned long addr)
 	{
 		unsigned long data;
-		int id;
 
 		// There already?
-		if (m_addrToBreakpointMap.find(addr) != m_addrToBreakpointMap.end())
-			return m_addrToBreakpointMap[addr];
+		if (m_instructionMap.find(addr) != m_instructionMap.end())
+			return 0;
 
 		if (readMemory(&data, addr) == false)
 			return -1;
 
-		id = m_breakpointId++;
-
-		m_breakpointToAddrMap[id] = addr;
-		m_addrToBreakpointMap[addr] = id;
 		m_instructionMap[addr] = data;
 		m_pendingBreakpoints.push_back(addr);
 
 		kcov_debug(BP_MSG, "BP registered at 0x%lx\n", addr);
 
-		return id;
+		return 0;
 	}
 
 	void setupAllBreakpoints()
@@ -325,31 +318,26 @@ public:
 
 	void clearAllBreakpoints()
 	{
-		for (breakpointToAddrMap_t::const_iterator it = m_breakpointToAddrMap.begin();
-				it != m_breakpointToAddrMap.end();
+		for (instructionMap_t::const_iterator it = m_instructionMap.begin();
+				it != m_instructionMap.end();
 				++it)
 			clearBreakpoint(it->first);
 
-		m_addrToBreakpointMap.clear();
-		m_addrToBreakpointMap.clear();
 		m_instructionMap.clear();
 	}
 
-	bool clearBreakpoint(int id)
+	virtual bool clearBreakpoint(const Event &ev)
 	{
-		if (m_breakpointToAddrMap.find(id) == m_breakpointToAddrMap.end()) {
-			kcov_debug(BP_MSG, "Can't find breakpoint %d\n", id);
+		return clearBreakpoint(ev.addr);
+	}
+
+	bool clearBreakpoint(unsigned long addr)
+	{
+		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
+			kcov_debug(BP_MSG, "Can't find breakpoint at 0x%lx\n", addr);
+
 			return false;
 		}
-
-		unsigned long addr = m_breakpointToAddrMap[id];
-
-		panic_if(m_addrToBreakpointMap.find(addr) == m_addrToBreakpointMap.end(),
-				"Breakpoint id, but no addr-to-id map!");
-
-		panic_if(m_instructionMap.find(addr) == m_instructionMap.end(),
-				"Breakpoint found, but no instruction data at that point!");
-
 
 		// Clear the actual breakpoint instruction
 		unsigned long val = m_instructionMap[addr];
@@ -447,14 +435,10 @@ public:
 				out.type = ev_breakpoint;
 				out.data = -1;
 
-				// Breakpoint id
-				AddrToBreakpointMap_t::iterator it = m_addrToBreakpointMap.find(out.addr);
-				if (it != m_addrToBreakpointMap.end())
-					out.data = it->second;
-
 				kcov_debug(PTRACE_MSG, "PT BP at 0x%llx:%d for %d\n",
 						(unsigned long long)out.addr, out.data, m_activeChild);
-				if (out.data != -1)
+				// Single-step if we have this BP
+				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
 					singleStep();
 
 				if (m_solibThreadValid && m_firstBreakpoint) {
@@ -681,8 +665,6 @@ private:
 		ptrace((__ptrace_request)PTRACE_POKETEXT, m_activeChild, getAligned(addr), val);
 	}
 
-	typedef std::unordered_map<int, unsigned long> breakpointToAddrMap_t;
-	typedef std::unordered_map<unsigned long, int> AddrToBreakpointMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
 	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
@@ -691,8 +673,6 @@ private:
 	int m_breakpointId;
 
 	instructionMap_t m_instructionMap;
-	breakpointToAddrMap_t m_breakpointToAddrMap;
-	AddrToBreakpointMap_t m_addrToBreakpointMap;
 	PendingBreakpointList_t m_pendingBreakpoints;
 	PhdrList_t m_phdrs;
 	std::mutex m_phdrListMutex;

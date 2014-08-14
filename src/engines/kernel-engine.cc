@@ -57,7 +57,7 @@ public:
 	{
 	}
 
-	bool clearBreakpoint(int id)
+	bool clearBreakpoint(const Event &ev)
 	{
 		return true;
 	}
