@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -364,7 +365,15 @@ void mdelay(unsigned int ms)
 
 uint64_t get_ms_timestamp(void)
 {
-	return ((uint64_t)time(NULL)) * 1000;
+	static uint64_t first;
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+
+	if (first == 0)
+		first = (tv.tv_sec * 1000000ULL + tv.tv_usec) / 1000;
+
+	return ((tv.tv_sec * 1000000ULL + tv.tv_usec) / 1000) - first;
 }
 
 bool machine_is_64bit(void)
