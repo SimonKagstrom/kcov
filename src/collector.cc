@@ -178,13 +178,10 @@ private:
 			return;
 
 		m_engine.registerBreakpoint(addr);
-		m_addrs[addr]++;
 	}
 
-	typedef std::unordered_map<unsigned long, int> AddrMap_t;
 	typedef std::vector<ICollector::IListener *> ListenerList_t;
 
-	AddrMap_t m_addrs;
 	IFileParser &m_fileParser;
 	IEngine &m_engine;
 	ListenerList_t m_listeners;
