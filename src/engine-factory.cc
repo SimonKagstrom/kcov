@@ -22,7 +22,7 @@ public:
 		IEngine *best = NULL;
 		size_t sz;
 
-		uint8_t *data = (uint8_t *)read_file(&sz, "%s", fileName.c_str());
+		uint8_t *data = (uint8_t *)peek_file(&sz, "%s", fileName.c_str());
 
 		for (EngineList_t::const_iterator it = m_engines.begin();
 				it != m_engines.end();
