@@ -163,7 +163,7 @@ int main(int argc, const char *argv[])
 
 	ICollector &collector = ICollector::create(*parser, *engine, filter);
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
-	IOutputHandler &output = IOutputHandler::create(*parser, reporter);
+	IOutputHandler &output = IOutputHandler::create(*parser, reporter, collector);
 
 	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
 

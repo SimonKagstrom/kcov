@@ -7,6 +7,7 @@ namespace kcov
 	class IWriter;
 	class IReporter;
 	class IFileParser;
+	class ICollector;
 
 	class IOutputHandler
 	{
@@ -24,7 +25,7 @@ namespace kcov
 
 		virtual const std::string &getOutDirectory() = 0;
 
-		static IOutputHandler &create(IFileParser &parser, IReporter &reporter);
+		static IOutputHandler &create(IFileParser &parser, IReporter &reporter, ICollector &collector);
 
 		static IOutputHandler &getInstance();
 	};

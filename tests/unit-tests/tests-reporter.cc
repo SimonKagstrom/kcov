@@ -9,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "mocks/mock-collector.hh"
+
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
@@ -20,23 +22,6 @@ struct marshalHeaderStruct
 	uint32_t db_version;
 	uint64_t checksum;
 };
-
-class MockCollector : public ICollector
-{
-public:
-	MOCK_METHOD1(registerListener, void(IListener &listener));
-	MOCK_METHOD0(prepare, int());
-	MOCK_METHOD1(run, int(const std::string &));
-	MOCK_METHOD0(stop, void());
-
-	void mockRegisterListener(IListener &listener)
-	{
-		m_listener = &listener;
-	}
-
-	IListener *m_listener;
-};
-
 
 class ElfListener : public IFileParser::ILineListener
 {

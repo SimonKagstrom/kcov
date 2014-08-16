@@ -17,10 +17,20 @@ namespace kcov
 			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
 		};
 
+		class IEventTickListener
+		{
+		public:
+			virtual void onTick() = 0;
+		};
+
 		static ICollector &create(IFileParser &elf, IEngine &engine, IFilter &filter);
 
 		virtual void registerListener(IListener &listener) = 0;
 
+		/**
+		 * Register a listener for events (called on each breakpoint)
+		 */
+		virtual void registerEventTickListener(IEventTickListener &listener) = 0;
 
 		virtual int run(const std::string &filename) = 0;
 

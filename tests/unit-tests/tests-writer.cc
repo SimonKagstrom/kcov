@@ -16,6 +16,8 @@
 #include "../../src/html-writer.hh"
 #include "../../src/cobertura-writer.hh"
 
+#include "mocks/mock-collector.hh"
+
 using namespace kcov;
 
 class MockReporter : public IReporter
@@ -119,7 +121,9 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Return(summary))
 		;
 
-	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
+	MockCollector collector;
+
+	IOutputHandler &output = IOutputHandler::create(*elf, reporter, collector);
 	IWriter &writer = createHtmlWriter(*elf, reporter,
 			output.getBaseDirectory(), output.getOutDirectory(), "kalle");
 	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter,
@@ -197,7 +201,8 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 		.WillRepeatedly(Return(summary))
 		;
 
-	IOutputHandler &output = IOutputHandler::create(*elf, reporter);
+	MockCollector collector;
+	IOutputHandler &output = IOutputHandler::create(*elf, reporter, collector);
 	IWriter &writer = createHtmlWriter(*elf, reporter,
 			output.getBaseDirectory(), output.getOutDirectory(), "anka");
 

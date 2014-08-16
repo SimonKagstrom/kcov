@@ -230,6 +230,10 @@ public:
 		m_collectorListeners.push_back(&listener);
 	}
 
+	virtual void registerEventTickListener(ICollector::IEventTickListener &listener)
+	{
+	}
+
 	virtual int run(const std::string &filename)
 	{
 		// Not used

@@ -2,7 +2,6 @@
 #include <file-parser.hh>
 #include <utils.hh>
 #include <engine.hh>
-#include <output-handler.hh>
 #include <configuration.hh>
 #include <filter.hh>
 #include <signal.h>
@@ -33,6 +32,11 @@ public:
 		m_listeners.push_back(&listener);
 	}
 
+	void registerEventTickListener(IEventTickListener &listener)
+	{
+		m_eventTickListeners.push_back(&listener);
+	}
+
 	int run(const std::string &filename)
 	{
 		if (!m_engine.start(*this, filename)) {
@@ -40,27 +44,17 @@ public:
 			return -1;
 		}
 
-		IOutputHandler &output = IOutputHandler::getInstance();
-		unsigned int outputInterval = IConfiguration::getInstance().getOutputInterval();
-
 		// This will set all breakpoints
 		m_fileParser.parse();
 		m_engine.setupAllBreakpoints();
 
-		uint64_t lastTimestamp = get_ms_timestamp();
-
 		while (1) {
 			bool shouldContinue = m_engine.continueExecution();
 
-			uint64_t now = get_ms_timestamp();
-
-			if (outputInterval != 0 &&
-					now - lastTimestamp >= outputInterval) {
-				output.produce();
-
-				// Take a new timestamp since producing might take a long time
-				lastTimestamp = get_ms_timestamp();
-			}
+			for (EventTickListenerList_t::iterator it = m_eventTickListeners.begin();
+					it != m_eventTickListeners.end();
+					++it)
+				(*it)->onTick();
 
 			if (!shouldContinue)
 				break;
@@ -181,10 +175,12 @@ private:
 	}
 
 	typedef std::vector<ICollector::IListener *> ListenerList_t;
+	typedef std::vector<ICollector::IEventTickListener *> EventTickListenerList_t;
 
 	IFileParser &m_fileParser;
 	IEngine &m_engine;
 	ListenerList_t m_listeners;
+	EventTickListenerList_t m_eventTickListeners;
 	int m_exitCode;
 
 	IFilter &m_filter;

@@ -2,6 +2,7 @@
 #include <writer.hh>
 #include <configuration.hh>
 #include <reporter.hh>
+#include <collector.hh>
 #include <file-parser.hh>
 #include <utils.hh>
 
@@ -16,10 +17,13 @@
 
 namespace kcov
 {
-	class OutputHandler : public IOutputHandler, IFileParser::IFileListener
+	class OutputHandler :
+			public IOutputHandler,
+			public IFileParser::IFileListener,
+			public ICollector::IEventTickListener
 	{
 	public:
-		OutputHandler(IFileParser &parser, IReporter &reporter) :
+		OutputHandler(IFileParser &parser, IReporter &reporter, ICollector &collector) :
 			m_reporter(reporter),
 			m_unmarshalSize(0),
 			m_unmarshalData(NULL)
@@ -30,11 +34,15 @@ namespace kcov
 			m_outDirectory = m_baseDirectory + conf.getBinaryName() + "/";
 			m_dbFileName = m_outDirectory + "/coverage.db";
 			m_summaryDbFileName = m_outDirectory + "/summary.db";
+			m_outputInterval = conf.getOutputInterval();
+
+			m_lastTimestamp = get_ms_timestamp();
 
 			mkdir(m_baseDirectory.c_str(), 0755);
 			mkdir(m_outDirectory.c_str(), 0755);
 
 			parser.registerFileListener(*this);
+			collector.registerEventTickListener(*this);
 		}
 
 		~OutputHandler()
@@ -110,6 +118,20 @@ namespace kcov
 				(*it)->write();
 		}
 
+		// From ICollector::IEventTickListener
+		void onTick()
+		{
+			if (m_outputInterval == 0)
+				return;
+
+			if (get_ms_timestamp() - m_lastTimestamp >= m_outputInterval) {
+				produce();
+
+				// Take a new timestamp since producing might take a long time
+				m_lastTimestamp = get_ms_timestamp();
+			}
+		}
+
 
 	private:
 		typedef std::vector<IWriter *> WriterList_t;
@@ -125,13 +147,16 @@ namespace kcov
 
 		size_t m_unmarshalSize;
 		void *m_unmarshalData;
+
+		unsigned int m_outputInterval;
+		uint64_t m_lastTimestamp;
 	};
 
 	static OutputHandler *instance;
-	IOutputHandler &IOutputHandler::create(IFileParser &parser, IReporter &reporter)
+	IOutputHandler &IOutputHandler::create(IFileParser &parser, IReporter &reporter, ICollector &collector)
 	{
 		if (!instance)
-			instance = new OutputHandler(parser, reporter);
+			instance = new OutputHandler(parser, reporter, collector);
 
 		return *instance;
 	}
