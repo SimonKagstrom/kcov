@@ -54,6 +54,11 @@ public:
 		return m_checksum;
 	}
 
+	std::string getParserType()
+	{
+		return "ELF";
+	}
+
 	bool elfIs64Bit()
 	{
 		return !m_elfIs32Bit;

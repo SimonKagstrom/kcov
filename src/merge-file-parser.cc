@@ -101,6 +101,11 @@ public:
 		return 0;
 	}
 
+	std::string getParserType()
+	{
+		return "merge";
+	}
+
 	void setupParser(IFilter *filter)
 	{
 	}

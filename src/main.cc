@@ -6,6 +6,7 @@
 #include <filter.hh>
 #include <output-handler.hh>
 #include <file-parser.hh>
+#include <solib-handler.hh>
 #include <utils.hh>
 
 #include <string.h>
@@ -25,6 +26,7 @@ static IEngine *g_engine;
 static IOutputHandler *g_output;
 static ICollector *g_collector;
 static IReporter *g_reporter;
+static ISolibHandler *g_solibHandler;
 
 static void do_cleanup()
 {
@@ -32,6 +34,7 @@ static void do_cleanup()
 	delete g_output;
 	delete g_engine;
 	delete g_reporter;
+	delete g_solibHandler;
 }
 
 static void ctrlc(int sig)
@@ -164,6 +167,7 @@ int main(int argc, const char *argv[])
 	ICollector &collector = ICollector::create(*parser, *engine, filter);
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter, collector);
+	ISolibHandler &solibHandler = createSolibHandler(*engine, *parser, collector);
 
 	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
 
@@ -203,6 +207,7 @@ int main(int argc, const char *argv[])
 	g_output = &output;
 	g_reporter = &reporter;
 	g_collector = &collector;
+	g_solibHandler = &solibHandler;
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);
 

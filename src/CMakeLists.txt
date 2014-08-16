@@ -39,6 +39,7 @@ set (${KCOV}_SRCS
     parsers/elf-parser.cc
     parser-manager.cc
     reporter.cc
+    solib-handler.cc
     solib-parser/phdr_data.c
     utils.cc
     writer-base.cc

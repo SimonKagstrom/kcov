@@ -47,6 +47,9 @@ namespace kcov
 
 		virtual uint64_t getChecksum() = 0;
 
+		virtual std::string getParserType() = 0;
+
+
 		virtual unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 
 		// Setup once the parser has been chosen

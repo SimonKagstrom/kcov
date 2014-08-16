@@ -2,6 +2,7 @@
 #include <utils.hh>
 #include <configuration.hh>
 #include <output-handler.hh>
+#include <solib-handler.hh>
 #include <file-parser.hh>
 #include <phdr_data.h>
 
@@ -15,7 +16,6 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
-#include <pthread.h>
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -130,38 +130,16 @@ public:
 		m_activeChild(0),
 		m_child(0),
 		m_firstChild(0),
-		m_ldPreloadString(NULL),
-		m_envString(NULL),
 		m_parentCpu(0),
-		m_solibThreadValid(false),
-		m_elf(NULL),
 		m_listener(NULL),
 		m_signal(0),
 		m_filter(NULL)
 	{
-		memset(&m_solibThread, 0, sizeof(m_solibThread));
-
 		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	~Ptrace()
 	{
-		void *rv;
-
-		unlink(m_solibPath.c_str());
-		close(m_solibFd);
-
-		/*
-		 * First kill the solib thread if it's stuck in open (i.e., before
-		 * the tracee has started), then wait for it to terminate for maximum
-		 * niceness.
-		 *
-		 * Only do this if it has been started, naturally
-		 */
-		if (m_solibThreadValid) {
-			pthread_kill(m_solibThread, SIGTERM);
-			pthread_join(m_solibThread, &rv);
-		}
 		kill(SIGTERM);
 		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
 	}
@@ -188,39 +166,6 @@ public:
 		/* Basic check first */
 		if (access(executable.c_str(), X_OK) != 0)
 			return false;
-
-		std::string kcov_solib_pipe_path =
-				IOutputHandler::getInstance().getOutDirectory() +
-				"kcov-solib.pipe";
-		std::string kcov_solib_path =
-				IOutputHandler::getInstance().getBaseDirectory() +
-				"libkcov_sowrapper.so";
-
-		write_file(__library_data.data(), __library_data.size(), "%s", kcov_solib_path.c_str());
-
-		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
-				kcov_solib_pipe_path;
-		unlink(kcov_solib_pipe_path.c_str());
-		mkfifo(kcov_solib_pipe_path.c_str(), 0644);
-
-		free(m_envString);
-		m_envString = (char *)xmalloc(kcov_solib_env.size() + 1);
-		strcpy(m_envString, kcov_solib_env.c_str());
-
-		std::string preloadEnv = std::string("LD_PRELOAD=" + kcov_solib_path).c_str();
-		free(m_ldPreloadString);
-		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
-		strcpy(m_ldPreloadString, preloadEnv.c_str());
-
-		if (IConfiguration::getInstance().getParseSolibs()) {
-			if (file_exists(kcov_solib_path.c_str()))
-				putenv(m_ldPreloadString);
-		}
-		putenv(m_envString);
-
-		m_solibPath = kcov_solib_pipe_path;
-		pthread_create(&m_solibThread, NULL,
-				Ptrace::threadStatic, (void *)this);
 
 		unsigned int pid = IConfiguration::getInstance().getAttachPid();
 		bool res = false;
@@ -267,55 +212,6 @@ public:
 		m_pendingBreakpoints.clear();
 	}
 
-	void solibThreadMain()
-	{
-		uint8_t buf[1024 * 1024];
-
-		m_solibFd = open(m_solibPath.c_str(), O_RDONLY);
-		m_solibThreadValid = true;
-
-		if (m_solibFd < 0)
-			return;
-
-		while (1) {
-			int r = read(m_solibFd, buf, sizeof(buf));
-
-			// The destructor will close m_solibFd, so we'll exit here in that case
-			if (r <= 0)
-				break;
-
-			panic_if ((unsigned)r >= sizeof(buf),
-					"Too much solib data read");
-
-			struct phdr_data *p = phdr_data_unmarshal(buf);
-
-			if (p) {
-				size_t sz = sizeof(struct phdr_data) + p->n_entries * sizeof(struct phdr_data_entry);
-				struct phdr_data *cpy = (struct phdr_data*)xmalloc(sz);
-
-				memcpy(cpy, p, sz);
-
-				m_phdrListMutex.lock();
-				m_phdrs.push_back(cpy);
-				m_phdrListMutex.unlock();
-			}
-			m_solibDataReadSemaphore.notify();
-		}
-
-		m_solibDataReadSemaphore.notify();
-		close(m_solibFd);
-	}
-
-	static void *threadStatic(void *pThis)
-	{
-		Ptrace *p = (Ptrace *)pThis;
-
-		p->solibThreadMain();
-
-		// Never reached
-		return NULL;
-	}
-
 	void clearAllBreakpoints()
 	{
 		for (instructionMap_t::const_iterator it = m_instructionMap.begin();
@@ -357,43 +253,6 @@ public:
 		// Step back one instruction
 		arch_adjustPcAfterBreakpoint(regs);
 		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
-	}
-
-	void checkSolibData()
-	{
-		struct phdr_data *p = NULL;
-
-		if (!m_elf)
-			return;
-
-		m_phdrListMutex.lock();
-		if (!m_phdrs.empty()) {
-			p = m_phdrs.front();
-			m_phdrs.pop_front();
-		}
-		m_phdrListMutex.unlock();
-
-		if (!p)
-			return;
-
-		for (unsigned int i = 0; i < p->n_entries; i++)
-		{
-			struct phdr_data_entry *cur = &p->entries[i];
-
-			if (strlen(cur->name) == 0)
-				continue;
-
-			// Skip this very special library
-			if (strstr(cur->name, "libkcov_sowrapper.so"))
-				continue;
-
-			m_elf->addFile(cur->name, cur);
-			m_elf->parse();
-
-			setupAllBreakpoints();
-		}
-
-		free(p);
 	}
 
 	const Event waitEvent()
@@ -441,8 +300,8 @@ public:
 				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
 					singleStep();
 
-				if (m_solibThreadValid && m_firstBreakpoint) {
-					m_solibDataReadSemaphore.wait();
+				if (m_firstBreakpoint) {
+					blockUntilSolibDataRead();
 					m_firstBreakpoint = false;
 				}
 
@@ -504,8 +363,6 @@ public:
 	{
 		int res;
 
-		checkSolibData();
-
 		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, m_signal);
 		if (res < 0) {
@@ -535,12 +392,6 @@ public:
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
-		m_elf = IParserManager::getInstance().matchParser(filename);
-
-		// We need a parser for this to work
-		if (!m_elf)
-			return match_none;
-
 		// Unless #!/bin/sh etc, this should win
 		return 1;
 	}
@@ -668,16 +519,11 @@ private:
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
 	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
-	typedef std::list<struct phdr_data *> PhdrList_t;
 
 	int m_breakpointId;
 
 	instructionMap_t m_instructionMap;
 	PendingBreakpointList_t m_pendingBreakpoints;
-	PhdrList_t m_phdrs;
-	std::mutex m_phdrListMutex;
-	pthread_t m_solibThread;
-	Semaphore m_solibDataReadSemaphore;
 	bool m_firstBreakpoint;
 
 	pid_t m_activeChild;
@@ -685,16 +531,8 @@ private:
 	pid_t m_firstChild;
 	ChildMap_t m_children;
 
-	std::string m_solibPath;
-	char *m_ldPreloadString;
-	char *m_envString;
-
 	int m_parentCpu;
 
-	bool m_solibThreadValid;
-	int m_solibFd;
-
-	IFileParser *m_elf;
 	IEventListener *m_listener;
 	unsigned long m_signal;
 

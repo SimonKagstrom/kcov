@@ -14,6 +14,7 @@ public:
 	MOCK_METHOD1(registerFileListener, void(IFileListener &listener));
 	MOCK_METHOD0(parse, bool());
 	MOCK_METHOD0(getChecksum, uint64_t());
+	MOCK_METHOD0(getParserType, std::string());
 	MOCK_METHOD1(setupParser, void(IFilter *));
 	MOCK_METHOD3(matchParser, unsigned int(const std::string &filename, uint8_t *mock_data, size_t dataSize));
 };

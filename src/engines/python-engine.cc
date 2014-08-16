@@ -231,6 +231,11 @@ public:
 		return 0;
 	}
 
+	std::string getParserType()
+	{
+		return "python";
+	}
+
 	void setupParser(IFilter *filter)
 	{
 	}

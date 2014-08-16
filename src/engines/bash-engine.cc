@@ -252,6 +252,11 @@ public:
 		return 0;
 	}
 
+	std::string getParserType()
+	{
+		return "bash";
+	}
+
 	void setupParser(IFilter *filter)
 	{
 	}
