@@ -90,6 +90,8 @@ extern int write_file(const void *data, size_t len, const char *fmt, ...) __attr
 
 extern void *read_file(size_t *out_size, const char *fmt, ...) __attribute__((format(printf,2,3)));
 
+extern void *peek_file(size_t *out_size, const char *fmt, ...) __attribute__((format(printf,2,3)));
+
 extern std::string dir_concat(const std::string &dir, const std::string &filename);
 
 #define xwrite_file(data, len, dir...) do { \

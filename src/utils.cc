@@ -119,6 +119,39 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 	return read_file_int(out_size, 0, path);
 }
 
+void *peek_file(size_t *out_size, const char *fmt, ...)
+{
+	char path[2048];
+	va_list ap;
+	int r;
+
+	/* Create the filename */
+	va_start(ap, fmt);
+	r = vsnprintf(path, 2048, fmt, ap);
+	va_end(ap);
+
+	panic_if (r >= 2048,
+			"Too long string!");
+
+	// Read a little bit of the file
+	FILE *fp;
+
+	fp = fopen(path, "r");
+	if (!fp)
+		return NULL;
+
+	const size_t to_read = 512;
+	void *out = xmalloc(to_read);
+	*out_size = to_read;
+	if (fread(out, to_read, 1, fp) != 1) {
+		free(out);
+		out = NULL;
+	}
+	fclose(fp);
+
+	return out;
+}
+
 static int write_file_int(const void *data, size_t len, uint64_t timeout, const char *path)
 {
 	int fd;
