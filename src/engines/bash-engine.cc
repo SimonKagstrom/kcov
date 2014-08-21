@@ -85,14 +85,6 @@ public:
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
-			// Make a copy of the vector, now with "bash -x" first
-			char **vec;
-			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
-			vec[0] = xstrdup(conf.getBashCommand().c_str());
-			vec[1] = xstrdup("-x");
-			for (unsigned i = 0; i < argc; i++)
-				vec[2 + i] = xstrdup(argv[i]);
-
 			const std::string command = conf.getBashCommand();
 
 			/* Close the childs read end of the pipe */
@@ -112,6 +104,14 @@ public:
 			char *envString = (char *)xmalloc(ps4.size() + 1);
 			strcpy(envString, ps4.c_str());
 			putenv(envString);
+
+			// Make a copy of the vector, now with "bash -x" first
+			char **vec;
+			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
+			vec[0] = xstrdup(conf.getBashCommand().c_str());
+			vec[1] = xstrdup("-x");
+			for (unsigned i = 0; i < argc; i++)
+				vec[2 + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
 			if (execv(vec[0], vec)) {
