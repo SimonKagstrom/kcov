@@ -86,7 +86,11 @@ public:
 
 		std::string kcov_python_env = "KCOV_PYTHON_PIPE_PATH=" + kcov_python_pipe_path;
 		unlink(kcov_python_pipe_path.c_str());
-		mkfifo(kcov_python_pipe_path.c_str(), 0600);
+		if (mkfifo(kcov_python_pipe_path.c_str(), 0600) < 0) {
+			error("Can't create python FIFO %s\n", kcov_python_pipe_path.c_str());
+
+			return false;
+		}
 
 		char *envString = (char *)xmalloc(kcov_python_env.size() + 1);
 		strcpy(envString, kcov_python_env.c_str());
