@@ -38,8 +38,8 @@ namespace kcov
 
 			m_lastTimestamp = get_ms_timestamp();
 
-			mkdir(m_baseDirectory.c_str(), 0755);
-			mkdir(m_outDirectory.c_str(), 0755);
+			(void)mkdir(m_baseDirectory.c_str(), 0755);
+			(void)mkdir(m_outDirectory.c_str(), 0755);
 
 			parser.registerFileListener(*this);
 			collector.registerEventTickListener(*this);

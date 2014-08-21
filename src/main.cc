@@ -189,7 +189,7 @@ int main(int argc, const char *argv[])
 				base, base + "/kcov-merged", "[merged]", false);
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/cobertura.xml");
-		mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+		(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 		collector.registerListener(mergeParser);
 

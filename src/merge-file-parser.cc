@@ -188,9 +188,9 @@ public:
 	// From IWriter
 	void onStartup()
 	{
-		mkdir(m_baseDirectory.c_str(), 0755);
-		mkdir(m_outputDirectory.c_str(), 0755);
-		mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
+		(void)mkdir(m_baseDirectory.c_str(), 0755);
+		(void)mkdir(m_outputDirectory.c_str(), 0755);
+		(void)mkdir(fmt("%s/metadata", m_outputDirectory.c_str()).c_str(), 0755);
 	}
 
 	void onStop()

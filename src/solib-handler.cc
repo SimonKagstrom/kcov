@@ -86,7 +86,7 @@ public:
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;
 		unlink(kcov_solib_pipe_path.c_str());
-		mkfifo(kcov_solib_pipe_path.c_str(), 0644);
+		(void)mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 
 		free(m_envString);
 		m_envString = (char *)xmalloc(kcov_solib_env.size() + 1);
