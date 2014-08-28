@@ -63,7 +63,7 @@ public:
 				"\n"
 				"Examples:\n"
 				"  kcov /tmp/frodo ./frodo          # Check coverage for ./frodo\n"
-				"  kcov --pid=1000 /tmp/frodo       # Check coverage for PID 1000\n"
+				"  kcov --pid=1000 /tmp/frodo ./frodo     # Check coverage for PID 1000\n"
 				"  kcov --include-pattern=/src/frodo/ /tmp/frodo ./frodo  # Only include files\n"
 				"                                                         # including /src/frodo\n"
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
