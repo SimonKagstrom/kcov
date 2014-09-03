@@ -262,11 +262,6 @@ out_open:
 			if (ndirs == 0)
 				continue;
 
-			// Filter early
-			std::string curDir(src_dirs[0] == NULL ? "" : src_dirs[0]);
-			if (m_filter && !m_filter->runFilters(curDir))
-				continue;
-
 			/* Store them */
 			for (i = 0; i < line_count; i++) {
 				Dwarf_Line *line;
