@@ -96,6 +96,7 @@ add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
+add_executable(issue31 daemon/test-issue31.cc)
 
 
 add_custom_target (illegal-insn ALL
@@ -113,6 +114,8 @@ target_link_libraries(multi_fork
 	m)
 target_link_libraries(setpgid-kill
 	z)
+target_link_libraries(issue31
+	pthread)
 
 
 add_custom_target(tests-stripped ALL
