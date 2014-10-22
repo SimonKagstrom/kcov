@@ -43,7 +43,7 @@ def jens_anka(kalle):
 
 def sven_anka():
     'single-quoted line'
-    pass
+    jerker_anka()
 
 def mats_anka():
     "single-quoted line"
@@ -68,3 +68,11 @@ dict = {
          1, 2
          ]
 }
+
+def jerker_anka():
+    try:
+        f = open("/tmp/a")
+    except:
+        print "Exception"
+    finally:
+        print "Finally finally!"
