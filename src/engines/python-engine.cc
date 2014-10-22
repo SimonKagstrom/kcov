@@ -336,6 +336,10 @@ private:
 			if (s.find("else:") != std::string::npos)
 				continue;
 
+			// As is finally:
+			if (s.find("finally:") != std::string::npos)
+				continue;
+
 			// Single-line python strings (e.g., 'description of the function')
 			if (isPythonString(s))
 				continue;
