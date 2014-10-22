@@ -212,6 +212,12 @@ python-exit-status
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
     Should be equal as integers    ${rc}    ${no_kcov_rc}
 
+python-unittest
+	Run								rm -rf ${out}/testdriver
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/unittest/testdriver
+    ${output}=    Run    ${xml_lookup} ${out}/testdriver/cobertura.xml testdriver 14
+    Should Contain    ${output}    1
+
 python-coverage
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
