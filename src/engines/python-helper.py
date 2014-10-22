@@ -4,12 +4,21 @@
 # Based on http://pymotw.com/2/sys/tracing.html, "Tracing a program as it runs"
 # and http://hg.python.org/cpython/file/2.7/Lib/trace.py
 
+import imp
 import sys
 import os
 import struct
 
 fifo_file = None
 report_trace_real = None
+
+try:
+    # In Py 2.x, the builtins were in __builtin__
+    BUILTINS = sys.modules['__builtin__']
+except KeyError:
+    # In Py 3.x, they're in builtins
+    BUILTINS = sys.modules['builtins']
+
 
 def report_trace3(file, line):
     size = len(file) + 1 + 8 + 4 + 4
@@ -50,12 +59,10 @@ def trace_calls(frame, event, arg):
     report_trace(filename, line_no)
     return trace_lines
 
-def runctx(cmd, globals=None, locals=None):
-    if globals is None: globals = {}
-    if locals is None: locals = {}
+def runctx(cmd, globals):
     sys.settrace(trace_calls)
     try:
-        exec(cmd, globals, locals)
+        exec(cmd, globals)
     finally:
         sys.settrace(None)
 
@@ -91,7 +98,13 @@ if __name__ == "__main__":
                 '__package__': None,
                 '__cached__': None,
             }
-            runctx(code, globs, globs)
+            main_mod = imp.new_module('__main__')
+            sys.modules['__main__'] = main_mod
+            main_mod.__file__ = progname
+            main_mod.__package__ = None
+            main_mod.__builtins__ = BUILTINS
+
+            runctx(code, main_mod.__dict__)
     except IOError:
         sys.stderr.write("Cannot run file %r" % (sys.argv[0]))
         sys.exit(127)
