@@ -88,23 +88,22 @@ if __name__ == "__main__":
         sys.stderr.write("Can't open fifo file")
         sys.exit(127)
 
+    main_mod = imp.new_module('__main__')
+    old_main_mod = sys.modules['__main__']
+    sys.modules['__main__'] = main_mod
+    main_mod.__file__ = progname
+    main_mod.__package__ = None
+    main_mod.__builtins__ = BUILTINS
+
     try:
         with open(progname) as fp:
-            code = compile(fp.read(), progname, 'exec')
             # try to emulate __main__ namespace as much as possible
-            globs = {
-                '__file__': progname,
-                '__name__': '__main__',
-                '__package__': None,
-                '__cached__': None,
-            }
-            main_mod = imp.new_module('__main__')
-            sys.modules['__main__'] = main_mod
-            main_mod.__file__ = progname
-            main_mod.__package__ = None
-            main_mod.__builtins__ = BUILTINS
+
+            code = compile(fp.read(), progname, 'exec')
 
             runctx(code, main_mod.__dict__)
     except IOError:
         sys.stderr.write("Cannot run file %r" % (sys.argv[0]))
         sys.exit(127)
+    finally:
+        sys.modules['__main__'] = old_main_mod
