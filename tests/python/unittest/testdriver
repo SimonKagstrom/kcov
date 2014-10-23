@@ -6,11 +6,11 @@ import unittest
 class testcase (unittest.TestCase):
 
     def setUp(self):
-        print 'in setUp()'
+        print('in setUp()')
         self.unitundertest = unitundertest.testme()
 
     def testMethod1(self):
-        print 'in testcase.testMethod1()'
+        print('in testcase.testMethod1()')
         expected=4
         result= self.unitundertest.testmethod1(2,2)
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     try:
         import unitundertest
-    except IOError, e:
-        print 'exception'
+    except:
+        print('exception')
 
     unittest.main()
