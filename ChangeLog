@@ -1,3 +1,16 @@
+Kcov (22):
+	* Issue #32: Fix problems when running Python unittest modules
+
+	* Various coverity resource leak fixes
+
+	* Peek into files to improve performance for matching
+
+	* Break out solib handling from ptrace (not really related)
+
+	* Improve ptrace performance a bit, while also simplifying code
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (21):
 	* Fix regression for coverage-of-32-bit-binaries-on-64-bit-systems introduced
 	  in kcov 20
