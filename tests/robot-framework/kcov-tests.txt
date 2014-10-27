@@ -218,6 +218,12 @@ python-unittest
     ${output}=    Run    ${xml_lookup} ${out}/testdriver/cobertura.xml testdriver 14
     Should Contain    ${output}    1
 
+python-short-file
+	Run								rm -rf ${out}/short-test.py
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/short-test.py
+    ${output}=    Run    ${xml_lookup} ${out}/testdriver/cobertura.xml short_test_py 6
+    Should Contain    ${output}    1
+
 python-coverage
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/main 5
@@ -321,6 +327,13 @@ bash-coverage
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 38
     Should Contain    ${output}    nocode
 
+bash-short-file
+	Run								rm -rf ${out}/short-test.sh
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml short_test_sh 5
+    Should Contain    ${output}    1
+
+
 bash-coverage-heredoc-backslashes
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
@@ -374,8 +387,8 @@ merge-same-file-in-multiple-binaries
     ${output}=    Run    ${xml_lookup} ${out}/multi_1/cobertura.xml main_1_c 9
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/multi_1/cobertura.xml main_1_c 10
-    Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/multi_1/cobertura.xml file_c 3
+    Should Contain    ${output}    0
     Should Contain    ${output}    0
     ${rc}=    Run and return RC    ${kcov} ${out} ./multi_2
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml main_2_c 9
