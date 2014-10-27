@@ -17,6 +17,7 @@
 #include <utils.hh>
 
 #include <sstream>
+#include <fstream>
 #include <stdexcept>
 #include <algorithm>
 #include <unordered_map>
@@ -133,21 +134,28 @@ void *peek_file(size_t *out_size, const char *fmt, ...)
 	panic_if (r >= 2048,
 			"Too long string!");
 
-	// Read a little bit of the file
-	FILE *fp;
+	// Read a little bit of the file    
+	const size_t to_read = 512;    
+	char *out = static_cast<char*>(xmalloc(to_read));
+    
+	std::ifstream str(path);
+	if (str.is_open()) {
+		str.read(out,to_read);
+		// If successful (all desired characters) or
+		// a non-zero number of characters were read, then succeed
+		if (str || str.gcount() > 0) {
+			*out_size = str.gcount();
+		} else {
+			// No characters read, so fail
+			free(out);
+			out = NULL;
+		}
+		str.close();
 
-	fp = fopen(path, "r");
-	if (!fp)
-		return NULL;
-
-	const size_t to_read = 512;
-	void *out = xmalloc(to_read);
-	*out_size = to_read;
-	if (fread(out, to_read, 1, fp) != 1) {
+	} else {
 		free(out);
 		out = NULL;
 	}
-	fclose(fp);
 
 	return out;
 }
