@@ -1,9 +1,11 @@
 Kcov (22):
+	* Issue #35: Support installation RPATH for build
+
 	* Issue #32: Fix problems when running Python unittest modules
 
 	* Various coverity resource leak fixes
 
-	* Peek into files to improve performance for matching
+	* Peek into files to improve performance for matching (also Issue #33)
 
 	* Break out solib handling from ptrace (not really related)
 
