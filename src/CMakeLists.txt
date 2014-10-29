@@ -112,6 +112,17 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
+# Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
+if(SPECIFY_RPATH)
+	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+	# the RPATH to be used when installing, but only if it's not a system directory
+	LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+	IF("${isSystemDir}" STREQUAL "-1")
+	  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	ENDIF("${isSystemDir}" STREQUAL "-1")
+endif(SPECIFY_RPATH)
 
 add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc html-data-files.cc)
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
