@@ -1,3 +1,8 @@
+Kcov (23):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
+
 Kcov (22):
 	* Issue #35: Support installation RPATH for build (Chris Love)
 
