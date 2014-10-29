@@ -1,17 +1,17 @@
 Kcov (22):
-	* Issue #35: Support installation RPATH for build
+	* Issue #35: Support installation RPATH for build (Chris Love)
 
 	* Issue #32: Fix problems when running Python unittest modules
 
 	* Various coverity resource leak fixes
 
-	* Peek into files to improve performance for matching (also Issue #33)
+	* Peek into files to improve performance for matching (also see Issue #33)
 
 	* Break out solib handling from ptrace (not really related)
 
 	* Improve ptrace performance a bit, while also simplifying code
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Wed Oct 29 12:58:18 CET 2014
 
 Kcov (21):
 	* Fix regression for coverage-of-32-bit-binaries-on-64-bit-systems introduced
