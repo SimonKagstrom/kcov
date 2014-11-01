@@ -221,7 +221,8 @@ python-unittest
 python-short-file
 	Run								rm -rf ${out}/short-test.py
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/python/short-test.py
-    ${output}=    Run    ${xml_lookup} ${out}/testdriver/cobertura.xml short_test_py 6
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/short-test.py/cobertura.xml short_test_py 6
     Should Contain    ${output}    1
 
 python-coverage
@@ -330,7 +331,8 @@ bash-coverage
 bash-short-file
 	Run								rm -rf ${out}/short-test.sh
     ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
-    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml short_test_sh 5
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/short-test.sh/cobertura.xml short_test_sh 5
     Should Contain    ${output}    1
 
 
