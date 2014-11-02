@@ -25,7 +25,7 @@ set_property(SOURCE multi-fork/test-multi-fork.c APPEND PROPERTY OBJECT_DEPENDS 
 set (main_tests_SRCS
 	main.cc
 	subdir/file.c
-	subdir2/file.c
+	subdir2/file2.c
 )
 
 set (argv_dependent_SRCS

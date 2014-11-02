@@ -84,6 +84,35 @@ shared-library-filter-out
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    nocode
 
+include-exclude-pattern
+    Run                            rm -rf ${out}/main-tests
+    ${rc}=    Run and return RC    ${kcov} --exclude-pattern=.cc ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=subdir2 ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=subdir ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=subdir --exclude-pattern=file2 ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
+    Should Contain    ${output}    nocode
+
 main-test
     Run                            rm -rf ${out}/main-tests
     ${no_kcov_rc}=    Run and return RC    ./main-tests
@@ -99,7 +128,7 @@ main-test
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
     Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 7
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 7
     Should Contain    ${output}    0
 
 accumulate-data
