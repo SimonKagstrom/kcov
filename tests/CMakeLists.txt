@@ -70,7 +70,6 @@ set (daemon_SRCS
 
 add_library(shared_library SHARED shared-library/solib.c)
 
-
 set(CMAKE_BUILD_TYPE distribution)
 set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "-g")
@@ -97,6 +96,9 @@ add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
 add_executable(issue31 daemon/test-issue31.cc)
+add_executable(dlopen dlopen/dlopen.cc)
+
+target_link_libraries(dlopen dl)
 
 
 add_custom_target (illegal-insn ALL
