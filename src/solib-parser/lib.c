@@ -33,7 +33,7 @@ static int phdrSizeCallback(struct dl_phdr_info *info, size_t size, void *data)
 	return 0;
 }
 
-void  __attribute__((constructor))at_startup(void)
+static void parse_solibs(void)
 {
 	char *kcov_solib_path;
 	void *p;
@@ -73,7 +73,9 @@ void  __attribute__((constructor))at_startup(void)
 	phdr_data_free(p);
 
 	close(fd);
+}
 
-	// Clear from the environment
-	putenv("KCOV_SOLIB_PATH");
+void  __attribute__((constructor))kcov_solib_at_startup(void)
+{
+	parse_solibs();
 }
