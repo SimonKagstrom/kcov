@@ -74,6 +74,14 @@ shared-library
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    1
 
+shared-library-skip
+    Run                            rm -rf ${out}/shared_library_test
+    ${rc}=    Run and return RC    ${kcov} --skip-solibs ${out} ./shared_library_test
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml main_c 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
+    Should Contain    ${output}    nocode
+
 shared-library-filter-out
     Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test
