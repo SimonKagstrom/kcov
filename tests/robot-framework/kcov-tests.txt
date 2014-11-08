@@ -84,6 +84,20 @@ shared-library-filter-out
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    nocode
 
+dlopen
+    Run                            rm -rf ${out}/dlopen
+    ${no_kcov_rc}=    Run and return RC    ./dlopen
+    ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 12
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
+    Should Contain    ${output}    0
+
 include-exclude-pattern
     Run                            rm -rf ${out}/main-tests
     ${rc}=    Run and return RC    ${kcov} --exclude-pattern=.cc ${out} ./main-tests
