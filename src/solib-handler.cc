@@ -32,6 +32,7 @@ public:
 		m_envString(NULL),
 		m_solibFd(-1),
 		m_solibThreadValid(false),
+		m_threadShouldExit(false),
 		m_parser(&parser),
 		m_engine(&engine)
 	{
@@ -51,6 +52,7 @@ public:
 	{
 		void *rv;
 
+		m_threadShouldExit = true;
 		if (m_solibPath != "")
 			unlink(m_solibPath.c_str());
 		if (m_solibFd >= 0)
@@ -64,6 +66,7 @@ public:
 		 * Only do this if it has been started, naturally
 		 */
 		if (m_solibThreadValid) {
+			pthread_cancel(m_solibThread);
 			pthread_kill(m_solibThread, SIGTERM);
 			pthread_join(m_solibThread, &rv);
 		}
@@ -113,7 +116,7 @@ public:
 
 	}
 
-	void solibThreadMain()
+	void solibThreadParse()
 	{
 		uint8_t buf[1024 * 1024];
 
@@ -152,6 +155,15 @@ public:
 		close(m_solibFd);
 	}
 
+	void solibThreadMain()
+	{
+		while (1) {
+			if (m_threadShouldExit)
+				break;
+
+			solibThreadParse();
+		}
+	}
 
 	// Wrapper for ptrace
 	static void *threadStatic(void *pThis)
@@ -211,6 +223,7 @@ public:
 	char *m_envString;
 	int m_solibFd;
 	bool m_solibThreadValid;
+	bool m_threadShouldExit;
 	pthread_t m_solibThread;
 	Semaphore m_solibDataReadSemaphore;
 	PhdrList_t m_phdrs;
