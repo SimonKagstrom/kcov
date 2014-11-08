@@ -79,7 +79,12 @@ static void parse_solibs(void)
 static void *(*orig_dlopen)(const char *, int);
 void *dlopen(const char *filename, int flag)
 {
-	void *out = orig_dlopen(filename, flag);
+	void *out;
+
+	if (!orig_dlopen)
+		orig_dlopen = dlsym(RTLD_NEXT, "dlopen");
+
+	out = orig_dlopen(filename, flag);
 
 	parse_solibs();
 
@@ -90,5 +95,4 @@ void *dlopen(const char *filename, int flag)
 void  __attribute__((constructor))kcov_solib_at_startup(void)
 {
 	parse_solibs();
-	orig_dlopen = dlsym(RTLD_NEXT, "dlopen");
 }
