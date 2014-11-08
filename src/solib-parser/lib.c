@@ -12,6 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <link.h>
+#include <dlfcn.h>
 
 #include <phdr_data.h>
 
@@ -75,7 +76,19 @@ static void parse_solibs(void)
 	close(fd);
 }
 
+static void *(*orig_dlopen)(const char *, int);
+void *dlopen(const char *filename, int flag)
+{
+	void *out = orig_dlopen(filename, flag);
+
+	parse_solibs();
+
+	return out;
+}
+
+
 void  __attribute__((constructor))kcov_solib_at_startup(void)
 {
 	parse_solibs();
+	orig_dlopen = dlsym(RTLD_NEXT, "dlopen");
 }

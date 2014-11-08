@@ -70,6 +70,8 @@ link_directories (/home/ska/local/lib)
 
 add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 
+target_link_libraries(${SOLIB} dl)
+
 add_custom_command(
    OUTPUT library.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.cc
