@@ -8,6 +8,7 @@
 
 #include <mutex>
 #include <vector>
+#include <unordered_map>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -41,6 +42,9 @@ public:
 			collector.registerEventTickListener(*this);
 			startup();
 		}
+
+		// Skip this very special library
+		m_foundSolibs["libkcov_sowrapper.so"] = true;
 	}
 
 	virtual ~SolibHandler()
@@ -183,14 +187,14 @@ public:
 			if (strlen(cur->name) == 0)
 				continue;
 
-			// Skip this very special library
-			if (strstr(cur->name, "libkcov_sowrapper.so"))
+			if (m_foundSolibs.find(cur->name) != m_foundSolibs.end())
 				continue;
 
 			m_parser->addFile(cur->name, cur);
 			m_parser->parse();
 
 			m_engine->setupAllBreakpoints();
+			m_foundSolibs[cur->name] = true;
 		}
 
 		free(p);
@@ -200,6 +204,7 @@ public:
 //private:
 
 	typedef std::list<struct phdr_data *> PhdrList_t;
+	typedef std::unordered_map<std::string, bool> FoundSolibsMap_t;
 
 	std::string m_solibPath;
 	char *m_ldPreloadString;
@@ -209,6 +214,7 @@ public:
 	pthread_t m_solibThread;
 	Semaphore m_solibDataReadSemaphore;
 	PhdrList_t m_phdrs;
+	FoundSolibsMap_t m_foundSolibs;
 	std::mutex m_phdrListMutex;
 
 	IFileParser *m_parser;
