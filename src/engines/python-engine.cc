@@ -40,8 +40,7 @@ public:
 	PythonEngine() :
 		m_child(0),
 		m_pipe(NULL),
-		m_listener(NULL),
-		m_currentAddress(1) // 0 is an invalid address
+		m_listener(NULL)
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 		IParserManager::getInstance().registerParser(*this);
@@ -391,7 +390,7 @@ private:
 	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
 		size_t id = getLineId(filename, lineNo);
-		uint64_t address = m_currentAddress ^ crc;
+		uint64_t address = lineNo ^ crc;
 
 		m_lineIdToAddress[id] = address;
 
@@ -399,8 +398,6 @@ private:
 				lit != m_lineListeners.end();
 				++lit)
 			(*lit)->onLine(get_real_path(filename).c_str(), lineNo, address);
-
-		m_currentAddress++;
 	}
 
 	size_t multilineIdx(const std::string &s)
@@ -509,7 +506,6 @@ private:
 	LineIdToAddressMap_t m_lineIdToAddress;
 
 	IEventListener *m_listener;
-	uint64_t m_currentAddress;
 };
 
 static PythonEngine::Ctor g_pythonEngine;
