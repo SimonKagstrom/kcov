@@ -139,13 +139,21 @@ public:
 			p = Line::unMarshal(p, &addr, &hits);
 			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
-			if (it == m_addrToLine.end())
-				continue;
-
-			Line *line = it->second;
-
 			if (!hits)
 				continue;
+
+			/* Can't find this address.
+			 *
+			 * Either it doesn't exist in the binary, or it hasn't been parsed
+			 * yet, which will be the case for bash/python. Add it to pending
+			 * addresses if so.
+			 */
+			if (it == m_addrToLine.end()) {
+				m_pendingHits[addr] = hits;
+				continue;
+			}
+
+			Line *line = it->second;
 
 			// Really an internal error, but let's not hang on corrupted data
 			if (hits > line->possibleHits())
@@ -229,12 +237,24 @@ private:
 			line = new Line(file, lineNr);
 
 			m_lines[key] = line;
+
 		} else {
 			line = it->second;
 		}
 
 		line->addAddress(addr);
 		m_addrToLine[addr] = line;
+
+		/*
+		 * If we have pending hits for this address, service
+		 * them here.
+		 */
+		AddrToHitsMap_t::iterator pend = m_pendingHits.find(addr);
+		if (pend != m_pendingHits.end()) {
+			onAddress(addr, pend->second);
+
+			m_pendingHits.erase(addr);
+		}
 	}
 
 	/* Called during runtime */
@@ -335,9 +355,11 @@ private:
 
 	typedef std::unordered_map<size_t, Line *> LineMap_t;
 	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
+	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
 
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
+	AddrToHitsMap_t m_pendingHits;
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
