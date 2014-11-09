@@ -99,7 +99,7 @@ add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
 add_executable(issue31 daemon/test-issue31.cc)
-add_executable(dlopen dlopen/dlopen.cc)
+add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 
 target_link_libraries(dlopen dl)
 

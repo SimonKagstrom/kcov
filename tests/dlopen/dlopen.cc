@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, const char *argv[])
+void do_dlopen()
 {
 	void *handle;
 	int (*sym)(int);
@@ -25,6 +25,4 @@ int main(int argc, const char *argv[])
 	printf("from shared lib: %d\n", a);
 
 	dlclose(handle);
-
-	return 0;
 }

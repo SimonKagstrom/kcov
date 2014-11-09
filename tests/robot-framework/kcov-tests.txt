@@ -106,6 +106,21 @@ dlopen
     ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
     Should Contain    ${output}    0
 
+dlopen-in-ignored-source-file
+    Run                            rm -rf ${out}/dlopen
+    ${no_kcov_rc}=    Run and return RC    ./dlopen
+    ${rc}=    Run and return RC    ${kcov} --exclude-pattern=dlopen.cc ${out} ./dlopen
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_main_cc 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
+    Should Contain    ${output}    0
+
+
 include-exclude-pattern
     Run                            rm -rf ${out}/main-tests
     ${rc}=    Run and return RC    ${kcov} --exclude-pattern=.cc ${out} ./main-tests
