@@ -68,7 +68,10 @@ set (daemon_SRCS
 	daemon/test-daemon.cc
 )
 
-add_library(shared_library SHARED shared-library/solib.c)
+add_library(shared_library SHARED
+	shared-library/big-symbol.S
+	shared-library/solib.c
+)
 
 set(CMAKE_BUILD_TYPE distribution)
 set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
