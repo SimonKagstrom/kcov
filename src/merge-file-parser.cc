@@ -63,6 +63,7 @@ public:
 	friend class merge_parser::input;
 
 	MergeParser(IFileParser &localParser,
+			IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter) :
@@ -70,6 +71,7 @@ public:
 		m_outputDirectory(outputDirectory),
 		m_filter(filter)
 	{
+		reporter.registerListener(*this);
 		localParser.registerFileListener(*this);
 		localParser.registerLineListener(*this);
 	}
@@ -116,7 +118,7 @@ public:
 		return match_none;
 	}
 
-	// From ICollector::IListener
+	// From IReporter::IListener
 	void onAddress(unsigned long addr, unsigned long hits)
 	{
 		if (m_fileLineByAddress.find(addr) == m_fileLineByAddress.end())
@@ -132,9 +134,8 @@ public:
 
 		for (CollectorListenerList_t::const_iterator it = m_collectorListeners.begin();
 				it != m_collectorListeners.end();
-				++it) {
-			(*it)->onAddress(addr, hits);
-		}
+				++it)
+			(*it)->onAddressHit(addr, hits);
 	}
 
 	// From IFileParser::ILineListener
@@ -372,10 +373,11 @@ private:
 				if (hit) {
 					file->registerHits(lineNr, 1);
 
+
 					for (CollectorListenerList_t::const_iterator itC = m_collectorListeners.begin();
 							itC != m_collectorListeners.end();
 							++itC)
-						(*itC)->onAddress(addr, 1);
+						(*itC)->onAddressHit(addr, 1);
 				}
 			}
 		}
@@ -558,10 +560,11 @@ private:
 namespace kcov
 {
 	IMergeParser &createMergeParser(IFileParser &localParser,
+			IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter)
 	{
-		return *new MergeParser(localParser, baseDirectory, outputDirectory, filter);
+		return *new MergeParser(localParser, reporter, baseDirectory, outputDirectory, filter);
 	}
 }

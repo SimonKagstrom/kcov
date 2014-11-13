@@ -147,7 +147,7 @@ private:
 			for (ListenerList_t::const_iterator it = m_listeners.begin();
 					it != m_listeners.end();
 					++it)
-				(*it)->onAddress(ev.addr, 1);
+				(*it)->onAddressHit(ev.addr, 1);
 
 			// Disable this breakpoint
 			m_engine.clearBreakpoint(ev);

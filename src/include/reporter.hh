@@ -42,7 +42,22 @@ namespace kcov
 			unsigned int m_includeInTotals;
 		};
 
+		class IListener
+		{
+		public:
+			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
+		};
+
+
 		virtual ~IReporter() {}
+
+
+		/**
+		 * Register a listener for reported addresses.
+		 *
+		 * @param listener the listener
+		 */
+		virtual void registerListener(IListener &listener) = 0;
 
 		/**
 		 * Return if a file path should be included in the output.

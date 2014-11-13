@@ -23,7 +23,11 @@ struct marshalHeaderStruct
 	uint64_t checksum;
 };
 
-class Reporter : public IReporter, public IFileParser::ILineListener, public ICollector::IListener
+class Reporter :
+		public IReporter,
+		public IFileParser::ILineListener,
+		public ICollector::IListener,
+		public IReporter::IListener
 {
 public:
 	Reporter(IFileParser &fileParser, ICollector &collector, IFilter &filter) :
@@ -36,6 +40,11 @@ public:
 	~Reporter()
 	{
 		stop();
+	}
+
+	void registerListener(IReporter::IListener &listener)
+	{
+		m_listeners.push_back(&listener);
 	}
 
 	bool fileIsIncluded(const std::string &file)
@@ -160,7 +169,7 @@ public:
 				hits = line->possibleHits();
 
 			// Register all hits for this address
-			line->registerHit(addr, hits);
+			reportAddress(addr, hits);
 		}
 
 		return true;
@@ -251,23 +260,40 @@ private:
 		 */
 		AddrToHitsMap_t::iterator pend = m_pendingHits.find(addr);
 		if (pend != m_pendingHits.end()) {
-			onAddress(addr, pend->second);
+			reportAddress(addr, pend->second);
 
 			m_pendingHits.erase(addr);
 		}
 	}
 
 	/* Called during runtime */
-	void onAddress(unsigned long addr, unsigned long hits)
+	void reportAddress(unsigned long addr, unsigned long hits)
 	{
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
-		if (it != m_addrToLine.end()) {
-			Line *line = it->second;
+		if (it == m_addrToLine.end())
+			return;
 
-			kcov_debug(INFO_MSG, "REPORT hit at 0x%lx\n", addr);
-			line->registerHit(addr, hits);
-		}
+		Line *line = it->second;
+
+		kcov_debug(INFO_MSG, "REPORT hit at 0x%lx\n", addr);
+		line->registerHit(addr, hits);
+
+		for (ListenerList_t::const_iterator it = m_listeners.begin();
+				it != m_listeners.end();
+				++it)
+			(*it)->onAddress(addr, hits);
+	}
+
+	// From ICollector::IListener
+	void onAddressHit(unsigned long addr, unsigned long hits)
+	{
+		reportAddress(addr, hits);
+	}
+
+	// From IReporter::IListener - report recursively
+	void onAddress(unsigned long addr, unsigned long hits)
+	{
 	}
 
 	class Line
@@ -356,10 +382,12 @@ private:
 	typedef std::unordered_map<size_t, Line *> LineMap_t;
 	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
+	typedef std::vector<IReporter::IListener *> ListenerList_t;
 
 	LineMap_t m_lines;
 	AddrToLineMap_t m_addrToLine;
 	AddrToHitsMap_t m_pendingHits;
+	ListenerList_t m_listeners;
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;

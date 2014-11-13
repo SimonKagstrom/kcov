@@ -182,7 +182,7 @@ int main(int argc, const char *argv[])
 				out + "/cobertura.xml");
 
 		// The merge parser is both a parser, a writer and a collector (!)
-		IMergeParser &mergeParser = createMergeParser(*parser,
+		IMergeParser &mergeParser = createMergeParser(*parser, reporter,
 				base, out, filter);
 		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
@@ -191,7 +191,7 @@ int main(int argc, const char *argv[])
 				base + "kcov-merged/cobertura.xml");
 		(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
-		collector.registerListener(mergeParser);
+		reporter.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
 		// Only one covered binary? No need for merging writers then

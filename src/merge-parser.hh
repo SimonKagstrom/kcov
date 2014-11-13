@@ -1,5 +1,7 @@
 #pragma once
 
+#include <reporter.hh>
+
 #include <string>
 
 namespace kcov
@@ -8,13 +10,14 @@ namespace kcov
 
 	class IMergeParser :
 		public IFileParser,
-		public ICollector::IListener,
+		public IReporter::IListener,
 		public IWriter,
 		public ICollector
 	{
 	};
 
 	IMergeParser &createMergeParser(IFileParser &localParser,
+			IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter);

@@ -14,7 +14,7 @@ namespace kcov
 		class IListener
 		{
 		public:
-			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
+			virtual void onAddressHit(unsigned long addr, unsigned long hits) = 0;
 		};
 
 		class IEventTickListener
