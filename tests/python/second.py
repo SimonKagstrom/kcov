@@ -73,6 +73,6 @@ def jerker_anka():
     try:
         f = open("/tmp/a")
     except:
-        print "Exception"
+        print("Exception")
     finally:
-        print "Finally finally!"
+        print("Finally finally!")
