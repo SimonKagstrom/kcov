@@ -1,5 +1,6 @@
 #include "test.hh"
 
+#include "mocks/mock-reporter.hh"
 #include "../../src/merge-file-parser.cc"
 
 #include <utils.hh>
@@ -67,7 +68,7 @@ protected:
 	std::unordered_map<unsigned int, unsigned long> m_lineToAddr;
 };
 
-class AddressListenerFixture : public ICollector::IListener
+class AddressListenerFixture : public IReporter::IListener, public ICollector::IListener
 {
 public:
 	virtual ~AddressListenerFixture()
@@ -79,8 +80,14 @@ public:
 		m_addrToHits[addr] = hits;
 	}
 
+	void onAddressHit(unsigned long addr, unsigned long hits)
+	{
+		m_breakpointToHits[addr] = hits;
+	}
+
 protected:
 	std::unordered_map<unsigned int, unsigned long> m_addrToHits;
+	std::unordered_map<unsigned int, unsigned long> m_breakpointToHits;
 };
 
 
@@ -89,6 +96,7 @@ TESTSUITE(merge_parser)
 	TEST(marshal)
 	{
 		MockParser mockParser;
+		MockReporter reporter;
 		auto &filter = IFilter::create();
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
@@ -101,7 +109,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
+		MergeParser parser(mockParser, reporter, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -141,7 +149,7 @@ TESTSUITE(merge_parser)
 		ASSERT_TRUE(be_to_host<uint64_t>(addressTable[start + 1]) == parser.hashAddress("a", 1, 3) + 1);
 
 		// No output
-		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle", filter);
+		MergeParser parser2(mockParser, reporter, "/tmp", "/tmp/kalle", filter);
 
 		parser2.onLine("c", 4, 1);
 		// New timestamp for the "a" file
@@ -185,6 +193,7 @@ TESTSUITE(merge_parser)
 	{
 		auto &filter = IFilter::create();
 		MockParser mockParser;
+		MockReporter reporter;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
 			.Times(Exactly(1))
@@ -196,7 +205,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
+		MergeParser parser(mockParser, reporter, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -219,6 +228,7 @@ TESTSUITE(merge_parser)
 	{
 		auto &filter = IFilter::create();
 		MockParser mockParser;
+		MockReporter reporter;
 
 		EXPECT_CALL(mockParser, registerFileListener(_))
 			.Times(Exactly(2))
@@ -230,7 +240,7 @@ TESTSUITE(merge_parser)
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
 		mocked_ts = 1;
 
-		MergeParser parser(mockParser, "/tmp", "/tmp/kalle", filter);
+		MergeParser parser(mockParser, reporter, "/tmp", "/tmp/kalle", filter);
 
 		mock_file_exists(mocked_file_exists);
 		mock_read_file(mocked_read_file);
@@ -238,7 +248,7 @@ TESTSUITE(merge_parser)
 		mock_get_file_timestamp(mocked_get_timestamp);
 
 		// Register the collector address listener
-		parser.registerListener(*this);
+		reporter.registerListener(*this);
 
 		parser.onLine("a", 1, 2);
 		parser.onLine("a", 3, 9);
@@ -266,7 +276,7 @@ TESTSUITE(merge_parser)
 		p = parser.marshalFile("a");
 		ASSERT_TRUE(p);
 
-		MergeParser parser2(mockParser, "/tmp", "/tmp/kalle", filter);
+		MergeParser parser2(mockParser, reporter, "/tmp", "/tmp/kalle", filter);
 		parser2.registerLineListener(*this);
 		parser2.registerListener(*this);
 

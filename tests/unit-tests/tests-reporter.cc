@@ -82,7 +82,7 @@ TEST(reporter)
 
 
 	// Test something which doesn't exist
-	collector.m_listener->onAddress(100, 1);
+	collector.m_listener->onAddressHit(100, 1);
 
 	summary = reporter.getExecutionSummary();
 	ASSERT_TRUE(summary.m_executedLines == 0U);
@@ -97,7 +97,7 @@ TEST(reporter)
 	ASSERT_TRUE(elfListener.m_lineToAddr[8]);
 
 	// and something which does
-	collector.m_listener->onAddress(elfListener.m_lineToAddr[19], 1);
+	collector.m_listener->onAddressHit(elfListener.m_lineToAddr[19], 1);
 
 	lc = reporter.getLineExecutionCount(elfListener.m_file.c_str(), 19);
 	ASSERT_TRUE(lc.m_hits == 1U);
@@ -105,7 +105,7 @@ TEST(reporter)
 
 	// Once again (should not happen except on marshalling - this should
 	// not count up the number of hits)
-	collector.m_listener->onAddress(elfListener.m_lineToAddr[19], 1);
+	collector.m_listener->onAddressHit(elfListener.m_lineToAddr[19], 1);
 	lc = reporter.getLineExecutionCount(elfListener.m_file.c_str(), 19);
 	ASSERT_TRUE(lc.m_hits == 1U);
 
@@ -119,7 +119,7 @@ TEST(reporter)
 	ASSERT_TRUE(res == false);
 
 	// Test marshal and unmarshal
-	collector.m_listener->onAddress(elfListener.m_lineToAddr[16], 1);
+	collector.m_listener->onAddressHit(elfListener.m_lineToAddr[16], 1);
 
 	summary = reporter.getExecutionSummary();
 	ASSERT_TRUE(summary.m_executedLines == 2U);
@@ -130,7 +130,7 @@ TEST(reporter)
 	ASSERT_TRUE(data);
 
 	// Happened after, not part of the marshalling
-	collector.m_listener->onAddress(elfListener.m_lineToAddr[17], 1);
+	collector.m_listener->onAddressHit(elfListener.m_lineToAddr[17], 1);
 
 	summary = reporter.getExecutionSummary();
 	ASSERT_TRUE(summary.m_executedLines == 3U);
