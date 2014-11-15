@@ -76,6 +76,21 @@ static void parse_solibs(void)
 	close(fd);
 }
 
+static void force_breakpoint(void)
+{
+	asm volatile(
+#if defined(__i386__) || defined(__x86_64__)
+			"int3\n"
+#elif defined(__powerpc__)
+			".long 0x7fe00008\n" /* trap instruction, UNTESTED */
+#elif defined(__arm__)
+			"bpkt\n" /* UNTESTED!*/
+#else
+# error Unsupported architecture
+#endif
+			);
+}
+
 static void *(*orig_dlopen)(const char *, int);
 void *dlopen(const char *filename, int flag)
 {
@@ -87,6 +102,7 @@ void *dlopen(const char *filename, int flag)
 	out = orig_dlopen(filename, flag);
 
 	parse_solibs();
+	force_breakpoint();
 
 	return out;
 }
@@ -95,4 +111,5 @@ void *dlopen(const char *filename, int flag)
 void  __attribute__((constructor))kcov_solib_at_startup(void)
 {
 	parse_solibs();
+	force_breakpoint();
 }

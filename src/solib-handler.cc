@@ -126,6 +126,7 @@ public:
 		if (m_solibFd < 0)
 			return;
 
+		m_phdrListMutex.lock();
 		while (1) {
 			int r = read(m_solibFd, buf, sizeof(buf));
 
@@ -144,15 +145,14 @@ public:
 
 				memcpy(cpy, p, sz);
 
-				m_phdrListMutex.lock();
 				m_phdrs.push_back(cpy);
-				m_phdrListMutex.unlock();
 			}
 			m_solibDataReadSemaphore.notify();
 		}
+		close(m_solibFd);
+		m_phdrListMutex.unlock();
 
 		m_solibDataReadSemaphore.notify();
-		close(m_solibFd);
 	}
 
 	void solibThreadMain()
