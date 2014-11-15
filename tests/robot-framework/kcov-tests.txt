@@ -433,7 +433,7 @@ bash-coverage-tricky
 
 bash-honor-signal
 	Run								rm -rf ${out}
-    ${output}=   Run				${kcov} ${kcov_path}/tests/setpgid-kill/test-script.sh ${kcov} ${out} ${kcov_path}/tests/bash/trap.sh
+    ${output}=   Run				${kcov_path}/tests/setpgid-kill/test-script.sh ${kcov} ${out} ${kcov_path}/tests/bash/trap.sh
     Should Contain    ${output}    SUCCESS
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml trap_sh 5
     Should Contain    ${output}    1
