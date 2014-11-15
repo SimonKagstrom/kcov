@@ -121,8 +121,11 @@ public:
 	// From IReporter::IListener
 	void onAddress(unsigned long addr, unsigned long hits)
 	{
-		if (m_fileLineByAddress.find(addr) == m_fileLineByAddress.end())
+		if (m_fileLineByAddress.find(addr) == m_fileLineByAddress.end()) {
+			m_pendingHits[addr] = hits;
 			return;
+		}
+
 		addr = m_fileLineByAddress[addr];
 
 		File *file = m_filesByAddress[addr];
@@ -165,19 +168,29 @@ public:
 
 		m_addressByFileLine[addrHash] = addr;
 		m_fileLineByAddress[addr] = addrHash;
-		addr = addrHash;
 
 		// Mark as a local file
 		file->setLocal();
-		file->addLine(lineNr, addr & ~(1ULL << 63));
+		file->addLine(lineNr, addrHash & ~(1ULL << 63));
 
 		// Record this for the collector hits
-		m_filesByAddress[addr] = file;
+		m_filesByAddress[addrHash] = file;
 
 		for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
 				it != m_lineListeners.end();
 				++it)
-			(*it)->onLine(filename, lineNr, addr);
+			(*it)->onLine(filename, lineNr, addrHash);
+
+		/*
+		 * Visit pending addresses for this file/line. onAddress gets a non-
+		 * hashed address, so replicate that behavior here.
+		 */
+		AddrToHitsMap_t::iterator pend = m_pendingHits.find(addr);
+		if (pend != m_pendingHits.end()) {
+			onAddress(addr, pend->second);
+
+			m_pendingHits.erase(addr);
+		}
 	}
 
 	// From IFileParser::IFileListener
@@ -540,6 +553,7 @@ private:
 	typedef std::unordered_map<std::string, File *> FileByNameMap_t;
 	typedef std::unordered_map<unsigned long, File *> FileByAddressMap_t;
 	typedef std::unordered_map<unsigned long, uint64_t> FileLineByAddress_t;
+	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddressByFileLine_t;
 	typedef std::vector<IFileParser::ILineListener *> LineListenerList_t;
 
@@ -548,6 +562,7 @@ private:
 	FileByAddressMap_t m_filesByAddress;
 	FileLineByAddress_t m_fileLineByAddress;
 	AddressByFileLine_t m_addressByFileLine;
+	AddrToHitsMap_t m_pendingHits;
 
 	LineListenerList_t m_lineListeners;
 	const std::string m_baseDirectory;
