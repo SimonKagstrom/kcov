@@ -471,6 +471,30 @@ bash-accumulate-changed-data
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 6
     Should Contain    ${output}    	1
 
+bash-merge-data-issue-38
+	Run								rm -rf ${out}
+    ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 1
+    ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 16
+    Should Contain    ${output}    0
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 2
+    ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 16
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 6
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh all
+    ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 36
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 30
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 33
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 36
+    Should Contain    ${output}    1
+
+
 merge-basic
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
