@@ -1,0 +1,43 @@
+Classes
+=======
+The kcov design is based on a number of classes:
+
+FileParser
+----------
+Reads the binary to parse debugging information, i.e., file/line -> address
+mappings, and reports these to listeners. For ELF binaries, this is done on
+startup, Python and Bash report during runtime.
+
+Collector
+---------
+Controls execution, setup breakpoints, catch signals etc, and report breakpoint
+hits. 
+
+Engine
+------
+Low-level control of execution (i.e., setup breakpoints, start/stop execution).
+
+Reporter
+--------
+Reports breakpoint hits and can be queried for address -> file/line mappings.
+Also reads back accumulated data from previous runs.
+
+OutputHandler
+-------------
+Receives files from the parser and allows writers to register. Will call into
+writers at regular intervals.
+
+Writer
+------
+Queries the reporter to produce HTML and cobertura (currently) output with
+coverage data.
+
+
+Python/bash
+===========
+The above classes are mainly modelled for dwarf/ptrace-based applications.
+When covering python/bash code, the FileParser and Engine interfaces are
+implemented by the same class since coverage data is collected during runtime.
+
+Merge parser
+============
