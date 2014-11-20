@@ -20,8 +20,6 @@ struct summaryStruct
 	char name[256];
 };
 
-int WriterBase::File::fileNameCount;
-
 WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
 		m_fileParser(parser), m_reporter(reporter),
 		m_commonPath("not set")
@@ -40,17 +38,17 @@ WriterBase::File::File(const std::string &filename) :
 		m_fileName = m_name;
 
 	// Make this name unique (we might have several files with the same name)
-	m_outFileName = fmt("%s.%d.html", m_fileName.c_str(), fileNameCount);
-	m_jsonOutFileName = fmt("%s.%d.json", m_fileName.c_str(), fileNameCount);
-	fileNameCount++;
+	uint32_t crc = readFile(filename);
 
-	readFile(filename);
+	m_outFileName = fmt("%s.%x.html", m_fileName.c_str(), crc);
+	m_jsonOutFileName = fmt("%s.%x.json", m_fileName.c_str(), crc);
 }
 
-void WriterBase::File::readFile(const std::string &filename)
+uint32_t WriterBase::File::readFile(const std::string &filename)
 {
 	FILE *fp = fopen(filename.c_str(), "r");
 	unsigned int lineNr = 1;
+	uint32_t crc = 0;
 
 	panic_if(!fp, "Can't open %s", filename.c_str());
 
@@ -66,6 +64,7 @@ void WriterBase::File::readFile(const std::string &filename)
 		std::string s(lineptr);
 		s.erase(s.find_last_not_of(" \n\r\t")+1);
 		m_lineMap[lineNr] = s;
+		crc ^= crc32(s.c_str(), s.size());
 
 		free((void *)lineptr);
 		lineNr++;
@@ -74,6 +73,8 @@ void WriterBase::File::readFile(const std::string &filename)
 	m_lastLineNr = lineNr;
 
 	fclose(fp);
+
+	return crc;
 }
 
 
