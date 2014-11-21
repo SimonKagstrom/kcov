@@ -494,6 +494,15 @@ bash-merge-data-issue-38
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 36
     Should Contain    ${output}    1
 
+bash-output-crc
+	Run								rm -rf ${out}/a.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/first-dir/a.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/second-dir/a.sh
+    ${output}=    Run              ls -l ${out}/a.sh/a.*.json | wc -l
+    Should Contain    ${output}    2
+    ${output}=    Run              ls -l ${out}/a.sh/b.*.json | wc -l
+    Should Contain    ${output}    2
+
 
 merge-basic
 	Run								rm -rf ${out}
