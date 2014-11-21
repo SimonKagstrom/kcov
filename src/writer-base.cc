@@ -48,7 +48,7 @@ uint32_t WriterBase::File::readFile(const std::string &filename)
 {
 	FILE *fp = fopen(filename.c_str(), "r");
 	unsigned int lineNr = 1;
-	uint32_t crc = 0;
+	uint32_t crc = crc32(filename.c_str(), filename.size());
 
 	panic_if(!fp, "Can't open %s", filename.c_str());
 
