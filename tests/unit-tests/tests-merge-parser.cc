@@ -248,16 +248,16 @@ TESTSUITE(merge_parser)
 		mock_get_file_timestamp(mocked_get_timestamp);
 
 		// Register the collector address listener
-		reporter.registerListener(*this);
+		parser.registerListener(*this);
 
 		parser.onLine("a", 1, 2);
 		parser.onLine("a", 3, 9);
 		parser.onLine("a", 4, 72);
 		parser.onLine("b", 2, 3);
 
-		ASSERT_TRUE(m_addrToHits[parser.hashAddress("b", 2, 3)] == 0);
+		ASSERT_TRUE(m_breakpointToHits[parser.hashAddress("b", 2, 3)] == 0);
 		parser.onAddress(3, 2);
-		ASSERT_TRUE(m_addrToHits[parser.hashAddress("b", 2, 3)] == 2);
+		ASSERT_TRUE(m_breakpointToHits[parser.hashAddress("b", 2, 3)] == 2);
 
 		// Register afterwards to get everything on parse below...
 		parser.registerLineListener(*this);
@@ -282,7 +282,7 @@ TESTSUITE(merge_parser)
 
 		// Valid file and data
 		ASSERT_TRUE(m_lineToAddr.size() == 0);
-		ASSERT_TRUE(m_addrToHits[parser.hashAddress("a", 4, 72)] == 0);
+		ASSERT_TRUE(m_breakpointToHits[parser.hashAddress("a", 4, 72)] == 0);
 
 		// See to it that we "know of" file "a"
 		parser2.onLine("a", 4, 72);
@@ -304,7 +304,7 @@ TESTSUITE(merge_parser)
 				fmt("0x%08x", parser.m_files["a"]->m_checksum));
 		ASSERT_TRUE(m_lineToAddr.size() == 3);
 		ASSERT_TRUE(m_lineToAddr[1] == parser.hashAddress("a", 1, 2));
-		ASSERT_TRUE(m_addrToHits[parser.hashAddress("a", 4, 72)] == 1);
+		ASSERT_TRUE(m_breakpointToHits[parser.hashAddress("a", 4, 72)] == 1);
 
 		free((void *)p);
 	}
