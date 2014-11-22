@@ -164,9 +164,8 @@ public:
 		}
 
 
-		uint64_t addrHash = hashAddressUnique(filename, lineNr, addr);
+		uint64_t addrHash = hashAddress(filename, lineNr, addr);
 
-		m_addressByFileLine[addrHash] = addr;
 		m_fileLineByAddress[addr] = addrHash;
 
 		// Mark as a local file
@@ -267,17 +266,6 @@ private:
 	{
 		// Convert address into a suitable format for the merge parser
 		uint64_t addrHash = crc32(filename.c_str(), filename.size()) ^ crc32(&lineNr, sizeof(lineNr));
-
-		return addrHash;
-	}
-
-	uint64_t hashAddressUnique(const std::string &filename, unsigned int lineNr, uint64_t addr)
-	{
-		uint64_t addrHash = hashAddress(filename, lineNr, addr);
-
-		// Find some unique position (if there are multiple addresses for this line)
-		while (m_addressByFileLine.find(addrHash) != m_addressByFileLine.end())
-			addrHash++;
 
 		return addrHash;
 	}
@@ -561,7 +549,6 @@ private:
 	FileByNameMap_t m_files;
 	FileByAddressMap_t m_filesByAddress;
 	FileLineByAddress_t m_fileLineByAddress;
-	AddressByFileLine_t m_addressByFileLine;
 	AddrToHitsMap_t m_pendingHits;
 
 	LineListenerList_t m_lineListeners;
