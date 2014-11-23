@@ -18,6 +18,8 @@
 
 #include <swap-endian.hh>
 
+#include "script-engine-base.hh"
+
 using namespace kcov;
 
 extern std::vector<uint8_t> python_helper_data;
@@ -34,37 +36,19 @@ struct coverage_data
 	const char filename[];
 };
 
-class PythonEngine : public IEngine, public IFileParser
+class PythonEngine : public ScriptEngineBase
 {
 public:
 	PythonEngine() :
+		ScriptEngineBase(),
 		m_child(0),
-		m_pipe(NULL),
-		m_listener(NULL)
+		m_pipe(NULL)
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
-		IParserManager::getInstance().registerParser(*this);
 	}
 
 	~PythonEngine()
 	{
 		kill(SIGTERM);
-	}
-
-	// From IEngine
-	int registerBreakpoint(unsigned long addr)
-	{
-		// No breakpoints
-		return 0;
-	}
-
-	void setupAllBreakpoints()
-	{
-	}
-
-	bool clearBreakpoint(const Event &ev)
-	{
-		return true;
 	}
 
 	bool start(IEventListener &listener, const std::string &executable)
@@ -202,45 +186,9 @@ public:
 		::kill(m_child, signal);
 	}
 
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		return matchParser(filename, data, dataSize);
-	}
-
-
-	// From IFileParser
-	bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
-	{
-		return true;
-	}
-
-	void registerLineListener(ILineListener &listener)
-	{
-		m_lineListeners.push_back(&listener);
-	}
-
-	void registerFileListener(IFileListener &listener)
-	{
-		m_fileListeners.push_back(&listener);
-	}
-
-	bool parse()
-	{
-		return true;
-	}
-
-	uint64_t getChecksum()
-	{
-		return 0;
-	}
-
 	std::string getParserType()
 	{
 		return "python";
-	}
-
-	void setupParser(IFilter *filter)
-	{
 	}
 
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
@@ -266,14 +214,6 @@ public:
 	};
 
 private:
-	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0)
-	{
-		if (!m_listener)
-			return;
-
-		m_listener->onEvent(Event(type, data, address));
-	}
-
 	void unmarshalCoverageData(struct coverage_data *p)
 	{
 		p->magic = be_to_host<uint64_t>(p->magic);
@@ -387,19 +327,6 @@ private:
 		}
 	}
 
-	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
-	{
-		size_t id = getLineId(filename, lineNo);
-		uint64_t address = lineNo ^ crc;
-
-		m_lineIdToAddress[id] = address;
-
-		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
-				lit != m_lineListeners.end();
-				++lit)
-			(*lit)->onLine(get_real_path(filename).c_str(), lineNo, address);
-	}
-
 	size_t multilineIdx(const std::string &s)
 	{
 		size_t idx = s.find("'''");
@@ -492,20 +419,8 @@ private:
 		return p;
 	}
 
-	typedef std::vector<ILineListener *> LineListenerList_t;
-	typedef std::vector<IFileListener *> FileListenerList_t;
-	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
-	typedef std::unordered_map<size_t, uint64_t> LineIdToAddressMap_t;
-
 	pid_t m_child;
 	FILE *m_pipe;
-
-	LineListenerList_t m_lineListeners;
-	FileListenerList_t m_fileListeners;
-	ReportedFileMap_t m_reportedFiles;
-	LineIdToAddressMap_t m_lineIdToAddress;
-
-	IEventListener *m_listener;
 };
 
 static PythonEngine::Ctor g_pythonEngine;

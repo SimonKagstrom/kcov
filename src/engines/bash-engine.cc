@@ -18,39 +18,23 @@
 
 #include <swap-endian.hh>
 
+#include "script-engine-base.hh"
+
 using namespace kcov;
 
-class BashEngine : public IEngine, public IFileParser
+class BashEngine : public ScriptEngineBase
 {
 public:
 	BashEngine() :
+		ScriptEngineBase(),
 		m_child(0),
-		m_stderr(NULL),
-		m_listener(NULL)
+		m_stderr(NULL)
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
-		IParserManager::getInstance().registerParser(*this);
 	}
 
 	~BashEngine()
 	{
 		kill(SIGTERM);
-	}
-
-	// From IEngine
-	int registerBreakpoint(unsigned long addr)
-	{
-		// No breakpoints
-		return 0;
-	}
-
-	void setupAllBreakpoints()
-	{
-	}
-
-	bool clearBreakpoint(const Event &ev)
-	{
-		return true;
 	}
 
 	bool start(IEventListener &listener, const std::string &executable)
@@ -219,45 +203,9 @@ public:
 		::kill(m_child, signal);
 	}
 
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		return matchParser(filename, data, dataSize);
-	}
-
-
-	// From IFileParser
-	bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
-	{
-		return true;
-	}
-
-	void registerLineListener(ILineListener &listener)
-	{
-		m_lineListeners.push_back(&listener);
-	}
-
-	void registerFileListener(IFileListener &listener)
-	{
-		m_fileListeners.push_back(&listener);
-	}
-
-	bool parse()
-	{
-		return true;
-	}
-
-	uint64_t getChecksum()
-	{
-		return 0;
-	}
-
 	std::string getParserType()
 	{
 		return "bash";
-	}
-
-	void setupParser(IFilter *filter)
-	{
 	}
 
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
@@ -289,13 +237,6 @@ public:
 	};
 
 private:
-	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0)
-	{
-		if (!m_listener)
-			return;
-
-		m_listener->onEvent(Event(type, data, address));
-	}
 
 	// Sweep through lines in a file to determine what is valid code
 	void parseFile(const std::string &filename)
@@ -414,33 +355,8 @@ private:
 		}
 	}
 
-	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
-	{
-		size_t id = getLineId(filename, lineNo);
-		uint64_t address = lineNo ^ crc;
-
-		m_lineIdToAddress[id] = address;
-
-		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
-				lit != m_lineListeners.end();
-				++lit)
-			(*lit)->onLine(filename.c_str(), lineNo, address);
-	}
-
-	typedef std::vector<ILineListener *> LineListenerList_t;
-	typedef std::vector<IFileListener *> FileListenerList_t;
-	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
-	typedef std::unordered_map<size_t, uint64_t> LineIdToAddressMap_t;
-
 	pid_t m_child;
 	FILE *m_stderr;
-
-	LineListenerList_t m_lineListeners;
-	FileListenerList_t m_fileListeners;
-	ReportedFileMap_t m_reportedFiles;
-	LineIdToAddressMap_t m_lineIdToAddress;
-
-	IEventListener *m_listener;
 };
 
 static BashEngine::Ctor g_bashEngine;
