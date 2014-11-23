@@ -230,7 +230,7 @@ public:
 			if (!fd)
 				continue;
 
-			uint32_t crc = crc32((const void *)it->second->m_filename.c_str(), it->second->m_filename.size());
+			uint32_t crc = hash_block((const void *)it->second->m_filename.c_str(), it->second->m_filename.size());
 			std::string name = fmt("%08x", crc);
 
 			write_file((const void *)fd, be_to_host<uint32_t>(fd->size), "%s/metadata/%s",
@@ -269,7 +269,7 @@ private:
 	uint64_t hashAddress(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
 		// Convert address into a suitable format for the merge parser
-		uint64_t addrHash = crc32(filename.c_str(), filename.size()) ^ crc32(&lineNr, sizeof(lineNr));
+		uint64_t addrHash = hash_block(filename.c_str(), filename.size()) ^ hash_block(&lineNr, sizeof(lineNr));
 
 		return addrHash;
 	}
@@ -510,7 +510,7 @@ private:
 			data = read_file(&size, "%s", filename.c_str());
 			panic_if(!data,
 					"File %s exists, but can't be read???", filename.c_str());
-			m_checksum = crc32(data, size);
+			m_checksum = hash_block(data, size);
 			m_fileTimestamp = get_file_timestamp(filename.c_str());
 
 			free((void *)data);

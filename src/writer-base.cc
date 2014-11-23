@@ -48,7 +48,7 @@ uint32_t WriterBase::File::readFile(const std::string &filename)
 {
 	FILE *fp = fopen(filename.c_str(), "r");
 	unsigned int lineNr = 1;
-	uint32_t crc = crc32(filename.c_str(), filename.size());
+	uint32_t crc = hash_block(filename.c_str(), filename.size());
 
 	panic_if(!fp, "Can't open %s", filename.c_str());
 
@@ -64,7 +64,7 @@ uint32_t WriterBase::File::readFile(const std::string &filename)
 		std::string s(lineptr);
 		s.erase(s.find_last_not_of(" \n\r\t")+1);
 		m_lineMap[lineNr] = s;
-		crc ^= crc32(s.c_str(), s.size());
+		crc ^= hash_block(s.c_str(), s.size());
 
 		free((void *)lineptr);
 		lineNr++;

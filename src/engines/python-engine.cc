@@ -295,8 +295,8 @@ private:
 			return;
 		std::string fileData(p, sz);
 
-		// Compute crc32 for this file
-		uint32_t crc = crc32((const uint8_t *)p, sz);
+		// Compute hash for this file
+		uint32_t crc = hash_block((const uint8_t *)p, sz);
 
 		free((void*)p);
 

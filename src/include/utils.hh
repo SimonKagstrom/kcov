@@ -194,5 +194,5 @@ void mock_file_exists(bool (*callback)(const std::string &path));
 
 void mock_get_file_timestamp(uint64_t (*callback)(const std::string &path));
 
-uint32_t crc32(const void *buf, size_t len);
+uint32_t hash_block(const void *buf, size_t len);
 

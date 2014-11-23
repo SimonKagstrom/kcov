@@ -609,7 +609,7 @@ std::string escape_json(const std::string &str)
 	return out;
 }
 
-uint32_t crc32(const void *buf, size_t len)
+uint32_t hash_block(const void *buf, size_t len)
 {
 	return crc32(0, (const Bytef *)buf, len);
 }
