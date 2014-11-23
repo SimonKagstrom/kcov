@@ -226,6 +226,10 @@ public:
 				continue;
 
 			const struct file_data *fd = marshalFile(it->second->m_filename);
+
+			if (!fd)
+				continue;
+
 			uint32_t crc = crc32((const void *)it->second->m_filename.c_str(), it->second->m_filename.size());
 			std::string name = fmt("%08x", crc);
 
