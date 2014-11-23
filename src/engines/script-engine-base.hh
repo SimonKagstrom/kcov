@@ -102,7 +102,7 @@ protected:
 	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
 		size_t id = getLineId(filename, lineNo);
-		uint64_t address = (uint64_t)crc | ((uint64_t)hash_block(&lineNo, sizeof(lineNo)) << 32ULL);
+		uint64_t address = (uint64_t)crc | ((uint64_t)lineNo << 32ULL);
 
 		m_lineIdToAddress[id] = address;
 

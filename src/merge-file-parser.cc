@@ -269,7 +269,7 @@ private:
 	uint64_t hashAddress(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
 		// Convert address into a suitable format for the merge parser
-		uint64_t addrHash = (uint64_t)hash_block(filename.c_str(), filename.size()) | ((uint64_t)hash_block(&lineNr, sizeof(lineNr)) << 32ULL);
+		uint64_t addrHash = (uint64_t)hash_block(filename.c_str(), filename.size()) | ((uint64_t)lineNr << 32ULL);
 
 		return addrHash;
 	}
