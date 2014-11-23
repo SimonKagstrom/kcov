@@ -21,7 +21,7 @@
 using namespace kcov;
 
 #define MERGE_MAGIC   0x4d6f6172 // "Moar"
-#define MERGE_VERSION 2
+#define MERGE_VERSION 3
 
 struct line_entry
 {
@@ -164,13 +164,13 @@ public:
 		}
 
 
-		uint64_t addrHash = hashAddress(filename, lineNr, addr);
+		uint64_t addrHash = hashAddress(filename, lineNr, addr) & ~(1ULL << 63);
 
 		m_fileLineByAddress[addr] = addrHash;
 
 		// Mark as a local file
 		file->setLocal();
-		file->addLine(lineNr, addrHash & ~(1ULL << 63));
+		file->addLine(lineNr, addrHash);
 
 		// Record this for the collector hits
 		m_filesByAddress[addrHash] = file;
@@ -269,7 +269,7 @@ private:
 	uint64_t hashAddress(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
 		// Convert address into a suitable format for the merge parser
-		uint64_t addrHash = hash_block(filename.c_str(), filename.size()) ^ hash_block(&lineNr, sizeof(lineNr));
+		uint64_t addrHash = (uint64_t)hash_block(filename.c_str(), filename.size()) | ((uint64_t)hash_block(&lineNr, sizeof(lineNr)) << 32ULL);
 
 		return addrHash;
 	}
