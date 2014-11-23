@@ -217,8 +217,8 @@ TESTSUITE(merge_parser)
 
 		parser.onStop();
 
-		std::string p0 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("a", 1));
-		std::string p1 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", crc32("b", 1));
+		std::string p0 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", hash_block("a", 1));
+		std::string p1 = parser.m_outputDirectory + "/metadata/" + fmt("%08x", hash_block("b", 1));
 
 		ASSERT_TRUE(path_to_data.find(p0) != path_to_data.end());
 		ASSERT_TRUE(path_to_data.find(p1) != path_to_data.end());
