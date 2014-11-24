@@ -149,3 +149,7 @@ target_link_libraries(${LINE2ADDR}
 	${LIBZ_LIBRARIES})
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
+
+file ( GLOB kcov-merge kcov-merge )
+
+install (PROGRAMS ${kcov-merge} DESTINATION bin )
