@@ -9,6 +9,8 @@ namespace std { class type_info; }
 #include <string>
 #include <list>
 #include <unordered_map>
+#include <iostream>
+#include <fstream>
 
 #include "writer-base.hh"
 
@@ -34,7 +36,12 @@ public:
 
 	void write()
 	{
-		std::string str;
+		std::ofstream out(m_outFile);
+
+		// Output directory not writable?
+		if (!out.is_open())
+			return;
+
 
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
@@ -46,15 +53,20 @@ public:
 				++it) {
 			File *file = it->second;
 
-			str = str + writeOne(file);
 			nTotalCodeLines += file->m_codeLines;
 			nTotalExecutedLines += file->m_executedLines;
 		}
+		out << getHeader(nTotalCodeLines, nTotalExecutedLines);
 
-		str = getHeader(nTotalCodeLines, nTotalExecutedLines) + str + getFooter();
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
+			File *file = it->second;
 
-		write_file((void *)str.c_str(), str.size(),
-				"%s", m_outFile.c_str());
+			out << writeOne(file);
+		}
+
+		out << getFooter();
 	}
 
 private:
