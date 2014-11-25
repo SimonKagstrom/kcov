@@ -58,7 +58,7 @@ public:
 	}
 
 private:
-	std::string mangleFileName(std::string name)
+	const std::string mangleFileName(const std::string &name)
 	{
 		std::string out = name;
 
@@ -84,8 +84,6 @@ private:
 		unsigned int nCodeLines = 0;
 
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
-			std::string line = file->m_lineMap[n];
-
 			if (!m_reporter.lineIsCode(file->m_name, n))
 					continue;
 
@@ -108,7 +106,7 @@ private:
 		if (nCodeLines == 0)
 			nCodeLines = 1;
 
-		std::string filename = file->m_name;
+		std::string &filename = file->m_name;
 		size_t pos = filename.find(m_commonPath);
 
 		if (pos != std::string::npos && filename.size() > m_commonPath.size())
@@ -156,7 +154,7 @@ private:
 				;
 	}
 
-	std::string getFooter()
+	const std::string getFooter()
 	{
 		return
 				"			</classes>\n"
