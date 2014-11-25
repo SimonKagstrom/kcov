@@ -118,7 +118,7 @@ private:
 		if (nCodeLines == 0)
 			nCodeLines = 1;
 
-		std::string &filename = file->m_name;
+		std::string filename = file->m_name;
 		size_t pos = filename.find(m_commonPath);
 
 		if (pos != std::string::npos && filename.size() > m_commonPath.size())
