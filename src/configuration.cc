@@ -33,7 +33,7 @@ public:
 		m_newPathPrefix="";
 		m_parseSolibs = true;
 		m_exitFirstProcess = false;
-		m_outputInterval = 1000;
+		m_outputInterval = 5000;
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
 	}
