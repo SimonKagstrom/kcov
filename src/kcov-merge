@@ -78,7 +78,7 @@ class CovFile:
             type='linePartCov'
         if self.rate > self.high:
             type='lineCov'
-        indexFile.write("{'link':'','title':'%s','summary_name':'%s','covered_class':'%s','covered':'%0.1f','covered_lines':'%d','uncovered_lines':'%d','total_lines':'%d' },\n"
+        indexFile.write("{'title':'%s','summary_name':'%s','covered_class':'%s','covered':'%0.1f','covered_lines':'%d','uncovered_lines':'%d','total_lines':'%d' },\n"
                          % (self.filename, self.filename, type,self.rate, self.hits,
                             (self.lines - self.hits), self.lines ))
         coberturaFile.write('''
@@ -167,7 +167,7 @@ class CovReport:
     </thead>
     <tbody id="main-data">
     <tr data-template>
-      <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
+      <td class="coverFile">{{summary_name}}</td>
       <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
       <td class="coverNum">{{covered_lines}}</td>
       <td class="coverNum">{{uncovered_lines}}</td>
@@ -306,16 +306,21 @@ class Main:
 
     def main(self,argv):
 
-        parser = OptionParser(usage="%prog [options] [dir1 dir2 ... dirn]", version="%prog 1.0")
-        parser.add_option("-o", "--output", dest="directory", default="aggregate",
-                          help="output directory name", metavar="DIR")
+        parser = OptionParser(usage="%prog [options] outdir dir1 [dir2 ... dirn]", version="%prog 1.0")
         parser.add_option("-l", "--limits", dest="limits", default="25,75",
                           help="setup limits for low/high coverage (default 25,75)", metavar="LOW,HIGH")
 
         (options, args) = parser.parse_args()
 
-        directories = args
-        outputDir = options.directory
+        # Output directory and at least 1 kcov output directory must be specified
+        if len(args) < 2:
+            print ('output directory and at least 1 kcov output directory not specified')
+            sys.exit(1)
+
+
+        outputDir = args[0]
+        args.remove(outputDir)
+        directories = args        
         limits = options.limits
 
         low=25

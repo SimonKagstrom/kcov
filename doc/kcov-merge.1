@@ -19,7 +19,7 @@
 kcov-merge \- Merge code coverage data from multiple kcov output directories
 .SH SYNOPSIS
 .B kcov-merge
-.RI [ options ] " outdir dir1[,dir2...]
+.RI [ options ] " outdir dir1 [dir2...]
 .SH DESCRIPTION
 .PP
 This manual page documents briefly the \fBkcov-merge\fP command. \fBkcov\-merge\fP is a
@@ -30,9 +30,6 @@ utility to merge the code coverage data gathered from multiple
 \fB\-h\fP, \fB\-\-help\fP
 Display help message and exit
 .TP
-\fB\-o\fP, \fB\-\-output\fP=\fIDIR\fP
-Output directory to generate aggregate coverage information.
-.TP
 \fB\-l\fP, \fB\-\-limits\fP=\fIlow,high\fP
 Setup limits for low/high coverage (default: 25,75).
 .RE
@@ -42,7 +39,7 @@ Generate aggregate coverage from ./kcov1 and ./kcov2 directories and
 generate HTML output in ./kcov-aggregate.
 .PP
 .RS
-kcov-merge /tmp/kcov --output ./kcov-aggregate ./kcov1 ./kcov2
+kcov-merge ./kcov-aggregate ./kcov1 ./kcov2
 .RE
 .RE
 .SH HTML OUTPUT
