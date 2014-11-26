@@ -34,7 +34,7 @@ namespace kcov
 			unsigned int m_lastLineNr;
 
 		private:
-			uint32_t readFile(const std::string &filename);
+			void readFile(const std::string &filename);
 		};
 
 		typedef std::unordered_map<std::string, File *> FileMap_t;

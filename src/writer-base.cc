@@ -38,17 +38,17 @@ WriterBase::File::File(const std::string &filename) :
 		m_fileName = m_name;
 
 	// Make this name unique (we might have several files with the same name)
-	uint32_t crc = readFile(filename);
+	uint32_t crc = hash_block(filename.c_str(), filename.size());
+	readFile(filename);
 
 	m_outFileName = fmt("%s.%x.html", m_fileName.c_str(), crc);
 	m_jsonOutFileName = fmt("%s.%x.json", m_fileName.c_str(), crc);
 }
 
-uint32_t WriterBase::File::readFile(const std::string &filename)
+void WriterBase::File::readFile(const std::string &filename)
 {
 	FILE *fp = fopen(filename.c_str(), "r");
 	unsigned int lineNr = 1;
-	uint32_t crc = hash_block(filename.c_str(), filename.size());
 
 	panic_if(!fp, "Can't open %s", filename.c_str());
 
@@ -64,7 +64,6 @@ uint32_t WriterBase::File::readFile(const std::string &filename)
 		std::string s(lineptr);
 		s.erase(s.find_last_not_of(" \n\r\t")+1);
 		m_lineMap[lineNr] = s;
-		crc ^= hash_block(s.c_str(), s.size());
 
 		free((void *)lineptr);
 		lineNr++;
@@ -73,8 +72,6 @@ uint32_t WriterBase::File::readFile(const std::string &filename)
 	m_lastLineNr = lineNr;
 
 	fclose(fp);
-
-	return crc;
 }
 
 
