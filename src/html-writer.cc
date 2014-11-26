@@ -67,9 +67,6 @@ private:
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
 			const std::string &line = file->m_lineMap[n];
 
-			IReporter::LineExecutionCount cnt =
-					m_reporter.getLineExecutionCount(file->m_name, n);
-
 			json += fmt(
 					"{'lineNum':'%5u',"
 					"'line':'%s'",
@@ -78,6 +75,7 @@ private:
 					);
 
 			if (m_reporter.lineIsCode(file->m_name, n)) {
+				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
 				std::string lineClass = "lineNoCov";
 
 				if (cnt.m_hits == cnt.m_possibleHits)
