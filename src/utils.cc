@@ -590,6 +590,9 @@ std::string escape_json(const std::string &str)
 			n_escapes++;
 	}
 
+	if (n_escapes)
+		return str;
+
 	std::string out;
 	out.resize(str.size() + n_escapes);
 	unsigned cur = 0;
