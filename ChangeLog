@@ -1,4 +1,17 @@
 Kcov (23):
+	* Performance improvements for the Cobertura writer by reducing the amount
+	  of string operations
+
+	* Add a kcov-merge command which merges data from multiple kcov
+	  directories into a single report (Chris Love)
+
+	* Issue #39: Reduce the amount of extra output files by using filename
+	  as a tie breaker instead of file data.
+
+	* Issue #38: Fix several bugs which caused merged output to miss data
+	  present in the regular output
+
+	* Issue #37: Correct coverage accumulation for Python/bash
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
