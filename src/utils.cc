@@ -590,7 +590,7 @@ std::string escape_json(const std::string &str)
 			n_escapes++;
 	}
 
-	if (n_escapes)
+	if (n_escapes == 0)
 		return str;
 
 	std::string out;
