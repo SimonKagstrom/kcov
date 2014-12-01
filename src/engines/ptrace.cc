@@ -299,6 +299,8 @@ public:
 				// Single-step if we have this BP
 				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
 					singleStep();
+				else
+					skipInstruction();
 
 				if (m_firstBreakpoint) {
 					blockUntilSolibDataRead();
@@ -487,6 +489,20 @@ private:
 		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
 
 		return true;
+	}
+
+	// Skip over this instruction
+	void skipInstruction()
+	{
+		unsigned long regs[1024];
+
+		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
+
+		// Nop on x86, op on PowerPC
+#if defined(__powerpc__)
+		regs[ppc_NIP] += 4;
+#endif
+		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
 	}
 
 	unsigned long getPcFromRegs(unsigned long *regs)
