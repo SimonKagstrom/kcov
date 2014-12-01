@@ -52,6 +52,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	IReporter::ExecutionSummary summary(17, 4);
 
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "/kcov-writer");
+	system(fmt("rm -rf %s", outDir.c_str()).c_str());
 
 	sprintf(filename, "%s/test-binary", crpcut::get_start_dir());
 	elf = IParserManager::getInstance().matchParser(filename);
@@ -144,6 +145,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	IReporter::ExecutionSummary summary(17, 4);
 
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "/kcov-writerSameName");
+	system(fmt("rm -rf %s", outDir.c_str()).c_str());
 
 	sprintf(filename, "%s/same-name-test", crpcut::get_start_dir());
 	elf = IParserManager::getInstance().matchParser(filename);
