@@ -1,4 +1,9 @@
 Kcov (23):
+	* Correct use-after-free case when the solib thread is killed
+
+	* Default to 5s output interval to avoid costly write-to-disk sessions
+	  too often
+
 	* Performance improvements for the Cobertura writer by reducing the amount
 	  of string operations
 
@@ -12,6 +17,10 @@ Kcov (23):
 	  present in the regular output
 
 	* Issue #37: Correct coverage accumulation for Python/bash
+
+	* Issue #36: Collect coverage from dlopen:ed libraries (through unconditional
+	  breakpoints in the dlopen call). Should also improve reliability of
+	  general shared library coverage collection
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
