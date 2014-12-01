@@ -481,6 +481,7 @@ const std::string &get_real_path(const std::string &path)
 		return path;
 
 	realPathCache[path] = rp;
+	free(rp);
 
 	return realPathCache[path];
 }
