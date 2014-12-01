@@ -494,15 +494,15 @@ private:
 	// Skip over this instruction
 	void skipInstruction()
 	{
+		// Nop on x86, op on PowerPC
+#if defined(__powerpc__)
 		unsigned long regs[1024];
 
 		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
 
-		// Nop on x86, op on PowerPC
-#if defined(__powerpc__)
 		regs[ppc_NIP] += 4;
-#endif
 		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
+#endif
 	}
 
 	unsigned long getPcFromRegs(unsigned long *regs)
