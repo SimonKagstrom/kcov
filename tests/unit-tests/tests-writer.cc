@@ -104,11 +104,6 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	output.registerWriter(writer);
 	output.registerWriter(coberturaWriter);
 
-	EXPECT_CALL(reporter, unMarshal(_,_))
-		.Times(Exactly(1))
-		.WillOnce(Return(true))
-		;
-
 	res = elf->addFile(filename);
 	ASSERT_TRUE(res == true);
 	res = elf->parse();
