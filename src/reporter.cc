@@ -40,6 +40,11 @@ public:
 	~Reporter()
 	{
 		stop();
+
+		for (LineMap_t::iterator it = m_lines.begin();
+				it != m_lines.end();
+				++it)
+			free(it->second);
 	}
 
 	void registerListener(IReporter::IListener &listener)
