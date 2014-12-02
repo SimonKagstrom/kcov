@@ -22,7 +22,7 @@ Kcov (23):
 	  breakpoints in the dlopen call). Should also improve reliability of
 	  general shared library coverage collection
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Tue Dec  2 20:42:04 CET 2014
 
 
 Kcov (22):
