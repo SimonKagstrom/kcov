@@ -60,10 +60,6 @@ DISABLED_TEST(collector)
 		.Times(Exactly(1))
 		;
 
-	EXPECT_CALL(engine, clearBreakpoint(_))
-		.Times(Exactly(1))
-		;
-
 	v = collector.run(filename);
 
 	ASSERT_TRUE(v == evExit.data);
