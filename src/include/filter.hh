@@ -4,6 +4,11 @@
 
 namespace kcov
 {
+	/**
+	 * Class for filtering output data.
+	 *
+	 * Used for the --include-path and --include-pattern command line options.
+	 */
 	class IFilter
 	{
 	public:
@@ -13,7 +18,14 @@ namespace kcov
 			virtual bool includeFile(const std::string &file) = 0;
 		};
 
-		virtual bool runFilters(const std::string &file) = 0;
+		/**
+		 * Run filters on @a path.
+		 *
+		 * @param path the path to check
+		 *
+		 * @return true if this path should be included in the output, false otherwise.
+		 */
+		virtual bool runFilters(const std::string &path) = 0;
 
 
 		static IFilter &create();
