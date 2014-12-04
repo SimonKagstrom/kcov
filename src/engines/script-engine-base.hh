@@ -44,10 +44,6 @@ public:
 		return 0;
 	}
 
-	void setupAllBreakpoints()
-	{
-	}
-
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		return matchParser(filename, data, dataSize);

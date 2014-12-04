@@ -15,8 +15,6 @@ public:
 	}
 
 	MOCK_METHOD1(registerBreakpoint, int(unsigned long addr));
-	MOCK_METHOD0(setupAllBreakpoints, void());
-	MOCK_METHOD0(clearAllBreakpoints, void());
 	MOCK_METHOD2(start, bool(IEventListener &listener, const std::string &executable));
 	MOCK_METHOD0(continueExecution, bool());
 	MOCK_METHOD1(kill, void(int));

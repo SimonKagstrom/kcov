@@ -13,7 +13,7 @@ namespace kcov
 		}
 	};
 
-	ISolibHandler &createSolibHandler(IEngine &engine, IFileParser &parser, ICollector &collector);
+	ISolibHandler &createSolibHandler(IFileParser &parser, ICollector &collector);
 
 	// Wait for the solib thread to finish parsing the solib data
 	void blockUntilSolibDataRead();

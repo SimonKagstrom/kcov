@@ -27,15 +27,14 @@ extern std::vector<uint8_t> __library_data;
 class SolibHandler : public ISolibHandler, ICollector::IEventTickListener
 {
 public:
-	SolibHandler(IEngine &engine, IFileParser &parser, ICollector &collector) :
+	SolibHandler(IFileParser &parser, ICollector &collector) :
 		m_ldPreloadString(NULL),
 		m_envString(NULL),
 		m_solibFd(-1),
 		m_solibThreadValid(false),
 		m_threadShouldExit(false),
-		m_parser(&parser),
-		m_engine(&engine)
-	{
+		m_parser(&parser)
+{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
 		// Only useful for ELF binaries
@@ -205,7 +204,6 @@ public:
 			m_parser->addFile(cur->name, cur);
 			m_parser->parse();
 
-			m_engine->setupAllBreakpoints();
 			m_foundSolibs[cur->name] = true;
 		}
 
@@ -231,15 +229,14 @@ public:
 	std::mutex m_phdrListMutex;
 
 	IFileParser *m_parser;
-	IEngine *m_engine;
 };
 
 
 static SolibHandler *g_handler;
-ISolibHandler &kcov::createSolibHandler(IEngine &engine, IFileParser &parser, ICollector &collector)
+ISolibHandler &kcov::createSolibHandler(IFileParser &parser, ICollector &collector)
 {
 	// OK, not very nicely encapsulated...
-	g_handler = new SolibHandler(engine, parser, collector);
+	g_handler = new SolibHandler(parser, collector);
 
 	return *g_handler;
 }

@@ -46,7 +46,6 @@ public:
 
 		// This will set all breakpoints
 		m_fileParser.parse();
-		m_engine.setupAllBreakpoints();
 
 		while (1) {
 			bool shouldContinue = m_engine.continueExecution();

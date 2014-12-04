@@ -197,21 +197,6 @@ public:
 		return 0;
 	}
 
-	void setupAllBreakpoints()
-	{
-		for (PendingBreakpointList_t::const_iterator addrIt = m_pendingBreakpoints.begin();
-				addrIt != m_pendingBreakpoints.end();
-				++addrIt) {
-			unsigned long addr = *addrIt;
-			unsigned long cur_data = peekWord(addr);
-
-			// Set the breakpoint
-			pokeWord(addr,	arch_setupBreakpoint(addr, cur_data));
-		}
-
-		m_pendingBreakpoints.clear();
-	}
-
 	bool clearBreakpoint(unsigned long addr)
 	{
 		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
@@ -350,6 +335,8 @@ public:
 	{
 		int res;
 
+		setupAllBreakpoints();
+
 		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, m_signal);
 		if (res < 0) {
@@ -396,6 +383,23 @@ public:
 	};
 
 private:
+
+	void setupAllBreakpoints()
+	{
+		for (PendingBreakpointList_t::const_iterator addrIt = m_pendingBreakpoints.begin();
+				addrIt != m_pendingBreakpoints.end();
+				++addrIt) {
+			unsigned long addr = *addrIt;
+			unsigned long cur_data = peekWord(addr);
+
+			// Set the breakpoint
+			pokeWord(addr,	arch_setupBreakpoint(addr, cur_data));
+		}
+
+		m_pendingBreakpoints.clear();
+	}
+
+
 	bool forkChild(const char *executable)
 	{
 		char *const *argv = (char *const *)IConfiguration::getInstance().getArgv();

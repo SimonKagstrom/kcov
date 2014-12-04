@@ -56,9 +56,6 @@ namespace kcov
 		 */
 		virtual int registerBreakpoint(unsigned long addr) = 0;
 
-		virtual void setupAllBreakpoints() = 0;
-
-
 		/**
 		 * For a new process and attach to it with ptrace
 		 *
