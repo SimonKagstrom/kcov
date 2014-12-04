@@ -58,8 +58,6 @@ namespace kcov
 
 		virtual void setupAllBreakpoints() = 0;
 
-		virtual bool clearBreakpoint(const Event &ev) = 0;
-
 
 		/**
 		 * For a new process and attach to it with ptrace

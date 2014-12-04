@@ -222,11 +222,6 @@ public:
 		m_instructionMap.clear();
 	}
 
-	virtual bool clearBreakpoint(const Event &ev)
-	{
-		return clearBreakpoint(ev.addr);
-	}
-
 	bool clearBreakpoint(unsigned long addr)
 	{
 		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
@@ -378,6 +373,9 @@ public:
 
 		if (m_listener)
 			m_listener->onEvent(ev);
+
+		if (ev.type == ev_breakpoint)
+			clearBreakpoint(ev.addr);
 
 		if (ev.type == ev_error)
 			return false;

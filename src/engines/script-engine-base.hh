@@ -48,12 +48,6 @@ public:
 	{
 	}
 
-	bool clearBreakpoint(const Event &ev)
-	{
-		return true;
-	}
-
-
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		return matchParser(filename, data, dataSize);

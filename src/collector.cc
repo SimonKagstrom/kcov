@@ -149,9 +149,6 @@ private:
 					++it)
 				(*it)->onAddressHit(ev.addr, 1);
 
-			// Disable this breakpoint
-			m_engine.clearBreakpoint(ev);
-
 			break;
 
 		default:
