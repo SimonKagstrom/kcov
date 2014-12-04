@@ -212,16 +212,6 @@ public:
 		m_pendingBreakpoints.clear();
 	}
 
-	void clearAllBreakpoints()
-	{
-		for (instructionMap_t::const_iterator it = m_instructionMap.begin();
-				it != m_instructionMap.end();
-				++it)
-			clearBreakpoint(it->first);
-
-		m_instructionMap.clear();
-	}
-
 	bool clearBreakpoint(unsigned long addr)
 	{
 		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
