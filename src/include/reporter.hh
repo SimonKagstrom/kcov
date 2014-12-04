@@ -63,7 +63,6 @@ namespace kcov
 			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
 		};
 
-
 		virtual ~IReporter() {}
 
 
@@ -93,8 +92,21 @@ namespace kcov
 		 */
 		virtual bool lineIsCode(const std::string &file, unsigned int lineNr) = 0;
 
+		/**
+		 * Get the execution count for a file:line pair
+		 *
+		 * @param file the filename to check
+		 * @param lineNr the line to check
+		 *
+		 * @return the execution count
+		 */
 		virtual LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr) = 0;
 
+		/**
+		 * Get a summary of what has been executed so far
+		 *
+		 * @return the summary
+		 */
 		virtual ExecutionSummary getExecutionSummary() = 0;
 
 		/**
@@ -115,6 +127,8 @@ namespace kcov
 		 * @return true if the data could be unmarshalled, false otherwise
 		 */
 		virtual bool unMarshal(void *data, size_t sz) = 0;
+
+
 
 		static IReporter &create(IFileParser &elf, ICollector &collector, IFilter &filter);
 	};
