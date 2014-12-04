@@ -101,6 +101,10 @@ add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
 add_executable(issue31 daemon/test-issue31.cc)
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 
+add_executable(main-tests-gcov ${main_tests_SRCS})
+set_target_properties(main-tests-gcov PROPERTIES COMPILE_FLAGS "--coverage")
+set_target_properties(main-tests-gcov PROPERTIES LINK_FLAGS "--coverage")
+
 target_link_libraries(dlopen dl)
 
 
