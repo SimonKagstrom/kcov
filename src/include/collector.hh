@@ -8,12 +8,21 @@ namespace kcov
 	class IEngine;
 	class IFilter;
 
+	/**
+	 * Run a program and collect coverage for it.
+	 */
 	class ICollector
 	{
 	public:
 		class IListener
 		{
 		public:
+			/**
+			 * Called when an address is hit.
+			 *
+			 * @param addr the address which just got executed
+			 * @param hits the number of hits for the address
+			 */
 			virtual void onAddressHit(unsigned long addr, unsigned long hits) = 0;
 		};
 
@@ -23,8 +32,13 @@ namespace kcov
 			virtual void onTick() = 0;
 		};
 
-		static ICollector &create(IFileParser &elf, IEngine &engine, IFilter &filter);
+		virtual ~ICollector() {};
 
+		/**
+		 * Register a listener for breakpoint address hits
+		 *
+		 * @param listener the listener
+		 */
 		virtual void registerListener(IListener &listener) = 0;
 
 		/**
@@ -32,8 +46,15 @@ namespace kcov
 		 */
 		virtual void registerEventTickListener(IEventTickListener &listener) = 0;
 
+		/**
+		 * Run a program and collect coverage data
+		 *
+		 * @param filename the program to run
+		 */
 		virtual int run(const std::string &filename) = 0;
 
-		virtual ~ICollector() {};
+
+
+		static ICollector &create(IFileParser &elf, IEngine &engine, IFilter &filter);
 	};
 }
