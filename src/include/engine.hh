@@ -19,6 +19,9 @@ namespace kcov
 		ev_signal_exit =  5,
 	};
 
+	/**
+	 * An "engine" which can run programs and collect events (e.g., breakpoints)
+	 */
 	class IEngine
 	{
 	public:
@@ -57,7 +60,7 @@ namespace kcov
 		virtual int registerBreakpoint(unsigned long addr) = 0;
 
 		/**
-		 * For a new process and attach to it with ptrace
+		 * Fork a new process and attach to it
 		 *
 		 * @return true if OK, false otherwise
 		 */
@@ -78,6 +81,15 @@ namespace kcov
 		virtual bool continueExecution() = 0;
 
 
+		/**
+		 * See if a particular file can be matched with this engine.
+		 *
+		 * Should return how well this engine fits, the higher the better
+		 *
+		 * @param filename the name of the file
+		 * @param data the first few bytes of the file
+		 * @param dataSize the size of @a data
+		 */
 		virtual unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 	};
 
