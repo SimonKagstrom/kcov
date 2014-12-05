@@ -22,8 +22,6 @@
 #include <mutex>
 #include <vector>
 
-extern std::vector<uint8_t> __library_data;
-
 using namespace kcov;
 
 #define str(s) #s
