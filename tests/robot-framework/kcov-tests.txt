@@ -298,7 +298,7 @@ python-coverage
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 22
@@ -345,7 +345,7 @@ python-coverage-python3
     Run                            rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} --python-parser=python3 ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 22
