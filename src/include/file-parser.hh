@@ -96,6 +96,15 @@ namespace kcov
 
 
 		/**
+		 * Return if this parser is of the single-shot type (i.e., relying on
+		 * breakpoints which are cleared after hit), or if every address
+		 * can occur multiple times.
+		 *
+		 * @return if the parser is of the single-shot type
+		 */
+		virtual bool hitsAreSingleshot() = 0;
+
+		/**
 		 * See if a particular file can be matched with this parser.
 		 *
 		 * Should return how well this parser fits, the higher the better

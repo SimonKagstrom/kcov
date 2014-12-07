@@ -42,7 +42,11 @@
 </table>
 
 <pre class="source" id="main-data">
-<source-line data-template><span class="lineNum">{{lineNum}}</span><span class="{{class}}">{{coverage}} {{line}}</span>
+<source-line data-template data-if-possible_hits="0"><span class="lineNum">{{lineNum}}</span><span class="coverHits">{{hits}} </span><span class="{{class}}"> {{line}}</span>
+</source-line>
+<source-line data-template data-if-possible_hits="-1"><span class="lineNum">{{lineNum}}</span><span class="coverHits">&nbsp;</span><span class="{{class}}"> {{line}}</span>
+</source-line>
+<source-line data-template><span class="lineNum">{{lineNum}}</span><span class="coverHits">{{hits}} / {{possible_hits}}</span><span class="{{class}}"> {{line}}</span>
 </source-line>
 </pre>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" id="merged-data">

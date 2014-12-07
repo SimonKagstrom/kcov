@@ -108,6 +108,11 @@ public:
 		return "merge";
 	}
 
+	bool hitsAreSingleshot()
+	{
+		return false; // Hits from multiple binaries
+	}
+
 	void setupParser(IFilter *filter)
 	{
 	}

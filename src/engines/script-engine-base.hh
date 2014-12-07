@@ -76,6 +76,11 @@ public:
 		return 0;
 	}
 
+	bool hitsAreSingleshot()
+	{
+		return false;
+	}
+
 	void setupParser(IFilter *filter)
 	{
 	}

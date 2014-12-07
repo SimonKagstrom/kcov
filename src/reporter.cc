@@ -35,6 +35,8 @@ public:
 	{
 		m_fileParser.registerLineListener(*this);
 		m_collector.registerListener(*this);
+
+		m_hitsAreSingleshot = fileParser.hitsAreSingleshot();
 	}
 
 	~Reporter()
@@ -248,7 +250,7 @@ private:
 		Line *line;
 
 		if (it == m_lines.end()) {
-			line = new Line(file, lineNr);
+			line = new Line(file, lineNr, m_hitsAreSingleshot);
 
 			m_lines[key] = line;
 
@@ -306,9 +308,10 @@ private:
 	public:
 		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
 
-		Line(const std::string &file, unsigned int lineNr) :
+		Line(const std::string &file, unsigned int lineNr, bool hitsAreSingleshot) :
 			m_file(file),
-			m_lineNr(lineNr)
+			m_lineNr(lineNr),
+			m_hitsAreSingleshot(hitsAreSingleshot)
 		{
 		}
 
@@ -320,7 +323,10 @@ private:
 
 		void registerHit(unsigned long addr, unsigned long hits)
 		{
-			m_addrs[addr]++;
+			if (m_hitsAreSingleshot)
+				m_addrs[addr] = 1;
+			else
+				m_addrs[addr]++;
 		}
 
 		void clearHits()
@@ -345,7 +351,10 @@ private:
 
 		unsigned int possibleHits()
 		{
-			return m_addrs.size();
+			if (m_hitsAreSingleshot)
+				return m_addrs.size();
+
+			return 0; // Meaning any number of hits are possible
 		}
 
 		uint8_t *marshal(uint8_t *start)
@@ -377,6 +386,7 @@ private:
 		std::string m_file;
 		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
+		bool m_hitsAreSingleshot; // Breakpoints or accumulated hits
 	};
 
 	typedef std::unordered_map<size_t, Line *> LineMap_t;
@@ -392,6 +402,7 @@ private:
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
 	IFilter &m_filter;
+	bool m_hitsAreSingleshot;
 };
 
 IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)

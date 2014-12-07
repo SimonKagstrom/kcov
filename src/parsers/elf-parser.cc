@@ -69,6 +69,11 @@ public:
 		m_filter = filter;
 	}
 
+	bool hitsAreSingleshot()
+	{
+		return true; // Breakpoints are cleared after a hit
+	}
+
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		Elf32_Ehdr *hdr = (Elf32_Ehdr *)data;
