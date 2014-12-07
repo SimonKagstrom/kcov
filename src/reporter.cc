@@ -170,7 +170,7 @@ public:
 			Line *line = it->second;
 
 			// Really an internal error, but let's not hang on corrupted data
-			if (hits > line->possibleHits())
+			if (line->possibleHits() > 0 && hits > line->possibleHits())
 				hits = line->possibleHits();
 
 			// Register all hits for this address
@@ -309,7 +309,6 @@ private:
 		Line(const std::string &file, unsigned int lineNr) :
 			m_file(file),
 			m_lineNr(lineNr)
-
 		{
 		}
 
@@ -319,13 +318,9 @@ private:
 				m_addrs[addr] = 0;
 		}
 
-		unsigned int registerHit(unsigned long addr, unsigned long hits)
+		void registerHit(unsigned long addr, unsigned long hits)
 		{
-			unsigned int out = !m_addrs[addr];
-
-			m_addrs[addr] = 1;
-
-			return out;
+			m_addrs[addr]++;
 		}
 
 		void clearHits()
