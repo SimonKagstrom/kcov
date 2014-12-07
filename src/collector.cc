@@ -164,9 +164,6 @@ private:
 			return;
 		}
 
-		if (addr == 0)
-			return;
-
 		m_engine.registerBreakpoint(addr);
 	}
 

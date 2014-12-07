@@ -178,6 +178,9 @@ public:
 
 	int registerBreakpoint(unsigned long addr)
 	{
+		if (addr == 0)
+			return -1;
+
 		unsigned long data;
 
 		// There already?
