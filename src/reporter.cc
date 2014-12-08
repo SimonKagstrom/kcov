@@ -244,7 +244,7 @@ private:
 
 		kcov_debug(INFO_MSG, "REPORT %s:%u at 0x%lx\n",
 				file.c_str(), lineNr, (unsigned long)addr);
-		size_t key = getLineId(file, lineNr);
+		uint64_t key = getLineId(file, lineNr);
 
 		LineMap_t::iterator it = m_lines.find(key);
 		Line *line;
@@ -389,7 +389,7 @@ private:
 		bool m_hitsAreSingleshot; // Breakpoints or accumulated hits
 	};
 
-	typedef std::unordered_map<size_t, Line *> LineMap_t;
+	typedef std::unordered_map<uint64_t, Line *> LineMap_t;
 	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;

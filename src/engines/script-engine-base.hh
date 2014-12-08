@@ -96,7 +96,7 @@ protected:
 
 	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
-		size_t id = getLineId(filename, lineNo);
+		uint64_t id = getLineId(filename, lineNo);
 		uint64_t address = (uint64_t)crc | ((uint64_t)lineNo << 32ULL);
 
 		m_lineIdToAddress[id] = address;
@@ -111,7 +111,7 @@ protected:
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::unordered_map<std::string, bool> ReportedFileMap_t;
-	typedef std::unordered_map<size_t, uint64_t> LineIdToAddressMap_t;
+	typedef std::unordered_map<uint64_t, uint64_t> LineIdToAddressMap_t;
 
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;

@@ -7,8 +7,8 @@
 
 namespace kcov
 {
-	static size_t getLineId(const std::string &fileName, unsigned int nr)
+	static uint64_t getLineId(const std::string &fileName, unsigned int nr)
 	{
-		return std::hash<std::string>()(fileName) ^ std::hash<unsigned int>()(nr);
+		return std::hash<std::string>()(fileName) | ((uint64_t)nr << 32ULL);
 	}
 }
