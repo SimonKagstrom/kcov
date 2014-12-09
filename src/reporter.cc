@@ -326,7 +326,7 @@ private:
 			if (m_hitsAreSingleshot)
 				m_addrs[addr] = 1;
 			else
-				m_addrs[addr]++;
+				m_addrs[addr] += hits;
 		}
 
 		void clearHits()
