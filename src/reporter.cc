@@ -172,7 +172,7 @@ public:
 			Line *line = it->second;
 
 			// Really an internal error, but let's not hang on corrupted data
-			if (line->possibleHits() > 0 && hits > line->possibleHits())
+			if (m_hitsAreSingleshot && hits > line->possibleHits())
 				hits = line->possibleHits();
 
 			// Register all hits for this address
