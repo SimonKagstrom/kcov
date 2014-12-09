@@ -74,12 +74,13 @@ namespace kcov
 			if (flags & IFileParser::FLG_TYPE_SOLIB)
 				return;
 
-			if (!m_unmarshalData)
+			if (!m_unmarshalData) {
 				m_unmarshalData = read_file(&m_unmarshalSize, "%s", m_dbFileName.c_str());
 
-			if (m_unmarshalData) {
-				if (!m_reporter.unMarshal(m_unmarshalData, m_unmarshalSize))
-					kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
+				if (m_unmarshalData) {
+					if (!m_reporter.unMarshal(m_unmarshalData, m_unmarshalSize))
+						kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
+				}
 			}
 		}
 
