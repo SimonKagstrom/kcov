@@ -382,7 +382,7 @@ bash-exit-status
     Should be equal as integers    ${rc}   ${no_kcov_rc}
 
 bash-coverage
-	Run								rm -rf ${out}/main
+	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 3
     Should Contain    ${output}    nocode
@@ -392,6 +392,8 @@ bash-coverage
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 26
     Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 30
+    Should Contain    ${output}    5
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 34
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 38
@@ -406,10 +408,10 @@ bash-short-file
 
 
 bash-coverage-heredoc-backslashes
-	Run								rm -rf ${out}/main
+	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 52
-    Should Contain    ${output}    1
+    Should Contain    ${output}    4
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 53
     Should Contain    ${output}    nocode
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 55
@@ -422,7 +424,7 @@ bash-coverage-heredoc-backslashes
     Should Contain    ${output}    nocode
 
 bash-coverage-tricky
-	Run								rm -rf ${out}/main
+	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 36
     Should Contain    ${output}    nocode
@@ -488,11 +490,11 @@ bash-merge-data-issue-38
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 36
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 30
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 33
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 36
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
 
 bash-output-crc
 	Run								rm -rf ${out}/a.sh
@@ -509,7 +511,7 @@ merge-basic
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
-    Should Contain    ${output}    1
+    Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml main 10
