@@ -44,7 +44,8 @@ public:
 		m_indexDirectory(indexDirectory + "/"),
 		m_summaryDbFileName(outDirectory + "/summary.db"),
 		m_name(name),
-		m_includeInTotals(includeInTotals)
+		m_includeInTotals(includeInTotals),
+		m_maxPossibleHits(parser.maxPossibleHits())
 	{
 	}
 
@@ -78,10 +79,11 @@ private:
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
 				std::string lineClass = "lineNoCov";
 
-				if (cnt.m_possibleHits == 0) {
+				if (m_maxPossibleHits == IFileParser::HITS_UNLIMITED ||
+						m_maxPossibleHits == IFileParser::HITS_SINGLE) {
 					if (cnt.m_hits)
 						lineClass = "lineCov";
-				} else {
+				} else { // One or multiple for a line
 					if (cnt.m_hits == cnt.m_possibleHits)
 						lineClass = "lineCov";
 					else if (cnt.m_hits)
@@ -90,10 +92,12 @@ private:
 
 				json += fmt(
 					",'class':'%s',"
-					"'hits':'%u',"
-					"'possible_hits':'%u',",
+					"'hits':'%u',",
 					lineClass.c_str(),
-					cnt.m_hits, cnt.m_possibleHits);
+					cnt.m_hits);
+
+				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
+					json += fmt("'possible_hits':'%u',", cnt.m_possibleHits);
 
 				nExecutedLines += !!cnt.m_hits;
 				nCodeLines++;
@@ -394,6 +398,7 @@ private:
 	std::string m_summaryDbFileName;
 	std::string m_name;
 	bool m_includeInTotals;
+	enum IFileParser::PossibleHits m_maxPossibleHits;
 };
 
 namespace kcov
