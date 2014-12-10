@@ -97,8 +97,6 @@ private:
 
 				nExecutedLines += !!cnt.m_hits;
 				nCodeLines++;
-			} else {
-				json += ",'hits':'0','possible_hits':'-1'";
 			}
 			json += "},\n";
 
