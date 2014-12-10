@@ -76,9 +76,9 @@ public:
 		return 0;
 	}
 
-	bool hitsAreSingleshot()
+	enum IFileParser::PossibleHits maxPossibleHits()
 	{
-		return false;
+		return IFileParser::HITS_UNLIMITED;
 	}
 
 	void setupParser(IFilter *filter)

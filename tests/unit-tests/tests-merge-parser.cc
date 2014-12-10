@@ -17,6 +17,7 @@ public:
 	MOCK_METHOD0(getChecksum, uint64_t());
 	MOCK_METHOD0(getParserType, std::string());
 	MOCK_METHOD1(setupParser, void(IFilter *));
+	MOCK_METHOD0(maxPossibleHits, enum IFileParser::PossibleHits());
 	MOCK_METHOD3(matchParser, unsigned int(const std::string &filename, uint8_t *mock_data, size_t dataSize));
 };
 

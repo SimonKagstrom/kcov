@@ -69,9 +69,9 @@ public:
 		m_filter = filter;
 	}
 
-	bool hitsAreSingleshot()
+	enum IFileParser::PossibleHits maxPossibleHits()
 	{
-		return true; // Breakpoints are cleared after a hit
+		return IFileParser::HITS_LIMITED; // Breakpoints are cleared after a hit
 	}
 
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)

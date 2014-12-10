@@ -36,7 +36,7 @@ public:
 		m_fileParser.registerLineListener(*this);
 		m_collector.registerListener(*this);
 
-		m_hitsAreSingleshot = fileParser.hitsAreSingleshot();
+		m_maxPossibleHits = fileParser.maxPossibleHits();
 	}
 
 	~Reporter()
@@ -172,7 +172,7 @@ public:
 			Line *line = it->second;
 
 			// Really an internal error, but let's not hang on corrupted data
-			if (m_hitsAreSingleshot && hits > line->possibleHits())
+			if (m_maxPossibleHits != IFileParser::HITS_UNLIMITED && hits > line->possibleHits())
 				hits = line->possibleHits();
 
 			// Register all hits for this address
@@ -250,7 +250,7 @@ private:
 		Line *line;
 
 		if (it == m_lines.end()) {
-			line = new Line(file, lineNr, m_hitsAreSingleshot);
+			line = new Line(file, lineNr, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
 			m_lines[key] = line;
 
@@ -402,7 +402,7 @@ private:
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
 	IFilter &m_filter;
-	bool m_hitsAreSingleshot;
+	enum IFileParser::PossibleHits m_maxPossibleHits;
 };
 
 IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)

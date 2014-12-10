@@ -108,9 +108,9 @@ public:
 		return "merge";
 	}
 
-	bool hitsAreSingleshot()
+	enum IFileParser::PossibleHits maxPossibleHits()
 	{
-		return false; // Hits from multiple binaries
+		return IFileParser::HITS_SINGLE; // Hits from multiple binaries
 	}
 
 	void setupParser(IFilter *filter)

@@ -22,6 +22,13 @@ namespace kcov
 			FLG_TYPE_SOLIB = 1,
 		};
 
+		enum PossibleHits
+		{
+			HITS_SINGLE,     //< Yes/no (merge-parser)
+			HITS_LIMITED,    //< E.g., multiple branches
+			HITS_UNLIMITED,  //< Accumulated (Python/bash)
+		};
+
 		virtual ~IFileParser() {}
 
 		/**
@@ -96,13 +103,14 @@ namespace kcov
 
 
 		/**
-		 * Return if this parser is of the single-shot type (i.e., relying on
-		 * breakpoints which are cleared after hit), or if every address
-		 * can occur multiple times.
+		 * Return if this parser is of the multiple type (i.e., relying on
+		 * breakpoints which are cleared after hit, but can have branches),
+		 * or if every address can occur multiple times, or if only
+		 * covered/non-covered is possible.
 		 *
-		 * @return if the parser is of the single-shot type
+		 * @return the possible hits of this parser
 		 */
-		virtual bool hitsAreSingleshot() = 0;
+		virtual enum PossibleHits maxPossibleHits() = 0;
 
 		/**
 		 * See if a particular file can be matched with this parser.
