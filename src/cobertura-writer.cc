@@ -22,7 +22,8 @@ public:
 	CoberturaWriter(IFileParser &parser, IReporter &reporter,
 			const std::string &outFile) :
 		WriterBase(parser, reporter),
-		m_outFile(outFile)
+		m_outFile(outFile),
+		m_maxPossibleHits(parser.maxPossibleHits())
 	{
 	}
 
@@ -105,9 +106,14 @@ private:
 			nExecutedLines += !!cnt.m_hits;
 			nCodeLines++;
 
+			unsigned int hits = cnt.m_hits;
+
+			if (hits && m_maxPossibleHits == IFileParser::HITS_SINGLE)
+				hits = 1;
+
 			out = out +
 					"						<line number=\"" + fmt("%u", n) +
-					"\" hits=\"" + fmt("%u", cnt.m_hits) +
+					"\" hits=\"" + fmt("%u", hits) +
 					"\"/>\n";
 
 			// Update the execution count
@@ -177,6 +183,7 @@ private:
 
 
 	std::string m_outFile;
+	IFileParser::PossibleHits m_maxPossibleHits;
 };
 
 namespace kcov
