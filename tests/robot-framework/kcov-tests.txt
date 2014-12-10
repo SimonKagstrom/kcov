@@ -461,9 +461,9 @@ bash-accumulate-changed-data
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 40
     Should Contain    ${output}    	1
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 67
-    Should Contain    ${output}    	1
+    Should Contain    ${output}    	2
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 6
-    Should Contain    ${output}    	1
+    Should Contain    ${output}    	2
     Run                             echo 'echo arne-anka' >> shell-main
     ${rc}=    Run and return RC    	${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ./shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 40
@@ -471,7 +471,7 @@ bash-accumulate-changed-data
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 67
     Should Contain    ${output}    	0
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 6
-    Should Contain    ${output}    	1
+    Should Contain    ${output}    	3
 
 bash-merge-data-issue-38
 	Run								rm -rf ${out}
@@ -490,11 +490,11 @@ bash-merge-data-issue-38
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 36
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 30
-    Should Contain    ${output}    2
+    Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 33
-    Should Contain    ${output}    2
+    Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml unitundertest_sh 36
-    Should Contain    ${output}    2
+    Should Contain    ${output}    1
 
 bash-output-crc
 	Run								rm -rf ${out}/a.sh
