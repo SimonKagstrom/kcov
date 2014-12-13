@@ -1,3 +1,17 @@
+Kcov (24):
+	* Update the HTML/Cobertura output to display single-shot, limited and
+	  unlimited output in a logical way
+
+	* Allow three hit modes for parsers/engines: Single-shot (covered or not,
+	  as in the merge parser), limited (as in ptrace) and unlimited (line
+	  execution count used in Python/Bash)
+
+	* Remove some ptrace-specific stuff from the Engine interface
+
+	* Document classes better
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (23):
 	* Correct use-after-free case when the solib thread is killed
 
