@@ -82,7 +82,7 @@ static void force_breakpoint(void)
 #if defined(__i386__) || defined(__x86_64__)
 			"int3\n"
 #elif defined(__powerpc__)
-			".long 0x7fe00008\n" /* trap instruction, UNTESTED */
+			".long 0x7fe00008\n" /* trap instruction */
 #elif defined(__arm__)
 			"bpkt\n" /* UNTESTED!*/
 #else
