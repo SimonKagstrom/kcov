@@ -84,7 +84,7 @@ static void force_breakpoint(void)
 #elif defined(__powerpc__)
 			".long 0x7fe00008\n" /* trap instruction */
 #elif defined(__arm__)
-			"bpkt\n" /* UNTESTED!*/
+			".long 0xfedeffe7\n" /* undefined insn */
 #else
 # error Unsupported architecture
 #endif

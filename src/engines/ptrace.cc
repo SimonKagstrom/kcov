@@ -49,7 +49,7 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 #elif defined(__x86_64__)
 	out = regs[x86_64_RIP] - 1;
 #elif defined(__arm__)
-	out = regs[arm_PC] - 4;
+	out = regs[arm_PC];
 #elif defined(__powerpc__)
 	out = regs[ppc_NIP];
 #else
@@ -65,9 +65,7 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
-#elif defined(__arm__)
-	regs[arm_PC] -= 4;
-#elif defined(__powerpc__)
+#elif defined(__powerpc__) || defined(__arm__)
 	// Do nothing
 #else
 # error Unsupported architecture
@@ -89,7 +87,7 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 #elif defined(__powerpc__)
 	val =  0x7fe00008; /* tw */
 #elif defined(__arm__)
-	val = 0x123456; //0xe1200070; /* BKPT */
+	val = 0xfedeffe7; // Undefined insn
 #else
 # error Unsupported architecture
 #endif
@@ -254,6 +252,12 @@ public:
 		if (WIFSTOPPED(status)) {
 			siginfo_t siginfo;
 			int sig = WSTOPSIG(status);
+			int sigill = SIGUNUSED;
+
+			// Arm is using an undefined instruction, so we'll get a SIGILL here
+#if defined(__arm__)
+			sigill = SIGILL;
+#endif
 
 			out.type = ev_signal;
 			out.data = sig;
@@ -261,7 +265,7 @@ public:
 			ptrace(PTRACE_GETSIGINFO, m_activeChild, NULL, (void *)&siginfo);
 
 			// A trap?
-			if (sig == SIGTRAP || sig == SIGSTOP) {
+			if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill) {
 				out.type = ev_breakpoint;
 				out.data = -1;
 
@@ -487,13 +491,17 @@ private:
 	// Skip over this instruction
 	void skipInstruction()
 	{
-		// Nop on x86, op on PowerPC
-#if defined(__powerpc__)
+		// Nop on x86, op on PowerPC/ARM
+#if defined(__powerpc__) || defined(__arm__)
 		unsigned long regs[1024];
 
 		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
 
+# if defined(__powerpc__)
 		regs[ppc_NIP] += 4;
+#else
+		regs[arm_PC] += 4;
+#endif
 		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
 #endif
 	}
