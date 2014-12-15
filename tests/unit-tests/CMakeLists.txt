@@ -5,7 +5,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
-find_package (LibDwarf REQUIRED)
+find_package (Elfutils REQUIRED)
 find_package (GTest REQUIRED)
 
 # ====================================
