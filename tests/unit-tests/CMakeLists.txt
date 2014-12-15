@@ -76,7 +76,7 @@ include_directories(
 	${GTEST_INCLUDE_DIRS}
 	${LIBCRPCUT_INCLUDE_DIRS}
 	${LIBELF_INCLUDE_DIRS}
-	${LIBDWARF_INCLUDE_DIRS}
+	${LIBDW_INCLUDE_DIRS}
 	)
 
 link_directories (/home/ska/local/lib)
@@ -87,7 +87,7 @@ target_link_libraries(${TGT}
 	${LIBCRPCUT_LIBRARIES}
 	${GTEST_BOTH_LIBRARIES}
 	gmock
-	${LIBDWARF_LIBRARIES}
+	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
 	z

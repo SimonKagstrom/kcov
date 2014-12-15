@@ -62,7 +62,7 @@ set (CMAKE_CXX_FLAGS "-std=c++0x -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRAR
 include_directories(
 	include/
 	${LIBELF_INCLUDE_DIRS}
-	${LIBDWARF_INCLUDE_DIRS}
+	${LIBDW_INCLUDE_DIRS}
 	${LIBZ_INCLUDE_DIRS}
 	)
 
@@ -130,7 +130,7 @@ add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc html-data-fi
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 
 target_link_libraries(${KCOV}
-	${LIBDWARF_LIBRARIES}
+	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
@@ -140,7 +140,7 @@ target_link_libraries(${KCOV}
 
 
 target_link_libraries(${LINE2ADDR}
-	${LIBDWARF_LIBRARIES}
+	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
