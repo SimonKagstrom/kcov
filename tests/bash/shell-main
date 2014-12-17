@@ -75,3 +75,9 @@ fi
 A=awk  '{print HEJ}'<<<$0
 
 echo hoppsan
+
+exec 3>&1
+exec 4>&2
+exec 2>>$1
+exec 1>>$1
+echo hopp
