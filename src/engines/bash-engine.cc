@@ -335,7 +335,8 @@ private:
 					// Skip << and remove spaces before and after "EOF"
 					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
 
-					state = heredoc;
+					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
+						state = heredoc;
 				}
 			}
 
