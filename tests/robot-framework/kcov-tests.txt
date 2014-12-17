@@ -423,6 +423,12 @@ bash-coverage-heredoc-backslashes
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 62
     Should Contain    ${output}    nocode
 
+bash-issue-44-heredoc-special-cases
+	Run								rm -rf ${out}/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 77
+    Should Contain    ${output}    1
+
 bash-coverage-tricky
 	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5

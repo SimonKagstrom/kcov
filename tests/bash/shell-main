@@ -71,3 +71,7 @@ if [ $# -gt 0 ]
 then
 	exit $1
 fi
+
+A=awk  '{print HEJ}'<<<$0
+
+echo hoppsan
