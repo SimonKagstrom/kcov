@@ -1,4 +1,8 @@
 Kcov (24):
+	* Issue #31: Fix handling of attaching to pid in a multithreaded process.
+	  Implementation taken from GDB: kcov now loops through all threads in
+	  a process and attaches to each one.
+
 	* Issue #44: Bash: Fix issues with <<< redirection, which were parsed
 	  as here documents
 
