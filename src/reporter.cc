@@ -74,7 +74,7 @@ public:
 
 			if (line) {
 				hits = line->hits();
-				possibleHits = line->possibleHits();
+				possibleHits = line->possibleHits(m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 			}
 		}
 
@@ -171,8 +171,8 @@ public:
 			Line *line = it->second;
 
 			// Really an internal error, but let's not hang on corrupted data
-			if (m_maxPossibleHits != IFileParser::HITS_UNLIMITED && hits > line->possibleHits())
-				hits = line->possibleHits();
+			if (m_maxPossibleHits != IFileParser::HITS_UNLIMITED && hits > line->possibleHits(true))
+				hits = line->possibleHits(true);
 
 			// Register all hits for this address
 			reportAddress(addr, hits);
@@ -245,7 +245,7 @@ private:
 		Line *line = m_files[file].getLine(lineNr);
 
 		if (!line) {
-			line = new Line(file, lineNr, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
+			line = new Line(file, lineNr);
 			m_files[file].addLine(lineNr, line);
 		}
 
@@ -275,7 +275,7 @@ private:
 		Line *line = it->second;
 
 		kcov_debug(INFO_MSG, "REPORT hit at 0x%lx\n", addr);
-		line->registerHit(addr, hits);
+		line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
 		for (ListenerList_t::const_iterator it = m_listeners.begin();
 				it != m_listeners.end();
@@ -299,9 +299,8 @@ private:
 	public:
 		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
 
-		Line(const std::string &file, unsigned int lineNr, bool hitsAreSingleshot) :
-			m_lineNr(lineNr),
-			m_hitsAreSingleshot(hitsAreSingleshot)
+		Line(const std::string &file, unsigned int lineNr) :
+			m_lineNr(lineNr)
 		{
 		}
 
@@ -311,9 +310,9 @@ private:
 				m_addrs[addr] = 0;
 		}
 
-		void registerHit(unsigned long addr, unsigned long hits)
+		void registerHit(unsigned long addr, unsigned long hits, bool singleShot)
 		{
-			if (m_hitsAreSingleshot)
+			if (singleShot)
 				m_addrs[addr] = 1;
 			else
 				m_addrs[addr] += hits;
@@ -339,9 +338,9 @@ private:
 			return out;
 		}
 
-		unsigned int possibleHits() const
+		unsigned int possibleHits(bool singleShot) const
 		{
-			if (m_hitsAreSingleshot)
+			if (singleShot)
 				return m_addrs.size();
 
 			return 0; // Meaning any number of hits are possible
@@ -381,7 +380,6 @@ private:
 	private:
 		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
-		bool m_hitsAreSingleshot; // Breakpoints or accumulated hits
 	};
 
 	class File
