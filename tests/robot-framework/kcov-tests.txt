@@ -275,6 +275,18 @@ setpgid
     ${output}=   Run				${kcov_path}/tests/setpgid-kill/test-script.sh ${kcov} ${out} ./setpgid-kill
     Should Contain    ${output}    SUCCESS
 
+# Issue 31
+attach-process-with-threads
+	Run								rm -rf ${out}
+    ${output}=   Run				${kcov_path}/tests/daemon/test-script.sh ${kcov} ${out} ./issue31
+    ${output}=   Run   ${xml_lookup} ${out}/issue31/cobertura.xml test_issue31_cc 28
+    Should Contain     ${output}    1
+    ${output}=   Run   ${xml_lookup} ${out}/issue31/cobertura.xml test_issue31_cc 11
+    Should Contain     ${output}    1
+    ${output}=   Run   ${xml_lookup} ${out}/issue31/cobertura.xml test_issue31_cc 8
+    Should Contain     ${output}    0
+
+
 python-exit-status
 	Run								rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    python ${kcov_path}/tests/python/main 5
