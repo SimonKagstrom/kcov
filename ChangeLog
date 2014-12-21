@@ -1,4 +1,7 @@
 Kcov (24):
+	* Issue #44: Bash: Fix issues with <<< redirection, which were parsed
+	  as here documents
+
 	* Update the HTML/Cobertura output to display single-shot, limited and
 	  unlimited output in a logical way
 
