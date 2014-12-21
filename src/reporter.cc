@@ -3,7 +3,6 @@
 #include <collector.hh>
 #include <utils.hh>
 #include <filter.hh>
-#include <lineid.hh>
 
 #include <string>
 #include <list>
@@ -42,11 +41,6 @@ public:
 	~Reporter()
 	{
 		stop();
-
-		for (LineMap_t::iterator it = m_lines.begin();
-				it != m_lines.end();
-				++it)
-			delete it->second;
 	}
 
 	void registerListener(IReporter::IListener &listener)
@@ -61,11 +55,11 @@ public:
 
 	bool lineIsCode(const std::string &file, unsigned int lineNr)
 	{
-		bool out;
+		// Not code if the file doesn't exist!
+		if (m_files.find(file) == m_files.end())
+			return false;
 
-		out = m_lines.find(getLineId(file, lineNr)) != m_lines.end();
-
-		return out;
+		return m_files[file].lineIsCode(lineNr);
 	}
 
 	LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr)
@@ -73,17 +67,18 @@ public:
 		unsigned int hits = 0;
 		unsigned int possibleHits = 0;
 
-		LineMap_t::iterator it = m_lines.find(getLineId(file, lineNr));
+		FileMap_t::const_iterator it = m_files.find(file);
 
-		if (it != m_lines.end()) {
-			Line *line = it->second;
+		if (it != m_files.end()) {
+			const Line *line = it->second.getLine(lineNr);
 
-			hits = line->hits();
-			possibleHits = line->possibleHits();
+			if (line) {
+				hits = line->hits();
+				possibleHits = line->possibleHits();
+			}
 		}
 
-		return LineExecutionCount(hits,
-				possibleHits);
+		return LineExecutionCount(hits, possibleHits);
 	}
 
 	ExecutionSummary getExecutionSummary()
@@ -91,20 +86,23 @@ public:
 		unsigned int executedLines = 0;
 		unsigned int nrLines = 0;
 
-		for (LineMap_t::const_iterator it = m_lines.begin();
-				it != m_lines.end();
+		// Summarize all files
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
 				++it) {
-			Line *cur = it->second;
+			const std::string &fileName = it->first;
+			const File &file = it->second;
 
 			// Don't include non-existing files in summary
-			if (!file_exists(cur->m_file))
+			if (!file_exists(fileName))
 				continue;
 
-			if (!m_filter.runFilters(cur->m_file))
+			// And not filtered ones either
+			if (!m_filter.runFilters(fileName))
 				continue;
 
-			executedLines += !!cur->hits();
-			nrLines++;
+			executedLines += file.getExecutedLines();
+			nrLines += file.getNrLines();
 		}
 
 		return ExecutionSummary(nrLines, executedLines);
@@ -122,12 +120,13 @@ public:
 		memset(start, 0, sz);
 		p = marshalHeader((uint8_t *)start);
 
-		for (LineMap_t::const_iterator it = m_lines.begin();
-				it != m_lines.end();
+		// Marshal all lines in the files
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
 				++it) {
-			Line *cur = it->second;
+			const File &cur = it->second;
 
-			p = cur->marshal(p);
+			p = cur.marshal(p);
 		}
 
 		*szOut = sz;
@@ -197,14 +196,12 @@ private:
 	{
 		size_t out = 0;
 
-		for (LineMap_t::const_iterator it = m_lines.begin();
-				it != m_lines.end();
+		// Sum all file sizes
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
 				++it) {
-			Line *cur = it->second;
-
-			out += cur->m_addrs.size();
+			out += it->second.marshalSize();
 		}
-
 
 		return out * getMarshalEntrySize() + sizeof(struct marshalHeaderStruct);
 	}
@@ -244,18 +241,12 @@ private:
 
 		kcov_debug(INFO_MSG, "REPORT %s:%u at 0x%lx\n",
 				file.c_str(), lineNr, (unsigned long)addr);
-		uint64_t key = getLineId(file, lineNr);
 
-		LineMap_t::iterator it = m_lines.find(key);
-		Line *line;
+		Line *line = m_files[file].getLine(lineNr);
 
-		if (it == m_lines.end()) {
+		if (!line) {
 			line = new Line(file, lineNr, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
-
-			m_lines[key] = line;
-
-		} else {
-			line = it->second;
+			m_files[file].addLine(lineNr, line);
 		}
 
 		line->addAddress(addr);
@@ -309,7 +300,6 @@ private:
 		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
 
 		Line(const std::string &file, unsigned int lineNr, bool hitsAreSingleshot) :
-			m_file(file),
 			m_lineNr(lineNr),
 			m_hitsAreSingleshot(hitsAreSingleshot)
 		{
@@ -337,7 +327,7 @@ private:
 				it->second = 0;
 		}
 
-		unsigned int hits()
+		unsigned int hits() const
 		{
 			unsigned int out = 0;
 
@@ -349,7 +339,7 @@ private:
 			return out;
 		}
 
-		unsigned int possibleHits()
+		unsigned int possibleHits() const
 		{
 			if (m_hitsAreSingleshot)
 				return m_addrs.size();
@@ -383,18 +373,120 @@ private:
 			return (uint8_t *)data;
 		}
 
-		std::string m_file;
 		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
 		bool m_hitsAreSingleshot; // Breakpoints or accumulated hits
 	};
 
-	typedef std::unordered_map<uint64_t, Line *> LineMap_t;
+	class File
+	{
+	public:
+		File() : m_nrLines(0)
+		{
+		}
+
+		~File()
+		{
+			for (unsigned int i = 0; i < m_lines.size(); i++) {
+				Line *cur = m_lines[i];
+
+				if (!cur)
+					continue;
+
+				delete cur;
+			}
+		}
+
+		void addLine(unsigned int lineNr, Line *line)
+		{
+			// Resize the vector to fit this line
+			if (lineNr >= m_lines.size())
+				m_lines.resize(lineNr + 1);
+
+			m_lines[lineNr] = line;
+			m_nrLines++;
+		}
+
+		Line *getLine(unsigned int lineNr) const
+		{
+			if (lineNr >= m_lines.size())
+				return NULL;
+
+			return m_lines[lineNr];
+		}
+
+		// Marshal all line data
+		uint8_t *marshal(uint8_t *p) const
+		{
+			for (unsigned int i = 0; i < m_lines.size(); i++) {
+				Line *cur = m_lines[i];
+
+				if (!cur)
+					continue;
+
+				p = cur->marshal(p);
+			}
+
+			return p;
+		}
+
+		size_t marshalSize() const
+		{
+			size_t out = 0;
+
+			for (unsigned int i = 0; i < m_lines.size(); i++) {
+				Line *cur = m_lines[i];
+
+				if (!cur)
+					continue;
+
+				out += cur->m_addrs.size();
+			}
+
+			return out;
+		}
+
+		unsigned int getExecutedLines() const
+		{
+			unsigned int out = 0;
+
+			for (unsigned int i = 0; i < m_lines.size(); i++) {
+				Line *cur = m_lines[i];
+
+				if (!cur)
+					continue;
+
+				// Hits as zero or one (executed or not)
+				out += !!cur->hits();
+			}
+
+			return out;
+		}
+
+		unsigned int getNrLines() const
+		{
+			return m_nrLines;
+		}
+
+		bool lineIsCode(unsigned int lineNr) const
+		{
+			if (lineNr >= m_lines.size())
+				return false;
+
+			return m_lines[lineNr] != NULL;
+		}
+
+	private:
+		std::vector<Line *> m_lines;
+		unsigned int m_nrLines;
+	};
+
+	typedef std::unordered_map<std::string, File> FileMap_t;
 	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
 
-	LineMap_t m_lines;
+	FileMap_t m_files;
 	AddrToLineMap_t m_addrToLine;
 	AddrToHitsMap_t m_pendingHits;
 	ListenerList_t m_listeners;
