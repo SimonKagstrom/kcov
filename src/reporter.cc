@@ -362,6 +362,11 @@ private:
 			return (uint8_t *)data;
 		}
 
+		size_t marshalSize() const
+		{
+			return m_addrs.size();
+		}
+
 		static uint8_t *unMarshal(uint8_t *p,
 				unsigned long *outAddr, unsigned int *outHits)
 		{
@@ -373,6 +378,7 @@ private:
 			return (uint8_t *)data;
 		}
 
+	private:
 		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
 		bool m_hitsAreSingleshot; // Breakpoints or accumulated hits
@@ -440,7 +446,7 @@ private:
 				if (!cur)
 					continue;
 
-				out += cur->m_addrs.size();
+				out += cur->marshalSize();
 			}
 
 			return out;
