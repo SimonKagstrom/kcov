@@ -16,6 +16,9 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -116,6 +119,97 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 }
 
 
+/* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
+static int linux_proc_get_int (pid_t lwpid, const char *field)
+{
+	size_t field_len = strlen (field);
+	FILE *status_file;
+	char buf[100];
+	int retval = -1;
+
+	snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
+	status_file = fopen(buf, "r");
+	if (status_file == NULL)
+	{
+		warning("unable to open /proc file '%s'", buf);
+		return -1;
+	}
+
+	while (fgets (buf, sizeof (buf), status_file)) {
+		if (strncmp (buf, field, field_len) == 0 && buf[field_len] == ':') {
+			retval = strtol (&buf[field_len + 1], NULL, 10);
+			break;
+		}
+	}
+
+	fclose (status_file);
+
+	return retval;
+}
+
+static int linux_proc_pid_has_state (pid_t pid, const char *state)
+{
+	char buffer[100];
+	FILE *procfile;
+	int retval;
+	int have_state;
+
+	xsnprintf (buffer, sizeof (buffer), "/proc/%d/status", (int) pid);
+	procfile = fopen(buffer, "r");
+	if (procfile == NULL) {
+		warning("unable to open /proc file '%s'", buffer);
+		return 0;
+	}
+
+	have_state = 0;
+	while (fgets (buffer, sizeof (buffer), procfile) != NULL) {
+		if (strncmp (buffer, "State:", 6) == 0) {
+			have_state = 1;
+			break;
+		}
+	}
+	retval = (have_state && strstr (buffer, state) != NULL);
+	fclose (procfile);
+	return retval;
+}
+
+/* Detect `T (stopped)' in `/proc/PID/status'.
+ * Other states including `T (tracing stop)' are reported as false.
+ */
+static int linux_proc_pid_is_stopped (pid_t pid)
+{
+	return linux_proc_pid_has_state (pid, "T (stopped)");
+}
+
+static int linux_proc_get_tgid (pid_t lwpid)
+{
+	return linux_proc_get_int (lwpid, "Tgid");
+}
+
+static int kill_lwp (unsigned long lwpid, int signo)
+{
+	/* Use tkill, if possible, in case we are using nptl threads.  If tkill
+	 * fails, then we are not using nptl threads and we should be using kill. */
+
+#ifdef __NR_tkill
+	{
+		static int tkill_failed;
+
+		if (!tkill_failed)
+		{
+			int ret;
+
+			errno = 0;
+			ret = syscall (__NR_tkill, lwpid, signo);
+			if (errno != ENOSYS)
+				return ret;
+			tkill_failed = 1;
+		}
+	}
+#endif
+
+	return kill (lwpid, signo);
+}
 
 class Ptrace : public IEngine
 {
@@ -458,11 +552,14 @@ private:
 
 	bool attachPid(pid_t pid)
 	{
+		int rv;
+
 		m_child = m_activeChild = m_firstChild = pid;
 
 		errno = 0;
-		ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
-		if (errno) {
+		rv = linuxAttach(m_activeChild);
+		//rv = ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
+		if (rv < 0) {
 			const char *err = strerror(errno);
 
 			fprintf(stderr, "Can't attach to %d. Error %s\n", pid, err);
@@ -487,6 +584,120 @@ private:
 
 		return true;
 	}
+
+	/* Taken from GDB (loop through all threads and attach to each one)  */
+	int linuxAttach (pid_t pid)
+	{
+		int err;
+
+		/* Attach to PID.  We will check for other threads soon. */
+		err = attachLwp (pid);
+		if (err != 0)
+			error ("Cannot attach to process %d\n", pid);
+
+		if (linux_proc_get_tgid (pid) != pid)
+		{
+			return 0;
+		}
+
+		DIR *dir;
+		char pathname[128];
+
+		sprintf (pathname, "/proc/%d/task", pid);
+
+		dir = opendir (pathname);
+
+		if (!dir) {
+			error("Could not open /proc/%d/task.\n", pid);
+
+			return 0;
+		}
+
+		/* At this point we attached to the tgid.  Scan the task for
+		 * existing threads. */
+		int new_threads_found;
+		int iterations = 0;
+
+		std::unordered_map<unsigned long, bool> threads;
+		threads[pid] = true;
+
+		while (iterations < 2)
+		{
+			struct dirent *dp;
+
+			new_threads_found = 0;
+			/* Add all the other threads.  While we go through the
+			 * threads, new threads may be spawned.  Cycle through
+			 * the list of threads until we have done two iterations without
+			 * finding new threads.  */
+			while ((dp = readdir (dir)) != NULL)
+			{
+				int lwp;
+
+				/* Fetch one lwp.  */
+				lwp = strtoul (dp->d_name, NULL, 10);
+
+				/* Is this a new thread?  */
+				if (lwp != 0 && threads.find(lwp) == threads.end())
+				{
+					int err;
+					threads[lwp] = true;
+
+					err = attachLwp (lwp);
+					if (err != 0)
+						warning ("Cannot attach to lwp %d\n", lwp);
+
+					new_threads_found++;
+				}
+			}
+
+			if (!new_threads_found)
+				iterations++;
+			else
+				iterations = 0;
+
+			rewinddir (dir);
+		}
+		closedir (dir);
+
+		return 0;
+	}
+
+	/* Attach to an inferior process. */
+	int attachLwp (int lwpid)
+	{
+		int rv;
+
+		rv = ptrace (PTRACE_ATTACH, lwpid, 0, 0);
+
+		if (rv < 0)
+			return errno;
+
+		if (linux_proc_pid_is_stopped (lwpid)) {
+			/* The process is definitely stopped.  It is in a job control
+			 * stop, unless the kernel predates the TASK_STOPPED /
+			 * TASK_TRACED distinction, in which case it might be in a
+			 * ptrace stop.  Make sure it is in a ptrace stop; from there we
+			 * can kill it, signal it, et cetera.
+			 *
+			 * First make sure there is a pending SIGSTOP.  Since we are
+			 * already attached, the process can not transition from stopped
+			 * to running without a PTRACE_CONT; so we know this signal will
+			 * go into the queue.  The SIGSTOP generated by PTRACE_ATTACH is
+			 * probably already in the queue (unless this kernel is old
+			 * enough to use TASK_STOPPED for ptrace stops); but since
+			 * SIGSTOP is not an RT signal, it can only be queued once.  */
+			kill_lwp (lwpid, SIGSTOP);
+
+			/* Finally, resume the stopped process.  This will deliver the
+			 * SIGSTOP (or a higher priority signal, just like normal
+			 * PTRACE_ATTACH), which we'll catch later on.  */
+			ptrace (PTRACE_CONT, lwpid, 0, 0);
+		}
+
+		return 0;
+	}
+
 
 	// Skip over this instruction
 	void skipInstruction()
