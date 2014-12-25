@@ -225,7 +225,7 @@ std::string dir_concat(const std::string &dir, const std::string &filename)
 	if (dir == "")
 		return filename;
 
-	return fmt("%s/%s", dir.c_str(), filename.c_str());
+	return dir + "/" + filename;
 }
 
 const char *get_home(void)
