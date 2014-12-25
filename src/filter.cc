@@ -1,5 +1,6 @@
 #include <filter.hh>
 #include <configuration.hh>
+#include <utils.hh>
 
 #include <limits.h>
 #include <stdlib.h>
@@ -138,12 +139,7 @@ private:
 			if (m_includePaths.size() != 0)
 				out = false;
 
-			char *path = realpath(file.c_str(), NULL);
-			// Can't show something which doesn't exist, so filter it out
-			if (!path)
-				return false;
-			std::string pathStr(path);
-			free(path);
+			const std::string pathStr = get_real_path(file);
 
 			for (PathMap_t::const_iterator it = m_includePaths.begin();
 					it != m_includePaths.end();
