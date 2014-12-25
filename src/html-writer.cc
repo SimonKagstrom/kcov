@@ -229,7 +229,7 @@ private:
 		for (de = readdir(dir); de; de = readdir(dir)) {
 			std::string cur = idx + de->d_name + "/summary.db";
 
-			if (!file_exists(cur.c_str()))
+			if (!file_exists(cur))
 				continue;
 
 			size_t sz;

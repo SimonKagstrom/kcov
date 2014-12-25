@@ -104,7 +104,7 @@ public:
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
 		if (IConfiguration::getInstance().getParseSolibs()) {
-			if (file_exists(kcov_solib_path.c_str()))
+			if (file_exists(kcov_solib_path))
 				putenv(m_ldPreloadString);
 		}
 		putenv(m_envString);
