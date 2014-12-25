@@ -171,7 +171,7 @@ out_open:
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(m_filename.c_str(), m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
+			(*it)->onFile(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
