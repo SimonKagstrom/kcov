@@ -325,7 +325,7 @@ out_open:
 					for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
 							it != m_lineListeners.end();
 							++it)
-						(*it)->onLine(file_path.c_str(), line_nr, adjustAddressBySegment(addr));
+						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
 				}
 			}
 		}
