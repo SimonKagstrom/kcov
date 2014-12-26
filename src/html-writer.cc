@@ -12,6 +12,7 @@
 #include <list>
 #include <vector>
 #include <unordered_map>
+#include <fstream>
 
 #include "writer-base.hh"
 
@@ -62,13 +63,18 @@ private:
 		unsigned int nExecutedLines = 0;
 		unsigned int nCodeLines = 0;
 
-		std::string json = "var data = [\n";
+		// Out-file for JSON data
+		std::ofstream outJson(jsonOutName);
+		// ... and HTML data
+		std::ofstream outHtml(htmlOutName);
+
+		outJson << "var data = [\n";
 
 		// Produce each line in the file
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
 			const std::string &line = file->m_lineMap[n];
 
-			json += fmt(
+			outJson << fmt(
 					"{'lineNum':'%5u',"
 					"'line':'%s'",
 					n,
@@ -90,19 +96,19 @@ private:
 						lineClass = "linePartCov";
 				}
 
-				json += fmt(
+				outJson << fmt(
 					",'class':'%s',"
 					"'hits':'%u',",
 					lineClass.c_str(),
 					cnt.m_hits);
 
 				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
-					json += fmt("'possible_hits':'%u',", cnt.m_possibleHits);
+					outJson << fmt("'possible_hits':'%u',", cnt.m_possibleHits);
 
 				nExecutedLines += !!cnt.m_hits;
 				nCodeLines++;
 			}
-			json += "},\n";
+			outJson << "},\n";
 
 			// Update the execution count
 			file->m_executedLines = nExecutedLines;
@@ -110,17 +116,15 @@ private:
 		}
 
 		// Add the header
-		json += "];\n" + getHeader(nCodeLines, nExecutedLines) + "var merged_data = [];\n";
+		outJson << "];\n";
+		outJson << getHeader(nCodeLines, nExecutedLines);
+		outJson << "var merged_data = [];\n";
 
-		// Produce HTML outfile
-		std::string html = fmt(
+		// Produce HTML out-file
+		outHtml << fmt(
 				"<script type=\"text/javascript\" src=\"%s\"></script>\n",
 				file->m_jsonOutFileName.c_str());
-		html += std::string((const char *)source_file_text_data.data(), source_file_text_data.size());
-
-		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), "%s", jsonOutName.c_str());
-		write_file((void *)html.c_str(), html.size(), "%s", htmlOutName.c_str());
+		outHtml << source_file_text_data.data();
 	}
 
 	void writeIndex()
@@ -129,7 +133,9 @@ private:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
-		std::string json = "var data = [\n"; // Not really json, but anyway
+		// Out-file for JSON data
+		std::ofstream outJson(m_outDirectory + "index.json");
+		outJson << "var data = [\n"; // Not really json, but anyway
 
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
@@ -164,12 +170,12 @@ private:
 				listName = prefix + listName.substr(pathToRemove.size());
 			}
 
-			json += getIndexHeader(file->m_outFileName, file->m_fileName, listName, nCodeLines, nExecutedLines);
+			outJson << getIndexHeader(file->m_outFileName, file->m_fileName, listName, nCodeLines, nExecutedLines);
 		}
 
 
 		// Add the header
-		json += fmt("];\n"
+		outJson << fmt("];\n"
 				"var percent_low = %d;"
 				"var percent_high = %d;"
 				"\n"
@@ -190,11 +196,8 @@ private:
 				"var merged_data = [];\n";
 
 		// Produce HTML outfile
-		std::string html = std::string((const char *)index_text_data.data(), index_text_data.size());
-
-		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), "%s", (m_outDirectory + "index.json").c_str());
-		write_file((void *)html.c_str(), html.size(), "%s", (m_outDirectory + "index.html").c_str());
+		std::ofstream outHtml(m_outDirectory + "index.html");
+		outHtml << index_text_data.data();
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
@@ -222,7 +225,9 @@ private:
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
 
-		std::string json = "var data = [\n";
+		std::ofstream outJson(m_indexDirectory + "index.json");
+
+		outJson << "var data = [\n";
 		std::string merged;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
@@ -256,20 +261,18 @@ private:
 			if (name == "[merged]")
 				merged += datum;
 			else
-				json += datum;
+				outJson << datum;
 		}
 
 		merged = "var merged_data = [" + merged + "];";
 
 		// Add the header
-		json += "];\n" + getHeader(nTotalCodeLines, nTotalExecutedLines) + merged;
+		outJson << "];\n" + getHeader(nTotalCodeLines, nTotalExecutedLines) + merged;
 
 		// Produce HTML outfile
-		std::string html = std::string((const char *)index_text_data.data(), index_text_data.size());
+		std::ofstream outHtml(m_indexDirectory + "index.html");
+		outHtml << index_text_data.data();
 
-		// .. And write both files to disk
-		write_file((void *)json.c_str(), json.size(), "%s", (m_indexDirectory + "index.json").c_str());
-		write_file((void *)html.c_str(), html.size(), "%s", (m_indexDirectory + "index.html").c_str());
 		closedir(dir);
 	}
 
