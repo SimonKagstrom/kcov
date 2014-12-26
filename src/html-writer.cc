@@ -62,7 +62,7 @@ private:
 		unsigned int nExecutedLines = 0;
 		unsigned int nCodeLines = 0;
 
-		std::string json;
+		std::string json = "var data = [\n";
 
 		// Produce each line in the file
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
@@ -110,7 +110,7 @@ private:
 		}
 
 		// Add the header
-		json = getHeader(nCodeLines, nExecutedLines) + json + "];\n" + "var merged_data = [];\n";
+		json += "];\n" + getHeader(nCodeLines, nExecutedLines) + "var merged_data = [];\n";
 
 		// Produce HTML outfile
 		std::string html = fmt(
@@ -129,7 +129,7 @@ private:
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
 
-		std::string json; // Not really json, but anyway
+		std::string json = "var data = [\n"; // Not really json, but anyway
 
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
@@ -169,7 +169,7 @@ private:
 
 
 		// Add the header
-		json =  fmt(
+		json += fmt("];\n"
 				"var percent_low = %d;"
 				"var percent_high = %d;"
 				"\n"
@@ -179,15 +179,14 @@ private:
 				" 'instrumented' : %d,"
 				" 'covered' : %d,"
 				"};"
-				"\n"
-				"var data = [\n",
+				"\n",
 				conf.getLowLimit(),
 				conf.getHighLimit(),
 				escape_json(conf.getBinaryName()).c_str(),
 				getDateNow().c_str(),
 				nTotalCodeLines,
 				nTotalExecutedLines
-				) + json + "];\n" +
+				) +
 				"var merged_data = [];\n";
 
 		// Produce HTML outfile
@@ -223,7 +222,7 @@ private:
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
 
-		std::string json;
+		std::string json = "var data = [\n";
 		std::string merged;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
@@ -263,7 +262,7 @@ private:
 		merged = "var merged_data = [" + merged + "];";
 
 		// Add the header
-		json = getHeader(nTotalCodeLines, nTotalExecutedLines) + json + "];\n" + merged;
+		json += "];\n" + getHeader(nTotalCodeLines, nTotalExecutedLines) + merged;
 
 		// Produce HTML outfile
 		std::string html = std::string((const char *)index_text_data.data(), index_text_data.size());
@@ -304,8 +303,7 @@ private:
 				" 'instrumented' : %d,"
 				" 'covered' : %d,"
 				"};"
-				"\n"
-				"var data = [\n",
+				"\n",
 				conf.getLowLimit(),
 				conf.getHighLimit(),
 				escape_json(conf.getBinaryName()).c_str(),
