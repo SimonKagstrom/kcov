@@ -21,8 +21,7 @@ class CoverallsWriter : public WriterBase
 {
 public:
 	CoverallsWriter(IFileParser &parser, IReporter &reporter) :
-		WriterBase(parser, reporter),
-		m_outFile("/tmp/coveralls.out") // FIXME! Temporary
+		WriterBase(parser, reporter)
 	{
 	}
 
@@ -36,15 +35,23 @@ public:
 
 	void write()
 	{
-		std::ofstream out(m_outFile);
+		IConfiguration &conf = IConfiguration::getInstance();
+		const std::string &repo_token = conf.getCoverallsRepoToken();
+
+		// No token? Skip output then
+		if (repo_token == "")
+			return;
+
+		std::string outFile = conf.getOutDirectory() + "/" + conf.getBinaryName() + "/coveralls.out";
+
+		std::ofstream out(outFile);
 
 		// Output directory not writable?
 		if (!out.is_open())
 			return;
 
 		out << "{\n";
-		out << " \'service_name\': \'travis-ci\',\n";
-		out << " \'service_job_id\': \'12345678\',\n"; // FIXME!
+		out << " \'repo_token\': \'" + repo_token + "\',\n"; // FIXME!
 		out << " \'source_files\': [\n";
 		setupCommonPaths();
 
@@ -85,7 +92,6 @@ public:
 	}
 
 private:
-	std::string m_outFile;
 };
 
 namespace kcov
