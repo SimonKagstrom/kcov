@@ -6,6 +6,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 pkg_check_modules(LIBZ REQUIRED zlib)
+pkg_check_modules(LIBCURL REQUIRED libcurl)
 
 # ====================================
 # project name and version
@@ -65,6 +66,7 @@ include_directories(
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDW_INCLUDE_DIRS}
 	${LIBZ_INCLUDE_DIRS}
+	${LIBCURL_INCLUDE_DIRS}
 	)
 
 link_directories (/home/ska/local/lib)
@@ -136,6 +138,7 @@ target_link_libraries(${KCOV}
 	stdc++
 	dl
 	pthread
+	${LIBCURL_LIBRARIES}
 	m
 	${LIBZ_LIBRARIES})
 
