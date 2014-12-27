@@ -32,6 +32,13 @@ namespace kcov
 
 		virtual const std::string &getBinaryPath() = 0;
 
+		/**
+		 * Return the secret repo token for coveralls.io.
+		 *
+		 * @return the token, or "" if it isn't set.
+		 */
+		virtual const std::string &getCoverallsRepoToken() = 0;
+
 		virtual const std::string &getKernelCoveragePath() = 0;
 
 		virtual const std::string &getPythonCommand() const = 0;
