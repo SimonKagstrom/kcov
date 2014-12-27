@@ -51,8 +51,8 @@ public:
 			return;
 
 		out << "{\n";
-		out << " \'repo_token\': \'" + repo_token + "\',\n"; // FIXME!
-		out << " \'source_files\': [\n";
+		out << " \"repo_token\": \"" + repo_token + "\",\n"; // FIXME!
+		out << " \"source_files\": [\n";
 		setupCommonPaths();
 
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -61,14 +61,14 @@ public:
 			File *file = it->second;
 
 			out << "  {\n";
-			out << "   \'name\': \'" + escape_json(file->m_fileName) + "\',\n";
-			out << "   \'source\': \'";
+			out << "   \"name\": \"" + escape_json(file->m_fileName) + "\",\n";
+			out << "   \"source\": \"";
 
 			// Output source lines
 			for (unsigned int n = 1; n < file->m_lastLineNr; n++)
 				out << escape_json(file->m_lineMap[n]) << "\\n";
-			out << "\',\n";
-			out << "   \'coverage\': [";
+			out << "\",\n";
+			out << "   \"coverage\": [";
 
 			// And coverage
 			for (unsigned int n = 1; n < file->m_lastLineNr; n++) {

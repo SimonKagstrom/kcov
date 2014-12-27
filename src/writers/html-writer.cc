@@ -75,8 +75,8 @@ private:
 			const std::string &line = file->m_lineMap[n];
 
 			outJson << fmt(
-					"{'lineNum':'%5u',"
-					"'line':'%s'",
+					"{\"lineNum\":\"%5u\","
+					"\"line\":\"%s\"",
 					n,
 					escape_json(line).c_str()
 					);
@@ -97,13 +97,13 @@ private:
 				}
 
 				outJson << fmt(
-					",'class':'%s',"
-					"'hits':'%u',",
+					",\"class\":\"%s\","
+					"\"hits\":\"%u\",",
 					lineClass.c_str(),
 					cnt.m_hits);
 
 				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
-					outJson << fmt("'possible_hits':'%u',", cnt.m_possibleHits);
+					outJson << fmt("\"possible_hits\":\"%u\",", cnt.m_possibleHits);
 
 				nExecutedLines += !!cnt.m_hits;
 				nCodeLines++;
@@ -180,10 +180,10 @@ private:
 				"var percent_high = %d;"
 				"\n"
 				"var header = {"
-				" 'command' : '%s',"
-				" 'date' : '%s',"
-				" 'instrumented' : %d,"
-				" 'covered' : %d,"
+				" \"command\" : \"%s\","
+				" \"date\" : \"%s\","
+				" \"instrumented\" : %d,"
+				" \"covered\" : %d,"
 				"};"
 				"\n",
 				conf.getLowLimit(),
@@ -301,10 +301,10 @@ private:
 				"var percent_high = %d;"
 				"\n"
 				"var header = {"
-				" 'command' : '%s',"
-				" 'date' : '%s',"
-				" 'instrumented' : %d,"
-				" 'covered' : %d,"
+				" \"command\" : \"%s\","
+				" \"date\" : \"%s\","
+				" \"instrumented\" : %d,"
+				" \"covered\" : %d,"
 				"};"
 				"\n",
 				conf.getLowLimit(),
@@ -325,14 +325,14 @@ private:
 			percent = (executedLines / (double)lines) * 100;
 
 		return fmt(
-				"{'link':'%s',"
-				"'title':'%s',"
-				"'summary_name':'%s',"
-				"'covered_class':'%s',"
-				"'covered':'%.1f',"
-				"'covered_lines':'%d',"
-				"'uncovered_lines':'%d',"
-				"'total_lines' : '%d'},\n",
+				"{\"link\":\"%s\","
+				"\"title\":\"%s\","
+				"\"summary_name\":\"%s\","
+				"\"covered_class\":\"%s\","
+				"\"covered\":\"%.1f\","
+				"\"covered_lines\":\"%d\","
+				"\"uncovered_lines\":\"%d\","
+				"\"total_lines\" : \"%d\"},\n",
 				linkName.c_str(),
 				titleName.c_str(),
 				summaryName.c_str(),

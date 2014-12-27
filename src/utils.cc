@@ -587,7 +587,7 @@ std::string escape_json(const std::string &str)
 	size_t n_escapes = 0;
 
 	for (unsigned i = 0; i < str.size(); i++) {
-		if (str[i] == '\'' || str[i] == '\\')
+		if (str[i] == '\"' || str[i] == '\\')
 			n_escapes++;
 	}
 
@@ -601,8 +601,8 @@ std::string escape_json(const std::string &str)
 	for (unsigned i = 0; i < str.size(); i++) {
 		out[cur] = str[i];
 
-		// Quote single-quotes and backslashes
-		if (str[i] == '\'' || str[i] == '\\') {
+		// Quote quotes and backslashes
+		if (str[i] == '\"' || str[i] == '\\') {
 			out[cur] = '\\';
 			cur++;
 			out[cur] = str[i];
