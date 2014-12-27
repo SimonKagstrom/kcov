@@ -85,7 +85,7 @@ public:
 				if (n != file->m_lastLineNr - 1)
 					out << ",";
 			}
-			out << "   ]\n";
+			out << "]\n";
 
 			// Add comma or not on the last run
 			filesLeft--;
