@@ -125,8 +125,10 @@ public:
 		// Line markers always start with kcov@
 
 		size_t kcovStr = cur.find("kcov@");
-		if (kcovStr == std::string::npos)
+		if (kcovStr == std::string::npos) {
+			fprintf(stderr, "%s", cur.c_str());
 			return true;
+		}
 		std::vector<std::string> parts = split_string(cur.substr(kcovStr), "@");
 
 		// kcov@FILENAME@LINENO@...
