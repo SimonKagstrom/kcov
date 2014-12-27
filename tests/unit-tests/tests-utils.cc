@@ -24,6 +24,8 @@ TESTSUITE(utils)
 		std::string a = "var kalle=1;";
 		std::string b = "var kalle=\"1\";";
 		std::string c = "var a=\"\\hej\";";
+		std::string d = "var kalle=\tX;";
+		std::string e = "var kalle='X';";
 
 		std::string s;
 
@@ -35,5 +37,11 @@ TESTSUITE(utils)
 
 		s = escape_json(c);
 		ASSERT_TRUE(s == "var a=\\\"\\\\hej\\\";");
+
+		s = escape_json(d);
+		ASSERT_TRUE(s == "var kalle=\\tX;");
+
+		s = escape_json(e);
+		ASSERT_TRUE(s == "var kalle=\\'X\\';");
 	}
 }
