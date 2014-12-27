@@ -15,16 +15,16 @@ project (unit-test)
 set (TGT ut)
 
 set (${TGT}_SRCS
-    ../../src/cobertura-writer.cc
     ../../src/collector.cc
     ../../src/engine-factory.cc
-    ../../src/html-writer.cc
     ../../src/output-handler.cc
     ../../src/parsers/elf-parser.cc
     ../../src/parser-manager.cc
     ../../src/reporter.cc
     ../../src/utils.cc
-    ../../src/writer-base.cc
+    ../../src/writers/cobertura-writer.cc
+    ../../src/writers/html-writer.cc
+    ../../src/writers/writer-base.cc
     main.cc
     tests-collector.cc
     tests-configuration.cc

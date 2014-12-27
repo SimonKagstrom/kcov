@@ -23,7 +23,6 @@ set (${SOLIB}_SRCS
 	)
 
 set (${KCOV}_SRCS
-    cobertura-writer.cc
     collector.cc
     configuration.cc
     engine-factory.cc
@@ -32,7 +31,6 @@ set (${KCOV}_SRCS
     engines/ptrace.cc
     engines/python-engine.cc
     filter.cc
-    html-writer.cc
     main.cc
     merge-file-parser.cc
     output-handler.cc
@@ -42,7 +40,9 @@ set (${KCOV}_SRCS
     solib-handler.cc
     solib-parser/phdr_data.c
     utils.cc
-    writer-base.cc
+    writers/cobertura-writer.cc
+    writers/html-writer.cc
+    writers/writer-base.cc
     )
 
 set (${LINE2ADDR}_SRCS

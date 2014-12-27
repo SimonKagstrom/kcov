@@ -13,8 +13,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "../../src/html-writer.hh"
-#include "../../src/cobertura-writer.hh"
+#include "../../src/writers/html-writer.hh"
+#include "../../src/writers/cobertura-writer.hh"
 
 #include "mocks/mock-collector.hh"
 #include "mocks/mock-reporter.hh"

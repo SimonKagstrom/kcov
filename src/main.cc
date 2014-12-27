@@ -17,8 +17,8 @@
 #include <unistd.h>
 
 #include "merge-parser.hh"
-#include "html-writer.hh"
-#include "cobertura-writer.hh"
+#include "writers/html-writer.hh"
+#include "writers/cobertura-writer.hh"
 
 using namespace kcov;
 
