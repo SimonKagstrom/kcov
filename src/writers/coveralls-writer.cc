@@ -153,9 +153,10 @@ public:
 				it != m_files.end();
 				++it) {
 			File *file = it->second;
+			std::string fileName = file->m_name.substr(m_commonPath.size() + 1);
 
 			out << "  {\n";
-			out << "   \"name\": \"" + escape_json(file->m_fileName) + "\",\n";
+			out << "   \"name\": \"" + escape_json(fileName) + "\",\n";
 			out << "   \"source\": \"";
 
 			// Output source lines
