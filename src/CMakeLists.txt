@@ -41,6 +41,7 @@ set (${KCOV}_SRCS
     solib-parser/phdr_data.c
     utils.cc
     writers/cobertura-writer.cc
+    writers/coveralls-writer.cc
     writers/html-writer.cc
     writers/writer-base.cc
     )

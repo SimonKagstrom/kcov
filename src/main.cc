@@ -18,6 +18,7 @@
 
 #include "merge-parser.hh"
 #include "writers/html-writer.hh"
+#include "writers/coveralls-writer.hh"
 #include "writers/cobertura-writer.hh"
 
 using namespace kcov;
@@ -180,6 +181,7 @@ int main(int argc, const char *argv[])
 				base, out, conf.getBinaryName());
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
 				out + "/cobertura.xml");
+		IWriter &coverallsWriter = createCoverallsWriter(*parser, reporter);
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(*parser, reporter,
@@ -201,6 +203,7 @@ int main(int argc, const char *argv[])
 		}
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
+		output.registerWriter(coverallsWriter);
 	}
 
 	g_engine = engine;
