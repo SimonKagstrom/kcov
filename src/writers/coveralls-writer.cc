@@ -55,6 +55,7 @@ public:
 		out << " \"source_files\": [\n";
 		setupCommonPaths();
 
+		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
 				++it) {
@@ -84,8 +85,14 @@ public:
 				if (n != file->m_lastLineNr - 1)
 					out << ",";
 			}
-			out << "   ],\n";
-			out << "  },\n";
+			out << "   ]\n";
+
+			// Add comma or not on the last run
+			filesLeft--;
+			if (filesLeft > 0)
+				out << "  },\n";
+			else
+				out << "  }\n";
 		}
 		out << " ]\n";
 		out << "}\n";
