@@ -584,11 +584,14 @@ std::string escape_html(const std::string &str)
 
 std::string escape_json(const std::string &str)
 {
+	const std::string escapeChars = "\"\\";
 	size_t n_escapes = 0;
 
 	for (unsigned i = 0; i < str.size(); i++) {
-		if (str[i] == '\"' || str[i] == '\\')
-			n_escapes++;
+		for (unsigned int n = 0; n < escapeChars.size(); n++) {
+			if (str[i] == escapeChars[n])
+				n_escapes++;
+		}
 	}
 
 	if (n_escapes == 0)
@@ -602,10 +605,12 @@ std::string escape_json(const std::string &str)
 		out[cur] = str[i];
 
 		// Quote quotes and backslashes
-		if (str[i] == '\"' || str[i] == '\\') {
-			out[cur] = '\\';
-			cur++;
-			out[cur] = str[i];
+		for (unsigned int n = 0; n < escapeChars.size(); n++) {
+			if (str[i] == escapeChars[n]) {
+				out[cur] = '\\';
+				cur++;
+				out[cur] = str[i];
+			}
 		}
 		cur++;
 	}
