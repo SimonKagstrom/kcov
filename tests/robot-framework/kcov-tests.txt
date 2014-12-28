@@ -410,6 +410,11 @@ bash-coverage
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 38
     Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 5
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml short_test_sh 5
+    Should Contain    ${output}    11
 
 bash-short-file
 	Run								rm -rf ${out}/short-test.sh

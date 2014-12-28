@@ -81,3 +81,5 @@ exec 4>&2
 exec 2>>$1
 exec 1>>$1
 echo hopp
+
+`dirname $0`/short-test.sh
