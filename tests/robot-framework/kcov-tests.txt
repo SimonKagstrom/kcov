@@ -416,7 +416,7 @@ bash-short-file
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
     Should be equal as integers    ${rc}    0
     ${output}=    Run    ${xml_lookup} ${out}/short-test.sh/cobertura.xml short_test_sh 5
-    Should Contain    ${output}    1
+    Should Contain    ${output}    11
 
 
 bash-coverage-heredoc-backslashes
