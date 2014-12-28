@@ -60,7 +60,8 @@ public:
 				" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
 				"                         coverage report\n"
 				"\n"
-				" --coveralls-token=token Secret repo_token for uploads to Coveralls.io\n"
+				" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
+				"                         Coveralls.io\n"
 				"%s"
 				"\n"
 				"Examples:\n"
@@ -97,7 +98,7 @@ public:
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
 				{"include-path", required_argument, 0, 'I'},
-				{"coveralls-token", required_argument, 0, 'T'},
+				{"coveralls-id", required_argument, 0, 'T'},
 				{"debug", required_argument, 0, 'D'},
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
@@ -198,7 +199,7 @@ public:
 				m_bashCommand = optarg;
 				break;
 			case 'T':
-				m_coverallsRepoToken = optarg;
+				m_coverallsId = optarg;
 				break;
 			case 'x':
 				m_excludePattern = getCommaSeparatedList(std::string(optarg));
@@ -322,9 +323,9 @@ public:
 		return m_kernelCoveragePath;
 	}
 
-	const std::string &getCoverallsRepoToken()
+	const std::string &getCoverallsId()
 	{
-		return m_coverallsRepoToken;
+		return m_coverallsId;
 	}
 
 	const std::string &getPythonCommand() const
@@ -552,7 +553,7 @@ public:
 	std::string m_pythonCommand;
 	std::string m_bashCommand;
 	std::string m_kernelCoveragePath;
-	std::string m_coverallsRepoToken;
+	std::string m_coverallsId;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;

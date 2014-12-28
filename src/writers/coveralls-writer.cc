@@ -128,10 +128,10 @@ public:
 	void write()
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
-		const std::string &repo_token = conf.getCoverallsRepoToken();
+		const std::string &id = conf.getCoverallsId();
 
 		// No token? Skip output then
-		if (repo_token == "")
+		if (id == "")
 			return;
 
 		std::string outFile = conf.getOutDirectory() + "/" + conf.getBinaryName() + "/coveralls.out";
@@ -144,7 +144,12 @@ public:
 			return;
 
 		out << "{\n";
-		out << " \"repo_token\": \"" + repo_token + "\",\n"; // FIXME!
+		if (isRepoToken(id)) {
+			out << " \"repo_token\": \"" + id + "\",\n";
+		} else {
+			out << " \"service_name\": \"travis-ci\",\n";
+			out << " \"service_job_id\": \"" + id + "\",\n";
+		}
 		out << " \"source_files\": [\n";
 		setupCommonPaths();
 
@@ -199,6 +204,11 @@ public:
 	}
 
 private:
+	bool isRepoToken(const std::string &str)
+	{
+		return str.size() >= 32;
+	}
+
 	bool m_doWrite;
 };
 
