@@ -55,8 +55,9 @@ Only collect coverage data, don't produce HTML/Cobertura output
 \fB\-\-report\-only
 Only report HTML/Cobertura output, don't collect data
 .TP
-\fB\-\-coveralls\-repo\-token\fP=\fIrepo_token\fP
-Upload data to coveralls.io using secret token \fIrepo_token\fP.
+\fB\-\-coveralls\-id\fP=\fIid\fP
+Upload data to coveralls.io using secret repo_token or Travis CI service job ID \fIid\fP.
+The ID is taken as a repo_token if it's longer or equal to 32 characters.
 .SH UNCOMMON OPTIONS
 .TP
 \fB\-t\fP, \fB\-\-title\fP=\fItitle\fP
