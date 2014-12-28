@@ -38,11 +38,11 @@ WriterBase::File::File(const std::string &filename) :
 		m_fileName = m_name;
 
 	// Make this name unique (we might have several files with the same name)
-	uint32_t crc = hash_block(filename.c_str(), filename.size());
+	m_crc = hash_block(filename.c_str(), filename.size());
 	readFile(filename);
 
-	m_outFileName = fmt("%s.%x.html", m_fileName.c_str(), crc);
-	m_jsonOutFileName = fmt("%s.%x.json", m_fileName.c_str(), crc);
+	m_outFileName = fmt("%s.%x.html", m_fileName.c_str(), m_crc);
+	m_jsonOutFileName = fmt("%s.%x.json", m_fileName.c_str(), m_crc);
 }
 
 void WriterBase::File::readFile(const std::string &filename)

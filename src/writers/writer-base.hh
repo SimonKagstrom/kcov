@@ -28,6 +28,7 @@ namespace kcov
 			std::string m_fileName;
 			std::string m_outFileName;
 			std::string m_jsonOutFileName;
+			uint32_t m_crc;
 			LineMap_t m_lineMap;
 			unsigned int m_codeLines;
 			unsigned int m_executedLines;

@@ -162,12 +162,8 @@ public:
 
 			out << "  {\n";
 			out << "   \"name\": \"" + escape_json(fileName) + "\",\n";
-			out << "   \"source\": \"";
-
-			// Output source lines
-			for (unsigned int n = 1; n < file->m_lastLineNr; n++)
-				out << escape_json(file->m_lineMap[n]) << "\\n";
-			out << "\",\n";
+			// Use hash as source file
+			out << fmt("   \"source\": \"0x%08lx\",\n", (unsigned long)file->m_crc);
 			out << "   \"coverage\": [";
 
 			// And coverage
