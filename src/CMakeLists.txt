@@ -88,6 +88,12 @@ add_custom_command(
    )
 
 add_custom_command(
+   OUTPUT bash-helper.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh bash_helper > bash-helper.cc
+   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   )
+
+add_custom_command(
    OUTPUT html-data-files.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
     ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
@@ -129,7 +135,7 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc html-data-files.cc)
+add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc bash-helper.cc html-data-files.cc)
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 
 target_link_libraries(${KCOV}

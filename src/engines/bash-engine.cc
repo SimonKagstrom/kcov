@@ -20,6 +20,8 @@
 
 #include "script-engine-base.hh"
 
+extern std::vector<uint8_t> bash_helper_data;
+
 using namespace kcov;
 
 class BashEngine : public ScriptEngineBase
@@ -45,6 +47,16 @@ public:
 			error("Failed to open pipe");
 
 			return false;
+		}
+
+		std::string helperPath =
+				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
+
+		if (write_file(bash_helper_data.data(), bash_helper_data.size(),
+				"%s", helperPath.c_str()) < 0) {
+				error("Can't write helper at %s", helperPath.c_str());
+
+				return false;
 		}
 
 		m_listener = &listener;
@@ -82,19 +94,15 @@ public:
 			close(stderrPipe[1]);
 
 			/* Set up PS4 for tracing */
-			std::string ps4 = "PS4=kcov@${BASH_SOURCE}@${LINENO}@";
-
-			char *envString = (char *)xmalloc(ps4.size() + 1);
-			strcpy(envString, ps4.c_str());
-			putenv(envString);
+			doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
+			doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
 			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.getBashCommand().c_str());
-			vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
-				vec[2 + i] = xstrdup(argv[i]);
+				vec[1 + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
 			if (execv(vec[0], vec)) {
@@ -239,6 +247,15 @@ public:
 	};
 
 private:
+	void doSetenv(const std::string &val)
+	{
+		// "Leak" some bytes, but the environment needs that
+		char *envString = (char *)xmalloc(val.size() + 1);
+
+		strcpy(envString, val.c_str());
+
+		putenv(envString);
+	}
 
 	// Sweep through lines in a file to determine what is valid code
 	void parseFile(const std::string &filename)
