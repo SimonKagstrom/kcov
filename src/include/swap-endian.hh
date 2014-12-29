@@ -21,7 +21,7 @@ T swap_endian(T u)
 }
 
 
-static bool cpu_is_little_endian()
+static inline bool cpu_is_little_endian()
 {
 	static uint16_t data = 0x1122;
 	uint8_t *p = (uint8_t *)&data;
