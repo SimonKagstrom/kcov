@@ -1,4 +1,12 @@
 Kcov (24):
+	* Correct clang build (well, in Fedora 20 it still fails)
+
+	* Issue #46: Add support for uploading to coveralls.io via the
+	 --coveralls-id=<travis-id-or-repo_token> option
+
+	* Issue #45: Bash: Fix coverage collection when executing sub-scripts as
+	  programs.
+
 	* Issue #31: Fix handling of attaching to pid in a multithreaded process.
 	  Implementation taken from GDB: kcov now loops through all threads in
 	  a process and attaches to each one.
