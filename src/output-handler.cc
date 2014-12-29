@@ -6,7 +6,6 @@
 #include <file-parser.hh>
 #include <utils.hh>
 
-#include <thread>
 #include <list>
 
 #include <sys/stat.h>
