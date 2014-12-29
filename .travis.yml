@@ -9,7 +9,7 @@ compiler:
   - gcc
   - clang
 
-script: mkdir -f bld && cd bld && cmake .. && make
+script: mkdir -p bld && cd bld && cmake .. && make
 
 notifications:
   recipients:
