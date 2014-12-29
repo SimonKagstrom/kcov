@@ -215,15 +215,13 @@ class Ptrace : public IEngine
 {
 public:
 	Ptrace() :
-		m_breakpointId(0),
 		m_firstBreakpoint(true),
 		m_activeChild(0),
 		m_child(0),
 		m_firstChild(0),
 		m_parentCpu(0),
 		m_listener(NULL),
-		m_signal(0),
-		m_filter(NULL)
+		m_signal(0)
 	{
 		IEngineFactory::getInstance().registerEngine(*this);
 	}
@@ -748,8 +746,6 @@ private:
 	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
 
-	int m_breakpointId;
-
 	instructionMap_t m_instructionMap;
 	PendingBreakpointList_t m_pendingBreakpoints;
 	bool m_firstBreakpoint;
@@ -763,8 +759,6 @@ private:
 
 	IEventListener *m_listener;
 	unsigned long m_signal;
-
-	IFilter *m_filter;
 };
 
 static Ptrace::Ctor g_ptraceEngine;
