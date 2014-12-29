@@ -3,13 +3,15 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev
+before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev python-pip && sudo pip install robotframework
 language: cpp
 compiler:
   - gcc
   - clang
 
 script: mkdir -p bld && cd bld && cmake .. && make
+
+after_script: mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt
 
 notifications:
   recipients:
