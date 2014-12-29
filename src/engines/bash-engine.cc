@@ -101,8 +101,9 @@ public:
 			char **vec;
 			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.getBashCommand().c_str());
+			vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
-				vec[1 + i] = xstrdup(argv[i]);
+				vec[2 + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
 			if (execv(vec[0], vec)) {
