@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/SimonKagstrom/kcov.svg?branch=master)](https://travis-ci.org/SimonKagstrom/kcov) [![Coverage Status](https://img.shields.io/coveralls/SimonKagstrom/kcov.svg)](https://coveralls.io/r/SimonKagstrom/kcov?branch=master)
+
 Kcov is a code coverage tester based on Bcov (http://bcov.sf.net).
 
 Kcov, like Bcov, uses DWARF debugging information to make it possible
