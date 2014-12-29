@@ -9,7 +9,7 @@ compiler:
   - gcc
   - clang
 
-script: mkdir -p bld && cd bld && cmake .. && make ; cd -
+script: mkdir -p build && cd build && cmake .. && make ; cd -
 
 after_script: mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt ; cd -
 
