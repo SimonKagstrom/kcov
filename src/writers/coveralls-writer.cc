@@ -164,7 +164,7 @@ public:
 			if (m_commonPath != file->m_name)
 				fileName = file->m_name.substr(m_commonPath.size() + 1);
 			else
-				fileName = file->m_name;
+				fileName = file->m_fileName;
 
 			out << "  {\n";
 			out << "   \"name\": \"" + escape_json(fileName) + "\",\n";
