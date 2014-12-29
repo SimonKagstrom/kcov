@@ -299,8 +299,7 @@ private:
 	public:
 		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
 
-		Line(const std::string &file, unsigned int lineNr) :
-			m_lineNr(lineNr)
+		Line(const std::string &file, unsigned int lineNr)
 		{
 		}
 
@@ -378,7 +377,6 @@ private:
 		}
 
 	private:
-		unsigned int m_lineNr;
 		AddrToHitsMap_t m_addrs;
 	};
 
