@@ -9,9 +9,9 @@ compiler:
   - gcc
   - clang
 
-script: mkdir -p build && cd build && cmake .. && make ; cd -
+script: mkdir -p build && cd build && cmake .. && make && cd -
 
-after_success: rm -rf /tmp/kcov-kcov && mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt ; cd -
+after_success: rm -rf /tmp/kcov-kcov && mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt && cd -
 
 notifications:
   recipients:
