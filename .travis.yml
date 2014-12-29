@@ -3,7 +3,7 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev
+before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev
 language: cpp
 compiler:
   - gcc
