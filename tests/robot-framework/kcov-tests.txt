@@ -9,11 +9,11 @@ ${xml_lookup}     ${kcov_path}/tests/tools/lookup-xml-node.py
 
 *** Test Cases ***
 too-few-arguments
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out}
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out}
     Should be equal as integers    ${rc}    1
 
 wrong-arguments
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} --abcd=efg ${out} tests-stripped
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} --abcd=efg ${out} tests-stripped
     Should be equal as integers    ${rc}    1
 
 illegal-insn
@@ -21,7 +21,7 @@ illegal-insn
     Should Contain    ${output}    Illegal instructions are
 
 unit test
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ../unit-tests/ut
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ../unit-tests/ut
 
 fork-no-wait
     Run                            rm -rf ${out}/fork_no_wait
@@ -290,25 +290,25 @@ attach-process-with-threads
 python-exit-status
 	Run								rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    python ${kcov_path}/tests/python/main 5
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     Should be equal as integers    ${rc}    ${no_kcov_rc}
 
 python-unittest
 	Run								rm -rf ${out}/testdriver
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/unittest/testdriver
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/unittest/testdriver
     ${output}=    Run    ${xml_lookup} ${out}/testdriver/cobertura.xml testdriver 14
     Should Contain    ${output}    1
 
 python-short-file
 	Run								rm -rf ${out}/short-test.py
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/short-test.py
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/short-test.py
     Should be equal as integers    ${rc}    0
     ${output}=    Run    ${xml_lookup} ${out}/short-test.py/cobertura.xml short_test_py 6
     Should Contain    ${output}    1
 
 python-coverage
 	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
     Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
@@ -342,7 +342,7 @@ python-coverage
 
 python-accumulate-data
 	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 16
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 19
@@ -355,7 +355,7 @@ python-accumulate-data
 
 python-coverage-python3
     Run                            rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} --python-parser=python3 ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} --python-parser=python3 ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
     Should Contain    ${output}    2
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 17
@@ -369,13 +369,13 @@ python-coverage-python3
 
 python-tricky-single-line-string-assignment
 	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
     Should Contain    ${output}    1
 
 python-tricky-single-dict-assignment
 	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 57
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 61
@@ -390,12 +390,12 @@ python-tricky-single-dict-assignment
 bash-exit-status
 	Run								rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/bash/shell-main 5
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
     Should be equal as integers    ${rc}   ${no_kcov_rc}
 
 bash-coverage
 	Run								rm -rf ${out}/shell-main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 3
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 4
@@ -412,13 +412,13 @@ bash-coverage
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 5
     Should Contain    ${output}    1
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml short_test_sh 5
     Should Contain    ${output}    11
 
 bash-short-file
 	Run								rm -rf ${out}/short-test.sh
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
     Should be equal as integers    ${rc}    0
     ${output}=    Run    ${xml_lookup} ${out}/short-test.sh/cobertura.xml short_test_sh 5
     Should Contain    ${output}    11
@@ -426,7 +426,7 @@ bash-short-file
 
 bash-coverage-heredoc-backslashes
 	Run								rm -rf ${out}
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 52
     Should Contain    ${output}    4
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 53
@@ -442,7 +442,7 @@ bash-coverage-heredoc-backslashes
 
 bash-issue-44-heredoc-special-cases
 	Run								rm -rf ${out}/shell-main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 77
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 83
@@ -450,7 +450,7 @@ bash-issue-44-heredoc-special-cases
 
 bash-coverage-tricky
 	Run								rm -rf ${out}/shell-main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 36
     Should Contain    ${output}    nocode
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 44
@@ -467,7 +467,7 @@ bash-honor-signal
 
 bash-accumulate-data
 	Run								rm -rf ${out}
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 1
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 6
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 16
@@ -482,7 +482,7 @@ bash-accumulate-changed-data
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    	cp ${kcov_path}/tests/bash/shell-main .
     ${rc}=    Run and return RC    	cp ${kcov_path}/tests/bash/other.sh .
-    ${rc}=    Run and return RC    	${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ./shell-main 5 9
+    ${rc}=    Run and return RC    	${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ./shell-main 5 9
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 40
     Should Contain    ${output}    	1
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 67
@@ -490,7 +490,7 @@ bash-accumulate-changed-data
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml other_sh 6
     Should Contain    ${output}    	2
     Run                             echo 'echo arne-anka' >> shell-main
-    ${rc}=    Run and return RC    	${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ./shell-main 5
+    ${rc}=    Run and return RC    	${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ./shell-main 5
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 40
     Should Contain    ${output}    	0
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 67
@@ -501,7 +501,7 @@ bash-accumulate-changed-data
 bash-merge-data-issue-38
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 1
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/unitundertest.sh 1
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 6
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/unitundertest.sh/cobertura.xml unitundertest_sh 16
@@ -523,8 +523,8 @@ bash-merge-data-issue-38
 
 bash-output-crc
 	Run								rm -rf ${out}/a.sh
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/first-dir/a.sh
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/second-dir/a.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/first-dir/a.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/second-dir/a.sh
     ${output}=    Run              ls -l ${out}/a.sh/a.*.json | wc -l
     Should Contain    ${output}    2
     ${output}=    Run              ls -l ${out}/a.sh/b.*.json | wc -l
@@ -533,7 +533,7 @@ bash-output-crc
 
 merge-basic
 	Run								rm -rf ${out}
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml main 10
     Should Contain    ${output}    2
@@ -598,4 +598,4 @@ merge-changed-file
 
 report-to-coveralls
 	Run								rm -rf ${out}
-    ${rc}=    Run and return RC    ${kcov} --coveralls-id=%{TRAVIS_JOB_ID} --include-pattern=kcov /tmp/kcov-kcov ${kcov}
+    ${rc}=    Run and return RC    ${kcov} --coveralls-id=%{TRAVIS_JOB_ID} --include-pattern=kcov --exclude-pattern=build /tmp/kcov-kcov ${kcov}
