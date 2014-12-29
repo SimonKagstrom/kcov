@@ -11,7 +11,7 @@ compiler:
 
 script: mkdir -p build && cd build && cmake .. && make ; cd -
 
-after_script: mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt ; cd -
+after_script: rm -rf /tmp/kcov-kcov && mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt ; cd -
 
 notifications:
   recipients:
