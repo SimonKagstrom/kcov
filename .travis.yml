@@ -1,0 +1,20 @@
+# Build matrix / environment variable are explained on:
+# http://about.travis-ci.org/docs/user/build-configuration/
+# This file can be validated on:
+# http://lint.travis-ci.org/
+
+before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev
+language: cpp
+compiler:
+  - gcc
+  - clang
+
+script: mkdir -f bld && cd bld && cmake .. && make
+
+notifications:
+  recipients:
+    - simon.kagstrom@gmail.com
+  email:
+    on_success: change
+    on_failure: always
+
