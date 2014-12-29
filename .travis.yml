@@ -3,7 +3,7 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev python-pip gcc-multilib && sudo pip install robotframework
+before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev python-pip gcc-multilib python3 && sudo pip install robotframework
 language: cpp
 compiler:
   - gcc
