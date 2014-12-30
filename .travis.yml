@@ -3,15 +3,15 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-before_install: sudo apt-get install cmake elfutils libcurl4-openssl-dev libdw-dev libelf-dev python-pip gcc-multilib python3 && sudo pip install robotframework
+before_install: make -f travis/Makefile prepare_environment
+
 language: cpp
 compiler:
   - gcc
   - clang
 
-script: mkdir -p build && cd build && cmake .. && make && cd -
+script: make -f travis/Makefile run-tests
 
-after_success: rm -rf /tmp/kcov-kcov && mkdir -p build-tests && cd build-tests && cmake ../tests/ && make && WORKSPACE=`pwd`/../ pybot ../tests/robot-framework/kcov-tests.txt && cd -
 
 notifications:
   recipients:
