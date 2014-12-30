@@ -163,7 +163,7 @@ main-test
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 14
     Should Contain    ${output}    nocode
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 18
-    Should Contain    ${output}    1
+    Should Be True    ${output} >= 1
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 25
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
@@ -200,7 +200,7 @@ global-constructors-test
     ${rc}=    Run and return RC    ${kcov} ${out} ./global-constructors
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/global-constructors/cobertura.xml test_global_ctors_cc 4
-    Should Contain    ${output}    1
+    Should Be True    ${output} >= 1
 
 daemon-wait-for-last-child-test
 	Run                            rm -rf ${out}/test_daemon
