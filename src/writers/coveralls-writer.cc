@@ -127,6 +127,10 @@ public:
 
 	void write()
 	{
+		// Write once at the end only
+		if (!m_doWrite)
+			return;
+
 		IConfiguration &conf = IConfiguration::getInstance();
 		const std::string &id = conf.getCoverallsId();
 
@@ -200,9 +204,7 @@ public:
 
 		out.close();
 
-		// Write once at the end only
-		if (m_doWrite)
-			g_curl.talk(outFile);
+		g_curl.talk(outFile);
 	}
 
 private:
