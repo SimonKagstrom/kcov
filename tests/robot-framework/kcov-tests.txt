@@ -212,6 +212,7 @@ daemon-wait-for-last-child-test
     Should Contain    ${output}    1
     
 daemon-no-wait-for-last-child-test
+	[Tags]	not_ready
 	Run                            rm -rf ${out}/test_daemon/cobertura.xml
     ${no_kcov_rc}=    Run and return RC    ./test_daemon
     ${rc}=    Run and return RC    ${kcov} --exit-first-process ${out} ./test_daemon
@@ -368,12 +369,14 @@ python-coverage-python3
     Should Contain    ${output}    nocode
 
 python-tricky-single-line-string-assignment
+	[Tags]	not_ready
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
     Should Contain    ${output}    1
 
 python-tricky-single-dict-assignment
+	[Tags]	not_ready
 	Run								rm -rf ${out}/main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 57
@@ -597,5 +600,6 @@ merge-changed-file
     Should Contain    ${output}    0
 
 report-to-coveralls
+	[Tags]	not_ready
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} --coveralls-id=%{TRAVIS_JOB_ID} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov}
