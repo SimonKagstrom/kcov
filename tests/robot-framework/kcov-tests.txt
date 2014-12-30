@@ -68,6 +68,7 @@ fork-32
     Should Contain    ${output}    1
 
 shared-library
+	[Tags]	not_ready
     Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test
     ${rc}=    Run and return RC    ${kcov} ${out} ./shared_library_test
@@ -96,6 +97,7 @@ shared-library-filter-out
     Should Contain    ${output}    nocode
 
 dlopen
+	[Tags]	not_ready
     Run                            rm -rf ${out}/dlopen
     ${no_kcov_rc}=    Run and return RC    ./dlopen
     ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
@@ -110,6 +112,7 @@ dlopen
     Should Contain    ${output}    0
 
 dlopen-in-ignored-source-file
+	[Tags]	not_ready
     Run                            rm -rf ${out}/dlopen
     ${no_kcov_rc}=    Run and return RC    ./dlopen
     ${rc}=    Run and return RC    ${kcov} --exclude-pattern=dlopen.cc ${out} ./dlopen
