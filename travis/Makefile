@@ -1,5 +1,6 @@
 #!/usr/bin/make
 
+chroot=/tmp/32-bit-chroot
 .PHONY: prepare_environment
 
 build:
@@ -17,5 +18,9 @@ run-tests: build-tests
 
 prepare_environment:
 	sudo apt-get update -qq
-	sudo apt-get install -y libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 gcc-multilib
+	sudo apt-get install -y libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 gcc-multilib debootstrap
 	sudo pip install robotframework
+	sudo i386 debootstrap --arch=i386 precise $(chroot)
+	sudo mount --rbind "$(shell pwd)" "${chroot}/$(shell pwd)"
+	sudo i386 chroot "${chroot}" apt-get install -y build-essential
+	sudo i386 chroot "${chroot}" apt-get install -y libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3
