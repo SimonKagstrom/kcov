@@ -14,10 +14,10 @@ build:
 
 build_gcc:
 	sudo mkdir -p ${chroot}/$(shell pwd)/build-32 ${chroot}/$(shell pwd)/build-32-tests
-	cd build-32 && cmake ..
-	make -C build
-	cd build-tests-32 && cmake ../tests
-	make -C build-tests
+	sudo i386 chroot ${chroot} && cd $(shell pwd)/build-32 && cmake ..
+	sudo i386 chroot ${chroot} && make -C $(shell pwd)/build-32
+	sudo i386 chroot ${chroot} && cd $(shell pwd)/build-tests-32 && cmake ../tests
+	sudo i386 chroot ${chroot} && make -C $(shell pwd)/build-tests-32
 
 build_clang:
 
