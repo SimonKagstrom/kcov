@@ -13,14 +13,14 @@ build:
 	make -C build-tests
 
 build_gcc:
-	sudo mkdir -p ${chroot}/$(shell pwd)/build-32 ${chroot}/$(shell pwd)/build-tests-32
-	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-32 && cmake .."
-	sudo i386 chroot ${chroot} sh -c "make -C $(shell pwd)/build-32"
-	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-tests-32 && cmake ../tests"
-	sudo i386 chroot ${chroot} sh -c "make -C $(shell pwd)/build-tests-32"
+	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
+	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
+	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build"
+	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && cmake ../tests"
+	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
 run-tests-gcc: build_gcc
-	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-tests-32 && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
+	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
 
 run-tests-clang:
 
@@ -35,9 +35,9 @@ prepare_linux:
 	sudo pip install robotframework
 
 prepare_gcc:
-	sudo mkdir -p "${chroot}/$(shell pwd)"
+	sudo mkdir -p "${chroot}/tmp/kcov"
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
-	sudo mount --rbind "$(shell pwd)" "${chroot}/$(shell pwd)"
+	sudo cp -rap "$(shell pwd)/*" "${chroot}/tmp/kcov"
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
