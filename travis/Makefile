@@ -13,6 +13,8 @@ build:
 	make -C build-tests
 
 build_gcc:
+	sudo cp -rap "$(shell pwd)/*" "${chroot}/tmp/kcov"
+	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build"
@@ -37,7 +39,6 @@ prepare_linux:
 prepare_gcc:
 	sudo mkdir -p "${chroot}/tmp/kcov"
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
-	sudo cp -rap "$(shell pwd)/*" "${chroot}/tmp/kcov"
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
