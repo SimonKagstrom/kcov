@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 chroot=/tmp/32-bit-chroot
-kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3
+kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 cmake
 
 .PHONY: prepare_environment
 
@@ -24,13 +24,19 @@ build_clang:
 run-tests: build build_${CC}
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 
-prepare_environment:
+prepare_linux:
 	sudo apt-get update -qq
 	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap
 	sudo pip install robotframework
+
+prepare_gcc:
 	sudo mkdir -p "${chroot}/$(shell pwd)"
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo mount --rbind "$(shell pwd)" "${chroot}/$(shell pwd)"
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
+
+prepare_clang:
+
+prepare_environment: prepare_linux prepare_${CC}
