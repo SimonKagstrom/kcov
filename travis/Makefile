@@ -19,9 +19,14 @@ build_gcc:
 	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-tests-32 && cmake ../tests"
 	sudo i386 chroot ${chroot} sh -c "make -C $(shell pwd)/build-tests-32"
 
+run-tests-gcc: build_gcc
+	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-tests-32 && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
+
+run-tests-clang:
+
 build_clang:
 
-run-tests: build build_${CC}
+run-tests: build run-tests-${CC}
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 
 prepare_linux:
