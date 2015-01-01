@@ -41,6 +41,7 @@ prepare_gcc:
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
+	sudo i386 chroot "${chroot}" pip install robotframework
 
 prepare_clang:
 
