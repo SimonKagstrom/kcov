@@ -13,7 +13,7 @@ build:
 	make -C build-tests
 
 build_gcc:
-	sudo mkdir -p ${chroot}/$(shell pwd)/build-32 ${chroot}/$(shell pwd)/build-32-tests
+	sudo mkdir -p ${chroot}/$(shell pwd)/build-32 ${chroot}/$(shell pwd)/build-tests-32
 	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-32 && cmake .."
 	sudo i386 chroot ${chroot} sh -c "make -C $(shell pwd)/build-32"
 	sudo i386 chroot ${chroot} sh -c "cd $(shell pwd)/build-tests-32 && cmake ../tests"
