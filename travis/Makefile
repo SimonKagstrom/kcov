@@ -21,7 +21,7 @@ prepare_environment:
 	sudo apt-get install -y libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 gcc-multilib debootstrap
 	sudo pip install robotframework
 	sudo mkdir -p "${chroot}/$(shell pwd)"
-	sudo i386 debootstrap --arch=i386 precise $(chroot)
+	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo mount --rbind "$(shell pwd)" "${chroot}/$(shell pwd)"
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
