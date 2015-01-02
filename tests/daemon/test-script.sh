@@ -5,9 +5,10 @@ out=$2
 prg=$3
 
 $prg &
-pid=`pidof $prg`
+pid=$!
 
 $kcov --pid=$pid $out $prg &
+kcov_pid=$!
 
 sleep 1.2
-kill `pidof $kcov`
+kill $kcov_pid
