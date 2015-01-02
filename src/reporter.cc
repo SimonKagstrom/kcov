@@ -362,7 +362,8 @@ private:
 
 		size_t marshalSize() const
 		{
-			return m_addrs.size();
+			// Address and number of hits (both 64-bit values)
+			return m_addrs.size() * sizeof(uint64_t) * 2;
 		}
 
 		static uint8_t *unMarshal(uint8_t *p,
