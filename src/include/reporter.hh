@@ -60,7 +60,7 @@ namespace kcov
 			 * @param addr the executed address
 			 * @param hits the number of hits of the address (typically 1)
 			 */
-			virtual void onAddress(unsigned long addr, unsigned long hits) = 0;
+			virtual void onAddress(uint64_t addr, unsigned long hits) = 0;
 		};
 
 		virtual ~IReporter() {}

@@ -23,7 +23,7 @@ namespace kcov
 			 * @param addr the address which just got executed
 			 * @param hits the number of hits for the address
 			 */
-			virtual void onAddressHit(unsigned long addr, unsigned long hits) = 0;
+			virtual void onAddressHit(uint64_t addr, unsigned long hits) = 0;
 		};
 
 		class IEventTickListener

@@ -124,7 +124,7 @@ public:
 	}
 
 	// From IReporter::IListener
-	void onAddress(unsigned long addr, unsigned long hits)
+	void onAddress(uint64_t addr, unsigned long hits)
 	{
 		if (m_fileLineByAddress.find(addr) == m_fileLineByAddress.end()) {
 			m_pendingHits[addr] = hits;
@@ -147,8 +147,7 @@ public:
 	}
 
 	// From IFileParser::ILineListener
-	void onLine(const std::string &filename, unsigned int lineNr,
-					unsigned long addr)
+	void onLine(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
 		if (!m_filter.runFilters(filename))
 		{
@@ -499,7 +498,7 @@ private:
 		return true;
 	}
 
-	typedef std::unordered_map<unsigned long, unsigned int> AddrMap_t;
+	typedef std::unordered_map<uint64_t, unsigned int> AddrMap_t;
 	typedef std::unordered_map<unsigned int, AddrMap_t> LineAddrMap_t;
 
 	class File
@@ -547,9 +546,9 @@ private:
 
 	typedef std::vector<ICollector::IListener *> CollectorListenerList_t;
 	typedef std::unordered_map<std::string, File *> FileByNameMap_t;
-	typedef std::unordered_map<unsigned long, File *> FileByAddressMap_t;
-	typedef std::unordered_map<unsigned long, uint64_t> FileLineByAddress_t;
-	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
+	typedef std::unordered_map<uint64_t, File *> FileByAddressMap_t;
+	typedef std::unordered_map<uint64_t, uint64_t> FileLineByAddress_t;
+	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddressByFileLine_t;
 	typedef std::vector<IFileParser::ILineListener *> LineListenerList_t;
 

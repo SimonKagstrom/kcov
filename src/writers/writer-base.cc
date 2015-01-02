@@ -75,7 +75,7 @@ void WriterBase::File::readFile(const std::string &filename)
 }
 
 
-void WriterBase::onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
+void WriterBase::onLine(const std::string &file, unsigned int lineNr, uint64_t addr)
 {
 	if (!m_reporter.fileIsIncluded(file))
 		return;

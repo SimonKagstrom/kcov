@@ -40,7 +40,7 @@ namespace kcov
 		{
 		public:
 			virtual void onLine(const std::string &file, unsigned int lineNr,
-					unsigned long addr) = 0;
+					uint64_t addr) = 0;
 		};
 
 		/**

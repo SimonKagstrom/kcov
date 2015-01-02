@@ -42,7 +42,7 @@ namespace kcov
 
 
 		/* Called when the ELF is parsed */
-		void onLine(const std::string &file, unsigned int lineNr, unsigned long addr);
+		void onLine(const std::string &file, unsigned int lineNr, uint64_t addr);
 
 
 		void *marshalSummary(IReporter::ExecutionSummary &summary,

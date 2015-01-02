@@ -148,8 +148,8 @@ public:
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
 		for (size_t i = 0; i < n; i++) {
-			unsigned long addr;
-			unsigned int hits;
+			uint64_t addr;
+			uint64_t hits;
 
 			p = Line::unMarshal(p, &addr, &hits);
 			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
@@ -234,7 +234,7 @@ private:
 	}
 
 	/* Called when the file is parsed */
-	void onLine(const std::string &file, unsigned int lineNr, unsigned long addr)
+	void onLine(const std::string &file, unsigned int lineNr, uint64_t addr)
 	{
 		if (!m_filter.runFilters(file))
 			return;
@@ -265,7 +265,7 @@ private:
 	}
 
 	/* Called during runtime */
-	void reportAddress(unsigned long addr, unsigned long hits)
+	void reportAddress(uint64_t addr, unsigned long hits)
 	{
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
@@ -274,7 +274,7 @@ private:
 
 		Line *line = it->second;
 
-		kcov_debug(INFO_MSG, "REPORT hit at 0x%lx\n", addr);
+		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long)addr);
 		line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
 		for (ListenerList_t::const_iterator it = m_listeners.begin();
@@ -284,32 +284,32 @@ private:
 	}
 
 	// From ICollector::IListener
-	void onAddressHit(unsigned long addr, unsigned long hits)
+	void onAddressHit(uint64_t addr, unsigned long hits)
 	{
 		reportAddress(addr, hits);
 	}
 
 	// From IReporter::IListener - report recursively
-	void onAddress(unsigned long addr, unsigned long hits)
+	void onAddress(uint64_t addr, unsigned long hits)
 	{
 	}
 
 	class Line
 	{
 	public:
-		typedef std::unordered_map<unsigned long, int> AddrToHitsMap_t;
+		typedef std::unordered_map<uint64_t, int> AddrToHitsMap_t;
 
 		Line(const std::string &file, unsigned int lineNr)
 		{
 		}
 
-		void addAddress(unsigned long addr)
+		void addAddress(uint64_t addr)
 		{
 			if (m_addrs.find(addr) == m_addrs.end())
 				m_addrs[addr] = 0;
 		}
 
-		void registerHit(unsigned long addr, unsigned long hits, bool singleShot)
+		void registerHit(uint64_t addr, unsigned long hits, bool singleShot)
 		{
 			if (singleShot)
 				m_addrs[addr] = 1;
@@ -366,12 +366,12 @@ private:
 		}
 
 		static uint8_t *unMarshal(uint8_t *p,
-				unsigned long *outAddr, unsigned int *outHits)
+				uint64_t *outAddr, uint64_t *outHits)
 		{
 			uint64_t *data = (uint64_t *)p;
 
-			*outAddr = be_to_host(*data++);
-			*outHits = be_to_host(*data++);
+			*outAddr = be_to_host<uint64_t>(*data++);
+			*outHits = be_to_host<uint64_t>(*data++);
 
 			return (uint8_t *)data;
 		}
@@ -484,8 +484,8 @@ private:
 	};
 
 	typedef std::unordered_map<std::string, File> FileMap_t;
-	typedef std::unordered_map<unsigned long, Line *> AddrToLineMap_t;
-	typedef std::unordered_map<unsigned long, unsigned long> AddrToHitsMap_t;
+	typedef std::unordered_map<uint64_t, Line *> AddrToLineMap_t;
+	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
 
 	FileMap_t m_files;

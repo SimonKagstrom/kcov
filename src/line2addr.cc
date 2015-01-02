@@ -18,8 +18,7 @@ public:
 	{
 	}
 
-	void onLine(const std::string &file, unsigned int lineNr,
-			unsigned long addr)
+	void onLine(const std::string &file, unsigned int lineNr, uint64_t addr)
 	{
 		if (file.find(m_filePattern) != std::string::npos) {
 			if (m_lineNr < 0 || lineNr == (unsigned int)m_lineNr)

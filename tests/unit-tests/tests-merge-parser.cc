@@ -76,12 +76,12 @@ public:
 	{
 	}
 
-	void onAddress(unsigned long addr, unsigned long hits)
+	void onAddress(uint64_t addr, unsigned long hits)
 	{
 		m_addrToHits[addr] = hits;
 	}
 
-	void onAddressHit(unsigned long addr, unsigned long hits)
+	void onAddressHit(uint64_t addr, unsigned long hits)
 	{
 		m_breakpointToHits[addr] = hits;
 	}
