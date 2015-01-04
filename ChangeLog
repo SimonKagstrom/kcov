@@ -1,7 +1,14 @@
 Kcov (24):
+	* Misc performance improvements here and there
+
+	* Build: Use the travis-ci.org build service to make tests more
+	  reliable.
+
 	* Unbreak Python and Bash coverage collection on 32-bit builds
 
 	* Correct clang build (well, in Fedora 20 it still fails)
+
+	* Issue #43: Clarify elfutils dependency
 
 	* Issue #46: Add support for uploading to coveralls.io via the
 	 --coveralls-id=<travis-id-or-repo_token> option
