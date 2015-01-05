@@ -34,7 +34,7 @@ Kcov (24):
 
 	* Document classes better
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jan  5 09:46:29 CET 2015
 
 Kcov (23):
 	* Correct use-after-free case when the solib thread is killed
