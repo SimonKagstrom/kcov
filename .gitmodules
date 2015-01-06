@@ -1,0 +1,3 @@
+[submodule "tests/unit-tests/trompeloeil"]
+	path = tests/unit-tests/trompeloeil
+	url = https://github.com/rollbear/trompeloeil.git
