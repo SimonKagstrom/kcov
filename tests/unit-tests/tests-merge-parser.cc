@@ -10,15 +10,15 @@
 class MockParser : public IFileParser
 {
 public:
-	MOCK_METHOD2(addFile, bool(const std::string &filename, struct phdr_data_entry *phdr_data));
-	MOCK_METHOD1(registerLineListener, void(ILineListener &listener));
-	MOCK_METHOD1(registerFileListener, void(IFileListener &listener));
-	MOCK_METHOD0(parse, bool());
-	MOCK_METHOD0(getChecksum, uint64_t());
-	MOCK_METHOD0(getParserType, std::string());
-	MOCK_METHOD1(setupParser, void(IFilter *));
-	MOCK_METHOD0(maxPossibleHits, enum IFileParser::PossibleHits());
-	MOCK_METHOD3(matchParser, unsigned int(const std::string &filename, uint8_t *mock_data, size_t dataSize));
+	MAKE_MOCK2(addFile, bool(const std::string &filename, struct phdr_data_entry *phdr_data));
+	MAKE_MOCK1(registerLineListener, void(ILineListener &listener));
+	MAKE_MOCK1(registerFileListener, void(IFileListener &listener));
+	MAKE_MOCK0(parse, bool());
+	MAKE_MOCK0(getChecksum, uint64_t());
+	MAKE_MOCK0(getParserType, std::string());
+	MAKE_MOCK1(setupParser, void(IFilter *));
+	MAKE_MOCK0(maxPossibleHits, enum IFileParser::PossibleHits());
+	MAKE_MOCK3(matchParser, unsigned int(const std::string &filename, uint8_t *mock_data, size_t dataSize));
 };
 
 static bool mocked_file_exists(const std::string &path)
@@ -100,11 +100,11 @@ TESTSUITE(merge_parser)
 		MockReporter reporter;
 		auto &filter = IFilter::create();
 
-		EXPECT_CALL(mockParser, registerFileListener(_))
-			.Times(Exactly(2))
+		REQUIRE_CALL(mockParser, registerFileListener(_))
+			.TIMES(2)
 		;
-		EXPECT_CALL(mockParser, registerLineListener(_))
-			.Times(Exactly(2))
+		REQUIRE_CALL(mockParser, registerLineListener(_))
+			.TIMES(2)
 		;
 
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
@@ -196,11 +196,11 @@ TESTSUITE(merge_parser)
 		MockParser mockParser;
 		MockReporter reporter;
 
-		EXPECT_CALL(mockParser, registerFileListener(_))
-			.Times(Exactly(1))
+		REQUIRE_CALL(mockParser, registerFileListener(_))
+			.TIMES(1)
 		;
-		EXPECT_CALL(mockParser, registerLineListener(_))
-			.Times(Exactly(1))
+		REQUIRE_CALL(mockParser, registerLineListener(_))
+			.TIMES(1)
 		;
 
 		mock_data = {'a', '\n', 'b', '\n', '\0'};
@@ -231,11 +231,11 @@ TESTSUITE(merge_parser)
 		MockParser mockParser;
 		MockReporter reporter;
 
-		EXPECT_CALL(mockParser, registerFileListener(_))
-			.Times(Exactly(2))
+		REQUIRE_CALL(mockParser, registerFileListener(_))
+			.TIMES(2)
 		;
-		EXPECT_CALL(mockParser, registerLineListener(_))
-			.Times(Exactly(2))
+		REQUIRE_CALL(mockParser, registerLineListener(_))
+			.TIMES(2)
 		;
 
 		mock_data = {'a', '\n', 'b', '\n', '\0'};

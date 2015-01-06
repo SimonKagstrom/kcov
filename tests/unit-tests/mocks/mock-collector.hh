@@ -8,11 +8,11 @@
 class MockCollector : public kcov::ICollector
 {
 public:
-	MOCK_METHOD1(registerListener, void(kcov::ICollector::IListener &listener));
-	MOCK_METHOD1(registerEventTickListener, void(kcov::ICollector::IEventTickListener &listener));
-	MOCK_METHOD0(prepare, int());
-	MOCK_METHOD1(run, int(const std::string &));
-	MOCK_METHOD0(stop, void());
+	MAKE_MOCK1(registerListener, void(kcov::ICollector::IListener &listener));
+	MAKE_MOCK1(registerEventTickListener, void(kcov::ICollector::IEventTickListener &listener));
+	MAKE_MOCK0(prepare, int());
+	MAKE_MOCK1(run, int(const std::string &));
+	MAKE_MOCK0(stop, void());
 
 	void mockRegisterListener(IListener &listener)
 	{

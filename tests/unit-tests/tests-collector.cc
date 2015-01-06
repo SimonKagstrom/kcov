@@ -13,7 +13,11 @@ using namespace kcov;
 class MockCollectorListener : public ICollector::IListener
 {
 public:
-	MOCK_METHOD2(onAddressHit, void(unsigned long addr, unsigned long hits));
+	virtual ~MockCollectorListener()
+	{
+	}
+
+	MAKE_MOCK2(onAddressHit, void(unsigned long addr, unsigned long hits));
 };
 
 DISABLED_TEST(collector)
@@ -32,8 +36,9 @@ DISABLED_TEST(collector)
 
 	collector.registerListener(listener);
 
-	EXPECT_CALL(engine, registerBreakpoint(_))
-		.Times(AtLeast(1))
+	REQUIRE_CALL(engine, registerBreakpoint(_))
+		.TIMES(AT_LEAST(1))
+		.RETURN(0)
 		;
 
 	res = elf->parse();
@@ -41,9 +46,9 @@ DISABLED_TEST(collector)
 
 	int v;
 
-	EXPECT_CALL(engine, start(_,_))
-		.Times(Exactly(1))
-		.WillRepeatedly(Return(true))
+	REQUIRE_CALL(engine, start(_,_))
+		.TIMES(1)
+		.RETURN(true)
 		;
 
 	IEngine::Event evExit, evOnce;
@@ -56,26 +61,27 @@ DISABLED_TEST(collector)
 	evOnce.type = ev_breakpoint;
 	evOnce.data = 1;
 
-	EXPECT_CALL(listener, onAddressHit(1, _))
-		.Times(Exactly(1))
+	REQUIRE_CALL(listener, onAddressHit(1, _))
+		.TIMES(1)
 		;
 
 	v = collector.run(filename);
 
-	ASSERT_TRUE(v == evExit.data);
+	ASSERT_EQ(v, evExit.data);
 
 	evOnce.type = ev_error;
 
 	// Test error
-	EXPECT_CALL(engine, start(_,_))
-		.Times(Exactly(1))
-		.WillRepeatedly(Return(0))
+	REQUIRE_CALL(engine, start(_,_))
+		.TIMES(1)
+		.RETURN(0)
 		;
 
-	EXPECT_CALL(engine, continueExecution())
-		.Times(Exactly(1))
+	REQUIRE_CALL(engine, continueExecution())
+		.TIMES(1)
+		.RETURN(true)
 		;
 	v = collector.run(filename);
 
-	ASSERT_TRUE(v == -1);
+	ASSERT_EQ(v, -1);
 }

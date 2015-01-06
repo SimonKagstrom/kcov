@@ -6,6 +6,8 @@
 #include <string>
 #include <string.h>
 
+#include <map>
+
 using namespace kcov;
 
 class FunctionListener : public IFileParser::ILineListener

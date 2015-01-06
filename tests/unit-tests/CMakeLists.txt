@@ -6,7 +6,6 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
 find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
-find_package (GTest REQUIRED)
 
 # ====================================
 # project name and version
@@ -37,7 +36,7 @@ set (${TGT}_SRCS
     )
 set (CMAKE_BUILD_TYPE debug)
 
-set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP")
+set (CMAKE_CXX_FLAGS "-std=c++1y -Wall -D_GLIBCXX_USE_NANOSLEEP")
 
 
 add_custom_command(
@@ -72,8 +71,6 @@ add_custom_command(
 
 include_directories(
 	../../src/include/
-	${GMOCK_INCLUDE_DIRS}
-	${GTEST_INCLUDE_DIRS}
 	${LIBCRPCUT_INCLUDE_DIRS}
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDW_INCLUDE_DIRS}
@@ -85,8 +82,6 @@ add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
 	${LIBCRPCUT_LIBRARIES}
-	${GTEST_BOTH_LIBRARIES}
-	gmock
 	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl

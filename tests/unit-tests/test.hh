@@ -1,7 +1,6 @@
 #pragma once
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "trompeloeil/trompeloeil.hpp"
 #include <crpcut.hpp>
 
-using namespace testing;
+using trompeloeil::_;

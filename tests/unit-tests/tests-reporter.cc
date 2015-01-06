@@ -57,9 +57,9 @@ TEST(reporter)
 
 	MockCollector collector;
 
-	EXPECT_CALL(collector, registerListener(_))
-		.Times(Exactly(1))
-		.WillRepeatedly(Invoke(&collector, &MockCollector::mockRegisterListener))
+	REQUIRE_CALL(collector, registerListener(_))
+		.TIMES(1)
+//		.WillRepeatedly(Invoke(&collector, &MockCollector::mockRegisterListener))
 		;
 
 

@@ -63,34 +63,34 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	res = conf.parse(3, argv);
 	ASSERT_TRUE(res);
 
-	EXPECT_CALL(reporter, lineIsCode(_,_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(true))
+	REQUIRE_CALL(reporter, lineIsCode(_,_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((true))
 		;
-	EXPECT_CALL(reporter, fileIsIncluded(_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(true))
+	REQUIRE_CALL(reporter, fileIsIncluded(_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((true))
 		;
-	EXPECT_CALL(reporter, lineIsCode(_,7))
-		.Times(AtLeast(4)) // Both files
-		.WillRepeatedly(Return(false))
+	REQUIRE_CALL(reporter, lineIsCode(_,7))
+		.TIMES(AT_LEAST(4)) // Both files
+		.RETURN((false))
 		;
 
-	EXPECT_CALL(reporter, getLineExecutionCount(_,_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(def))
+	REQUIRE_CALL(reporter, getLineExecutionCount(_,_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((def))
 		;
-	EXPECT_CALL(reporter, getLineExecutionCount(_,8))
-		.Times(AtLeast(3))
-		.WillRepeatedly(Return(partial))
+	REQUIRE_CALL(reporter, getLineExecutionCount(_,8))
+		.TIMES(AT_LEAST(3))
+		.RETURN((partial))
 		;
-	EXPECT_CALL(reporter, getLineExecutionCount(_,11))
-		.Times(AtLeast(2))
-		.WillRepeatedly(Return(full))
+	REQUIRE_CALL(reporter, getLineExecutionCount(_,11))
+		.TIMES(AT_LEAST(2))
+		.RETURN((full))
 		;
-	EXPECT_CALL(reporter, getExecutionSummary())
-		.Times(AtLeast(3))
-		.WillRepeatedly(Return(summary))
+	REQUIRE_CALL(reporter, getExecutionSummary())
+		.TIMES(AT_LEAST(3))
+		.RETURN((summary))
 		;
 
 	MockCollector collector;
@@ -112,9 +112,10 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 	output.produce();
 
-	EXPECT_CALL(reporter, marshal(_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
+	REQUIRE_CALL(reporter, marshal(_))
+		.TIMES(AT_LEAST(1))
+		.RETURN(nullptr) // FIXME!
+//		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
 	output.produce();
@@ -151,22 +152,22 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	res = conf.parse(3, argv);
 	ASSERT_TRUE(res);
 
-	EXPECT_CALL(reporter, lineIsCode(_,_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(true))
+	REQUIRE_CALL(reporter, lineIsCode(_,_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((true))
 		;
-	EXPECT_CALL(reporter, fileIsIncluded(_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(true))
+	REQUIRE_CALL(reporter, fileIsIncluded(_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((true))
 		;
 
-	EXPECT_CALL(reporter, getLineExecutionCount(_,_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Return(def))
+	REQUIRE_CALL(reporter, getLineExecutionCount(_,_))
+		.TIMES(AT_LEAST(1))
+		.RETURN((def))
 		;
-	EXPECT_CALL(reporter, getExecutionSummary())
-		.Times(AtLeast(2))
-		.WillRepeatedly(Return(summary))
+	REQUIRE_CALL(reporter, getExecutionSummary())
+		.TIMES(AT_LEAST(2))
+		.RETURN((summary))
 		;
 
 	MockCollector collector;
@@ -184,9 +185,10 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 
 	output.produce();
 
-	EXPECT_CALL(reporter, marshal(_))
-		.Times(AtLeast(1))
-		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
+	REQUIRE_CALL(reporter, marshal(_))
+		.TIMES(AT_LEAST(1))
+		.RETURN(nullptr) // FIXME!
+//		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
 		;
 
 	output.produce();
