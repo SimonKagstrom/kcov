@@ -28,6 +28,8 @@ static IOutputHandler *g_output;
 static ICollector *g_collector;
 static IReporter *g_reporter;
 static ISolibHandler *g_solibHandler;
+static IFilter *g_filter;
+static IFilter *g_dummyFilter;
 
 static void do_cleanup()
 {
@@ -36,6 +38,8 @@ static void do_cleanup()
 	delete g_solibHandler; // Before the engine since a SIGTERM is sent to the thread
 	delete g_engine;
 	delete g_reporter;
+	delete g_filter;
+	delete g_dummyFilter;
 }
 
 static void ctrlc(int sig)
@@ -211,6 +215,8 @@ int main(int argc, const char *argv[])
 	g_reporter = &reporter;
 	g_collector = &collector;
 	g_solibHandler = &solibHandler;
+	g_filter = &filter;
+	g_dummyFilter = &dummyFilter;
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);
 
