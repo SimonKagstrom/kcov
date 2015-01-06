@@ -114,8 +114,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 	REQUIRE_CALL(reporter, marshal(_))
 		.TIMES(AT_LEAST(1))
-		.RETURN(nullptr) // FIXME!
-//		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
+		.LR_RETURN(reporter.mockMarshal(_1))
 		;
 
 	output.produce();
@@ -187,8 +186,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 
 	REQUIRE_CALL(reporter, marshal(_))
 		.TIMES(AT_LEAST(1))
-		.RETURN(nullptr) // FIXME!
-//		.WillRepeatedly(Invoke(&reporter, &MockReporter::mockMarshal))
+		.LR_RETURN(reporter.mockMarshal(_1))
 		;
 
 	output.produce();

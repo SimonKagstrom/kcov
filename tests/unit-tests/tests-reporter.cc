@@ -59,7 +59,7 @@ TEST(reporter)
 
 	REQUIRE_CALL(collector, registerListener(_))
 		.TIMES(1)
-//		.WillRepeatedly(Invoke(&collector, &MockCollector::mockRegisterListener))
+		.LR_SIDE_EFFECT(collector.mockRegisterListener(_1))
 		;
 
 
