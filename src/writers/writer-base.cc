@@ -27,6 +27,19 @@ WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
 		m_fileParser.registerLineListener(*this);
 }
 
+WriterBase::~WriterBase()
+{
+	for (FileMap_t::iterator it = m_files.begin();
+			it != m_files.end();
+			++it) {
+		File *cur = it->second;
+
+		delete cur;
+	}
+
+	m_files.clear();
+}
+
 WriterBase::File::File(const std::string &filename) :
 						m_name(filename), m_codeLines(0), m_executedLines(0), m_lastLineNr(0)
 {

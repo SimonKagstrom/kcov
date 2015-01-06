@@ -48,6 +48,15 @@ namespace kcov
 		{
 			stop();
 			free(m_unmarshalData);
+
+			// Delete all writers
+			for (WriterList_t::iterator it = m_writers.begin();
+					it != m_writers.end();
+					++it) {
+				IWriter *cur = *it;
+
+				delete cur;
+			}
 		}
 
 		const std::string &getBaseDirectory()

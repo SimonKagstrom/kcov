@@ -17,6 +17,8 @@ namespace kcov
 	protected:
 		WriterBase(IFileParser &elf, IReporter &reporter);
 
+		~WriterBase();
+
 		class File
 		{
 		public:
