@@ -4,7 +4,7 @@ import sys, struct
 
 def generate(data_in, base_name):
 	print "#include <vector>"
-	print "std::vector<uint8_t> %s_data = {" % (base_name)
+	print "const uint8_t %s_data_raw[] = {" % (base_name)
 
 	for i in range(0, len(data), 20):
 		line = data[i:i+20]
@@ -16,6 +16,7 @@ def generate(data_in, base_name):
 		print ""
 
 	print "};"
+	print "std::vector<uint8_t> %s_data = std::vector<uint8_t>(%s_data_raw, %s_data_raw + sizeof(%s_data_raw));" % (base_name, base_name, base_name, base_name)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3 or (len(sys.argv) - 1) % 2 != 0:
