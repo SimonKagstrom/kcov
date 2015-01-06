@@ -23,13 +23,13 @@ using namespace kcov;
 class CurlConnectionHandler
 {
 public:
-	CurlConnectionHandler()
+	CurlConnectionHandler() :
+		m_headerlist(NULL)
 	{
-		struct curl_slist *headerlist=NULL;
 		static const char buf[] = "Expect:";
 
 		// Workaround proxy problems
-		headerlist = curl_slist_append(headerlist, buf);
+		m_headerlist = curl_slist_append(m_headerlist, buf);
 
 		curl_global_init(CURL_GLOBAL_ALL);
 
@@ -40,11 +40,12 @@ public:
 		curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, curlWriteFuncStatic);
 		curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, (void *)this);
 		curl_easy_setopt(m_curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-		curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, headerlist); // Proxy issues
+		curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headerlist); // Proxy issues
 	}
 
 	~CurlConnectionHandler()
 	{
+		curl_slist_free_all(m_headerlist);
 		curl_easy_cleanup(m_curl);
 		curl_global_cleanup();
 	}
@@ -102,6 +103,7 @@ private:
 
 	CURL *m_curl;
 	std::string m_writtenData;
+	struct curl_slist *m_headerlist;
 };
 
 static CurlConnectionHandler g_curl;
