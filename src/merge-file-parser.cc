@@ -21,7 +21,7 @@
 using namespace kcov;
 
 #define MERGE_MAGIC   0x4d6f6172 // "Moar"
-#define MERGE_VERSION 3
+#define MERGE_VERSION 4
 
 struct line_entry
 {
@@ -409,7 +409,8 @@ private:
 		size_t size = sizeof(struct file_data) +
 				file->m_lines.size() * sizeof(struct line_entry) +
 				n_addrs * sizeof(uint64_t) +
-				file->m_filename.size() + 1;
+				file->m_filename.size() + 1 +
+				8; // allow padding of the address table
 		struct file_data *out = (struct file_data *)xmalloc(size);
 
 		out->magic = to_be<uint32_t>(MERGE_MAGIC);
@@ -423,7 +424,15 @@ private:
 
 		// Point to address table
 		uint64_t *addrTable = (uint64_t *)((char *)p + sizeof(struct line_entry) * file->m_lines.size());
+		unsigned long addrTable_8 = (unsigned long)addrTable;
 		uint32_t tableOffset = 0;
+
+		// 64-bit align address table
+		if ((addrTable_8 & 7) != 0) {
+			addrTable_8 += 8 - (addrTable_8 & 7);
+
+			addrTable = (uint64_t *)addrTable_8;
+		}
 
 		for (LineAddrMap_t::const_iterator it = file->m_lines.begin();
 				it != file->m_lines.end();
