@@ -5,11 +5,6 @@ cmake_minimum_required (VERSION 2.6)
 # project name and version
 # ====================================
 project (kcov)
-set (PROJECT_VERSION_MAJOR  11)
-set (PROJECT_VERSION_MINOR  0)
-set (PROJECT_VERSION_PATCH  0)
-set (PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-
 
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE  Release)
