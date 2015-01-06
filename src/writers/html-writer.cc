@@ -124,7 +124,7 @@ private:
 		outHtml << fmt(
 				"<script type=\"text/javascript\" src=\"%s\"></script>\n",
 				file->m_jsonOutFileName.c_str());
-		outHtml << source_file_text_data.data();
+		outHtml.write((const char *)source_file_text_data.data(), source_file_text_data.size());
 	}
 
 	void writeIndex()
@@ -197,7 +197,7 @@ private:
 
 		// Produce HTML outfile
 		std::ofstream outHtml(m_outDirectory + "index.html");
-		outHtml << index_text_data.data();
+		outHtml.write((const char *)index_text_data.data(), index_text_data.size());
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
@@ -271,7 +271,7 @@ private:
 
 		// Produce HTML outfile
 		std::ofstream outHtml(m_indexDirectory + "index.html");
-		outHtml << index_text_data.data();
+		outHtml.write((const char *)index_text_data.data(), index_text_data.size());
 
 		closedir(dir);
 	}
