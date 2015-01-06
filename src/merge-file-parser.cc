@@ -76,6 +76,19 @@ public:
 		localParser.registerLineListener(*this);
 	}
 
+	~MergeParser()
+	{
+		for (FileByNameMap_t::iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
+			File *cur = it->second;
+
+			delete cur;
+		}
+
+		m_files.clear();
+	}
+
 	// From IFileParser
 	virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
 	{
