@@ -509,7 +509,6 @@ public:
 		}
 
 		size_t pos, lastPos;
-		unsigned int n = 0;
 
 		lastPos = 0;
 		for (pos = str.find_first_of(",");
