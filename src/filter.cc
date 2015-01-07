@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 using namespace kcov;
 
@@ -90,7 +91,7 @@ private:
 			for (PatternMap_t::const_iterator it = m_includePatterns.begin();
 					it != m_includePatterns.end();
 					++it) {
-				const std::string &pattern = it->second;
+				const std::string &pattern = *it;
 
 				if (file.find(pattern) != std::string::npos)
 					out = true;
@@ -99,7 +100,7 @@ private:
 			for (PatternMap_t::const_iterator it = m_excludePatterns.begin();
 					it != m_excludePatterns.end();
 					++it) {
-				const std::string &pattern = it->second;
+				const std::string &pattern = *it;
 
 				if (file.find(pattern) != std::string::npos)
 					out = false;
@@ -108,10 +109,10 @@ private:
 			return out;
 		}
 	private:
-		typedef std::unordered_map<unsigned int, std::string> PatternMap_t;
+		typedef std::vector<std::string> PatternMap_t;
 
-		PatternMap_t &m_includePatterns;
-		PatternMap_t &m_excludePatterns;
+		const PatternMap_t &m_includePatterns;
+		const PatternMap_t &m_excludePatterns;
 	};
 
 
@@ -144,7 +145,7 @@ private:
 			for (PathMap_t::const_iterator it = m_includePaths.begin();
 					it != m_includePaths.end();
 					++it) {
-				const std::string &pathPattern = it->second;
+				const std::string &pathPattern = *it;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = true;
@@ -153,7 +154,7 @@ private:
 			for (PathMap_t::const_iterator it = m_excludePaths.begin();
 					it != m_excludePaths.end();
 					++it) {
-				const std::string &pathPattern = it->second;
+				const std::string &pathPattern = *it;
 
 				if (pathStr.find(pathPattern) == 0)
 					out = false;
@@ -162,10 +163,10 @@ private:
 			return out;
 		}
 	private:
-		typedef std::unordered_map<unsigned int, std::string> PathMap_t;
+		typedef std::vector<std::string> PathMap_t;
 
-		PathMap_t &m_includePaths;
-		PathMap_t &m_excludePaths;
+		const PathMap_t &m_includePaths;
+		const PathMap_t &m_excludePaths;
 	};
 
 

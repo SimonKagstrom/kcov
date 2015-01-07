@@ -2,7 +2,7 @@
 
 #include <string>
 #include <list>
-#include <unordered_map>
+#include <vector>
 
 namespace kcov
 {
@@ -60,13 +60,13 @@ namespace kcov
 
 		virtual unsigned int getArgc() = 0;
 
-		virtual std::unordered_map<unsigned int,std::string> &getExcludePattern() = 0;
+		virtual const std::vector<std::string> &getExcludePattern() = 0;
 
-		virtual std::unordered_map<unsigned int,std::string> &getOnlyIncludePattern() = 0;
+		virtual const std::vector<std::string> &getOnlyIncludePattern() = 0;
 
-		virtual std::unordered_map<unsigned int,std::string> &getOnlyIncludePath() = 0;
+		virtual const std::vector<std::string> &getOnlyIncludePath() = 0;
 
-		virtual std::unordered_map<unsigned int,std::string> &getExcludePath() = 0;
+		virtual const std::vector<std::string> &getExcludePath() = 0;
 
 		virtual enum OutputType getOutputType() = 0;
 		virtual const std::string& getNewPathPrefix() = 0;

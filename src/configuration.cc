@@ -224,10 +224,10 @@ public:
 				for (StrVecMap_t::const_iterator it = vec.begin();
 						it != vec.end();
 						++it) {
-					if (!string_is_integer(it->second, 16))
+					if (!string_is_integer(*it, 16))
 						continue;
 
-					m_fixedBreakpoints.push_back(string_to_integer(it->second, 16));
+					m_fixedBreakpoints.push_back(string_to_integer(*it, 16));
 				}
 
 				break;
@@ -368,22 +368,22 @@ public:
 		return m_argc;
 	}
 
-	std::unordered_map<unsigned int, std::string> &getExcludePattern()
+	const std::vector<std::string> &getExcludePattern()
 	{
 		return m_excludePattern;
 	}
 
-	std::unordered_map<unsigned int, std::string> &getOnlyIncludePattern()
+	const std::vector<std::string> &getOnlyIncludePattern()
 	{
 		return m_onlyIncludePattern;
 	}
 
-	std::unordered_map<unsigned int, std::string> &getOnlyIncludePath()
+	const std::vector<std::string> &getOnlyIncludePath()
 	{
 		return m_onlyIncludePath;
 	}
 
-	std::unordered_map<unsigned int, std::string> &getExcludePath()
+	const std::vector<std::string> &getExcludePath()
 	{
 		return m_excludePath;
 	}
@@ -439,7 +439,7 @@ public:
 	}
 
 	// "private", but we ignore that in the unit test
-	typedef std::unordered_map<unsigned int, std::string> StrVecMap_t;
+	typedef std::vector<std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
 
 	std::string uncommonOptions()
@@ -491,11 +491,11 @@ public:
 		for (StrVecMap_t::iterator it = paths.begin();
 				it != paths.end();
 				++it) {
-			std::string &s = it->second;
+			std::string &s = *it;
 
 			if (s[0] == '~')
 				s = get_home() + s.substr(1, s.size());
-			it->second = s;
+			*it = s;
 		}
 	}
 
@@ -504,7 +504,7 @@ public:
 		StrVecMap_t out;
 
 		if (str.find(',') == std::string::npos) {
-			out[0] = str;
+			out.push_back(str);
 			return out;
 		}
 
@@ -517,10 +517,10 @@ public:
 				pos = str.find_first_of(",", pos + 1)) {
 			std::string cur = str.substr(lastPos, pos - lastPos);
 
-			out[n++] = cur;
+			out.push_back(cur);
 			lastPos = pos + 1;
 		}
-		out[n] = str.substr(lastPos, str.size() - lastPos);
+		out.push_back(str.substr(lastPos, str.size() - lastPos));
 
 		return out;
 	}
