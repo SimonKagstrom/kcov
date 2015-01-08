@@ -453,6 +453,14 @@ public:
 		return m_runMode;
 	}
 
+	void registerListener(IListener &listener, const std::vector<std::string> &keys)
+	{
+		for (std::vector<std::string>::const_iterator it = keys.begin();
+				it != keys.end();
+				++it)
+			m_listeners[*it] = &listener;
+	}
+
 	// "private", but we ignore that in the unit test
 	typedef std::vector<std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
@@ -460,6 +468,9 @@ public:
 	typedef std::unordered_map<std::string, std::string> StringKeyMap_t;
 	typedef std::unordered_map<std::string, int> IntKeyMap_t;
 	typedef std::unordered_map<std::string, StrVecMap_t> StrVecKeyMap_t;
+
+	typedef std::unordered_map<std::string, IListener *> ListenerMap_t;
+
 
 	// Setup the default key:value pairs
 	void setupDefaults()
@@ -472,16 +483,33 @@ public:
 	void setKey(const std::string &key, const std::string &val)
 	{
 		m_strings[key] = val;
+
+		notifyKeyListeners(key);
 	}
 
 	void setKey(const std::string &key, int val)
 	{
 		m_ints[key] = val;
+
+		notifyKeyListeners(key);
 	}
 
 	void setKey(const std::string &key, const std::vector<std::string> &val)
 	{
 		m_stringVectors[key] = val;
+
+		notifyKeyListeners(key);
+	}
+
+	void notifyKeyListeners(const std::string &key)
+	{
+		ListenerMap_t::iterator it = m_listeners.find(key);
+
+		if (it == m_listeners.end())
+			return;
+
+		// The callback should re-read the configuration item
+		it->second->onConfigurationChanged(key);
 	}
 
 	std::string uncommonOptions()
@@ -612,6 +640,8 @@ public:
 	RunMode_t m_runMode;
 	bool m_printUncommon;
 	std::list<uint64_t> m_fixedBreakpoints;
+
+	ListenerMap_t m_listeners;
 };
 
 
