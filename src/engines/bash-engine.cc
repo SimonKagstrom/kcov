@@ -80,7 +80,7 @@ public:
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
-			const std::string command = conf.getBashCommand();
+			const std::string command = conf.keyAsString("bash-command");
 
 			/* Close the childs read end of the pipe */
 			close(stderrPipe[0]);
@@ -100,7 +100,7 @@ public:
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
 			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
-			vec[0] = xstrdup(conf.getBashCommand().c_str());
+			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
 			vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
 				vec[2 + i] = xstrdup(argv[i]);

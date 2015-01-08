@@ -88,7 +88,7 @@ public:
 			unsigned int argc = conf.getArgc();
 
 			std::string s = fmt("%s %s ",
-					conf.getPythonCommand().c_str(),
+					conf.keyAsString("python-command").c_str(),
 					kcov_python_path.c_str());
 			for (unsigned int i = 0; i < argc; i++)
 				s += std::string(argv[i]) + " ";

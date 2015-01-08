@@ -26,6 +26,41 @@ namespace kcov
 
 		virtual void printUsage() = 0;
 
+
+		/**
+		 * Return a value as a string.
+		 *
+		 * Will panic if the key is not present.
+		 *
+		 * @param key the key to lookup
+		 *
+		 * @return the string value
+		 */
+		virtual const std::string &keyAsString(const std::string &key) = 0;
+
+		/**
+		 * Return a value as an integer.
+		 *
+		 * Will panic if the key is not present.
+		 *
+		 * @param key the key to lookup
+		 *
+		 * @return the integer value
+		 */
+		virtual int keyAsInt(const std::string &key) = 0;
+
+		/**
+		 * Return a value as a string list.
+		 *
+		 * Will panic if the key is not present.
+		 *
+		 * @param key the key to lookup
+		 *
+		 * @return the values as a list, potentially empty
+		 */
+		virtual const std::vector<std::string> &keyAsList(const std::string &key) = 0;
+
+
 		virtual const std::string &getOutDirectory() = 0;
 
 		virtual const std::string &getBinaryName() = 0;
@@ -41,10 +76,6 @@ namespace kcov
 		virtual const std::string &getCoverallsId() = 0;
 
 		virtual const std::string &getKernelCoveragePath() = 0;
-
-		virtual const std::string &getPythonCommand() const = 0;
-
-		virtual const std::string &getBashCommand() const = 0;
 
 		virtual std::list<uint64_t> getFixedBreakpoints() = 0;
 

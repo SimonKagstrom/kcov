@@ -19,8 +19,6 @@ public:
 	{
 		m_outDirectory = "";
 		m_binaryName = "";
-		m_pythonCommand = "python";
-		m_bashCommand = "/bin/bash";
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_lowLimit = 25;
 		m_highLimit = 75;
@@ -36,6 +34,33 @@ public:
 		m_outputInterval = 5000;
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
+
+		setupDefaults();
+	}
+
+
+	const std::string &keyAsString(const std::string &key)
+	{
+		panic_if(m_strings.find(key) == m_strings.end(),
+				"key %s not found", key.c_str());
+
+		return m_strings[key];
+	}
+
+	int keyAsInt(const std::string &key)
+	{
+		panic_if(m_ints.find(key) == m_ints.end(),
+				"key %s not found", key.c_str());
+
+		return m_ints[key];
+	}
+
+	const std::vector<std::string> &keyAsList(const std::string &key)
+	{
+		panic_if(m_stringVectors.find(key) == m_stringVectors.end(),
+				"key %s not found", key.c_str());
+
+		return m_stringVectors[key];
 	}
 
 	bool usage(void)
@@ -193,10 +218,10 @@ public:
 				m_onlyIncludePattern = getCommaSeparatedList(std::string(optarg));
 				break;
 			case 'P':
-				m_pythonCommand = optarg;
+				setKey("python-command", optarg);
 				break;
 			case 'B':
-				m_bashCommand = optarg;
+				setKey("bash-command", optarg);
 				break;
 			case 'T':
 				m_coverallsId = optarg;
@@ -328,16 +353,6 @@ public:
 		return m_coverallsId;
 	}
 
-	const std::string &getPythonCommand() const
-	{
-		return m_pythonCommand;
-	}
-
-	const std::string &getBashCommand() const
-	{
-		return m_bashCommand;
-	}
-
 	std::list<uint64_t> getFixedBreakpoints()
 	{
 		return m_fixedBreakpoints;
@@ -442,6 +457,33 @@ public:
 	typedef std::vector<std::string> StrVecMap_t;
 	typedef std::pair<std::string, std::string> StringPair_t;
 
+	typedef std::unordered_map<std::string, std::string> StringKeyMap_t;
+	typedef std::unordered_map<std::string, int> IntKeyMap_t;
+	typedef std::unordered_map<std::string, StrVecMap_t> StrVecKeyMap_t;
+
+	// Setup the default key:value pairs
+	void setupDefaults()
+	{
+		setKey("python-command", "python");
+		setKey("bash-command", "/bin/bash");
+	}
+
+
+	void setKey(const std::string &key, const std::string &val)
+	{
+		m_strings[key] = val;
+	}
+
+	void setKey(const std::string &key, int val)
+	{
+		m_ints[key] = val;
+	}
+
+	void setKey(const std::string &key, const std::vector<std::string> &val)
+	{
+		m_stringVectors[key] = val;
+	}
+
 	std::string uncommonOptions()
 	{
 		if (!m_printUncommon)
@@ -466,7 +508,7 @@ public:
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
 				"                         default: %s\n",
-				m_pathStripLevel, m_outputInterval, m_pythonCommand.c_str(), m_bashCommand.c_str()
+				m_pathStripLevel, m_outputInterval, keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
 				);
 	}
 
@@ -541,6 +583,9 @@ public:
 		return out;
 	}
 
+	StringKeyMap_t m_strings;
+	IntKeyMap_t m_ints;
+	StrVecKeyMap_t m_stringVectors;
 
 	unsigned int m_lowLimit;
 	unsigned int m_highLimit;
@@ -549,8 +594,6 @@ public:
 	std::string m_outDirectory;
 	std::string m_binaryName;
 	std::string m_binaryPath;
-	std::string m_pythonCommand;
-	std::string m_bashCommand;
 	std::string m_kernelCoveragePath;
 	std::string m_coverallsId;
 	const char **m_programArgs;
