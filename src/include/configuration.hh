@@ -112,8 +112,6 @@ namespace kcov
 		virtual const std::string& getOriginalPathPrefix() = 0;
 		virtual void setOutputType(enum OutputType) = 0;
 
-		virtual bool getParseSolibs() = 0;
-
 		virtual void setParseSolibs(bool on) = 0;
 
 		virtual bool getExitFirstProcess() = 0;

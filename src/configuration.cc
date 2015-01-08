@@ -27,7 +27,6 @@ public:
 		m_outputType = OUTPUT_COVERAGE;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
-		m_parseSolibs = true;
 		m_exitFirstProcess = false;
 		m_outputInterval = 5000;
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
@@ -174,7 +173,7 @@ public:
 				m_printUncommon = true;
 				break;
 			case 'L':
-				m_parseSolibs = false;
+				setKey("parse-solibs", 0);
 				break;
 			case 'F':
 				m_exitFirstProcess = true;
@@ -397,14 +396,9 @@ public:
 		return m_newPathPrefix;
 	}
 
-	bool getParseSolibs()
-	{
-		return m_parseSolibs;
-	}
-
 	void setParseSolibs(bool on)
 	{
-		m_parseSolibs = on;
+		setKey("parse-solibs", on);
 	}
 
 	bool getExitFirstProcess()
@@ -453,6 +447,7 @@ public:
 		setKey("bash-command", "/bin/bash");
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
+		setKey("parse-solibs", 1);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
@@ -608,7 +603,6 @@ public:
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
-	bool m_parseSolibs;
 	bool m_exitFirstProcess;
 	enum OutputType m_outputType;
 	unsigned int m_outputInterval;

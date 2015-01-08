@@ -103,7 +103,7 @@ public:
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
-		if (IConfiguration::getInstance().getParseSolibs()) {
+		if (IConfiguration::getInstance().keyAsInt("parse-solibs")) {
 			if (file_exists(kcov_solib_path))
 				putenv(m_ldPreloadString);
 		}
