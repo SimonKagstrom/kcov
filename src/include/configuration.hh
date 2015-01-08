@@ -99,8 +99,6 @@ namespace kcov
 
 		virtual std::list<uint64_t> getFixedBreakpoints() = 0;
 
-		virtual unsigned int getAttachPid() = 0;
-
 		virtual unsigned int getLowLimit() = 0;
 
 		virtual unsigned int getHighLimit() = 0;

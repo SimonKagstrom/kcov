@@ -22,7 +22,6 @@ public:
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_lowLimit = 25;
 		m_highLimit = 75;
-		m_ptracePid = 0;
 		m_programArgs = NULL;
 		m_argc = 0;
 		m_outputType = OUTPUT_COVERAGE;
@@ -183,7 +182,7 @@ public:
 			case 'p':
 				if (!isInteger(std::string(optarg)))
 					return usage();
-				m_ptracePid = stoul(std::string(optarg));
+				setKey("attach-pid", stoul(std::string(optarg)));
 				extraNeeded = 1;
 				break;
 			case 't':
@@ -363,11 +362,6 @@ public:
 		return m_fixedBreakpoints;
 	}
 
-	unsigned int getAttachPid()
-	{
-		return m_ptracePid;
-	}
-
 	unsigned int getLowLimit()
 	{
 		return m_lowLimit;
@@ -458,6 +452,7 @@ public:
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
 		setKey("path-strip-level", 2);
+		setKey("attach-pid", 0);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
@@ -603,7 +598,6 @@ public:
 
 	unsigned int m_lowLimit;
 	unsigned int m_highLimit;
-	unsigned int m_ptracePid;
 	std::string m_outDirectory;
 	std::string m_binaryName;
 	std::string m_binaryPath;

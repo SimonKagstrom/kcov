@@ -255,7 +255,7 @@ public:
 		if (access(executable.c_str(), X_OK) != 0)
 			return false;
 
-		unsigned int pid = IConfiguration::getInstance().getAttachPid();
+		unsigned int pid = IConfiguration::getInstance().keyAsInt("attach-pid");
 		bool res = false;
 
 		if (pid != 0)
