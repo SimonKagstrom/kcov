@@ -462,7 +462,6 @@ public:
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
 		setKey("include-path", StrVecMap_t());
-		printf("VVV: %d, %d\n", m_strings.size(), m_stringVectors.size());
 	}
 
 
