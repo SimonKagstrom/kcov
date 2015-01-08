@@ -150,7 +150,7 @@ private:
 			std::string listName = file->m_name;
 
 			size_t pos = listName.find(m_commonPath);
-			unsigned int stripLevel = IConfiguration::getInstance().getPathStripLevel();
+			unsigned int stripLevel = IConfiguration::getInstance().keyAsInt("path-strip-level");
 
 			if (pos != std::string::npos && m_commonPath.size() != 0 && stripLevel != ~0U) {
 				std::string pathToRemove = m_commonPath;

@@ -22,7 +22,6 @@ public:
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_lowLimit = 25;
 		m_highLimit = 75;
-		m_pathStripLevel = 2;
 		m_ptracePid = 0;
 		m_programArgs = NULL;
 		m_argc = 0;
@@ -203,12 +202,16 @@ public:
 				m_outputInterval = stoul(std::string(optarg));
 				break;
 			case 'S':
+			{
 				if (!isInteger(std::string(optarg)))
 					return usage();
-				m_pathStripLevel = stoul(std::string(optarg));
-				if (m_pathStripLevel == 0)
-					m_pathStripLevel = ~0;
+
+				int pathStripLevel = stoul(std::string(optarg));
+				if (pathStripLevel == 0)
+					pathStripLevel = INT_MAX;
+				setKey("path-strip-level", pathStripLevel);
 				break;
+			}
 			case 'D':
 				if (!isInteger(std::string(optarg)))
 					return usage();
@@ -403,11 +406,6 @@ public:
 		return m_excludePath;
 	}
 
-	unsigned int getPathStripLevel()
-	{
-		return m_pathStripLevel;
-	}
-
 	enum OutputType getOutputType()
 	{
 		return m_outputType;
@@ -477,6 +475,7 @@ public:
 	{
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
+		setKey("path-strip-level", 2);
 	}
 
 
@@ -521,7 +520,7 @@ public:
 				" --replace-src-path=path replace the string found before the : with the string \n"
 				"                         found after the :\n"
 				" -t, --title=title       title for the coverage (default: filename)\n"
-				" --path-strip-level=num  path levels to show for common paths (default: %u)\n"
+				" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 				"\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
@@ -536,7 +535,7 @@ public:
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
 				"                         default: %s\n",
-				m_pathStripLevel, m_outputInterval, keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
+				keyAsInt("path-strip-level"), m_outputInterval, keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
 				);
 	}
 
@@ -617,7 +616,6 @@ public:
 
 	unsigned int m_lowLimit;
 	unsigned int m_highLimit;
-	unsigned int m_pathStripLevel;
 	unsigned int m_ptracePid;
 	std::string m_outDirectory;
 	std::string m_binaryName;
