@@ -139,12 +139,6 @@ public:
 		unsigned int extraNeeded = 2;
 		unsigned int lastArg;
 
-
-		m_onlyIncludePath.clear();
-		m_onlyIncludePattern.clear();
-		m_excludePath.clear();
-		m_excludePattern.clear();
-
 		/* Scan through the parameters for an ELF file: That will be the
 		 * second last argument in the list.
 		 *
@@ -218,7 +212,7 @@ public:
 				g_kcov_debug_mask = stoul(std::string(optarg));
 				break;
 			case 'i':
-				m_onlyIncludePattern = getCommaSeparatedList(std::string(optarg));
+				setKey("include-pattern", getCommaSeparatedList(std::string(optarg)));
 				break;
 			case 'P':
 				setKey("python-command", optarg);
@@ -230,16 +224,24 @@ public:
 				m_coverallsId = optarg;
 				break;
 			case 'x':
-				m_excludePattern = getCommaSeparatedList(std::string(optarg));
+				setKey("exclude-pattern", getCommaSeparatedList(std::string(optarg)));
 				break;
 			case 'I':
-				m_onlyIncludePath = getCommaSeparatedList(std::string(optarg));
-				expandPath(m_onlyIncludePath);
+			{
+				StrVecMap_t onlyIncludePath = getCommaSeparatedList(std::string(optarg));
+				expandPath(onlyIncludePath);
+
+				setKey("include-path", onlyIncludePath);
 				break;
+			}
 			case 'X':
-				m_excludePath = getCommaSeparatedList(std::string(optarg));
-				expandPath(m_excludePath);
+			{
+				StrVecMap_t excludePath = getCommaSeparatedList(std::string(optarg));
+				expandPath(excludePath);
+
+				setKey("exclude-path", excludePath);
 				break;
+			}
 			case 'C':
 				m_runMode = IConfiguration::MODE_COLLECT_ONLY;
 				break;
@@ -386,26 +388,6 @@ public:
 		return m_argc;
 	}
 
-	const std::vector<std::string> &getExcludePattern()
-	{
-		return m_excludePattern;
-	}
-
-	const std::vector<std::string> &getOnlyIncludePattern()
-	{
-		return m_onlyIncludePattern;
-	}
-
-	const std::vector<std::string> &getOnlyIncludePath()
-	{
-		return m_onlyIncludePath;
-	}
-
-	const std::vector<std::string> &getExcludePath()
-	{
-		return m_excludePath;
-	}
-
 	enum OutputType getOutputType()
 	{
 		return m_outputType;
@@ -476,6 +458,11 @@ public:
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
 		setKey("path-strip-level", 2);
+		setKey("exclude-pattern", StrVecMap_t());
+		setKey("include-pattern", StrVecMap_t());
+		setKey("exclude-path", StrVecMap_t());
+		setKey("include-path", StrVecMap_t());
+		printf("VVV: %d, %d\n", m_strings.size(), m_stringVectors.size());
 	}
 
 
@@ -495,6 +482,7 @@ public:
 
 	void setKey(const std::string &key, const std::vector<std::string> &val)
 	{
+		printf("XXX: %s\n", key.c_str());
 		m_stringVectors[key] = val;
 
 		notifyKeyListeners(key);
@@ -629,10 +617,6 @@ public:
 	std::string m_newPathPrefix;
 	bool m_parseSolibs;
 	bool m_exitFirstProcess;
-	StrVecMap_t m_excludePattern;
-	StrVecMap_t m_onlyIncludePattern;
-	StrVecMap_t m_excludePath;
-	StrVecMap_t m_onlyIncludePath;
 	enum OutputType m_outputType;
 	unsigned int m_outputInterval;
 	RunMode_t m_runMode;

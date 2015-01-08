@@ -109,14 +109,6 @@ namespace kcov
 
 		virtual unsigned int getArgc() = 0;
 
-		virtual const std::vector<std::string> &getExcludePattern() = 0;
-
-		virtual const std::vector<std::string> &getOnlyIncludePattern() = 0;
-
-		virtual const std::vector<std::string> &getOnlyIncludePath() = 0;
-
-		virtual const std::vector<std::string> &getExcludePath() = 0;
-
 		virtual enum OutputType getOutputType() = 0;
 		virtual const std::string& getNewPathPrefix() = 0;
 		virtual const std::string& getOriginalPathPrefix() = 0;

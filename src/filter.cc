@@ -68,8 +68,8 @@ private:
 	{
 	public:
 		PatternHandler() :
-			m_includePatterns(IConfiguration::getInstance().getOnlyIncludePattern()),
-			m_excludePatterns(IConfiguration::getInstance().getExcludePattern())
+			m_includePatterns(IConfiguration::getInstance().keyAsList("include-pattern")),
+			m_excludePatterns(IConfiguration::getInstance().keyAsList("exclude-pattern"))
 		{
 		}
 
@@ -120,8 +120,8 @@ private:
 	{
 	public:
 		PathHandler() :
-			m_includePaths(IConfiguration::getInstance().getOnlyIncludePath()),
-			m_excludePaths(IConfiguration::getInstance().getExcludePath())
+			m_includePaths(IConfiguration::getInstance().keyAsList("include-path")),
+			m_excludePaths(IConfiguration::getInstance().keyAsList("exclude-path"))
 		{
 		}
 
