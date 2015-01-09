@@ -33,7 +33,7 @@ namespace kcov
 			m_outDirectory = m_baseDirectory + conf.getBinaryName() + "/";
 			m_dbFileName = m_outDirectory + "/coverage.db";
 			m_summaryDbFileName = m_outDirectory + "/summary.db";
-			m_outputInterval = conf.getOutputInterval();
+			m_outputInterval = conf.keyAsInt("output-interval");
 
 			m_lastTimestamp = get_ms_timestamp();
 

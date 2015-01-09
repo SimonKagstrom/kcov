@@ -24,7 +24,7 @@ public:
 		m_argc = 0;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
-		m_outputInterval = 5000;
+		setKey("output-interval", 5000);
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
 
@@ -187,7 +187,7 @@ public:
 				if (!isInteger(std::string(optarg)))
 					return usage();
 
-				m_outputInterval = stoul(std::string(optarg));
+				setKey("output-interval", stoul(std::string(optarg)));
 				break;
 			case 'S':
 			{
@@ -382,11 +382,6 @@ public:
 		setKey("parse-solibs", on);
 	}
 
-	unsigned int getOutputInterval()
-	{
-		return m_outputInterval;
-	}
-
 	RunMode_t getRunningMode()
 	{
 		return m_runMode;
@@ -476,7 +471,7 @@ public:
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
 				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
-				"                         only output when kcov terminates, default %u)\n"
+				"                         only output when kcov terminates, default %d)\n"
 				"\n"
 				" --debug=X               set kcov debugging level (max 31, default 0)\n"
 				" --set-breakpoint=A[,..] manually set breakpoints\n"
@@ -485,7 +480,7 @@ public:
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
 				"                         default: %s\n",
-				keyAsInt("path-strip-level"), m_outputInterval, keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
+				keyAsInt("path-strip-level"), keyAsInt("output-interval"), keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
 				);
 	}
 
@@ -574,7 +569,6 @@ public:
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
-	unsigned int m_outputInterval;
 	RunMode_t m_runMode;
 	bool m_printUncommon;
 	std::list<uint64_t> m_fixedBreakpoints;

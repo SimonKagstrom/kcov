@@ -102,8 +102,6 @@ namespace kcov
 
 		virtual void setParseSolibs(bool on) = 0;
 
-		virtual unsigned int getOutputInterval() = 0;
-
 		virtual RunMode_t getRunningMode() = 0;
 
 
