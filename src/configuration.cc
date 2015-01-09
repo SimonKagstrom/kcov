@@ -471,7 +471,6 @@ public:
 
 	void setKey(const std::string &key, const std::vector<std::string> &val)
 	{
-		printf("XXX: %s\n", key.c_str());
 		m_stringVectors[key] = val;
 
 		notifyKeyListeners(key);
