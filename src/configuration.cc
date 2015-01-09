@@ -22,7 +22,6 @@ public:
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_programArgs = NULL;
 		m_argc = 0;
-		m_outputType = OUTPUT_COVERAGE;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
 		m_exitFirstProcess = false;
@@ -369,11 +368,6 @@ public:
 		return m_argc;
 	}
 
-	enum OutputType getOutputType()
-	{
-		return m_outputType;
-	}
-
 	const std::string& getOriginalPathPrefix()
 	{
 		return m_originalPathPrefix;
@@ -392,11 +386,6 @@ public:
 	bool getExitFirstProcess()
 	{
 		return m_exitFirstProcess;
-	}
-
-	void setOutputType(enum OutputType type)
-	{
-		m_outputType = type;
 	}
 
 	unsigned int getOutputInterval()
@@ -591,7 +580,6 @@ public:
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
 	bool m_exitFirstProcess;
-	enum OutputType m_outputType;
 	unsigned int m_outputInterval;
 	RunMode_t m_runMode;
 	bool m_printUncommon;

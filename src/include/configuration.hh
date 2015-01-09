@@ -9,12 +9,6 @@ namespace kcov
 	class IConfiguration
 	{
 	public:
-		enum OutputType
-		{
-			OUTPUT_COVERAGE,
-			OUTPUT_PROFILER
-		};
-
 		typedef enum
 		{
 			MODE_COLLECT_ONLY       = 1,
@@ -103,10 +97,8 @@ namespace kcov
 
 		virtual unsigned int getArgc() = 0;
 
-		virtual enum OutputType getOutputType() = 0;
 		virtual const std::string& getNewPathPrefix() = 0;
 		virtual const std::string& getOriginalPathPrefix() = 0;
-		virtual void setOutputType(enum OutputType) = 0;
 
 		virtual void setParseSolibs(bool on) = 0;
 
