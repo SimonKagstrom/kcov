@@ -307,8 +307,8 @@ private:
 				" \"covered\" : %d,"
 				"};"
 				"\n",
-				conf.keyAsInt("lowLimit"),
-				conf.keyAsInt("highLimit"),
+				conf.keyAsInt("low-limit"),
+				conf.keyAsInt("high-limit"),
 				escape_json(conf.getBinaryName()).c_str(),
 				getDateNow().c_str(),
 				lines,
