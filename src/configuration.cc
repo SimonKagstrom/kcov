@@ -24,7 +24,6 @@ public:
 		m_argc = 0;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
-		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
 
 		setupDefaults();
@@ -236,10 +235,10 @@ public:
 				break;
 			}
 			case 'C':
-				m_runMode = IConfiguration::MODE_COLLECT_ONLY;
+				setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 				break;
 			case 'r':
-				m_runMode = IConfiguration::MODE_REPORT_ONLY;
+				setKey("running-mode", IConfiguration::MODE_REPORT_ONLY);
 				break;
 			case 'b': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
@@ -381,11 +380,6 @@ public:
 		setKey("parse-solibs", on);
 	}
 
-	RunMode_t getRunningMode()
-	{
-		return m_runMode;
-	}
-
 	void registerListener(IListener &listener, const std::vector<std::string> &keys)
 	{
 		for (std::vector<std::string>::const_iterator it = keys.begin();
@@ -417,6 +411,7 @@ public:
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
+		setKey("running-mode", IConfiguration::MODE_COLLECT_AND_REPORT);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
@@ -569,7 +564,6 @@ public:
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
-	RunMode_t m_runMode;
 	bool m_printUncommon;
 	std::list<uint64_t> m_fixedBreakpoints;
 

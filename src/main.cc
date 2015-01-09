@@ -174,7 +174,7 @@ int main(int argc, const char *argv[])
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter, collector);
 	ISolibHandler &solibHandler = createSolibHandler(*parser, collector);
 
-	IConfiguration::RunMode_t runningMode = conf.getRunningMode();
+	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
 
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
