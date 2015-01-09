@@ -24,7 +24,6 @@ public:
 		m_argc = 0;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
-		setKey("output-interval", 5000);
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
 
@@ -416,6 +415,7 @@ public:
 		setKey("parse-solibs", 1);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
+		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
