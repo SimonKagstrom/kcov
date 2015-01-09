@@ -96,20 +96,20 @@ TESTSUITE(configuration)
 		res = runParse(fmt("--include-path=/a,/b/c --exclude-pattern=d/e/f /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 
-		ASSERT_TRUE(conf->getOnlyIncludePath().size() == 2U);
-		ASSERT_TRUE(conf->getOnlyIncludePath()[0] == "/a");
-		ASSERT_TRUE(conf->getOnlyIncludePath()[1] == "/b/c");
+		ASSERT_TRUE(conf->keyAsList("include-path").size() == 2U);
+		ASSERT_TRUE(conf->keyAsList("include-path")[0] == "/a");
+		ASSERT_TRUE(conf->keyAsList("include-path")[1] == "/b/c");
 
-		ASSERT_TRUE(conf->getExcludePattern().size() == 1U);
-		ASSERT_TRUE(conf->getExcludePattern()[0] == "d/e/f");
+		ASSERT_TRUE(conf->keyAsList("exclude-pattern").size() == 1U);
+		ASSERT_TRUE(conf->keyAsList("exclude-pattern")[0] == "d/e/f");
 
 		res = runParse(fmt("--include-path=~/a /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 
-		ASSERT_TRUE(conf->getOnlyIncludePath().size() == 1U);
-		ASSERT_TRUE(conf->getOnlyIncludePath()[0] == fmt("%s/a", get_home()));
+		ASSERT_TRUE(conf->keyAsList("include-path").size() == 1U);
+		ASSERT_TRUE(conf->keyAsList("include-path")[0] == fmt("%s/a", get_home()));
 
-		ASSERT_TRUE(conf->getAttachPid() == 0U);
+		ASSERT_TRUE(conf->keyAsInt("attach-pid") == 0U);
 		res = runParse(fmt("-p ejNummer /tmp/vobb %s", filename.c_str()));
 		ASSERT_FALSE(res);
 
@@ -118,7 +118,7 @@ TESTSUITE(configuration)
 
 		res = runParse(fmt("--pid=100 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
-		ASSERT_TRUE(conf->getAttachPid() == 100U);
+		ASSERT_TRUE(conf->keyAsInt("attach-pid") == 100U);
 
 		ASSERT_TRUE(g_kcov_debug_mask == STATUS_MSG);
 		res = runParse(fmt("--debug=7 /tmp/vobb %s", filename.c_str()));
@@ -128,13 +128,13 @@ TESTSUITE(configuration)
 		res = runParse(fmt("--exclude-pattern=a /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 
-		auto ep = conf->getExcludePattern();
+		auto ep = conf->keyAsList("exclude-pattern");
 		ASSERT_TRUE(ep.size() == 1);
 		ASSERT_TRUE(ep[0] == "a");
 
 		res = runParse(fmt("--include-pattern=a,b,c /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
-		ep = conf->getOnlyIncludePattern();
+		ep = conf->keyAsList("include-pattern");
 		ASSERT_TRUE(ep.size() == 3);
 		ASSERT_TRUE(ep[0] == "a");
 		ASSERT_TRUE(ep[1] == "b");
