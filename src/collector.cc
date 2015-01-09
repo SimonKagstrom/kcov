@@ -129,7 +129,7 @@ private:
 			break;
 
 		case ev_exit_first_process:
-			if (IConfiguration::getInstance().getExitFirstProcess()) {
+			if (IConfiguration::getInstance().keyAsInt("daemonize-on-first-process-exit")) {
 				IConfiguration &conf = IConfiguration::getInstance();
 				std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
 

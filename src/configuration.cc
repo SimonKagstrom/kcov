@@ -24,7 +24,6 @@ public:
 		m_argc = 0;
 		m_originalPathPrefix="";
 		m_newPathPrefix="";
-		m_exitFirstProcess = false;
 		m_outputInterval = 5000;
 		m_runMode = IConfiguration::MODE_COLLECT_AND_REPORT;
 		m_printUncommon = false;
@@ -173,7 +172,7 @@ public:
 				setKey("parse-solibs", 0);
 				break;
 			case 'F':
-				m_exitFirstProcess = true;
+				setKey("daemonize-on-first-process-exit", 1);
 				break;
 			case 'p':
 				if (!isInteger(std::string(optarg)))
@@ -383,11 +382,6 @@ public:
 		setKey("parse-solibs", on);
 	}
 
-	bool getExitFirstProcess()
-	{
-		return m_exitFirstProcess;
-	}
-
 	unsigned int getOutputInterval()
 	{
 		return m_outputInterval;
@@ -427,6 +421,7 @@ public:
 		setKey("parse-solibs", 1);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
+		setKey("daemonize-on-first-process-exit", 0);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
@@ -579,7 +574,6 @@ public:
 	std::string m_title;
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
-	bool m_exitFirstProcess;
 	unsigned int m_outputInterval;
 	RunMode_t m_runMode;
 	bool m_printUncommon;

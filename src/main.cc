@@ -220,7 +220,7 @@ int main(int argc, const char *argv[])
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);
 
-	if (conf.getExitFirstProcess())
+	if (conf.keyAsInt("daemonize-on-first-process-exit"))
 		daemonize();
 
 	parser->setupParser(&filter);
