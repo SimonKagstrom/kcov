@@ -20,8 +20,6 @@ public:
 		m_outDirectory = "";
 		m_binaryName = "";
 		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
-		m_lowLimit = 25;
-		m_highLimit = 75;
 		m_programArgs = NULL;
 		m_argc = 0;
 		m_outputType = OUTPUT_COVERAGE;
@@ -94,7 +92,7 @@ public:
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
 				"",
-				m_lowLimit, m_highLimit,
+				keyAsInt("low-limit"), keyAsInt("high-limit"),
 				uncommonOptions().c_str());
 
 		return false;
@@ -269,8 +267,8 @@ public:
 				if (!isInteger(vec[0]) || !isInteger(vec[1]))
 					return usage();
 
-				m_lowLimit = stoul(vec[0]);
-				m_highLimit = stoul(vec[1]);
+				setKey("low-limit", stoul(vec[0]));
+				setKey("high-limit", stoul(vec[1]));
 				break;
 			}
 			case 'R': {
@@ -361,16 +359,6 @@ public:
 		return m_fixedBreakpoints;
 	}
 
-	unsigned int getLowLimit()
-	{
-		return m_lowLimit;
-	}
-
-	unsigned int getHighLimit()
-	{
-		return m_highLimit;
-	}
-
 	const char **getArgv()
 	{
 		return m_programArgs;
@@ -448,6 +436,8 @@ public:
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
 		setKey("parse-solibs", 1);
+		setKey("low-limit", 25);
+		setKey("high-limit", 75);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
@@ -590,8 +580,6 @@ public:
 	IntKeyMap_t m_ints;
 	StrVecKeyMap_t m_stringVectors;
 
-	unsigned int m_lowLimit;
-	unsigned int m_highLimit;
 	std::string m_outDirectory;
 	std::string m_binaryName;
 	std::string m_binaryPath;

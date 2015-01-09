@@ -186,8 +186,8 @@ private:
 				" \"covered\" : %d,"
 				"};"
 				"\n",
-				conf.getLowLimit(),
-				conf.getHighLimit(),
+				conf.keyAsInt("low-limit"),
+				conf.keyAsInt("high-limit"),
 				escape_json(conf.getBinaryName()).c_str(),
 				getDateNow().c_str(),
 				nTotalCodeLines,
@@ -307,8 +307,8 @@ private:
 				" \"covered\" : %d,"
 				"};"
 				"\n",
-				conf.getLowLimit(),
-				conf.getHighLimit(),
+				conf.keyAsInt("lowLimit"),
+				conf.keyAsInt("highLimit"),
 				escape_json(conf.getBinaryName()).c_str(),
 				getDateNow().c_str(),
 				lines,
@@ -347,9 +347,9 @@ private:
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
 
-		if (percent >= conf.getHighLimit())
+		if (percent >= conf.keyAsInt("high-limit"))
 			return "lineCov";
-		else if (percent > conf.getLowLimit())
+		else if (percent > conf.keyAsInt("low-limit"))
 			return "linePartCov";
 
 		return "lineNoCov";

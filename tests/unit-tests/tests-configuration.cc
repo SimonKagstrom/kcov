@@ -60,14 +60,14 @@ TESTSUITE(configuration)
 		res = runParse("-s vbb");
 		ASSERT_FALSE(res);
 
-		ASSERT_TRUE(conf->m_lowLimit == 25U);
-		ASSERT_TRUE(conf->m_highLimit == 75U);
+		ASSERT_TRUE(conf->keyAsInt("low-limit") == 25);
+		ASSERT_TRUE(conf->keyAsInt("high-limit")== 75U);
 
 		res = runParse(fmt("-l 30,60 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
 
-		ASSERT_TRUE(conf->m_lowLimit == 30U);
-		ASSERT_TRUE(conf->m_highLimit == 60U);
+		ASSERT_TRUE(conf->keyAsInt("low-limit")== 30);
+		ASSERT_TRUE(conf->keyAsInt("high-limit") == 60);
 
 		res = runParse(fmt("-l 20 /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(!res);
