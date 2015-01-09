@@ -134,7 +134,7 @@ public:
 			return;
 
 		IConfiguration &conf = IConfiguration::getInstance();
-		const std::string &id = conf.getCoverallsId();
+		const std::string &id = conf.keyAsString("coveralls-id");
 
 		// No token? Skip output then
 		if (id == "")

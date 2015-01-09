@@ -213,7 +213,7 @@ public:
 				setKey("bash-command", optarg);
 				break;
 			case 'T':
-				m_coverallsId = optarg;
+				setKey("coveralls-id", optarg);
 				break;
 			case 'x':
 				setKey("exclude-pattern", getCommaSeparatedList(std::string(optarg)));
@@ -345,11 +345,6 @@ public:
 		return m_kernelCoveragePath;
 	}
 
-	const std::string &getCoverallsId()
-	{
-		return m_coverallsId;
-	}
-
 	std::list<uint64_t> getFixedBreakpoints()
 	{
 		return m_fixedBreakpoints;
@@ -411,6 +406,7 @@ public:
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
+		setKey("coveralls-id", "");
 		setKey("running-mode", IConfiguration::MODE_COLLECT_AND_REPORT);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
@@ -558,7 +554,6 @@ public:
 	std::string m_binaryName;
 	std::string m_binaryPath;
 	std::string m_kernelCoveragePath;
-	std::string m_coverallsId;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;
