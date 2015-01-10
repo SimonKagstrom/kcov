@@ -79,8 +79,6 @@ namespace kcov
 
 		virtual const std::string &getBinaryName() = 0;
 
-		virtual const std::string &getBinaryPath() = 0;
-
 		virtual const char **getArgv() = 0;
 
 		virtual unsigned int getArgc() = 0;

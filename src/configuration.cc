@@ -299,7 +299,7 @@ public:
 		{
 			StringPair_t tmp = splitPath(argv[afterOpts + 1]);
 
-			m_binaryPath = tmp.first;
+			setKey("binary-path", tmp.first);
 			m_binaryName = tmp.second;
 		}
 		m_programArgs = &argv[afterOpts + 1];
@@ -317,11 +317,6 @@ public:
 	const std::string &getBinaryName()
 	{
 		return m_binaryName;
-	}
-
-	const std::string &getBinaryPath()
-	{
-		return m_binaryPath;
 	}
 
 	const char **getArgv()
@@ -356,6 +351,7 @@ public:
 	// Setup the default key:value pairs
 	void setupDefaults()
 	{
+		setKey("binary-path", "");
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
 		setKey("kernel-coverage-path", "/sys/kernel/debug/kprobe-coverage");
@@ -513,7 +509,6 @@ public:
 
 	std::string m_outDirectory;
 	std::string m_binaryName;
-	std::string m_binaryPath;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;

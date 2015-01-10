@@ -152,7 +152,7 @@ int main(int argc, const char *argv[])
 	if (!conf.parse(argc, argv))
 		return 1;
 
-	std::string file = conf.getBinaryPath() + conf.getBinaryName();
+	std::string file = conf.keyAsString("binary-path") + conf.getBinaryName();
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
 	if (!parser) {
 		conf.printUsage();
