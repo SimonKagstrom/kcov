@@ -21,8 +21,6 @@ public:
 		m_binaryName = "";
 		m_programArgs = NULL;
 		m_argc = 0;
-		m_originalPathPrefix="";
-		m_newPathPrefix="";
 		m_printUncommon = false;
 
 		setupDefaults();
@@ -259,20 +257,22 @@ public:
 			  if ((tokenPosFront != std::string::npos) && 
 			      (tokenPosFront == tokenPosBack)) {
 
-			    m_originalPathPrefix = tmpArg.substr(0, tokenPosFront);
-			    m_newPathPrefix = tmpArg.substr(tokenPosFront + 1);
+			    std::string originalPathPrefix = tmpArg.substr(0, tokenPosFront);
+			    std::string newPathPrefix = tmpArg.substr(tokenPosFront + 1);
 			    
-			    char* rp = ::realpath(m_newPathPrefix.c_str(), NULL);
+			    char* rp = ::realpath(newPathPrefix.c_str(), NULL);
 			    if (rp) {
 			      free((void*) rp);
 			    }
 			    else {
-			      error("%s is not a valid path.\n", m_newPathPrefix.c_str());
+			      panic("%s is not a valid path.\n", newPathPrefix.c_str());
 			    }
-			    
+
+			    setKey("orig-path-prefix", originalPathPrefix);
+			    setKey("new-path-prefix", newPathPrefix);
 			  }
 			  else {
-			    error("%s is formatted incorrectly\n", tmpArg.c_str());
+			    panic("%s is formatted incorrectly\n", tmpArg.c_str());
 			    
 			  }
 			  break;
@@ -334,16 +334,6 @@ public:
 		return m_argc;
 	}
 
-	const std::string& getOriginalPathPrefix()
-	{
-		return m_originalPathPrefix;
-	}
-
-	const std::string& getNewPathPrefix()
-	{
-		return m_newPathPrefix;
-	}
-
 	void registerListener(IListener &listener, const std::vector<std::string> &keys)
 	{
 		for (std::vector<std::string>::const_iterator it = keys.begin();
@@ -377,6 +367,8 @@ public:
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
 		setKey("coveralls-id", "");
+		setKey("orig-path-prefix", "");
+		setKey("new-path-prefix", "");
 		setKey("running-mode", IConfiguration::MODE_COLLECT_AND_REPORT);
 		setKey("exclude-pattern", StrVecMap_t());
 		setKey("include-pattern", StrVecMap_t());
@@ -525,8 +517,6 @@ public:
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;
-	std::string m_originalPathPrefix;
-	std::string m_newPathPrefix;
 	bool m_printUncommon;
 
 	ListenerMap_t m_listeners;
