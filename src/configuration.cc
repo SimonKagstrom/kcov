@@ -19,7 +19,6 @@ public:
 	{
 		m_outDirectory = "";
 		m_binaryName = "";
-		m_kernelCoveragePath = "/sys/kernel/debug/kprobe-coverage";
 		m_programArgs = NULL;
 		m_argc = 0;
 		m_originalPathPrefix="";
@@ -340,11 +339,6 @@ public:
 		return m_binaryPath;
 	}
 
-	const std::string &getKernelCoveragePath()
-	{
-		return m_kernelCoveragePath;
-	}
-
 	std::list<uint64_t> getFixedBreakpoints()
 	{
 		return m_fixedBreakpoints;
@@ -399,6 +393,7 @@ public:
 	{
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
+		setKey("kernel-coverage-path", "/sys/kernel/debug/kprobe-coverage");
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
 		setKey("parse-solibs", 1);
@@ -553,7 +548,6 @@ public:
 	std::string m_outDirectory;
 	std::string m_binaryName;
 	std::string m_binaryPath;
-	std::string m_kernelCoveragePath;
 	const char **m_programArgs;
 	unsigned int m_argc;
 	std::string m_title;

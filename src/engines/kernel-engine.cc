@@ -64,7 +64,7 @@ public:
 
 	bool start(IEventListener &listener, const std::string &executable)
 	{
-		std::string path = IConfiguration::getInstance().getKernelCoveragePath();
+		std::string path = IConfiguration::getInstance().keyAsString("kernel-coverage-path");
 		std::string control = path + "/control";
 		std::string show = path + "/show";
 
