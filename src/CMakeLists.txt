@@ -24,6 +24,7 @@ set (${SOLIB}_SRCS
 	)
 
 set (${KCOV}_SRCS
+    capabilities.cc
     collector.cc
     configuration.cc
     engine-factory.cc
@@ -48,6 +49,7 @@ set (${KCOV}_SRCS
     )
 
 set (${LINE2ADDR}_SRCS
+    capabilities.cc
 	configuration.cc
 	filter.cc
 	line2addr.cc

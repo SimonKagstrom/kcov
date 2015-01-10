@@ -14,6 +14,7 @@ project (unit-test)
 set (TGT ut)
 
 set (${TGT}_SRCS
+    ../../src/capabilities.cc
     ../../src/collector.cc
     ../../src/engine-factory.cc
     ../../src/output-handler.cc
