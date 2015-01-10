@@ -90,8 +90,6 @@ namespace kcov
 		virtual const std::string& getNewPathPrefix() = 0;
 		virtual const std::string& getOriginalPathPrefix() = 0;
 
-		virtual void setParseSolibs(bool on) = 0;
-
 
 		/**
 		 * Register a configuration-changed listener

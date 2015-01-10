@@ -2,6 +2,7 @@
 #include <collector.hh>
 #include <output-handler.hh>
 #include <configuration.hh>
+#include <capabilities.hh>
 #include <file-parser.hh>
 #include <utils.hh>
 #include <phdr_data.h>
@@ -103,7 +104,8 @@ public:
 		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
-		if (IConfiguration::getInstance().keyAsInt("parse-solibs")) {
+		if (IConfiguration::getInstance().keyAsInt("parse-solibs") &&
+				ICapabilities::getInstance().hasCapability("handle-solibs")) {
 			if (file_exists(kcov_solib_path))
 				putenv(m_ldPreloadString);
 		}

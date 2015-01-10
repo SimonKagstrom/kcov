@@ -364,11 +364,6 @@ public:
 		return m_newPathPrefix;
 	}
 
-	void setParseSolibs(bool on)
-	{
-		setKey("parse-solibs", on);
-	}
-
 	void registerListener(IListener &listener, const std::vector<std::string> &keys)
 	{
 		for (std::vector<std::string>::const_iterator it = keys.begin();

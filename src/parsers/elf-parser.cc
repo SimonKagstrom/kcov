@@ -1,6 +1,7 @@
 #include <file-parser.hh>
 #include <engine.hh>
 #include <utils.hh>
+#include <capabilities.hh>
 #include <phdr_data.h>
 
 #include <sys/types.h>
@@ -141,10 +142,14 @@ public:
 			raw = elf_getident(elf, &sz);
 
 			if (raw && sz > EI_CLASS) {
+				ICapabilities &capabilities = ICapabilities::getInstance();
+
 				m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
 
 				if (elfIs64Bit() != machine_is_64bit())
-					IConfiguration::getInstance().setParseSolibs(false);
+					capabilities.removeCapability("handle-solibs");
+				else
+					capabilities.addCapability("handle-solibs");
 			}
 
 			m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
