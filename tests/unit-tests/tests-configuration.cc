@@ -52,7 +52,7 @@ TESTSUITE(configuration)
 		ASSERT_TRUE(std::string("tjena") == a[1]);
 
 		ASSERT_TRUE(conf->getBinaryName() == "test-binary");
-		ASSERT_TRUE(conf->getBinaryPath() == std::string(crpcut::get_start_dir()) + "/");
+		ASSERT_TRUE(conf->keyAsString("binary-path") == std::string(crpcut::get_start_dir()) + "/");
 
 		res = runParse("-h");
 		ASSERT_FALSE(res);
