@@ -81,8 +81,6 @@ namespace kcov
 
 		virtual const std::string &getBinaryPath() = 0;
 
-		virtual std::list<uint64_t> getFixedBreakpoints() = 0;
-
 		virtual const char **getArgv() = 0;
 
 		virtual unsigned int getArgc() = 0;

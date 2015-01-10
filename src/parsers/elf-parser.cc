@@ -92,8 +92,6 @@ public:
 			m_origRoot = IConfiguration::getInstance().getOriginalPathPrefix();
 			m_newRoot  = IConfiguration::getInstance().getNewPathPrefix();
 
-			m_fixedAddresses = IConfiguration::getInstance().getFixedBreakpoints();
-
 			panic_if(elf_version(EV_CURRENT) == EV_NONE,
 					"ELF version failed\n");
 			m_initialized = true;
@@ -180,17 +178,6 @@ out_open:
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
-
-		// One-time setup of fixed breakpoints
-		for (FixedAddressList_t::const_iterator it = m_fixedAddresses.begin();
-				it != m_fixedAddresses.end();
-				++it) {
-			for (LineListenerList_t::const_iterator itL = m_lineListeners.begin();
-					itL != m_lineListeners.end();
-					++itL)
-				(*itL)->onLine("", 0, *it);
-		}
-		m_fixedAddresses.clear();
 
 		return true;
 	}
@@ -492,7 +479,6 @@ private:
 	typedef std::vector<Segment> SegmentList_t;
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
-	typedef std::list<uint64_t> FixedAddressList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{
@@ -533,7 +519,6 @@ private:
 	bool m_isMainFile;
 	uint64_t m_checksum;
 	bool m_initialized;
-	FixedAddressList_t m_fixedAddresses;
 
 	/***** Add strings to update path information. *******/
 	std::string m_origRoot;

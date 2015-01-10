@@ -121,7 +121,6 @@ public:
 				{"python-parser", required_argument, 0, 'P'},
 				{"bash-parser", required_argument, 0, 'B'},
 				{"uncommon-options", no_argument, 0, 'U'},
-				{"set-breakpoint", required_argument, 0, 'b'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
 				{0,0,0,0}
@@ -239,20 +238,6 @@ public:
 			case 'r':
 				setKey("running-mode", IConfiguration::MODE_REPORT_ONLY);
 				break;
-			case 'b': {
-				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
-
-				for (StrVecMap_t::const_iterator it = vec.begin();
-						it != vec.end();
-						++it) {
-					if (!string_is_integer(*it, 16))
-						continue;
-
-					m_fixedBreakpoints.push_back(string_to_integer(*it, 16));
-				}
-
-				break;
-			}
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
@@ -337,11 +322,6 @@ public:
 	const std::string &getBinaryPath()
 	{
 		return m_binaryPath;
-	}
-
-	std::list<uint64_t> getFixedBreakpoints()
-	{
-		return m_fixedBreakpoints;
 	}
 
 	const char **getArgv()
@@ -455,7 +435,6 @@ public:
 				"                         only output when kcov terminates, default %d)\n"
 				"\n"
 				" --debug=X               set kcov debugging level (max 31, default 0)\n"
-				" --set-breakpoint=A[,..] manually set breakpoints\n"
 				"\n"
 				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
 				"                         default: %s\n"
@@ -549,7 +528,6 @@ public:
 	std::string m_originalPathPrefix;
 	std::string m_newPathPrefix;
 	bool m_printUncommon;
-	std::list<uint64_t> m_fixedBreakpoints;
 
 	ListenerMap_t m_listeners;
 };
