@@ -17,7 +17,6 @@ class Configuration : public IConfiguration
 public:
 	Configuration()
 	{
-		m_outDirectory = "";
 		m_binaryName = "";
 		m_programArgs = NULL;
 		m_argc = 0;
@@ -292,9 +291,9 @@ public:
 		if (argc < afterOpts + extraNeeded)
 			return usage();
 
-		m_outDirectory = argv[afterOpts];
-		if (m_outDirectory[m_outDirectory.size() - 1] != '/')
-			m_outDirectory += "/";
+		std::string outDirectory = argv[afterOpts];
+		if (outDirectory[outDirectory.size() - 1] != '/')
+			outDirectory += "/";
 		if (argc >= afterOpts + 2)
 		{
 			StringPair_t tmp = splitPath(argv[afterOpts + 1]);
@@ -302,18 +301,14 @@ public:
 			setKey("binary-path", tmp.first);
 			m_binaryName = tmp.second;
 		}
-		setKey("target-directory", m_outDirectory + "/" + m_binaryName);
+		setKey("out-directory", outDirectory);
+		setKey("target-directory", outDirectory + "/" + m_binaryName);
 
 		m_programArgs = &argv[afterOpts + 1];
 		m_argc = argc - afterOpts - 1;
 
 
 		return true;
-	}
-
-	const std::string &getOutDirectory()
-	{
-		return m_outDirectory;
 	}
 
 	const std::string &getBinaryName()
@@ -509,7 +504,6 @@ public:
 	IntKeyMap_t m_ints;
 	StrVecKeyMap_t m_stringVectors;
 
-	std::string m_outDirectory;
 	std::string m_binaryName;
 	const char **m_programArgs;
 	unsigned int m_argc;

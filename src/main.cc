@@ -103,7 +103,7 @@ static void daemonize(void)
 unsigned int countMetadata()
 {
 	IConfiguration &conf = IConfiguration::getInstance();
-	std::string base = conf.getOutDirectory();
+	std::string base = conf.keyAsString("out-directory");
 	DIR *dir;
 	struct dirent *de;
 

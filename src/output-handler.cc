@@ -29,7 +29,7 @@ namespace kcov
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
-			m_baseDirectory = conf.getOutDirectory();
+			m_baseDirectory = conf.keyAsString("out-directory");
 			m_outDirectory = m_baseDirectory + conf.getBinaryName() + "/";
 			m_dbFileName = m_outDirectory + "/coverage.db";
 			m_summaryDbFileName = m_outDirectory + "/summary.db";
