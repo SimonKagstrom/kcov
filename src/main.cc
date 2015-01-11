@@ -118,7 +118,7 @@ unsigned int countMetadata()
 		std::string cur = base + de->d_name + "/metadata";
 
 		// ... except for the current coveree
-		if (de->d_name == conf.getBinaryName())
+		if (de->d_name == conf.keyAsString("binary-name"))
 			continue;
 
 		DIR *metadataDir;
@@ -152,7 +152,7 @@ int main(int argc, const char *argv[])
 	if (!conf.parse(argc, argv))
 		return 1;
 
-	std::string file = conf.keyAsString("binary-path") + conf.getBinaryName();
+	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
 	if (!parser) {
 		conf.printUsage();
@@ -182,7 +182,7 @@ int main(int argc, const char *argv[])
 		const std::string &out = output.getOutDirectory();
 
 		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
-				base, out, conf.getBinaryName());
+				base, out, conf.keyAsString("binary-name"));
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
 				out + "/cobertura.xml");
 		IWriter &coverallsWriter = createCoverallsWriter(*parser, reporter);

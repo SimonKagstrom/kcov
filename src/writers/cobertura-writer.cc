@@ -166,7 +166,7 @@ private:
 				"	</sources>\n"
 				"	<packages>\n"
 				"		<package name=\"" +
-				mangleFileName(IConfiguration::getInstance().getBinaryName()) +
+				mangleFileName(IConfiguration::getInstance().keyAsString("binary-name")) +
 				"\" line-rate=\"" + lineRate + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
 				"			<classes>\n"
 				;

@@ -188,7 +188,7 @@ private:
 				"\n",
 				conf.keyAsInt("low-limit"),
 				conf.keyAsInt("high-limit"),
-				escape_json(conf.getBinaryName()).c_str(),
+				escape_json(conf.keyAsString("binary-name")).c_str(),
 				getDateNow().c_str(),
 				nTotalCodeLines,
 				nTotalExecutedLines
@@ -309,7 +309,7 @@ private:
 				"\n",
 				conf.keyAsInt("low-limit"),
 				conf.keyAsInt("high-limit"),
-				escape_json(conf.getBinaryName()).c_str(),
+				escape_json(conf.keyAsString("binary-name")).c_str(),
 				getDateNow().c_str(),
 				lines,
 				executedLines);
