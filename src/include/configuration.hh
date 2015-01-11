@@ -6,6 +6,9 @@
 
 namespace kcov
 {
+	/**
+	 * Class that hold kcov configuration (command line options)
+	 */
 	class IConfiguration
 	{
 	public:
@@ -38,6 +41,10 @@ namespace kcov
 
 		virtual ~IConfiguration() {}
 
+
+		/**
+		 * Print kcov usage.
+		 */
 		virtual void printUsage() = 0;
 
 
@@ -75,8 +82,18 @@ namespace kcov
 		virtual const std::vector<std::string> &keyAsList(const std::string &key) = 0;
 
 
+		/**
+		 * Return the coveree argv (i.e., without kcov and kcov options)
+		 *
+		 * @return The coveree argv
+		 */
 		virtual const char **getArgv() = 0;
 
+		/**
+		 * Return the coveree argc (i.e., without kcov and kcov options)
+		 *
+		 * @return The coveree argc
+		 */
 		virtual unsigned int getArgc() = 0;
 
 		/**
@@ -88,8 +105,12 @@ namespace kcov
 		virtual void registerListener(IListener &listener, const std::vector<std::string> &keys) = 0;
 
 
+		/**
+		 * Parse argc, argv and setup the configuration
+		 *
+		 * @return true if the configuration is OK
+		 */
 		virtual bool parse(unsigned int argc, const char *argv[]) = 0;
-
 
 		static IConfiguration &getInstance();
 	};
