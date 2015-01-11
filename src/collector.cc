@@ -131,7 +131,7 @@ private:
 		case ev_exit_first_process:
 			if (IConfiguration::getInstance().keyAsInt("daemonize-on-first-process-exit")) {
 				IConfiguration &conf = IConfiguration::getInstance();
-				std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
+				std::string fifoName = conf.keyAsString("target-directory") + "/done.fifo";
 
 				std::string exitCode = fmt("%u", ev.data);
 

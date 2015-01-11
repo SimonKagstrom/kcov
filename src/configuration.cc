@@ -302,6 +302,8 @@ public:
 			setKey("binary-path", tmp.first);
 			m_binaryName = tmp.second;
 		}
+		setKey("target-directory", m_outDirectory + "/" + m_binaryName);
+
 		m_programArgs = &argv[afterOpts + 1];
 		m_argc = argc - afterOpts - 1;
 

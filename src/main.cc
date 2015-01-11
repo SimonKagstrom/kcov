@@ -54,7 +54,7 @@ static void daemonize(void)
 	int res;
 
 	IConfiguration &conf = IConfiguration::getInstance();
-	std::string fifoName = conf.getOutDirectory() + conf.getBinaryName() + "/done.fifo";
+	std::string fifoName = conf.keyAsString("target-directory") + "/done.fifo";
 
 	unlink(fifoName.c_str());
 	res = mkfifo(fifoName.c_str(), 0600);

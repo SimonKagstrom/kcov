@@ -140,7 +140,7 @@ public:
 		if (id == "")
 			return;
 
-		std::string outFile = conf.getOutDirectory() + "/" + conf.getBinaryName() + "/coveralls.out";
+		std::string outFile = conf.keyAsString("target-directory") + "/coveralls.out";
 
 		// Output file with coveralls json data
 		std::ofstream out(outFile);
