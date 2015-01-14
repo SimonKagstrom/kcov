@@ -83,3 +83,11 @@ exec 1>>$1
 echo hopp
 
 `dirname $0`/short-test.sh
+
+# Issue #50: This breaks
+cat<<EOF || echo "cat failed"
+foo
+bar
+EOF
+
+echo "From here on it do not work!"
