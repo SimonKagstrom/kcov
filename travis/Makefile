@@ -9,6 +9,7 @@ build:
 	mkdir -p build build-tests
 	cd build && cmake ..
 	make -C build
+	sudo make -C build install
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
