@@ -2,7 +2,7 @@
 Library           OperatingSystem
 
 *** Variables ***
-${kcov}           %{WORKSPACE}/build/src/kcov
+${kcov}           kcov
 ${out}            %{WORKSPACE}/kcov
 ${kcov_path}      %{WORKSPACE}
 ${xml_lookup}     ${kcov_path}/tests/tools/lookup-xml-node.py
