@@ -18,6 +18,7 @@ build_gcc:
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build"
+	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build install"
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && cmake ../tests"
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
