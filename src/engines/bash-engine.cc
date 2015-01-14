@@ -355,6 +355,14 @@ private:
 					// Skip << and remove spaces before and after "EOF"
 					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
 
+					// Make sure the heredoc marker is a word
+					for (unsigned int i = 0; i < heredocMarker.size(); i++) {
+						if (heredocMarker[i] == ' ' || heredocMarker[i] == '\t') {
+							heredocMarker = heredocMarker.substr(0, i);
+							break;
+						}
+					}
+
 					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
 						state = heredoc;
 				}
