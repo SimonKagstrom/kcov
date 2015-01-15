@@ -455,6 +455,10 @@ bash-issue-44-heredoc-special-cases
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 83
     Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 88
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 93
+    Should Contain    ${output}    1
 
 bash-coverage-tricky
 	Run								rm -rf ${out}/shell-main
