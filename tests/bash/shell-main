@@ -91,3 +91,5 @@ bar
 EOF
 
 echo "From here on it do not work!"
+
+`dirname $0`/sh-shebang.sh
