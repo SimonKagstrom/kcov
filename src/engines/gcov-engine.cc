@@ -3,6 +3,9 @@
 #include <configuration.hh>
 #include <file-parser.hh>
 
+#include <vector>
+#include <unordered_map>
+
 using namespace kcov;
 
 /*
@@ -72,6 +75,12 @@ using namespace kcov;
 #define GCOV_TAG_AFDO_FILE_NAMES ((uint32_t)0xaa000000)
 #define GCOV_TAG_AFDO_FUNCTION ((uint32_t)0xac000000)
 #define GCOV_TAG_AFDO_WORKING_SET ((uint32_t)0xaf000000)
+
+/* Arc flags */
+#define GCOV_ARC_ON_TREE 	 (1 << 0)
+#define GCOV_ARC_FAKE		 (1 << 1)
+#define GCOV_ARC_FALLTHROUGH (1 << 2)
+
 
 struct file_header
 {
@@ -175,9 +184,73 @@ protected:
 class GcnoParser : public GcovParser
 {
 public:
-	GcnoParser(const uint8_t *data, size_t dataSize) :
-		GcovParser(data, dataSize)
+	// Holder-class for fn/bb -> file/line
+	class BasicBlockMapping
 	{
+	public:
+		friend GcnoParser;
+
+		const int32_t m_function;
+		const int32_t m_basicBlock;
+		const std::string m_file;
+		const int32_t m_line;
+
+	private:
+		BasicBlockMapping(int32_t function, int32_t basicBlock,
+				const std::string &file, int32_t line) :
+					m_function(function), m_basicBlock(basicBlock),
+					m_file(file), m_line(line)
+		{
+		}
+	};
+
+	// Holder-class for arcs between blocks
+	class Arc
+	{
+	public:
+		friend GcnoParser;
+
+		const int32_t m_function;
+		const int32_t m_srcBlock;
+		const int32_t m_dstBlock;
+
+	private:
+		Arc(int32_t function, int32_t srcBlock, int32_t dstBlock) :
+			m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
+		{
+		}
+	};
+
+	typedef std::vector<BasicBlockMapping> BasicBlockList_t;
+	typedef std::vector<Arc> ArcList_t;
+
+
+
+	GcnoParser(const uint8_t *data, size_t dataSize) :
+		GcovParser(data, dataSize),
+		m_functionId(-1)
+	{
+	}
+
+	/* Return a reference to the basic blocks to file/line in the file.
+	 * Empty if parse() hasn't been called.
+	 *
+	 * @return the basic blocks
+	 */
+	const BasicBlockList_t &getBasicBlocks()
+	{
+		return m_basicBlocks;
+	}
+
+	/**
+	 * Return a reference to the arcs in the file. Empty if parse() hasn't
+	 * been called.
+	 *
+	 * @return the arcs
+	 */
+	const ArcList_t &getArcs()
+	{
+		return m_arcs;
 	}
 
 protected:
@@ -213,21 +286,14 @@ private:
 
 		p8 = readString(p8 + 3 * 4, m_function);
 		p8 = readString(p8, m_file);
+		m_functionId = ident;
 
-		// The first line of this function
-		p32 = (const int32_t *)p8;
-		int32_t startLine = p32[0];
-
-		printf("FN: %s, %s, 0x%08x, %d\n", m_function.c_str(), m_file.c_str(), ident, startLine);
+		// The first line of this function comes next, but let's ignore that
 	}
 
 	void onBlocks(const struct header *header, const uint8_t *data)
 	{
-		const int32_t *p32 = (const int32_t *)data;
-
-		printf("  BLOCKs %d\n", header->length);
-		for (int32_t i = 0; i < header->length; i++)
-			printf("   %2d: 0x%08x\n", i, p32[i]);
+		// Not used by kcov
 	}
 
 	void onLines(const struct header *header, const uint8_t *data)
@@ -255,7 +321,8 @@ private:
 			}
 
 			p32++;
-			printf("  BB %2d: %s:%3d\n", blockNo, m_file.c_str(), line);
+
+			m_basicBlocks.push_back(BasicBlockMapping(m_functionId, blockNo, m_file, line));
 		}
 	}
 
@@ -273,7 +340,10 @@ private:
 			int32_t destBlock = p32[0];
 			int32_t flags = p32[1];
 
-			printf("  Arc%2d from %2d to %2d (%s %s %s)\n", arc, blockNo, destBlock, flags & 1 ? "OT" : "  ", flags & 2 ? "FK" : "  ", flags & 4 ? "TR" : "  ");
+			// Report non-on-tree arcs
+			if (!(flags & GCOV_ARC_ON_TREE))
+				m_arcs.push_back(Arc(m_functionId, blockNo, destBlock));
+
 			p32 += 2;
 			arc++;
 		}
@@ -281,14 +351,46 @@ private:
 
 	std::string m_file;
 	std::string m_function;
+	int32_t m_functionId;
+	BasicBlockList_t m_basicBlocks;
+	ArcList_t m_arcs;
 };
 
 class GcdaParser : public GcovParser
 {
 public:
 	GcdaParser(const uint8_t *data, size_t dataSize) :
-		GcovParser(data, dataSize)
+		GcovParser(data, dataSize),
+		m_functionId(-1)
 	{
+	}
+
+	size_t countersForFunction(int32_t function)
+	{
+		if (function < 0)
+			panic("Garbage in!");
+
+		if (m_functionToCounters.find(function) == m_functionToCounters.end())
+			return 0;
+
+		// Simply the size of the vector
+		return m_functionToCounters[function].size();
+	}
+
+	int64_t getCounter(int32_t function, int32_t counter)
+	{
+		if (function < 0 || counter < 0)
+			panic("Garbage in!");
+
+		if (m_functionToCounters.find(function) == m_functionToCounters.end())
+			return -1;
+
+		// List of counters
+		CounterList_t &cur = m_functionToCounters[function];
+		if ((size_t)counter >= cur.size())
+			return -1;
+
+		return cur[counter];
 	}
 
 protected:
@@ -315,9 +417,9 @@ protected:
 	{
 		const int32_t *p32 = (const int32_t *)data;
 		int32_t ident = p32[0];
-		// FIXME! Handle checksums after this
 
-		printf(" FN da ident %d\n", ident);
+		// FIXME! Handle checksums after this
+		m_functionId = ident;
 	}
 
 	void onCounterBase(const struct header *header, const uint8_t *data)
@@ -325,9 +427,22 @@ protected:
 		const int64_t *p64 = (const int64_t *)data;
 		int32_t count = header->length / 2; // 64-bit values
 
-		for (int32_t i = 0; i <= count; i++)
-			printf(" Cntr: %lld\n", (long long)p64[i]);
+		// Size properly since we know this
+		CounterList_t counters(count + 1);
+
+		for (int32_t i = 0; i <= count; i++) {
+			printf(" Cntr %d: %lld\n", i, (long long)p64[i]);
+			counters.push_back(p64[i]);
+		}
+
+		m_functionToCounters[m_functionId] = counters;
 	}
+
+	typedef std::vector<int64_t> CounterList_t;
+	typedef std::unordered_map<int32_t, CounterList_t> FunctionToCountersMap_t;
+
+	int32_t m_functionId;
+	FunctionToCountersMap_t m_functionToCounters;
 };
 
 class GcovEngine : public IEngine
@@ -369,10 +484,29 @@ public:
 		gcno.parse();
 		gcda.parse();
 
+		const GcnoParser::BasicBlockList_t &bbs = gcno.getBasicBlocks();
+		const GcnoParser::ArcList_t &arcs = gcno.getArcs();
+
+		for (GcnoParser::BasicBlockList_t::const_iterator it = bbs.begin();
+				it != bbs.end();
+				++it) {
+			const GcnoParser::BasicBlockMapping &cur = *it;
+
+			printf("  BB %2d: %s:%3d\n", cur.m_basicBlock, cur.m_file.c_str(), cur.m_line);
+		}
+		for (GcnoParser::ArcList_t::const_iterator it = arcs.begin();
+				it != arcs.end();
+				++it) {
+			const GcnoParser::Arc &cur = *it;
+
+			printf("  Arc from %2d to %2d\n", cur.m_srcBlock, cur.m_dstBlock);
+		}
+
 		return match_none;
 	}
 
 private:
+
 	class Ctor
 	{
 	public:
