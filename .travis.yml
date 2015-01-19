@@ -12,6 +12,11 @@ compiler:
 
 script: make -f travis/Makefile run-tests
 
+# Performance regression test vs v23
+continuous-performance:
+  reference-commit: 3b9473f4731d0c911cc6934c86ce9e1db291c077
+  script:
+    - mkdir -p build-reference && cd build-reference && cmake .. && make
 
 notifications:
   recipients:
