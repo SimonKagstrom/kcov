@@ -6,11 +6,12 @@ kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 
 .PHONY: prepare_environment
 
 build_reference:
-	mkdir -p build-reference
-	git checkout 3b9473f4731d0c911cc6934c86ce9e1db291c077 && cd build-reference && cmake ..
-	make -C build-reference
-	cp build-reference/src/kcov /tmp/kcov-reference
-	git checkout master
+	mkdir -p reference/src reference/build
+	cd reference/ && git clone https://github.com/SimonKagstrom/kcov.git
+	cd reference/kcov && git checkout v23
+	cd reference/build && cmake ../kcov
+	make -C reference/build/
+	cp reference/build/src/kcov /tmp/kcov-reference
 
 build: build_reference
 	mkdir -p build build-tests
@@ -41,7 +42,7 @@ run-tests: build run-tests-${CC}
 
 prepare_linux:
 	sudo apt-get update -qq
-	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap
+	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git
 	sudo pip install robotframework
 
 prepare_gcc:
