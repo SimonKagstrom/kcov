@@ -5,7 +5,14 @@ kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 
 
 .PHONY: prepare_environment
 
-build:
+build_reference:
+	mkdir -p build-reference
+	git checkout 3b9473f4731d0c911cc6934c86ce9e1db291c077 && cd build-reference && cmake ..
+	make -C build-reference
+	cp build-reference/src/kcov /tmp/kcov-reference
+	git checkout master
+
+build: build_reference
 	mkdir -p build build-tests
 	cd build && cmake ..
 	make -C build
