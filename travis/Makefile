@@ -13,7 +13,7 @@ build_reference:
 	make -C reference/build/
 	cp reference/build/src/kcov /tmp/kcov-reference
 
-build: build_reference
+build:
 	mkdir -p build build-tests
 	cd build && cmake ..
 	make -C build
@@ -21,7 +21,7 @@ build: build_reference
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc:
+build_gcc: build_reference
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
