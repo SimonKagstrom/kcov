@@ -12,3 +12,5 @@ $KCOV /tmp/kcov-perf tests/python/main 5
 $KCOV /tmp/kcov-perf tests/bash/shell-main 5
 $KCOV /tmp/kcov-perf build/src/kcov /tmp/kcov-perf tests/python/main 5
 $KCOV /tmp/kcov-perf build/src/kcov /tmp/kcov-perf tests/bash/shell-main 5
+
+exit 0
