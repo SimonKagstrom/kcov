@@ -32,6 +32,7 @@ build_gcc: build_reference
 
 run-performance: build_gcc
 	/usr/bin/time -f "%e" travis/perf-test.sh build/src/kcov >/dev/null
+	rm -rf /tmp/kcov-perf
 	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference >/dev/null
 
 run-tests-gcc: run-performance
