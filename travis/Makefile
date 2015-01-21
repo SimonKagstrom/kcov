@@ -31,7 +31,7 @@ build_gcc: build_reference
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
 run-performance: build_gcc
-	/usr/bin/time -f "%e" travis/perf-test.sh src/kcov >/dev/null
+	/usr/bin/time -f "%e" travis/perf-test.sh build/src/kcov >/dev/null
 	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference >/dev/null
 
 run-tests-gcc: run-performance
