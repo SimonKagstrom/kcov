@@ -30,7 +30,11 @@ build_gcc: build_reference
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && cmake ../tests"
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
-run-tests-gcc: build_gcc
+run-performance: build_gcc
+	/usr/bin/time -f "%e" travis/perf-test.sh src/kcov >/dev/null
+	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference >/dev/null
+
+run-tests-gcc: run-performance
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=/tmp/kcov/ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
 
 run-tests-clang:
