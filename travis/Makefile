@@ -46,7 +46,7 @@ run-tests: build run-tests-${CC}
 
 prepare_linux:
 	sudo apt-get update -qq
-	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git
+	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time
 	sudo pip install robotframework
 
 prepare_gcc:
