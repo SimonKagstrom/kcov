@@ -26,7 +26,7 @@ addons:
     notification_email: simon.kagstrom@gmail.com
     build_command_prepend: "mkdir coverity-build && cmake .."
     build_command:   "cd coverity-build && make"
-    branch_pattern: coverity_scan
+    branch_pattern: master
 
 notifications:
   recipients:
