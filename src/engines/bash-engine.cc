@@ -109,6 +109,8 @@ public:
 			if (execv(vec[0], vec)) {
 				perror("Failed to execute script");
 
+				free(vec);
+
 				return false;
 			}
 		} else if (m_child < 0) {
