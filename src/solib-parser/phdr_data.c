@@ -83,6 +83,9 @@ struct phdr_data *phdr_data_unmarshal(void *p)
 		return NULL;
 	if (out->version != KCOV_SOLIB_VERSION)
 		return NULL;
+	// Silly amounts of entries mean broken data
+	if (out->n_entries > 0x10000)
+		return NULL;
 
 	return out;
 }
