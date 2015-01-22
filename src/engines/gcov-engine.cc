@@ -39,6 +39,9 @@ public:
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
+		if (!IConfiguration::getInstance().keyAsInt("gcov"))
+			return match_none;
+
 		size_t sz;
 		void *d = read_file(&sz, "%s", "/home/ska/projects/build/kcov/build-tests/CMakeFiles/main-tests-gcov.dir/subdir2/file2.c.gcno");
 		GcnoParser gcno((uint8_t *)d, sz);

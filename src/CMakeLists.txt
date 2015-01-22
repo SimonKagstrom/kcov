@@ -29,10 +29,12 @@ set (${KCOV}_SRCS
     configuration.cc
     engine-factory.cc
     engines/bash-engine.cc
+    engines/gcov-engine.cc
     engines/kernel-engine.cc
     engines/ptrace.cc
     engines/python-engine.cc
     filter.cc
+    gcov.cc
     main.cc
     merge-file-parser.cc
     output-handler.cc
