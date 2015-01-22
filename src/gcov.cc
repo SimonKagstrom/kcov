@@ -91,7 +91,7 @@ struct header
 };
 
 GcovParser::GcovParser(const uint8_t *data, size_t dataSize) :
-						m_data(data), m_dataSize(dataSize)
+        m_data(data), m_dataSize(dataSize)
 {
 }
 
@@ -168,22 +168,22 @@ const uint8_t *GcovParser::padPointer(const uint8_t *p)
 
 GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function, int32_t basicBlock,
 		const std::string &file, int32_t line) :
-											m_function(function), m_basicBlock(basicBlock),
-											m_file(file), m_line(line)
+        m_function(function), m_basicBlock(basicBlock),
+        m_file(file), m_line(line)
 {
 }
 
 // Holder-class for arcs between blocks
 GcnoParser::Arc::Arc(int32_t function, int32_t srcBlock, int32_t dstBlock) :
-									m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
+        m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
 {
 }
 
 
 
 GcnoParser::GcnoParser(const uint8_t *data, size_t dataSize) :
-						GcovParser(data, dataSize),
-						m_functionId(-1)
+        GcovParser(data, dataSize),
+        m_functionId(-1)
 {
 }
 
@@ -303,8 +303,8 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 }
 
 GcdaParser::GcdaParser(const uint8_t *data, size_t dataSize) :
-				GcovParser(data, dataSize),
-				m_functionId(-1)
+        GcovParser(data, dataSize),
+        m_functionId(-1)
 {
 }
 
