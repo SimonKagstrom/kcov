@@ -101,7 +101,6 @@ public:
 				{"pid", required_argument, 0, 'p'},
 				{"limits", required_argument, 0, 'l'},
 				{"output-interval", required_argument, 0, 'O'},
-				{"title", required_argument, 0, 't'},
 				{"path-strip-level", required_argument, 0, 'S'},
 				{"skip-solibs", no_argument, 0, 'L'},
 				{"exit-first-process", no_argument, 0, 'F'},
@@ -175,9 +174,6 @@ public:
 					return usage();
 				setKey("attach-pid", stoul(std::string(optarg)));
 				extraNeeded = 1;
-				break;
-			case 't':
-				m_title = optarg;
 				break;
 			case 'O':
 				if (!isInteger(std::string(optarg)))
@@ -412,7 +408,6 @@ public:
 		return fmt(
 				" --replace-src-path=path replace the string found before the : with the string \n"
 				"                         found after the :\n"
-				" -t, --title=title       title for the coverage (default: filename)\n"
 				" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 				"\n"
 				" --gcov                  use gcov parser instead of DWARF debugging info\n"
@@ -509,7 +504,6 @@ public:
 
 	const char **m_programArgs;
 	unsigned int m_argc;
-	std::string m_title;
 	bool m_printUncommon;
 
 	ListenerMap_t m_listeners;
