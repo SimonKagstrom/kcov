@@ -105,6 +105,7 @@ public:
 				{"path-strip-level", required_argument, 0, 'S'},
 				{"skip-solibs", no_argument, 0, 'L'},
 				{"exit-first-process", no_argument, 0, 'F'},
+				{"gcov", no_argument, 0, 'g'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -165,6 +166,9 @@ public:
 				break;
 			case 'F':
 				setKey("daemonize-on-first-process-exit", 1);
+				break;
+			case 'g':
+				setKey("gcov", 1);
 				break;
 			case 'p':
 				if (!isInteger(std::string(optarg)))
@@ -352,6 +356,7 @@ public:
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
 		setKey("parse-solibs", 1);
+		setKey("gcov", 0);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);
@@ -410,6 +415,7 @@ public:
 				" -t, --title=title       title for the coverage (default: filename)\n"
 				" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 				"\n"
+				" --gcov                  use gcov parser instead of DWARF debugging info\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
