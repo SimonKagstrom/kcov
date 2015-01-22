@@ -22,8 +22,8 @@ addons:
       name: "SimonKagstrom/kcov"
       description: "code coverage"
     notification_email: simon.kagstrom@gmail.com
-    build_command_prepend: "mkdir coverity-build && cmake .."
-    build_command:   "cd coverity-build && make"
+    build_command_prepend: "mkdir -p coverity-build && cd coverity-build && cmake .."
+    build_command:   "make -C coverity-build"
     branch_pattern: master
 
 script: make -f travis/Makefile run-tests
