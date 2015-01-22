@@ -165,6 +165,11 @@ const uint8_t *GcovParser::padPointer(const uint8_t *p)
 	return p;
 }
 
+GcnoParser::BasicBlockMapping::BasicBlockMapping(const BasicBlockMapping &other) :
+        m_function(other.m_function), m_basicBlock(other.m_basicBlock),
+        m_file(other.m_file), m_line(other.m_line)
+{
+}
 
 GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function, int32_t basicBlock,
 		const std::string &file, int32_t line) :
@@ -173,7 +178,11 @@ GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function, int32_t basic
 {
 }
 
-// Holder-class for arcs between blocks
+GcnoParser::Arc::Arc(const Arc &other) :
+        m_function(other.m_function), m_srcBlock(other.m_srcBlock), m_dstBlock(other.m_dstBlock)
+{
+}
+
 GcnoParser::Arc::Arc(int32_t function, int32_t srcBlock, int32_t dstBlock) :
         m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
 {
