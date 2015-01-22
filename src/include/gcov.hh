@@ -49,10 +49,10 @@ namespace kcov
 		public:
 			friend GcnoParser;
 
-			const int32_t m_function;
-			const int32_t m_basicBlock;
+			int32_t m_function;
+			int32_t m_basicBlock;
 			const std::string m_file;
-			const int32_t m_line;
+			int32_t m_line;
 
 		private:
 			BasicBlockMapping(int32_t function, int32_t basicBlock,
@@ -65,9 +65,9 @@ namespace kcov
 		public:
 			friend GcnoParser;
 
-			const int32_t m_function;
-			const int32_t m_srcBlock;
-			const int32_t m_dstBlock;
+			int32_t m_function;
+			int32_t m_srcBlock;
+			int32_t m_dstBlock;
 
 		private:
 			Arc(int32_t function, int32_t srcBlock, int32_t dstBlock);
