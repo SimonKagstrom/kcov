@@ -51,7 +51,7 @@ namespace kcov
 
 			int32_t m_function;
 			int32_t m_basicBlock;
-			const std::string m_file;
+			std::string m_file;
 			int32_t m_line;
 
 		private:
