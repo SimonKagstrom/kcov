@@ -12,11 +12,21 @@ compiler:
 
 script: make -f travis/Makefile run-tests
 
-# Performance regression test vs v23
-continuous-performance:
-  reference-commit: 3b9473f4731d0c911cc6934c86ce9e1db291c077
-  script:
-    - mkdir -p build-reference && cd build-reference && cmake .. && make
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "WG/iday4nudNJ9acP/gjjuXzI0Jw0MN0zP9JA3WueMvMV0UrVRnBKM+papB06XiB4Gyiaoy92pfOGzmby0ciMAvydBn2DyuGZhM1nXuEIbkQqfP3AR3z6nCZHY27NAhVnpnEAyb56FwD353JMVZj34cnRmcjgKArMM3Y8W66Zls="
+
+addons:
+  coverity_scan:
+    project:
+      name: "SimonKagstrom/kcov"
+      description: "code coverage"
+    notification_email: simon.kagstrom@gmail.com
+    build_command_prepend: "mkdir coverity-build && cmake .."
+    build_command:   "cd coverity-build && make"
+    branch_pattern: coverity_scan
 
 notifications:
   recipients:
