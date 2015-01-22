@@ -137,7 +137,7 @@ static int linux_proc_get_int (pid_t lwpid, const char *field)
 
 	while (fgets (buf, sizeof (buf), status_file)) {
 		if (strncmp (buf, field, field_len) == 0 && buf[field_len] == ':') {
-			retval = strtol (&buf[field_len + 1], NULL, 10);
+			retval = (int)strtol (&buf[field_len + 1], NULL, 10);
 			break;
 		}
 	}
