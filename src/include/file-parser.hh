@@ -20,6 +20,7 @@ namespace kcov
 		{
 			FLG_NONE = 0,
 			FLG_TYPE_SOLIB = 1,
+			FLG_TYPE_COVERAGE_DATA = 2, //< Typically gcov data files
 		};
 
 		enum PossibleHits
