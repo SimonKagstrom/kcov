@@ -113,15 +113,6 @@ public:
 		m_show = NULL;
 	}
 
-	class Ctor
-	{
-	public:
-		Ctor()
-		{
-			new KernelEngine();
-		}
-	};
-
 private:
 	void parseOneLine(const std::string &line)
 	{
@@ -156,8 +147,6 @@ private:
 
 	std::string m_module;
 };
-
-static KernelEngine::Ctor g_kernelEngine;
 
 class KernelEngineCreator : public IEngineFactory::IEngineCreator
 {
