@@ -2,6 +2,7 @@
 #include <engine.hh>
 #include <utils.hh>
 #include <capabilities.hh>
+#include <gcov.hh>
 #include <phdr_data.h>
 
 #include <sys/types.h>
@@ -169,7 +170,12 @@ out_open:
 			return 0;
 
 		parseOneElf();
-		parseOneDwarf();
+
+		// Gcov data?
+		if (IConfiguration::getInstance().keyAsInt("gcov") && !m_gcnoFiles.empty())
+			parseGcnoFiles();
+		else
+			parseOneDwarf();
 
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
@@ -180,6 +186,53 @@ out_open:
 		m_isMainFile = false;
 
 		return true;
+	}
+
+	void parseGcnoFiles()
+	{
+		for (FileList_t::const_iterator it = m_gcnoFiles.begin();
+				it != m_gcnoFiles.end();
+				++it) {
+			const std::string &cur = *it;
+
+			parseOneGcno(cur);
+		}
+	}
+
+	void parseOneGcno(const std::string &filename)
+	{
+		size_t sz;
+		void *data;
+
+		// The data is freed by the parser
+		data = read_file(&sz, "%s", filename.c_str());
+		if (!data)
+			return;
+
+		// Parse this gcno file!
+		GcnoParser parser((uint8_t *)data, sz);
+
+		// Parsing error?
+		if (!parser.parse()) {
+			warning("Can't parse %s\n", filename.c_str());
+
+			return;
+		}
+
+		const GcnoParser::BasicBlockList_t &bbs = parser.getBasicBlocks();
+
+		for (GcnoParser::BasicBlockList_t::const_iterator it = bbs.begin();
+				it != bbs.end();
+				++it) {
+			const GcnoParser::BasicBlockMapping &cur = *it;
+
+			// Report a generated address
+			for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
+					it != m_lineListeners.end();
+					++it)
+				(*it)->onLine(cur.m_file, cur.m_line,
+						gcovGetAddress(filename, cur.m_function, cur.m_basicBlock));
+		}
 	}
 
 	bool parseOneDwarf()
@@ -338,6 +391,8 @@ out_err:
 		size_t shstrndx;
 		bool ret = false;
 		bool setupSegments = false;
+		FileList_t gcdaFiles; // List of gcov data files scanned from .rodata
+		bool doScanForGcda = IConfiguration::getInstance().keyAsInt("gcov");
 		int fd;
 		unsigned int i;
 
@@ -398,6 +453,38 @@ out_err:
 					goto out_elf_begin;
 			}
 
+			// Parse rodata to find gcda files
+			if (doScanForGcda && data->d_buf && strcmp(name, ".rodata") == 0) {
+				const char *dataPtr = (const char *)data->d_buf;
+
+				for (size_t i = 0; i < data->d_size - 5; i++) {
+					const char *p = &dataPtr[i];
+
+					if (memcmp(p, (const void *)"gcda\0", 5) != 0)
+						continue;
+
+					const char *gcda = p;
+
+					// Rewind to start of string
+					while (gcda != dataPtr && *gcda != '\0')
+						gcda--;
+
+					// Rewound until start of rodata?
+					if (gcda == dataPtr)
+						continue;
+
+					std::string file(gcda + 1);
+
+					gcdaFiles.push_back(file);
+
+					// Notify listeners that we have found gcda files
+					for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
+							it != m_fileListeners.end();
+							++it)
+						(*it)->onFile(file, IFileParser::FLG_TYPE_COVERAGE_DATA);
+				}
+			}
+
 			if (sh_type == SHT_NOTE) {
 				if (m_elfIs32Bit) {
 					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
@@ -436,6 +523,22 @@ out_err:
 				m_curSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 			m_executableSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
 		}
+
+		// If we have gcda files, try to find the corresponding gcno dittos
+		for (FileList_t::iterator it = gcdaFiles.begin();
+				it != gcdaFiles.end();
+				++it) {
+			std::string &gcno = *it; // Modify in-place
+			size_t sz = gcno.size();
+
+			// .gcda -> .gcno
+			gcno[sz - 2] = 'n';
+			gcno[sz - 1] = 'o';
+
+			if (file_exists(gcno))
+				m_gcnoFiles.push_back(gcno);
+		}
+
 		elf_end(m_elf);
 		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
 			error("elf_begin failed on %s\n", m_filename.c_str());
@@ -479,6 +582,7 @@ private:
 	typedef std::vector<Segment> SegmentList_t;
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
+	typedef std::vector<std::string> FileList_t;
 
 	bool addressIsValid(uint64_t addr)
 	{
@@ -509,6 +613,7 @@ private:
 
 	SegmentList_t m_curSegments;
 	SegmentList_t m_executableSegments;
+	FileList_t m_gcnoFiles;
 
 	struct Elf *m_elf;
 	bool m_elfIs32Bit;

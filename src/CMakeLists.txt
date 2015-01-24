@@ -54,6 +54,7 @@ set (${LINE2ADDR}_SRCS
     capabilities.cc
 	configuration.cc
 	filter.cc
+	gcov.cc
 	line2addr.cc
 	parsers/elf-parser.cc
 	parser-manager.cc
