@@ -2,11 +2,23 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <functional>
 
 struct header;
 
 namespace kcov
 {
+	static inline uint64_t gcovGetAddress(const std::string &filename, int32_t function,
+			int32_t basicBlock)
+	{
+		uint16_t fn16 = ((uint32_t)function) & 0xffff;
+		uint16_t bb16 = ((uint32_t)basicBlock) & 0xffff;
+		uint64_t fnAndBb = (fn16 << 16) | bb16;
+		uint64_t fileNameHash = (((uint64_t)std::hash<std::string>()(filename)) & 0xffffffffULL);
+
+		return (fileNameHash << 32ULL) | fnAndBb;
+	}
+
 	class GcovParser
 	{
 	public:
