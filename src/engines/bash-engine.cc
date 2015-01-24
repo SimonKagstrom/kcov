@@ -240,14 +240,6 @@ public:
 		return match_none;
 	}
 
-	class Ctor
-	{
-	public:
-		Ctor()
-		{
-			new BashEngine();
-		}
-	};
 
 private:
 	void doSetenv(const std::string &val)
@@ -390,4 +382,49 @@ private:
 	FILE *m_stderr;
 };
 
-static BashEngine::Ctor g_bashEngine;
+// This ugly stuff should be fixed
+static BashEngine *g_bashEngine;
+class Ctor
+{
+public:
+	Ctor()
+	{
+		g_bashEngine = new BashEngine();
+	}
+};
+static Ctor g_bashCtor;
+
+class BashEngineCreator : public IEngineFactory::IEngineCreator
+{
+public:
+	virtual ~BashEngineCreator()
+	{
+	}
+
+	virtual IEngine *create(IFileParser &parser)
+	{
+		return g_bashEngine;
+	}
+
+
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
+	{
+		std::string s((const char *)data, 80);
+
+		if (filename.substr(filename.size() - 3, filename.size()) == ".sh")
+			return 200;
+
+		if (s.find("#!/bin/bash") != std::string::npos)
+			return 400;
+		if (s.find("#!/bin/sh") != std::string::npos)
+			return 300;
+		if (s.find("bash") != std::string::npos)
+			return 100;
+		if (s.find("sh") != std::string::npos)
+			return 50;
+
+		return match_none;
+	}
+};
+
+static BashEngineCreator g_bashEngineCreator;

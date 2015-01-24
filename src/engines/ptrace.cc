@@ -223,7 +223,6 @@ public:
 		m_listener(NULL),
 		m_signal(0)
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	~Ptrace()
@@ -463,21 +462,6 @@ public:
 		if (m_activeChild != 0)
 			::kill(m_activeChild, signal);
 	}
-
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		// Unless #!/bin/sh etc, this should win
-		return 1;
-	}
-
-	class Ctor
-	{
-	public:
-		Ctor()
-		{
-			new Ptrace();
-		}
-	};
 
 private:
 
@@ -761,4 +745,25 @@ private:
 	unsigned long m_signal;
 };
 
-static Ptrace::Ctor g_ptraceEngine;
+
+
+class PtraceEngineCreator : public IEngineFactory::IEngineCreator
+{
+public:
+	virtual ~PtraceEngineCreator()
+	{
+	}
+
+	virtual IEngine *create(IFileParser &parser)
+	{
+		return new Ptrace();
+	}
+
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
+	{
+		// Unless #!/bin/sh etc, this should win
+		return 1;
+	}
+};
+
+static PtraceEngineCreator g_ptraceEngineCreator;

@@ -9,12 +9,11 @@
 
 using namespace kcov;
 
-class GcovEngine : public IEngine
+class GcovEngine : public IEngine, IFileParser::IFileListener
 {
 public:
 	GcovEngine()
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	int registerBreakpoint(unsigned long addr)
@@ -74,22 +73,37 @@ public:
 
 private:
 
-	class Ctor
+	// From IFileParser::IFileListener
+	void onFile(const std::string &file, enum IFileParser::FileFlags flags)
 	{
-	public:
-		Ctor()
-		{
-			m_engine = new GcovEngine();
-		}
+		if (!(flags & IFileParser::FLG_TYPE_COVERAGE_DATA))
+			return;
 
-		~Ctor()
-		{
-			delete m_engine;
-		}
-
-		GcovEngine *m_engine;
-	};
-	static GcovEngine::Ctor g_gcovEngine;
+		printf("Woho!\n", file.c_str());
+	}
 };
 
-GcovEngine::Ctor GcovEngine::g_gcovEngine;
+
+class GcovEngineCreator : public IEngineFactory::IEngineCreator
+{
+public:
+	virtual ~GcovEngineCreator()
+	{
+	}
+
+	virtual IEngine *create(IFileParser &parser)
+	{
+		return new GcovEngine();
+	}
+
+
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
+	{
+		if (!IConfiguration::getInstance().keyAsInt("gcov"))
+			return match_none;
+
+		return match_perfect;
+	}
+};
+
+static GcovEngineCreator g_gcovEngineCreator;

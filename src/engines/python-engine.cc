@@ -204,15 +204,6 @@ public:
 		return match_none;
 	}
 
-	class Ctor
-	{
-	public:
-		Ctor()
-		{
-			new PythonEngine();
-		}
-	};
-
 private:
 	void unmarshalCoverageData(struct coverage_data *p)
 	{
@@ -423,4 +414,43 @@ private:
 	FILE *m_pipe;
 };
 
-static PythonEngine::Ctor g_pythonEngine;
+
+// This ugly stuff should be fixed
+static PythonEngine *g_pythonEngine;
+class Ctor
+{
+public:
+	Ctor()
+	{
+		g_pythonEngine = new PythonEngine();
+	}
+};
+static Ctor g_pythonCtor;
+
+class PythonEngineCreator : public IEngineFactory::IEngineCreator
+{
+public:
+	virtual ~PythonEngineCreator()
+	{
+	}
+
+	virtual IEngine *create(IFileParser &parser)
+	{
+		return g_pythonEngine;
+	}
+
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
+	{
+		std::string s((const char *)data, 80);
+
+		if (filename.substr(filename.size() - 3, filename.size()) == ".py")
+			return 200;
+
+		if (s.find("python") != std::string::npos)
+			return 100;
+
+		return match_none;
+	}
+};
+
+static PythonEngineCreator g_pythonEngineCreator;

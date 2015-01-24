@@ -29,7 +29,6 @@ public:
 	ScriptEngineBase() :
 		m_listener(NULL)
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
 		IParserManager::getInstance().registerParser(*this);
 	}
 

@@ -9,6 +9,8 @@
 
 namespace kcov
 {
+	class IFileParser;
+
 	enum event_type
 	{
 		ev_error       = -1,
@@ -79,18 +81,6 @@ namespace kcov
 		 * @return true if the process should continue, false otherwise
 		 */
 		virtual bool continueExecution() = 0;
-
-
-		/**
-		 * See if a particular file can be matched with this engine.
-		 *
-		 * Should return how well this engine fits, the higher the better
-		 *
-		 * @param filename the name of the file
-		 * @param data the first few bytes of the file
-		 * @param dataSize the size of @a data
-		 */
-		virtual unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
 	};
 
 	/**
@@ -100,13 +90,34 @@ namespace kcov
 	class IEngineFactory
 	{
 	public:
+		class IEngineCreator
+		{
+		public:
+			IEngineCreator();
+
+			virtual IEngine *create(IFileParser &parser) = 0;
+
+			/**
+			 * See if a particular file can be matched with this engine.
+			 *
+			 * Should return how well this engine fits, the higher the better
+			 *
+			 * @param filename the name of the file
+			 * @param data the first few bytes of the file
+			 * @param dataSize the size of @a data
+			 */
+			virtual unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize) = 0;
+		};
+
+		typedef IEngine *(*EngineCreator_t)(IFileParser &parser);
+
 		virtual ~IEngineFactory()
 		{
 		}
 
-		virtual void registerEngine(IEngine &engine) = 0;
+		virtual void registerEngine(IEngineCreator &creator) = 0;
 
-		virtual IEngine *matchEngine(const std::string &file) = 0;
+		virtual IEngineCreator &matchEngine(const std::string &file) = 0;
 
 		static IEngineFactory &getInstance();
 	};

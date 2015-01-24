@@ -160,7 +160,9 @@ int main(int argc, const char *argv[])
 	}
 	parser->addFile(file);
 
-	IEngine *engine = IEngineFactory::getInstance().matchEngine(file);
+	// Match and create an engine
+	IEngineFactory::IEngineCreator &engineCreator = IEngineFactory::getInstance().matchEngine(file);
+	IEngine *engine = engineCreator.create(*parser);
 	if (!engine) {
 		conf.printUsage();
 		return 1;

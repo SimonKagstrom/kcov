@@ -12,19 +12,19 @@ public:
 	{
 	}
 
-	void registerEngine(IEngine &engine)
+	void registerEngine(IEngineCreator &engine)
 	{
 		m_engines.push_back(&engine);
 	}
 
-	IEngine *matchEngine(const std::string &fileName)
+	IEngineCreator &matchEngine(const std::string &fileName)
 	{
-		IEngine *best = NULL;
+		IEngineCreator *best = NULL;
 		size_t sz;
 
 		uint8_t *data = (uint8_t *)peek_file(&sz, "%s", fileName.c_str());
 
-		for (EngineList_t::const_iterator it = m_engines.begin();
+		for (EngineList_t::iterator it = m_engines.begin();
 				it != m_engines.end();
 				++it) {
 			if (!best)
@@ -35,15 +35,22 @@ public:
 		}
 		free((void *)data);
 
-		return best;
+		if (!best)
+			panic("No engines registered");
+
+		return *best;
 	}
 
 private:
-	typedef std::vector<IEngine *> EngineList_t;
+	typedef std::vector<IEngineCreator *> EngineList_t;
 
 	EngineList_t m_engines;
 };
 
+IEngineFactory::IEngineCreator::IEngineCreator()
+{
+	IEngineFactory::getInstance().registerEngine(*this);
+}
 
 static EngineFactory *g_instance;
 IEngineFactory &IEngineFactory::getInstance()

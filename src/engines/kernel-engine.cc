@@ -24,7 +24,6 @@ public:
 		m_show(NULL),
 		m_listener(NULL)
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	~KernelEngine()
@@ -114,27 +113,6 @@ public:
 		m_show = NULL;
 	}
 
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		if (filename.find("vmlinux") != std::string::npos)
-			return match_perfect;
-
-		if (filename.find(".ko") == std::string::npos)
-			return match_none;
-
-		m_module = filename;
-		size_t slashPos = m_module.rfind("/");
-		if (slashPos == std::string::npos)
-			slashPos = 0;
-		else
-			slashPos++; // Skip the actual slash
-
-		// Remove path before and .ko after the name
-		m_module = m_module.substr(slashPos, m_module.size() - slashPos - 3) + ":";
-
-		return match_perfect;
-	}
-
 	class Ctor
 	{
 	public:
@@ -180,3 +158,41 @@ private:
 };
 
 static KernelEngine::Ctor g_kernelEngine;
+
+class KernelEngineCreator : public IEngineFactory::IEngineCreator
+{
+public:
+	virtual ~KernelEngineCreator()
+	{
+	}
+
+	virtual IEngine *create(IFileParser &parser)
+	{
+		return new KernelEngine();
+	}
+
+	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
+	{
+		if (filename.find("vmlinux") != std::string::npos)
+			return match_perfect;
+
+		if (filename.find(".ko") == std::string::npos)
+			return match_none;
+
+		// Fix this somehow
+#if 0
+		m_module = filename;
+		size_t slashPos = m_module.rfind("/");
+		if (slashPos == std::string::npos)
+			slashPos = 0;
+		else
+			slashPos++; // Skip the actual slash
+
+		// Remove path before and .ko after the name
+		m_module = m_module.substr(slashPos, m_module.size() - slashPos - 3) + ":";
+#endif
+
+		return match_perfect;
+	}
+};
+static KernelEngineCreator g_kernelEngineCreator;
