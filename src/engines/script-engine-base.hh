@@ -43,11 +43,6 @@ public:
 		return 0;
 	}
 
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		return matchParser(filename, data, dataSize);
-	}
-
 
 	// From IFileParser
 	bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
