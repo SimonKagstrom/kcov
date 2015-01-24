@@ -12,8 +12,9 @@ using namespace kcov;
 class GcovEngine : public IEngine, IFileParser::IFileListener
 {
 public:
-	GcovEngine()
+	GcovEngine(IFileParser &parser)
 	{
+		parser.registerFileListener(*this);
 	}
 
 	int registerBreakpoint(unsigned long addr)
@@ -33,14 +34,6 @@ public:
 
 	bool continueExecution()
 	{
-		return true;
-	}
-
-	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
-	{
-		if (!IConfiguration::getInstance().keyAsInt("gcov"))
-			return match_none;
-
 		size_t sz;
 		void *d = read_file(&sz, "%s", "/home/ska/projects/build/kcov/build-tests/CMakeFiles/main-tests-gcov.dir/subdir2/file2.c.gcno");
 		GcnoParser gcno((uint8_t *)d, sz);
@@ -68,10 +61,11 @@ public:
 			printf("  Arc from %2d to %2d\n", cur.m_srcBlock, cur.m_dstBlock);
 		}
 
-		return match_none;
+		return false;
 	}
 
 private:
+	typedef std::vector<std::string> FileList_t;
 
 	// From IFileParser::IFileListener
 	void onFile(const std::string &file, enum IFileParser::FileFlags flags)
@@ -79,8 +73,13 @@ private:
 		if (!(flags & IFileParser::FLG_TYPE_COVERAGE_DATA))
 			return;
 
-		printf("Woho!\n", file.c_str());
+		if (!file_exists(file))
+			return;
+
+		m_gcdaFiles.push_back(file);
 	}
+
+	FileList_t m_gcdaFiles;
 };
 
 
@@ -93,7 +92,7 @@ public:
 
 	virtual IEngine *create(IFileParser &parser)
 	{
-		return new GcovEngine();
+		return new GcovEngine(parser);
 	}
 
 
