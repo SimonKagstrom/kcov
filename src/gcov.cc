@@ -196,11 +196,6 @@ GcnoParser::GcnoParser(const uint8_t *data, size_t dataSize) :
 {
 }
 
-/* Return a reference to the basic blocks to file/line in the file.
- * Empty if parse() hasn't been called.
- *
- * @return the basic blocks
- */
 const GcnoParser::BasicBlockList_t &GcnoParser::getBasicBlocks()
 {
 	return m_basicBlocks;
@@ -211,12 +206,6 @@ const GcnoParser::FunctionList_t &GcnoParser::getFunctions()
 	return m_functions;
 }
 
-/**
- * Return a reference to the arcs in the file. Empty if parse() hasn't
- * been called.
- *
- * @return the arcs
- */
 const GcnoParser::ArcList_t &GcnoParser::getArcs()
 {
 	return m_arcs;
