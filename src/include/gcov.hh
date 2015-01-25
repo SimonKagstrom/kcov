@@ -84,6 +84,7 @@ namespace kcov
 		};
 
 		typedef std::vector<BasicBlockMapping> BasicBlockList_t;
+		typedef std::vector<int32_t> FunctionList_t;
 		typedef std::vector<Arc> ArcList_t;
 
 
@@ -105,6 +106,14 @@ namespace kcov
 		 */
 		const ArcList_t &getArcs();
 
+		/**
+		 * Return a reference to the function IDs in the file. Empty if parse()
+		 * hasn't been called.
+		 *
+		 * @return the functions
+		 */
+		const FunctionList_t &getFunctions();
+
 	protected:
 		bool onRecord(const struct header *header, const uint8_t *data);
 
@@ -118,6 +127,7 @@ namespace kcov
 		std::string m_file;
 		std::string m_function;
 		int32_t m_functionId;
+		FunctionList_t m_functions;
 		BasicBlockList_t m_basicBlocks;
 		ArcList_t m_arcs;
 	};

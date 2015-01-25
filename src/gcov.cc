@@ -206,6 +206,11 @@ const GcnoParser::BasicBlockList_t &GcnoParser::getBasicBlocks()
 	return m_basicBlocks;
 }
 
+const GcnoParser::FunctionList_t &GcnoParser::getFunctions()
+{
+	return m_functions;
+}
+
 /**
  * Return a reference to the arcs in the file. Empty if parse() hasn't
  * been called.
@@ -249,6 +254,8 @@ void GcnoParser::onAnnounceFunction(const struct header *header, const uint8_t *
 	p8 = readString(p8 + 3 * 4, m_function);
 	p8 = readString(p8, m_file);
 	m_functionId = ident;
+
+	m_functions.push_back(m_functionId);
 
 	// The first line of this function comes next, but let's ignore that
 }
