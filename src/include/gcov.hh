@@ -137,8 +137,23 @@ namespace kcov
 	public:
 		GcdaParser(const uint8_t *data, size_t dataSize);
 
+		/**
+		 * Return the number of counters for a particular function.
+		 *
+		 * @param function the function
+		 *
+		 * @return the number of counters, or 0 for invalid functions
+		 */
 		size_t countersForFunction(int32_t function);
 
+		/**
+		 * Return the counter value for a function.
+		 *
+		 * @param function the function
+		 * @param counter the counter number
+		 *
+		 * @return the counter value, or -1 for invalid function/counters
+		 */
 		int64_t getCounter(int32_t function, int32_t counter);
 
 	protected:
