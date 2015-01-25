@@ -417,15 +417,15 @@ private:
 
 // This ugly stuff should be fixed
 static PythonEngine *g_pythonEngine;
-class Ctor
+class PythonCtor
 {
 public:
-	Ctor()
+	PythonCtor()
 	{
 		g_pythonEngine = new PythonEngine();
 	}
 };
-static Ctor g_pythonCtor;
+static PythonCtor g_pythonCtor;
 
 class PythonEngineCreator : public IEngineFactory::IEngineCreator
 {

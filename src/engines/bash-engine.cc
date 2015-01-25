@@ -384,15 +384,15 @@ private:
 
 // This ugly stuff should be fixed
 static BashEngine *g_bashEngine;
-class Ctor
+class BashCtor
 {
 public:
-	Ctor()
+	BashCtor()
 	{
 		g_bashEngine = new BashEngine();
 	}
 };
-static Ctor g_bashCtor;
+static BashCtor g_bashCtor;
 
 class BashEngineCreator : public IEngineFactory::IEngineCreator
 {
