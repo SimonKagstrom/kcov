@@ -343,8 +343,6 @@ int64_t GcdaParser::getCounter(int32_t function, int32_t counter)
 
 bool GcdaParser::onRecord(const struct header *header, const uint8_t *data)
 {
-	printf("DA: 0x%08x (%d)\n", header->tag, header->length);
-
 	switch (header->tag)
 	{
 	case GCOV_TAG_FUNCTION:
@@ -377,10 +375,8 @@ void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 	// Size properly since we know this
 	CounterList_t counters(count + 1);
 
-	for (int32_t i = 0; i <= count; i++) {
-		printf(" Cntr %d: %lld\n", i, (long long)p64[i]);
+	for (int32_t i = 0; i <= count; i++)
 		counters.push_back(p64[i]);
-	}
 
 	m_functionToCounters[m_functionId] = counters;
 }
