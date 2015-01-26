@@ -231,7 +231,7 @@ out_open:
 					it != m_lineListeners.end();
 					++it)
 				(*it)->onLine(cur.m_file, cur.m_line,
-						gcovGetAddress(filename, cur.m_function, cur.m_basicBlock));
+						gcovGetAddress(cur.m_file, cur.m_function, cur.m_basicBlock));
 		}
 	}
 
