@@ -39,7 +39,7 @@ public:
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
 		// Only useful for ELF binaries
-		if (parser.getParserType() == "ELF") {
+		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov")) {
 			collector.registerEventTickListener(*this);
 			startup();
 		}
