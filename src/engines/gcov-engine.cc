@@ -41,7 +41,6 @@ public:
 		// Run the program until completion
 		m_child = fork();
 		if (m_child == 0) {
-			printf("Exec: %s, %s\n", executable.c_str(), argv[0]);
 			execv(argv[0], argv);
 		} else if (m_child < 0) {
 			perror("fork");
