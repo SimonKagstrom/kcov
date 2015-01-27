@@ -308,7 +308,8 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 		if (!(flags & GCOV_ARC_ON_TREE))
 			m_arcs.push_back(Arc(m_functionId, blockNo, destBlock));
 
-		kcov_debug(ENGINE_MSG, "GCNO arc in function %d, %d->%d (flags %d)\n", m_functionId, blockNo, destBlock, flags);
+		kcov_debug(ENGINE_MSG, "GCNO arc in function %d, %d->%d (flags %d%s)\n",
+				m_functionId, blockNo, destBlock, flags, flags & GCOV_ARC_ON_TREE ? " OT" : "");
 
 		p32 += 2;
 		arc++;
