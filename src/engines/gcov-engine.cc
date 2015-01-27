@@ -130,17 +130,19 @@ private:
 			bbsByNumber[cur.m_basicBlock] = &cur;
 		}
 
-		unsigned int n = 0;
+		std::unordered_map<int32_t, unsigned int> counterByFunction;
 		for (GcnoParser::ArcList_t::const_iterator it = arcs.begin();
 				it != arcs.end();
-				++it, n++) {
+				++it) {
 			const GcnoParser::Arc &cur = *it;
 
-			int64_t counter = gcda.getCounter(cur.m_function, n);
+			int64_t counter = gcda.getCounter(cur.m_function, counterByFunction[cur.m_function]);
+
+			counterByFunction[cur.m_function]++;
 
 			// Not found?
 			if (counter < 0) {
-				warning("Arc %u but no counter\n", n);
+				warning("Arc %u but no counter\n", counterByFunction[cur.m_function]);
 				continue;
 			}
 
