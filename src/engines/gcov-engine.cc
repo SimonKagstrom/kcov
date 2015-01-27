@@ -146,6 +146,10 @@ private:
 				continue;
 			}
 
+			// No hit, so ignore
+			if (counter == 0)
+				continue;
+
 			const GcnoParser::BasicBlockMapping *bb = bbsByNumber[cur.m_dstBlock];
 			if (!bb) {
 				// No mapping to line information
