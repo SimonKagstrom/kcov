@@ -213,6 +213,9 @@ const GcnoParser::ArcList_t &GcnoParser::getArcs()
 
 bool GcnoParser::onRecord(const struct header *header, const uint8_t *data)
 {
+	kcov_debug(ENGINE_MSG, "GCNO record: 0x%08x (%d bytes)\n",
+			header->tag, header->length * 4);
+
 	switch (header->tag)
 	{
 	case GCOV_TAG_FUNCTION:
@@ -246,6 +249,7 @@ void GcnoParser::onAnnounceFunction(const struct header *header, const uint8_t *
 
 	m_functions.push_back(m_functionId);
 
+	kcov_debug(ENGINE_MSG, "GCNO function %d: %s\n", m_functionId, m_file.c_str());
 	// The first line of this function comes next, but let's ignore that
 }
 
@@ -280,6 +284,8 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 
 		p32++;
 
+		kcov_debug(ENGINE_MSG, "GCNO basic block in function %d, nr %d %s:%d\n",
+				m_functionId, blockNo, m_file.c_str(), line);
 		m_basicBlocks.push_back(BasicBlockMapping(m_functionId, blockNo, m_file, line));
 	}
 }
@@ -301,6 +307,8 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 		// Report non-on-tree arcs
 		if (!(flags & GCOV_ARC_ON_TREE))
 			m_arcs.push_back(Arc(m_functionId, blockNo, destBlock));
+
+		kcov_debug(ENGINE_MSG, "GCNO arc in function %d, %d->%d (flags %d)\n", m_functionId, blockNo, destBlock, flags);
 
 		p32 += 2;
 		arc++;
@@ -343,6 +351,9 @@ int64_t GcdaParser::getCounter(int32_t function, int32_t counter)
 
 bool GcdaParser::onRecord(const struct header *header, const uint8_t *data)
 {
+	kcov_debug(ENGINE_MSG, "GCDA record: 0x%08x (%d bytes)\n",
+			header->tag, header->length * 4);
+
 	switch (header->tag)
 	{
 	case GCOV_TAG_FUNCTION:
@@ -365,6 +376,8 @@ void GcdaParser::onAnnounceFunction(const struct header *header, const uint8_t *
 
 	// FIXME! Handle checksums after this
 	m_functionId = ident;
+
+	kcov_debug(ENGINE_MSG, "GCDA function %d\n", ident);
 }
 
 void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
@@ -375,8 +388,11 @@ void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 	// Size properly since we know this
 	CounterList_t counters(count + 1);
 
-	for (int32_t i = 0; i <= count; i++)
+	for (int32_t i = 0; i <= count; i++) {
 		counters.push_back(p64[i]);
+
+		kcov_debug(ENGINE_MSG, "GCDA counter %d %lld\n", i, (long long)counters.back());
+	}
 
 	m_functionToCounters[m_functionId] = counters;
 }
