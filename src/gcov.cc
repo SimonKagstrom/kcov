@@ -385,9 +385,8 @@ void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 	const int64_t *p64 = (const int64_t *)data;
 	int32_t count = header->length / 2; // 64-bit values
 
-	// Size properly since we know this
-	CounterList_t counters(count + 1);
-
+	// Store all counters in a list
+	CounterList_t counters;
 	for (int32_t i = 0; i <= count; i++) {
 		counters.push_back(p64[i]);
 
