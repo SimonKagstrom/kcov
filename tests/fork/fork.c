@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+// Space added
+// ... so that I don't have to change the tests :-)
 static void mibb(void)
 {
 	printf("Mibb\n");
