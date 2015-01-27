@@ -165,9 +165,6 @@ private:
 		if (!(flags & IFileParser::FLG_TYPE_COVERAGE_DATA))
 			return;
 
-		if (!file_exists(file))
-			return;
-
 		m_gcdaFiles.push_back(file);
 	}
 
