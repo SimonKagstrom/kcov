@@ -280,7 +280,7 @@ private:
 			{
 			case start:
 				if (idx != std::string::npos) {
-					kcov_debug(PTRACE_MSG, "python multiline ON  %3d: %s\n", lineNo, s.c_str());
+					kcov_debug(ENGINE_MSG, "python multiline ON  %3d: %s\n", lineNo, s.c_str());
 
 					std::string s2 = s.substr(idx + 3, std::string::npos);
 
@@ -297,7 +297,7 @@ private:
 				break;
 			case multiline_active:
 				if (idx != std::string::npos) {
-					kcov_debug(PTRACE_MSG, "python multiline OFF %3d: %s\n", lineNo, s.c_str());
+					kcov_debug(ENGINE_MSG, "python multiline OFF %3d: %s\n", lineNo, s.c_str());
 					state = start;
 
 					// The last line of a multi-line string will get reported by the
@@ -386,7 +386,7 @@ private:
 
 		bool valid = p->magic == COVERAGE_MAGIC && p->size < totalSize;
 
-		kcov_debug(PTRACE_MSG, "datum: 0x%16llx, size %u, line %u (%svalid)\n",
+		kcov_debug(ENGINE_MSG, "datum: 0x%16llx, size %u, line %u (%svalid)\n",
 				(unsigned long long)p->magic, (unsigned int)p->size,
 				(unsigned int)p->line, valid ? "" : "in");
 

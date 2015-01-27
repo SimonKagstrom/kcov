@@ -328,7 +328,7 @@ public:
 
 		who = waitpid(-1, &status, __WALL);
 		if (who == -1) {
-			kcov_debug(PTRACE_MSG, "Returning error\n");
+			kcov_debug(ENGINE_MSG, "Returning error\n");
 			return out;
 		}
 
@@ -337,7 +337,7 @@ public:
 		m_activeChild = who;
 		out.addr = getPc(m_activeChild);
 
-		kcov_debug(PTRACE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
+		kcov_debug(ENGINE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
 
 		// A signal?
 		if (WIFSTOPPED(status)) {
@@ -360,7 +360,7 @@ public:
 				out.type = ev_breakpoint;
 				out.data = -1;
 
-				kcov_debug(PTRACE_MSG, "PT BP at 0x%llx:%d for %d\n",
+				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
 						(unsigned long long)out.addr, out.data, m_activeChild);
 				// Single-step if we have this BP
 				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
@@ -375,12 +375,12 @@ public:
 
 				return out;
 			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
-				kcov_debug(PTRACE_MSG, "PT clone at 0x%llx for %d\n",
+				kcov_debug(ENGINE_MSG, "PT clone at 0x%llx for %d\n",
 						(unsigned long long)out.addr, m_activeChild);
 				out.data = 0;
 			}
 
-			kcov_debug(PTRACE_MSG, "PT signal %d at 0x%llx for %d\n",
+			kcov_debug(ENGINE_MSG, "PT signal %d at 0x%llx for %d\n",
 					WSTOPSIG(status), (unsigned long long)out.addr, m_activeChild);
 			lastSignalAddress = out.addr;
 		} else if (WIFSIGNALED(status)) {
@@ -391,7 +391,7 @@ public:
 			out.data = sig;
 			out.addr = lastSignalAddress;
 
-			kcov_debug(PTRACE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
+			kcov_debug(ENGINE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
 					sig, (unsigned long long)out.addr, m_activeChild);
 			m_children.erase(who);
 
@@ -401,7 +401,7 @@ public:
 		} else if (WIFEXITED(status)) {
 			int exitStatus = WEXITSTATUS(status);
 
-			kcov_debug(PTRACE_MSG, "PT exit %d at 0x%llx for %d%s\n",
+			kcov_debug(ENGINE_MSG, "PT exit %d at 0x%llx for %d%s\n",
 					exitStatus, (unsigned long long)out.addr, m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
 
 			m_children.erase(who);
@@ -433,10 +433,10 @@ public:
 
 		setupAllBreakpoints();
 
-		kcov_debug(PTRACE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
+		kcov_debug(ENGINE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
 		res = ptrace(PTRACE_CONT, m_activeChild, 0, m_signal);
 		if (res < 0) {
-			kcov_debug(PTRACE_MSG, "PT error for %d: %d\n", m_activeChild, res);
+			kcov_debug(ENGINE_MSG, "PT error for %d: %d\n", m_activeChild, res);
 			m_children.erase(m_activeChild);
 		}
 
@@ -514,7 +514,7 @@ private:
 		// from the parent), but better safe than sorry
 		kcov_tie_process_to_cpu(m_child, m_parentCpu);
 
-		kcov_debug(PTRACE_MSG, "PT forked %d\n", child);
+		kcov_debug(ENGINE_MSG, "PT forked %d\n", child);
 
 		/* Wait for the initial stop */
 		who = waitpid(child, &status, 0);

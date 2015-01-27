@@ -42,7 +42,7 @@ public:
 
 		std::string s = fmt("%s0x%llx\n", m_module.c_str(), (unsigned long long)addr);
 
-		kcov_debug(PTRACE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long)addr);
+		kcov_debug(ENGINE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long)addr);
 		panic_if (!m_control,
 				"Control file not open???");
 
@@ -134,7 +134,7 @@ private:
 
 		uint64_t value = string_to_integer(addr, 16);
 
-		kcov_debug(PTRACE_MSG, "KNRL BP at 0x%llx\n", (unsigned long long)value);
+		kcov_debug(ENGINE_MSG, "KNRL BP at 0x%llx\n", (unsigned long long)value);
 
 		m_listener->onEvent(Event(ev_breakpoint, 0, value));
 	}
