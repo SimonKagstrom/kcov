@@ -151,16 +151,21 @@ private:
 				continue;
 
 			const GcnoParser::BasicBlockMapping *bb = bbsByNumber[cur.m_dstBlock];
-			if (!bb) {
-				// No mapping to line information
-				continue;
-			}
+			if (bb)
+				reportBasicBlockHit(bb, counter);
 
-			uint64_t addr = gcovGetAddress(bb->m_file, bb->m_function, bb->m_basicBlock);
-			Event ev(ev_breakpoint, counter, addr);
-
-			m_listener->onEvent(ev);
+			bb = bbsByNumber[cur.m_srcBlock];
+			if (bb)
+				reportBasicBlockHit(bb, counter);
 		}
+	}
+
+	void reportBasicBlockHit(const GcnoParser::BasicBlockMapping *bb, int64_t counter)
+	{
+		uint64_t addr = gcovGetAddress(bb->m_file, bb->m_function, bb->m_basicBlock);
+		Event ev(ev_breakpoint, counter, addr);
+
+		m_listener->onEvent(ev);
 	}
 
 	// From IFileParser::IFileListener
