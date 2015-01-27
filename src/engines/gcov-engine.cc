@@ -148,7 +148,7 @@ private:
 
 			const GcnoParser::BasicBlockMapping *bb = bbsByNumber[cur.m_dstBlock];
 			if (!bb) {
-				warning("No BB for function %u\n", cur.m_dstBlock);
+				// No mapping to line information
 				continue;
 			}
 
