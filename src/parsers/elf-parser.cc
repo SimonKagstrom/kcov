@@ -485,7 +485,7 @@ out_err:
 				}
 			}
 
-			if (sh_type == SHT_NOTE) {
+			if (sh_type == SHT_NOTE && data->d_buf) {
 				if (m_elfIs32Bit) {
 					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
 
