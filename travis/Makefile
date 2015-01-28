@@ -29,7 +29,6 @@ build_gcc: build_reference
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build install"
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && cmake ../tests"
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
-	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-performance: build_gcc
 	travis/perf-test.sh build/src/kcov >/dev/null
@@ -40,6 +39,7 @@ run-performance: build_gcc
 
 run-tests-gcc: run-performance
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=/tmp/kcov/ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
+	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-tests-clang:
 
