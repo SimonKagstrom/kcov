@@ -167,14 +167,14 @@ const uint8_t *GcovParser::padPointer(const uint8_t *p)
 
 GcnoParser::BasicBlockMapping::BasicBlockMapping(const BasicBlockMapping &other) :
         m_function(other.m_function), m_basicBlock(other.m_basicBlock),
-        m_file(other.m_file), m_line(other.m_line)
+        m_file(other.m_file), m_line(other.m_line), m_index(other.m_index)
 {
 }
 
 GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function, int32_t basicBlock,
-		const std::string &file, int32_t line) :
+		const std::string &file, int32_t line, int32_t index) :
         m_function(function), m_basicBlock(basicBlock),
-        m_file(file), m_line(line)
+        m_file(file), m_line(line), m_index(index)
 {
 }
 
@@ -263,6 +263,7 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 	const int32_t *p32 = (const int32_t *)data;
 	int32_t blockNo = p32[0];
 	const int32_t *last = &p32[header->length];
+	int32_t n = 0; // index
 
 	p32++; // Skip blockNo
 
@@ -286,7 +287,9 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 
 		kcov_debug(ENGINE_MSG, "GCNO basic block in function %d, nr %d %s:%d\n",
 				m_functionId, blockNo, m_file.c_str(), line);
-		m_basicBlocks.push_back(BasicBlockMapping(m_functionId, blockNo, m_file, line));
+		m_basicBlocks.push_back(BasicBlockMapping(m_functionId, blockNo, m_file, line, n));
+
+		n++;
 	}
 }
 

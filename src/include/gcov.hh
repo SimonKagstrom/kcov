@@ -63,11 +63,12 @@ namespace kcov
 			int32_t m_basicBlock;
 			std::string m_file;
 			int32_t m_line;
+			int32_t m_index;
 
 			BasicBlockMapping(const BasicBlockMapping &other);
 
 			BasicBlockMapping(int32_t function, int32_t basicBlock,
-					const std::string &file, int32_t line);
+					const std::string &file, int32_t line, int32_t index);
 		};
 
 		// Holder-class for arcs between blocks
