@@ -175,6 +175,7 @@ main-test
     Should Contain    ${output}    0
 
 main-test-gcov
+    [Tags]	not_ready
     Run                            rm -rf ${out}/main-tests-gcov
     ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
     ${rc}=    Run and return RC    ${kcov} --gcov ${out} ./main-tests-gcov
@@ -193,7 +194,7 @@ main-test-gcov
     Should Contain    ${output}    0
 
 gcov-tests-tricky
-	[Tags]	not_ready
+    [Tags]	not_ready
     Run                            rm -rf ${out}/main-tests-gcov
     ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
     ${rc}=    Run and return RC    ${kcov} --gcov ${out} ./main-tests-gcov
