@@ -639,8 +639,3 @@ merge-changed-file
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 10
     Should Contain    ${output}    0
-
-report-to-coveralls
-	[Tags]	not_ready
-	Run								rm -rf ${out}
-    ${rc}=    Run and return RC    ${kcov} --coveralls-id=%{TRAVIS_JOB_ID} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov}
