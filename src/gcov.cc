@@ -386,13 +386,15 @@ void GcdaParser::onAnnounceFunction(const struct header *header, const uint8_t *
 
 void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 {
-	const int64_t *p64 = (const int64_t *)data;
-	int32_t count = header->length / 2; // 64-bit values
+	const int32_t *p32 = (const int32_t *)data;
+	int32_t count = header->length; // 32-bit data with 64-bit values
 
 	// Store all counters in a list
 	CounterList_t counters;
-	for (int32_t i = 0; i < count; i++) {
-		counters.push_back(p64[i]);
+	for (int32_t i = 0; i < count; i += 2) {
+		uint64_t v64 = (uint64_t)p32[i] | ((uint64_t)p32[i + 1] << 32ULL);
+
+		counters.push_back(v64);
 
 		kcov_debug(ENGINE_MSG, "GCDA counter %d %lld\n", i, (long long)counters.back());
 	}
