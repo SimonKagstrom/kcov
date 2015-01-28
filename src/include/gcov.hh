@@ -22,9 +22,10 @@ namespace kcov
 		uint16_t fn16 = ((uint32_t)function) & 0xffff;
 		uint16_t bb16 = ((uint32_t)basicBlock) & 0xffff;
 		uint64_t fnAndBb = (fn16 << 16) | bb16;
-		uint64_t fileNameHash = (((uint64_t)std::hash<std::string>()(filename)) & 0xffffffffULL);
+		uint64_t fileNameHash = (((uint64_t)std::hash<std::string>()(filename)) & 0xffffff00ULL);
+		uint64_t lineIndexMask = lineIndex & 0xffULL;
 
-		return (fileNameHash << 32ULL) | fnAndBb;
+		return (fileNameHash << 32ULL) | (lineIndexMask << 32ULL) | fnAndBb;
 	}
 
 	class GcovParser
