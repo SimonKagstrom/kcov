@@ -8,8 +8,16 @@ struct header;
 
 namespace kcov
 {
+	/**
+	 * Combine basic block/file info into an "address"
+	 *
+	 * @param filename the source filename
+	 * @param function the function to map for
+	 * @param basicBlock the basic block number
+	 * @param lineIndex the index number in the basic block map
+	 */
 	static inline uint64_t gcovGetAddress(const std::string &filename, int32_t function,
-			int32_t basicBlock)
+			int32_t basicBlock, int32_t lineIndex)
 	{
 		uint16_t fn16 = ((uint32_t)function) & 0xffff;
 		uint16_t bb16 = ((uint32_t)basicBlock) & 0xffff;

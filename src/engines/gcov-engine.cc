@@ -117,7 +117,7 @@ private:
 		gcno.parse();
 		gcda.parse();
 
-		std::unordered_map<int32_t, const GcnoParser::BasicBlockMapping *> bbsByNumber;
+		std::unordered_map<int32_t, GcnoParser::BasicBlockList_t> bbsByNumber;
 
 		const GcnoParser::BasicBlockList_t &bbs = gcno.getBasicBlocks();
 		const GcnoParser::ArcList_t &arcs = gcno.getArcs();
@@ -127,7 +127,7 @@ private:
 				++it) {
 			const GcnoParser::BasicBlockMapping &cur = *it;
 
-			bbsByNumber[cur.m_basicBlock] = &cur;
+			bbsByNumber[cur.m_basicBlock].push_back(cur);
 		}
 
 		std::unordered_map<int32_t, unsigned int> counterByFunction;
@@ -150,22 +150,23 @@ private:
 			if (counter == 0)
 				continue;
 
-			const GcnoParser::BasicBlockMapping *bb = bbsByNumber[cur.m_dstBlock];
-			if (bb)
-				reportBasicBlockHit(bb, counter);
-
-			bb = bbsByNumber[cur.m_srcBlock];
-			if (bb)
-				reportBasicBlockHit(bb, counter);
+			reportBasicBlockHit(bbsByNumber[cur.m_dstBlock], counter);
+			reportBasicBlockHit(bbsByNumber[cur.m_srcBlock], counter);
 		}
 	}
 
-	void reportBasicBlockHit(const GcnoParser::BasicBlockMapping *bb, int64_t counter)
+	void reportBasicBlockHit(const GcnoParser::BasicBlockList_t &bbs, int64_t counter)
 	{
-		uint64_t addr = gcovGetAddress(bb->m_file, bb->m_function, bb->m_basicBlock);
-		Event ev(ev_breakpoint, counter, addr);
+		for (GcnoParser::BasicBlockList_t::const_iterator it = bbs.begin();
+				it != bbs.end();
+				++it) {
+			const GcnoParser::BasicBlockMapping &bb = *it;
 
-		m_listener->onEvent(ev);
+			uint64_t addr = gcovGetAddress(bb.m_file, bb.m_function, bb.m_basicBlock, bb.m_index);
+			Event ev(ev_breakpoint, counter, addr);
+
+			m_listener->onEvent(ev);
+		}
 	}
 
 	// From IFileParser::IFileListener
