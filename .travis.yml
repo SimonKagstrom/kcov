@@ -23,7 +23,7 @@ addons:
       description: "code coverage"
     notification_email: simon.kagstrom@gmail.com
     build_command_prepend: "mkdir -p coverity-build && cd coverity-build && cmake .. && cd .."
-    build_command:   "make -C coverity-build || true"
+    build_command:   "make -C coverity-build"
     branch_pattern: master
 
 script: make -f travis/Makefile run-tests
