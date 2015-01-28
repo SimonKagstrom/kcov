@@ -174,6 +174,32 @@ main-test
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 7
     Should Contain    ${output}    0
 
+main-test-gcov
+    Run                            rm -rf ${out}/main-tests-gcov
+    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
+    ${rc}=    Run and return RC    ${kcov} --gcov ${out} ./main-tests-gcov
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 14
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 18
+    Should Be True    ${output} >= 1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 25
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file2_c 7
+    Should Contain    ${output}    0
+
+gcov-tests-tricky
+	[Tags]	not_ready
+    Run                            rm -rf ${out}/main-tests-gcov
+    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
+    ${rc}=    Run and return RC    ${kcov} --gcov ${out} ./main-tests-gcov
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 20
+    Should Contain    ${output}    nocode
+
 accumulate-data
     Run                            rm -rf ${out}/argv_dependent/
     ${rc}=    Run and return RC    ${kcov} ${out} ./argv_dependent
