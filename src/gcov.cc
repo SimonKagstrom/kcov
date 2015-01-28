@@ -391,7 +391,7 @@ void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 
 	// Store all counters in a list
 	CounterList_t counters;
-	for (int32_t i = 0; i <= count; i++) {
+	for (int32_t i = 0; i < count; i++) {
 		counters.push_back(p64[i]);
 
 		kcov_debug(ENGINE_MSG, "GCDA counter %d %lld\n", i, (long long)counters.back());
