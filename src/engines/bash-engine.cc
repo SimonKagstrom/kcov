@@ -162,7 +162,7 @@ public:
 			for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 					it != m_fileListeners.end();
 					++it)
-				(*it)->onFile(filename, IFileParser::FLG_NONE);
+				(*it)->onFile(File(filename, IFileParser::FLG_NONE));
 
 			parseFile(filename);
 		}

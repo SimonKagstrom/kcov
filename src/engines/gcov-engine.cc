@@ -170,12 +170,12 @@ private:
 	}
 
 	// From IFileParser::IFileListener
-	void onFile(const std::string &file, enum IFileParser::FileFlags flags)
+	void onFile(const IFileParser::File &file)
 	{
-		if (!(flags & IFileParser::FLG_TYPE_COVERAGE_DATA))
+		if (!(file.m_flags & IFileParser::FLG_TYPE_COVERAGE_DATA))
 			return;
 
-		m_gcdaFiles.push_back(file);
+		m_gcdaFiles.push_back(file.m_filename);
 	}
 
 	FileList_t m_gcdaFiles;

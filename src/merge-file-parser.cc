@@ -210,7 +210,7 @@ public:
 	}
 
 	// From IFileParser::IFileListener
-	void onFile(const std::string &file, enum FileFlags flags)
+	void onFile(const IFileParser::File &file)
 	{
 	}
 

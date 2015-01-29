@@ -180,7 +180,7 @@ out_open:
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB);
+			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
@@ -481,7 +481,7 @@ out_err:
 					for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 							it != m_fileListeners.end();
 							++it)
-						(*it)->onFile(file, IFileParser::FLG_TYPE_COVERAGE_DATA);
+						(*it)->onFile(File(file, IFileParser::FLG_TYPE_COVERAGE_DATA));
 				}
 			}
 

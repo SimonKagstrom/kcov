@@ -30,6 +30,21 @@ namespace kcov
 			HITS_UNLIMITED,  //< Accumulated (Python/bash)
 		};
 
+		/**
+		 * Holder class for files (e.g., ELF binaries)
+		 */
+		class File
+		{
+		public:
+			File(const std::string &filename, const enum FileFlags flags = FLG_NONE) :
+				m_filename(filename), m_flags(flags)
+			{
+			}
+
+			const std::string m_filename;
+			const enum FileFlags m_flags;
+		};
+
 		virtual ~IFileParser() {}
 
 		/**
@@ -50,7 +65,7 @@ namespace kcov
 		class IFileListener
 		{
 		public:
-			virtual void onFile(const std::string &file, enum FileFlags flags) = 0;
+			virtual void onFile(const File &file) = 0;
 		};
 
 		/**
