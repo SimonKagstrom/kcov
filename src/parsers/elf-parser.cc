@@ -114,7 +114,7 @@ public:
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
+			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB, m_curSegments));
 
 
 		return checkFile();

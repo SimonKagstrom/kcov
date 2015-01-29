@@ -59,8 +59,14 @@ namespace kcov
 			{
 			}
 
+			File(const std::string &filename, const enum FileFlags flags, const SegmentList_t &segments) :
+				m_filename(filename), m_flags(flags), m_segments(segments)
+			{
+			}
+
 			const std::string m_filename;
 			const enum FileFlags m_flags;
+			const SegmentList_t m_segments;
 		};
 
 		virtual ~IFileParser() {}
