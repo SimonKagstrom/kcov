@@ -96,6 +96,20 @@ shared-library-filter-out
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
     Should Contain    ${output}    nocode
 
+shared-library-accumulate
+	[Tags]	not_ready
+    Run                            rm -rf ${out}/shared_library_test
+    ${rc}=    Run and return RC    ${kcov} ${out} ./shared_library_test 5
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml main_c 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 10
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} ${out} ./shared_library_test
+    ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 10
+    Should Contain    ${output}    1
+
 dlopen
 	[Tags]	not_ready
     Run                            rm -rf ${out}/dlopen
