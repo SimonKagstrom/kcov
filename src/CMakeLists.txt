@@ -13,7 +13,6 @@ pkg_check_modules(LIBCURL REQUIRED libcurl)
 # ====================================
 project (kcov)
 set (KCOV kcov)
-set (LINE2ADDR line2addr)
 #set (CMAKE_EXE_LINKER_FLAGS "-static")
 
 set (SOLIB kcov_sowrapper)
@@ -49,17 +48,6 @@ set (${KCOV}_SRCS
     writers/html-writer.cc
     writers/writer-base.cc
     )
-
-set (${LINE2ADDR}_SRCS
-    capabilities.cc
-	configuration.cc
-	filter.cc
-	gcov.cc
-	line2addr.cc
-	parsers/elf-parser.cc
-	parser-manager.cc
-	utils.cc
-	)
 
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
@@ -141,7 +129,6 @@ if(SPECIFY_RPATH)
 endif(SPECIFY_RPATH)
 
 add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc bash-helper.cc html-data-files.cc)
-add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 
 target_link_libraries(${KCOV}
 	${LIBDW_LIBRARIES}
@@ -153,15 +140,6 @@ target_link_libraries(${KCOV}
 	m
 	${LIBZ_LIBRARIES})
 
-
-target_link_libraries(${LINE2ADDR}
-	${LIBDW_LIBRARIES}
-	${LIBELF_LIBRARIES}
-	stdc++
-	dl
-	pthread
-	m
-	${LIBZ_LIBRARIES})
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
 
