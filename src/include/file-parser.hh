@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <vector>
 
 struct phdr_data_entry;
 
@@ -29,6 +30,23 @@ namespace kcov
 			HITS_LIMITED,    //< E.g., multiple branches
 			HITS_UNLIMITED,  //< Accumulated (Python/bash)
 		};
+
+		/**
+		 * Holder class for address segments
+		 */
+		class Segment
+		{
+		public:
+			Segment(uint64_t paddr, uint64_t vaddr, uint64_t size) :
+				m_paddr(paddr), m_vaddr(vaddr), m_size(size)
+			{
+			}
+
+			const uint64_t m_paddr;
+			const uint64_t m_vaddr;
+			const size_t m_size;
+		};
+		typedef std::vector<Segment> SegmentList_t;
 
 		/**
 		 * Holder class for files (e.g., ELF binaries)

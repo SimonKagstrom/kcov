@@ -567,20 +567,6 @@ out_open:
 	}
 
 private:
-	class Segment
-	{
-	public:
-		Segment(uint64_t paddr, uint64_t vaddr, uint64_t size) :
-			m_paddr(paddr), m_vaddr(vaddr), m_size(size)
-		{
-		}
-
-		uint64_t m_paddr;
-		uint64_t m_vaddr;
-		size_t m_size;
-	};
-
-	typedef std::vector<Segment> SegmentList_t;
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::vector<std::string> FileList_t;
