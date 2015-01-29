@@ -14,19 +14,23 @@ build_reference:
 	cp reference/build/src/kcov /tmp/kcov-reference
 
 build:
-	mkdir -p build build-tests
+	mkdir -p build build-tests build-tools
 	cd build && cmake ..
 	make -C build
+	cd build-tools && cmake ../tools
+	make -C build-tools
 	sudo make -C build install
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
 build_gcc: build_reference
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
-	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
+	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build"
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build install"
+	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tools && cmake ../tools"
+	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tools"
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && cmake ../tests"
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
