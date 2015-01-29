@@ -111,6 +111,12 @@ public:
 			m_curSegments.push_back(Segment(seg->paddr, seg->vaddr, seg->size));
 		}
 
+		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
+				it != m_fileListeners.end();
+				++it)
+			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
+
+
 		return checkFile();
 	}
 
@@ -176,11 +182,6 @@ out_open:
 			parseGcnoFiles();
 		else
 			parseOneDwarf();
-
-		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
-				it != m_fileListeners.end();
-				++it)
-			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
 
 		// After the first, all other are solibs
 		m_isMainFile = false;
