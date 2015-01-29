@@ -35,9 +35,9 @@ static void do_cleanup()
 {
 	delete g_collector;
 	delete g_output;
+	delete g_reporter;
 	delete g_solibHandler; // Before the engine since a SIGTERM is sent to the thread
 	delete g_engine;
-	delete g_reporter;
 	delete g_filter;
 	delete g_dummyFilter;
 }

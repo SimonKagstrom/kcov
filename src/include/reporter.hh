@@ -109,26 +109,6 @@ namespace kcov
 		 */
 		virtual ExecutionSummary getExecutionSummary() = 0;
 
-		/**
-		 * Marshal collected data to a data chunk.
-		 *
-		 * @param szOut the size of the data (return parameter)
-		 *
-		 * @return the data, or NULL if something failed
-		 */
-		virtual void *marshal(size_t *szOut) = 0;
-
-		/**
-		 * Unmarshal marshalled data in-place.
-		 *
-		 * @param data the data to unmarshal
-		 * @param sz the size of the data
-		 *
-		 * @return true if the data could be unmarshalled, false otherwise
-		 */
-		virtual bool unMarshal(void *data, size_t sz) = 0;
-
-
 
 		static IReporter &create(IFileParser &elf, ICollector &collector, IFilter &filter);
 	};

@@ -22,16 +22,12 @@ namespace kcov
 			public ICollector::IEventTickListener
 	{
 	public:
-		OutputHandler(IFileParser &parser, IReporter &reporter, ICollector &collector) :
-			m_reporter(reporter),
-			m_unmarshalSize(0),
-			m_unmarshalData(NULL)
+		OutputHandler(IFileParser &parser, IReporter &reporter, ICollector &collector)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
 			m_baseDirectory = conf.keyAsString("out-directory");
 			m_outDirectory = conf.keyAsString("target-directory") + "/";
-			m_dbFileName = m_outDirectory + "/coverage.db";
 			m_summaryDbFileName = m_outDirectory + "/summary.db";
 			m_outputInterval = conf.keyAsInt("output-interval");
 
@@ -47,7 +43,6 @@ namespace kcov
 		~OutputHandler()
 		{
 			stop();
-			free(m_unmarshalData);
 
 			// Delete all writers
 			for (WriterList_t::iterator it = m_writers.begin();
@@ -78,18 +73,6 @@ namespace kcov
 		// From IElf::IFileListener
 		void onFile(const IFileParser::File &file)
 		{
-			// Only unmarshal the main file
-			if (file.m_flags & IFileParser::FLG_TYPE_SOLIB)
-				return;
-
-			if (!m_unmarshalData) {
-				m_unmarshalData = read_file(&m_unmarshalSize, "%s", m_dbFileName.c_str());
-
-				if (m_unmarshalData) {
-					if (!m_reporter.unMarshal(m_unmarshalData, m_unmarshalSize))
-						kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
-				}
-			}
 		}
 
 		void start()
@@ -102,14 +85,6 @@ namespace kcov
 
 		void stop()
 		{
-			size_t sz;
-			void *data = m_reporter.marshal(&sz);
-
-			if (data)
-				write_file(data, sz, "%s", m_dbFileName.c_str());
-
-			free(data);
-
 			for (WriterList_t::const_iterator it = m_writers.begin();
 					it != m_writers.end();
 					++it)
@@ -145,17 +120,11 @@ namespace kcov
 	private:
 		typedef std::vector<IWriter *> WriterList_t;
 
-		IReporter &m_reporter;
-
 		std::string m_outDirectory;
 		std::string m_baseDirectory;
-		std::string m_dbFileName;
 		std::string m_summaryDbFileName;
 
 		WriterList_t m_writers;
-
-		size_t m_unmarshalSize;
-		void *m_unmarshalData;
 
 		unsigned int m_outputInterval;
 		uint64_t m_lastTimestamp;

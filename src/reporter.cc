@@ -3,6 +3,7 @@
 #include <collector.hh>
 #include <utils.hh>
 #include <filter.hh>
+#include <configuration.hh>
 
 #include <string>
 #include <list>
@@ -25,17 +26,21 @@ struct marshalHeaderStruct
 class Reporter :
 		public IReporter,
 		public IFileParser::ILineListener,
+		public IFileParser::IFileListener,
 		public ICollector::IListener,
 		public IReporter::IListener
 {
 public:
 	Reporter(IFileParser &fileParser, ICollector &collector, IFilter &filter) :
-		m_fileParser(fileParser), m_collector(collector), m_filter(filter)
+		m_fileParser(fileParser), m_collector(collector), m_filter(filter),
+		m_maxPossibleHits(fileParser.maxPossibleHits()),
+		m_unmarshallingDone(false)
 	{
 		m_fileParser.registerLineListener(*this);
+		m_fileParser.registerFileListener(*this);
 		m_collector.registerListener(*this);
 
-		m_maxPossibleHits = fileParser.maxPossibleHits();
+		m_dbFileName = IConfiguration::getInstance().keyAsString("target-directory") + "/coverage.db";
 	}
 
 	~Reporter()
@@ -183,6 +188,13 @@ public:
 
 	virtual void stop()
 	{
+		size_t sz;
+		void *data = marshal(&sz);
+
+		if (data)
+			write_file(data, sz, "%s", m_dbFileName.c_str());
+
+		free(data);
 	}
 
 
@@ -261,6 +273,25 @@ private:
 			reportAddress(addr, pend->second);
 
 			m_pendingHits.erase(addr);
+		}
+	}
+
+	// Called when a file is added (e.g., a shared library)
+	void onFile(const IFileParser::File &file)
+	{
+		// Only unmarshal once
+		if (!m_unmarshallingDone) {
+			void *data;
+			size_t sz;
+
+			data = read_file(&sz, "%s", m_dbFileName.c_str());
+
+			if (data && !unMarshal(data, sz))
+				kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
+
+			m_unmarshallingDone = true;
+
+			free(data);
 		}
 	}
 
@@ -498,6 +529,9 @@ private:
 	ICollector &m_collector;
 	IFilter &m_filter;
 	enum IFileParser::PossibleHits m_maxPossibleHits;
+
+	bool m_unmarshallingDone;
+	std::string m_dbFileName;
 };
 
 IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)
