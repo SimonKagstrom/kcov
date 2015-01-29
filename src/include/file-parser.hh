@@ -42,6 +42,35 @@ namespace kcov
 			{
 			}
 
+			/**
+			 * Check if an address is contained within this segment
+			 *
+			 * @param addr the address to check
+			 *
+			 * @return true if valid
+			 */
+			bool addressIsWithinSegment(uint64_t addr) const
+			{
+				return addr >= m_paddr && addr < m_paddr + m_size;
+			}
+
+			/**
+			 * Adjust an address with the segment.
+			 *
+			 * @param addr the address to adjust
+			 *
+			 * @return the new address
+			 */
+			uint64_t adjustAddress(uint64_t addr) const
+			{
+				if (addressIsWithinSegment(addr))
+					return addr - m_paddr + m_vaddr;
+
+				return addr;
+			}
+
+
+		private:
 			const uint64_t m_paddr;
 			const uint64_t m_vaddr;
 			const size_t m_size;

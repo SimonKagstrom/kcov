@@ -576,9 +576,8 @@ private:
 		for (SegmentList_t::const_iterator it = m_executableSegments.begin();
 				it != m_executableSegments.end();
 				++it) {
-			if (addr >= it->m_paddr && addr < it->m_paddr + it->m_size) {
+			if (it->addressIsWithinSegment(addr))
 				return true;
-			}
 		}
 
 		return false;
@@ -589,8 +588,8 @@ private:
 		for (SegmentList_t::const_iterator it = m_curSegments.begin();
 				it != m_curSegments.end();
 				++it) {
-			if (addr >= it->m_paddr && addr < it->m_paddr + it->m_size) {
-				addr = (addr - it->m_paddr + it->m_vaddr);
+			if (it->addressIsWithinSegment(addr)) {
+				addr = it->adjustAddress(addr);
 				break;
 			}
 		}
