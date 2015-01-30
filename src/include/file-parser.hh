@@ -42,6 +42,11 @@ namespace kcov
 			{
 			}
 
+			Segment(const Segment &other) :
+				m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
+			{
+			}
+
 			/**
 			 * Check if an address is contained within this segment
 			 *
@@ -80,9 +85,10 @@ namespace kcov
 			}
 
 		private:
-			const uint64_t m_paddr;
-			const uint64_t m_vaddr;
-			const size_t m_size;
+			// Should really be const, but GCC 4.6 doesn't like that
+			uint64_t m_paddr;
+			uint64_t m_vaddr;
+			size_t m_size;
 		};
 		typedef std::vector<Segment> SegmentList_t;
 
