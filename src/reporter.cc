@@ -16,7 +16,7 @@
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 3
+#define KCOV_DB_VERSION 4
 
 struct marshalHeaderStruct
 {
@@ -158,12 +158,24 @@ public:
 			uint64_t fileHash;
 			uint64_t addr;
 			uint64_t hits;
+			uint64_t rangeIndex;
 
-			p = Line::unMarshal(p, &addr, &hits, &fileHash);
+			p = Line::unMarshal(p, &addr, &hits, &fileHash, &rangeIndex);
 			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
 			if (!hits)
 				continue;
+
+			/*
+			 * Can't find this file.
+			 *
+			 * Typically because it's in a shared library, which hasn't been
+			 * loaded yet.
+			 */
+			if (fileHash != 0 && m_presentFiles.find(fileHash) == m_presentFiles.end()) {
+				m_pendingFiles[fileHash].push_back(PendingFileAddress(addr, rangeIndex, hits));
+				continue;
+			}
 
 			/* Can't find this address.
 			 *
@@ -204,7 +216,7 @@ public:
 private:
 	size_t getMarshalEntrySize()
 	{
-		return 3 * sizeof(uint64_t);
+		return 4 * sizeof(uint64_t);
 	}
 
 	size_t getMarshalSize()
@@ -306,6 +318,31 @@ private:
 
 			free(data);
 		}
+
+		// Report pending addresses for this file
+		PendingFilesMap_t::const_iterator it = m_pendingFiles.find(fileHash);
+		if (it != m_pendingFiles.end()) {
+			const AddressRangeList_t &ranges = m_presentFiles[fileHash];
+
+			for (PendingHitsList_t::const_iterator fit = it->second.begin();
+					fit != it->second.end();
+					++fit) {
+				const PendingFileAddress &val = *fit;
+				uint64_t addr = val.m_addr;
+				unsigned long hits = val.m_hits;
+				uint64_t index = val.m_index;
+
+				if (index < ranges.size()) {
+					const AddressRange &range = ranges[index];
+
+					addr = addr + range.getAddress();
+				}
+
+				m_pendingHits[addr]= hits;
+			}
+
+			m_pendingFiles[fileHash].clear();
+		}
 	}
 
 	/* Called during runtime */
@@ -336,6 +373,50 @@ private:
 	// From IReporter::IListener - report recursively
 	void onAddress(uint64_t addr, unsigned long hits)
 	{
+	}
+
+	// Remove the base for an address (solibs)
+	uint64_t addressToOffset(uint64_t addr) const
+	{
+		// Nothing to lookup
+		if (m_addressRanges.empty())
+			return 0;
+
+		AddressRangeMap_t::const_iterator it = m_addressRanges.lower_bound(addr);
+
+		it--;
+		if (it == m_addressRanges.end())
+			return addr;
+
+		// Out of bounds?
+		if (addr > it->first.getAddress() + it->first.getSize())
+			return addr;
+
+		return addr - it->first.getAddress();
+	}
+
+	int getAddressRangeIndex(uint64_t hash, uint64_t addr) const
+	{
+		const PresentFilesMap_t::const_iterator rit = m_presentFiles.find(hash);
+
+		if (rit == m_presentFiles.end())
+			return 0;
+
+		const AddressRangeList_t &ranges = rit->second;
+
+		int i = 0;
+		for (AddressRangeList_t::const_iterator it = ranges.begin();
+				it != ranges.end();
+				++it, i++) {
+			if (addr >= it->getAddress() && addr < it->getAddress() + it->getSize())
+				break;
+		}
+
+		// Not found?
+		if (i == (int)ranges.size())
+			return 0;
+
+		return i;
 	}
 
 	// Lookup the address within a range
@@ -412,9 +493,21 @@ private:
 			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
 					it != m_addrs.end();
 					++it) {
-				// Address, hash and number of hits
-				*data++ = to_be<uint64_t>(it->first);
-				*data++ = to_be<uint64_t>(parent.getFileHashForAddress(it->first));
+				uint64_t hash = parent.getFileHashForAddress(it->first);
+				uint64_t addr = it->first;
+				uint64_t index = 0;
+
+				// For solibs, we want only the offset
+				if (hash != 0) {
+					// Before addressToOffset since addr is changed
+					index = parent.getAddressRangeIndex(hash, addr);
+					addr = parent.addressToOffset(addr);
+				}
+
+				// Address, hash, index and number of hits
+				*data++ = to_be<uint64_t>(addr);
+				*data++ = to_be<uint64_t>(hash);
+				*data++ = to_be<uint64_t>(index);
 				*data++ = to_be<uint64_t>(it->second);
 			}
 
@@ -424,16 +517,18 @@ private:
 		size_t marshalSize() const
 		{
 			// Address, file hash and number of hits (64-bit values)
-			return m_addrs.size() * sizeof(uint64_t) * 3;
+			return m_addrs.size() * sizeof(uint64_t) * 4;
 		}
 
 		static uint8_t *unMarshal(uint8_t *p,
-				uint64_t *outAddr, uint64_t *outHits, uint64_t *outFileHash)
+				uint64_t *outAddr, uint64_t *outHits, uint64_t *outFileHash,
+				uint64_t *outIndex)
 		{
 			uint64_t *data = (uint64_t *)p;
 
 			*outAddr = be_to_host<uint64_t>(*data++);
 			*outFileHash = be_to_host<uint64_t>(*data++);
+			*outIndex = be_to_host<uint64_t>(*data++);
 			*outHits = be_to_host<uint64_t>(*data++);
 
 			return (uint8_t *)data;
@@ -573,9 +668,32 @@ private:
 			return m_addr == other.m_addr && m_size == other.m_size;
 		}
 
+		uint64_t getAddress() const
+		{
+			return m_addr;
+		}
+
+		size_t getSize() const
+		{
+			return m_size;
+		}
+
 	private:
 		uint64_t m_addr;
 		size_t m_size;
+	};
+
+	class PendingFileAddress
+	{
+	public:
+		PendingFileAddress(uint64_t addr, uint64_t index, unsigned long hits) :
+			m_addr(addr), m_index(index), m_hits(hits)
+		{
+		}
+
+		uint64_t m_addr;
+		uint64_t m_index;
+		unsigned long m_hits;
 	};
 
 	typedef std::unordered_map<std::string, File> FileMap_t;
@@ -585,6 +703,8 @@ private:
 	typedef std::map<AddressRange, uint64_t> AddressRangeMap_t;
 	typedef std::vector<AddressRange> AddressRangeList_t;
 	typedef std::unordered_map<uint64_t, AddressRangeList_t> PresentFilesMap_t;
+	typedef std::vector<PendingFileAddress> PendingHitsList_t; // Address, hits
+	typedef std::unordered_map<uint64_t, PendingHitsList_t> PendingFilesMap_t;
 
 	FileMap_t m_files;
 	AddrToLineMap_t m_addrToLine;
@@ -592,6 +712,7 @@ private:
 	ListenerList_t m_listeners;
 	AddressRangeMap_t m_addressRanges;
 	PresentFilesMap_t m_presentFiles;
+	PendingFilesMap_t m_pendingFiles;
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
