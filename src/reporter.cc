@@ -341,6 +341,10 @@ private:
 	// Lookup the address within a range
 	uint64_t getFileHashForAddress(uint64_t addr) const
 	{
+		// Nothing to lookup
+		if (m_addressRanges.empty())
+			return 0;
+
 		AddressRangeMap_t::const_iterator it = m_addressRanges.lower_bound(addr);
 
 		it--;
