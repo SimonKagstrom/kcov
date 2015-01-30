@@ -8,13 +8,15 @@
 #include <string>
 #include <list>
 #include <unordered_map>
+#include <functional>
+#include <map>
 
 #include "swap-endian.hh"
 
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 2
+#define KCOV_DB_VERSION 3
 
 struct marshalHeaderStruct
 {
@@ -131,7 +133,7 @@ public:
 				++it) {
 			const File &cur = it->second;
 
-			p = cur.marshal(p);
+			p = cur.marshal(p, *this);
 		}
 
 		*szOut = sz;
@@ -153,10 +155,11 @@ public:
 		n = (sz - (p - start)) / getMarshalEntrySize();
 
 		for (size_t i = 0; i < n; i++) {
+			uint64_t fileHash;
 			uint64_t addr;
 			uint64_t hits;
 
-			p = Line::unMarshal(p, &addr, &hits);
+			p = Line::unMarshal(p, &addr, &hits, &fileHash);
 			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
 			if (!hits)
@@ -201,7 +204,7 @@ public:
 private:
 	size_t getMarshalEntrySize()
 	{
-		return 2 * sizeof(uint64_t);
+		return 3 * sizeof(uint64_t);
 	}
 
 	size_t getMarshalSize()
@@ -279,6 +282,16 @@ private:
 	// Called when a file is added (e.g., a shared library)
 	void onFile(const IFileParser::File &file)
 	{
+		uint64_t fileHash = std::hash<std::string>()(file.m_filename);
+
+		// Add segments to the range list and mark file as present
+		for (IFileParser::SegmentList_t::const_iterator it = file.m_segments.begin();
+				it != file.m_segments.end();
+				++it) {
+			m_addressRanges[AddressRange(it->getBase(), it->getSize())] = fileHash;
+			m_presentFiles[fileHash].push_back(AddressRange(it->getBase(), it->getSize()));
+		}
+
 		// Only unmarshal once
 		if (!m_unmarshallingDone) {
 			void *data;
@@ -323,6 +336,18 @@ private:
 	// From IReporter::IListener - report recursively
 	void onAddress(uint64_t addr, unsigned long hits)
 	{
+	}
+
+	// Lookup the address within a range
+	uint64_t getFileHashForAddress(uint64_t addr) const
+	{
+		AddressRangeMap_t::const_iterator it = m_addressRanges.lower_bound(addr);
+
+		it--;
+		if (it == m_addressRanges.end())
+			return 0;
+
+		return it->second;
 	}
 
 	class Line
@@ -376,15 +401,16 @@ private:
 			return 0; // Meaning any number of hits are possible
 		}
 
-		uint8_t *marshal(uint8_t *start)
+		uint8_t *marshal(uint8_t *start, const Reporter &parent)
 		{
 			uint64_t *data = (uint64_t *)start;
 
 			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
 					it != m_addrs.end();
 					++it) {
-				// Address and number of hits
+				// Address, hash and number of hits
 				*data++ = to_be<uint64_t>(it->first);
+				*data++ = to_be<uint64_t>(parent.getFileHashForAddress(it->first));
 				*data++ = to_be<uint64_t>(it->second);
 			}
 
@@ -393,16 +419,17 @@ private:
 
 		size_t marshalSize() const
 		{
-			// Address and number of hits (both 64-bit values)
-			return m_addrs.size() * sizeof(uint64_t) * 2;
+			// Address, file hash and number of hits (64-bit values)
+			return m_addrs.size() * sizeof(uint64_t) * 3;
 		}
 
 		static uint8_t *unMarshal(uint8_t *p,
-				uint64_t *outAddr, uint64_t *outHits)
+				uint64_t *outAddr, uint64_t *outHits, uint64_t *outFileHash)
 		{
 			uint64_t *data = (uint64_t *)p;
 
 			*outAddr = be_to_host<uint64_t>(*data++);
+			*outFileHash = be_to_host<uint64_t>(*data++);
 			*outHits = be_to_host<uint64_t>(*data++);
 
 			return (uint8_t *)data;
@@ -450,7 +477,7 @@ private:
 		}
 
 		// Marshal all line data
-		uint8_t *marshal(uint8_t *p) const
+		uint8_t *marshal(uint8_t *p, const Reporter &reporter) const
 		{
 			for (unsigned int i = 0; i < m_lines.size(); i++) {
 				Line *cur = m_lines[i];
@@ -458,7 +485,7 @@ private:
 				if (!cur)
 					continue;
 
-				p = cur->marshal(p);
+				p = cur->marshal(p, reporter);
 			}
 
 			return p;
@@ -515,15 +542,52 @@ private:
 		unsigned int m_nrLines;
 	};
 
+	/*
+	 * Helper class to store address ranges (base, size pairs). Used to convert
+	 * shared library addresses back to offsets.
+	 */
+	class AddressRange
+	{
+	public:
+		AddressRange(uint64_t addr, size_t size = 1) :
+			m_addr(addr), m_size(size)
+		{
+		}
+
+		bool operator<(const uint64_t addr) const
+		{
+			return m_addr < addr;
+		}
+
+		bool operator<(const AddressRange &other) const
+		{
+			return m_addr < other.m_addr;
+		}
+
+		bool operator==(const AddressRange &other) const
+		{
+			return m_addr == other.m_addr && m_size == other.m_size;
+		}
+
+	private:
+		uint64_t m_addr;
+		size_t m_size;
+	};
+
 	typedef std::unordered_map<std::string, File> FileMap_t;
 	typedef std::unordered_map<uint64_t, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
+	typedef std::map<AddressRange, uint64_t> AddressRangeMap_t;
+	typedef std::vector<AddressRange> AddressRangeList_t;
+	typedef std::unordered_map<uint64_t, AddressRangeList_t> PresentFilesMap_t;
 
 	FileMap_t m_files;
 	AddrToLineMap_t m_addrToLine;
 	AddrToHitsMap_t m_pendingHits;
 	ListenerList_t m_listeners;
+	AddressRangeMap_t m_addressRanges;
+	PresentFilesMap_t m_presentFiles;
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;

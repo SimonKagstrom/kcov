@@ -69,6 +69,15 @@ namespace kcov
 				return addr;
 			}
 
+			uint64_t getBase() const
+			{
+				return m_vaddr;
+			}
+
+			size_t getSize() const
+			{
+				return m_size;
+			}
 
 		private:
 			const uint64_t m_paddr;
