@@ -1,4 +1,19 @@
 Kcov (25):
+	* Issue #54: Implement handling of coverage accumulation for shared
+	  libraries
+	  
+	* Issue #50: Make sure that Bash "heredoc" markers are words
+	
+	* Fix some failure handling coverity errors
+	  
+	* Implement broken gcov engine (multiple issues still pending)
+
+	* Refactor configuration handling to be more generic (avoid setters,
+	  use key/value pairs via strings instead)
+	
+	* Add "capabilities" class to make parts of the implementation clearer
+	  
+	* HTML-writer: Correct off-by-one access to static data
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
