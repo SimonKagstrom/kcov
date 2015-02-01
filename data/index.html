@@ -57,8 +57,8 @@
       <th width="10%">Executable lines</th>
     </tr>
     </thead>
-    {{#each files}}
     <tbody id="main-data">
+    {{#each files}}
     <tr>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
@@ -66,8 +66,8 @@
       <td class="coverNum">{{uncovered_lines}}</td>
       <td class="coverNum">{{total_lines}}</td>
     </tr>
-    </tbody>
     {{/each}}
+    </tbody>
     {{#each merged_files}}
     <tbody tablesorter-no-sort id="merged-data">
     <tr>
