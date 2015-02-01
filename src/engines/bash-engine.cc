@@ -150,6 +150,10 @@ public:
 		const std::string &filename = get_real_path(parts[1]);
 		const std::string &lineNo = parts[2];
 
+		// Skip the helper library
+		if (filename.find("bash-helper.sh") != std::string::npos)
+			return true;
+
 		if (!string_is_integer(lineNo)) {
 			error("%s is not an integer", lineNo.c_str());
 
