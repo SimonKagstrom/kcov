@@ -5,15 +5,14 @@
   <link rel="stylesheet" href="data/tablesorter-theme.css">
   <link rel="stylesheet" type="text/css" href="data/bcov.css"/>
 </head>
-<body>
 
-<!-- Import Tempo etc -->
 <script type="text/javascript" src="index.json"></script>
 <script type="text/javascript" src="data/js/jquery.min.js"></script>
 <script type="text/javascript" src="data/js/tablesorter.min.js"></script>
 <script type="text/javascript" src="data/js/jquery.tablesorter.widgets.min.js"></script>
-<script type="text/javascript" src="data/js/tempo.min.js"></script>
+<script type="text/javascript" src="data/js/handlebars.js"></script>
 <script type="text/javascript" src="data/js/kcov.js"></script>
+<body>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="title">Coverage Report</td></tr>
@@ -45,9 +44,11 @@
   <tr><td class="ruler"><img src="data/glass.png" width="3" height="3" alt=""/></td></tr>
 </table>
 
+
+<script id="files-template" type="text/x-handlebars-template">
 <center>
   <table width="80%" cellpadding="2" cellspacing="1" border="0" id="index-table" class="tablesorter">
-	<thead>
+    <thead>
     <tr>
       <th class="tableHead" width="50%">Filename</th>
       <th width="20%">Coverage percent</th>
@@ -56,8 +57,9 @@
       <th width="10%">Executable lines</th>
     </tr>
     </thead>
+    {{#each files}}
     <tbody id="main-data">
-    <tr data-template>
+    <tr>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
       <td class="coverNum">{{covered_lines}}</td>
@@ -65,8 +67,10 @@
       <td class="coverNum">{{total_lines}}</td>
     </tr>
     </tbody>
+    {{/each}}
+    {{#each merged_files}}
     <tbody tablesorter-no-sort id="merged-data">
-    <tr data-template>
+    <tr>
       <td class="coverFile"><a href="{{link}}" title="{{title}}">{{summary_name}}</a></td>
       <td class="coverPer"><span style="display:block;width:{{covered}}%" class="{{covered_class}}">{{covered}}%</td>
       <td class="coverNum">{{covered_lines}}</td>
@@ -74,8 +78,12 @@
       <td class="coverNum">{{total_lines}}</td>
     </tr>
     </tbody>
+    {{/each}}
   </table>
 </center>
+</script>
+<div id="files-placeholder"></div>
+
 <br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td class="ruler"><img src="data/amber.png" width="3" height="3" alt=""/></td></tr>

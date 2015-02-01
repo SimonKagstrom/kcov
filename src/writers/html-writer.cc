@@ -24,7 +24,7 @@ extern std::vector<uint8_t> icon_amber_data;
 extern std::vector<uint8_t> icon_glass_data;
 extern std::vector<uint8_t> source_file_text_data;
 extern std::vector<uint8_t> index_text_data;
-extern std::vector<uint8_t> tempo_text_data;
+extern std::vector<uint8_t> handlebars_text_data;
 extern std::vector<uint8_t> kcov_text_data;
 extern std::vector<uint8_t> jquery_text_data;
 extern std::vector<uint8_t> tablesorter_text_data;
@@ -68,7 +68,7 @@ private:
 		// ... and HTML data
 		std::ofstream outHtml(htmlOutName);
 
-		outJson << "var data = [\n";
+		outJson << "var data = {lines:[\n";
 
 		// Produce each line in the file
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
@@ -116,7 +116,7 @@ private:
 		}
 
 		// Add the header
-		outJson << "];\n";
+		outJson << "]};\n";
 		outJson << getHeader(nCodeLines, nExecutedLines);
 		outJson << "var merged_data = [];\n";
 
@@ -135,7 +135,7 @@ private:
 
 		// Out-file for JSON data
 		std::ofstream outJson(m_outDirectory + "index.json");
-		outJson << "var data = [\n"; // Not really json, but anyway
+		outJson << "var data = {files:[\n"; // Not really json, but anyway
 
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
@@ -175,7 +175,7 @@ private:
 
 
 		// Add the header
-		outJson << fmt("];\n"
+		outJson << fmt("]};\n"
 				"var percent_low = %d;"
 				"var percent_high = %d;"
 				"\n"
@@ -227,7 +227,7 @@ private:
 
 		std::ofstream outJson(m_indexDirectory + "index.json");
 
-		outJson << "var data = [\n";
+		outJson << "var data = {files:[\n";
 		std::string merged;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
@@ -264,10 +264,8 @@ private:
 				outJson << datum;
 		}
 
-		merged = "var merged_data = [" + merged + "];";
-
 		// Add the header
-		outJson << "];\n" + getHeader(nTotalCodeLines, nTotalExecutedLines) + merged;
+		outJson << "], merged_files:[" + merged + "]};\n" + getHeader(nTotalCodeLines, nTotalExecutedLines);
 
 		// Produce HTML outfile
 		std::ofstream outHtml(m_indexDirectory + "index.html");
@@ -379,7 +377,7 @@ private:
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/data/glass.png", dir.c_str());
 		write_file(css_text_data.data(), css_text_data.size(), "%s/data/bcov.css", dir.c_str());
-		write_file(tempo_text_data.data(), tempo_text_data.size(), "%s/data/js/tempo.min.js", dir.c_str());
+		write_file(handlebars_text_data.data(), handlebars_text_data.size(), "%s/data/js/handlebars.js", dir.c_str());
 		write_file(kcov_text_data.data(), kcov_text_data.size(), "%s/data/js/kcov.js", dir.c_str());
 		write_file(jquery_text_data.data(), jquery_text_data.size(), "%s/data/js/jquery.min.js", dir.c_str());
 		write_file(tablesorter_text_data.data(), tablesorter_text_data.size(), "%s/data/js/tablesorter.min.js", dir.c_str());
