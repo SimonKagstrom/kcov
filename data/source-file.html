@@ -47,13 +47,14 @@
 {{#ifCond possible_hits "==" "0"}}
 <source-line><span class="lineNum">{{lineNum}}</span><span class="coverHits">{{hits}} </span><span class="{{class}}"> {{line}}</span></source-line>
 {{else}}
- {{#exists hits}}
+ {{#exists possible_hits}}
 <source-line><span class="lineNum">{{lineNum}}</span><span class="coverHits">{{hits}} / {{possible_hits}}</span><span class="{{class}}"> {{line}}</span></source-line>
  {{else}}
    {{#exists class}}
-<source-line data-template data-has="class"><span class="lineNum">{{lineNum}}</span><span class="coverHits">&nbsp;</span><span class="{{class}}"> {{line}}</span></source-line>
+<source-line><span class="lineNum">{{lineNum}}</span><span class="coverHits">&nbsp;</span><span class="{{class}}"> {{line}}</span></source-line>
+   {{else}}
+<source-line><span class="lineNum">{{lineNum}}</span><span class="coverHits">&nbsp;</span><span class="{{class}}"> {{line}}</span></source-line>
    {{/exists}}
-<source-line data-template><span class="lineNum">{{lineNum}}</span><span class="coverHits">&nbsp;</span><span class="{{class}}"> {{line}}</span></source-line>
  {{/exists}}
 {{/ifCond}}
 {{/each}}
