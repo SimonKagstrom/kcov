@@ -1,4 +1,6 @@
 Kcov (25):
+	* Issue #52: Don't include bash-helper.sh in the output
+
 	* Issue #54: Implement handling of coverage accumulation for shared
 	  libraries
 	  
