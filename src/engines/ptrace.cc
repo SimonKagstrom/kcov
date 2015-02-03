@@ -232,14 +232,6 @@ public:
 	}
 
 
-	bool readMemory(unsigned long *dst, unsigned long addr)
-	{
-		*dst = peekWord(addr);
-
-		return true;
-	}
-
-
 
 	bool start(IEventListener &listener, const std::string &executable)
 	{
@@ -276,8 +268,7 @@ public:
 		if (m_instructionMap.find(addr) != m_instructionMap.end())
 			return 0;
 
-		if (readMemory(&data, addr) == false)
-			return -1;
+		data = peekWord(addr);
 
 		m_instructionMap[addr] = data;
 		m_pendingBreakpoints.push_back(addr);
