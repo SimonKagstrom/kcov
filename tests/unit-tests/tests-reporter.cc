@@ -9,19 +9,10 @@
 #include <string>
 #include <unordered_map>
 
+#include "../../src/reporter.cc"
 #include "mocks/mock-collector.hh"
 
 using namespace kcov;
-
-#define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 1
-
-struct marshalHeaderStruct
-{
-	uint32_t magic;
-	uint32_t db_version;
-	uint64_t checksum;
-};
 
 class ElfListener : public IFileParser::ILineListener
 {
@@ -63,7 +54,7 @@ TEST(reporter)
 		;
 
 
-	IReporter &reporter = IReporter::create(*elf, collector, IFilter::create());
+	Reporter &reporter = (Reporter &)IReporter::create(*elf, collector, IFilter::create());
 
 	IReporter::ExecutionSummary summary =
 			reporter.getExecutionSummary();

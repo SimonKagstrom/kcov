@@ -12,7 +12,6 @@ class MockEngine : public IEngine
 public:
 	MockEngine()
 	{
-		IEngineFactory::getInstance().registerEngine(*this);
 	}
 
 	MAKE_MOCK1(registerBreakpoint, int(unsigned long addr));

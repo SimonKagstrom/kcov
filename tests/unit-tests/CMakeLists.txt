@@ -17,10 +17,10 @@ set (${TGT}_SRCS
     ../../src/capabilities.cc
     ../../src/collector.cc
     ../../src/engine-factory.cc
+    ../../src/gcov.cc
     ../../src/output-handler.cc
     ../../src/parsers/elf-parser.cc
     ../../src/parser-manager.cc
-    ../../src/reporter.cc
     ../../src/utils.cc
     ../../src/writers/cobertura-writer.cc
     ../../src/writers/html-writer.cc
@@ -48,7 +48,7 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/glass.png icon_glass
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html source_file_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html index_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js tempo_text
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/handlebars.js handlebars_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/kcov.js kcov_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.min.js jquery_text
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.tablesorter.min.js tablesorter_text
@@ -61,7 +61,7 @@ add_custom_command(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/glass.png
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/source-file.html
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/index.html
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/tempo.min.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/handlebars.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/kcov.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.min.js
     ${CMAKE_CURRENT_SOURCE_DIR}/../../data/js/jquery.tablesorter.min.js
