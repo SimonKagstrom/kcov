@@ -35,11 +35,11 @@ build_gcc: build_reference
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-tests"
 
 run-performance: build_gcc
-	travis/perf-test.sh build/src/kcov >/dev/null
-	/usr/bin/time -f "%e" travis/perf-test.sh build/src/kcov >/dev/null
+	travis/perf-test.sh build/src/kcov . build >/dev/null
+	/usr/bin/time -f "%e" travis/perf-test.sh build/src/kcov . build >/dev/null
 	rm -rf /tmp/kcov-perf
-	travis/perf-test.sh /tmp/kcov-reference >/dev/null
-	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference >/dev/null
+	travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
+	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
 
 run-tests-gcc: run-performance
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=/tmp/kcov/ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
