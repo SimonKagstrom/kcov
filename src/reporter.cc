@@ -16,7 +16,7 @@
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 4
+#define KCOV_DB_VERSION 5
 
 struct marshalHeaderStruct
 {
@@ -493,6 +493,10 @@ private:
 			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
 					it != m_addrs.end();
 					++it) {
+				// No hits? Ignore if so
+				if (!it->second)
+					continue;
+
 				uint64_t hash = parent.getFileHashForAddress(it->first);
 				uint64_t addr = it->first;
 				uint64_t index = 0;
@@ -516,8 +520,20 @@ private:
 
 		size_t marshalSize() const
 		{
+			unsigned int n = 0;
+
+			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
+					it != m_addrs.end();
+					++it) {
+				// No hits? Ignore if so
+				if (!it->second)
+					continue;
+
+				n++;
+			}
+
 			// Address, file hash and number of hits (64-bit values)
-			return m_addrs.size() * sizeof(uint64_t) * 4;
+			return n * sizeof(uint64_t) * 4;
 		}
 
 		static uint8_t *unMarshal(uint8_t *p,
