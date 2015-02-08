@@ -3,6 +3,7 @@
 #include <configuration.hh>
 #include <writer.hh>
 #include <utils.hh>
+#include <generated-data-base.hh>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -19,17 +20,17 @@
 using namespace kcov;
 
 // Generated
-extern std::vector<uint8_t> css_text_data;
-extern std::vector<uint8_t> icon_amber_data;
-extern std::vector<uint8_t> icon_glass_data;
-extern std::vector<uint8_t> source_file_text_data;
-extern std::vector<uint8_t> index_text_data;
-extern std::vector<uint8_t> handlebars_text_data;
-extern std::vector<uint8_t> kcov_text_data;
-extern std::vector<uint8_t> jquery_text_data;
-extern std::vector<uint8_t> tablesorter_text_data;
-extern std::vector<uint8_t> tablesorter_widgets_text_data;
-extern std::vector<uint8_t> tablesorter_theme_text_data;
+extern GeneratedData css_text_data;
+extern GeneratedData icon_amber_data;
+extern GeneratedData icon_glass_data;
+extern GeneratedData source_file_text_data;
+extern GeneratedData index_text_data;
+extern GeneratedData handlebars_text_data;
+extern GeneratedData kcov_text_data;
+extern GeneratedData jquery_text_data;
+extern GeneratedData tablesorter_text_data;
+extern GeneratedData tablesorter_widgets_text_data;
+extern GeneratedData tablesorter_theme_text_data;
 
 
 class HtmlWriter : public WriterBase

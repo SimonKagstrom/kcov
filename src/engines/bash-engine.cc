@@ -4,6 +4,7 @@
 #include <output-handler.hh>
 #include <lineid.hh>
 #include <utils.hh>
+#include <generated-data-base.hh>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,9 +21,9 @@
 
 #include "script-engine-base.hh"
 
-extern std::vector<uint8_t> bash_helper_data;
-
 using namespace kcov;
+
+extern GeneratedData bash_helper_data;
 
 class BashEngine : public ScriptEngineBase
 {

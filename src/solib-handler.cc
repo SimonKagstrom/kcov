@@ -6,6 +6,7 @@
 #include <file-parser.hh>
 #include <utils.hh>
 #include <phdr_data.h>
+#include <generated-data-base.hh>
 
 #include <mutex>
 #include <vector>
@@ -23,7 +24,7 @@
 
 using namespace kcov;
 
-extern std::vector<uint8_t> __library_data;
+extern GeneratedData __library_data;
 
 class SolibHandler : public ISolibHandler, ICollector::IEventTickListener
 {

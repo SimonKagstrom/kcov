@@ -4,6 +4,7 @@
 #include <output-handler.hh>
 #include <lineid.hh>
 #include <utils.hh>
+#include <generated-data-base.hh>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,7 +23,7 @@
 
 using namespace kcov;
 
-extern std::vector<uint8_t> python_helper_data;
+extern GeneratedData python_helper_data;
 
 
 const uint64_t COVERAGE_MAGIC = 0x6d6574616c6c6775ULL; // "metallgut"
