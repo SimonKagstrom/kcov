@@ -106,7 +106,7 @@ private:
 	struct curl_slist *m_headerlist;
 };
 
-static CurlConnectionHandler g_curl;
+static CurlConnectionHandler *g_curl;
 
 
 class CoverallsWriter : public WriterBase
@@ -206,7 +206,11 @@ public:
 
 		out.close();
 
-		g_curl.talk(outFile);
+		// Create singleton
+		if (!g_curl)
+			g_curl = new CurlConnectionHandler();
+
+		g_curl->talk(outFile);
 	}
 
 private:
