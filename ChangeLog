@@ -1,4 +1,6 @@
 Kcov (25):
+	* Make database files smaller by storing only executed addresses
+
 	* Issue #52: Don't include bash-helper.sh in the output
 
 	* Issue #54: Implement handling of coverage accumulation for shared
@@ -8,7 +10,7 @@ Kcov (25):
 	
 	* Fix some failure handling coverity errors
 	  
-	* Implement broken gcov engine (multiple issues still pending)
+	* Issue #49 (WIP): Implement broken gcov engine (multiple issues still pending)
 
 	* Refactor configuration handling to be more generic (avoid setters,
 	  use key/value pairs via strings instead)
