@@ -19,7 +19,7 @@ Kcov (25):
 	  
 	* HTML-writer: Correct off-by-one access to static data
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Tue Feb 10 19:38:04 CET 2015
 
 Kcov (24):
 	* Misc performance improvements here and there
