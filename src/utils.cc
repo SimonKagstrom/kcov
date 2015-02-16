@@ -368,8 +368,20 @@ std::string fmt(const char *fmt, ...)
 	res = vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	panic_if(res >= (int)sizeof(buf),
-			"Buffer overflow");
+        if (res >= (int)sizeof(buf)) {
+		std::string result;
+		result.resize(res+1);
+
+		va_start(ap, fmt);
+		res = vsnprintf(&result[0], result.size(), fmt, ap);
+		va_end(ap);
+
+		panic_if(res >= (int)result.size(),
+				"Buffer overflow");
+
+		result.resize(res);
+		return result;
+	}
 
 	return std::string(buf);
 }
