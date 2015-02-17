@@ -16,6 +16,7 @@
 #include <list>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 
 #include <swap-endian.hh>
 
@@ -25,13 +26,22 @@ using namespace kcov;
 
 extern GeneratedData bash_helper_data;
 
+enum InputType
+{
+	INPUT_NORMAL,       // No multiline stuff
+	INPUT_QUOTE,        // "
+	INPUT_SINGLE_QUOTE, // '
+	INPUT_MULTILINE,    // backslash backslash
+};
+
 class BashEngine : public ScriptEngineBase
 {
 public:
 	BashEngine() :
 		ScriptEngineBase(),
 		m_child(0),
-		m_stderr(NULL)
+		m_stderr(NULL),
+		m_inputType(INPUT_NORMAL)
 	{
 	}
 
@@ -137,10 +147,18 @@ public:
 		// Line markers always start with kcov@
 
 		size_t kcovStr = cur.find("kcov@");
+		enum InputType ip = getInputType(cur);
 		if (kcovStr == std::string::npos) {
-			fprintf(stderr, "%s", cur.c_str());
+			if (m_inputType == INPUT_NORMAL)
+				fprintf(stderr, "%s", cur.c_str());
+			if (ip == INPUT_SINGLE_QUOTE && m_inputType == INPUT_SINGLE_QUOTE)
+				m_inputType = INPUT_NORMAL;
+
 			return true;
 		}
+
+		m_inputType = ip;
+
 		std::vector<std::string> parts = split_string(cur.substr(kcovStr), "@");
 
 		// kcov@FILENAME@LINENO@...
@@ -247,6 +265,18 @@ public:
 
 
 private:
+	enum InputType getInputType(const std::string &str)
+	{
+		enum InputType out = INPUT_NORMAL;
+
+		size_t singleQuotes = std::count(str.begin(), str.end(), '\'');
+
+		if (singleQuotes == 1)
+			out = INPUT_SINGLE_QUOTE;
+
+		return out;
+	}
+
 	void doSetenv(const std::string &val)
 	{
 		// "Leak" some bytes, but the environment needs that
@@ -385,6 +415,7 @@ private:
 
 	pid_t m_child;
 	FILE *m_stderr;
+	enum InputType m_inputType;
 };
 
 // This ugly stuff should be fixed
