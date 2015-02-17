@@ -93,3 +93,6 @@ EOF
 echo "From here on it do not work!"
 
 `dirname $0`/sh-shebang.sh
+
+# Echo to stderr
+>&2 echo "I'm echoing to stderr via some illogical interface"
