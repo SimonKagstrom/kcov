@@ -598,6 +598,12 @@ bash-multiline-quotes
 	${output}=    Run    ${xml_lookup} ${out}/multiline-alias.sh/cobertura.xml multiline_alias_sh 6
     Should Contain    ${output}    1
 
+bash-multiline-backslashes
+	Run								rm -rf ${out}/multiline-backslash.sh
+    ${output}=    Run 		${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/multiline-backslash.sh 2>/tmp/robot.err
+    ${output}=    Run	cat /tmp/robot.err
+	Should Not Contain   ${output}    	function_name
+
 merge-basic
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
