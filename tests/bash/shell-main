@@ -36,7 +36,7 @@ case $# in
     1)
       	echo "1 args"
         ;;
-    2)
+    (2)
       	echo "2 args" ;;# Comment
     'sorry mister')
         echo "This is very much dead code!"
