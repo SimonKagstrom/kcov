@@ -90,23 +90,26 @@ public:
 			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
+			int xtraceFd = 193; // Typical bash users use 3,4 etc but not high fd numbers (?)
 
 			const std::string command = conf.keyAsString("bash-command");
 
-			/* Close the childs read end of the pipe */
-			close(stderrPipe[0]);
-
-			if (dup2(stderrPipe[1], 2) < 0) {
-				perror("Failed to exchange stderr for pipe");
-				return false;
+			if (dup2(stderrPipe[1], xtraceFd) < 0) {
+			    perror("Failed to exchange stderr for pipe");
+			    return false;
 			}
 
 			/* Close the childs old write end of the pipe */
 			close(stderrPipe[1]);
 
+			/* Close the childs read end of the pipe */
+			close(stderrPipe[0]);
+
 			/* Set up PS4 for tracing */
-			doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
 			doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
+			doSetenv(fmt("KCOV_BASH_XTRACEFD=%d", xtraceFd));
+			doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
+			doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
