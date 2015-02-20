@@ -50,6 +50,8 @@ run-tests-clang:
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 
 build_clang:
+	# Stupid workaround for coverity scans...
+	sleep 97
 
 run-tests: build run-tests-${CC}
 
