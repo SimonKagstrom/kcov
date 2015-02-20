@@ -404,8 +404,9 @@ private:
 
 			// Case switches are nocode
 			if (caseActive && s[s.size() - 1] == ')') {
-				// But let functions be
-				if (s.find("(") == std::string::npos)
+				// But let functions be (albeit not with balanced parentheses)
+			        size_t startParenthesis = s.find("(");
+				if (startParenthesis == std::string::npos || startParenthesis == 0)
 					continue;
 			}
 
