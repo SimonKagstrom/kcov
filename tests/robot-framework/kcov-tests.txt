@@ -608,6 +608,13 @@ bash-multiline-backslashes
     ${output}=    Run	cat /tmp/robot.err
 	Should Not Contain   ${output}    	function_name
 
+bash-stderr-redirection
+	Run								rm -rf ${out}/redirect-stderr.sh
+    ${output}=    Run 		${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/redirect-stderr.sh >/tmp/robot.err
+    ${rc}=    Run and return RC    grep kcov /tmp/robot.err
+    Should be equal as integers		${rc}    1
+
+
 merge-basic
 	Run								rm -rf ${out}
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
