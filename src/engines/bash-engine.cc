@@ -94,6 +94,10 @@ public:
 
 			const std::string command = conf.keyAsString("bash-command");
 
+			// Revert to stderr if this bash version can't handle BASH_XTRACE
+			if (!bashCanHandleXtraceFd())
+				xtraceFd = 2;
+
 			if (dup2(stderrPipe[1], xtraceFd) < 0) {
 			    perror("Failed to exchange stderr for pipe");
 			    return false;
@@ -268,6 +272,40 @@ public:
 
 
 private:
+	bool bashCanHandleXtraceFd()
+	{
+		FILE *fp;
+		bool out = false;
+		std::string cmd = IConfiguration::getInstance().keyAsString("bash-command") + " --version";
+
+		fp = popen(cmd.c_str(), "r");
+		if (!fp)
+			return false;
+
+		// Read the first line
+		char *line;
+		ssize_t len;
+		size_t linecap = 0;
+
+		len = getline(&line, &linecap, fp);
+		// Let's play safe
+		if (len > 0) {
+			std::string cur(line);
+			size_t where = cur.find("version ");
+			if (where != std::string::npos) {
+				std::string versionStr = cur.substr(where + strlen("version "));
+
+				if (versionStr.size() > 4 && versionStr[0] >= '4' && versionStr[2] >= '1')
+					out = true;
+			}
+		}
+
+		fclose(fp);
+
+		return out;
+	}
+
+
 	enum InputType getInputType(const std::string &str)
 	{
 		enum InputType out = INPUT_NORMAL;
