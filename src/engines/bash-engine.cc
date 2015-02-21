@@ -41,6 +41,7 @@ public:
 		ScriptEngineBase(),
 		m_child(0),
 		m_stderr(NULL),
+		m_stdout(NULL),
 		m_inputType(INPUT_NORMAL)
 	{
 	}
@@ -53,9 +54,18 @@ public:
 	bool start(IEventListener &listener, const std::string &executable)
 	{
 		int stderrPipe[2];
+		int stdoutPipe[2];
 
 		if (pipe(stderrPipe) < 0) {
 			error("Failed to open pipe");
+
+			return false;
+		}
+
+		if (pipe(stdoutPipe) < 0) {
+			error("Failed to open pipe");
+			close(stderrPipe[0]);
+			close(stderrPipe[1]);
 
 			return false;
 		}
@@ -78,11 +88,19 @@ public:
 
 			// Close the parents write end of the pipe
 			close(stderrPipe[1]);
+			close(stdoutPipe[1]);
 
 			// And open a FILE * to stderr
 			m_stderr = fdopen(stderrPipe[0], "r");
 			if (!m_stderr) {
 				error("Can't reopen the stderr pipe");
+				return false;
+			}
+			m_stdout = fdopen(stdoutPipe[0], "r");
+			if (!m_stderr) {
+				error("Can't reopen the stdout pipe");
+				fclose(m_stderr);
+
 				return false;
 			}
 
@@ -102,12 +120,18 @@ public:
 			    perror("Failed to exchange stderr for pipe");
 			    return false;
 			}
+			if (dup2(stdoutPipe[1], 1) < 0) {
+			    perror("Failed to exchange stderr for pipe");
+			    return false;
+			}
 
 			/* Close the childs old write end of the pipe */
 			close(stderrPipe[1]);
+			close(stdoutPipe[1]);
 
 			/* Close the childs read end of the pipe */
 			close(stderrPipe[0]);
+			close(stdoutPipe[0]);
 
 			/* Set up PS4 for tracing */
 			doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
@@ -145,6 +169,9 @@ public:
 		char *curLine;
 		ssize_t len;
 		size_t linecap = 0;
+
+		// First printout any collected stdout data
+		handleStdout();
 
 		len = getline(&curLine, &linecap, m_stderr);
 		if (len < 0)
@@ -272,6 +299,35 @@ public:
 
 
 private:
+	// Printout lines to stdout, except kcov markers
+	void handleStdout()
+	{
+		// Has input?
+		if (!file_readable(m_stdout, 0))
+			return;
+
+		char *curLine;
+		ssize_t len;
+		size_t linecap = 0;
+
+		len = getline(&curLine, &linecap, m_stdout);
+		if (len <= 0)
+			return;
+
+		std::string cur(curLine);
+
+		/* Check for line markers to filter these away.
+		 *
+		 * For some reason, redirection sometimes give kkcov@..., so filter that
+		 * in addition to the obvious stuff
+		 */
+		size_t kcovMarker = cur.find("kcov@");
+		if (kcovMarker == 0 || kcovMarker == 1)
+			return;
+
+		printf("%s", cur.c_str());
+	}
+
 	bool bashCanHandleXtraceFd()
 	{
 		FILE *fp;
@@ -464,6 +520,7 @@ private:
 
 	pid_t m_child;
 	FILE *m_stderr;
+	FILE *m_stdout;
 	enum InputType m_inputType;
 };
 
