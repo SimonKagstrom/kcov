@@ -1,3 +1,8 @@
+Kcov (26):
+	* Issue #57: bash-engine: Correct handling of quoted multiline variables
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (25):
 	* Make database files smaller by storing only executed addresses
 
