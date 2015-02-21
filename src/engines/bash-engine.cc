@@ -90,7 +90,7 @@ public:
 			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
-			int xtraceFd = 193; // Typical bash users use 3,4 etc but not high fd numbers (?)
+			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
 
 			const std::string command = conf.keyAsString("bash-command");
 
