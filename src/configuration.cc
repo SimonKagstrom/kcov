@@ -111,6 +111,7 @@ public:
 				{"include-path", required_argument, 0, 'I'},
 				{"coveralls-id", required_argument, 0, 'T'},
 				{"debug", required_argument, 0, 'D'},
+				{"debug-force-bash-stderr", no_argument, 0, 'd'},
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
@@ -228,6 +229,9 @@ public:
 				setKey("exclude-path", excludePath);
 				break;
 			}
+			case 'd':
+				setKey("bash-force-stderr-input", 1);
+				break;
 			case 'C':
 				setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 				break;
@@ -365,6 +369,7 @@ public:
 		setKey("include-pattern", StrVecMap_t());
 		setKey("exclude-path", StrVecMap_t());
 		setKey("include-path", StrVecMap_t());
+		setKey("bash-force-stderr-input", 0);
 	}
 
 

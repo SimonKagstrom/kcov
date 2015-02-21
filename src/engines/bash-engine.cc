@@ -276,7 +276,14 @@ private:
 	{
 		FILE *fp;
 		bool out = false;
-		std::string cmd = IConfiguration::getInstance().keyAsString("bash-command") + " --version";
+		IConfiguration &conf = IConfiguration::getInstance();
+		std::string cmd = conf.keyAsString("bash-command") + " --version";
+
+		/* Has input via stderr been forced regardless of bash version?
+		 * Basically for testing only
+		 */
+		if (conf.keyAsInt("bash-force-stderr-input"))
+			return false;
 
 		fp = popen(cmd.c_str(), "r");
 		if (!fp)
