@@ -42,6 +42,7 @@ public:
 		m_child(0),
 		m_stderr(NULL),
 		m_stdout(NULL),
+		m_bashSupportsXtraceFd(false),
 		m_inputType(INPUT_NORMAL)
 	{
 	}
@@ -69,6 +70,8 @@ public:
 
 			return false;
 		}
+
+		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
 
 		std::string helperPath =
 				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
@@ -113,7 +116,7 @@ public:
 			const std::string command = conf.keyAsString("bash-command");
 
 			// Revert to stderr if this bash version can't handle BASH_XTRACE
-			if (!bashCanHandleXtraceFd())
+			if (!m_bashSupportsXtraceFd)
 				xtraceFd = 2;
 
 			if (dup2(stderrPipe[1], xtraceFd) < 0) {
@@ -313,6 +316,12 @@ private:
 		len = getline(&curLine, &linecap, m_stdout);
 		if (len <= 0)
 			return;
+
+		// No need to filter if the output is sent elsewhere
+		if (m_bashSupportsXtraceFd) {
+			printf("%s", curLine);
+			return;
+		}
 
 		std::string cur(curLine);
 
@@ -521,6 +530,7 @@ private:
 	pid_t m_child;
 	FILE *m_stderr;
 	FILE *m_stdout;
+	bool m_bashSupportsXtraceFd;
 	enum InputType m_inputType;
 };
 
