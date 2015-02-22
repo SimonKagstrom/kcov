@@ -1,4 +1,9 @@
 Kcov (26):
+	* Issue #61: bash-engine: Output trace data via BASH_XTRACEFD when possible
+	  (bash >= 4.1) and filter stdout to catch redirections otherwise
+
+	* Issue #58: Lookup program in $PATH if it's not given on the command line
+
 	* Issue #57: bash-engine: Correct handling of quoted multiline variables
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
