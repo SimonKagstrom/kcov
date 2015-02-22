@@ -428,6 +428,12 @@ python-tricky-single-dict-assignment
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 61
     Should Contain    ${output}    1
 
+lookup-binary-in-path
+    Run                            rm -rf ${out}/main
+    ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    PATH=$PATH:${kcov_path}/tests/python/ ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} main 5
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+
 
 #python-select-parser
 #	Run								rm -rf ${out}/main
@@ -616,7 +622,6 @@ bash-stderr-redirection
     ${output}=    Run 		${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --debug-force-bash-stderr ${out} ${kcov_path}/tests/bash/redirect-stderr.sh >/tmp/robot.err
     ${rc}=    Run and return RC    grep kcov /tmp/robot.err
     Should be equal as integers		${rc}    1
-
 
 merge-basic
 	Run								rm -rf ${out}
