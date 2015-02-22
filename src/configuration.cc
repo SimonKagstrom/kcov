@@ -126,6 +126,13 @@ public:
 		unsigned int extraNeeded = 2;
 		unsigned int lastArg;
 
+		const char *path = getenv("PATH");
+
+		if (!path)
+			path = "";
+
+		std::vector<std::string> paths = split_string(path, ":");
+
 		/* Scan through the parameters for an ELF file: That will be the
 		 * second last argument in the list.
 		 *
@@ -133,6 +140,24 @@ public:
 		 */
 		for (lastArg = 1; lastArg < argc; lastArg++) {
 			if (IParserManager::getInstance().matchParser(argv[lastArg]))
+				break;
+
+			bool found = false;
+			for (std::vector<std::string>::const_iterator it = paths.begin();
+					it != paths.end();
+					++it) {
+				const std::string &curPath = *it;
+				std::string cur = curPath + "/" + argv[lastArg];
+
+				if (IParserManager::getInstance().matchParser(cur)) {
+					// Intentional memory leak
+					argv[lastArg] = xstrdup(cur.c_str());
+					found = true;
+					break;
+				}
+			}
+
+			if (found)
 				break;
 		}
 
