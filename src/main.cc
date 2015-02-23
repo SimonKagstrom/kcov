@@ -158,7 +158,6 @@ int main(int argc, const char *argv[])
 		conf.printUsage();
 		return 1;
 	}
-	parser->addFile(file);
 
 	// Match and create an engine
 	IEngineFactory::IEngineCreator &engineCreator = IEngineFactory::getInstance().matchEngine(file);
@@ -175,6 +174,8 @@ int main(int argc, const char *argv[])
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
 	IOutputHandler &output = IOutputHandler::create(*parser, reporter, collector);
 	ISolibHandler &solibHandler = createSolibHandler(*parser, collector);
+
+	parser->addFile(file);
 
 	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
 
