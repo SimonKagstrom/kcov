@@ -372,7 +372,7 @@ private:
 			}
 		}
 
-		fclose(fp);
+		pclose(fp);
 
 		return out;
 	}
