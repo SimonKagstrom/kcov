@@ -111,13 +111,15 @@ public:
 			m_curSegments.push_back(Segment(seg->paddr, seg->vaddr, seg->size));
 		}
 
+		if (!checkFile())
+			return false;
+
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
 			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB, m_curSegments));
 
-
-		return checkFile();
+		return true;
 	}
 
 	bool checkFile()
