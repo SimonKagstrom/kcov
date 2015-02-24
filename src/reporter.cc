@@ -438,7 +438,8 @@ private:
 	class Line
 	{
 	public:
-		typedef std::unordered_map<uint64_t, int> AddrToHitsMap_t;
+		// More efficient than an unordered_map
+		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
 		Line(const std::string &file, unsigned int lineNr)
 		{
@@ -446,16 +447,38 @@ private:
 
 		void addAddress(uint64_t addr)
 		{
-			if (m_addrs.find(addr) == m_addrs.end())
-				m_addrs[addr] = 0;
+			// Check if it already exists
+			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
+					it != m_addrs.end();
+					++it) {
+				if (it->first == addr)
+					return;
+			}
+
+			m_addrs.push_back(std::pair<uint64_t, int>(addr, 0));
 		}
 
 		void registerHit(uint64_t addr, unsigned long hits, bool singleShot)
 		{
+			AddrToHitsMap_t::iterator it;
+
+			for (it = m_addrs.begin();
+					it != m_addrs.end();
+					++it) {
+				if (it->first == addr)
+					break;
+			}
+
+			// Add one last
+			if (it == m_addrs.end()) {
+				m_addrs.push_back(std::pair<uint64_t, int>(addr, 0));
+				--it;
+			}
+
 			if (singleShot)
-				m_addrs[addr] = 1;
+				it->second = 1;
 			else
-				m_addrs[addr] += hits;
+				it->second += hits;
 		}
 
 		void clearHits()
