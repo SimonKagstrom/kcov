@@ -77,10 +77,10 @@ private:
 
 			outJson << fmt(
 					"{\"lineNum\":\"%5u\","
-					"\"line\":\"%s\"",
-					n,
-					escape_json(line).c_str()
+					"\"line\":\"",
+					n
 					);
+			outJson << escape_json(line) << "\"";
 
 			if (m_reporter.lineIsCode(file->m_name, n)) {
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
