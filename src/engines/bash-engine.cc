@@ -172,7 +172,7 @@ public:
 
 	bool checkEvents()
 	{
-		char *curLine;
+		char *curLine = NULL;
 		ssize_t len;
 		size_t linecap = 0;
 
@@ -312,7 +312,7 @@ private:
 		if (!file_readable(m_stdout, 0))
 			return;
 
-		char *curLine;
+		char *curLine = NULL;
 		ssize_t len;
 		size_t linecap = 0;
 
@@ -358,7 +358,7 @@ private:
 			return false;
 
 		// Read the first line
-		char *line;
+		char *line = NULL;
 		ssize_t len;
 		size_t linecap = 0;
 
