@@ -452,7 +452,7 @@ private:
 				continue;
 
 			// Empty braces
-			if (s[0] == '{' || s[0] == '}')
+			if ((s[0] == '{' || s[0] == '}') && s.size() == 1)
 				continue;
 
 			// While, if, switch endings
