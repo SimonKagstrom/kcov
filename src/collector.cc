@@ -50,10 +50,7 @@ public:
 		while (1) {
 			bool shouldContinue = m_engine.continueExecution();
 
-			for (EventTickListenerList_t::iterator it = m_eventTickListeners.begin();
-					it != m_eventTickListeners.end();
-					++it)
-				(*it)->onTick();
+			tick();
 
 			if (!shouldContinue)
 				break;
@@ -67,6 +64,13 @@ public:
 	}
 
 private:
+	void tick()
+	{
+		for (EventTickListenerList_t::iterator it = m_eventTickListeners.begin();
+				it != m_eventTickListeners.end();
+				++it)
+			(*it)->onTick();
+	}
 
 	std::string eventToName(IEngine::Event ev)
 	{
