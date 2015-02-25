@@ -367,7 +367,8 @@ private:
 			if (where != std::string::npos) {
 				std::string versionStr = cur.substr(where + strlen("version "));
 
-				if (versionStr.size() > 4 && versionStr[0] >= '4' && versionStr[2] >= '1')
+				// Bash 4.2 and above supports BASH_XTRACEFD
+				if (versionStr.size() > 4 && versionStr[0] >= '4' && versionStr[2] >= '2')
 					out = true;
 			}
 		}
