@@ -17,7 +17,7 @@ env:
    - secure: "WG/iday4nudNJ9acP/gjjuXzI0Jw0MN0zP9JA3WueMvMV0UrVRnBKM+papB06XiB4Gyiaoy92pfOGzmby0ciMAvydBn2DyuGZhM1nXuEIbkQqfP3AR3z6nCZHY27NAhVnpnEAyb56FwD353JMVZj34cnRmcjgKArMM3Y8W66Zls="
 
 addons:
-  coverity_scan:
+  coverity_scan-disabled:
     project:
       name: "SimonKagstrom/kcov"
       description: "code coverage"
