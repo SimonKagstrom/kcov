@@ -610,6 +610,12 @@ bash-multiline-backslashes
     ${output}=    Run	cat /tmp/robot.err
 	Should Not Contain   ${output}    	function_name
 
+bash-no-executed-lines
+	Run								rm -rf ${out}/no-executed-statements.sh
+    ${output}=    Run 		${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/no-executed-statements.sh
+	${output}=    Run    ${xml_lookup} ${out}/no-executed-statements.sh/cobertura.xml no_executed_statements_sh 4
+    Should Contain    ${output}    	0
+
 bash-stderr-redirection
 	Run								rm -rf ${out}/redirect-stderr.sh
     ${output}=    Run 		${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/redirect-stderr.sh >/tmp/robot.err
