@@ -507,6 +507,14 @@ bash-issue-44-heredoc-special-cases
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 93
     Should Contain    ${output}    1
 
+bash-non-empty-braces
+	Run								rm -rf ${out}/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 102
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 103
+    Should Contain    ${output}    3
+
 bash-coverage-tricky
 	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5

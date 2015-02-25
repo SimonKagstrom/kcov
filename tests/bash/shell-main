@@ -96,3 +96,11 @@ echo "From here on it do not work!"
 
 # Echo to stderr
 >&2 echo "I'm echoing to stderr via some illogical interface"
+
+function some_test
+    {
+    test "${1}" == "--quiet" &&
+        { quiet=${1} ; shift ; echo hej ; }
+    }
+
+some_test --quiet
