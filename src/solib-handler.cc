@@ -40,10 +40,8 @@ public:
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
 		// Only useful for ELF binaries
-		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov")) {
+		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov"))
 			collector.registerEventTickListener(*this);
-			startup();
-		}
 
 		// Skip this very special library
 		m_foundSolibs["libkcov_sowrapper.so"] = true;

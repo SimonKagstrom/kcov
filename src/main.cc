@@ -228,6 +228,7 @@ int main(int argc, const char *argv[])
 
 	parser->setupParser(&filter);
 	output.start();
+	solibHandler.startup();
 
 	int ret = 0;
 

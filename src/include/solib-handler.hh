@@ -11,6 +11,8 @@ namespace kcov
 		virtual ~ISolibHandler()
 		{
 		}
+
+		virtual void startup() = 0;
 	};
 
 	ISolibHandler &createSolibHandler(IFileParser &parser, ICollector &collector);
