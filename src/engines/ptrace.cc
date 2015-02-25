@@ -283,6 +283,9 @@ public:
 		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
 			kcov_debug(BP_MSG, "Can't find breakpoint at 0x%lx\n", addr);
 
+			// Stupid workaround for avoiding the solib thread race
+			msleep(1);
+
 			return false;
 		}
 
