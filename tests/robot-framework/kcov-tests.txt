@@ -109,6 +109,7 @@ shared-library-accumulate
     Should Contain    ${output}    1
 
 dlopen
+    [Tags]	not_ready
     Run                            rm -rf ${out}/dlopen
     ${no_kcov_rc}=    Run and return RC    ./dlopen
     ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
@@ -123,6 +124,7 @@ dlopen
     Should Contain    ${output}    0
 
 dlopen-in-ignored-source-file
+    [Tags]	not_ready
     Run                            rm -rf ${out}/dlopen
     ${no_kcov_rc}=    Run and return RC    ./dlopen
     ${rc}=    Run and return RC    ${kcov} --exclude-pattern=dlopen.cc ${out} ./dlopen
