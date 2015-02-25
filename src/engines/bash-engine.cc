@@ -164,6 +164,9 @@ public:
 			return false;
 		}
 
+		parseFile(executable);
+		m_reportedFiles[executable] = true;
+
 		return true;
 	}
 
