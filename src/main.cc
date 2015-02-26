@@ -155,7 +155,7 @@ int main(int argc, const char *argv[])
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
 	if (!parser) {
-		conf.printUsage();
+		error("Can't find or open %s\n", file.c_str());
 		return 1;
 	}
 
