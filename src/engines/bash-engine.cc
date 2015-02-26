@@ -427,6 +427,7 @@ private:
 		unsigned int lineNo = 0;
 		enum { none, backslash, heredoc } state = none;
 		bool caseActive = false;
+		bool aritmeticActive = false;
 		std::string heredocMarker;
 
 		for (std::vector<std::string>::const_iterator it = stringList.begin();
@@ -497,7 +498,11 @@ private:
 			} else {
 				size_t heredocStart = s.find("<<");
 
-				if (heredocStart != std::string::npos) {
+				if (!aritmeticActive &&
+						s.find("let ") != 0 &&
+						s.find("$((") == std::string::npos &&
+						s.find("))") == std::string::npos &&
+						heredocStart != std::string::npos) {
 					// Skip << and remove spaces before and after "EOF"
 					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
 
@@ -518,6 +523,15 @@ private:
 				caseActive = true;
 			else if (s.find("esac") == 0)
 				caseActive = false;
+
+			if (s.find("$((") != std::string::npos)
+				aritmeticActive = true;
+			if (s.find("))") != std::string::npos)
+				aritmeticActive = false;
+
+			// Only the last line of arithmetic is code
+			if (aritmeticActive)
+				continue;
 
 			// Case switches are nocode
 			if (caseActive && s[s.size() - 1] == ')') {
