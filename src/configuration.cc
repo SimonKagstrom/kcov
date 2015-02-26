@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <map>
 #include <list>
 #include <string>
@@ -147,7 +150,19 @@ public:
 					it != paths.end();
 					++it) {
 				const std::string &curPath = *it;
-				std::string cur = curPath + "/" + argv[lastArg];
+				const std::string &cur = get_real_path(curPath + "/" + argv[lastArg]);
+				struct stat st;
+
+				if (lstat(cur.c_str(), &st) < 0)
+					continue;
+
+				// Regular file?
+				if (S_ISREG(st.st_mode) == 0)
+					continue;
+
+				// Executable?
+				if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
+					continue;
 
 				if (IParserManager::getInstance().matchParser(cur)) {
 					// Intentional memory leak
