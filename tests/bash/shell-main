@@ -104,3 +104,17 @@ function some_test
     }
 
 some_test --quiet
+
+declare -r NIGHTLY_CODE_PROJECT_MASK=$(( 1 << 0 ))
+declare -r NIGHTLY_TESTS_PROJECT_MASK=$(( 1 << 1 ))
+declare -r NIGHTLY_DOCS_PROJECT_MASK=$(( 1 << 2 ))
+echo $((
+ 1 << 1))
+
+echo $((
+ 3 << 1
+))
+
+let "a = 1 << 3"
+
+echo After
