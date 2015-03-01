@@ -80,6 +80,9 @@ public:
 
 	void startup()
 	{
+		if (m_parser->getParserType() != "ELF")
+			return;
+
 		std::string kcov_solib_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() +
 				"kcov-solib.pipe";
