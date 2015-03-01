@@ -604,9 +604,8 @@ bash-output-crc
     Should Contain    ${output}    2
 
 bash-sh-shebang
-	[Tags]	not_ready
 	Run								rm -rf ${out}/shell-main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
 	${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml sh_shebang_sh 4
     Should Contain    ${output}    	1
 

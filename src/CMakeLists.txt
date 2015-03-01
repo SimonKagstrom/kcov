@@ -65,12 +65,20 @@ include_directories(
 link_directories (/home/ska/local/lib)
 
 add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
+add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 
 target_link_libraries(${SOLIB} dl)
+target_link_libraries(bash_execve_redirector dl)
 
 add_custom_command(
    OUTPUT library.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.cc
+   DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   )
+
+add_custom_command(
+   OUTPUT bash-redirector-library.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py libbash_execve_redirector.so bash_redirector_library > bash-redirector-library.cc
    DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
@@ -128,7 +136,7 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.cc python-helper.cc bash-helper.cc html-data-files.cc)
+add_executable (${KCOV} ${${KCOV}_SRCS} library.cc bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc)
 
 target_link_libraries(${KCOV}
 	${LIBDW_LIBRARIES}

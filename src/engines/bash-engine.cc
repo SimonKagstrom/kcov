@@ -25,6 +25,7 @@
 using namespace kcov;
 
 extern GeneratedData bash_helper_data;
+extern GeneratedData bash_redirector_library_data;
 
 enum InputType
 {
@@ -75,10 +76,18 @@ public:
 
 		std::string helperPath =
 				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
+		std::string redirectorPath =
+				IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
 
 		if (write_file(bash_helper_data.data(), bash_helper_data.size(),
 				"%s", helperPath.c_str()) < 0) {
 				error("Can't write helper at %s", helperPath.c_str());
+
+				return false;
+		}
+		if (write_file(bash_redirector_library_data.data(), bash_redirector_library_data.size(),
+				"%s", redirectorPath.c_str()) < 0) {
+				error("Can't write redirector library at %s", redirectorPath.c_str());
 
 				return false;
 		}
@@ -141,6 +150,12 @@ public:
 			doSetenv(fmt("KCOV_BASH_XTRACEFD=%d", xtraceFd));
 			doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
 			doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
+
+			// Export the bash command for use in the bash-execve-redirector library
+			doSetenv(fmt("KCOV_BASH_COMMAND=%s", command.c_str()));
+
+			// And preload it!
+			doSetenv(std::string("LD_PRELOAD=" + redirectorPath));
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
