@@ -1,4 +1,6 @@
 Kcov (26):
+	* Report file-not-found or file-not-executable errors more clearly
+
 	* Issue #61: bash-engine: Output trace data via BASH_XTRACEFD when possible
 	  (bash >= 4.1) and filter stdout to catch redirections otherwise
 
