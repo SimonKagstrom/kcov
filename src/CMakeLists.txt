@@ -22,6 +22,20 @@ set (${SOLIB}_SRCS
 	solib-parser/lib.c
 	)
 
+set (LINUX_SRCS
+	dummy-solib-handler.cc
+)
+
+# Linux-specific sources
+if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+	set (LINUX_SRCS
+		engines/ptrace.cc
+		parsers/elf-parser.cc
+		solib-handler.cc
+		solib-parser/phdr_data.c
+	)
+endif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+
 set (${KCOV}_SRCS
     capabilities.cc
     collector.cc
@@ -30,23 +44,20 @@ set (${KCOV}_SRCS
     engines/bash-engine.cc
     engines/gcov-engine.cc
     engines/kernel-engine.cc
-    engines/ptrace.cc
     engines/python-engine.cc
     filter.cc
     gcov.cc
     main.cc
     merge-file-parser.cc
     output-handler.cc
-    parsers/elf-parser.cc
     parser-manager.cc
     reporter.cc
-    solib-handler.cc
-    solib-parser/phdr_data.c
     utils.cc
     writers/cobertura-writer.cc
     writers/coveralls-writer.cc
     writers/html-writer.cc
     writers/writer-base.cc
+    ${LINUX_SRCS}
     )
 
 
