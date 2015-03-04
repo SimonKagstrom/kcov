@@ -77,6 +77,14 @@ run with Python 3 on systems where Python 2 is the default.
 \fB\-\-bash\-parser\fP=\fIPARSER\fP
 Set the bash parser to use for shell scripts (the default is /bin/bash).
 .TP
+\fB\-\-bash\-method\fP=\fIMETHOD\fP
+Use collection method \fIMETHOD\fP for bash scripts. The method can be either PS4, for use of
+the PS4 environment variable, or DEBUG for use of the DEBUG trap.
+.TP
+\fB\-\-bash\-handle\-sh\-invocation
+Handle invocations of /bin/sh scripts via using a LD_PRELOADed library that replaces execve (i.e., /bin/sh is
+executed as /bin/bash). Does not work well on some systems, so the default is not to use this.
+.TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
 .RE
