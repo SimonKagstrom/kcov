@@ -25,6 +25,7 @@
 using namespace kcov;
 
 extern GeneratedData bash_helper_data;
+extern GeneratedData bash_helper_debug_trap_data;
 extern GeneratedData bash_redirector_library_data;
 
 enum InputType
@@ -76,12 +77,20 @@ public:
 
 		std::string helperPath =
 				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
+		std::string helperDebugTrapPath =
+				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
 		std::string redirectorPath =
 				IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
 
 		if (write_file(bash_helper_data.data(), bash_helper_data.size(),
 				"%s", helperPath.c_str()) < 0) {
-				error("Can't write helper at %s", helperPath.c_str());
+				error("Can't write helper");
+
+				return false;
+		}
+		if (write_file(bash_helper_debug_trap_data.data(), bash_helper_debug_trap_data.size(),
+				"%s", helperDebugTrapPath.c_str()) < 0) {
+				error("Can't write helper");
 
 				return false;
 		}
@@ -123,9 +132,10 @@ public:
 			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
 
 			const std::string command = conf.keyAsString("bash-command");
+			bool usePS4 = conf.keyAsInt("bash-use-ps4");
 
 			// Revert to stderr if this bash version can't handle BASH_XTRACE
-			if (!m_bashSupportsXtraceFd)
+			if (usePS4 && !m_bashSupportsXtraceFd)
 				xtraceFd = 2;
 
 			if (dup2(stderrPipe[1], xtraceFd) < 0) {
@@ -145,14 +155,21 @@ public:
 			close(stderrPipe[0]);
 			close(stdoutPipe[0]);
 
-			/* Set up PS4 for tracing */
-			doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 			doSetenv(fmt("KCOV_BASH_XTRACEFD=%d", xtraceFd));
-			doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
-			doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
-
 			// Export the bash command for use in the bash-execve-redirector library
 			doSetenv(fmt("KCOV_BASH_COMMAND=%s", command.c_str()));
+
+			/* Set up PS4 for tracing */
+			if (usePS4) {
+				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
+				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
+				doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
+			} else {
+				// Use DEBUG trap
+				doSetenv(fmt("BASH_ENV=%s", helperDebugTrapPath.c_str()));
+				doSetenv(fmt("KCOV_BASH_USE_DEBUG_TRAP=1"));
+			}
+
 
 			// And preload it!
 			if (conf.keyAsInt("bash-handle-sh-invocation"))
@@ -160,11 +177,14 @@ public:
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
+			int argcStart = usePS4 ? 2 : 1;
 			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
-			vec[1] = xstrdup("-x");
+
+			if (usePS4)
+				vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
-				vec[2 + i] = xstrdup(argv[i]);
+				vec[argcStart + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
 			if (execv(vec[0], vec)) {
@@ -225,8 +245,10 @@ public:
 		const std::string &filename = get_real_path(parts[1]);
 		const std::string &lineNo = parts[2];
 
-		// Skip the helper library
+		// Skip the helper libraries
 		if (filename.find("bash-helper.sh") != std::string::npos)
+			return true;
+		if (filename.find("bash-helper-debug-trap.sh") != std::string::npos)
 			return true;
 
 		if (!string_is_integer(lineNo)) {

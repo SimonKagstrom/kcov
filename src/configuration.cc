@@ -121,6 +121,7 @@ public:
 				{"report-only", no_argument, 0, 'r'},
 				{"python-parser", required_argument, 0, 'P'},
 				{"bash-parser", required_argument, 0, 'B'},
+				{"bash-method", required_argument, 0, '4'},
 				{"uncommon-options", no_argument, 0, 'U'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
@@ -272,10 +273,22 @@ public:
 			}
 			case 'd':
 				setKey("bash-force-stderr-input", 1);
+				setKey("bash-use-ps4", 1); // Needed in this mode
 				break;
 			case 's':
 				setKey("bash-handle-sh-invocation", 1);
 				break;
+			case '4':
+			{
+				std::string s(optarg);
+
+				if (s== "DEBUG")
+					setKey("bash-use-ps4", 0);
+				else if (s == "PS4")
+					setKey("bash-use-ps4", 1);
+				else
+					panic("Invalid bash method: Use PS4 or DEBUG\n");
+			} break;
 			case 'C':
 				setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 				break;
@@ -415,6 +428,7 @@ public:
 		setKey("include-path", StrVecMap_t());
 		setKey("bash-force-stderr-input", 0);
 		setKey("bash-handle-sh-invocation", 0);
+		setKey("bash-use-ps4", 1);
 	}
 
 
@@ -473,6 +487,7 @@ public:
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
 				"                         default: %s\n"
+				" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
 				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
 				"                         execve replacement. Buggy on some systems\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"), keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()

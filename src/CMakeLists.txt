@@ -101,8 +101,14 @@ add_custom_command(
 
 add_custom_command(
    OUTPUT bash-helper.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh bash_helper > bash-helper.cc
-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh bash_helper
+     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh bash_helper_debug_trap
+   > bash-helper.cc
+   DEPENDS
+     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh
+     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh
+     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
 add_custom_command(

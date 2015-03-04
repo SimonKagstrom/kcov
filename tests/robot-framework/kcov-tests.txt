@@ -473,6 +473,17 @@ bash-coverage
     ${output}=    Run	cat /tmp/robot.err
 	Should Contain   ${output}    	I'm echoing to stderr via some
 
+# Very limited, will expand once it's working better
+bash-coverage-debug-trap
+	Run								rm -rf ${out}/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --bash-method=DEBUG ${out} ${kcov_path}/tests/bash/shell-main 5
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 3
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 13
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 26
+    Should Contain    ${output}    nocode
+
 bash-short-file
 	Run								rm -rf ${out}/short-test.sh
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/short-test.sh
