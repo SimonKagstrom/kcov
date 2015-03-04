@@ -596,7 +596,7 @@ std::string escape_html(const std::string &str)
 
 std::string escape_json(const std::string &str)
 {
-	const std::string escapeChars = "\"\\\t'";
+	const std::string escapeChars = "\"\\\t\015'";
 	size_t n_escapes = 0;
 
 	for (unsigned i = 0; i < str.size(); i++) {
