@@ -115,6 +115,7 @@ public:
 				{"coveralls-id", required_argument, 0, 'T'},
 				{"debug", required_argument, 0, 'D'},
 				{"debug-force-bash-stderr", no_argument, 0, 'd'},
+				{"bash-handle-sh-invocation", no_argument, 0, 's'},
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
@@ -272,6 +273,9 @@ public:
 			case 'd':
 				setKey("bash-force-stderr-input", 1);
 				break;
+			case 's':
+				setKey("bash-handle-sh-invocation", 1);
+				break;
 			case 'C':
 				setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 				break;
@@ -410,6 +414,7 @@ public:
 		setKey("exclude-path", StrVecMap_t());
 		setKey("include-path", StrVecMap_t());
 		setKey("bash-force-stderr-input", 0);
+		setKey("bash-handle-sh-invocation", 0);
 	}
 
 
@@ -467,7 +472,9 @@ public:
 				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
-				"                         default: %s\n",
+				"                         default: %s\n"
+				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
+				"                         execve replacement. Buggy on some systems\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"), keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
 				);
 	}

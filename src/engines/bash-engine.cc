@@ -155,7 +155,8 @@ public:
 			doSetenv(fmt("KCOV_BASH_COMMAND=%s", command.c_str()));
 
 			// And preload it!
-			doSetenv(std::string("LD_PRELOAD=" + redirectorPath));
+			if (conf.keyAsInt("bash-handle-sh-invocation"))
+				doSetenv(std::string("LD_PRELOAD=" + redirectorPath));
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
