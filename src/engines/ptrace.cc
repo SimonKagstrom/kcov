@@ -359,7 +359,7 @@ public:
 				// Single-step if we have this BP
 				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
 					singleStep();
-				else
+				else if (sig != SIGSTOP)
 					skipInstruction();
 
 				if (m_firstBreakpoint) {
