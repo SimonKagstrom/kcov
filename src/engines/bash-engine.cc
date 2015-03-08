@@ -478,8 +478,15 @@ private:
 			// Remove comments
 			size_t comment = s.find("#");
 			if (comment != std::string::npos) {
-				s = s.substr(0, comment);
-				s = trim_string(s);
+
+				// But not $# or ${#variable}...
+				if ((comment >= 1 && s[comment - 1] == '$') ||
+						(comment >= 2 && s[comment - 1] == '{' && s[comment - 2] == '$')) {
+					// Do nothing
+				} else {
+					s = trim_string(s);
+					s = s.substr(0, comment);
+				}
 			}
 
 			// Empty line, ignore
