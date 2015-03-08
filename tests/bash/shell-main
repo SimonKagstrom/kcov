@@ -118,3 +118,11 @@ echo $((
 let "a = 1 << 3"
 
 echo After
+
+var=(c)
+test ${#var[*]} -gt 2 -o \
+     "${var[$((${#var[*]} - 1))]}" != "c" ||
+    {
+    echo Some line
+    }
+echo Something else
