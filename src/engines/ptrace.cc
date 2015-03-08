@@ -356,13 +356,17 @@ public:
 
 				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
 						(unsigned long long)out.addr, out.data, m_activeChild);
+
+				bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
+
 				// Single-step if we have this BP
-				if (m_instructionMap.find(out.addr) != m_instructionMap.end())
+				if (insnFound)
 					singleStep();
 				else if (sig != SIGSTOP)
 					skipInstruction();
 
-				if (m_firstBreakpoint) {
+				// Wait for solib data if this is the first time
+				if (m_firstBreakpoint && insnFound) {
 					blockUntilSolibDataRead();
 					m_firstBreakpoint = false;
 				}
