@@ -205,13 +205,14 @@ main-test-gcov
     ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file2_c 7
     Should Contain    ${output}    0
 
-gcov-tests-tricky
-    [Tags]	not_ready
-    Run                            rm -rf ${out}/main-tests-gcov
-    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
-    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 20
-    Should Contain    ${output}    nocode
+# Appears to hang at times, so ignore it
+#gcov-tests-tricky
+#    [Tags]	not_ready
+#    Run                            rm -rf ${out}/main-tests-gcov
+#    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
+#    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 20
+#    Should Contain    ${output}    nocode
 
 accumulate-data
     Run                            rm -rf ${out}/argv_dependent/
