@@ -237,6 +237,11 @@ popen-test
     ${output}=    Run    ${kcov} ${out} ./test_popen
     Should Contain    ${output}    popen OK
 
+short-filename
+    Run                            rm -rf ${out}/s
+    ${rc}=    Run and return RC    ${kcov} ${out} ./s
+    Should be equal as integers    ${rc}    99
+
 global-constructors-test
     Run                            rm -rf ${out}/global-constructors
     ${no_kcov_rc}=    Run and return RC    ./global-constructors
