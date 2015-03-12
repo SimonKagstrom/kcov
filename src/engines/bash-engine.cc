@@ -326,7 +326,7 @@ public:
 	{
 		std::string s((const char *)data, 80);
 
-		if (filename.substr(filename.size() - 3, filename.size()) == ".sh")
+		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".sh")
 			return 200;
 
 		if (s.find("#!/bin/bash") != std::string::npos)
@@ -626,7 +626,7 @@ public:
 	{
 		std::string s((const char *)data, 80);
 
-		if (filename.substr(filename.size() - 3, filename.size()) == ".sh")
+		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".sh")
 			return 200;
 
 		if (s.find("#!/bin/bash") != std::string::npos)

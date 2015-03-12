@@ -196,7 +196,7 @@ public:
 	{
 		std::string s((const char *)data, 80);
 
-		if (filename.substr(filename.size() - 3, filename.size()) == ".py")
+		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".py")
 			return 200;
 
 		if (s.find("python") != std::string::npos)
@@ -444,7 +444,7 @@ public:
 	{
 		std::string s((const char *)data, 80);
 
-		if (filename.substr(filename.size() - 3, filename.size()) == ".py")
+		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".py")
 			return 200;
 
 		if (s.find("python") != std::string::npos)
