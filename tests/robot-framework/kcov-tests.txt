@@ -242,6 +242,14 @@ short-filename
     ${rc}=    Run and return RC    ${kcov} ${out} ./s
     Should be equal as integers    ${rc}    99
 
+pie
+    Run                            rm -rf ${out}/pie
+    ${no_kcov_rc}=    Run and return RC    ./pie
+    ${rc}=    Run and return RC    ${kcov} ${out} ./pie
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/pie/cobertura.xml pie_c 5
+    Should Contain    ${output}    1
+
 global-constructors-test
     Run                            rm -rf ${out}/global-constructors
     ${no_kcov_rc}=    Run and return RC    ./global-constructors

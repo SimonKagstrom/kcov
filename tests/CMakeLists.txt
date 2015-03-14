@@ -102,6 +102,10 @@ add_executable(issue31 daemon/test-issue31.cc)
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 add_executable(s short-file.c)
 
+add_executable(pie pie.c)
+set_target_properties(pie PROPERTIES COMPILE_FLAGS "-g -fpie -fPIE")
+set_target_properties(pie PROPERTIES LINK_FLAGS "-pie")
+
 add_executable(main-tests-gcov ${main_tests_SRCS})
 set_target_properties(main-tests-gcov PROPERTIES COMPILE_FLAGS "--coverage")
 set_target_properties(main-tests-gcov PROPERTIES LINK_FLAGS "--coverage")
