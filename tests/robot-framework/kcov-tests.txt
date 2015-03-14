@@ -242,12 +242,38 @@ short-filename
     ${rc}=    Run and return RC    ${kcov} ${out} ./s
     Should be equal as integers    ${rc}    99
 
+# Position-independent executables
 pie
     Run                            rm -rf ${out}/pie
     ${no_kcov_rc}=    Run and return RC    ./pie
     ${rc}=    Run and return RC    ${kcov} ${out} ./pie
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/pie/cobertura.xml pie_c 5
+    Should Contain    ${output}    1
+
+pie-argv-basic
+    Run                            rm -rf ${out}/pie-test
+    ${rc}=    Run and return RC    ${kcov} ${out} ./pie-test
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 11
+    Should Contain    ${output}    0
+
+pie-accumulate
+    [Tags]	not_ready
+    Run                            rm -rf ${out}/pie-test
+    ${rc}=    Run and return RC    ${kcov} ${out} ./pie-test
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 11
+    Should Contain    ${output}    0
+    ${rc}=    Run and return RC    ${kcov} ${out} ./pie-test a
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 11
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/pie-test/cobertura.xml argv_dependent_c 5
     Should Contain    ${output}    1
 
 global-constructors-test

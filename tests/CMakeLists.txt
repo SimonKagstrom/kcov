@@ -110,6 +110,10 @@ add_executable(main-tests-gcov ${main_tests_SRCS})
 set_target_properties(main-tests-gcov PROPERTIES COMPILE_FLAGS "--coverage")
 set_target_properties(main-tests-gcov PROPERTIES LINK_FLAGS "--coverage")
 
+add_executable(pie-test argv-dependent.c)
+set_target_properties(pie-test PROPERTIES COMPILE_FLAGS "-g -fpie -fPIE")
+set_target_properties(pie-test PROPERTIES LINK_FLAGS "-pie")
+
 target_link_libraries(dlopen dl)
 
 
