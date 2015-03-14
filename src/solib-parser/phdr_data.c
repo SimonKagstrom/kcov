@@ -10,7 +10,7 @@
 #include <link.h>
 
 #define KCOV_MAGIC         0x6b636f76 /* "kcov" */
-#define KCOV_SOLIB_VERSION 2
+#define KCOV_SOLIB_VERSION 3
 
 static uint8_t data_area[4 * 1024 * 1024];
 
@@ -23,6 +23,7 @@ struct phdr_data *phdr_data_new(size_t allocSize)
 
 	p->magic = KCOV_MAGIC;
 	p->version = KCOV_SOLIB_VERSION;
+	p->relocation = 0;
 	p->n_entries = 0;
 
 	return p;

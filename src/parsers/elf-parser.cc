@@ -40,6 +40,7 @@ public:
 		m_filename = "";
 		m_checksum = 0;
 		m_elfIs32Bit = true;
+		m_elfIsShared = false;
 		m_isMainFile = true;
 		m_initialized = false;
 		m_filter = NULL;
@@ -145,6 +146,7 @@ public:
 		if (m_isMainFile) {
 			char *raw;
 			size_t sz;
+			uint16_t e_type;
 
 			raw = elf_getident(elf, &sz);
 
@@ -159,6 +161,9 @@ public:
 					capabilities.addCapability("handle-solibs");
 			}
 
+			e_type = m_elfIs32Bit ? elf32_getehdr(elf)->e_type : elf64_getehdr(elf)->e_type;
+
+			m_elfIsShared = e_type == ET_DYN;
 			m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
 		}
 
@@ -172,37 +177,70 @@ out_open:
 
 	bool parse()
 	{
+		// should defer until setMainFileRelocation
+		if (m_isMainFile && m_elfIsShared)
+			return true;
+
+		if (!doParse(0))
+			return false;
+
+		// After the first, all other are solibs
+		m_isMainFile = false;
+		return true;
+	}
+
+	bool doParse(unsigned long relocation)
+	{
 		struct stat st;
 
 		if (lstat(m_filename.c_str(), &st) < 0)
-			return 0;
+			return false;
 
 		parseOneElf();
 
 		// Gcov data?
 		if (IConfiguration::getInstance().keyAsInt("gcov") && !m_gcnoFiles.empty())
-			parseGcnoFiles();
+			parseGcnoFiles(relocation);
 		else
-			parseOneDwarf();
-
-		// After the first, all other are solibs
-		m_isMainFile = false;
+			parseOneDwarf(relocation);
 
 		return true;
 	}
 
-	void parseGcnoFiles()
+	bool setMainFileRelocation(unsigned long relocation)
+	{
+		if (!m_isMainFile)
+			return false;
+
+		kcov_debug(INFO_MSG, "main file relocation = %#lx", relocation);
+
+		if (m_elfIsShared) {
+			if (!doParse(relocation))
+				return false;
+		} else {
+			// this situation is probably problematic, as we have already notified
+			// segment informations to the listeners.
+			if (relocation != 0) {
+				warning("Got a static executable with relocation=%#lx, "
+					"probably the trace wouldn't work.", relocation);
+			}
+		}
+
+		return true;
+	}
+
+	void parseGcnoFiles(unsigned long relocation)
 	{
 		for (FileList_t::const_iterator it = m_gcnoFiles.begin();
 				it != m_gcnoFiles.end();
 				++it) {
 			const std::string &cur = *it;
 
-			parseOneGcno(cur);
+			parseOneGcno(cur, relocation);
 		}
 	}
 
-	void parseOneGcno(const std::string &filename)
+	void parseOneGcno(const std::string &filename, unsigned long relocation)
 	{
 		size_t sz;
 		void *data;
@@ -234,11 +272,11 @@ out_open:
 					it != m_lineListeners.end();
 					++it)
 				(*it)->onLine(cur.m_file, cur.m_line,
-						gcovGetAddress(cur.m_file, cur.m_function, cur.m_basicBlock, cur.m_index));
+						gcovGetAddress(cur.m_file, cur.m_function, cur.m_basicBlock, cur.m_index) + relocation);
 		}
 	}
 
-	bool parseOneDwarf()
+	bool parseOneDwarf(unsigned long relocation)
 	{
 		Dwarf_Off offset = 0;
 		Dwarf_Off last_offset = 0;
@@ -373,7 +411,7 @@ out_open:
 					for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
 							it != m_lineListeners.end();
 							++it)
-						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr));
+						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr) + relocation);
 				}
 			}
 		}
@@ -605,6 +643,7 @@ private:
 
 	struct Elf *m_elf;
 	bool m_elfIs32Bit;
+	bool m_elfIsShared;
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;
 	std::string m_filename;

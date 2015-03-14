@@ -147,6 +147,22 @@ namespace kcov
 		virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data = 0) = 0;
 
 		/**
+		 * Set the relocation of the main file for the position-independent executable (PIE) support
+		 *
+		 * PIEs have, like shared objects, an unknown load address which can only be
+		 * retrieved from the solib handler. Because of this the parser may defer
+		 * onFile and onLine notifications before this call.
+		 *
+		 * This method, if any, should be called after the initial parse call and
+		 * beefore the following addFile calls for solibs.
+		 *
+		 * @param relocation relocation offset
+		 *
+		 * @return true if the relocation is properly set, false otherwise
+		 */
+		virtual bool setMainFileRelocation(unsigned long relocation) = 0;
+
+		/**
 		 * Register a listener for source lines.
 		 *
 		 * Will be called when new source file/line pairs are found
