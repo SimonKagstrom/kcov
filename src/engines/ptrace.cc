@@ -7,6 +7,7 @@
 #include <phdr_data.h>
 
 #include <unistd.h>
+#include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/types.h>
@@ -487,7 +488,20 @@ private:
 
 		/* Executable exists, try to launch it */
 		if ((child = fork()) == 0) {
+			int persona;
 			int res;
+
+			/* Avoid address randomization */
+			persona = personality(0xffffffff);
+			if (persona < 0) {
+				perror("Can't get personality");
+				return false;
+			}
+			persona |= 0x0040000; /* ADDR_NO_RANDOMIZE */
+			if (personality(persona) < 0) {
+				perror("Can't set personality");
+				return false;
+			}
 
 			/* And launch the process */
 			res = ptrace(PTRACE_TRACEME, 0, 0, 0);

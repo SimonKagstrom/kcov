@@ -195,6 +195,8 @@ public:
 		if (!p)
 			return;
 
+		m_parser->setMainFileRelocation(p->relocation);
+
 		for (unsigned int i = 0; i < p->n_entries; i++)
 		{
 			struct phdr_data_entry *cur = &p->entries[i];

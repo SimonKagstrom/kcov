@@ -50,6 +50,11 @@ public:
 		return true;
 	}
 
+	bool setMainFileRelocation(unsigned long relocation)
+	{
+		return true;
+	}
+
 	void registerLineListener(ILineListener &listener)
 	{
 		m_lineListeners.push_back(&listener);

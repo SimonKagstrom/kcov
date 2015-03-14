@@ -20,6 +20,12 @@ static struct phdr_data *phdr_data;
 
 static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 {
+	// the first entry is used to determine the executable's "base address"
+	// (which is actually the relocation for PIE)
+	if (phdr_data->n_entries == 0) {
+		phdr_data->relocation = info->dlpi_addr;
+	}
+
 	phdr_data_add(phdr_data, info);
 
 	return 0;

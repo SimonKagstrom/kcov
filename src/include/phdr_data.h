@@ -27,6 +27,7 @@ struct phdr_data
 {
 	uint32_t magic;
 	uint32_t version;
+	unsigned long relocation; // for PIE
 	uint32_t n_entries;
 
 	struct phdr_data_entry entries[];

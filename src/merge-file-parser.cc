@@ -95,6 +95,11 @@ public:
 		return true;
 	}
 
+	virtual bool setMainFileRelocation(unsigned long relocation)
+	{
+		return true;
+	}
+
 	virtual void registerLineListener(IFileParser::ILineListener &listener)
 	{
 		m_lineListeners.push_back(&listener);
