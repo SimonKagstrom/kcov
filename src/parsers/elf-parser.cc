@@ -212,7 +212,7 @@ out_open:
 		if (!m_isMainFile)
 			return false;
 
-		kcov_debug(INFO_MSG, "main file relocation = %#lx", relocation);
+		kcov_debug(INFO_MSG, "main file relocation = %#lx\n", relocation);
 
 		if (m_elfIsShared) {
 			if (!doParse(relocation))
