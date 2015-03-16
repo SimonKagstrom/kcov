@@ -31,7 +31,8 @@ It's often useful to filter output, since e.g., /usr/include is seldomly of inte
 This can be done in two ways:
 
 ```
-kcov --exclude-path=/usr/include --include-pattern=part/of/path,other/path /path/to/outdir executable
+kcov --exclude-pattern=/usr/include --include-pattern=part/of/path,other/path \
+      /path/to/outdir executable
 ```
 
 which will do a string-comparison and include everything which contains
