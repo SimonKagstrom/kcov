@@ -1,3 +1,7 @@
+Kcov (27):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (26):
 	* Issue #77: Collect coverage for Position-Independent Executables
 	 (Kang Seonghoon)
