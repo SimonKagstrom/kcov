@@ -164,7 +164,10 @@ public:
 			e_type = m_elfIs32Bit ? elf32_getehdr(elf)->e_type : elf64_getehdr(elf)->e_type;
 
 			m_elfIsShared = e_type == ET_DYN;
-			m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
+			if (!m_checksum)
+			{
+				m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
+			}
 		}
 
 		elf_end(elf);
