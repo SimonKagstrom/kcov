@@ -54,7 +54,6 @@ namespace merge_parser
 
 class MergeParser :
 	public IMergeParser,
-	public IFileParser::ILineListener,
 	public IFileParser::IFileListener
 {
 public:
@@ -73,7 +72,6 @@ public:
 	{
 		reporter.registerListener(*this);
 		localParser.registerFileListener(*this);
-		localParser.registerLineListener(*this);
 	}
 
 	~MergeParser()
@@ -164,8 +162,8 @@ public:
 			(*it)->onAddressHit(addr, hits);
 	}
 
-	// From IFileParser::ILineListener
-	void onLine(const std::string &filename, unsigned int lineNr, uint64_t addr)
+	// From IReporter::IListener
+	virtual void onLineReporter(const std::string &filename, unsigned int lineNr, uint64_t addr)
 	{
 		if (!m_filter.runFilters(filename))
 		{

@@ -261,7 +261,6 @@ pie-argv-basic
     Should Contain    ${output}    0
 
 pie-accumulate
-    [Tags]	not_ready
     Run                            rm -rf ${out}/pie-test
     ${rc}=    Run and return RC    ${kcov} ${out} ./pie-test
     Should be equal as integers    ${rc}    0

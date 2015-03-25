@@ -61,6 +61,18 @@ namespace kcov
 			 * @param hits the number of hits of the address (typically 1)
 			 */
 			virtual void onAddress(uint64_t addr, unsigned long hits) = 0;
+
+			/**
+			 * Re-report on-lines from the file-parser.
+			 *
+			 * The address can be changed by the reporter, so this will match
+			 * onAddress above.
+			 *
+			 * @param file the source file
+			 * @param lineNr the line number in @a file
+			 * @param addr the (hashed) address for this file/line combination
+			 */
+			virtual void onLineReporter(const std::string &file, unsigned int lineNr, uint64_t addr) {}
 		};
 
 		virtual ~IReporter() {}

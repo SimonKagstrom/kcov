@@ -16,7 +16,7 @@
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 5
+#define KCOV_DB_VERSION 6
 
 struct marshalHeaderStruct
 {
@@ -48,6 +48,14 @@ public:
 	~Reporter()
 	{
 		stop();
+
+		for (FileMap_t::const_iterator it = m_files.begin();
+				it != m_files.end();
+				++it) {
+			File *cur = it->second;
+
+			delete cur;
+		}
 	}
 
 	void registerListener(IReporter::IListener &listener)
@@ -62,11 +70,13 @@ public:
 
 	bool lineIsCode(const std::string &file, unsigned int lineNr)
 	{
+		FileMap_t::iterator it = m_files.find(file);
+
 		// Not code if the file doesn't exist!
-		if (m_files.find(file) == m_files.end())
+		if (it == m_files.end())
 			return false;
 
-		return m_files[file].lineIsCode(lineNr);
+		return it->second->lineIsCode(lineNr);
 	}
 
 	LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr)
@@ -77,7 +87,7 @@ public:
 		FileMap_t::const_iterator it = m_files.find(file);
 
 		if (it != m_files.end()) {
-			const Line *line = it->second.getLine(lineNr);
+			const Line *line = it->second->getLine(lineNr);
 
 			if (line) {
 				hits = line->hits();
@@ -98,7 +108,7 @@ public:
 				it != m_files.end();
 				++it) {
 			const std::string &fileName = it->first;
-			const File &file = it->second;
+			const File *file = it->second;
 
 			// Don't include non-existing files in summary
 			if (!file_exists(fileName))
@@ -108,8 +118,8 @@ public:
 			if (!m_filter.runFilters(fileName))
 				continue;
 
-			executedLines += file.getExecutedLines();
-			nrLines += file.getNrLines();
+			executedLines += file->getExecutedLines();
+			nrLines += file->getNrLines();
 		}
 
 		return ExecutionSummary(nrLines, executedLines);
@@ -131,9 +141,9 @@ public:
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
 				++it) {
-			const File &cur = it->second;
+			const File *cur = it->second;
 
-			p = cur.marshal(p, *this);
+			p = cur->marshal(p, *this);
 		}
 
 		*szOut = sz;
@@ -158,44 +168,43 @@ public:
 			uint64_t fileHash;
 			uint64_t addr;
 			uint64_t hits;
-			uint64_t rangeIndex;
+			uint64_t addrIndex;
 
-			p = Line::unMarshal(p, &addr, &hits, &fileHash, &rangeIndex);
-			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
+			p = Line::unMarshal(p, &addr, &hits, &fileHash, &addrIndex);
 
 			if (!hits)
 				continue;
 
-			/*
-			 * Can't find this file.
-			 *
-			 * Typically because it's in a shared library, which hasn't been
-			 * loaded yet.
-			 */
-			if (fileHash != 0 && m_presentFiles.find(fileHash) == m_presentFiles.end()) {
-				m_pendingFiles[fileHash].push_back(PendingFileAddress(addr, rangeIndex, hits));
-				continue;
-			}
+			AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
-			/* Can't find this address.
+			/*
+			 * Can't find this file/line
 			 *
 			 * Either it doesn't exist in the binary, or it hasn't been parsed
 			 * yet, which will be the case for bash/python. Add it to pending
 			 * addresses if so.
+
+			 * Typically because it's in a shared library, which hasn't been
+			 * loaded yet.
 			 */
 			if (it == m_addrToLine.end()) {
-				m_pendingHits[addr] = hits;
+				LineIdToFileMap_t::iterator lit = m_lineIdToFileMap.find(fileHash);
+
+				if (lit == m_lineIdToFileMap.end()) {
+					// No line ID (shared library?). Add to pending
+					m_pendingFiles[fileHash].push_back(PendingFileAddress(addrIndex, hits));
+				} else {
+					// line ID exists, but not address (PIEs etc)
+					reportAddress(fileHash, hits);
+
+					lit->second->registerHitIndex(addrIndex, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
+				}
+
 				continue;
 			}
 
-			Line *line = it->second;
-
-			// Really an internal error, but let's not hang on corrupted data
-			if (m_maxPossibleHits != IFileParser::HITS_UNLIMITED && hits > line->possibleHits(true))
-				hits = line->possibleHits(true);
-
-			// Register all hits for this address
-			reportAddress(addr, hits);
+			// Part of this file - just report it
+			onAddressHit(addr, hits);
 		}
 
 		return true;
@@ -227,7 +236,7 @@ private:
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
 				++it) {
-			out += it->second.marshalSize();
+			out += it->second->marshalSize();
 		}
 
 		return out * getMarshalEntrySize() + sizeof(struct marshalHeaderStruct);
@@ -269,26 +278,50 @@ private:
 		kcov_debug(INFO_MSG, "REPORT %s:%u at 0x%lx\n",
 				file.c_str(), lineNr, (unsigned long)addr);
 
-		Line *line = m_files[file].getLine(lineNr);
+		File *fp = m_files[file];
+
+		if (!fp) {
+			fp = new File(file);
+
+			m_files[file] = fp;
+		}
+
+		Line *line = fp->getLine(lineNr);
 
 		if (!line) {
-			line = new Line(file, lineNr);
-			m_files[file].addLine(lineNr, line);
+			line = new Line(fp->getFileHash(), lineNr);
+			fp->addLine(lineNr, line);
 		}
+
+		uint64_t lineId = line->lineId();
 
 		line->addAddress(addr);
 		m_addrToLine[addr] = line;
+		m_lineIdToFileMap[lineId] = line;
 
-		/*
-		 * If we have pending hits for this address, service
-		 * them here.
-		 */
-		AddrToHitsMap_t::iterator pend = m_pendingHits.find(addr);
-		if (pend != m_pendingHits.end()) {
-			reportAddress(addr, pend->second);
+		// Report pending addresses for this file/line
+		PendingFilesMap_t::const_iterator it = m_pendingFiles.find(lineId);
+		if (it != m_pendingFiles.end()) {
+			for (PendingHitsList_t::const_iterator fit = it->second.begin();
+					fit != it->second.end();
+					++fit) {
+				const PendingFileAddress &val = *fit;
+				unsigned long hits = val.m_hits;
+				uint64_t index = val.m_index;
 
-			m_pendingHits.erase(addr);
+				reportAddress(lineId, hits);
+
+				line->registerHitIndex(index, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
+			}
+
+			// Handled now
+			m_pendingFiles[lineId].clear();
 		}
+
+		for (ListenerList_t::const_iterator it = m_listeners.begin();
+				it != m_listeners.end();
+				++it)
+			(*it)->onLineReporter(file, lineNr, lineId);
 	}
 
 	// Called when a file is added (e.g., a shared library)
@@ -318,56 +351,33 @@ private:
 
 			free(data);
 		}
-
-		// Report pending addresses for this file
-		PendingFilesMap_t::const_iterator it = m_pendingFiles.find(fileHash);
-		if (it != m_pendingFiles.end()) {
-			const AddressRangeList_t &ranges = m_presentFiles[fileHash];
-
-			for (PendingHitsList_t::const_iterator fit = it->second.begin();
-					fit != it->second.end();
-					++fit) {
-				const PendingFileAddress &val = *fit;
-				uint64_t addr = val.m_addr;
-				unsigned long hits = val.m_hits;
-				uint64_t index = val.m_index;
-
-				if (index < ranges.size()) {
-					const AddressRange &range = ranges[index];
-
-					addr = addr + range.getAddress();
-				}
-
-				m_pendingHits[addr]= hits;
-			}
-
-			m_pendingFiles[fileHash].clear();
-		}
 	}
 
 	/* Called during runtime */
-	void reportAddress(uint64_t addr, unsigned long hits)
+	void reportAddress(uint64_t lineHash, unsigned long hits)
+	{
+		// Report the line hash (loosing partial hit info from now on, but
+		// that's only for the merge-reporter anyway)
+		for (ListenerList_t::const_iterator it = m_listeners.begin();
+				it != m_listeners.end();
+				++it)
+			(*it)->onAddress(lineHash, hits);
+	}
+
+	// From ICollector::IListener
+	void onAddressHit(uint64_t addr, unsigned long hits)
 	{
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
 
 		if (it == m_addrToLine.end())
 			return;
 
+		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long)addr);
 		Line *line = it->second;
 
-		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long)addr);
 		line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
-		for (ListenerList_t::const_iterator it = m_listeners.begin();
-				it != m_listeners.end();
-				++it)
-			(*it)->onAddress(addr, hits);
-	}
-
-	// From ICollector::IListener
-	void onAddressHit(uint64_t addr, unsigned long hits)
-	{
-		reportAddress(addr, hits);
+		reportAddress(line->lineId(), hits);
 	}
 
 	// From IReporter::IListener - report recursively
@@ -441,7 +451,8 @@ private:
 		// More efficient than an unordered_map
 		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
-		Line(const std::string &file, unsigned int lineNr)
+		Line(uint64_t fileHash, unsigned int lineNr) :
+			m_lineId((fileHash << 32ULL) | lineNr)
 		{
 		}
 
@@ -481,6 +492,15 @@ private:
 				it->second += hits;
 		}
 
+		void registerHitIndex(uint64_t index, unsigned long hits, bool singleShot)
+		{
+			// Avoid broken data
+			if (m_addrs.size() <= index)
+				return;
+
+			m_addrs[index].second += hits;
+		}
+
 		void clearHits()
 		{
 			for (AddrToHitsMap_t::iterator it = m_addrs.begin();
@@ -509,32 +529,30 @@ private:
 			return 0; // Meaning any number of hits are possible
 		}
 
+		uint64_t lineId() const
+		{
+			return m_lineId;
+		}
+
 		uint8_t *marshal(uint8_t *start, const Reporter &parent)
 		{
 			uint64_t *data = (uint64_t *)start;
+			unsigned int addrIndex = 0;
 
 			for (AddrToHitsMap_t::const_iterator it = m_addrs.begin();
 					it != m_addrs.end();
-					++it) {
+					++it, addrIndex++) {
 				// No hits? Ignore if so
 				if (!it->second)
 					continue;
 
-				uint64_t hash = parent.getFileHashForAddress(it->first);
+				uint64_t hash = m_lineId;
 				uint64_t addr = it->first;
-				uint64_t index = 0;
-
-				// For solibs, we want only the offset
-				if (hash != 0) {
-					// Before addressToOffset since addr is changed
-					index = parent.getAddressRangeIndex(hash, addr);
-					addr = parent.addressToOffset(addr);
-				}
 
 				// Address, hash, index and number of hits
 				*data++ = to_be<uint64_t>(addr);
 				*data++ = to_be<uint64_t>(hash);
-				*data++ = to_be<uint64_t>(index);
+				*data++ = to_be<uint64_t>(addrIndex);
 				*data++ = to_be<uint64_t>(it->second);
 			}
 
@@ -575,13 +593,22 @@ private:
 
 	private:
 		AddrToHitsMap_t m_addrs;
+		uint64_t m_lineId;
 	};
 
 	class File
 	{
 	public:
-		File() : m_nrLines(0)
+		File(const std::string &filename) : m_nrLines(0)
 		{
+			size_t sz;
+			void *data = read_file(&sz, "%s", filename.c_str());
+
+			// Compute checksum by contents
+			if (data)
+				m_fileHash = hash_block(data, sz);
+
+			free(data);
 		}
 
 		~File()
@@ -612,6 +639,11 @@ private:
 				return NULL;
 
 			return m_lines[lineNr];
+		}
+
+		uint64_t getFileHash() const
+		{
+			return m_fileHash;
 		}
 
 		// Marshal all line data
@@ -676,6 +708,7 @@ private:
 		}
 
 	private:
+		uint64_t m_fileHash;
 		std::vector<Line *> m_lines;
 		unsigned int m_nrLines;
 	};
@@ -725,23 +758,23 @@ private:
 	class PendingFileAddress
 	{
 	public:
-		PendingFileAddress(uint64_t addr, uint64_t index, unsigned long hits) :
-			m_addr(addr), m_index(index), m_hits(hits)
+		PendingFileAddress(uint64_t index, unsigned long hits) :
+			m_index(index), m_hits(hits)
 		{
 		}
 
-		uint64_t m_addr;
 		uint64_t m_index;
 		unsigned long m_hits;
 	};
 
-	typedef std::unordered_map<std::string, File> FileMap_t;
+	typedef std::unordered_map<std::string, File *> FileMap_t;
 	typedef std::unordered_map<uint64_t, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
 	typedef std::map<AddressRange, uint64_t> AddressRangeMap_t;
 	typedef std::vector<AddressRange> AddressRangeList_t;
 	typedef std::unordered_map<uint64_t, AddressRangeList_t> PresentFilesMap_t;
+	typedef std::unordered_map<uint64_t, Line *> LineIdToFileMap_t;
 	typedef std::vector<PendingFileAddress> PendingHitsList_t; // Address, hits
 	typedef std::unordered_map<uint64_t, PendingHitsList_t> PendingFilesMap_t;
 
@@ -752,6 +785,8 @@ private:
 	AddressRangeMap_t m_addressRanges;
 	PresentFilesMap_t m_presentFiles;
 	PendingFilesMap_t m_pendingFiles;
+	LineIdToFileMap_t m_lineIdToFileMap;
+
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
