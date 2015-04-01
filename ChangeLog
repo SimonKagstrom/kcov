@@ -1,4 +1,5 @@
 Kcov (27):
+	* Issue #80: Fix coverage accumulation for PIE executables
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 
