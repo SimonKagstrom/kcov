@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 chroot=/tmp/32-bit-chroot
-kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 cmake
+kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 cmake binutils-dev
 
 .PHONY: prepare_environment
 

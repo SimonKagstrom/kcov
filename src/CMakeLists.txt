@@ -6,6 +6,10 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 
+include(TargetArch)
+target_architecture(CMAKE_TARGET_ARCHITECTURES)
+message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
+
 pkg_check_modules(LIBZ REQUIRED zlib)
 pkg_check_modules(LIBCURL REQUIRED libcurl)
 
@@ -26,6 +30,17 @@ set (${SOLIB}_SRCS
 set (ADDRESS_VERIFIER_SRCS
 	parsers/dummy-address-verifier.cc
 )
+
+if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
+	set (ADDRESS_VERIFIER_SRCS
+		parsers/bfd-address-verifier.cc
+	)
+	set (ADDRESS_VERIFIER_LIBRARIES
+		bfd
+		iberty
+		opcodes
+	)
+endif()
 
 set (LINUX_SRCS
 	dummy-solib-handler.cc
@@ -169,9 +184,7 @@ target_link_libraries(${KCOV}
 	pthread
 	${LIBCURL_LIBRARIES}
 	m
-	bfd
-	iberty
-	opcodes
+	${ADDRESS_VERIFIER_LIBRARIES}
 	${LIBZ_LIBRARIES})
 
 
