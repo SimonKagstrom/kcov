@@ -19,6 +19,7 @@ set (${LINE2ADDR}_SRCS
 	../src/filter.cc
 	../src/gcov.cc
 	../src/parsers/elf-parser.cc
+	../src/parsers/dummy-address-verifier.cc
 	../src/parser-manager.cc
 	../src/utils.cc
 	line2addr.cc
