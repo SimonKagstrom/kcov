@@ -127,7 +127,7 @@ private:
 				kcov_debug(STATUS_MSG,
 						"\nkcov: Illegal instructions are sometimes caused by some GCC versions\n"
 						"kcov: miscompiling C++ headers. If the problem is persistent, try running\n"
-						"kcov: with --exclude-pattern=/usr/include. For more information, see\n"
+						"kcov: with --verify. For more information, see\n"
 						"kcov: http://github.com/SimonKagstrom/kcov/issues/18\n");
 
 			break;

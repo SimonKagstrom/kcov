@@ -5,6 +5,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
+
 pkg_check_modules(LIBZ REQUIRED zlib)
 pkg_check_modules(LIBCURL REQUIRED libcurl)
 
@@ -21,6 +22,10 @@ set (${SOLIB}_SRCS
 	solib-parser/phdr_data.c
 	solib-parser/lib.c
 	)
+
+set (ADDRESS_VERIFIER_SRCS
+	parsers/dummy-address-verifier.cc
+)
 
 set (LINUX_SRCS
 	dummy-solib-handler.cc
@@ -50,6 +55,7 @@ set (${KCOV}_SRCS
     main.cc
     merge-file-parser.cc
     output-handler.cc
+    ${ADDRESS_VERIFIER_SRCS}
     parser-manager.cc
     reporter.cc
     utils.cc
@@ -163,6 +169,9 @@ target_link_libraries(${KCOV}
 	pthread
 	${LIBCURL_LIBRARIES}
 	m
+	bfd
+	iberty
+	opcodes
 	${LIBZ_LIBRARIES})
 
 

@@ -122,6 +122,7 @@ public:
 				{"python-parser", required_argument, 0, 'P'},
 				{"bash-parser", required_argument, 0, 'B'},
 				{"bash-method", required_argument, 0, '4'},
+				{"verify", no_argument, 0, 'V'},
 				{"uncommon-options", no_argument, 0, 'U'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
@@ -202,6 +203,9 @@ public:
 				break;
 			case 'U':
 				m_printUncommon = true;
+				break;
+			case 'V':
+				setKey("verify", 1);
 				break;
 			case 'L':
 				setKey("parse-solibs", 0);
@@ -429,6 +433,7 @@ public:
 		setKey("bash-force-stderr-input", 0);
 		setKey("bash-handle-sh-invocation", 0);
 		setKey("bash-use-ps4", 1);
+		setKey("verify", 0);
 	}
 
 
@@ -482,6 +487,8 @@ public:
 				"                         only output when kcov terminates, default %d)\n"
 				"\n"
 				" --debug=X               set kcov debugging level (max 31, default 0)\n"
+				"\n"
+				" --verify                verify breakpoint setup (to catch compiler bugs)\n"
 				"\n"
 				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
 				"                         default: %s\n"

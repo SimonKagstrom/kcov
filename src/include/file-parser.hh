@@ -37,13 +37,13 @@ namespace kcov
 		class Segment
 		{
 		public:
-			Segment(uint64_t paddr, uint64_t vaddr, uint64_t size) :
-				m_paddr(paddr), m_vaddr(vaddr), m_size(size)
+			Segment(const void *data, uint64_t paddr, uint64_t vaddr, uint64_t size) :
+				m_data(data), m_paddr(paddr), m_vaddr(vaddr), m_size(size)
 			{
 			}
 
 			Segment(const Segment &other) :
-				m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
+				m_data(other.m_data), m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
 			{
 			}
 
@@ -79,12 +79,19 @@ namespace kcov
 				return m_vaddr;
 			}
 
+			const void *getData() const
+			{
+				return m_data;
+			}
+
 			size_t getSize() const
 			{
 				return m_size;
 			}
 
 		private:
+			const void *m_data;
+
 			// Should really be const, but GCC 4.6 doesn't like that
 			uint64_t m_paddr;
 			uint64_t m_vaddr;

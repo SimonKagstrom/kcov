@@ -66,6 +66,9 @@ Number of path levels to show for common paths (default: 2).
 \fB\-\-skip\-solibs
 Skip coverage collection for shared libraries (improves performance)
 .TP
+\fB\-\-verify
+Verify that breakpoints are setup on instruction boundaries. This will slow down execution greatly, but can catch problems where the compiler generates bad DWARF data.
+.TP
 \fB\-\-exit\-first\-process
 exit when the first process exits, i.e., honor the behavior of daemons. The default behavior
 is to return to the console when the last process exits.

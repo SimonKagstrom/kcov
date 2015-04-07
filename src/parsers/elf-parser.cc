@@ -16,12 +16,15 @@
 #include <vector>
 #include <string>
 #include <configuration.hh>
+
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
 #include <link.h>
 
 #include <filter.hh>
+
+#include "address-verifier.hh"
 
 using namespace kcov;
 
@@ -37,6 +40,7 @@ public:
 	ElfInstance()
 	{
 		m_elf = NULL;
+		m_addressVerifier = IAddressVerifier::create();
 		m_filename = "";
 		m_checksum = 0;
 		m_elfIs32Bit = true;
@@ -50,6 +54,7 @@ public:
 
 	virtual ~ElfInstance()
 	{
+		delete m_addressVerifier;
 	}
 
 	uint64_t getChecksum()
@@ -93,6 +98,7 @@ public:
 			/******* Swap debug source root with runtime source root *****/
 			m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
 			m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
+			m_verifyAddresses = IConfiguration::getInstance().keyAsInt("verify");
 
 			panic_if(elf_version(EV_CURRENT) == EV_NONE,
 					"ELF version failed\n");
@@ -109,7 +115,7 @@ public:
 		for (uint32_t i = 0; data && i < data->n_segments; i++) {
 			struct phdr_data_segment *seg = &data->segments[i];
 
-			m_curSegments.push_back(Segment(seg->paddr, seg->vaddr, seg->size));
+			m_curSegments.push_back(Segment(NULL, seg->paddr, seg->vaddr, seg->size));
 		}
 
 		if (!checkFile())
@@ -437,19 +443,23 @@ out_err:
 		bool setupSegments = false;
 		FileList_t gcdaFiles; // List of gcov data files scanned from .rodata
 		bool doScanForGcda = IConfiguration::getInstance().keyAsInt("gcov");
-		int fd;
+		char *fileData;
+		size_t fileSize;
 		unsigned int i;
 
-		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
-		if (fd < 0) {
+		fileData = (char *)read_file(&fileSize, "%s", m_filename.c_str());
+		if (!fileData) {
 				error("Cannot open %s\n", m_filename.c_str());
 				return false;
 		}
 
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
+		if (!(m_elf = elf_memory(fileData, fileSize)) ) {
 				error("elf_begin failed on %s\n", m_filename.c_str());
-				goto out_open;
+				free(fileData);
+				return false;
 		}
+
+		m_addressVerifier->setup(fileData, EI_NIDENT);
 
 		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
 				error("elf_getshstrndx failed on %s\n", m_filename.c_str());
@@ -464,6 +474,7 @@ out_err:
 			uint64_t sh_size;
 			uint64_t sh_flags;
 			uint64_t sh_name;
+			uint64_t sh_offset;
 			uint64_t n_namesz;
 			uint64_t n_descsz;
 			uint64_t n_type;
@@ -478,6 +489,7 @@ out_err:
 				sh_size = shdr32->sh_size;
 				sh_flags = shdr32->sh_flags;
 				sh_name = shdr32->sh_name;
+				sh_offset = shdr32->sh_offset;
 			} else {
 				Elf64_Shdr *shdr64 = elf64_getshdr(scn);
 
@@ -486,6 +498,7 @@ out_err:
 				sh_size = shdr64->sh_size;
 				sh_flags = shdr64->sh_flags;
 				sh_name = shdr64->sh_name;
+				sh_offset = shdr64->sh_offset;
 			}
 
 			Elf_Data *data = elf_getdata(scn, NULL);
@@ -562,10 +575,11 @@ out_err:
 			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) != (SHF_EXECINSTR | SHF_ALLOC))
 				continue;
 
+			Segment seg(fileData + sh_offset, sh_addr, sh_addr, sh_size);
 			// If we have segments already, we can safely skip this
 			if (setupSegments)
-				m_curSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
-			m_executableSegments.push_back(Segment(sh_addr, sh_addr, sh_size));
+				m_curSegments.push_back(seg);
+			m_executableSegments.push_back(seg);
 		}
 
 		// If we have gcda files, try to find the corresponding gcno dittos
@@ -583,18 +597,10 @@ out_err:
 				m_gcnoFiles.push_back(gcno);
 		}
 
-		elf_end(m_elf);
-		if (!(m_elf = elf_begin(fd, ELF_C_READ, NULL)) ) {
-			error("elf_begin failed on %s\n", m_filename.c_str());
-			goto out_open;
-		}
-
 		ret = true;
 
 out_elf_begin:
 		elf_end(m_elf);
-out_open:
-		close(fd);
 
 		return ret;
 	}
@@ -619,8 +625,21 @@ private:
 		for (SegmentList_t::const_iterator it = m_executableSegments.begin();
 				it != m_executableSegments.end();
 				++it) {
-			if (it->addressIsWithinSegment(addr))
-				return true;
+			if (it->addressIsWithinSegment(addr)) {
+				bool out = true;
+
+				if (m_verifyAddresses) {
+					uint64_t offset = addr - it->getBase();
+
+					out = m_addressVerifier->verify(it->getData(),it->getSize(), offset);
+
+					if (!out)
+						kcov_debug(STATUS_MSG, "kcov: Address 0x%llx is not at an instruction boundary, skipping\n",
+								(unsigned long long)addr);
+				}
+
+				return out;
+			}
 		}
 
 		return false;
@@ -644,6 +663,8 @@ private:
 	SegmentList_t m_executableSegments;
 	FileList_t m_gcnoFiles;
 
+	IAddressVerifier *m_addressVerifier;
+	bool m_verifyAddresses;
 	struct Elf *m_elf;
 	bool m_elfIs32Bit;
 	bool m_elfIsShared;
