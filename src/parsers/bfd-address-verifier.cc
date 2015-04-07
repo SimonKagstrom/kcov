@@ -1,4 +1,5 @@
 #include "address-verifier.hh"
+#include <utils.hh>
 
 #include <unordered_map>
 
@@ -29,6 +30,9 @@ public:
 	virtual void setup(const void *header, size_t headerSize)
 	{
 		const uint8_t *data = (const uint8_t *)header;
+
+		panic_if(headerSize <= EI_CLASS,
+				"Header size must be at least %u", EI_CLASS);
 
 		if (data[EI_CLASS] == ELFCLASS64)
 			m_info.mach = bfd_mach_x86_64;
