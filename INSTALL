@@ -1,8 +1,8 @@
 Building Kcov
 =============
 
-You need development headers and libraries for libstdc++, curl and
-elfutils to build kcov.
+You need development headers and libraries for libstdc++, curl, elfutils
+and (optional) binutils and libiberty to build kcov.
 
 Create an empty build dir and do the following steps:
 
