@@ -3,6 +3,10 @@
 
 #include <unordered_map>
 
+#ifndef ATTRIBUTE_FPTR_PRINTF_2
+# define ATTRIBUTE_FPTR_PRINTF_2
+#endif
+
 #include <bfd.h>
 #include <dis-asm.h>
 
