@@ -1,4 +1,7 @@
 Kcov (27):
+	* Issue #18: Add --verify option that checks that all breakpoints are
+	  set on proper addresses (i.e., instruction boundaries)
+
 	* Issue #80: Fix coverage accumulation for PIE executables
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
