@@ -5,6 +5,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
+find_package (Bfd)
 
 include(TargetArch)
 target_architecture(CMAKE_TARGET_ARCHITECTURES)
@@ -32,14 +33,16 @@ set (ADDRESS_VERIFIER_SRCS
 )
 
 if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
-	set (ADDRESS_VERIFIER_SRCS
-		parsers/bfd-address-verifier.cc
-	)
-	set (ADDRESS_VERIFIER_LIBRARIES
-		bfd
-		iberty
-		opcodes
-	)
+	if(LIBBFD_FOUND)
+		set (ADDRESS_VERIFIER_SRCS
+			parsers/bfd-address-verifier.cc
+		)
+		set (ADDRESS_VERIFIER_LIBRARIES
+			${LIBBFD_BFD_LIBRARY}
+			${LIBBFD_IBERTY_LIBRARY}
+			${LIBBFD_OPCODES_LIBRARY}
+		)
+	endif()
 endif()
 
 set (LINUX_SRCS
