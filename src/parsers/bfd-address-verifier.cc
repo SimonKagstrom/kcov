@@ -58,9 +58,13 @@ public:
 			it = m_cache.find(sectionData);
 		}
 
+		// The address is valid there is an instruction starting at it
 		return it->second.find(offset) != it->second.end();
 	}
 private:
+	/*
+	 * Disassemble the section and note all instruction-start addresses in a map.
+	 */
 	void doDisassemble(InstructionAddressMap_t &insnMap, const void *p, size_t size)
 	{
 		uint8_t *data = (uint8_t *)p;
