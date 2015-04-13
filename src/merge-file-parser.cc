@@ -53,16 +53,14 @@ namespace merge_parser
 }
 
 class MergeParser :
-	public IMergeParser,
-	public IFileParser::IFileListener
+	public IMergeParser
 {
 public:
 	friend class merge_parser::marshal;
 	friend class merge_parser::output;
 	friend class merge_parser::input;
 
-	MergeParser(IFileParser &localParser,
-			IReporter &reporter,
+	MergeParser(IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter) :
@@ -71,7 +69,6 @@ public:
 		m_filter(filter)
 	{
 		reporter.registerListener(*this);
-		localParser.registerFileListener(*this);
 	}
 
 	~MergeParser()
@@ -210,11 +207,6 @@ public:
 
 			m_pendingHits.erase(addr);
 		}
-	}
-
-	// From IFileParser::IFileListener
-	void onFile(const IFileParser::File &file)
-	{
 	}
 
 
@@ -595,12 +587,11 @@ private:
 
 namespace kcov
 {
-	IMergeParser &createMergeParser(IFileParser &localParser,
-			IReporter &reporter,
+	IMergeParser &createMergeParser(IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter)
 	{
-		return *new MergeParser(localParser, reporter, baseDirectory, outputDirectory, filter);
+		return *new MergeParser(reporter, baseDirectory, outputDirectory, filter);
 	}
 }

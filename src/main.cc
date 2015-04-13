@@ -191,8 +191,7 @@ int main(int argc, const char *argv[])
 		IWriter &coverallsWriter = createCoverallsWriter(*parser, reporter);
 
 		// The merge parser is both a parser, a writer and a collector (!)
-		IMergeParser &mergeParser = createMergeParser(*parser, reporter,
-				base, out, filter);
+		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
 		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", "[merged]", false);

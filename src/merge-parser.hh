@@ -16,8 +16,7 @@ namespace kcov
 	{
 	};
 
-	IMergeParser &createMergeParser(IFileParser &localParser,
-			IReporter &reporter,
+	IMergeParser &createMergeParser(IReporter &reporter,
 			const std::string &baseDirectory,
 			const std::string &outputDirectory,
 			IFilter &filter);
