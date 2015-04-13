@@ -53,13 +53,15 @@ public:
 
 	bool runFilters(const std::string &file)
 	{
-		if (m_pathHandler->isSetup())
-			return m_pathHandler->includeFile(file);
+		bool out = true;
 
-		if (m_patternHandler->isSetup())
+		if (m_pathHandler->isSetup())
+			out = m_pathHandler->includeFile(file);
+
+		if (out && m_patternHandler->isSetup())
 			return m_patternHandler->includeFile(file);
 
-		return true;
+		return out;
 	}
 
 
