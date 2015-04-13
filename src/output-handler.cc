@@ -21,7 +21,7 @@ namespace kcov
 			public ICollector::IEventTickListener
 	{
 	public:
-		OutputHandler(IReporter &reporter, ICollector &collector)
+		OutputHandler(IReporter &reporter, ICollector *collector)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
@@ -35,7 +35,8 @@ namespace kcov
 			(void)mkdir(m_baseDirectory.c_str(), 0755);
 			(void)mkdir(m_outDirectory.c_str(), 0755);
 
-			collector.registerEventTickListener(*this);
+			if (collector)
+				collector->registerEventTickListener(*this);
 		}
 
 		~OutputHandler()
@@ -124,7 +125,7 @@ namespace kcov
 	};
 
 	static OutputHandler *instance;
-	IOutputHandler &IOutputHandler::create(IReporter &reporter, ICollector &collector)
+	IOutputHandler &IOutputHandler::create(IReporter &reporter, ICollector *collector)
 	{
 		if (!instance)
 			instance = new OutputHandler(reporter, collector);

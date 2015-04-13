@@ -172,7 +172,7 @@ int main(int argc, const char *argv[])
 
 	ICollector &collector = ICollector::create(*parser, *engine, filter);
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
-	IOutputHandler &output = IOutputHandler::create(reporter, collector);
+	IOutputHandler &output = IOutputHandler::create(reporter, &collector);
 	ISolibHandler &solibHandler = createSolibHandler(*parser, collector);
 
 	parser->addFile(file);
