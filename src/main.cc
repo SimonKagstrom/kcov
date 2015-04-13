@@ -144,6 +144,40 @@ unsigned int countMetadata()
 	return out;
 }
 
+/*
+ * Run in merge-mode, i.e., run kcov on previously generated coverage runs and
+ * create a common merged output from them.
+ */
+static int runMergeMode()
+{
+	IFilter &filter = IFilter::create();
+	IFilter &dummyFilter = IFilter::createDummy();
+	IReporter &reporter = IReporter::createDummyReporter();
+	IOutputHandler &output = IOutputHandler::create(reporter, NULL);
+
+	const std::string &base = output.getBaseDirectory();
+	const std::string &out = output.getOutDirectory();
+
+	IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
+	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
+	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
+			base, base + "/kcov-merged", "[merged]", true);
+	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
+			base + "kcov-merged/cobertura.xml");
+	(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+
+	reporter.registerListener(mergeParser);
+
+	output.registerWriter(mergeParser);
+	output.registerWriter(mergeHtmlWriter);
+	output.registerWriter(mergeCoberturaWriter);
+
+	output.start();
+
+	delete &output;
+
+	return 0;
+}
 
 int main(int argc, const char *argv[])
 {
@@ -151,6 +185,11 @@ int main(int argc, const char *argv[])
 
 	if (!conf.parse(argc, argv))
 		return 1;
+
+	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
+
+	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
+		return runMergeMode();
 
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
@@ -177,8 +216,6 @@ int main(int argc, const char *argv[])
 
 	parser->addFile(file);
 
-	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
-
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
 		const std::string &base = output.getBaseDirectory();
@@ -202,14 +239,15 @@ int main(int argc, const char *argv[])
 		reporter.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
+		output.registerWriter(htmlWriter);
+		output.registerWriter(coberturaWriter);
+		output.registerWriter(coverallsWriter);
+
 		// Only one covered binary? No need for merging writers then
 		if (countMetadata() > 0) {
 			output.registerWriter(mergeHtmlWriter);
 			output.registerWriter(mergeCoberturaWriter);
 		}
-		output.registerWriter(htmlWriter);
-		output.registerWriter(coberturaWriter);
-		output.registerWriter(coverallsWriter);
 	}
 
 	g_engine = engine;

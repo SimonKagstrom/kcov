@@ -19,7 +19,10 @@
 kcov \- Code coverage analysis for compiled programs and Python scripts
 .SH SYNOPSIS
 .B kcov
-.RI [ options ] " outdir executable [ args for executable ]
+.RI [ options ] " outdir executable [args-for-executable...]
+.PP
+.B kcov
+.RI --merge " outdir <path-to-coverage> [path-to-more-coverage...]
 .SH DESCRIPTION
 .PP
 This manual page documents briefly the \fBkcov\fP command. \fBkcov\fP is a
@@ -50,10 +53,13 @@ Comma-separated list of path patterns to include in the report.
 Comma-separated list of path patterns to exclude from the report.
 .TP
 \fB\-\-collect\-only
-Only collect coverage data, don't produce HTML/Cobertura output
+Only collect coverage data, don't produce HTML/Cobertura output.
 .TP
 \fB\-\-report\-only
-Only report HTML/Cobertura output, don't collect data
+Only report HTML/Cobertura output, don't collect data.
+.TP
+\fB\-\-merge
+Merge the result of multiple kcov runs. Instead of a program to test, the output paths from previous runs should be given on the command line.
 .TP
 \fB\-\-coveralls\-id\fP=\fIid\fP
 Upload data to coveralls.io using secret repo_token or Travis CI service job ID \fIid\fP.

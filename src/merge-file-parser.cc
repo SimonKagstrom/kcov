@@ -3,6 +3,7 @@
 #include <utils.hh>
 #include <filter.hh>
 #include <writer.hh>
+#include <configuration.hh>
 
 #include <vector>
 #include <string>
@@ -220,7 +221,13 @@ public:
 
 	void onStop()
 	{
-		parseStoredData();
+		IConfiguration &conf = IConfiguration::getInstance();
+
+		// Parse data from earlier runs
+		if (conf.keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY)
+			parseStoredDataMerged();
+		else
+			parseStoredData();
 
 		/* Produce something like
 		 *
@@ -306,6 +313,34 @@ private:
 			parseDirectory(cur);
 		}
 		closedir(dir);
+	}
+
+	void parseStoredDataMerged()
+	{
+		IConfiguration &conf = IConfiguration::getInstance();
+		const char **argv = conf.getArgv();
+		unsigned int argc = conf.getArgc();
+
+		// argv[] contains the directories to merge
+		for (unsigned int i = 0; i < argc; i++) {
+			DIR *dir;
+			struct dirent *de;
+
+			dir = opendir(argv[i]);
+
+			if (!dir) {
+				warning("kcov: Can't open directory %s\n", argv[i]);
+				continue;
+			}
+
+			// Unmarshal and parse all metadata
+			for (de = readdir(dir); de; de = readdir(dir)) {
+				std::string cur = fmt("%s/%s", argv[i], de->d_name);
+
+				parseDirectory(cur);
+			}
+			closedir(dir);
+		}
 	}
 
 	void parseDirectory(const std::string &dirName)

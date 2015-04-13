@@ -800,3 +800,16 @@ merge-changed-file
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/kcov-merged/cobertura.xml file_c 10
     Should Contain    ${output}    0
+
+merge-multiple-output-directories
+	Run								rm -rf ${out}
+	Run								mkdir -p ${out}/first
+	Run								mkdir -p ${out}/second
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out}/first ${kcov_path}/tests/python/main 5
+    ${rc}=    Run and return RC    ${kcov} ${out}/second ./main-tests
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --merge ${out}/merged ${out}/first ${out}/second
+	${output}=    Run    ${xml_lookup} ${out}/merged/kcov-merged/cobertura.xml main 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/merged/kcov-merged/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+ 

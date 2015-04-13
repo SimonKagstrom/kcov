@@ -65,6 +65,7 @@ public:
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
 				"                         Cobertura output)\n"
 				" --report-only           Produce output from stored databases, don't collect\n"
+				" --merge                 Merge output from multiple source dirs\n"
 				"\n"
 				" --include-path=path     comma-separated paths to include in the coverage report\n"
 				" --exclude-path=path     comma-separated paths to exclude from the coverage\n"
@@ -119,6 +120,7 @@ public:
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
+				{"merge", no_argument, 0, 'm'},
 				{"python-parser", required_argument, 0, 'P'},
 				{"bash-parser", required_argument, 0, 'B'},
 				{"bash-method", required_argument, 0, '4'},
@@ -299,6 +301,9 @@ public:
 			case 'r':
 				setKey("running-mode", IConfiguration::MODE_REPORT_ONLY);
 				break;
+			case 'm':
+				setKey("running-mode", IConfiguration::MODE_MERGE_ONLY);
+				break;
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
@@ -359,21 +364,26 @@ public:
 		if (outDirectory[outDirectory.size() - 1] != '/')
 			outDirectory += "/";
 
-		std::string binaryName;
-		if (argc >= afterOpts + 2)
-		{
-			StringPair_t tmp = splitPath(argv[afterOpts + 1]);
-
-			setKey("binary-path", tmp.first);
-			binaryName = tmp.second;
-		}
 		setKey("out-directory", outDirectory);
-		setKey("target-directory", outDirectory + "/" + binaryName);
-		setKey("binary-name", binaryName);
+		if (keyAsInt("running-mode") != IConfiguration::MODE_MERGE_ONLY) {
+			std::string binaryName;
+			if (argc >= afterOpts + 2)
+			{
+				StringPair_t tmp = splitPath(argv[afterOpts + 1]);
+
+				setKey("binary-path", tmp.first);
+				binaryName = tmp.second;
+			}
+			setKey("target-directory", outDirectory + "/" + binaryName);
+			setKey("binary-name", binaryName);
+		} else {
+			// argv contains the directories to merge in this case, but we have no binary name etc
+			setKey("binary-name", "merged-kcov-output");
+			setKey("target-directory", outDirectory + "/merged-kcov-output");
+		}
 
 		m_programArgs = &argv[afterOpts + 1];
 		m_argc = argc - afterOpts - 1;
-
 
 		return true;
 	}

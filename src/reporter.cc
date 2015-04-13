@@ -797,7 +797,39 @@ private:
 	std::string m_dbFileName;
 };
 
+// The merge mode doesn't have/need a proper reporter
+class DummyReporter : public IReporter
+{
+	virtual void registerListener(IListener &listener)
+	{
+	}
+
+	virtual bool fileIsIncluded(const std::string &file)
+	{
+		return false;
+	}
+
+	virtual bool lineIsCode(const std::string &file, unsigned int lineNr)
+	{
+		return false;
+	}
+
+	virtual LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr)
+	{
+		return LineExecutionCount(0,0);
+	}
+	virtual ExecutionSummary getExecutionSummary()
+	{
+		return ExecutionSummary();
+	}
+};
+
 IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)
 {
 	return *new Reporter(parser, collector, filter);
+}
+
+IReporter &IReporter::createDummyReporter()
+{
+	return *new DummyReporter();
 }
