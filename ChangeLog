@@ -1,4 +1,12 @@
 Kcov (27):
+	* Issue #60: Add --merge option to merge output of multiple runs (i.e.,
+	  what the kcov-merge script did, but now integrated)
+
+	* Issue #81: Make --include-path= combined with --include-pattern=
+	  coexist more naturally (i.e., consider both)
+
+	* Lookup realpath of the paths passed to --include/exclude-path=
+
 	* Issue #18: Add --verify option that checks that all breakpoints are
 	  set on proper addresses (i.e., instruction boundaries)
 
