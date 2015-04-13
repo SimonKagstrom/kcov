@@ -25,7 +25,7 @@ namespace kcov
 
 		virtual const std::string &getOutDirectory() = 0;
 
-		static IOutputHandler &create(IFileParser &parser, IReporter &reporter, ICollector &collector);
+		static IOutputHandler &create(IReporter &reporter, ICollector &collector);
 
 		static IOutputHandler &getInstance();
 	};

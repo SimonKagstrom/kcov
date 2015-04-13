@@ -18,11 +18,10 @@ namespace kcov
 {
 	class OutputHandler :
 			public IOutputHandler,
-			public IFileParser::IFileListener,
 			public ICollector::IEventTickListener
 	{
 	public:
-		OutputHandler(IFileParser &parser, IReporter &reporter, ICollector &collector)
+		OutputHandler(IReporter &reporter, ICollector &collector)
 		{
 			IConfiguration &conf = IConfiguration::getInstance();
 
@@ -36,7 +35,6 @@ namespace kcov
 			(void)mkdir(m_baseDirectory.c_str(), 0755);
 			(void)mkdir(m_outDirectory.c_str(), 0755);
 
-			parser.registerFileListener(*this);
 			collector.registerEventTickListener(*this);
 		}
 
@@ -68,11 +66,6 @@ namespace kcov
 		void registerWriter(IWriter &writer)
 		{
 			m_writers.push_back(&writer);
-		}
-
-		// From IElf::IFileListener
-		void onFile(const IFileParser::File &file)
-		{
 		}
 
 		void start()
@@ -131,10 +124,10 @@ namespace kcov
 	};
 
 	static OutputHandler *instance;
-	IOutputHandler &IOutputHandler::create(IFileParser &parser, IReporter &reporter, ICollector &collector)
+	IOutputHandler &IOutputHandler::create(IReporter &reporter, ICollector &collector)
 	{
 		if (!instance)
-			instance = new OutputHandler(parser, reporter, collector);
+			instance = new OutputHandler(reporter, collector);
 
 		return *instance;
 	}
