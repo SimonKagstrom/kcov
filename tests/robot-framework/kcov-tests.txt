@@ -168,6 +168,25 @@ include-exclude-pattern
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
     Should Contain    ${output}    nocode
 
+include-path
+    Run                            rm -rf ${out}/main-tests
+    ${rc}=    Run and return RC    ${kcov} --include-path=../tests/subdir ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
+    Should Contain    ${output}    nocode
+    Run                            rm -rf ${out}/main-tests
+    ${rc}=    Run and return RC    ${kcov} --exclude-path=../tests/subdir ${out} ./main-tests
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file_c 6
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 6
+    Should Contain    ${output}    1
+
+
 main-test
     Run                            rm -rf ${out}/main-tests
     ${no_kcov_rc}=    Run and return RC    ./main-tests

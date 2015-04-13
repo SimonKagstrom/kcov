@@ -123,6 +123,15 @@ private:
 			m_includePaths(IConfiguration::getInstance().keyAsList("include-path")),
 			m_excludePaths(IConfiguration::getInstance().keyAsList("exclude-path"))
 		{
+			for (PathMap_t::iterator it = m_includePaths.begin();
+					it != m_includePaths.end();
+					++it)
+				*it = get_real_path(*it);
+
+			for (PathMap_t::iterator it = m_excludePaths.begin();
+					it != m_excludePaths.end();
+					++it)
+				*it = get_real_path(*it);
 		}
 
 		bool isSetup()
@@ -142,21 +151,27 @@ private:
 
 			const std::string pathStr = get_real_path(file);
 
+			// If found in --include-path=, accept this path
 			for (PathMap_t::const_iterator it = m_includePaths.begin();
 					it != m_includePaths.end();
 					++it) {
 				const std::string &pathPattern = *it;
+				size_t last = pathPattern.size();
 
-				if (pathStr.find(pathPattern) == 0)
+				if (pathStr.find(pathPattern) == 0 &&
+						(pathStr.size() <= last || pathStr[last] == '/'))
 					out = true;
 			}
 
+			// ... unless it's found in --exclude-path=.
 			for (PathMap_t::const_iterator it = m_excludePaths.begin();
 					it != m_excludePaths.end();
 					++it) {
 				const std::string &pathPattern = *it;
+				size_t last = pathPattern.size();
 
-				if (pathStr.find(pathPattern) == 0)
+				if (pathStr.find(pathPattern) == 0 &&
+						(pathStr.size() <= last || pathStr[last] == '/'))
 					out = false;
 			}
 
@@ -165,8 +180,8 @@ private:
 	private:
 		typedef std::vector<std::string> PathMap_t;
 
-		const PathMap_t &m_includePaths;
-		const PathMap_t &m_excludePaths;
+		PathMap_t m_includePaths;
+		PathMap_t m_excludePaths;
 	};
 
 
