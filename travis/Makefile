@@ -63,7 +63,7 @@ prepare_linux:
 	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time
 	sudo pip install robotframework
 
-prepare_gcc:
+prepare_linux_gcc:
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
@@ -73,6 +73,6 @@ prepare_gcc:
 	sudo i386 chroot "${chroot}" sh -c "mount -t proc procfs /proc"
 
 
-prepare_clang:
+prepare_linux_clang:
 
-prepare_environment: prepare_linux prepare_${CC}
+prepare_environment: prepare_${TRAVIS_OS_NAME} prepare_${TRAVIS_OS_NAME}_${CC}
