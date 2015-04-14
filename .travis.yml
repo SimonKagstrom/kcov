@@ -5,6 +5,10 @@
 
 before_install: make -f travis/Makefile prepare_environment
 
+os:
+  - linux
+  - osx
+
 language: cpp
 compiler:
   - gcc
@@ -13,10 +17,6 @@ compiler:
 matrix:
   allow_failures:
     - os: osx
-
-os:
-  - linux
-  - osx
 
 env:
   global:
