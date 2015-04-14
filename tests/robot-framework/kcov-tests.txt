@@ -463,6 +463,12 @@ bash-coverage
     Should Contain    ${output}    11
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 128
     Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 132
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 135
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 136
+    Should Contain    ${output}    1
     ${output}=    Run	cat /tmp/robot.err
 	Should Contain   ${output}    	I'm echoing to stderr via some
 

@@ -126,3 +126,11 @@ test ${#var[*]} -gt 2 -o \
     echo Some line
     }
 echo Something else
+
+
+MESSAGE="some message"
+USAGE="usage: some message
+
+   --some-option   Does something
+"
+echo "After usage"

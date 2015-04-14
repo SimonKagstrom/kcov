@@ -463,7 +463,7 @@ private:
 
 		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
-		enum { none, backslash, heredoc } state = none;
+		enum { none, backslash, quote, heredoc } state = none;
 		bool caseActive = false;
 		bool aritmeticActive = false;
 		std::string heredocMarker;
@@ -531,6 +531,15 @@ private:
 					state = none;
 				continue;
 			}
+
+			// Multi-line quote - only the last line is code
+			if (state == quote) {
+				if (s.find('"') == s.size() - 1) // String ends with "
+					state = none;
+				else
+					continue;
+			}
+
 			// HERE documents
 			if (state == heredoc) {
 				if (s == heredocMarker)
@@ -540,6 +549,11 @@ private:
 
 			if (s[s.size() - 1] == '\\') {
 				state = backslash;
+			} else if ((s.find("=\"") != std::string::npos || // Handle multi-line string assignments
+					s.find("= \"") != std::string::npos) &&
+					std::count(s.begin(), s.end(), '"') == 1) {
+				state = quote;
+				continue;
 			} else {
 				size_t heredocStart = s.find("<<");
 
