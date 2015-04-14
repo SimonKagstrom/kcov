@@ -53,11 +53,12 @@ set (LINUX_SRCS
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	set (LINUX_SRCS
 		engines/ptrace.cc
+		engines/kernel-engine.cc
 		parsers/elf-parser.cc
 		solib-handler.cc
 		solib-parser/phdr_data.c
 	)
-endif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+endif ()
 
 set (${KCOV}_SRCS
     capabilities.cc
@@ -66,7 +67,6 @@ set (${KCOV}_SRCS
     engine-factory.cc
     engines/bash-engine.cc
     engines/gcov-engine.cc
-    engines/kernel-engine.cc
     engines/python-engine.cc
     filter.cc
     gcov.cc
