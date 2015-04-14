@@ -108,36 +108,6 @@ shared-library-accumulate
     ${output}=    Run    ${xml_lookup} ${out}/shared_library_test/cobertura.xml solib_c 10
     Should Contain    ${output}    1
 
-dlopen
-    [Tags]	not_ready
-    Run                            rm -rf ${out}/dlopen
-    ${no_kcov_rc}=    Run and return RC    ./dlopen
-    ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
-    Should be equal as integers    ${rc}    ${no_kcov_rc}
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 12
-    Should Contain    ${output}    0
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
-    Should Contain    ${output}    0
-
-dlopen-in-ignored-source-file
-    [Tags]	not_ready
-    Run                            rm -rf ${out}/dlopen
-    ${no_kcov_rc}=    Run and return RC    ./dlopen
-    ${rc}=    Run and return RC    ${kcov} --exclude-pattern=dlopen.cc ${out} ./dlopen
-    Should be equal as integers    ${rc}    ${no_kcov_rc}
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_main_cc 10
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
-    Should Contain    ${output}    nocode
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
-    Should Contain    ${output}    0
-
 
 include-exclude-pattern
     Run                            rm -rf ${out}/main-tests
@@ -232,34 +202,6 @@ main-test-verify
     ${output}=    Run    ${xml_lookup} ${out}/main-tests/cobertura.xml file2_c 7
     Should Contain    ${output}    0
 
-# The gcov tests appears to hang at times, so ignore them (not finished anyway)
-#main-test-gcov
-#    [Tags]	not_ready
-#    Run                            rm -rf ${out}/main-tests-gcov
-#    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
-#    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
-#    Should be equal as integers    ${rc}    ${no_kcov_rc}
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 9
-#    Should Contain    ${output}    1
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 14
-#    Should Contain    ${output}    nocode
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 18
-#    Should Be True    ${output} >= 1
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 25
-#    Should Contain    ${output}    1
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file_c 6
-#    Should Contain    ${output}    1
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file2_c 7
-#    Should Contain    ${output}    0
-
-#gcov-tests-tricky
-#    [Tags]	not_ready
-#    Run                            rm -rf ${out}/main-tests-gcov
-#    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
-#    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
-#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 20
-#    Should Contain    ${output}    nocode
-
 accumulate-data
     Run                            rm -rf ${out}/argv_dependent/
     ${rc}=    Run and return RC    ${kcov} ${out} ./argv_dependent
@@ -335,18 +277,6 @@ daemon-wait-for-last-child-test
     Should be equal as integers    ${no_kcov_rc}    2
     ${rc}=    Run and return RC    ${kcov} ${out} ./test_daemon
     Should be equal as integers    ${rc}    4
-    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
-    Should Contain    ${output}    1
-    
-daemon-no-wait-for-last-child-test
-	[Tags]	not_ready
-	Run                            rm -rf ${out}/test_daemon/cobertura.xml
-    ${no_kcov_rc}=    Run and return RC    ./test_daemon
-    ${rc}=    Run and return RC    ${kcov} --exit-first-process ${out} ./test_daemon
-    Should be equal as integers    ${no_kcov_rc}    ${rc}
-    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
-    Should Contain    ${output}    0
-    Run                            sleep 5
     ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
     Should Contain    ${output}    1
     
@@ -495,22 +425,6 @@ python-coverage-python3
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 4
     Should Contain    ${output}    nocode
 
-python-tricky-single-line-string-assignment
-	[Tags]	not_ready
-	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
-    Should Contain    ${output}    1
-
-python-tricky-single-dict-assignment
-	[Tags]	not_ready
-	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 57
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 61
-    Should Contain    ${output}    1
-
 lookup-binary-in-path
     Run                            rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/python/main 5
@@ -522,14 +436,6 @@ lookup-binary-in-path
 #	Run								rm -rf ${out}/main
 #    ${rc}=    Run and return RC    ${kcov} --python-parser=${kcov_path}/tests/tools/dummy-python.sh ${out} ${kcov_path}/tests/python/main 5
 #    Should be equal as integers    ${rc}   99
-
-# Not sure why this fails in some settings (works in F20 at least)
-bash-exit-status
-	[Tags]	not_ready
-	Run								rm -rf ${out}/main
-    ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/bash/shell-main 5
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
-    Should be equal as integers    ${rc}   ${no_kcov_rc}
 
 bash-coverage
 	Run								rm -rf ${out}/shell-main
@@ -812,4 +718,103 @@ merge-multiple-output-directories
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/merged/kcov-merged/cobertura.xml main_cc 9
     Should Contain    ${output}    1
+
+
+
+
+noncrit-dlopen
+    [Tags]	not_ready
+    Run                            rm -rf ${out}/dlopen
+    ${no_kcov_rc}=    Run and return RC    ./dlopen
+    ${rc}=    Run and return RC    ${kcov} ${out} ./dlopen
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 12
+    Should Contain    ${output}    0
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
+    Should Contain    ${output}    0
+
+noncrit-dlopen-in-ignored-source-file
+    [Tags]	not_ready
+    Run                            rm -rf ${out}/dlopen
+    ${no_kcov_rc}=    Run and return RC    ./dlopen
+    ${rc}=    Run and return RC    ${kcov} --exclude-pattern=dlopen.cc ${out} ./dlopen
+    Should be equal as integers    ${rc}    ${no_kcov_rc}
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_main_cc 10
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml dlopen_cc 11
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 5
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dlopen/cobertura.xml solib_c 12
+    Should Contain    ${output}    0
+
+
+# Not sure why this fails in some settings (works in F20 at least)
+noncrit-bash-exit-status
+	[Tags]	not_ready
+	Run								rm -rf ${out}/main
+    ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/bash/shell-main 5
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
+    Should be equal as integers    ${rc}   ${no_kcov_rc}
+
+noncrit-python-tricky-single-line-string-assignment
+	[Tags]	not_ready
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
+    Should Contain    ${output}    1
+
+noncrit-python-tricky-single-dict-assignment
+	[Tags]	not_ready
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 57
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 61
+    Should Contain    ${output}    1
+
+noncrit-daemon-no-wait-for-last-child-test
+	[Tags]	not_ready
+	Run                            rm -rf ${out}/test_daemon/cobertura.xml
+    ${no_kcov_rc}=    Run and return RC    ./test_daemon
+    ${rc}=    Run and return RC    ${kcov} --exit-first-process ${out} ./test_daemon
+    Should be equal as integers    ${no_kcov_rc}    ${rc}
+    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
+    Should Contain    ${output}    0
+    Run                            sleep 5
+    ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
+    Should Contain    ${output}    1
+
+
+# The gcov tests appears to hang at times, so ignore them (not finished anyway)
+#noncrit-main-test-gcov
+#    [Tags]	not_ready
+#    Run                            rm -rf ${out}/main-tests-gcov
+#    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
+#    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
+#    Should be equal as integers    ${rc}    ${no_kcov_rc}
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 9
+#    Should Contain    ${output}    1
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 14
+#    Should Contain    ${output}    nocode
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 18
+#    Should Be True    ${output} >= 1
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 25
+#    Should Contain    ${output}    1
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file_c 6
+#    Should Contain    ${output}    1
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml file2_c 7
+#    Should Contain    ${output}    0
+
+#noncrit-gcov-tests-tricky
+#    [Tags]	not_ready
+#    Run                            rm -rf ${out}/main-tests-gcov
+#    ${no_kcov_rc}=    Run and return RC    ./main-tests-gcov
+#    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --gcov ${out} ./main-tests-gcov
+#    ${output}=    Run    ${xml_lookup} ${out}/main-tests-gcov/cobertura.xml main_cc 20
+#    Should Contain    ${output}    nocode
  
