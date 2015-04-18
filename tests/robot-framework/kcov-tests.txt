@@ -425,6 +425,12 @@ python-coverage-python3
     ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 4
     Should Contain    ${output}    nocode
 
+python-tricky-single-line-string-assignment
+	Run								rm -rf ${out}/main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
+    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
+    Should Contain    ${output}    2
+
 lookup-binary-in-path
     Run                            rm -rf ${out}/main
     ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/python/main 5
@@ -766,13 +772,6 @@ noncrit-bash-exit-status
     ${no_kcov_rc}=    Run and return RC    ${kcov_path}/tests/bash/shell-main 5
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main 5
     Should be equal as integers    ${rc}   ${no_kcov_rc}
-
-noncrit-python-tricky-single-line-string-assignment
-	[Tags]	not_ready
-	Run								rm -rf ${out}/main
-    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/python/main 5
-    ${output}=    Run    ${xml_lookup} ${out}/main/cobertura.xml second_py 34
-    Should Contain    ${output}    1
 
 noncrit-python-tricky-single-dict-assignment
 	[Tags]	not_ready

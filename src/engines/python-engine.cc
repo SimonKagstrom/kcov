@@ -287,8 +287,16 @@ private:
 
 					if (multilineIdx(s2) == std::string::npos)
 						state = multiline_active;
+					else // Ends on the same line
+						break;
 
-					// E.g., a = '''yadayada [...]'''
+					/*
+					 *  E.g.
+					 *
+					 *    a = '''yadayada [...]
+					 *    hejsan
+					 *    '''
+					 */
 					if (idx > 0)
 						multiLineStartLine = true;
 
