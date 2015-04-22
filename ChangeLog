@@ -1,4 +1,6 @@
 Kcov (27):
+	* python: Improve handling of some corner-cases for '''-strings
+
 	* Issue #76: bash: Handle multi-line quoted strings
 
 	* Issue #60: Add --merge option to merge output of multiple runs (i.e.,
