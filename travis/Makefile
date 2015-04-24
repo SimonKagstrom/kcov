@@ -36,6 +36,8 @@ build_gcc: build_reference
 	sudo i386 chroot ${chroot} sh -c "apt-get -y remove binutils-dev"
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-no-binutils && cd /tmp/kcov/build-no-binutils && cmake .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-no-binutils"
+	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
+	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
 
 run-performance: build_gcc
 	travis/perf-test.sh build/src/kcov . build >/dev/null

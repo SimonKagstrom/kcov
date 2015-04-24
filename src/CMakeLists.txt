@@ -19,7 +19,7 @@ pkg_check_modules(LIBCURL REQUIRED libcurl)
 # ====================================
 project (kcov)
 set (KCOV kcov)
-#set (CMAKE_EXE_LINKER_FLAGS "-static")
+
 
 set (SOLIB kcov_sowrapper)
 
@@ -43,6 +43,17 @@ if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTU
 			${LIBBFD_OPCODES_LIBRARY}
 		)
 	endif()
+endif()
+
+set (coveralls_SRCS writers/coveralls-writer.cc)
+
+if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
+	message(STATUS "Building a static binary (no coveralls support)")
+
+	set (LIBCURL_LIBRARIES "")
+	# Coveralls doesn't work in a static setting
+	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
+	set (CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 
 set (LINUX_SRCS
@@ -78,7 +89,7 @@ set (${KCOV}_SRCS
     reporter.cc
     utils.cc
     writers/cobertura-writer.cc
-    writers/coveralls-writer.cc
+    ${coveralls_SRCS}
     writers/html-writer.cc
     writers/writer-base.cc
     ${LINUX_SRCS}
