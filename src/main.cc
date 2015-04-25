@@ -164,6 +164,7 @@ static int runMergeMode()
 			base, base + "/kcov-merged", "[merged]", true);
 	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/cobertura.xml");
+	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser, mergeReporter);
 	(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 	reporter.registerListener(mergeParser);
@@ -171,6 +172,7 @@ static int runMergeMode()
 	output.registerWriter(mergeParser);
 	output.registerWriter(mergeHtmlWriter);
 	output.registerWriter(mergeCoberturaWriter);
+	output.registerWriter(mergeCoverallsWriter);
 
 	output.start();
 
