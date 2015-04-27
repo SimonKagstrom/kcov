@@ -732,6 +732,16 @@ merge-multiple-output-directories
     Should Contain    ${output}    1
 
 
+noncrit-bash-dollar-var-replacement
+	Run								rm -rf ${out}/dollar-var-replacement.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/dollar-var-replacement.sh
+    Should be equal as integers    ${rc}    0
+    ${output}=    Run    ${xml_lookup} ${out}/dollar-var-replacement.sh/cobertura.xml dollar_var_replacement_sh 1
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dollar-var-replacement.sh/cobertura.xml dollar_var_replacement_sh 4
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/dollar-var-replacement.sh/cobertura.xml dollar_var_replacement_sh 5
+    Should Contain    ${output}    1
 
 
 noncrit-dlopen
