@@ -733,6 +733,7 @@ merge-multiple-output-directories
 
 
 noncrit-bash-dollar-var-replacement
+    [Tags]	not_ready
 	Run								rm -rf ${out}/dollar-var-replacement.sh
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/dollar-var-replacement.sh
     Should be equal as integers    ${rc}    0
