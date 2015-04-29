@@ -475,6 +475,8 @@ private:
 
 			lineNo++;
 
+			kcov_debug(ENGINE_MSG, "bash_line %2d: %s\n", lineNo, s.c_str());
+
 			// Remove comments
 			size_t comment = s.find("#");
 			if (comment != std::string::npos) {
