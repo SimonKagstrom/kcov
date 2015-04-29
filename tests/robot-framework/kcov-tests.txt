@@ -741,6 +741,16 @@ merge-multiple-output-directories
     ${output}=    Run    ${xml_lookup} ${out}/merged/kcov-merged/cobertura.xml main_cc 9
     Should Contain    ${output}    1
 
+noncrit-bash-subshell
+    [Tags]	not_ready
+	Run								rm -rf ${out}/subshell.sh
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/subshell.sh
+    ${output}=    Run    ${xml_lookup} ${out}/subshell.sh/cobertura.xml subshell_sh 1
+    Should Contain    ${output}    nocode
+    ${output}=    Run    ${xml_lookup} ${out}/subshell.sh/cobertura.xml subshell_sh 4
+    Should Contain    ${output}    2
+    ${output}=    Run    ${xml_lookup} ${out}/subshell.sh/cobertura.xml subshell_sh 8
+    Should Contain    ${output}    nocode
 
 noncrit-dlopen
     [Tags]	not_ready
