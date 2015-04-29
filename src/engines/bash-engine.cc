@@ -483,7 +483,7 @@ private:
 
 				// But not $# or ${#variable}...
 				if ((comment >= 1 && s[comment - 1] == '$') ||
-						(comment >= 2 && s[comment - 1] == '{' && s[comment - 2] == '$')) {
+						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
 					// Do nothing
 				} else {
 					s = trim_string(s);
