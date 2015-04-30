@@ -210,7 +210,8 @@ public:
 		if (!g_curl)
 			g_curl = new CurlConnectionHandler();
 
-		g_curl->talk(outFile);
+		if (id != "dry-run")
+			g_curl->talk(outFile);
 	}
 
 private:
