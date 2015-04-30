@@ -227,7 +227,6 @@ int main(int argc, const char *argv[])
 				base, out, conf.keyAsString("binary-name"));
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
 				out + "/cobertura.xml");
-		IWriter &coverallsWriter = createCoverallsWriter(*parser, reporter);
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
@@ -243,12 +242,14 @@ int main(int argc, const char *argv[])
 		output.registerWriter(mergeParser);
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
-		output.registerWriter(coverallsWriter);
 
-		// Only one covered binary? No need for merging writers then
+		// Multiple binaries? Register the merged mode stuff
 		if (countMetadata() > 0) {
 			output.registerWriter(mergeHtmlWriter);
 			output.registerWriter(mergeCoberturaWriter);
+			output.registerWriter(createCoverallsWriter(mergeParser, mergeReporter));
+		} else {
+			output.registerWriter(createCoverallsWriter(*parser, reporter));
 		}
 	}
 
