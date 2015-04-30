@@ -423,9 +423,9 @@ public:
 	}
 
 
-		/**
-		 * Continue execution with an event
-		 */
+	/**
+	 * Continue execution with an event
+	 */
 	bool continueExecution()
 	{
 		int res;
