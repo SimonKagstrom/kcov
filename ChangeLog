@@ -1,4 +1,12 @@
 Kcov (27):
+	* Issue #90: coveralls: Publish merged results if available
+
+	* Issue #88: bash: Correct handling of ${var#}
+
+	* Issue #87: Allow coveralls uploads when using --merge (Ricardo Martins)
+
+	* Issue #86: Fix build on distros with Python 3 as default (David Barnett)
+
 	* python: Improve handling of some corner-cases for '''-strings
 
 	* Issue #76: bash: Handle multi-line quoted strings
