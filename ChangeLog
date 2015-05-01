@@ -24,7 +24,7 @@ Kcov (27):
 
 	* Issue #80: Fix coverage accumulation for PIE executables
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri May  1 19:44:04 CEST 2015
 
 Kcov (26):
 	* Issue #77: Collect coverage for Position-Independent Executables
