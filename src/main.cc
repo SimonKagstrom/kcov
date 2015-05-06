@@ -240,8 +240,6 @@ int main(int argc, const char *argv[])
 		reporter.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
-		output.registerWriter(htmlWriter);
-		output.registerWriter(coberturaWriter);
 
 		// Multiple binaries? Register the merged mode stuff
 		if (countMetadata() > 0) {
@@ -251,6 +249,9 @@ int main(int argc, const char *argv[])
 		} else {
 			output.registerWriter(createCoverallsWriter(*parser, reporter));
 		}
+
+		output.registerWriter(htmlWriter);
+		output.registerWriter(coberturaWriter);
 	}
 
 	g_engine = engine;
