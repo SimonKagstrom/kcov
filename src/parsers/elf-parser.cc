@@ -48,6 +48,7 @@ public:
 		m_isMainFile = true;
 		m_initialized = false;
 		m_filter = NULL;
+		m_verifyAddresses = false;
 
 		IParserManager::getInstance().registerParser(*this);
 	}
