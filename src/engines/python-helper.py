@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # encoding: utf-8
 
 # Based on http://pymotw.com/2/sys/tracing.html, "Tracing a program as it runs"
