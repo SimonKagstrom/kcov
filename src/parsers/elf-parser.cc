@@ -138,7 +138,7 @@ public:
 
 		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
 		if (fd < 0) {
-				error("Cannot open %s\n", m_filename.c_str());
+				kcov_debug(ELF_MSG, "Cannot open %s\n", m_filename.c_str());
 				return false;
 		}
 
