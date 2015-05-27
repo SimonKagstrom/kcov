@@ -1,3 +1,10 @@
+Kcov (28):
+	* Issue #26: Don't warn for non-existing ELFs (typically linux-vdso.so.1)
+
+	* Issue #91: Correctly generate [merged] output after running two programs
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (27):
 	* Issue #90: coveralls: Publish merged results if available
 
