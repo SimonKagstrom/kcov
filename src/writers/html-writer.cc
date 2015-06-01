@@ -103,6 +103,12 @@ private:
 					lineClass.c_str(),
 					cnt.m_hits);
 
+				// Don't report order for zeroes
+				if (cnt.m_order)
+					outJson << fmt(
+					"\"order\":\"%llu\",",
+					(unsigned long long)cnt.m_order);
+
 				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
 					outJson << fmt("\"possible_hits\":\"%u\",", cnt.m_possibleHits);
 

@@ -21,13 +21,14 @@ namespace kcov
 		class LineExecutionCount
 		{
 		public:
-			LineExecutionCount(unsigned int hits, unsigned int possibleHits) :
-				m_hits(hits), m_possibleHits(possibleHits)
+			LineExecutionCount(unsigned int hits, unsigned int possibleHits, uint64_t order) :
+				m_hits(hits), m_possibleHits(possibleHits), m_order(order)
 			{
 			}
 
 			unsigned int m_hits;
 			unsigned int m_possibleHits;
+			uint64_t m_order;
 		};
 
 		class ExecutionSummary

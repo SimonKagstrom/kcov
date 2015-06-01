@@ -46,9 +46,9 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 	bool res;
 	char filename[1024];
 	MockReporter reporter;
-	IReporter::LineExecutionCount def(0, 1);
-	IReporter::LineExecutionCount partial(1, 2);
-	IReporter::LineExecutionCount full(3, 3);
+	IReporter::LineExecutionCount def(0, 1, 0);
+	IReporter::LineExecutionCount partial(1, 2, 0);
+	IReporter::LineExecutionCount full(3, 3, 0);
 	IReporter::ExecutionSummary summary(17, 4);
 
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "/kcov-writer");
@@ -134,9 +134,9 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 	bool res;
 	char filename[1024];
 	MockReporter reporter;
-	IReporter::LineExecutionCount def(0, 1);
-	IReporter::LineExecutionCount partial(1, 2);
-	IReporter::LineExecutionCount full(3, 3);
+	IReporter::LineExecutionCount def(0, 1, 0);
+	IReporter::LineExecutionCount partial(1, 2, 1);
+	IReporter::LineExecutionCount full(3, 3, 2);
 	IReporter::ExecutionSummary summary(17, 4);
 
 	std::string outDir = (std::string(crpcut::get_start_dir()) + "/kcov-writerSameName");

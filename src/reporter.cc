@@ -36,7 +36,8 @@ public:
 	Reporter(IFileParser &fileParser, ICollector &collector, IFilter &filter) :
 		m_fileParser(fileParser), m_collector(collector), m_filter(filter),
 		m_maxPossibleHits(fileParser.maxPossibleHits()),
-		m_unmarshallingDone(false)
+		m_unmarshallingDone(false),
+		m_order(1) // "First" hit - 0 marks unset
 	{
 		m_fileParser.registerLineListener(*this);
 		m_fileParser.registerFileListener(*this);
@@ -83,6 +84,7 @@ public:
 	{
 		unsigned int hits = 0;
 		unsigned int possibleHits = 0;
+		uint64_t order = 0;
 
 		FileMap_t::const_iterator it = m_files.find(file);
 
@@ -92,10 +94,11 @@ public:
 			if (line) {
 				hits = line->hits();
 				possibleHits = line->possibleHits(m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
+				order = line->getOrder();
 			}
 		}
 
-		return LineExecutionCount(hits, possibleHits);
+		return LineExecutionCount(hits, possibleHits, order);
 	}
 
 	ExecutionSummary getExecutionSummary()
@@ -377,6 +380,12 @@ private:
 
 		line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
+		// Setup the hit order
+		if (line->getOrder() == 0) {
+			line->setOrder(m_order);
+			m_order++;
+		}
+
 		reportAddress(line->lineId(), hits);
 	}
 
@@ -452,8 +461,19 @@ private:
 		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
 		Line(uint64_t fileHash, unsigned int lineNr) :
-			m_lineId((fileHash << 32ULL) | lineNr)
+			m_lineId((fileHash << 32ULL) | lineNr),
+			m_order(0)
 		{
+		}
+
+		uint64_t getOrder() const
+		{
+			return m_order;
+		}
+
+		void setOrder(uint64_t order)
+		{
+			m_order = order;
 		}
 
 		void addAddress(uint64_t addr)
@@ -594,6 +614,7 @@ private:
 	private:
 		AddrToHitsMap_t m_addrs;
 		uint64_t m_lineId;
+		uint64_t m_order;
 	};
 
 	class File
@@ -795,6 +816,8 @@ private:
 
 	bool m_unmarshallingDone;
 	std::string m_dbFileName;
+
+	uint64_t m_order;
 };
 
 // The merge mode doesn't have/need a proper reporter
@@ -816,7 +839,7 @@ class DummyReporter : public IReporter
 
 	virtual LineExecutionCount getLineExecutionCount(const std::string &file, unsigned int lineNr)
 	{
-		return LineExecutionCount(0,0);
+		return LineExecutionCount(0,0, 0);
 	}
 	virtual ExecutionSummary getExecutionSummary()
 	{
