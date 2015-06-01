@@ -1,4 +1,7 @@
 Kcov (28):
+	* Issue #98: Show execution order in the HTML output and add headings for
+	  the source view
+
 	* Issue #26: Don't warn for non-existing ELFs (typically linux-vdso.so.1)
 
 	* Issue #91: Correctly generate [merged] output after running two programs
