@@ -14,7 +14,7 @@ switches.
 
 How to use it
 -------------
-The usage is simple:
+Basic usage is straight-forward:
 
 ```
 kcov /path/to/outdir executable [args for the executable]
