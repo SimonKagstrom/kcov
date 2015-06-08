@@ -1,4 +1,7 @@
 Kcov (28):
+	* Issue #99: Add support for looking up debug info from .gnu_debuglink
+	  sections (Vincent Brillault)
+
 	* Issue #98: Show execution order in the HTML output and add headings for
 	  the source view
 
