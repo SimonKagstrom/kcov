@@ -742,7 +742,7 @@ merge-multiple-output-directories
     Should Contain    ${output}    1
 
 debuglink
-	Run								rm -rf ${out}
+	Run								rm -rf ${out} .debug
 	Run								cp main-tests main-tests-debug-file
 	Run								objcopy --only-keep-debug main-tests-debug-file main-tests-debug-file.debug
 	Run								objcopy --add-gnu-debuglink=main-tests-debug-file.debug main-tests-debug-file
@@ -759,6 +759,11 @@ debuglink
     ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file
     ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file/cobertura.xml main_cc 9
     Should Contain    ${output}    1
+	Run								rm -rf ${out}
+	Run								echo "abc" >> .debug/main-tests-debug-file.debug
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file/cobertura.xml main_cc 9
+    Should Contain    ${output}    nocode
 	# Todo: Look in /usr/lib/debug as well
 
 
