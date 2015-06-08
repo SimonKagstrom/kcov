@@ -318,7 +318,7 @@ out_open:
 			debug_fd = ::open(debug_file.c_str(), O_RDONLY, 0);
 			if (debug_fd < 0) {
 				if (m_isMainFile)
-					warning("Cannot open %s", debug_file.c_str());
+					kcov_debug(ELF_MSG, "Cannot open %s", debug_file.c_str());
 			} else {
 				close(fd);
 				fd = debug_fd;
@@ -331,7 +331,7 @@ out_open:
 			int debug_fd = openDebuglinkFile();
 			if (debug_fd < 0) {
 				if (m_isMainFile)
-					warning("Cannot open debug-link file in standard locations");
+					kcov_debug(ELF_MSG, "Cannot open debug-link file in standard locations");
 			} else {
 				close(fd);
 				fd = debug_fd;
@@ -341,7 +341,8 @@ out_open:
 
 		if (!dbg) {
 			if (m_isMainFile)
-					warning("kcov requires binaries built with -g/-ggdb or a build-id file.");
+					warning("kcov requires binaries built with -g/-ggdb, a build-id file\n"
+							"or GNU debug link information.");
 			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename.c_str());
 			close(fd);
 			return false;
