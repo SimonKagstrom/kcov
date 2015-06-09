@@ -599,10 +599,10 @@ out_err:
 
 				// Align address for the CRC32
 				unsigned long addr = (unsigned long)p;
-				unsigned long offs = 0;
+				unsigned long offs = 4;
 
 				if ((addr & 3) != 0)
-					offs += 4 - (addr & 3);
+					offs = 4 - (addr & 3);
 				// ... and read out the CRC32
 				m_debuglinkCrc = *(uint32_t *)(p + offs);
 			}
