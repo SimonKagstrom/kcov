@@ -745,12 +745,34 @@ debuglink
 	Run								rm -rf ${out} .debug
 	Run								cp main-tests main-tests-debug-file
 	Run								objcopy --only-keep-debug main-tests-debug-file main-tests-debug-file.debug
+	Run								cp main-tests-debug-file.debug main-tests-debug-file.debug1
+	Run								cp main-tests-debug-file.debug main-tests-debug-file.debug12
+	Run								cp main-tests-debug-file.debug main-tests-debug-file.debug123
+	Run								cp main-tests-debug-file main-tests-debug-file1
+	Run								cp main-tests-debug-file main-tests-debug-file2
+	Run								cp main-tests-debug-file main-tests-debug-file3
 	Run								objcopy --add-gnu-debuglink=main-tests-debug-file.debug main-tests-debug-file
+	Run								objcopy --add-gnu-debuglink=main-tests-debug-file.debug1 main-tests-debug-file1
+	Run								objcopy --add-gnu-debuglink=main-tests-debug-file.debug12 main-tests-debug-file2
+	Run								objcopy --add-gnu-debuglink=main-tests-debug-file.debug123 main-tests-debug-file3
 	Run								strip -g ./main-tests-debug-file
+	Run								strip -g ./main-tests-debug-file1
+	Run								strip -g ./main-tests-debug-file2
+	Run								strip -g ./main-tests-debug-file3
     ${no_kcov_rc}=    Run and return RC    ./main-tests-debug-file
     ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    # Check alignment
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file1
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file1/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file2
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file2/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
+    ${rc}=    Run and return RC    ${kcov} ${out} ./main-tests-debug-file3
+    ${output}=    Run    ${xml_lookup} ${out}/main-tests-debug-file3/cobertura.xml main_cc 9
     Should Contain    ${output}    1
     # Look in .debug
 	Run								rm -rf ${out}
