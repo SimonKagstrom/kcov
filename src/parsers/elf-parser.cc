@@ -819,7 +819,7 @@ private:
 	std::string m_filename;
 	std::string m_buildId;
 	std::string m_debuglink;
-	unsigned m_debuglinkCrc;
+	uint32_t m_debuglinkCrc;
 	bool m_isMainFile;
 	uint64_t m_checksum;
 	bool m_initialized;
