@@ -594,17 +594,16 @@ out_err:
 			if (strcmp(name, ".gnu_debuglink") == 0) {
 				const char *p = (const char *)data->d_buf;
 				m_debuglink.append(p);
-
-				p += strlen(p);
+				const char *endOfString = p + strlen(p) + 1;
 
 				// Align address for the CRC32
-				unsigned long addr = (unsigned long)p;
-				unsigned long offs = 4;
+				unsigned long addr = (unsigned long)(endOfString - p);
+				unsigned long offs = 0;
 
 				if ((addr & 3) != 0)
 					offs = 4 - (addr & 3);
 				// ... and read out the CRC32
-				m_debuglinkCrc = *(uint32_t *)(p + offs);
+				memcpy((void *)&m_debuglinkCrc, endOfString + offs, sizeof(m_debuglinkCrc));
 			}
 
 			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) != (SHF_EXECINSTR | SHF_ALLOC))
