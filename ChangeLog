@@ -1,4 +1,6 @@
 Kcov (28):
+	* Coveralls: Use source_digest instead of source (current API?)
+
 	* Issue #99: Add support for looking up debug info from .gnu_debuglink
 	  sections (Vincent Brillault)
 
