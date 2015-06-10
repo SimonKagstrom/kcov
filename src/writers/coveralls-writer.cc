@@ -175,7 +175,7 @@ public:
 			out << "  {\n";
 			out << "   \"name\": \"" + escape_json(fileName) + "\",\n";
 			// Use hash as source file
-			out << fmt("   \"source\": \"0x%08lx\",\n", (unsigned long)file->m_crc);
+			out << fmt("   \"source_digest\": \"0x%08lx\",\n", (unsigned long)file->m_crc);
 			out << "   \"coverage\": [";
 
 			// And coverage
