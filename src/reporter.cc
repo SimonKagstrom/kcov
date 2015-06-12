@@ -43,6 +43,8 @@ public:
 		m_fileParser.registerFileListener(*this);
 		m_collector.registerListener(*this);
 
+		m_hashFilename = fileParser.getParserType() == "ELF";
+
 		m_dbFileName = IConfiguration::getInstance().keyAsString("target-directory") + "/coverage.db";
 	}
 
@@ -284,7 +286,29 @@ private:
 		File *fp = m_files[file];
 
 		if (!fp) {
-			fp = new File(file);
+			uint64_t hash = 0;
+
+			/*
+			 * Hash filenames for ELF parsers, the contents otherwise.
+			 *
+			 * Binaries are protected by an ELF checksum, but e.g., bash scripts need
+			 * to be identified by the contents.
+			 */
+			if (!m_hashFilename) {
+				size_t sz;
+				void *data = read_file(&sz, "%s", file.c_str());
+
+				// Compute checksum by contents
+				if (data)
+					hash = hash_block(data, sz);
+
+				free(data);
+			} else {
+				hash = m_fileHash(file);
+			}
+
+
+			fp = new File(hash);
 
 			m_files[file] = fp;
 		}
@@ -620,9 +644,8 @@ private:
 	class File
 	{
 	public:
-		File(const std::string &filename) : m_nrLines(0)
+		File(uint64_t hash) : m_fileHash(hash), m_nrLines(0)
 		{
-			m_fileHash = std::hash<std::string>()(filename);
 		}
 
 		~File()
@@ -800,7 +823,8 @@ private:
 	PresentFilesMap_t m_presentFiles;
 	PendingFilesMap_t m_pendingFiles;
 	LineIdToFileMap_t m_lineIdToFileMap;
-
+	std::hash<std::string> m_fileHash;
+	bool m_hashFilename;
 
 	IFileParser &m_fileParser;
 	ICollector &m_collector;
