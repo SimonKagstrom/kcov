@@ -622,14 +622,7 @@ private:
 	public:
 		File(const std::string &filename) : m_nrLines(0)
 		{
-			size_t sz;
-			void *data = read_file(&sz, "%s", filename.c_str());
-
-			// Compute checksum by contents
-			if (data)
-				m_fileHash = hash_block(data, sz);
-
-			free(data);
+			m_fileHash = std::hash<std::string>()(filename);
 		}
 
 		~File()
