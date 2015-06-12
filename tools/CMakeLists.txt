@@ -6,6 +6,7 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 find_package (PkgConfig REQUIRED)
+find_package (Threads)
 pkg_check_modules(LIBZ REQUIRED zlib)
 
 # ====================================
@@ -54,7 +55,7 @@ target_link_libraries(${LINE2ADDR}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
-	pthread
+	${CMAKE_THREAD_LIBS_INIT}
 	m
 	${LIBZ_LIBRARIES})
 

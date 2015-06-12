@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 project (kcov)
 set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
+find_package (Threads)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 find_package (Bfd)
@@ -195,11 +196,12 @@ target_link_libraries(${KCOV}
 	${LIBELF_LIBRARIES}
 	stdc++
 	dl
-	pthread
 	${LIBCURL_LIBRARIES}
 	m
 	${ADDRESS_VERIFIER_LIBRARIES}
-	${LIBZ_LIBRARIES})
+	${LIBZ_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
+)
 
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
