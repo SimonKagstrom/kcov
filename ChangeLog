@@ -1,4 +1,7 @@
 Kcov (28):
+	* Issue #101: Fix regression which caused --collect-only to work only
+	  if the source code was available.
+
 	* Coveralls: Use source_digest instead of source (current API?)
 
 	* Issue #99: Add support for looking up debug info from .gnu_debuglink
