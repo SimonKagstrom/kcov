@@ -296,6 +296,7 @@ out_open:
 		size_t hdr_size;
 		Dwarf *dbg;
 		int fd;
+		unsigned invalidBreakpoints = 0;
 
 		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
 		if (fd < 0) {
@@ -405,7 +406,7 @@ out_open:
 					std::string full_file_path;
 					std::string file_path = line_source;
 
-					if (!addressIsValid(addr))
+					if (!addressIsValid(addr, invalidBreakpoints))
 						continue;
 
 					/* Use the full compilation path unless the source already
@@ -443,6 +444,10 @@ out_open:
 			}
 		}
 
+		if (invalidBreakpoints > 0) {
+			kcov_debug(STATUS_MSG, "kcov: %u invalid breakpoints skipped in %s\n",
+					invalidBreakpoints, m_filename.c_str());
+		}
 out_err:
 		/* Shutdown libdwarf */
 		if (dwarf_end(dbg) != 0)
@@ -654,7 +659,7 @@ private:
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::vector<std::string> FileList_t;
 
-	bool addressIsValid(uint64_t addr)
+	bool addressIsValid(uint64_t addr, unsigned &invalidBreakpoints) const
 	{
 		for (SegmentList_t::const_iterator it = m_executableSegments.begin();
 				it != m_executableSegments.end();
@@ -667,9 +672,11 @@ private:
 
 					out = m_addressVerifier->verify(it->getData(),it->getSize(), offset);
 
-					if (!out)
-						kcov_debug(STATUS_MSG, "kcov: Address 0x%llx is not at an instruction boundary, skipping\n",
+					if (!out) {
+						kcov_debug(ELF_MSG, "kcov: Address 0x%llx is not at an instruction boundary, skipping\n",
 								(unsigned long long)addr);
+						invalidBreakpoints++;
+					}
 				}
 
 				return out;
