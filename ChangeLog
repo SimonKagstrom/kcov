@@ -1,4 +1,9 @@
 Kcov (28):
+	* Don't report each invalid breakpoint on --verify (give a summary instead)
+
+	* Issue #103: html: Display error message if JavaScript is disabled in
+	  the browser 
+
 	* Issue #101: Fix regression which caused --collect-only to work only
 	  if the source code was available.
 
@@ -14,7 +19,7 @@ Kcov (28):
 
 	* Issue #91: Correctly generate [merged] output after running two programs
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>, 
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Jul  4 05:16:21 CEST 2015
 
 Kcov (27):
 	* Issue #90: coveralls: Publish merged results if available

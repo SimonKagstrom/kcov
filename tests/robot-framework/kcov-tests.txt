@@ -788,6 +788,17 @@ debuglink
     Should Contain    ${output}    nocode
 	# Todo: Look in /usr/lib/debug as well
 
+collect-only-no-source
+	Run								rm -rf ${out} main.cc tmp-main.cc
+    ${rc}=    Run and return RC    	cp ${kcov_path}/tests/main.cc .
+    Should be equal as integers		${rc}    0
+    ${rc}=    Run and return RC    	gcc -g -o main-collect-only main.cc
+    ${rc}=    Run and return RC    	mv main.cc tmp-main.cc
+    ${rc}=    Run and return RC     ${kcov} --collect-only ${out} ./main-collect-only
+    ${rc}=    Run and return RC    	mv tmp-main.cc main.cc
+    ${rc}=    Run and return RC     ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --report-only ${out} ./main-collect-only
+    ${output}=    Run    ${xml_lookup} ${out}/main-collect-only/cobertura.xml main_cc 9
+    Should Contain    ${output}    1
 
 merge-coveralls
 	Run								rm -rf ${out}
@@ -797,7 +808,7 @@ merge-coveralls
     Should be equal as integers    ${rc}    0
     ${rc}=    Run and return RC    grep file2.c ${out}/main/coveralls.out
     Should be equal as integers    ${rc}    1
-    ${rc}=    Run and return RC    grep second.py ${out}/main-tests/coveralls.out
+    ${rc}=    Run and return RC    grep second.py ${out}/main-tests/ccollect-onloveralls.out
     Should be equal as integers    ${rc}    0
     ${rc}=    Run and return RC    grep file2.c ${out}/main-tests/coveralls.out
     Should be equal as integers    ${rc}    0
