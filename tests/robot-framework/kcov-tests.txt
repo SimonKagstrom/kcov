@@ -808,7 +808,7 @@ merge-coveralls
     Should be equal as integers    ${rc}    0
     ${rc}=    Run and return RC    grep file2.c ${out}/main/coveralls.out
     Should be equal as integers    ${rc}    1
-    ${rc}=    Run and return RC    grep second.py ${out}/main-tests/ccollect-onloveralls.out
+    ${rc}=    Run and return RC    grep second.py ${out}/main-tests/coveralls.out
     Should be equal as integers    ${rc}    0
     ${rc}=    Run and return RC    grep file2.c ${out}/main-tests/coveralls.out
     Should be equal as integers    ${rc}    0
