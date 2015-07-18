@@ -191,8 +191,13 @@ out_open:
 	bool parse()
 	{
 		// should defer until setMainFileRelocation
-		if (m_isMainFile && m_elfIsShared)
+		if (m_isMainFile && m_elfIsShared) {
+
+			// ... but this needs to be done if we don't have solibs
+			if (!IConfiguration::getInstance().keyAsInt("parse-solibs"))
+				setMainFileRelocation(0);
 			return true;
+		}
 
 		if (!doParse(0))
 			return false;
