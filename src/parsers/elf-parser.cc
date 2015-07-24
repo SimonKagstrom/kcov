@@ -190,21 +190,21 @@ out_open:
 
 	bool parse()
 	{
+		bool out = true;
+
 		// should defer until setMainFileRelocation
 		if (m_isMainFile && m_elfIsShared) {
 
 			// ... but this needs to be done if we don't have solibs
 			if (!IConfiguration::getInstance().keyAsInt("parse-solibs"))
 				setMainFileRelocation(0);
-			return true;
+		} else {
+			out = doParse(0);
 		}
 
-		if (!doParse(0))
-			return false;
-
-		// After the first, all other are solibs
 		m_isMainFile = false;
-		return true;
+
+		return out;
 	}
 
 	bool doParse(unsigned long relocation)
@@ -227,9 +227,6 @@ out_open:
 
 	bool setMainFileRelocation(unsigned long relocation)
 	{
-		if (!m_isMainFile)
-			return false;
-
 		kcov_debug(INFO_MSG, "main file relocation = %#lx\n", relocation);
 
 		if (m_elfIsShared) {
