@@ -1,4 +1,9 @@
 Kcov (28):
+	* Issue #104: Correct handling of shared libraries with build-id debug
+	  information
+
+	* Fix --skip-solibs handling
+
 	* Don't report each invalid breakpoint on --verify (give a summary instead)
 
 	* Issue #103: html: Display error message if JavaScript is disabled in
