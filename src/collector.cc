@@ -128,7 +128,13 @@ private:
 						"\nkcov: Illegal instructions are sometimes caused by some GCC versions\n"
 						"kcov: miscompiling C++ headers. If the problem is persistent, try running\n"
 						"kcov: with --verify. For more information, see\n"
-						"kcov: http://github.com/SimonKagstrom/kcov/issues/18\n");
+						"kcov: http://github.com/SimonKagstrom/kcov/issues/18\n"
+#if KCOV_HAS_LIBBFD == 0
+						"\n"
+						"kcov: WARNING: kcov has been built without libbfd-dev (or\n"
+						"kcov: binutils-dev), so the --verify option will not do anything."
+#endif
+						);
 
 			break;
 

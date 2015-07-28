@@ -208,6 +208,10 @@ public:
 				break;
 			case 'V':
 				setKey("verify", 1);
+#if KCOV_HAS_LIBBFD == 0
+				warning("kcov: WARNING: kcov has been built without libbfd-dev (or\n"
+						"kcov: binutils-dev), so the --verify option will not do anything.\n");
+#endif
 				break;
 			case 'L':
 				setKey("parse-solibs", 0);
