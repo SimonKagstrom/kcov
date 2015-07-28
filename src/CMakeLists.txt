@@ -33,8 +33,11 @@ set (ADDRESS_VERIFIER_SRCS
 	parsers/dummy-address-verifier.cc
 )
 
+set (HAS_LIBBFD "0")
+
 if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
 	if(LIBBFD_FOUND)
+		set (HAS_LIBBFD "1")
 		set (ADDRESS_VERIFIER_SRCS
 			parsers/bfd-address-verifier.cc
 		)
@@ -99,7 +102,7 @@ set (${KCOV}_SRCS
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
 
-set (CMAKE_CXX_FLAGS "-std=c++0x -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
+set (CMAKE_CXX_FLAGS "-std=c++0x -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX} -DKCOV_HAS_LIBBFD=${HAS_LIBBFD}")
 
 include_directories(
 	include/
