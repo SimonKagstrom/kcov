@@ -373,7 +373,7 @@ public:
 				}
 
 				return out;
-			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK) {
+			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK || (status >> 16) == PTRACE_EVENT_VFORK) {
 				kcov_debug(ENGINE_MSG, "PT clone at 0x%llx for %d\n",
 						(unsigned long long)out.addr, m_activeChild);
 				out.data = 0;
