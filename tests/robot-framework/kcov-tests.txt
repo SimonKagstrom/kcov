@@ -895,7 +895,7 @@ noncrit-vfork
     Should Contain    ${output}    1
     ${output}=    Run    ${xml_lookup} ${out}/vfork/cobertura.xml vfork_c 18
     Should Contain    ${output}    1
-x
+
 
 # The gcov tests appears to hang at times, so ignore them (not finished anyway)
 #noncrit-main-test-gcov
