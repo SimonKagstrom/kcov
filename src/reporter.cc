@@ -384,7 +384,7 @@ private:
 	/* Called during runtime */
 	void reportAddress(uint64_t lineHash, unsigned long hits)
 	{
-		// Report the line hash (loosing partial hit info from now on, but
+		// Report the line hash (losing partial hit info from now on, but
 		// that's only for the merge-reporter anyway)
 		for (ListenerList_t::const_iterator it = m_listeners.begin();
 				it != m_listeners.end();
