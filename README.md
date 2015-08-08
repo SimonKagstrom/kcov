@@ -27,7 +27,7 @@ http://coveralls.io for easy integration with travis-ci.
 
 Filtering output
 ----------------
-It's often useful to filter output, since e.g., /usr/include is seldomly of interest.
+It's often useful to filter output, since e.g., /usr/include is seldom of interest.
 This can be done in two ways:
 
 ```

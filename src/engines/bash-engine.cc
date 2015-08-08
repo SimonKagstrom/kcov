@@ -465,7 +465,7 @@ private:
 		unsigned int lineNo = 0;
 		enum { none, backslash, quote, heredoc } state = none;
 		bool caseActive = false;
-		bool aritmeticActive = false;
+		bool arithmeticActive = false;
 		std::string heredocMarker;
 
 		for (std::vector<std::string>::const_iterator it = stringList.begin();
@@ -559,7 +559,7 @@ private:
 			} else {
 				size_t heredocStart = s.find("<<");
 
-				if (!aritmeticActive &&
+				if (!arithmeticActive &&
 						s.find("let ") != 0 &&
 						s.find("$((") == std::string::npos &&
 						s.find("))") == std::string::npos &&
@@ -586,12 +586,12 @@ private:
 				caseActive = false;
 
 			if (s.find("$((") != std::string::npos)
-				aritmeticActive = true;
+				arithmeticActive = true;
 			if (s.find("))") != std::string::npos)
-				aritmeticActive = false;
+				arithmeticActive = false;
 
 			// Only the last line of arithmetic is code
-			if (aritmeticActive)
+			if (arithmeticActive)
 				continue;
 
 			// Case switches are nocode
