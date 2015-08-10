@@ -67,6 +67,14 @@ fork-32
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 46
     Should Contain    ${output}    1
 
+vfork
+	Run								rm -rf ${out}/vfork
+    ${rc}=    Run and return RC    ${kcov} ${out} ./vfork
+    ${output}=    Run    ${xml_lookup} ${out}/vfork/cobertura.xml vfork_c 12
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/vfork/cobertura.xml vfork_c 18
+    Should Contain    ${output}    1
+
 shared-library
     Run                            rm -rf ${out}/shared_library_test
     ${no_kcov_rc}=    Run and return RC    ./shared_library_test
@@ -813,7 +821,6 @@ merge-coveralls
     ${rc}=    Run and return RC    grep file2.c ${out}/main-tests/coveralls.out
     Should be equal as integers    ${rc}    0
 
-
 noncrit-bash-subshell
     [Tags]	not_ready
 	Run								rm -rf ${out}/subshell.sh
@@ -884,16 +891,6 @@ noncrit-daemon-no-wait-for-last-child-test
     Should Contain    ${output}    0
     Run                            sleep 5
     ${output}=    Run    ${xml_lookup} ${out}/test_daemon/cobertura.xml test_daemon_cc 31
-    Should Contain    ${output}    1
-
-
-noncrit-vfork
-    [Tags]	not_ready
-	Run								rm -rf ${out}/vfork
-    ${rc}=    Run and return RC    ${kcov} ${out} ./vfork
-    ${output}=    Run    ${xml_lookup} ${out}/vfork/cobertura.xml vfork_c 12
-    Should Contain    ${output}    1
-    ${output}=    Run    ${xml_lookup} ${out}/vfork/cobertura.xml vfork_c 18
     Should Contain    ${output}    1
 
 
