@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE  Release)
 endif(NOT CMAKE_BUILD_TYPE)
 
-add_definitions(-DPACAKGE)
+add_definitions(-DPACKAGE)
 add_definitions(-DPACKAGE_VERSION)
 # ====================================
 # configuring
