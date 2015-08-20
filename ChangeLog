@@ -1,4 +1,12 @@
 Kcov (28):
+	* Fix various spelling errors (Veres Lajos)
+
+	* Issue #110: Correct handling of vfork()
+
+	* --pid= requires an executable, actually say that as well (Vincent Gibert)
+
+	* Issue #105: Warn about --verify without binutils
+
 	* Issue #104: Correct handling of shared libraries with build-id debug
 	  information
 
