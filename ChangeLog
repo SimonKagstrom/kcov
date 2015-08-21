@@ -13,7 +13,7 @@ Kcov (29):
 
 	* Fix --skip-solibs handling
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Aug 21 07:39:41 CEST 2015
 
 Kcov (28):
 	* Don't report each invalid breakpoint on --verify (give a summary instead)
