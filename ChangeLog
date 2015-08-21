@@ -1,4 +1,5 @@
-Kcov (28):
+Kcov (29):
+
 	* Fix various spelling errors (Veres Lajos)
 
 	* Issue #110: Correct handling of vfork()
@@ -12,6 +13,9 @@ Kcov (28):
 
 	* Fix --skip-solibs handling
 
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
+Kcov (28):
 	* Don't report each invalid breakpoint on --verify (give a summary instead)
 
 	* Issue #103: html: Display error message if JavaScript is disabled in
