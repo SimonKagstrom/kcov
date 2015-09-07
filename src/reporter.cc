@@ -44,7 +44,6 @@ public:
 		m_collector.registerListener(*this);
 
 		m_hashFilename = fileParser.getParserType() == "ELF";
-		m_hashFilename = false;
 
 		m_dbFileName = IConfiguration::getInstance().keyAsString("target-directory") + "/coverage.db";
 	}
