@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <libelf.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -39,6 +38,119 @@ enum
 	arm_PC = 15,
 	aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
 };
+
+
+enum Commands
+{
+	CMD_START,
+	CMD_SET_BREAKPOINT,
+	CMD_CONTINUE,
+	CMD_EVENT,
+	CMD_KILL,
+	CMD_RESULT
+};
+
+class Command
+{
+public:
+	Command(enum Commands cmd, uint64_t data = 0) :
+		m_type(cmd), m_data(data)
+	{
+	}
+
+	Command(enum Commands cmd, const std::string &strArg) :
+		m_type(cmd), m_data(0),
+		m_strArg(strArg)
+	{
+	}
+
+	Command(const IEngine::Event &event) :
+		m_type(CMD_EVENT), m_data(0),
+		m_event(event)
+	{
+	}
+
+	uint64_t getData() const
+	{
+		return m_data;
+	}
+
+	const std::string &getStringArgument() const
+	{
+		return m_strArg;
+	}
+
+	enum Commands getType() const
+	{
+		return m_type;
+	}
+
+	const IEngine::Event &getEvent() const
+	{
+		return m_event;
+	}
+
+private:
+	enum Commands m_type;
+	uint64_t m_data;
+	std::string m_strArg;
+	IEngine::Event m_event;
+};
+
+
+class CommandMailbox
+{
+public:
+	CommandMailbox()
+	{
+		m_sem.wait(); // Start at 0
+	}
+
+	void post(const Command &cmd)
+	{
+		m_mutex.lock();
+		m_commands.push_back(cmd);
+		m_mutex.unlock();
+
+		m_sem.notify();
+	}
+
+	bool hasMail()
+	{
+		bool out;
+
+		m_mutex.lock();
+		out = m_commands.empty();
+		m_mutex.unlock();
+
+		return !out;
+	}
+
+	Command postAndWaitForMail(Command &cmd)
+	{
+		post(cmd);
+
+		return getMail();
+	}
+
+	Command getMail()
+	{
+		m_sem.wait();
+
+		m_mutex.lock();
+		Command out = m_commands.front();
+		m_commands.pop_front();
+		m_mutex.unlock();
+
+		return out;
+	}
+
+private:
+	std::list<Command> m_commands;
+	std::mutex m_mutex;
+	Semaphore m_sem;
+};
+
 
 static unsigned long getAligned(unsigned long addr)
 {
@@ -237,17 +349,18 @@ static int kill_lwp (unsigned long lwpid, int signo)
 	return kill (lwpid, signo);
 }
 
-class Ptrace : public IEngine
+class Ptrace
 {
 public:
-	Ptrace() :
+	Ptrace(CommandMailbox &inMailbox, CommandMailbox &outMailbox) :
 		m_firstBreakpoint(true),
 		m_activeChild(0),
 		m_child(0),
 		m_firstChild(0),
 		m_parentCpu(0),
-		m_listener(NULL),
-		m_signal(0)
+		m_signal(0),
+		m_inMailbox(inMailbox),
+		m_outMailbox(outMailbox)
 	{
 	}
 
@@ -259,10 +372,8 @@ public:
 
 
 
-	bool start(IEventListener &listener, const std::string &executable)
+	bool start(const std::string &executable)
 	{
-		m_listener = &listener;
-
 		m_parentCpu = get_current_cpu();
 		tie_process_to_cpu(getpid(), m_parentCpu);
 
@@ -335,10 +446,15 @@ public:
 		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
 	}
 
-	const Event waitEvent()
+	bool getNextEvent(IEngine::Event &ev)
+	{
+		return false;
+	}
+
+	const IEngine::Event waitEvent()
 	{
 		static uint64_t lastSignalAddress;
-		Event out;
+		IEngine::Event out;
 		int status;
 		int who;
 
@@ -462,11 +578,10 @@ public:
 		}
 
 
-		Event ev = waitEvent();
+		IEngine::Event ev = waitEvent();
 		m_signal = ev.type == ev_signal ? ev.data : 0;
 
-		if (m_listener)
-			m_listener->onEvent(ev);
+		m_outMailbox.post(Command(ev));
 
 		if (ev.type == ev_breakpoint)
 			clearBreakpoint(ev.addr);
@@ -484,8 +599,61 @@ public:
 			::kill(m_activeChild, signal);
 	}
 
-private:
+	bool handleCommand(Command &cmd)
+	{
+		bool cont = false;
 
+		switch (cmd.getType())
+		{
+			case CMD_START:
+			{
+				bool res = start(cmd.getStringArgument());
+
+				m_outMailbox.post(Command(CMD_RESULT, res));
+				break;
+			}
+			case CMD_SET_BREAKPOINT:
+			{
+				registerBreakpoint(cmd.getData());
+				break;
+			}
+			case CMD_CONTINUE:
+			{
+				cont = true;
+				break;
+			}
+			case CMD_KILL:
+			{
+				kill(cmd.getData());
+				break;
+			}
+			default:
+				break;
+		}
+
+		return cont;
+	}
+
+	void threadMain()
+	{
+		bool cont = false;
+
+		while (1) {
+			if (m_inMailbox.hasMail()) {
+				Command cmd = m_inMailbox.getMail();
+
+				cont = handleCommand(cmd);
+			}
+
+			if (cont) {
+				bool res = continueExecution();
+				if (res == false)
+					return;
+			}
+		}
+	}
+
+private:
 	void setupAllBreakpoints()
 	{
 		for (PendingBreakpointList_t::const_iterator addrIt = m_pendingBreakpoints.begin();
@@ -765,10 +933,108 @@ private:
 
 	int m_parentCpu;
 
-	IEventListener *m_listener;
 	unsigned long m_signal;
+
+	CommandMailbox &m_inMailbox;
+	CommandMailbox &m_outMailbox;
+
+	std::vector<IEngine::Event> m_resultQueue;
+	std::mutex m_resultMutex;
 };
 
+
+
+class PtraceEngineWrapper : public IEngine
+{
+public:
+	PtraceEngineWrapper() :
+		m_listener(NULL),
+		m_engine(m_outMailbox, m_inMailbox)
+	{
+		pthread_create(&m_thread, NULL,
+				PtraceEngineWrapper::threadStatic, (void *)this);
+	}
+
+	~PtraceEngineWrapper()
+	{
+		void *rv;
+
+		pthread_join(m_thread, &rv);
+		(void)rv;
+	}
+
+	int registerBreakpoint(unsigned long addr)
+	{
+		m_outMailbox.post(Command(CMD_SET_BREAKPOINT, addr));
+
+		return 0;
+	}
+
+	bool start(IEngine::IEventListener &listener, const std::string &executable)
+	{
+		m_listener = &listener;
+
+		m_outMailbox.post(Command(CMD_START, executable));
+		Command cmd = m_inMailbox.getMail();
+
+		if (cmd.getType() != CMD_RESULT)
+			return false;
+
+		return cmd.getData() != 0;
+	}
+
+	void kill(int sig)
+	{
+		m_outMailbox.post(Command(CMD_KILL, sig));
+	}
+
+	bool continueExecution()
+	{
+		m_outMailbox.post(Command(CMD_CONTINUE));
+
+		do {
+			Command cmd = m_inMailbox.getMail();
+
+			switch (cmd.getType())
+			{
+			case CMD_EVENT:
+			{
+				const IEngine::Event &ev = cmd.getEvent();
+				m_listener->onEvent(ev);
+
+				if (ev.type == ev_error)
+					return false;
+
+				break;
+			}
+			default:
+				break;
+			}
+		} while (m_inMailbox.hasMail());
+
+		return true;
+	}
+
+private:
+
+	// Wrapper for ptrace
+	static void *threadStatic(void *pThis)
+	{
+		PtraceEngineWrapper *p = (PtraceEngineWrapper*)pThis;
+
+		p->m_engine.threadMain();
+
+		return NULL;
+	}
+
+	Semaphore m_queueSem;
+
+	IEngine::IEventListener *m_listener;
+	pthread_t m_thread;
+	Ptrace m_engine;
+	CommandMailbox m_outMailbox;
+	CommandMailbox m_inMailbox;
+};
 
 
 class PtraceEngineCreator : public IEngineFactory::IEngineCreator
@@ -780,7 +1046,7 @@ public:
 
 	virtual IEngine *create(IFileParser &parser)
 	{
-		return new Ptrace();
+		return new PtraceEngineWrapper();
 	}
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
@@ -791,3 +1057,4 @@ public:
 };
 
 static PtraceEngineCreator g_ptraceEngineCreator;
+
