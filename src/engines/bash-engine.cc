@@ -485,6 +485,10 @@ private:
 				if ((comment >= 1 && s[comment - 1] == '$') ||
 						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
 					// Do nothing
+				// Nor if in a string
+				} else if (comment >= 1
+				&& (s.find("\"") < comment || s.find("'") < comment)) {
+					// Do nothing
 				} else {
 					s = trim_string(s);
 					s = s.substr(0, comment);
