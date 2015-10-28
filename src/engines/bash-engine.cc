@@ -578,6 +578,18 @@ private:
 						}
 					}
 
+					if (heredocMarker[0] == '-') {
+						// '-' marks tab-suppression in heredoc
+						heredocMarker = heredocMarker.substr(1);
+					}
+
+					if (heredocMarker.length() > 2
+					&& (heredocMarker[0] == '"' || heredocMarker[0] == '\'')
+					&&  heredocMarker[0] == heredocMarker[heredocMarker.length()-1]) {
+						// remove enclosing in quotes
+						heredocMarker = heredocMarker.substr(1, heredocMarker.length()-2);
+					}
+
 					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
 						state = heredoc;
 				}
