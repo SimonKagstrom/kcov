@@ -549,6 +549,9 @@ private:
 				continue;
 			}
 
+			if (s.find("$((") != std::string::npos || s.find("$[") != std::string::npos)
+				arithmeticActive = true;
+
 			if (s[s.size() - 1] == '\\') {
 				state = backslash;
 			} else if ((s.find("=\"") != std::string::npos || // Handle multi-line string assignments
@@ -585,9 +588,7 @@ private:
 			else if (s.find("esac") == 0)
 				caseActive = false;
 
-			if (s.find("$((") != std::string::npos)
-				arithmeticActive = true;
-			if (s.find("))") != std::string::npos)
+			if (s.find("))") != std::string::npos || s.find("]") != std::string::npos)
 				arithmeticActive = false;
 
 			// Only the last line of arithmetic is code
