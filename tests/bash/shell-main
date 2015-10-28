@@ -134,3 +134,16 @@ USAGE="usage: some message
    --some-option   Does something
 "
 echo "After usage"
+
+# Issue 116
+SUB=30
+max=$[ 1 << (32 - SUB) ]
+
+echo "$max covered?"
+
+# Issue 116
+cat <<-!
+    Middle
+!
+
+echo "Covered?"
