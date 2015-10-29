@@ -485,6 +485,10 @@ private:
 				if ((comment >= 1 && s[comment - 1] == '$') ||
 						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
 					// Do nothing
+				// Nor if in a string
+				} else if (comment >= 1
+				&& (s.find("\"") < comment || s.find("'") < comment)) {
+					// Do nothing
 				} else {
 					s = trim_string(s);
 					s = s.substr(0, comment);
@@ -576,6 +580,18 @@ private:
 							heredocMarker = heredocMarker.substr(0, i);
 							break;
 						}
+					}
+
+					if (heredocMarker[0] == '-') {
+						// '-' marks tab-suppression in heredoc
+						heredocMarker = heredocMarker.substr(1);
+					}
+
+					if (heredocMarker.length() > 2
+					&& (heredocMarker[0] == '"' || heredocMarker[0] == '\'')
+					&&  heredocMarker[0] == heredocMarker[heredocMarker.length()-1]) {
+						// remove enclosing in quotes
+						heredocMarker = heredocMarker.substr(1, heredocMarker.length()-2);
 					}
 
 					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
