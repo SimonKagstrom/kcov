@@ -635,6 +635,14 @@ bash-issue-116-aritmethic-and-heredoc
     ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 149
     Should Contain    ${output}    1
 
+bash-issue-117-comment-within-string
+	Run								rm -rf ${out}/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 151
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 152
+    Should Contain    ${output}    1
+
 bash-sh-shebang
 	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --bash-handle-sh-invocation ${out} ${kcov_path}/tests/bash/shell-main
