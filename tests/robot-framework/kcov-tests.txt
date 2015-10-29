@@ -627,6 +627,14 @@ bash-output-crc
     ${output}=    Run              ls -l ${out}/a.sh/b.*.json | wc -l
     Should Contain    ${output}    2
 
+bash-issue-116-aritmethic-and-heredoc
+	Run								rm -rf ${out}/shell-main
+    ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} ${out} ${kcov_path}/tests/bash/shell-main
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 142
+    Should Contain    ${output}    1
+    ${output}=    Run    ${xml_lookup} ${out}/shell-main/cobertura.xml shell_main 149
+    Should Contain    ${output}    1
+
 bash-sh-shebang
 	Run								rm -rf ${out}/shell-main
     ${rc}=    Run and return RC    ${kcov} --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov ${kcov} --bash-handle-sh-invocation ${out} ${kcov_path}/tests/bash/shell-main
