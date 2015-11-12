@@ -85,6 +85,7 @@ public:
 				"                                                       # including /src/frodo\n"
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
+				"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2    # Merge the dir1/dir2 reports"
 				"",
 				keyAsInt("low-limit"), keyAsInt("high-limit"),
 				uncommonOptions().c_str());
