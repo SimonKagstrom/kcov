@@ -400,7 +400,7 @@ private:
 			m_files[filename] = file;
 		} else {
 			// Checksum doesn't match, ignore this file
-			if (file->m_checksum != fd->checksum || file->m_fileTimestamp != fd->timestamp)
+			if (file->m_checksum != fd->checksum)
 				return;
 		}
 
