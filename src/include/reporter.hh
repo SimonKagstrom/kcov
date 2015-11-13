@@ -122,7 +122,7 @@ namespace kcov
 		 */
 		virtual ExecutionSummary getExecutionSummary() = 0;
 
-		virtual void stop() = 0;
+		virtual void writeCoverageDatabase() = 0;
 
 		static IReporter &create(IFileParser &elf, ICollector &collector, IFilter &filter);
 		static IReporter &createDummyReporter();

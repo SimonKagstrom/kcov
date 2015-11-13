@@ -25,7 +25,7 @@ namespace kcov
 
 		MAKE_MOCK2(unMarshal, bool(void *data, size_t sz));
 
-		MAKE_MOCK0(stop, void());
+		MAKE_MOCK0(writeCoverageDatabase, void());
 
 		void *mockMarshal(size_t *outSz)
 		{

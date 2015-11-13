@@ -50,7 +50,7 @@ public:
 
 	~Reporter()
 	{
-		stop();
+		writeCoverageDatabase();
 
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
@@ -215,7 +215,7 @@ public:
 		return true;
 	}
 
-	virtual void stop()
+	virtual void writeCoverageDatabase()
 	{
 		size_t sz;
 		void *data = marshal(&sz);
@@ -863,7 +863,7 @@ class DummyReporter : public IReporter
 		return ExecutionSummary();
 	}
 
-	void stop()
+	void writeCoverageDatabase()
 	{
 	}
 };
