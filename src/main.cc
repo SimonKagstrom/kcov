@@ -176,6 +176,7 @@ static int runMergeMode()
 
 	output.start();
 
+	mergeReporter.writeCoverageDatabase();
 	delete &output;
 
 	return 0;
