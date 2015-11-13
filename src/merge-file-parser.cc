@@ -222,9 +222,10 @@ public:
 	void onStop()
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
+		bool inMergeMode = conf.keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY;
 
 		// Parse data from earlier runs
-		if (conf.keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY)
+		if (inMergeMode)
 			parseStoredDataMerged();
 		else
 			parseStoredData();
@@ -240,8 +241,11 @@ public:
 		for (FileByNameMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
 				++it) {
-			// Only marshal local files
-			if (!it->second->m_local)
+			/*
+			 *  Only marshal local files, except when in merged mode - then all files
+			 *  are local (or none, depending on how you see it).
+			 */
+			if (!inMergeMode && !it->second->m_local)
 				continue;
 
 			const struct file_data *fd = marshalFile(it->second->m_filename);
