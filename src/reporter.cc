@@ -862,6 +862,10 @@ class DummyReporter : public IReporter
 	{
 		return ExecutionSummary();
 	}
+
+	void stop()
+	{
+	}
 };
 
 IReporter &IReporter::create(IFileParser &parser, ICollector &collector, IFilter &filter)
