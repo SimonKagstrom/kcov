@@ -173,6 +173,7 @@ static int runMergeMode()
 	output.registerWriter(mergeCoverallsWriter);
 
 	output.start();
+	output.stop();
 
 	mergeReporter.writeCoverageDatabase();
 	delete &output;
