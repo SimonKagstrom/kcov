@@ -167,8 +167,6 @@ static int runMergeMode()
 	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser, mergeReporter);
 	(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
-	reporter.registerListener(mergeParser);
-
 	output.registerWriter(mergeParser);
 	output.registerWriter(mergeHtmlWriter);
 	output.registerWriter(mergeCoberturaWriter);
