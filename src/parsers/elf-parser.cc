@@ -637,6 +637,7 @@ out_err:
 			if (file_exists(gcno))
 				m_gcnoFiles.push_back(gcno);
 		}
+		free(fileData);
 
 		ret = true;
 
