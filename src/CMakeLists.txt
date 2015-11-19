@@ -61,6 +61,7 @@ endif()
 set (LINUX_SRCS
 	dummy-solib-handler.cc
 )
+set (SOLIB_generated )
 
 # Linux-specific sources
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
@@ -73,6 +74,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 		solib-handler.cc
 		solib-parser/phdr_data.c
 	)
+	set (SOLIB_generated library.cc)
 endif ()
 
 set (${KCOV}_SRCS
@@ -192,7 +194,7 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} library.cc bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc)
+add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc)
 
 target_link_libraries(${KCOV}
 	${LIBDW_LIBRARIES}
