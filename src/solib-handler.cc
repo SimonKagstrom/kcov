@@ -35,7 +35,8 @@ public:
 		m_solibFd(-1),
 		m_solibThreadValid(false),
 		m_threadShouldExit(false),
-		m_parser(&parser)
+		m_parser(&parser),
+		m_hasSetupRelocation(false)
 {
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
@@ -195,7 +196,11 @@ public:
 		if (!p)
 			return;
 
-		m_parser->setMainFileRelocation(p->relocation);
+		// Setup where the main file is relocated once (for PIEs)
+		if (!m_hasSetupRelocation) {
+			m_hasSetupRelocation = true;
+			m_parser->setMainFileRelocation(p->relocation);
+		}
 
 		for (unsigned int i = 0; i < p->n_entries; i++)
 		{
@@ -235,6 +240,7 @@ public:
 	std::mutex m_phdrListMutex;
 
 	IFileParser *m_parser;
+	bool m_hasSetupRelocation;
 };
 
 
