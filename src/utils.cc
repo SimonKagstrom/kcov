@@ -306,7 +306,14 @@ uint64_t get_file_timestamp(const std::string &path)
 	if (lstat(path.c_str(), &st) != 0)
 		return 0;
 
-	return st.st_mtim.tv_sec;
+	// See http://stackoverflow.com/questions/11373505/getting-the-last-modified-date-of-a-file-in-c
+#ifdef __APPLE__
+#ifndef st_mtim
+#define st_mtim st_mtimespec
+#endif
+#endif
+
+    return st.st_mtim.tv_sec;
 }
 
 static void read_write(FILE *dst, FILE *src)
