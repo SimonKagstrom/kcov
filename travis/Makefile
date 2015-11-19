@@ -67,6 +67,7 @@ prepare_osx_gcc:
 prepare_osx:
 	brew update
 	brew install homebrew/dupes/zlib
+	brew install python
 
 prepare_linux:
 	-sudo apt-get update
