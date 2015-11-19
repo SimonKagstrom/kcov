@@ -4,8 +4,6 @@ project (kcov)
 set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (Threads)
-find_package (LibElf REQUIRED)
-find_package (Elfutils REQUIRED)
 find_package (Bfd)
 
 include(TargetArch)
@@ -66,6 +64,8 @@ set (LINUX_SRCS
 
 # Linux-specific sources
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+	find_package (LibElf REQUIRED)
+	find_package (Elfutils REQUIRED)
 	set (LINUX_SRCS
 		engines/ptrace.cc
 		engines/kernel-engine.cc
