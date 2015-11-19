@@ -130,12 +130,6 @@ unsigned long get_aligned_4b(unsigned long addr);
 
 std::string fmt(const char *fmt, ...) __attribute__((format(printf,1,2)));
 
-int coin_get_current_cpu(void);
-
-int kcov_get_current_cpu(void);
-
-void kcov_tie_process_to_cpu(pid_t pid, int cpu);
-
 void mdelay(unsigned int ms);
 
 uint64_t get_ms_timestamp(void);

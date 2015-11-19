@@ -120,6 +120,28 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 }
 
 
+
+static int get_current_cpu(void)
+{
+	return sched_getcpu();
+}
+
+static void tie_process_to_cpu(pid_t pid, int cpu)
+{
+	// Switching CPU while running will cause icache
+	// conflicts. So let's just forbid that.
+
+	cpu_set_t *set = CPU_ALLOC(1);
+	panic_if (!set,
+			"Can't allocate CPU set!\n");
+	CPU_ZERO_S(CPU_ALLOC_SIZE(1), set);
+	CPU_SET(cpu, set);
+	panic_if (sched_setaffinity(pid, CPU_ALLOC_SIZE(1), set) < 0,
+			"Can't set CPU affinity. Coincident won't work");
+	CPU_FREE(set);
+}
+
+
 /* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
 static int linux_proc_get_int (pid_t lwpid, const char *field)
 {
@@ -238,8 +260,8 @@ public:
 	{
 		m_listener = &listener;
 
-		m_parentCpu = kcov_get_current_cpu();
-		kcov_tie_process_to_cpu(getpid(), m_parentCpu);
+		m_parentCpu = get_current_cpu();
+		tie_process_to_cpu(getpid(), m_parentCpu);
 
 		m_instructionMap.clear();
 
@@ -509,7 +531,7 @@ private:
 				perror("Can't set me as ptraced");
 				return false;
 			}
-			kcov_tie_process_to_cpu(getpid(), m_parentCpu);
+			tie_process_to_cpu(getpid(), m_parentCpu);
 			execv(executable, argv);
 
 			/* Exec failed */
@@ -524,7 +546,7 @@ private:
 		m_child = m_activeChild = m_firstChild = child;
 		// Might not be completely necessary (the child should inherit this
 		// from the parent), but better safe than sorry
-		kcov_tie_process_to_cpu(m_child, m_parentCpu);
+		tie_process_to_cpu(m_child, m_parentCpu);
 
 		kcov_debug(ENGINE_MSG, "PT forked %d\n", child);
 
@@ -571,7 +593,7 @@ private:
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
-		kcov_tie_process_to_cpu(m_activeChild, m_parentCpu);
+		tie_process_to_cpu(m_activeChild, m_parentCpu);
 
 		::kill(m_activeChild, SIGSTOP);
 		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
