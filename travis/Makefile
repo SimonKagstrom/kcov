@@ -60,6 +60,8 @@ build_clang:
 
 run-tests: build run-tests-${CC}
 
+prepare_osx:
+
 prepare_linux:
 	-sudo apt-get update
 	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time
