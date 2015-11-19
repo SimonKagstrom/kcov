@@ -65,6 +65,8 @@ prepare_osx_clang:
 prepare_osx_gcc:
 
 prepare_osx:
+	brew update
+	brew install zlib
 
 prepare_linux:
 	-sudo apt-get update
