@@ -60,6 +60,10 @@ build_clang:
 
 run-tests: build run-tests-${CC}
 
+prepare_osx_clang:
+
+prepare_osx_gcc:
+
 prepare_osx:
 
 prepare_linux:
