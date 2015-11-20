@@ -13,6 +13,11 @@ build_reference:
 	make -C reference/build/
 	cp reference/build/src/kcov /tmp/kcov-reference
 
+build-osx:
+	mkdir -p build
+	cd build && cmake ..
+	make -C build
+
 build:
 	mkdir -p build build-tests build-tools
 	cd build && cmake ..
@@ -23,7 +28,7 @@ build:
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc: build_reference
+build_gcc: build build_reference
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
@@ -46,19 +51,25 @@ run-performance: build_gcc
 	travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
 	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
 
-run-tests-gcc: run-performance
+run-tests-linux-gcc: run-performance
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=/tmp/kcov/ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
-run-tests-clang:
+run-tests-linux-clang: build
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 
 build_clang:
 	# Stupid workaround for coverity scans...
 	sleep 97
 
-run-tests: build run-tests-${CC}
+run-tests-osx-gcc: build-osx
+
+run-tests-osx-clang: build-osx
+
+
+run-tests: run-tests-${TRAVIS_OS_NAME}-${CC}
+
 
 prepare_osx_clang:
 
