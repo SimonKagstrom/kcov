@@ -75,6 +75,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 		solib-parser/phdr_data.c
 	)
 	set (SOLIB_generated library.cc)
+	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
+	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
+	target_link_libraries(${SOLIB} dl)
 endif ()
 
 set (${KCOV}_SRCS
@@ -116,12 +119,9 @@ include_directories(
 
 link_directories (/home/ska/local/lib)
 
-add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
-set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
 
-target_link_libraries(${SOLIB} dl)
 target_link_libraries(bash_execve_redirector dl)
 
 add_custom_command(
