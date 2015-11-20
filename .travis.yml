@@ -14,9 +14,6 @@ compiler:
   - gcc
   - clang
 
-matrix:
-  allow_failures:
-    - os: osx
 
 env:
   global:
