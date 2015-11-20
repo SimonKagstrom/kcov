@@ -1,4 +1,12 @@
 Kcov (29):
+	* Issue #21: Allow builds on Mac OSX as well (Python and Bash only)
+
+	* Issue #122: Fix memory leak when adding shared libraries (jba31)
+
+	* Issue #118: Correct merging of reports collected on another machine
+
+	* Issue #116/#117: bash: Correct corner-cases for herecdocs and arithmetic
+	  (Phil Whineray)
 
 	* Fix various spelling errors (Veres Lajos)
 
