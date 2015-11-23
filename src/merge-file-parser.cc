@@ -428,7 +428,7 @@ private:
 
 				// Register and report the hit
 				if (hit) {
-					file->registerHits(lineNr, 1);
+					file->registerHits(addr, 1);
 
 
 					for (CollectorListenerList_t::const_iterator itC = m_collectorListeners.begin();
