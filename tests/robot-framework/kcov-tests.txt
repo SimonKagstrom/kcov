@@ -765,8 +765,7 @@ merge-multiple-output-directories
     ${output}=    Run    ${xml_lookup} ${out}/merged/kcov-merged/cobertura.xml main_cc 9
     Should Contain    ${output}    1
 
-noncrit-merge-merged-output
-	[Tags]	not_ready
+merge-merged-output
 	Run								rm -rf ${out}
 	Run								mkdir -p ${out}/first
 	Run								mkdir -p ${out}/second
