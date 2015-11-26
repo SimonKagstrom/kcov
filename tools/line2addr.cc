@@ -4,6 +4,8 @@
 
 using namespace kcov;
 
+const char *kcov_version = "";
+
 class Listener : public IFileParser::ILineListener
 {
 public:
