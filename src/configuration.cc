@@ -15,6 +15,8 @@
 #include <iostream>
 using namespace kcov;
 
+extern "C" const char *kcov_version;
+
 class Configuration : public IConfiguration
 {
 public:
@@ -58,6 +60,7 @@ public:
 				"\n"
 				"Where [OPTIONS] are\n"
 				" -h, --help              this text\n"
+				" --version               print the version of kcov\n"
 				" -p, --pid=PID           trace PID instead of executing in-file,\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
 				"\n"
@@ -125,6 +128,7 @@ public:
 				{"bash-parser", required_argument, 0, 'B'},
 				{"bash-method", required_argument, 0, '4'},
 				{"verify", no_argument, 0, 'V'},
+				{"version", no_argument, 0, 'v'},
 				{"uncommon-options", no_argument, 0, 'U'},
 				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
 				/*{"read-file", required_argument, 0, 'r'}, Ditto */
@@ -212,6 +216,10 @@ public:
 				warning("kcov: WARNING: kcov has been built without libbfd-dev (or\n"
 						"kcov: binutils-dev), so the --verify option will not do anything.\n");
 #endif
+				break;
+			case 'v':
+				printf("kcov %s\n", kcov_version);
+				exit(1);
 				break;
 			case 'L':
 				setKey("parse-solibs", 0);

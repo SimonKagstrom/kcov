@@ -20,6 +20,26 @@ project (kcov)
 set (KCOV kcov)
 
 
+# See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
+if( EXISTS "${CMAKE_SOURCE_DIR}/.git" )
+       execute_process(COMMAND git --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/../.git describe --abbrev=4 HEAD
+               OUTPUT_VARIABLE POD_VERSION
+               OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+       execute_process(COMMAND head -n 1 ${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog
+               COMMAND cut -d \( -f 2
+               COMMAND cut -d \) -f 1
+               OUTPUT_VARIABLE POD_VERSION
+               OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+add_custom_command(
+   OUTPUT version.c
+   COMMAND ${CMAKE_COMMAND} -E echo "const char *kcov_version = \\\"${POD_VERSION}\\\"\;"
+  > version.c
+)
+
+
 set (SOLIB kcov_sowrapper)
 
 set (${SOLIB}_SRCS
@@ -196,7 +216,7 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc)
+add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc version.c)
 
 target_link_libraries(${KCOV}
 	${LIBDW_LIBRARIES}
