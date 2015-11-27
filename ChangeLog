@@ -1,3 +1,7 @@
+Kcov (31):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (30):
 	* Issue #121: Add --version to display the current kcov version
 
