@@ -1,4 +1,9 @@
-Kcov (29):
+Kcov (30):
+	* Issue #121: Add --version to display the current kcov version
+
+	* Issue #119: Allow merged output to serve as input to another merge
+	  session
+
 	* Issue #21: Allow builds on Mac OSX as well (Python and Bash only)
 
 	* Issue #122: Fix memory leak when adding shared libraries (jba31)
@@ -21,7 +26,10 @@ Kcov (29):
 
 	* Fix --skip-solibs handling
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Aug 21 07:39:41 CEST 2015
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Nov 27 06:51:40 CET 2015
+
+kcov (29):
+	* Tagged v28 by mistake :-)
 
 Kcov (28):
 	* Don't report each invalid breakpoint on --verify (give a summary instead)
