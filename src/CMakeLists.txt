@@ -88,6 +88,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	find_package (LibElf REQUIRED)
 	find_package (Elfutils REQUIRED)
 	set (LINUX_SRCS
+		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
 		engines/kernel-engine.cc
 		parsers/elf-parser.cc

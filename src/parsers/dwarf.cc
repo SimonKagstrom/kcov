@@ -94,20 +94,85 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 			if (!isCode)
 				continue;
 
-			/* Use the full compilation path unless the source already
-			 * has an absolute path */
-			std::string fullFilePath;
-			std::string filePath = lineSource;
-
-			std::string dir = srcDirs[0] == NULL ? "" : srcDirs[0];
-			fullFilePath = dir_concat(dir, lineSource);
-			if (lineSource[0] != '/')
-				filePath = fullFilePath;
-
-			listener.onLine(filePath, lineNr, addr);
+			listener.onLine(fullPath(srcDirs, lineSource), lineNr, addr);
 		}
 	}
 }
+
+void DwarfParser::forAddress(IFileParser::ILineListener& listener, uint64_t address)
+{
+	if (!m_dwarf)
+		return;
+
+	Dwarf_Off offset = 0;
+	Dwarf_Off lastOffset = 0;
+	size_t headerSize;
+
+	if (!m_dwarf)
+		return;
+
+	/* Iterate over the headers */
+	while (dwarf_nextcu(m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
+		Dwarf_Die die;
+
+		if (dwarf_offdie(m_dwarf, lastOffset + headerSize, &die) == NULL) {
+			lastOffset = offset;
+			continue;
+		}
+
+		lastOffset = offset;
+
+		Dwarf_Line *line;
+		Dwarf_Files *files;
+		size_t fileCount;
+
+		line = dwarf_getsrc_die(&die, address);
+		if (!line)
+			continue;
+
+		/* And the files */
+		if (dwarf_getsrcfiles(&die, &files, &fileCount) != 0)
+			continue;
+
+		const char* lineSource;
+		Dwarf_Word mtime, len;
+
+		if (!(lineSource = dwarf_linesrc(line, &mtime, &len)) )
+			return;
+
+		const char *const *srcDirs;
+		size_t ndirs = 0;
+
+		/* Lookup the compilation path */
+		if (dwarf_getsrcdirs(files, &srcDirs, &ndirs) != 0)
+			continue;
+
+		int lineNr;
+
+		if (dwarf_lineno(line, &lineNr) != 0)
+			continue;
+
+		listener.onLine(fullPath(srcDirs, lineSource), lineNr, address);
+	}
+}
+
+
+std::string DwarfParser::fullPath(const char *const *srcDirs, const std::string &filename)
+{
+	/* Use the full compilation path unless the source already
+	 * has an absolute path */
+	std::string fullFilePath;
+	std::string filePath = filename;
+
+	std::string dir = srcDirs[0] == NULL ? "" : srcDirs[0];
+	fullFilePath = dir_concat(dir, filename);
+	if (filename[0] != '/')
+		filePath = fullFilePath;
+
+	return filePath;
+}
+
+
 
 bool DwarfParser::open(const std::string& filename)
 {

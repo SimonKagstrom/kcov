@@ -112,6 +112,7 @@ public:
 				{"skip-solibs", no_argument, 0, 'L'},
 				{"exit-first-process", no_argument, 0, 'F'},
 				{"gcov", no_argument, 0, 'g'},
+				{"clang", no_argument, 0, 'c'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -229,6 +230,9 @@ public:
 				break;
 			case 'g':
 				setKey("gcov", 1);
+				break;
+			case 'c':
+				setKey("clang-sanitizer", 1);
 				break;
 			case 'p':
 				if (!isInteger(std::string(optarg)))
@@ -440,6 +444,7 @@ public:
 		setKey("attach-pid", 0);
 		setKey("parse-solibs", 1);
 		setKey("gcov", 0);
+		setKey("clang-sanitizer", 0);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);
@@ -502,6 +507,7 @@ public:
 				" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 				"\n"
 				" --gcov                  use gcov parser instead of DWARF debugging info\n"
+				" --clang                 use Clang Sanitizer-coverage parser\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"
