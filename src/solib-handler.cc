@@ -43,9 +43,6 @@ public:
 		// Only useful for ELF binaries
 		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov"))
 			collector.registerEventTickListener(*this);
-
-		// Skip this very special library
-		m_foundSolibs["libkcov_sowrapper.so"] = true;
 	}
 
 	virtual ~SolibHandler()
@@ -90,6 +87,9 @@ public:
 		std::string kcov_solib_path =
 				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
+
+		// Skip this very special library
+		m_foundSolibs[get_real_path(kcov_solib_path)] = true;
 
 		write_file(__library_data.data(), __library_data.size(), "%s", kcov_solib_path.c_str());
 
