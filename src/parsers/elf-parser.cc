@@ -26,6 +26,7 @@
 #include <libgen.h>
 
 #include "address-verifier.hh"
+#include "dwarf.hh"
 
 using namespace kcov;
 
@@ -35,7 +36,7 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
-class ElfInstance : public IFileParser
+class ElfInstance : public IFileParser, IFileParser::ILineListener
 {
 public:
 	ElfInstance()
@@ -51,6 +52,8 @@ public:
 		m_filter = NULL;
 		m_verifyAddresses = false;
 		m_debuglinkCrc = 0;
+		m_relocation = 0;
+		m_invalidBreakpoints = 0;
 
 		IParserManager::getInstance().registerParser(*this);
 	}
@@ -293,169 +296,54 @@ out_open:
 
 	bool parseOneDwarf(unsigned long relocation)
 	{
-		Dwarf_Off offset = 0;
-		Dwarf_Off last_offset = 0;
-		size_t hdr_size;
-		Dwarf *dbg;
-		int fd;
 		unsigned invalidBreakpoints = 0;
 
-		fd = ::open(m_filename.c_str(), O_RDONLY, 0);
-		if (fd < 0) {
-				error("Cannot open %s\n", m_filename.c_str());
-				return false;
-		}
+		m_invalidBreakpoints = 0;
+		m_relocation = relocation;
 
-		/* Initialize libdwarf */
-		dbg = dwarf_begin(fd, DWARF_C_READ);
+		DwarfParser dp;
 
-		if (!dbg && m_buildId.length() > 0) {
+		bool rv = dp.open(m_filename);
+
+		if (!rv && m_buildId.length() > 0) {
 			/* Look for separate debug info: build-ids */
-			int debug_fd;
 			std::string debug_file = std::string("/usr/lib/debug/.build-id/" +
 							     m_buildId.substr(0,2) +
 							     "/" +
 							     m_buildId.substr(2, std::string::npos) +
 							     ".debug");
 
-			debug_fd = ::open(debug_file.c_str(), O_RDONLY, 0);
-			if (debug_fd < 0) {
-				if (m_isMainFile)
-					kcov_debug(ELF_MSG, "Cannot open %s\n", debug_file.c_str());
-			} else {
-				close(fd);
-				fd = debug_fd;
-				dbg = dwarf_begin(fd, DWARF_C_READ);
-			}
+			rv = dp.open(debug_file);
+			if (!rv && m_isMainFile)
+				kcov_debug(ELF_MSG, "Cannot open %s\n", debug_file.c_str());
 		}
 
-		if (!dbg && m_debuglink.length() > 0) {
+		if (!rv && m_debuglink.length() > 0) {
 			/* Look for separate debug info: debug-links */
-			int debug_fd = openDebuglinkFile();
-			if (debug_fd < 0) {
-				if (m_isMainFile)
-					kcov_debug(ELF_MSG, "Cannot open debug-link file in standard locations\n");
-			} else {
-				close(fd);
-				fd = debug_fd;
-				dbg = dwarf_begin(fd, DWARF_C_READ);
-			}
+			std::string debugPath = lookupDebuglinkFile();
+
+			if (debugPath == "" && m_isMainFile)
+				kcov_debug(ELF_MSG, "Cannot open debug-link file in standard locations\n");
+			else
+				rv = dp.open(debugPath);
 		}
 
-		if (!dbg) {
+		if (!rv) {
 			if (m_isMainFile)
 					warning("kcov requires binaries built with -g/-ggdb, a build-id file\n"
 							"or GNU debug link information.\n");
 			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename.c_str());
-			close(fd);
+
 			return false;
 		}
 
 		/* Iterate over the headers */
-		while (dwarf_nextcu(dbg, offset, &offset, &hdr_size, 0, 0, 0) == 0) {
-			Dwarf_Lines* line_buffer;
-			Dwarf_Files *file_buffer;
-			size_t line_count;
-			size_t file_count;
-			Dwarf_Die die;
-			unsigned int i;
+		dp.forEachLine(*this);
 
-			if (dwarf_offdie(dbg, last_offset + hdr_size, &die) == NULL)
-				goto out_err;
-
-			last_offset = offset;
-
-			/* Get the source lines */
-			if (dwarf_getsrclines(&die, &line_buffer, &line_count) != 0)
-				continue;
-
-			/* And the files */
-			if (dwarf_getsrcfiles(&die, &file_buffer, &file_count) != 0)
-				continue;
-
-			const char *const *src_dirs;
-			size_t ndirs = 0;
-
-			/* Lookup the compilation path */
-			if (dwarf_getsrcdirs(file_buffer, &src_dirs, &ndirs) != 0)
-				continue;
-
-			if (ndirs == 0)
-				continue;
-
-			/* Store them */
-			for (i = 0; i < line_count; i++) {
-				Dwarf_Line *line;
-				int line_nr;
-				const char* line_source;
-				Dwarf_Word mtime, len;
-				bool is_code;
-				Dwarf_Addr addr;
-
-				if ( !(line = dwarf_onesrcline(line_buffer, i)) )
-					goto out_err;
-				if (dwarf_lineno(line, &line_nr) != 0)
-					goto out_err;
-				if (!(line_source = dwarf_linesrc(line, &mtime, &len)) )
-					goto out_err;
-				if (dwarf_linebeginstatement(line, &is_code) != 0)
-					goto out_err;
-
-				if (dwarf_lineaddr(line, &addr) != 0)
-					goto out_err;
-
-				if (line_nr && is_code) {
-					std::string full_file_path;
-					std::string file_path = line_source;
-
-					if (!addressIsValid(addr, invalidBreakpoints))
-						continue;
-
-					/* Use the full compilation path unless the source already
-					 * has an absolute path */
-					std::string dir = src_dirs[0] == NULL ? "" : src_dirs[0];
-					full_file_path = dir_concat(dir, line_source);
-					if (line_source[0] != '/')
-						file_path = full_file_path;
-
-					/******** replace the path information found in the debug symbols with *********/
-					/******** the value from in the newRoot variable.         *********/
-					std::string rp;
-					if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
- 					  std::string dwarfPath = file_path;
-					  size_t dwIndex = dwarfPath.find(m_origRoot);
-					  if (dwIndex != std::string::npos) {
-					    dwarfPath.replace(dwIndex, m_origRoot.length(), m_newRoot);
-					    rp = get_real_path(dwarfPath);
-					  }
-					}
-					else {
-					  rp = get_real_path(file_path);
-					}
-
-					if (rp != "")
-					{
-						file_path = full_file_path = rp;
-					}
-
-					for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
-							it != m_lineListeners.end();
-							++it)
-						(*it)->onLine(file_path, line_nr, adjustAddressBySegment(addr) + relocation);
-				}
-			}
-		}
-
-		if (invalidBreakpoints > 0) {
+		if (m_invalidBreakpoints > 0) {
 			kcov_debug(STATUS_MSG, "kcov: %u invalid breakpoints skipped in %s\n",
 					invalidBreakpoints, m_filename.c_str());
 		}
-out_err:
-		/* Shutdown libdwarf */
-		if (dwarf_end(dbg) != 0)
-			goto out_err;
-
-		close(fd);
 
 		return true;
 	}
@@ -647,18 +535,18 @@ out_elf_begin:
 		return ret;
 	}
 
-	void registerLineListener(ILineListener &listener)
+	void registerLineListener(IFileParser::ILineListener &listener)
 	{
 		m_lineListeners.push_back(&listener);
 	}
 
-	void registerFileListener(IFileListener &listener)
+	void registerFileListener(IFileParser::IFileListener &listener)
 	{
 		m_fileListeners.push_back(&listener);
 	}
 
 private:
-	typedef std::vector<ILineListener *> LineListenerList_t;
+	typedef std::vector<IFileParser::ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::vector<std::string> FileList_t;
 
@@ -703,31 +591,58 @@ private:
 		return addr;
 	}
 
-	int tryDebugLink(const std::string &path)
+
+	// From IFileParser::ILineListener
+	void onLine(const std::string &file, unsigned int lineNr, uint64_t addr)
+	{
+		if (!addressIsValid(addr, m_invalidBreakpoints))
+			return;
+
+		/******** replace the path information found in the debug symbols with *********/
+		/******** the value from in the newRoot variable.         *********/
+		std::string rp = get_real_path(file);
+		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
+			std::string dwarfPath = file;
+			size_t dwIndex = dwarfPath.find(m_origRoot);
+
+			if (dwIndex != std::string::npos) {
+				dwarfPath.replace(dwIndex, m_origRoot.length(), m_newRoot);
+				rp = get_real_path(dwarfPath);
+			}
+		}
+
+		for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
+				it != m_lineListeners.end();
+				++it)
+			(*it)->onLine(rp, lineNr, adjustAddressBySegment(addr) + m_relocation);
+	}
+
+
+	std::string tryDebugLink(const std::string &path)
 	{
 		if (!file_exists(path))
-			return -1;
+			return "";
 
 		size_t sz;
 		uint8_t *p = (uint8_t *)read_file(&sz, "%s", path.c_str());
 		if (!p)
-			return -1;
+			return "";
 		uint32_t crc = debugLinkCrc32(0, p, sz);
 		free(p);
 
 		if (crc != m_debuglinkCrc) {
 			kcov_debug(ELF_MSG, "CRC mismatch for debug link %s. Should be 0x%08x, is 0x%08x!\n",
 					path.c_str(), m_debuglinkCrc, crc);
-			return -1;
+			return "";
 		}
 
-		return ::open(path.c_str(), O_RDONLY, 0);
+		return path;
 	}
 
-	int openDebuglinkFile()
+	std::string lookupDebuglinkFile()
 	{
 		std::string filePath;
-		int debug_fd;
+		std::string debugPath;
 		char *cpy;
 
 		cpy = ::strdup(m_filename.c_str());
@@ -735,14 +650,14 @@ private:
 		free(cpy);
 
 		// Use debug link from the ELF (same directory as binary)
-		debug_fd = tryDebugLink(fmt("%s/%s", filePath.c_str(), m_debuglink.c_str()));
-		if (debug_fd >= 0)
-			return debug_fd;
+		debugPath = tryDebugLink(fmt("%s/%s", filePath.c_str(), m_debuglink.c_str()));
+		if (debugPath != "")
+			return debugPath;
 
 		// Same directory .debug
-		debug_fd = tryDebugLink(fmt("%s/.debug/%s", filePath.c_str(), m_debuglink.c_str()));
-		if (debug_fd >= 0)
-			return debug_fd;
+		debugPath = tryDebugLink(fmt("%s/.debug/%s", filePath.c_str(), m_debuglink.c_str()));
+		if (debugPath != "")
+			return debugPath;
 
 		return tryDebugLink(fmt("/usr/lib/debug/%s/%s", get_real_path(filePath).c_str(), m_debuglink.c_str()));
 	}
@@ -832,6 +747,8 @@ private:
 	bool m_isMainFile;
 	uint64_t m_checksum;
 	bool m_initialized;
+	uint64_t m_relocation;
+	uint32_t m_invalidBreakpoints;
 
 	/***** Add strings to update path information. *******/
 	std::string m_origRoot;

@@ -91,6 +91,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 		engines/ptrace.cc
 		engines/kernel-engine.cc
 		parsers/elf-parser.cc
+		parsers/dwarf.cc
 		solib-handler.cc
 		solib-parser/phdr_data.c
 	)
