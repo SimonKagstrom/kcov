@@ -23,6 +23,9 @@ DwarfParser::~DwarfParser()
 
 void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 {
+	if (!m_dwarf)
+		return;
+
 	Dwarf_Off offset = 0;
 	Dwarf_Off lastOffset = 0;
 	size_t headerSize;
@@ -135,4 +138,7 @@ void DwarfParser::close()
 
 	if (m_fd >= 0)
 		::close(m_fd);
+
+	m_fd = -1;
+	m_dwarf = NULL;
 }
