@@ -37,7 +37,7 @@ public:
 	}
 
 	// From IEngine
-	int registerBreakpoint(unsigned long addr)
+	virtual int registerBreakpoint(unsigned long addr)
 	{
 		// No breakpoints
 		return 0;
@@ -45,42 +45,42 @@ public:
 
 
 	// From IFileParser
-	bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
+	virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
 	{
 		return true;
 	}
 
-	bool setMainFileRelocation(unsigned long relocation)
+	virtual bool setMainFileRelocation(unsigned long relocation)
 	{
 		return true;
 	}
 
-	void registerLineListener(ILineListener &listener)
+	virtual void registerLineListener(ILineListener &listener)
 	{
 		m_lineListeners.push_back(&listener);
 	}
 
-	void registerFileListener(IFileListener &listener)
+	virtual void registerFileListener(IFileListener &listener)
 	{
 		m_fileListeners.push_back(&listener);
 	}
 
-	bool parse()
+	virtual bool parse()
 	{
 		return true;
 	}
 
-	uint64_t getChecksum()
+	virtual uint64_t getChecksum()
 	{
 		return 0;
 	}
 
-	enum IFileParser::PossibleHits maxPossibleHits()
+	virtual enum IFileParser::PossibleHits maxPossibleHits()
 	{
 		return IFileParser::HITS_UNLIMITED;
 	}
 
-	void setupParser(IFilter *filter)
+	virtual void setupParser(IFilter *filter)
 	{
 	}
 
