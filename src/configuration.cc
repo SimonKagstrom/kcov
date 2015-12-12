@@ -62,6 +62,7 @@ public:
 				" -h, --help              this text\n"
 				" --version               print the version of kcov\n"
 				" -p, --pid=PID           trace PID instead of executing in-file,\n"
+				"                         in-file is optional in this case\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
 				"\n"
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
@@ -83,7 +84,7 @@ public:
 				"\n"
 				"Examples:\n"
 				"  kcov /tmp/kcov ./frodo                        # Check coverage for ./frodo\n"
-				"  kcov --pid=1000 /tmp/kcov ./frodo             # Check coverage for PID 1000\n"
+				"  kcov --pid=1000 /tmp/kcov                     # Check coverage for PID 1000\n"
 				"  kcov --include-pattern=/src/frodo/ /tmp/kcov ./frodo # Only include files\n"
 				"                                                       # including /src/frodo\n"
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
@@ -235,11 +236,20 @@ public:
 				setKey("clang-sanitizer", 1);
 				break;
 			case 'p':
+			{
 				if (!isInteger(std::string(optarg)))
 					return usage();
-				setKey("attach-pid", stoul(std::string(optarg)));
-				extraNeeded = 1;
+
+				unsigned long pid = stoul(std::string(optarg));
+				setKey("attach-pid", pid);
+
+				// Linux can derive this from /proc
+				if (file_exists(fmt("/proc/%lu/exe", pid)))
+				{
+					extraNeeded = 1;
+				}
 				break;
+			}
 			case 'O':
 				if (!isInteger(std::string(optarg)))
 					return usage();
@@ -381,21 +391,29 @@ public:
 			outDirectory += "/";
 
 		setKey("out-directory", outDirectory);
-		if (keyAsInt("running-mode") != IConfiguration::MODE_MERGE_ONLY) {
-			std::string binaryName;
-			if (argc >= afterOpts + 2)
-			{
-				StringPair_t tmp = splitPath(argv[afterOpts + 1]);
-
-				setKey("binary-path", tmp.first);
-				binaryName = tmp.second;
-			}
-			setKey("target-directory", outDirectory + "/" + binaryName);
-			setKey("binary-name", binaryName);
-		} else {
+		if (keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY) {
 			// argv contains the directories to merge in this case, but we have no binary name etc
 			setKey("binary-name", "merged-kcov-output");
 			setKey("target-directory", outDirectory + "/merged-kcov-output");
+		} else {
+			std::string binaryName;
+			std::string path;
+
+			if (keyAsInt("attach-pid") == 0) {
+				path = argv[afterOpts + 1];
+			} else {
+				// Trace by PID - derive from /proc/$pid/exe on Linux
+				int pid = keyAsInt("attach-pid");
+				path = get_real_path(fmt("/proc/%d/exe", pid));
+			}
+
+			StringPair_t tmp = splitPath(path);
+
+			setKey("binary-path", tmp.first);
+			binaryName = tmp.second;
+
+			setKey("target-directory", outDirectory + "/" + binaryName);
+			setKey("binary-name", binaryName);
 		}
 
 		m_programArgs = &argv[afterOpts + 1];
@@ -583,7 +601,7 @@ public:
 		return out;
 	}
 
-	StringPair_t splitPath(const char *pathStr)
+	StringPair_t splitPath(const std::string &pathStr)
 	{
 		StringPair_t out;
 		std::string path(pathStr);
