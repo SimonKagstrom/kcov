@@ -3,6 +3,9 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
+sudo: required
+dist: trusty
+
 before_install: make -f travis/Makefile prepare_environment
 
 os:
