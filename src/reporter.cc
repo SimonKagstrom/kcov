@@ -354,30 +354,21 @@ private:
 	// Called when a file is added (e.g., a shared library)
 	void onFile(const IFileParser::File &file)
 	{
-		uint64_t fileHash = std::hash<std::string>()(file.m_filename);
-
-		// Add segments to the range list and mark file as present
-		for (IFileParser::SegmentList_t::const_iterator it = file.m_segments.begin();
-				it != file.m_segments.end();
-				++it) {
-			m_addressRanges[AddressRange(it->getBase(), it->getSize())] = fileHash;
-			m_presentFiles[fileHash].push_back(AddressRange(it->getBase(), it->getSize()));
-		}
-
 		// Only unmarshal once
-		if (!m_unmarshallingDone) {
-			void *data;
-			size_t sz;
+		if (m_unmarshallingDone)
+			return;
 
-			data = read_file(&sz, "%s", m_dbFileName.c_str());
+		void *data;
+		size_t sz;
 
-			if (data && !unMarshal(data, sz))
-				kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
+		data = read_file(&sz, "%s", m_dbFileName.c_str());
 
-			m_unmarshallingDone = true;
+		if (data && !unMarshal(data, sz))
+			kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
 
-			free(data);
-		}
+		m_unmarshallingDone = true;
+
+		free(data);
 	}
 
 	/* Called during runtime */
@@ -416,66 +407,6 @@ private:
 	// From IReporter::IListener - report recursively
 	void onAddress(uint64_t addr, unsigned long hits)
 	{
-	}
-
-	// Remove the base for an address (solibs)
-	uint64_t addressToOffset(uint64_t addr) const
-	{
-		// Nothing to lookup
-		if (m_addressRanges.empty())
-			return 0;
-
-		AddressRangeMap_t::const_iterator it = m_addressRanges.lower_bound(addr);
-
-		it--;
-		if (it == m_addressRanges.end())
-			return addr;
-
-		// Out of bounds?
-		if (addr > it->first.getAddress() + it->first.getSize())
-			return addr;
-
-		return addr - it->first.getAddress();
-	}
-
-	int getAddressRangeIndex(uint64_t hash, uint64_t addr) const
-	{
-		const PresentFilesMap_t::const_iterator rit = m_presentFiles.find(hash);
-
-		if (rit == m_presentFiles.end())
-			return 0;
-
-		const AddressRangeList_t &ranges = rit->second;
-
-		int i = 0;
-		for (AddressRangeList_t::const_iterator it = ranges.begin();
-				it != ranges.end();
-				++it, i++) {
-			if (addr >= it->getAddress() && addr < it->getAddress() + it->getSize())
-				break;
-		}
-
-		// Not found?
-		if (i == (int)ranges.size())
-			return 0;
-
-		return i;
-	}
-
-	// Lookup the address within a range
-	uint64_t getFileHashForAddress(uint64_t addr) const
-	{
-		// Nothing to lookup
-		if (m_addressRanges.empty())
-			return 0;
-
-		AddressRangeMap_t::const_iterator it = m_addressRanges.lower_bound(addr);
-
-		it--;
-		if (it == m_addressRanges.end())
-			return 0;
-
-		return it->second;
 	}
 
 	class Line
@@ -750,48 +681,6 @@ private:
 		unsigned int m_nrLines;
 	};
 
-	/*
-	 * Helper class to store address ranges (base, size pairs). Used to convert
-	 * shared library addresses back to offsets.
-	 */
-	class AddressRange
-	{
-	public:
-		AddressRange(uint64_t addr, size_t size = 1) :
-			m_addr(addr), m_size(size)
-		{
-		}
-
-		bool operator<(const uint64_t addr) const
-		{
-			return m_addr < addr;
-		}
-
-		bool operator<(const AddressRange &other) const
-		{
-			return m_addr < other.m_addr;
-		}
-
-		bool operator==(const AddressRange &other) const
-		{
-			return m_addr == other.m_addr && m_size == other.m_size;
-		}
-
-		uint64_t getAddress() const
-		{
-			return m_addr;
-		}
-
-		size_t getSize() const
-		{
-			return m_size;
-		}
-
-	private:
-		uint64_t m_addr;
-		size_t m_size;
-	};
-
 	class PendingFileAddress
 	{
 	public:
@@ -808,9 +697,6 @@ private:
 	typedef std::unordered_map<uint64_t, Line *> AddrToLineMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
-	typedef std::map<AddressRange, uint64_t> AddressRangeMap_t;
-	typedef std::vector<AddressRange> AddressRangeList_t;
-	typedef std::unordered_map<uint64_t, AddressRangeList_t> PresentFilesMap_t;
 	typedef std::unordered_map<uint64_t, Line *> LineIdToFileMap_t;
 	typedef std::vector<PendingFileAddress> PendingHitsList_t; // Address, hits
 	typedef std::unordered_map<uint64_t, PendingHitsList_t> PendingFilesMap_t;
@@ -819,8 +705,6 @@ private:
 	AddrToLineMap_t m_addrToLine;
 	AddrToHitsMap_t m_pendingHits;
 	ListenerList_t m_listeners;
-	AddressRangeMap_t m_addressRanges;
-	PresentFilesMap_t m_presentFiles;
 	PendingFilesMap_t m_pendingFiles;
 	LineIdToFileMap_t m_lineIdToFileMap;
 	std::hash<std::string> m_fileHash;

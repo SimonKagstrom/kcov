@@ -36,6 +36,88 @@ enum SymbolType
 	SYM_DYNAMIC = 1,
 };
 
+/**
+ * Holder class for address segments
+ */
+class Segment
+{
+public:
+	Segment(const void *data, uint64_t paddr, uint64_t vaddr, uint64_t size) :
+		m_data(NULL), m_paddr(paddr), m_vaddr(vaddr), m_size(size)
+{
+
+		if (data) {
+			m_data = xmalloc(size);
+			memcpy(m_data, data, size);
+		}
+}
+
+	Segment(const Segment &other) :
+		m_data(NULL), m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
+	{
+		if (other.m_data) {
+			m_data = xmalloc(other.m_size);
+			memcpy(m_data, other.m_data, other.m_size);
+		}
+	}
+
+	~Segment()
+	{
+		free(m_data);
+	}
+
+	/**
+	 * Check if an address is contained within this segment
+	 *
+	 * @param addr the address to check
+	 *
+	 * @return true if valid
+	 */
+	bool addressIsWithinSegment(uint64_t addr) const
+	{
+		return addr >= m_paddr && addr < m_paddr + m_size;
+	}
+
+	/**
+	 * Adjust an address with the segment.
+	 *
+	 * @param addr the address to adjust
+	 *
+	 * @return the new address
+	 */
+	uint64_t adjustAddress(uint64_t addr) const
+	{
+		if (addressIsWithinSegment(addr))
+			return addr - m_paddr + m_vaddr;
+
+		return addr;
+	}
+
+	uint64_t getBase() const
+	{
+		return m_vaddr;
+	}
+
+	const void *getData() const
+	{
+		return m_data;
+	}
+
+	size_t getSize() const
+	{
+		return m_size;
+	}
+
+private:
+	void *m_data;
+
+	// Should really be const, but GCC 4.6 doesn't like that
+	uint64_t m_paddr;
+	uint64_t m_vaddr;
+	size_t m_size;
+};
+typedef std::vector<Segment> SegmentList_t;
+
 class ElfInstance : public IFileParser, IFileParser::ILineListener
 {
 public:
@@ -131,7 +213,7 @@ public:
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB, m_curSegments));
+			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
 
 		return true;
 	}
