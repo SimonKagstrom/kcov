@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $# -ne 3 ] ; then
+	echo "Usage: <kcov-binary> <out-dir> <program-to-run>"
+	exit 1
+fi
+
 kcov=$1
 out=$2
 prg=$3
