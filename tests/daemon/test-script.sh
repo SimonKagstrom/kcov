@@ -12,6 +12,7 @@ prg=$3
 $prg &
 pid=$!
 
+sleep 0.5
 $kcov --pid=$pid $out &
 kcov_pid=$!
 
