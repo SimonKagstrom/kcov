@@ -29,11 +29,11 @@ fork-no-wait
     ${rc}=    Run and return RC    ${kcov} ${out} ./fork_no_wait
     Should be equal as integers    ${rc}    ${no_kcov_rc}
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 20
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 22
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork_no_wait/cobertura.xml fork_no_wait_c 24
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
 
 fork
     Run                            rm -rf ${out}/fork
@@ -43,13 +43,13 @@ fork
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 21
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 26
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 34
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 37
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork/cobertura.xml fork_c 46
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
 
 fork-32
     Run                            rm -rf ${out}/fork-32
@@ -59,13 +59,13 @@ fork-32
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 21
     Should Contain    ${output}    0
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 26
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 34
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 37
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
     ${output}=    Run    ${xml_lookup} ${out}/fork-32/cobertura.xml fork_c 46
-    Should Contain    ${output}    1
+    Should Be True    ${output}    >= 1
 
 vfork
 	Run								rm -rf ${out}/vfork
