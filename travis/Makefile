@@ -58,6 +58,8 @@ run-tests-linux-gcc: run-performance
 
 run-tests-linux-clang: build
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
+	cd build-tests && ../tests/daemon/test-script.sh kcov /tmp/kcov-tmp ./issue31
+	cat /tmp/kcov-tmp/issue31/cobertura.xml
 
 build_clang:
 	# Stupid workaround for coverity scans...
