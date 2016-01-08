@@ -57,9 +57,6 @@ run-tests-linux-gcc: run-performance
 	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-tests-linux-clang: build
-	-cat /proc/sys/kernel/yama/ptrace_scope
-	-cd build-tests && ../tests/daemon/test-script.sh kcov /tmp/kcov-tmp ./issue31
-	-cat /tmp/kcov-tmp/issue31/cobertura.xml
 	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
 
 build_clang:
