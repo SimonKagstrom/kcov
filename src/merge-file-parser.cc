@@ -391,6 +391,8 @@ private:
 	{
 		std::string filename((const char *)fd + fd->file_name_offset);
 
+		filename = m_filter.mangleSourcePath(filename);
+
 		// File has been removed since last test
 		if (!file_exists(filename))
 			return;
