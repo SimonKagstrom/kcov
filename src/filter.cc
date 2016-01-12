@@ -25,6 +25,12 @@ public:
 	{
 		return true;
 	}
+
+	std::string mangleSourcePath(const std::string &path)
+	{
+		return path;
+	}
+
 };
 
 class Filter : public IFilter
@@ -34,6 +40,9 @@ public:
 	{
 		m_patternHandler = new PatternHandler();
 		m_pathHandler = new PathHandler();
+
+		m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
+		m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
 	}
 
 	~Filter()
@@ -64,6 +73,22 @@ public:
 		return out;
 	}
 
+	std::string mangleSourcePath(const std::string &path)
+	{
+		std::string filename = get_real_path(path);
+
+		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
+		    std::string path = filename;
+		    size_t index = path.find(m_origRoot);
+
+		    if (index != std::string::npos) {
+		        path.replace(index, m_origRoot.length(), m_newRoot);
+		        filename = get_real_path(path);
+		    }
+		}
+
+		return filename;
+	}
 
 private:
 	class PatternHandler
@@ -189,6 +214,8 @@ private:
 
 	PatternHandler *m_patternHandler;
 	PathHandler *m_pathHandler;
+	std::string m_origRoot;
+	std::string m_newRoot;
 };
 
 

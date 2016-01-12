@@ -27,6 +27,15 @@ namespace kcov
 		 */
 		virtual bool runFilters(const std::string &path) = 0;
 
+		/**
+		 * Convert source path to a real path and (if configured) run replacement
+		 * on parts of the path (if the source has moved).
+		 *
+		 * @param path the path to mangle
+		 *
+		 * @return the mangled path
+		 */
+		virtual std::string mangleSourcePath(const std::string &path) = 0;
 
 		static IFilter &create();
 

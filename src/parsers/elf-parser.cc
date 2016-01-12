@@ -183,9 +183,6 @@ public:
 	bool addFile(const std::string &filename, struct phdr_data_entry *data)
 	{
 		if (!m_initialized) {
-			/******* Swap debug source root with runtime source root *****/
-			m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
-			m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
 			m_verifyAddresses = IConfiguration::getInstance().keyAsInt("verify");
 
 			panic_if(elf_version(EV_CURRENT) == EV_NONE,
@@ -680,18 +677,7 @@ private:
 		if (!addressIsValid(addr, m_invalidBreakpoints))
 			return;
 
-		/******** replace the path information found in the debug symbols with *********/
-		/******** the value from in the newRoot variable.         *********/
-		std::string rp = get_real_path(file);
-		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
-			std::string dwarfPath = file;
-			size_t dwIndex = dwarfPath.find(m_origRoot);
-
-			if (dwIndex != std::string::npos) {
-				dwarfPath.replace(dwIndex, m_origRoot.length(), m_newRoot);
-				rp = get_real_path(dwarfPath);
-			}
-		}
+		std::string rp = m_filter->mangleSourcePath(file);
 
 		for (LineListenerList_t::const_iterator it = m_lineListeners.begin();
 				it != m_lineListeners.end();
