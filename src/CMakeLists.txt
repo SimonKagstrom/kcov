@@ -122,6 +122,7 @@ set (${KCOV}_SRCS
     writers/cobertura-writer.cc
     ${coveralls_SRCS}
     writers/html-writer.cc
+    writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
     ${LINUX_SRCS}
     )

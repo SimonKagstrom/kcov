@@ -20,6 +20,7 @@
 #include "writers/html-writer.hh"
 #include "writers/coveralls-writer.hh"
 #include "writers/cobertura-writer.hh"
+#include "writers/sonarqube-xml-writer.hh"
 
 using namespace kcov;
 
@@ -164,12 +165,15 @@ static int runMergeMode()
 			base, base + "/kcov-merged", "[merged]", true);
 	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/cobertura.xml");
+	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
+			base + "kcov-merged/sonarqube.xml");
 	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser, mergeReporter);
 	(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 	output.registerWriter(mergeParser);
 	output.registerWriter(mergeHtmlWriter);
 	output.registerWriter(mergeCoberturaWriter);
+	output.registerWriter(mergeSonarqubeWriter);
 	output.registerWriter(mergeCoverallsWriter);
 
 	output.start();
@@ -227,6 +231,8 @@ int main(int argc, const char *argv[])
 				base, out, conf.keyAsString("binary-name"));
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
 				out + "/cobertura.xml");
+		IWriter &sonarqubeWriter = createSonarqubeWriter(*parser, reporter,
+				out + "/sonarqube.xml");
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
@@ -235,6 +241,8 @@ int main(int argc, const char *argv[])
 				base, base + "/kcov-merged", "[merged]", false);
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/cobertura.xml");
+		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
+				base + "kcov-merged/sonarqube.xml");
 		(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 		reporter.registerListener(mergeParser);
@@ -245,6 +253,7 @@ int main(int argc, const char *argv[])
 		if (countMetadata() > 0) {
 			output.registerWriter(mergeHtmlWriter);
 			output.registerWriter(mergeCoberturaWriter);
+			output.registerWriter(mergeSonarqubeWriter);
 			output.registerWriter(createCoverallsWriter(mergeParser, mergeReporter));
 		} else {
 			output.registerWriter(createCoverallsWriter(*parser, reporter));
@@ -252,6 +261,7 @@ int main(int argc, const char *argv[])
 
 		output.registerWriter(htmlWriter);
 		output.registerWriter(coberturaWriter);
+		output.registerWriter(sonarqubeWriter);
 	}
 
 	g_engine = engine;
