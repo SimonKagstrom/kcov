@@ -74,14 +74,7 @@ private:
 
 			std::string covered = cnt.m_hits ? "true" : "false";
 
-			out << fmt("		<lineToCover lineNumber=\"%d\" covered=\"%s\"", n, covered.c_str());
-
-			if (m_maxPossibleHits == IFileParser::HITS_LIMITED &&
-					cnt.m_possibleHits > 1) {
-				out << fmt(" branchesToCover=\"%d\" coveredBranches=\"%d\"", cnt.m_possibleHits, cnt.m_hits);
-			}
-
-			out << "/>\n";
+			out << fmt("		<lineToCover lineNumber=\"%d\" covered=\"%s\"/>\n", n, covered.c_str());
 		}
 
 		out << "	</file>\n";
