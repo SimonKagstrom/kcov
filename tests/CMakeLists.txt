@@ -102,6 +102,7 @@ add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
 add_executable(issue31 daemon/test-issue31.cc)
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 add_executable(s short-file.c)
+add_executable(lock-prefix assembly/lock-prefix.c)
 
 add_executable(pie pie.c)
 set_target_properties(pie PROPERTIES COMPILE_FLAGS "-g -fpie -fPIE")

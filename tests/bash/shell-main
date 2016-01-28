@@ -150,3 +150,6 @@ echo "Covered?"
 
 id="# ${work_runtime_error}."
 echo afterid
+
+source `dirname $0`/first-dir/c.sh
+source `dirname $0`/first-dir/b.sh

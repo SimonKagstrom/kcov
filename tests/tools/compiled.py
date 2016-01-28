@@ -269,8 +269,8 @@ class attach_process_with_threads(testbase.KcovTestCase):
         self.setUp()
         rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/issue31", False)
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) == 1
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) == 1
+        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
+        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 8) == 0
 
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
