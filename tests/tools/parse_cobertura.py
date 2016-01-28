@@ -41,6 +41,23 @@ def parse(data):
 
     return dom
 
+def parseFile(filename):
+    #parse the xml you got from the file
+    dom = xml.dom.minidom.parseString(readFile(filename))
+
+    return dom
+
+def hitsPerLine(dom, fileName, lineNr):
+    fileName = fileName.replace(".", "_").replace("-", "_")
+
+    fileTag = lookupClassName(dom, fileName)
+
+    if fileTag != None:
+        hits = lookupHitsByLine(fileTag, lineNr)
+        if hits != None:
+            return hits
+
+    return None
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
@@ -52,7 +69,7 @@ if __name__ == "__main__":
     line = int(sys.argv[3])
 
     data = readFile(sys.argv[1])
-    
+
     dom = parse(data)
     fileTag = lookupClassName(dom, fileName)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 chroot=/tmp/32-bit-chroot
-kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python-pip python3 cmake binutils-dev
+kcov_deps=libdw-dev libelf-dev elfutils libcurl4-openssl-dev python3 cmake binutils-dev
 
 .PHONY: prepare_environment
 
@@ -52,12 +52,12 @@ run-performance: build_gcc
 	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
 
 run-tests-linux-gcc: run-performance
-	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build-tests && WORKSPACE=/tmp/kcov/ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt"
-	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
+	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov && tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v"
+	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-tests-linux-clang: build
-	cd build-tests && WORKSPACE=`pwd`/../ pybot --noncritical not_ready ../tests/robot-framework/kcov-tests.txt
+	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 
 build_clang:
 	# Stupid workaround for coverity scans...
@@ -79,19 +79,18 @@ prepare_osx:
 	brew update
 	brew install homebrew/dupes/zlib
 	brew install python
+	brew install bash
 
 prepare_linux:
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
 	-sudo apt-get update
 	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time
-	sudo pip install robotframework
 
 prepare_linux_gcc:
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
-	sudo i386 chroot "${chroot}" pip install robotframework
 	sudo cp -r "$(shell pwd)" "${chroot}/tmp/"
 	sudo i386 chroot "${chroot}" sh -c "mount -t proc procfs /proc"
 
