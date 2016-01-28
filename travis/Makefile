@@ -52,9 +52,9 @@ run-performance: build_gcc
 	/usr/bin/time -f "%e" travis/perf-test.sh /tmp/kcov-reference . build >/dev/null
 
 run-tests-linux-gcc: run-performance
+	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/output"
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov && tests/tools/run-tests build/src/kcov /tmp/output build-tests/ `pwd` -v"
-	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-tests-linux-clang: build
