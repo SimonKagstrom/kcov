@@ -65,8 +65,10 @@ build_clang:
 	sleep 97
 
 run-tests-osx-gcc: build-osx
+	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 
 run-tests-osx-clang: build-osx
+	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 
 
 run-tests: run-tests-${TRAVIS_OS_NAME}-${CC}
