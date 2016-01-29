@@ -95,7 +95,6 @@ class bash_honor_signal(testbase.KcovTestCase):
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/trap.sh/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "trap.sh", 5) == 1
-        assert o.find("SUCCESS") != -1
 
 class bash_accumulate_data(testbase.KcovTestCase):
     def runTest(self):
