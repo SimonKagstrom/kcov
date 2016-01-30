@@ -8,6 +8,7 @@ import testbase
 from basic import *
 if sys.platform.startswith("linux"):
     from compiled import *
+    from bash_linux_only import *
 from filter import *
 from accumulate import *
 from python import *

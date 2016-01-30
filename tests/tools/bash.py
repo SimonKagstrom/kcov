@@ -173,14 +173,6 @@ class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(test
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 151) == 1
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 152) == 1
 
-class bash_sh_shebang(testbase.KcovTestCase):
-    def runTest(self):
-        self.setUp()
-        rv,o = self.do(testbase.kcov + " --bash-handle-sh-invocation " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main")
-
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "sh-shebang.sh", 4) == 1
-
 class bash_multiline_quotes(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
