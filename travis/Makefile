@@ -54,7 +54,7 @@ run-performance: build_gcc
 run-tests-linux-gcc: run-performance
 	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/output"
-	sudo i386 chroot ${chroot} sh -c "PATH=/bin:/usr/bin:/sbin:/usr/sbin /tmp/kcov/tests/tools/run-tests /tmp/kcov/build/src/kcov /tmp/output build-tests/ /tmp/kcov -v"
+	sudo i386 chroot ${chroot} sh -c "PATH=/bin:/usr/bin:/sbin:/usr/sbin /tmp/kcov/tests/tools/run-tests /tmp/kcov/build/src/kcov /tmp/output /tmp/kcov/build-tests/ /tmp/kcov -v"
 	build/src/kcov --coveralls-id=$(TRAVIS_JOB_ID) --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc /tmp/kcov-kcov build/src/kcov || true
 
 run-tests-linux-clang: build
