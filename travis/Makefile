@@ -20,7 +20,7 @@ build-osx:
 
 build:
 	mkdir -p build build-tests build-tools
-	cd build && cmake ..
+	cd build && CXXFLAGS=-Werror cmake ..
 	make -C build
 	cd build-tools && cmake ../tools
 	make -C build-tools
