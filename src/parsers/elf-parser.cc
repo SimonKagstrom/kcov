@@ -204,18 +204,20 @@ public:
 			m_curSegments.push_back(Segment(NULL, seg->paddr, seg->vaddr, seg->size));
 		}
 
-		if (!checkFile())
+		uint64_t checksum = 0;
+
+		if (!checkFile(checksum))
 			return false;
 
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(File(m_filename, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
+			(*it)->onFile(File(m_filename, checksum, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
 
 		return true;
 	}
 
-	bool checkFile()
+	bool checkFile(uint64_t &checksum)
 	{
 		struct Elf *elf;
 		bool out = true;
@@ -256,9 +258,11 @@ public:
 			e_type = m_elfIs32Bit ? elf32_getehdr(elf)->e_type : elf64_getehdr(elf)->e_type;
 
 			m_elfIsShared = e_type == ET_DYN;
+
+			checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
 			if (!m_checksum)
 			{
-				m_checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
+				m_checksum = checksum;
 			}
 		}
 

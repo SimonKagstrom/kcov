@@ -40,12 +40,13 @@ namespace kcov
 		class File
 		{
 		public:
-			File(const std::string &filename, const enum FileFlags flags = FLG_NONE) :
-				m_filename(filename), m_flags(flags)
+			File(const std::string &filename, uint64_t checksum = 0, const enum FileFlags flags = FLG_NONE) :
+				m_filename(filename), m_checksum(checksum), m_flags(flags)
 			{
 			}
 
 			const std::string m_filename;
+			uint64_t m_checksum;
 			const enum FileFlags m_flags;
 		};
 
