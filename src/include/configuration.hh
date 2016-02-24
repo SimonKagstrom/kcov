@@ -18,6 +18,7 @@ namespace kcov
 			MODE_REPORT_ONLY        = 2,
 			MODE_COLLECT_AND_REPORT = 3,
 			MODE_MERGE_ONLY         = 4,
+			MODE_CREATE_DATABASE    = 5,
 		} RunMode_t;
 
 		class IListener
