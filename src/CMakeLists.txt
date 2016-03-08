@@ -106,6 +106,7 @@ set (${KCOV}_SRCS
     capabilities.cc
     collector.cc
     configuration.cc
+    database.cc
     engine-factory.cc
     engines/bash-engine.cc
     engines/gcov-engine.cc

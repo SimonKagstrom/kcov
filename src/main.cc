@@ -186,6 +186,23 @@ static int runMergeMode()
 	return 0;
 }
 
+/* Create a database for running without symbols */
+static int runCreateDatabase()
+{
+	IConfiguration &conf = IConfiguration::getInstance();
+
+	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+	IFileParser *parser = IParserManager::getInstance().matchParser(file);
+
+	if (!parser) {
+		error("Can't find or open %s\n", file.c_str());
+		return 1;
+	}
+	parser->addFile(file);
+
+	return 0;
+}
+
 int main(int argc, const char *argv[])
 {
 	IConfiguration &conf = IConfiguration::getInstance();
@@ -197,6 +214,8 @@ int main(int argc, const char *argv[])
 
 	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
 		return runMergeMode();
+	else if (runningMode == IConfiguration::MODE_CREATE_DATABASE)
+		return runCreateDatabase();
 
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
