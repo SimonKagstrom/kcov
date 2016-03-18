@@ -8,6 +8,7 @@
 #include <file-parser.hh>
 #include <solib-handler.hh>
 #include <utils.hh>
+#include <database.hh>
 
 #include <string.h>
 #include <signal.h>
@@ -189,6 +190,7 @@ static int runMergeMode()
 /* Create a database for running without symbols */
 static int runCreateDatabase()
 {
+	IFilter &filter = IFilter::create();
 	IConfiguration &conf = IConfiguration::getInstance();
 
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
@@ -198,7 +200,15 @@ static int runCreateDatabase()
 		error("Can't find or open %s\n", file.c_str());
 		return 1;
 	}
+
+	(void)mkdir(conf.keyAsString("database-directory").c_str(), 0755);
+
+	IDatabaseCreator &db = IDatabaseCreator::create(*parser);
+	parser->setupParser(&filter);
 	parser->addFile(file);
+	parser->parse();
+
+	db.write();
 
 	return 0;
 }
