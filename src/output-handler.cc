@@ -32,9 +32,6 @@ namespace kcov
 
 			m_lastTimestamp = get_ms_timestamp();
 
-			(void)mkdir(m_baseDirectory.c_str(), 0755);
-			(void)mkdir(m_outDirectory.c_str(), 0755);
-
 			if (collector)
 				collector->registerEventTickListener(*this);
 		}

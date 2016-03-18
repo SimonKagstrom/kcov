@@ -212,6 +212,9 @@ int main(int argc, const char *argv[])
 
 	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
 
+	(void)mkdir(conf.keyAsString("out-directory").c_str(), 0755);
+	(void)mkdir(conf.keyAsString("target-directory").c_str(), 0755);
+
 	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
 		return runMergeMode();
 	else if (runningMode == IConfiguration::MODE_CREATE_DATABASE)
