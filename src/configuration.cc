@@ -422,7 +422,7 @@ public:
 			outDirectory += "/";
 
 		setKey("out-directory", outDirectory);
-		setKey("out-directory", outDirectory + "/kcov-database");
+		setKey("database-directory", outDirectory + "/kcov-database");
 		if (keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY) {
 			// argv contains the directories to merge in this case, but we have no binary name etc
 			setKey("binary-name", "merged-kcov-output");
