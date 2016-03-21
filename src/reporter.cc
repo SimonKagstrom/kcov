@@ -16,7 +16,7 @@
 using namespace kcov;
 
 #define KCOV_MAGIC      0x6b636f76 /* "kcov" */
-#define KCOV_DB_VERSION 6
+#define KCOV_DB_VERSION 7
 
 struct marshalHeaderStruct
 {

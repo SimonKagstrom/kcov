@@ -14,6 +14,6 @@ namespace kcov
 
 	static uint64_t getLineId(const std::string &fileName, unsigned int nr)
 	{
-		return (getFileHash(fileName) & 0xffffffff) | ((uint64_t)nr << 32ULL);
+		return (getFileHash(fileName) << 32) | ((uint64_t)nr);
 	}
 }
