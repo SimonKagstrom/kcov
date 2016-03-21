@@ -418,7 +418,7 @@ private:
 		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
 		Line(uint64_t fileHash, unsigned int lineNr) :
-			m_lineId((fileHash << 32ULL) | lineNr),
+			m_lineId(getLineId(fileHash, lineNr)),
 			m_order(0)
 		{
 		}
