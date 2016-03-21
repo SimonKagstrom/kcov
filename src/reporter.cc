@@ -318,7 +318,7 @@ private:
 		Line *line = fp->getLine(lineNr);
 
 		if (!line) {
-			line = new Line(fp->getFileHash(), lineNr);
+			line = new Line(file, lineNr);
 			fp->addLine(lineNr, line);
 		}
 
@@ -417,8 +417,8 @@ private:
 		// More efficient than an unordered_map
 		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
-		Line(uint64_t fileHash, unsigned int lineNr) :
-			m_lineId((fileHash << 32ULL) | lineNr),
+		Line(const std::string &file, unsigned int lineNr) :
+			m_lineId(getLineId(file, lineNr)),
 			m_order(0)
 		{
 		}
