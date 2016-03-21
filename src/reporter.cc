@@ -11,6 +11,8 @@
 #include <functional>
 #include <map>
 
+#include <lineid.hh>
+
 #include "swap-endian.hh"
 
 using namespace kcov;
@@ -304,7 +306,7 @@ private:
 
 				free(data);
 			} else {
-				hash = m_fileHash(file);
+				hash = getFileHash(file);
 			}
 
 
@@ -707,7 +709,6 @@ private:
 	ListenerList_t m_listeners;
 	PendingFilesMap_t m_pendingFiles;
 	LineIdToFileMap_t m_lineIdToFileMap;
-	std::hash<std::string> m_fileHash;
 	bool m_hashFilename;
 
 	IFileParser &m_fileParser;
