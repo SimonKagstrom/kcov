@@ -221,7 +221,7 @@ public:
 				break;
 			case 'v':
 				printf("kcov %s\n", kcov_version);
-				exit(1);
+				exit(0);
 				break;
 			case 'L':
 				setKey("parse-solibs", 0);
