@@ -1,6 +1,17 @@
 Kcov (31):
+	* Exit with 0 when running --version (Pietro Monteiro)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	* travis: Run regression tests on OS X as well
+
+	* Issue #130: bash: Correct handling of data accumulation with absolute paths
+
+	* Issue #127: Add output support for the SonarQube coverage plugin
+
+	* Refactor travis tests to use pyunit instead of Robot Framework
+
+	* Allow --repace-src when running with --merge
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Apr 17 09:42:12 CEST 2016
 
 Kcov (30):
 	* Issue #121: Add --version to display the current kcov version
