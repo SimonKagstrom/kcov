@@ -33,6 +33,8 @@ namespace kcov
 		 */
 		virtual const std::vector<uint64_t> &get(uint64_t checksum) = 0;
 
-		static IDatabaseReader &create(IFileParser &parser);
+		virtual bool exists(uint64_t checksum) = 0;
+
+		static IDatabaseReader &getInstance();
 	};
 }

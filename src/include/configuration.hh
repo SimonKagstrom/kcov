@@ -49,6 +49,9 @@ namespace kcov
 		 */
 		virtual void printUsage() = 0;
 
+		virtual void setKey(const std::string &key, const std::string &val) = 0;
+
+		virtual void setKey(const std::string &key, int val) = 0;
 
 		/**
 		 * Return a value as a string.

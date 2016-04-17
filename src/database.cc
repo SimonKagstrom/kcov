@@ -96,14 +96,13 @@ IDatabaseCreator &IDatabaseCreator::create(IFileParser &parser)
 class DatabaseReader : public IDatabaseReader
 {
 public:
-	DatabaseReader(IFileParser &parser)
+	DatabaseReader()
 	{
 	}
 
 	const std::vector<uint64_t> &get(uint64_t checksum)
 	{
-		std::string dir = IConfiguration::getInstance().keyAsString("database-directory");
-		std::string filename = fmt("%s/%llx", dir.c_str(), (unsigned long long)checksum);
+		std::string filename = getFilenameFromChecksum(checksum);
 
 		if (!file_exists(filename))
 			return m_empty;
@@ -114,7 +113,20 @@ public:
 		return m_database;
 	}
 
+	bool exists(uint64_t checksum)
+	{
+		std::string filename = getFilenameFromChecksum(checksum);
+
+		return file_exists(filename);
+	}
+
 private:
+	std::string getFilenameFromChecksum(uint64_t checksum) const
+	{
+		std::string dir = IConfiguration::getInstance().keyAsString("database-directory");
+		return fmt("%s/%llx", dir.c_str(), (unsigned long long)checksum);
+	}
+
 	bool unmarshal(const std::string &filename)
 	{
 		size_t sz;
@@ -152,7 +164,12 @@ private:
 	std::vector<uint64_t> m_empty;
 };
 
-IDatabaseReader &IDatabaseReader::create(IFileParser &parser)
+IDatabaseReader &IDatabaseReader::getInstance()
 {
-	return *new DatabaseReader(parser);
+	static DatabaseReader *g_instance;
+
+	if (!g_instance)
+		g_instance = new DatabaseReader();
+
+	return *g_instance;
 }

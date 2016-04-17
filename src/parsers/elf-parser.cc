@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <configuration.hh>
+#include <database.hh>
 
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
@@ -136,6 +137,7 @@ public:
 		m_debuglinkCrc = 0;
 		m_relocation = 0;
 		m_invalidBreakpoints = 0;
+		m_currentChecksum = 0;
 
 		IParserManager::getInstance().registerParser(*this);
 	}
@@ -204,20 +206,23 @@ public:
 			m_curSegments.push_back(Segment(NULL, seg->paddr, seg->vaddr, seg->size));
 		}
 
-		uint64_t checksum = 0;
-
-		if (!checkFile(checksum))
+		if (!checkFile())
 			return false;
+
+
+		// Has debug symbols? Otherwise, only collect is possible
+		if (!DwarfParser().open(filename) && m_isMainFile)
+			IConfiguration::getInstance().setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 
 		for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
 				it != m_fileListeners.end();
 				++it)
-			(*it)->onFile(File(m_filename, checksum, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
+			(*it)->onFile(File(m_filename, m_currentChecksum, m_isMainFile ? IFileParser::FLG_NONE : IFileParser::FLG_TYPE_SOLIB));
 
 		return true;
 	}
 
-	bool checkFile(uint64_t &checksum)
+	bool checkFile()
 	{
 		struct Elf *elf;
 		bool out = true;
@@ -258,12 +263,12 @@ public:
 			e_type = m_elfIs32Bit ? elf32_getehdr(elf)->e_type : elf64_getehdr(elf)->e_type;
 
 			m_elfIsShared = e_type == ET_DYN;
+		}
 
-			checksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
-			if (!m_checksum)
-			{
-				m_checksum = checksum;
-			}
+		m_currentChecksum = m_elfIs32Bit ? elf32_checksum(elf) : elf64_checksum(elf);
+		if (!m_checksum)
+		{
+			m_checksum = m_currentChecksum;
 		}
 
 		elf_end(elf);
@@ -412,12 +417,26 @@ out_open:
 		}
 
 		if (!rv) {
-			if (m_isMainFile)
-					warning("kcov requires binaries built with -g/-ggdb, a build-id file\n"
-							"or GNU debug link information.\n");
+			IDatabaseReader &reader = IDatabaseReader::getInstance();
+
+			const std::vector<uint64_t> &addrs = reader.get(m_currentChecksum);
+
 			kcov_debug(ELF_MSG, "No debug symbols in %s.\n", m_filename.c_str());
 
-			return false;
+			if (addrs.empty() && m_isMainFile) {
+				warning("kcov requires binaries built with -g/-ggdb, a build-id file\n"
+						"or GNU debug link information.\n");
+
+				return false;
+			}
+
+			// Report all addresses (without file/line)
+			for (std::vector<uint64_t>::const_iterator it = addrs.begin();
+					it != addrs.end();
+					++it)
+				onLine("", 1, *it);
+
+			return true;
 		}
 
 		/* Iterate over the headers */
@@ -818,6 +837,7 @@ private:
 	uint32_t m_debuglinkCrc;
 	bool m_isMainFile;
 	uint64_t m_checksum;
+	uint64_t m_currentChecksum;
 	bool m_initialized;
 	uint64_t m_relocation;
 	uint32_t m_invalidBreakpoints;

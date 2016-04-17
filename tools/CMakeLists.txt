@@ -17,6 +17,7 @@ set (LINE2ADDR line2addr)
 set (${LINE2ADDR}_SRCS
     ../src/capabilities.cc
 	../src/configuration.cc
+	../src/database.cc
 	../src/filter.cc
 	../src/gcov.cc
 	../src/parsers/dwarf.cc
