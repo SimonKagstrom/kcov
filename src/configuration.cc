@@ -539,26 +539,17 @@ public:
 	void configure(const std::string &key, const std::string &value)
 	{
 		if (key == "low-limit" ||
-				key == "high-limit")
-		{
+				key == "high-limit") {
 			if (!isInteger(value))
-			{
 				panic("Value for %s must be integer\n", key.c_str());
-			}
 		}
 
 		if (key == "low-limit")
-		{
 			setKey(key, stoul(std::string(value)));
-		}
 		else if (key == "high-limit")
-		{
 			setKey(key, stoul(std::string(value)));
-		}
 		else
-		{
 			panic("Unknown key %s\n", key.c_str());
-		}
 	}
 
 	const char *getConfigurableValues()
