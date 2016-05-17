@@ -435,7 +435,11 @@ public:
 			binaryName = tmp.second;
 
 			setKey("target-directory", outDirectory + "/" + binaryName);
+
 			setKey("binary-name", binaryName);
+
+			if (keyAsString("command-name") == "")
+				setKey("command-name", binaryName);
 		}
 
 		m_programArgs = &argv[afterOpts + 1];
@@ -501,6 +505,7 @@ public:
 		setKey("bash-handle-sh-invocation", 0);
 		setKey("bash-use-ps4", 1);
 		setKey("verify", 0);
+		setKey("command-name", "");
 	}
 
 
@@ -548,6 +553,8 @@ public:
 			setKey(key, stoul(std::string(value)));
 		else if (key == "high-limit")
 			setKey(key, stoul(std::string(value)));
+		else if (key == "command-name")
+			setKey(key, std::string(value));
 		else
 			panic("Unknown key %s\n", key.c_str());
 	}
@@ -556,7 +563,8 @@ public:
 	{
 		return
 		"                           low-limit=NUM    Percentage for low coverage\n"
-		"                           high-limit=NUM   Percentage for high coverage\n";
+		"                           high-limit=NUM   Percentage for high coverage\n"
+		"                           command-name=STR Name of executed command\n";
 	}
 
 	std::string uncommonOptions()
