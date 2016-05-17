@@ -114,6 +114,7 @@ public:
 				{"exit-first-process", no_argument, 0, 'F'},
 				{"gcov", no_argument, 0, 'g'},
 				{"clang", no_argument, 0, 'c'},
+				{"configure", required_argument, 0, 'M'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -272,6 +273,27 @@ public:
 					return usage();
 				g_kcov_debug_mask = stoul(std::string(optarg));
 				break;
+			case 'M':
+			{
+				std::vector<std::string> values = split_string(optarg, ",");
+
+				for (std::vector<std::string>::const_iterator it = values.begin();
+						it != values.end();
+						++it)
+				{
+					std::vector<std::string> keyValue = split_string(*it, "=");
+
+					if (keyValue.size() != 2)
+					{
+						error("--configure needs key=value pairs\n");
+						return usage();
+					}
+
+					configure(keyValue[0], keyValue[1]);
+				}
+
+				break;
+			}
 			case 'i':
 				setKey("include-pattern", getCommaSeparatedList(std::string(optarg)));
 				break;
@@ -514,6 +536,38 @@ public:
 		it->second->onConfigurationChanged(key);
 	}
 
+	void configure(const std::string &key, const std::string &value)
+	{
+		if (key == "low-limit" ||
+				key == "high-limit")
+		{
+			if (!isInteger(value))
+			{
+				panic("Value for %s must be integer\n", key.c_str());
+			}
+		}
+
+		if (key == "low-limit")
+		{
+			setKey(key, stoul(std::string(value)));
+		}
+		else if (key == "high-limit")
+		{
+			setKey(key, stoul(std::string(value)));
+		}
+		else
+		{
+			panic("Unknown key %s\n", key.c_str());
+		}
+	}
+
+	const char *getConfigurableValues()
+	{
+		return
+		"                           low-limit=NUM    Percentage for low coverage\n"
+		"                           high-limit=NUM   Percentage for high coverage\n";
+	}
+
 	std::string uncommonOptions()
 	{
 		if (!m_printUncommon)
@@ -534,6 +588,9 @@ public:
 				"\n"
 				" --debug=X               set kcov debugging level (max 31, default 0)\n"
 				"\n"
+				" --configure=key=value,... Manually set configuration values. Possible values:\n"
+				"%s"
+				"\n"
 				" --verify                verify breakpoint setup (to catch compiler bugs)\n"
 				"\n"
 				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
@@ -543,7 +600,9 @@ public:
 				" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
 				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
 				"                         execve replacement. Buggy on some systems\n",
-				keyAsInt("path-strip-level"), keyAsInt("output-interval"), keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
+				keyAsInt("path-strip-level"), keyAsInt("output-interval"),
+				getConfigurableValues(),
+				keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
 				);
 	}
 
