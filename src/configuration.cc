@@ -506,6 +506,7 @@ public:
 		setKey("bash-use-ps4", 1);
 		setKey("verify", 0);
 		setKey("command-name", "");
+		setKey("css-file", "");
 	}
 
 
@@ -555,6 +556,8 @@ public:
 			setKey(key, stoul(std::string(value)));
 		else if (key == "command-name")
 			setKey(key, std::string(value));
+		else if (key == "css-file")
+			setKey(key, std::string(value));
 		else
 			panic("Unknown key %s\n", key.c_str());
 	}
@@ -564,7 +567,8 @@ public:
 		return
 		"                           low-limit=NUM    Percentage for low coverage\n"
 		"                           high-limit=NUM   Percentage for high coverage\n"
-		"                           command-name=STR Name of executed command\n";
+		"                           command-name=STR Name of executed command\n"
+		"                           css-file=FILE    Filename of bcov.css file\n";
 	}
 
 	std::string uncommonOptions()

@@ -375,15 +375,29 @@ private:
 
 	void writeHelperFiles(std::string dir)
 	{
+		IConfiguration &conf = IConfiguration::getInstance();
+		GeneratedData css = css_text_data;
+
+		std::string cssFileName = conf.keyAsString("css-file");
+		if (cssFileName != "") {
+			size_t sz;
+			uint8_t *p = (uint8_t *)read_file(&sz, "%s", cssFileName.c_str());
+
+			if (p)
+				css = GeneratedData(p, sz);
+			else
+				warning("Can't read CSS file %s\n", cssFileName.c_str());
+		}
+
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/amber.png", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/glass.png", dir.c_str());
-		write_file(css_text_data.data(), css_text_data.size(), "%s/bcov.css", dir.c_str());
+		write_file(css.data(), css.size(), "%s/bcov.css", dir.c_str());
 
 		(void)mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
 		(void)mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/data/glass.png", dir.c_str());
-		write_file(css_text_data.data(), css_text_data.size(), "%s/data/bcov.css", dir.c_str());
+		write_file(css.data(), css.size(), "%s/data/bcov.css", dir.c_str());
 		write_file(handlebars_text_data.data(), handlebars_text_data.size(), "%s/data/js/handlebars.js", dir.c_str());
 		write_file(kcov_text_data.data(), kcov_text_data.size(), "%s/data/js/kcov.js", dir.c_str());
 		write_file(jquery_text_data.data(), jquery_text_data.size(), "%s/data/js/jquery.min.js", dir.c_str());
