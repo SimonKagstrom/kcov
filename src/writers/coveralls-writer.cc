@@ -158,6 +158,12 @@ public:
 		}
 		out << " \"source_files\": [\n";
 		setupCommonPaths();
+		
+		std::string strip_path = conf.keyAsString("strip-path");
+		if (strip_path.size() == 0) {
+			setupCommonPaths();
+			strip_path = m_commonPath + "/";
+		}
 
 		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -166,9 +172,9 @@ public:
 			File *file = it->second;
 			std::string fileName;
 
-			// Strip away the common path (unless this is the only file)
-			if (m_commonPath != file->m_name)
-				fileName = file->m_name.substr(m_commonPath.size() + 1);
+			// Strip away the specified path (unless this is the only file)
+			if (file->m_name.compare(0, strip_path.length(), strip_path) == 0)
+				fileName = file->m_name.substr(strip_path.size());
 			else
 				fileName = file->m_fileName;
 
