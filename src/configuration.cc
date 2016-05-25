@@ -80,6 +80,7 @@ public:
 				"\n"
 				" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
 				"                         Coveralls.io\n"
+				" --strip-path=path       If not set, max common path will be stripped away.\n"
 				"%s"
 				"\n"
 				"Examples:\n"
@@ -120,6 +121,7 @@ public:
 				{"exclude-path", required_argument, 0, 'X'},
 				{"include-path", required_argument, 0, 'I'},
 				{"coveralls-id", required_argument, 0, 'T'},
+				{"strip-path", required_argument, 0, 'Z'},
 				{"debug", required_argument, 0, 'D'},
 				{"debug-force-bash-stderr", no_argument, 0, 'd'},
 				{"bash-handle-sh-invocation", no_argument, 0, 's'},
@@ -305,6 +307,9 @@ public:
 				break;
 			case 'T':
 				setKey("coveralls-id", optarg);
+				break;
+			case 'Z':
+				setKey("strip-path", std::string(optarg));
 				break;
 			case 'x':
 				setKey("exclude-pattern", getCommaSeparatedList(std::string(optarg)));
@@ -494,6 +499,7 @@ public:
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
 		setKey("coveralls-id", "");
+		setKey("strip-path", "");
 		setKey("orig-path-prefix", "");
 		setKey("new-path-prefix", "");
 		setKey("running-mode", IConfiguration::MODE_COLLECT_AND_REPORT);
