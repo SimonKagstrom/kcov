@@ -53,6 +53,8 @@ public:
 		m_threadShouldExit = true;
 		if (m_solibPath != "")
 			unlink(m_solibPath.c_str());
+		if (m_solibDirectory != "")
+			rmdir(m_solibDirectory.c_str());
 		if (m_solibFd >= 0)
 			close(m_solibFd);
 
@@ -94,10 +96,29 @@ public:
 
 		write_file(__library_data.data(), __library_data.size(), "%s", kcov_solib_path.c_str());
 
+		unlink(kcov_solib_pipe_path.c_str());
+
+		int rv = mkfifo(kcov_solib_pipe_path.c_str(), 0644);
+		if (rv < 0) {
+			char buf[128];
+
+			snprintf(buf, sizeof(buf), "kcov-solibXXXXXX");
+
+			char *dir = mkdtemp(buf);
+
+			if (!dir)
+				panic("Can't create temporary directory\n");
+			m_solibDirectory = dir;
+
+			kcov_solib_pipe_path = fmt("%s/kcov-solib.pipe", dir);
+
+			rv = mkfifo(kcov_solib_pipe_path.c_str(), 0644);
+			if (rv < 0)
+				panic("Can't create kcov fifo in temp dir %s\n", dir);
+		}
+
 		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
 				kcov_solib_pipe_path;
-		unlink(kcov_solib_pipe_path.c_str());
-		(void)mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 
 		free(m_envString);
 		m_envString = (char *)xmalloc(kcov_solib_env.size() + 1);
@@ -229,6 +250,7 @@ public:
 	typedef std::unordered_map<std::string, bool> FoundSolibsMap_t;
 
 	std::string m_solibPath;
+	std::string m_solibDirectory;
 	char *m_ldPreloadString;
 	char *m_envString;
 	int m_solibFd;
