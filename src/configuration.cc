@@ -512,6 +512,7 @@ public:
 		setKey("bash-use-ps4", 1);
 		setKey("verify", 0);
 		setKey("command-name", "");
+		setKey("merged-name", "[merged]");
 		setKey("css-file", "");
 	}
 
@@ -564,6 +565,8 @@ public:
 			setKey(key, std::string(value));
 		else if (key == "css-file")
 			setKey(key, std::string(value));
+		else if (key == "merged-name")
+			setKey(key, std::string(value));
 		else
 			panic("Unknown key %s\n", key.c_str());
 	}
@@ -574,6 +577,7 @@ public:
 		"                           low-limit=NUM    Percentage for low coverage\n"
 		"                           high-limit=NUM   Percentage for high coverage\n"
 		"                           command-name=STR Name of executed command\n"
+		"                           merged-name=STR  Name of [merged] tag in HTML\n"
 		"                           css-file=FILE    Filename of bcov.css file\n";
 	}
 

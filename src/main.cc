@@ -155,6 +155,7 @@ static int runMergeMode()
 	IFilter &dummyFilter = IFilter::createDummy();
 	IReporter &reporter = IReporter::createDummyReporter();
 	IOutputHandler &output = IOutputHandler::create(reporter, NULL);
+	IConfiguration &conf = IConfiguration::getInstance();
 
 	const std::string &base = output.getBaseDirectory();
 	const std::string &out = output.getOutDirectory();
@@ -162,7 +163,7 @@ static int runMergeMode()
 	IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
 	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
-			base, base + "/kcov-merged", "[merged]", true);
+			base, base + "/kcov-merged", conf.keyAsString("merged-name"), true);
 	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/cobertura.xml");
 	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
@@ -238,7 +239,7 @@ int main(int argc, const char *argv[])
 		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
 		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
-				base, base + "/kcov-merged", "[merged]", false);
+				base, base + "/kcov-merged", conf.keyAsString("merged-name"), false);
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/cobertura.xml");
 		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,

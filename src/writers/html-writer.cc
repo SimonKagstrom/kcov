@@ -228,6 +228,7 @@ private:
 		std::string s;
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
+		IConfiguration &conf = IConfiguration::getInstance();
 
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
@@ -265,7 +266,7 @@ private:
 
 			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines, summary.m_executedLines);
 
-			if (name == "[merged]")
+			if (name == conf.keyAsString("merged-name"))
 				merged += datum;
 			else
 				outJson << datum;
