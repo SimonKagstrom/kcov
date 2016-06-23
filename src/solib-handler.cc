@@ -100,9 +100,13 @@ public:
 
 		int rv = mkfifo(kcov_solib_pipe_path.c_str(), 0644);
 		if (rv < 0) {
-			char buf[128];
+			char buf[1024];
 
-			snprintf(buf, sizeof(buf), "kcov-solibXXXXXX");
+			const char* tmpdir = getenv("TMPDIR");
+			if (!tmpdir)
+				tmpdir = "/tmp";
+
+			snprintf(buf, sizeof(buf), "%s/kcov-solibXXXXXX", tmpdir);
 
 			char *dir = mkdtemp(buf);
 
