@@ -358,7 +358,6 @@ public:
 
 		// A signal?
 		if (WIFSTOPPED(status)) {
-			siginfo_t siginfo;
 			int sig = WSTOPSIG(status);
 			int sigill = SIGUNUSED;
 
@@ -369,36 +368,34 @@ public:
 
 			out.type = ev_signal;
 			out.data = sig;
-
-			ptrace(PTRACE_GETSIGINFO, m_activeChild, NULL, (void *)&siginfo);
-
-			// A trap?
-			if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill) {
-				out.type = ev_breakpoint;
-				out.data = -1;
-
-				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
-						(unsigned long long)out.addr, out.data, m_activeChild);
-
-				bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
-
-				// Single-step if we have this BP
-				if (insnFound)
-					singleStep();
-				else if (sig != SIGSTOP)
-					skipInstruction();
-
-				// Wait for solib data if this is the first time
-				if (m_firstBreakpoint && insnFound) {
-					blockUntilSolibDataRead();
-					m_firstBreakpoint = false;
-				}
-
-				return out;
-			} else if ((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK || (status >> 16) == PTRACE_EVENT_VFORK) {
+			if ((sig == SIGTRAP) &&
+					((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK || (status >> 16) == PTRACE_EVENT_VFORK)) {
 				kcov_debug(ENGINE_MSG, "PT clone at 0x%llx for %d\n",
 						(unsigned long long)out.addr, m_activeChild);
 				out.data = 0;
+			} else if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill) {
+				// A trap?
+						out.type = ev_breakpoint;
+						out.data = -1;
+
+						kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
+								(unsigned long long)out.addr, out.data, m_activeChild);
+
+						bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
+
+						// Single-step if we have this BP
+						if (insnFound)
+							singleStep();
+						else if (sig != SIGSTOP)
+							skipInstruction();
+
+						// Wait for solib data if this is the first time
+						if (m_firstBreakpoint && insnFound) {
+							blockUntilSolibDataRead();
+							m_firstBreakpoint = false;
+						}
+
+						return out;
 			}
 
 			kcov_debug(ENGINE_MSG, "PT signal %d at 0x%llx for %d\n",
