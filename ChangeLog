@@ -1,3 +1,18 @@
+Kcov (32):
+	* Issue #148: Correct handling of PTRACE events (Niklas Ögren)
+
+	* Issue #139: Create kcov-solib.pipe in a tempdir if out-dir is unfifoable
+
+	* Issue #141: Make [merged] name configurable via --configure
+
+	* Issue #138: Allow setting a different css file via --configure
+
+	* Issue #140: Allow specifying command name via --configure
+
+	* Issue #144: Allow setting configuration options manually with --configure
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (31):
 	* Exit with 0 when running --version (Pietro Monteiro)
 
