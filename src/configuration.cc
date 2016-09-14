@@ -491,6 +491,7 @@ public:
 	void setupDefaults()
 	{
 		setKey("binary-path", "");
+		setKey("elf-name", "");
 		setKey("python-command", "python");
 		setKey("bash-command", "/bin/bash");
 		setKey("kernel-coverage-path", "/sys/kernel/debug/kprobe-coverage");
@@ -571,6 +572,8 @@ public:
 		else if (key == "css-file")
 			setKey(key, std::string(value));
 		else if (key == "merged-name")
+			setKey(key, std::string(value));
+		else if (key == "elf-name")
 			setKey(key, std::string(value));
 		else
 			panic("Unknown key %s\n", key.c_str());

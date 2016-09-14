@@ -231,6 +231,10 @@ int main(int argc, const char *argv[])
 		return runCreateDatabase();
 
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+
+	if (conf.keyAsString("elf-name") != "")
+		file = conf.keyAsString("elf-name");
+
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
 	if (!parser) {
 		error("Can't find or open %s\n", file.c_str());
