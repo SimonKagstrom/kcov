@@ -217,6 +217,16 @@ class bash_dollar_var_replacement(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 4) == 1
         assert parse_cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 5) == 1
 
+# Issue #152
+class bash_done_eof(testbase.KcovTestCase):
+    @unittest.expectedFailure
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main 5")
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 163) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 169) == None
+
+
 class bash_subshell(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):

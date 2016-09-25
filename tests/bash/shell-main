@@ -154,3 +154,19 @@ echo afterid
 source `dirname $0`/first-dir/a.sh
 source `dirname $0`/first-dir/b.sh
 source `dirname $0`/first-dir/c.sh
+
+# Issue 152
+# Test 1: Coverage works fine
+printf "foo\nbar\n" | while read -r line
+do
+    echo line: "$line"
+done
+
+# Test 2: Coverage missed for line with here-document
+while read -r line
+do
+    echo line: "$line"
+done <<eof
+baz
+qux
+eof
