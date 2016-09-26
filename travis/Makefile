@@ -89,7 +89,7 @@ prepare_osx:
 prepare_linux:
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
 	-sudo apt-get update
-	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time
+	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time curl
 
 prepare_linux_gcc:
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
