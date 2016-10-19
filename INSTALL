@@ -2,7 +2,9 @@ Building Kcov
 =============
 
 You need development headers and libraries for libstdc++, curl, elfutils
-and (optional) binutils and libiberty to build kcov.
+and (optional) binutils and libiberty to build kcov. Note that elfutils is
+found in multiple variants, and at least in RH/Centos/Fedora you'll need
+elfutils-devel and *not* elfutils-libelf-devel.
 
 Create an empty build dir and do the following steps:
 
