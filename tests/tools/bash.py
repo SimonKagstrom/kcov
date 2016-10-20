@@ -222,6 +222,7 @@ class bash_done_eof(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main 5")
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 163) == None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 169) == None
 
