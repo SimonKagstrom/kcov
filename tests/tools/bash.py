@@ -219,7 +219,6 @@ class bash_dollar_var_replacement(testbase.KcovTestCase):
 
 # Issue #152
 class bash_done_eof(testbase.KcovTestCase):
-    @unittest.expectedFailure
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main 5")

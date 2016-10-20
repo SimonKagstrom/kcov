@@ -595,6 +595,22 @@ private:
 
 					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
 						state = heredoc;
+
+
+					std::string beforeHeredoc = trim_string(s.substr(0, heredocStart));
+					/*
+					 * Special case for things like
+					 * while read -r line ; do
+					 *     echo $line
+					 * done <<EOF
+					 * xxx
+					 * yyy
+					 * EOF
+					 *
+					 * where the done statement is nocode (as above)
+					 */
+					if (beforeHeredoc == "done")
+						continue;
 				}
 			}
 
