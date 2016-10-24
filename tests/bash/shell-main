@@ -170,3 +170,11 @@ done <<eof
 baz
 qux
 eof
+
+
+# Issue 154
+booknames=`sqlplus -S -R 3 "$LOGON_STR" <<-EOF
+       select name from books;
+       exit;
+EOF`
+echo $booknames
