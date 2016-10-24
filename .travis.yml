@@ -23,16 +23,18 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "WG/iday4nudNJ9acP/gjjuXzI0Jw0MN0zP9JA3WueMvMV0UrVRnBKM+papB06XiB4Gyiaoy92pfOGzmby0ciMAvydBn2DyuGZhM1nXuEIbkQqfP3AR3z6nCZHY27NAhVnpnEAyb56FwD353JMVZj34cnRmcjgKArMM3Y8W66Zls="
+   # This, and before_script, is taken from from https://github.com/umlaeute/Gem
+   - COVERITY_SCAN_BRANCH_PATTERN="master"
+   - COVERITY_SCAN_NOTIFICATION_EMAIL="simon.kagstrom@gmail.com"
+   - COVERITY_SCAN_BUILD_COMMAND_PREPEND="mkdir -p coverity-build && cd coverity-build && cmake .. && cd .."
+   - COVERITY_SCAN_BUILD_COMMAND="make -C coverity-build"
+   - COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
 
-addons:
-  coverity_scan-disabled:
-    project:
-      name: "SimonKagstrom/kcov"
-      description: "code coverage"
-    notification_email: simon.kagstrom@gmail.com
-    build_command_prepend: "mkdir -p coverity-build && cd coverity-build && cmake .. && cd .."
-    build_command:   "travis/coverity-build.sh"
-    branch_pattern: master
+
+before_script:
+    - mkdir -p coverity-build && cd coverity-build && cmake .. && cd ..
+    - if [[ -n $COVERITY_SCAN_PROJECT_NAME ]] ; then curl -s 'https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh' | bash || true ; fi
+
 
 script: make -f travis/Makefile run-tests
 
