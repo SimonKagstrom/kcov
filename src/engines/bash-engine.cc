@@ -547,7 +547,9 @@ private:
 
 			// HERE documents
 			if (state == heredoc) {
-				if (s == heredocMarker)
+				std::string trimmed = trim_string(s, " \t\r\n`");
+
+				if (trimmed == heredocMarker)
 					state = none;
 				continue;
 			}
