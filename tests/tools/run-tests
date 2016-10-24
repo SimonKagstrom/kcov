@@ -15,6 +15,10 @@ from python import *
 from bash import *
 
 if __name__ == "__main__":
+    if len(sys.argv) < 5:
+        print "Usage: run-tests <path-to-kcov-binary> <kcov-output> <path-to-test-builds> <path-to-kcov-source>"
+        sys.exit(1)
+
     testbase.configure(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
     sys.argv = sys.argv[4:]
