@@ -444,10 +444,10 @@ std::vector<std::string> split_string(const std::string &s, const char *delims)
     return elems;
 }
 
-std::string trim_string(const std::string &strIn)
+std::string trim_string(const std::string &strIn, const std::string &trimEndChars)
 {
 	std::string str = strIn;
-	size_t endpos = str.find_last_not_of(" \t\n\r");
+	size_t endpos = str.find_last_not_of(trimEndChars);
 
 	if (std::string::npos != endpos)
 		str = str.substr( 0, endpos+1 );

@@ -138,7 +138,7 @@ bool machine_is_64bit(void);
 
 std::vector<std::string> split_string(const std::string &s, const char *delims);
 
-std::string trim_string(const std::string &strIn);
+std::string trim_string(const std::string &strIn, const std::string &trimEndChars = " \t\n\r");
 
 const std::string &get_real_path(const std::string &path);
 
