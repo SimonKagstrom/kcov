@@ -1,4 +1,6 @@
 Kcov (32):
+	* Re-enable coverity for Travis CI builds again
+
 	* Issue #148: Correct handling of PTRACE events (Niklas Ögren)
 
 	* Issue #139: Create kcov-solib.pipe in a tempdir if out-dir is unfifoable
