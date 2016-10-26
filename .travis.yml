@@ -33,7 +33,7 @@ env:
 
 before_script:
     - mkdir -p coverity-build && cd coverity-build && cmake .. && cd ..
-    - if [[ "x${TRAVIS_OS_NAME}${ARCH}" = "xlinux" -a "x${CC}" = "xclang" ]] ; then curl -s 'https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh' | bash || true ; fi
+    - if [[ "x${TRAVIS_OS_NAME}${ARCH}" = "xlinux" && "x${CC}" = "xclang" ]] ; then curl -s 'https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh' | bash || true ; fi
 
 
 script: make -f travis/Makefile run-tests
