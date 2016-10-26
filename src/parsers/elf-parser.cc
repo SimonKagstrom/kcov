@@ -495,6 +495,13 @@ out_open:
 
 			Elf_Data *data = elf_getdata(scn, NULL);
 
+			// Nothing there?
+			if (!data)
+				continue;
+
+			if (!data->d_buf)
+				continue;
+
 			name = elf_strptr(m_elf, shstrndx, sh_name);
 			if(!data) {
 					error("elf_getdata failed on section %s in %s\n",
@@ -503,7 +510,7 @@ out_open:
 			}
 
 			// Parse rodata to find gcda files
-			if (doScanForGcda && data->d_buf && strcmp(name, ".rodata") == 0) {
+			if (doScanForGcda && strcmp(name, ".rodata") == 0) {
 				const char *dataPtr = (const char *)data->d_buf;
 
 				for (size_t i = 0; i < data->d_size - 5; i++) {
@@ -534,7 +541,7 @@ out_open:
 				}
 			}
 
-			if (sh_type == SHT_NOTE && data->d_buf) {
+			if (sh_type == SHT_NOTE) {
 				if (m_elfIs32Bit) {
 					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
 
