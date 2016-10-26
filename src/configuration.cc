@@ -164,7 +164,7 @@ public:
 					it != paths.end();
 					++it) {
 				const std::string &curPath = *it;
-				const std::string &cur = get_real_path(curPath + "/" + argv[lastArg]);
+				const std::string cur = get_real_path(curPath + "/" + argv[lastArg]);
 				struct stat st;
 
 				if (lstat(cur.c_str(), &st) < 0)
