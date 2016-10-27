@@ -95,7 +95,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 
 	MockCollector collector;
 
-	IOutputHandler &output = IOutputHandler::create(*elf, reporter, collector);
+	IOutputHandler &output = IOutputHandler::create(reporter, &collector);
 	IWriter &writer = createHtmlWriter(*elf, reporter,
 			output.getBaseDirectory(), output.getOutDirectory(), "kalle");
 	IWriter &coberturaWriter = createCoberturaWriter(*elf, reporter,
@@ -170,7 +170,7 @@ TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 		;
 
 	MockCollector collector;
-	IOutputHandler &output = IOutputHandler::create(*elf, reporter, collector);
+	IOutputHandler &output = IOutputHandler::create(reporter, &collector);
 	IWriter &writer = createHtmlWriter(*elf, reporter,
 			output.getBaseDirectory(), output.getOutDirectory(), "anka");
 

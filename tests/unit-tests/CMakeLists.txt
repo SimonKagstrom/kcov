@@ -19,7 +19,6 @@ set (${TGT}_SRCS
     ../../src/engine-factory.cc
     ../../src/gcov.cc
     ../../src/output-handler.cc
-    ../../src/parsers/elf-parser.cc
     ../../src/parser-manager.cc
     ../../src/utils.cc
     ../../src/writers/cobertura-writer.cc
@@ -30,7 +29,6 @@ set (${TGT}_SRCS
     tests-configuration.cc
     tests-elf.cc
     tests-filter.cc
-    tests-merge-parser.cc
     tests-reporter.cc
     tests-utils.cc
     tests-writer.cc

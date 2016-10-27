@@ -106,7 +106,7 @@ TESTSUITE(configuration)
 		res = runParse(fmt("--strip-path=path"));
 		ASSERT_TRUE(res);
 		
-		ASSERT_TRUE(conf.keyAsString("strip-path") == "path");
+		ASSERT_TRUE(conf->keyAsString("strip-path") == "path");
 
 		res = runParse(fmt("--include-path=~/a /tmp/vobb %s", filename.c_str()));
 		ASSERT_TRUE(res);
