@@ -382,6 +382,7 @@ private:
 		if (!file_readable(m_pipe, 100))
 			return NULL;
 
+		memset(buf, 0, sizeof(struct coverage_data));
 		rv = fread(buf, 1, sizeof(struct coverage_data), m_pipe);
 		if (rv == 0)
 			return NULL; // Not an error
