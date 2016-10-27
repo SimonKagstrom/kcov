@@ -28,7 +28,7 @@ build:
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc: build build_reference
+build_gcc: build build_unit_tests build_reference
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
@@ -43,6 +43,8 @@ build_gcc: build build_reference
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-no-binutils"
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
+
+build_clang: build
 
 run-performance: build_gcc
 	travis/perf-test.sh build/src/kcov . build >/dev/null
@@ -59,12 +61,16 @@ run-tests-linux-gcc: run-performance
 	wget https://codecov.io/bash || true
 	bash bash -s /tmp/kcov-kcov || true
 
-run-tests-linux-clang: build
+run-tests-linux-clang: build_clang
 	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 
-build_clang:
-	# Stupid workaround for coverity scans...
-	sleep 97
+trompeloeil:
+	git submodule update --recursive --remote
+
+build_unit_tests: trompeloeil
+	mkdir -p build-ut
+	cd build-ut && CXX=g++-6 CC=gcc-6 cmake ../tests/unit-tests/
+	CXX=g++-6 CC=gcc-6 make -C build-ut
 
 run-tests-osx-gcc: build-osx
 	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
@@ -88,10 +94,15 @@ prepare_osx:
 
 prepare_linux:
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
-	-sudo apt-get update
-	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time curl
+	sudo add-apt-repository ppa:jonlar/crpcut -y
+	sudo apt-get update -q
+	sudo apt-get install -y ${kcov_deps} gcc-multilib debootstrap git time curl crpcut crpcut-dev
 
 prepare_linux_gcc:
+	sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+	sudo apt-get update -q
+	sudo apt-get install g++-6
+
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo i386 chroot "${chroot}" apt-get update
 	sudo i386 chroot "${chroot}" apt-get install -y build-essential
