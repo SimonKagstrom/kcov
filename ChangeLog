@@ -1,4 +1,6 @@
 Kcov (32):
+	* Issue #152, #154: bash: Correct handling heredoc special cases
+
 	* Re-enable coverity for Travis CI builds again
 
 	* Issue #148: Correct handling of PTRACE events (Niklas Ögren)
