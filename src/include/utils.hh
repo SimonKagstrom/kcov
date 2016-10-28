@@ -160,7 +160,7 @@ private:
 public:
 	Semaphore()
 	{
-		m_sem = sem_open("kcov-sem", 0);
+		m_sem = sem_open("kcov-sem", O_CREAT, 0644, 1);
 	}
 
 	~Semaphore()
