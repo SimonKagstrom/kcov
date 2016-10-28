@@ -155,27 +155,27 @@ void msleep(uint64_t ms);
 class Semaphore
 {
 private:
-	sem_t m_sem;
+	sem_t *m_sem;
 
 public:
 	Semaphore()
 	{
-		sem_init(&m_sem, 0, 0);
+		m_sem = sem_open("kcov-sem", 0);
 	}
 
 	~Semaphore()
 	{
-		sem_destroy(&m_sem);
+		sem_close(m_sem);
 	}
 
 	void notify()
 	{
-		sem_post(&m_sem);
+		sem_post(m_sem);
 	}
 
 	void wait()
 	{
-		sem_wait(&m_sem);
+		sem_wait(m_sem);
 	}
 };
 
