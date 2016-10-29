@@ -164,7 +164,9 @@ private:
 public:
 	Semaphore()
 	{
-		m_sem = sem_open("kcov-sem", O_CREAT, 0644, 1);
+		std::string name = fmt("kcov-sem.%p", this);
+
+		m_sem = sem_open(name.c_str(), O_CREAT, 0644, 1);
 	}
 
 	~Semaphore()
