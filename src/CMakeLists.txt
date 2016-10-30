@@ -172,7 +172,7 @@ add_custom_command(
 
 add_custom_command(
    OUTPUT bash-redirector-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_BINARY_DIR}/libbash_execve_redirector.so bash_redirector_library > bash-redirector-library.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:bash_execve_redirector> bash_redirector_library > bash-redirector-library.cc
    DEPENDS bash_execve_redirector ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
