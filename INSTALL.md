@@ -16,6 +16,9 @@ Fedora / Centos / RHEL
 ----------------------
 elfutils-libelf-devel
 
+Mac OS X
+--------
+brew install homebrew/dupes/zlib bash cmake pkgconfig
 
 Building
 ========
