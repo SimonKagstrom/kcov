@@ -125,6 +125,23 @@ set (${KCOV}_SRCS
     writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
     ${LINUX_SRCS}
+    include/capabilities.hh
+    include/gcov.hh
+    include/reporter.hh
+    include/collector.hh
+    include/generated-data-base.hh
+    include/solib-handler.hh
+    include/configuration.hh
+    include/lineid.hh
+    include/swap-endian.hh
+    include/engine.hh
+    include/manager.hh
+    include/utils.hh
+    include/file-parser.hh
+    include/output-handler.hh
+    include/writer.hh
+    include/filter.hh
+    include/phdr_data.h
     )
 
 
