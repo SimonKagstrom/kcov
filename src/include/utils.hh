@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <semaphore.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #include <string>
 #include <vector>
@@ -155,27 +159,33 @@ void msleep(uint64_t ms);
 class Semaphore
 {
 private:
-	sem_t m_sem;
-
+	sem_t *m_sem;
+    std::string m_name;
+    
 public:
 	Semaphore()
 	{
-		sem_init(&m_sem, 0, 0);
+		m_name = fmt("/kcov-sem.%p", this);
+
+		m_sem = sem_open(m_name.c_str(), O_CREAT, 0644, 1);
+        if (!m_sem)
+            panic("Can't create semaphore");
 	}
 
 	~Semaphore()
 	{
-		sem_destroy(&m_sem);
+		sem_close(m_sem);
+        sem_unlink(m_name.c_str());
 	}
 
 	void notify()
 	{
-		sem_post(&m_sem);
+		sem_post(m_sem);
 	}
 
 	void wait()
 	{
-		sem_wait(&m_sem);
+		sem_wait(m_sem);
 	}
 };
 
