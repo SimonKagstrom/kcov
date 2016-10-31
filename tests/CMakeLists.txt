@@ -139,4 +139,5 @@ target_link_libraries(issue31
 
 
 add_custom_target(tests-stripped ALL
-	COMMAND strip -o tests-stripped main-tests)
+	COMMAND strip -o tests-stripped main-tests
+    DEPENDS main-tests)
