@@ -109,6 +109,7 @@ prepare_linux_gcc:
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
 	sudo cp -r "$(shell pwd)" "${chroot}/tmp/"
 	sudo i386 chroot "${chroot}" sh -c "mount -t proc procfs /proc"
+	sudo i386 chroot "${chroot}" sh -c "mount -t tmpfs none /dev/shm"
 
 
 prepare_linux_clang:
