@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <elfutils/libdw.h>
 #include <file-parser.hh>
 
 namespace kcov
@@ -22,11 +21,12 @@ namespace kcov
 		void forAddress(IFileParser::ILineListener &listener, uint64_t address);
 
 	private:
+		class Impl;
+
 		std::string fullPath(const char *const *srcDirs, const std::string &filename);
 
 		void close();
 
-		int m_fd;
-		Dwarf *m_dwarf;
+		Impl *m_impl;
 	};
 }

@@ -2,6 +2,8 @@
 
 #include <utils.hh>
 
+#include <elfutils/libdw.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -10,20 +12,33 @@
 
 using namespace kcov;
 
-DwarfParser::DwarfParser() :
-		m_fd(-1),
-		m_dwarf(NULL)
+class DwarfParser::Impl
 {
+public:
+	Impl() :
+	m_fd(-1),
+	m_dwarf(NULL)
+	{
+	}
+
+	int m_fd;
+	Dwarf *m_dwarf;
+};
+
+DwarfParser::DwarfParser()
+{
+	m_impl = new DwarfParser::Impl();
 }
 
 DwarfParser::~DwarfParser()
 {
 	close();
+	delete m_impl;
 }
 
 void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 {
-	if (!m_dwarf)
+	if (!m_impl->m_dwarf)
 		return;
 
 	Dwarf_Off offset = 0;
@@ -31,7 +46,7 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 	size_t headerSize;
 
 	/* Iterate over the headers */
-	while (dwarf_nextcu(m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
+	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
 		Dwarf_Lines* lines;
 		Dwarf_Files *files;
 		size_t lineCount;
@@ -39,7 +54,7 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 		Dwarf_Die die;
 		unsigned int i;
 
-		if (dwarf_offdie(m_dwarf, lastOffset + headerSize, &die) == NULL)
+		if (dwarf_offdie(m_impl->m_dwarf, lastOffset + headerSize, &die) == NULL)
 			continue;
 
 		lastOffset = offset;
@@ -101,21 +116,21 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 
 void DwarfParser::forAddress(IFileParser::ILineListener& listener, uint64_t address)
 {
-	if (!m_dwarf)
+	if (!m_impl->m_dwarf)
 		return;
 
 	Dwarf_Off offset = 0;
 	Dwarf_Off lastOffset = 0;
 	size_t headerSize;
 
-	if (!m_dwarf)
+	if (!m_impl->m_dwarf)
 		return;
 
 	/* Iterate over the headers */
-	while (dwarf_nextcu(m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
+	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
 		Dwarf_Die die;
 
-		if (dwarf_offdie(m_dwarf, lastOffset + headerSize, &die) == NULL) {
+		if (dwarf_offdie(m_impl->m_dwarf, lastOffset + headerSize, &die) == NULL) {
 			lastOffset = offset;
 			continue;
 		}
@@ -178,17 +193,17 @@ bool DwarfParser::open(const std::string& filename)
 {
 	close();
 
-	m_fd = ::open(filename.c_str(), O_RDONLY);
+	m_impl->m_fd = ::open(filename.c_str(), O_RDONLY);
 
-	if (m_fd < 0)
+	if (m_impl->m_fd < 0)
 		return false;
 
 	/* Initialize libdwarf from the file descriptor */
-	m_dwarf = dwarf_begin(m_fd, DWARF_C_READ);
+	m_impl->m_dwarf = dwarf_begin(m_impl->m_fd, DWARF_C_READ);
 
-	if (!m_dwarf) {
-		::close(m_fd);
-		m_fd = -1;
+	if (!m_impl->m_dwarf) {
+		::close(m_impl->m_fd);
+		m_impl->m_fd = -1;
 
 		return false;
 	}
@@ -198,12 +213,12 @@ bool DwarfParser::open(const std::string& filename)
 
 void DwarfParser::close()
 {
-	if (m_dwarf)
-		dwarf_end(m_dwarf);
+	if (m_impl->m_dwarf)
+		dwarf_end(m_impl->m_dwarf);
 
-	if (m_fd >= 0)
-		::close(m_fd);
+	if (m_impl->m_fd >= 0)
+		::close(m_impl->m_fd);
 
-	m_fd = -1;
-	m_dwarf = NULL;
+	m_impl->m_fd = -1;
+	m_impl->m_dwarf = NULL;
 }
