@@ -78,7 +78,7 @@ if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 
-set (LINUX_SRCS
+set (ELF_SRCS
 	dummy-solib-handler.cc
 )
 set (SOLIB_generated )
@@ -87,7 +87,7 @@ set (SOLIB_generated )
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	find_package (LibElf REQUIRED)
 	find_package (Elfutils REQUIRED)
-	set (LINUX_SRCS
+	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
 		engines/kernel-engine.cc
@@ -124,7 +124,7 @@ set (${KCOV}_SRCS
     writers/html-writer.cc
     writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
-    ${LINUX_SRCS}
+    ${ELF_SRCS}
     include/capabilities.hh
     include/gcov.hh
     include/reporter.hh
