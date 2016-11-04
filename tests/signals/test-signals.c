@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <sched.h>
+
 
 void catch_hup(int sig)
 {

@@ -1,10 +1,10 @@
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sched.h>
+
 
 int main(int argc, const char *argv[])
 {
