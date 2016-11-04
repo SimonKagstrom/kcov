@@ -14,9 +14,11 @@ build_reference:
 	cp reference/build/src/kcov /tmp/kcov-reference
 
 build-osx:
-	mkdir -p build
+	mkdir -p build build-tests
 	cd build && cmake ..
 	make -C build
+	cd build-tests && cmake ../tests
+	make -C build-tests
 
 build:
 	mkdir -p build build-tests build-tools
