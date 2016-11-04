@@ -85,7 +85,6 @@ find_library(shared_library_LIBRARY
 
 
 add_executable(main-tests ${main_tests_SRCS})
-add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
 add_executable(vfork fork/vfork.c)
@@ -105,27 +104,27 @@ add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
 
 add_executable(pie pie.c)
-set_target_properties(pie PROPERTIES COMPILE_FLAGS "-g -fpie -fPIE")
-set_target_properties(pie PROPERTIES LINK_FLAGS "-pie")
+set_target_properties(pie PROPERTIES POISITION_INDEPENDENT_CODE True)
 
 add_executable(main-tests-gcov ${main_tests_SRCS})
 set_target_properties(main-tests-gcov PROPERTIES COMPILE_FLAGS "--coverage")
 set_target_properties(main-tests-gcov PROPERTIES LINK_FLAGS "--coverage")
 
 add_executable(pie-test argv-dependent.c)
-set_target_properties(pie-test PROPERTIES COMPILE_FLAGS "-g -fpie -fPIE")
-set_target_properties(pie-test PROPERTIES LINK_FLAGS "-pie")
+set_target_properties(pie-test PROPERTIES POISITION_INDEPENDENT_CODE True)
 
 target_link_libraries(dlopen dl)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+	add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
+	add_custom_target (illegal-insn ALL
+  		COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_BINARY_DIR}/illegal-insn
+	)
 
-add_custom_target (illegal-insn ALL
-  COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_BINARY_DIR}/illegal-insn
-)
-
-add_custom_target (fork-32 ALL
-  COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_BINARY_DIR}/fork-32
-)
+	add_custom_target (fork-32 ALL
+  		COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_BINARY_DIR}/fork-32
+	)
+endif()
 
 target_link_libraries(shared_library_test shared_library)
 target_link_libraries(global-constructors shared_library)
