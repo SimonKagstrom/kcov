@@ -51,8 +51,8 @@ class vfork(testbase.KcovTestCase):
         assert rv == 0
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/vfork/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 12) == 1
-        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 18) == 1
+        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 12) >= 1
+        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
 
 class shared_library(testbase.KcovTestCase):
     def runTest(self):
@@ -62,7 +62,7 @@ class shared_library(testbase.KcovTestCase):
         assert rv == noKcovRv
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) == 1
+        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) >= 1
         assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
 class shared_library_skip(testbase.KcovTestCase):
@@ -111,7 +111,7 @@ class MainTestBase(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 14) == None
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 25) == 1
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 6) == 1
+        assert parse_cobertura.hitsPerLine(dom, "file.c", 6) >= 1
         assert parse_cobertura.hitsPerLine(dom, "file2.c", 7) == 0
 
 
