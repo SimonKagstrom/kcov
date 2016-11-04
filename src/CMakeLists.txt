@@ -81,6 +81,8 @@ endif()
 set (ELF_SRCS
 	dummy-solib-handler.cc
 )
+set (MACHO_SRCS
+)
 set (SOLIB_generated )
 
 # Linux-specific sources
@@ -100,6 +102,17 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
+else()
+	if(USE_LIB_PATH)
+		find_library(LLDB_LIBRARY LLDB PATHS ${USE_LIB_PATH})
+	else(USE_LIB_PATH)
+		find_library(LLDB_LIBRARY LLDB PATHS "/Applications/Xcode.app/Contents/SharedFrameworks")
+		endif(USE_LIB_PATH)
+	mark_as_advanced(LLDB_LIBRARY)
+
+	set (MACHO_SRCS
+		engines/lldb-engine.cc
+	)
 endif ()
 
 set (${KCOV}_SRCS
@@ -125,6 +138,7 @@ set (${KCOV}_SRCS
     writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
     ${ELF_SRCS}
+    ${MACHO_SRCS}
     include/capabilities.hh
     include/gcov.hh
     include/reporter.hh
@@ -151,6 +165,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -D_GLIBCXX_USE_NANO
 
 include_directories(
 	include/
+	../external/lldb/include/
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDW_INCLUDE_DIRS}
 	${LIBZ_INCLUDE_DIRS}
@@ -248,6 +263,7 @@ target_link_libraries(${KCOV}
 	${LIBZ_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
 	dl
+	${LLDB_LIBRARY}
 )
 
 
