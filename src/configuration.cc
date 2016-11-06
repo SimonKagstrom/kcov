@@ -62,7 +62,7 @@ public:
 				" -h, --help              this text\n"
 				" --version               print the version of kcov\n"
 				" -p, --pid=PID           trace PID instead of executing in-file,\n"
-				"                         in-file is optional in this case\n"
+				"                         in-file is optional on Linux in this case\n"
 				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
 				"\n"
 				" --collect-only          Only collect coverage data (don't produce HTML/\n"
@@ -432,6 +432,12 @@ public:
 				// Trace by PID - derive from /proc/$pid/exe on Linux
 				int pid = keyAsInt("attach-pid");
 				path = get_real_path(fmt("/proc/%d/exe", pid));
+
+				if (!file_exists(path)) {
+					if (argc < afterOpts + 1)
+						usage();
+					path = argv[afterOpts + 1];
+				}
 			}
 
 			StringPair_t tmp = splitPath(path);
