@@ -263,6 +263,14 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
+	if (self) {
+		signal(sig, handler_table[sig]);
+		kill(getpid(), sig);
+
+		return 0;
+	}
+
+
 	child = fork();
 	if (child < 0) {
 		fprintf(stderr, "fork failed!\n");
@@ -277,10 +285,7 @@ int main(int argc, const char *argv[])
 	} else {
 		// Parent
 		sleep(1);
-		if (self)
-			kill(getpid(), sig);
-		else
-			kill(child, sig);
+		kill(child, sig);
 	}
 
 	wait(&status);
