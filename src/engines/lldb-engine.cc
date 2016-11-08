@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <lldb/API/LLDB.h>
+#include <lldb/API/SBUnixSignals.h>
 
 using namespace kcov;
 using namespace lldb;
@@ -210,6 +211,7 @@ public:
 		}
 
 		m_listener->onEvent(ev);
+
 		SBError err = m_process.Continue();
 
 		return err.Success();
@@ -221,12 +223,20 @@ public:
 		SBFrame frame = curThread.GetSelectedFrame();
 
 		enum StopReason stopReason = curThread.GetStopReason();
+		unsigned long address = getAddress(frame.GetPCAddress());
 
 		switch (stopReason)
 		{
 			case eStopReasonSignal:
 			{
-				// FIXME! Should do something here
+				int signo = (int)curThread.GetStopReasonDataAtIndex(0);
+				enum event_type type = ev_signal;
+
+				if (signo == SIGSEGV || signo == SIGABRT)
+					type = ev_signal_exit;
+
+				return Event(type, signo, address);
+
 			} break;
 			case eStopReasonBreakpoint:
 			{
@@ -240,7 +250,7 @@ public:
 				break;
 		}
 
-		return Event(ev_breakpoint, -1, getAddress(frame.GetPCAddress()));
+		return Event(ev_breakpoint, -1, address);
 	}
 
 
