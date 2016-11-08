@@ -13,6 +13,7 @@ class illegal_insn(testbase.KcovTestCase):
         assert output.find("Illegal instructions are") != -1
 
 class fork_no_wait(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/fork_no_wait", False)
@@ -39,6 +40,7 @@ class ForkBase(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "fork.c", 46) >= 1
 
 class fork_64(ForkBase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
     def runTest(self):
         self.doTest("fork")
 
