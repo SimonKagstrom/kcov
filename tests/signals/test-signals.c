@@ -264,7 +264,10 @@ int main(int argc, const char *argv[])
 	}
 
 	if (self) {
-		signal(sig, handler_table[sig]);
+		// Test actual crashes / panics
+		if (sig != SIGABRT && sig != SIGSEGV)
+			signal(sig, handler_table[sig]);
+
 		kill(getpid(), sig);
 
 		return 0;
