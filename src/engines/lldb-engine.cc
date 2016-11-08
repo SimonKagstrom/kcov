@@ -197,10 +197,7 @@ public:
 		{
 			case eStateStopped:
 			{
-				SBThread curThread = m_process.GetSelectedThread();
-				SBFrame frame = curThread.GetSelectedFrame();
-
-				ev = Event(ev_breakpoint, -1, getAddress(frame.GetPCAddress()));
+				ev = handleStop();
 			} break;
 
 			case eStateExited:
@@ -217,6 +214,35 @@ public:
 
 		return err.Success();
 	}
+
+	Event handleStop()
+	{
+		SBThread curThread = m_process.GetSelectedThread();
+		SBFrame frame = curThread.GetSelectedFrame();
+
+		enum StopReason stopReason = curThread.GetStopReason();
+
+		switch (stopReason)
+		{
+			case eStopReasonSignal:
+			{
+				// FIXME! Should do something here
+			} break;
+			case eStopReasonBreakpoint:
+			{
+				uint64_t id = curThread.GetStopReasonDataAtIndex(0);
+
+				m_target.BreakpointDelete(id);
+			} break;
+
+			default:
+				kcov_debug(BP_MSG, "Unknown stop reason %d\n", stopReason);
+				break;
+		}
+
+		return Event(ev_breakpoint, -1, getAddress(frame.GetPCAddress()));
+	}
+
 
 	void kill(int signal)
 	{
