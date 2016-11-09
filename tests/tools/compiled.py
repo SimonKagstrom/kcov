@@ -239,7 +239,7 @@ class signals(testbase.KcovTestCase):
         dom = self.cmpOne("term")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
 
-class signals_self(testbase.KcovTestCase):
+class signals_crash(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals segv self", False)
