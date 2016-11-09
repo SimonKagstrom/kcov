@@ -60,6 +60,7 @@ class vfork(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
 
 class shared_library(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/shared_library_test", False)
@@ -71,6 +72,7 @@ class shared_library(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
 class shared_library_skip(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --skip-solibs " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test", False)
@@ -82,6 +84,7 @@ class shared_library_skip(testbase.KcovTestCase):
 
 
 class shared_library_filter_out(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --exclude-pattern=solib " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test", False)
@@ -93,6 +96,7 @@ class shared_library_filter_out(testbase.KcovTestCase):
 
 
 class shared_library_accumulate(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test 5", False)
@@ -195,6 +199,7 @@ class global_ctors(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
 
 class daemon_wait_for_last_child(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #158")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/test_daemon", False)
