@@ -233,11 +233,11 @@ class SignalsBase(testbase.KcovTestCase):
         dom = self.cmpOne("quit")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 24) == 1
 
-        dom = self.cmpOne("abrt")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 39) == 1
+        dom = self.cmpOne("bus")
+        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 44) == 1
 
-        dom = self.cmpOne("segv")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 64) == 1
+        dom = self.cmpOne("fpe")
+        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 49) == 1
 
         dom = self.cmpOne("term")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
