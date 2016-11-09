@@ -215,7 +215,7 @@ class SignalsBase(testbase.KcovTestCase):
         self.m_self = "";
 
     def cmpOne(self, sig):
-        noKcovRv,o = self.do(testbase.testbuild + "/signals " + sig, False)
+        noKcovRv,o = self.do(testbase.testbuild + "/signals " + sig + " " + self.m_self, False)
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals " + sig + " " + self.m_self, False)
         assert rv == noKcovRv
 
