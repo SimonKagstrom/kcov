@@ -210,15 +210,18 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
-class signals(testbase.KcovTestCase):
+class SignalsBase(testbase.KcovTestCase):
+    def SignalsBase():
+        self.m_self = "";
+
     def cmpOne(self, sig):
         noKcovRv,o = self.do(testbase.testbuild + "/signals " + sig, False)
-        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals " + sig, False)
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals " + sig + " " + self.m_self, False)
         assert rv == noKcovRv
 
         return parse_cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
 
-    def runTest(self):
+    def doTest(self):
         self.setUp()
 
         dom = self.cmpOne("hup")
@@ -238,6 +241,19 @@ class signals(testbase.KcovTestCase):
 
         dom = self.cmpOne("term")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
+
+class signals(SignalsBase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #158")
+
+    def runTest(self):
+        self.m_self = ""
+        self.doTest()
+
+class signals_self(SignalsBase):
+
+    def runTest(self):
+        self.m_self = "self"
+        self.doTest()
 
 class signals_crash(testbase.KcovTestCase):
     def runTest(self):
