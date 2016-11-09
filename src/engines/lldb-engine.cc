@@ -168,6 +168,14 @@ public:
 			return false;
 		}
 
+		// Send all signals to the process
+		SBUnixSignals sigs = m_process.GetUnixSignals();
+		for (unsigned int i = SIGHUP; i < SIGUSR2; i++) {
+			sigs.SetShouldNotify(i, false);
+			sigs.SetShouldStop(i, true);
+			sigs.SetShouldSuppress(i, false);
+		}
+
 		// Parse the file/line -> address mappings
 		for (uint32_t i = 0; i < m_target.GetNumModules(); i++)
 		{
