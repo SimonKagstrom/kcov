@@ -168,6 +168,13 @@ public:
 			return false;
 		}
 
+		// Special-case fork to workaround LLDB lack of follow-fork-mode
+		m_forkBreakpoint = m_target.BreakpointCreateByName("fork");
+
+		// Where the parent returns to after fork
+		if (!m_forkBreakpoint.IsValid())
+			warning("Can't set breakpoint at fork\n");
+
 		// Send all signals to the process
 		SBUnixSignals sigs = m_process.GetUnixSignals();
 		for (unsigned int i = SIGHUP; i < SIGUSR2; i++) {
@@ -250,7 +257,28 @@ public:
 			{
 				uint64_t id = curThread.GetStopReasonDataAtIndex(0);
 
-				m_target.BreakpointDelete(id);
+				/*
+				 * Special case for forks (OSX-specific):
+				 *
+				 * 1. Disable all breakpoints so that the child doesn't stop on INT3
+				 * 2. Set a temporary breakpoint in the parent fork return location
+				 * 3. Continue to this point. We have now started the child and are back in the parent.
+				 * 4. Enable all breakpoints again
+				 *
+				 */
+				if (m_forkBreakpoint.IsValid() && id == m_forkBreakpoint.GetID()) {
+					m_target.DisableAllBreakpoints();
+
+					SBBreakpoint inParent = m_target.BreakpointCreateByName("libSystem_atfork_parent");
+					if (inParent.IsValid()) {
+						m_process.Continue();
+						m_target.BreakpointDelete(inParent.GetID());
+					}
+
+					m_target.EnableAllBreakpoints();
+				} else {
+					m_target.BreakpointDelete(id);
+				}
 			} break;
 
 			default:
@@ -340,6 +368,7 @@ private:
 	SBDebugger m_debugger;
 	SBTarget m_target;
 	SBProcess m_process;
+	SBBreakpoint m_forkBreakpoint;
 };
 
 
