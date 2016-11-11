@@ -37,10 +37,7 @@ class KcovTestCase(unittest.TestCase):
         rv = 0
 
         extra = ""
-        if not sys.platform.startswith("linux"):
-            kcovKcov = True
-
-        if kcovKcov:
+        if kcovKcov and sys.platform.startswith("linux"):
             extra = kcov + " --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc " + outbase + "/kcov-kcov "
 
 
