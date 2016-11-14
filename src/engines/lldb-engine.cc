@@ -228,6 +228,10 @@ public:
 
 		m_listener->onEvent(ev);
 
+		// Don't continue on exit (saves a lot of execution time)
+		if (ev.type == ev_exit)
+			return false;
+
 		SBError err = m_process.Continue();
 
 		return err.Success();
