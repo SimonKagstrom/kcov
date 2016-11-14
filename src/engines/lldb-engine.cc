@@ -40,6 +40,7 @@ public:
 
 	virtual ~LLDBEngine()
 	{
+		SBDebugger::Destroy(m_debugger);
 	}
 
 	// From IEngine
