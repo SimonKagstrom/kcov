@@ -1,4 +1,6 @@
 Kcov (32):
+	* Issue #135: Covering binaries on OSX is now possible as well!
+
 	* Issue #114, Issue #150, Kcov also works with codecov without changes!
 
 	* Issue #152, Issue #154: bash: Correct handling heredoc special cases
