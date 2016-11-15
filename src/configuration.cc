@@ -520,6 +520,7 @@ public:
 		setKey("command-name", "");
 		setKey("merged-name", "[merged]");
 		setKey("css-file", "");
+		setKey("lldb-use-raw-breakpoint-writes", 0);
 	}
 
 
@@ -566,6 +567,8 @@ public:
 		if (key == "low-limit")
 			setKey(key, stoul(std::string(value)));
 		else if (key == "high-limit")
+			setKey(key, stoul(std::string(value)));
+		else if (key == "lldb-use-raw-breakpoint-writes")
 			setKey(key, stoul(std::string(value)));
 		else if (key == "command-name")
 			setKey(key, std::string(value));

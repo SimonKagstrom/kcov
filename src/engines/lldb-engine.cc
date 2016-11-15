@@ -29,7 +29,8 @@ class LLDBEngine : public IEngine, public IFileParser
 public:
 	LLDBEngine() :
 		m_useLoadAddresses(false),
-		m_listener(NULL)
+		m_listener(NULL),
+		m_useLLDBBreakpoints(true)
 	{
 		SBDebugger::Initialize();
 		m_debugger = SBDebugger::Create();
@@ -46,12 +47,27 @@ public:
 	// From IEngine
 	virtual int registerBreakpoint(unsigned long addr)
 	{
-		SBBreakpoint bp = m_target.BreakpointCreateByAddress(addr);
+		if (m_useLLDBBreakpoints) {
+			SBBreakpoint bp = m_target.BreakpointCreateByAddress(addr);
 
-		if (!bp.IsValid())
-			return -1;
+			if (!bp.IsValid())
+				return -1;
 
-		return bp.GetID();
+			return bp.GetID();
+		}
+
+		// Use raw writes, faster but x86-only
+		int data;
+
+		// There already?
+		if (m_instructionMap.find(addr) != m_instructionMap.end())
+			return 0;
+
+		data = peekByte(addr);
+		m_instructionMap[addr] = data;
+		pokeByte(addr, 0xcc);
+
+		return m_instructionMap.size();
 	}
 
 
@@ -126,6 +142,9 @@ public:
 		SBError error;
 		SBListener l;
 
+		IConfiguration &conf = IConfiguration::getInstance();
+
+
 		m_listener = &listener;
 
 		if (getcwd(buf, sizeof(buf)) < 0) {
@@ -134,7 +153,10 @@ public:
 			return false;
 		}
 
-		unsigned int pid = IConfiguration::getInstance().keyAsInt("attach-pid");
+		// Configurable via the command line
+		m_useLLDBBreakpoints = !conf.keyAsInt("lldb-use-raw-breakpoint-writes");
+
+		unsigned int pid = conf.keyAsInt("attach-pid");
 
 		if (pid != 0) {
 			// Attach to running process, use load addresses in this case
@@ -285,6 +307,22 @@ public:
 					m_target.BreakpointDelete(id);
 				}
 			} break;
+			case eStopReasonException:
+			{
+				uint64_t id = curThread.GetStopReasonDataAtIndex(0);
+
+				// Remove breakpoint by restoring the instruction again
+				address--;
+				InstructionMap_t::iterator it = m_instructionMap.find(address);
+
+				if (id == 6 && it != m_instructionMap.end()) {
+					pokeByte(address, m_instructionMap[address]);
+					frame.SetPC(address);
+				} else {
+					// Can't find this breakpoint or unknown exception type?
+					return Event(ev_error, -1, address);
+				}
+			} break;
 
 			default:
 				kcov_debug(BP_MSG, "Unknown stop reason %d\n", stopReason);
@@ -302,6 +340,24 @@ public:
 
 
 private:
+	int peekByte(unsigned long addr)
+	{
+		SBError error;
+		uint8_t out;
+
+		if (m_target.ReadMemory(SBAddress(addr, m_target), &out, sizeof(out), error) != sizeof(out))
+			return -1;
+
+		return out;
+	}
+
+	bool pokeByte(unsigned long addr, uint8_t data)
+	{
+		SBError error;
+
+		return m_process.WriteMemory(addr, &data, sizeof(data), error) == sizeof(data);
+	}
+
 	unsigned long getAddress(const SBAddress &addr) const
 	{
 		if (m_useLoadAddresses)
@@ -362,6 +418,7 @@ private:
 
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
+	typedef std::unordered_map<unsigned long, unsigned long > InstructionMap_t;
 
 	bool m_useLoadAddresses;
 	std::string m_filename;
@@ -374,6 +431,9 @@ private:
 	SBTarget m_target;
 	SBProcess m_process;
 	SBBreakpoint m_forkBreakpoint;
+
+	InstructionMap_t m_instructionMap;
+	bool m_useLLDBBreakpoints;
 };
 
 
