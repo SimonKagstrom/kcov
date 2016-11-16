@@ -9,12 +9,12 @@ elfutils-devel and *not* elfutils-libelf-devel.
 
 Ubuntu
 ------
-apt-get install binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev
+Install binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev
 
 
 Fedora / Centos / RHEL
 ----------------------
-elfutils-libelf-devel
+Install elfutils-libelf-devel
 
 Mac OS X
 --------
