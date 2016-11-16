@@ -103,11 +103,20 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
 else()
-	if(USE_LIB_PATH)
-		find_library(LLDB_LIBRARY LLDB PATHS ${USE_LIB_PATH})
-	else(USE_LIB_PATH)
-		find_library(LLDB_LIBRARY LLDB PATHS "/Applications/Xcode.app/Contents/SharedFrameworks")
-		endif(USE_LIB_PATH)
+	find_library(LLDB_LIBRARY
+      NAMES
+	    LLDB
+	  PATHS
+        "/usr/lib"
+        "/usr/lib64"
+        "/usr/local/lib"
+        "/usr/local/lib64"
+        "/opt/local/lib"
+        "/opt/usr/lib64"
+		"/Applications/Xcode.app/Contents/SharedFrameworks"
+		ENV LIBRARY_PATH
+		ENV LD_LIBRARY_PATH
+	)
 	mark_as_advanced(LLDB_LIBRARY)
 
 	set (MACHO_SRCS
