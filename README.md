@@ -3,10 +3,7 @@
 [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=simon.kagstrom%40gmail%2ecom&lc=US&item_name=Simon%20Kagstrom&item_number=kcov&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
 
 ## *kcov*
-
-What is it?
------------
-Kcov is a code coverage tester for compiled languages, Python and Bash.
+Kcov is a Linux/OSX code coverage tester for compiled languages, Python and Bash.
 Kcov was originally a fork of [Bcov](http://bcov.sf.net), but has since
 evolved to support a large feature set in addition to that of Bcov.
 
