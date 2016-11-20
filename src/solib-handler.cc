@@ -157,6 +157,8 @@ public:
 			return;
 
 		while (1) {
+			memset(buf, 0, sizeof(buf));
+
 			int r = read(m_solibFd, buf, sizeof(buf));
 
 			// The destructor will close m_solibFd, so we'll exit here in that case
