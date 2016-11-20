@@ -145,10 +145,14 @@ public:
 
 		const char *path = getenv("PATH");
 
+		// Avoid coverity warning about tainted-by-getenv (sanitize via strdup)
 		if (!path)
-			path = "";
+			path = strdup("");
+		else
+			path = strdup(path);
 
 		std::vector<std::string> paths = split_string(path, ":");
+		free((void*)path);
 
 		/* Scan through the parameters for an ELF file: That will be the
 		 * second last argument in the list.
