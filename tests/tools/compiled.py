@@ -302,6 +302,16 @@ class attach_process_with_threads(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 8) == 0
 
+class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.expectedFailure
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/thread-test", False)
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 19) >= 1
+        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
+
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()

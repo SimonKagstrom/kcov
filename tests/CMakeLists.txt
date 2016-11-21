@@ -102,6 +102,7 @@ add_executable(issue31 daemon/test-issue31.cc)
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
+add_executable(thread-test threads/thread-main.c)
 
 add_executable(pie pie.c)
 set_target_properties(pie PROPERTIES POISITION_INDEPENDENT_CODE True)
@@ -134,6 +135,8 @@ target_link_libraries(multi_fork
 target_link_libraries(setpgid-kill
 	z)
 target_link_libraries(issue31
+	pthread)
+target_link_libraries(thread-test
 	pthread)
 
 
