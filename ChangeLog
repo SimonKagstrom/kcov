@@ -19,7 +19,7 @@ Kcov (32):
 
 	* Issue #144: Allow setting configuration options manually with --configure
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Tue Nov 22 12:32:41 CET 2016
 
 Kcov (31):
 	* Exit with 0 when running --version (Pietro Monteiro)
