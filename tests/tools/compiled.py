@@ -132,6 +132,9 @@ class main_test_verify(MainTestBase):
     def runTest(self):
         self.doTest("--verify")
 
+class main_test_lldb_raw_breakpoints(MainTestBase):
+    def runTest(self):
+        self.doTest("--configure=lldb-use-raw-breakpoint-writes=1")
 
 class popen_test(testbase.KcovTestCase):
     def runTest(self):
