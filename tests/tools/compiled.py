@@ -311,7 +311,7 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
         self.setUp()
         rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/thread-test", False)
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 19) >= 1
+        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 21) >= 1
         assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
 
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):

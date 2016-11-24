@@ -14,25 +14,26 @@ void *thread_cb(void *ptr)
 void* real_thread_create()
 {
 	pthread_t thr;
+	int i;
 
-	while(1) {
+	// 10 seconds
+	for (i = 0; i < 100; i++) {
 		pthread_create(&thr, NULL, thread_cb, NULL);
-		sleep(1);
+		usleep(100 * 1000); // 100 ms
 	}
+
+	return NULL;
 }
 
 
 int main(int argc, const char *argv[])
 {
-	sem_t sem;
 	pthread_t tid;
+	void *retv;
 
 	pthread_create(&tid, NULL, real_thread_create, NULL);
 
-	sem_init(&sem, 0, 0);
-	sem_wait(&sem);
-
-	exit(0);
+	pthread_join(tid, &retv);
 
 	return 0;
 }
