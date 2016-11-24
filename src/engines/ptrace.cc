@@ -685,6 +685,7 @@ private:
 
 		if (rv < 0)
 			return errno;
+		ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
 
 		if (linux_proc_pid_is_stopped (lwpid)) {
 			/* The process is definitely stopped.  It is in a job control

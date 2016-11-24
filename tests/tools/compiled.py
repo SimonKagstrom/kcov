@@ -307,7 +307,6 @@ class attach_process_with_threads(testbase.KcovTestCase):
 
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
     @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
-    @unittest.expectedFailure
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/thread-test", False)
