@@ -17,9 +17,9 @@ void* real_thread_create()
 	int i;
 
 	// 10 seconds
-	for (i = 0; i < 100; i++) {
+	for (i = 0; i < 1000; i++) {
 		pthread_create(&thr, NULL, thread_cb, NULL);
-		usleep(100 * 1000); // 100 ms
+		usleep(10 * 1000); // 10 ms
 	}
 
 	return NULL;
