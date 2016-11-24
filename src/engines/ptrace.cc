@@ -608,6 +608,9 @@ private:
 		if (err != 0)
 			error ("Cannot attach to process %d\n", pid);
 
+		ptrace(PTRACE_INTERRUPT, pid, 0, 0);
+
+
 		if (linux_proc_get_tgid (pid) != pid)
 		{
 			return 0;
