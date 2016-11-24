@@ -592,9 +592,6 @@ private:
 		}
 		tie_process_to_cpu(m_activeChild, m_parentCpu);
 
-		::kill(m_activeChild, SIGSTOP);
-		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
-
 		return true;
 	}
 
@@ -687,13 +684,8 @@ private:
 			return errno;
 		ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
 
-		if (linux_proc_pid_is_stopped (lwpid)) {
-			/* The process is definitely stopped.  It is in a job control
-			 * stop, unless the kernel predates the TASK_STOPPED /
-			 * TASK_TRACED distinction, in which case it might be in a
-			 * ptrace stop.  Make sure it is in a ptrace stop; from there we
-			 * can kill it, signal it, et cetera.
-			 *
+		if (!linux_proc_pid_is_stopped (lwpid)) {
+			/*
 			 * First make sure there is a pending SIGSTOP.  Since we are
 			 * already attached, the process can not transition from stopped
 			 * to running without a PTRACE_CONT; so we know this signal will
@@ -702,11 +694,6 @@ private:
 			 * enough to use TASK_STOPPED for ptrace stops); but since
 			 * SIGSTOP is not an RT signal, it can only be queued once.  */
 			kill_lwp (lwpid, SIGSTOP);
-
-			/* Finally, resume the stopped process.  This will deliver the
-			 * SIGSTOP (or a higher priority signal, just like normal
-			 * PTRACE_ATTACH), which we'll catch later on.  */
-			ptrace (PTRACE_CONT, lwpid, 0, 0);
 		}
 
 		return 0;
