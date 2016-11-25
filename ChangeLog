@@ -1,3 +1,8 @@
+Kcov (33):
+	* Issue #163: Correct attaching to processes which create threads (ptrace)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (32):
 	* Issue #135: Covering binaries on OSX is now possible as well!
 
