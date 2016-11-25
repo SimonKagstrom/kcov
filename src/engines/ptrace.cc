@@ -694,11 +694,6 @@ private:
 			 * enough to use TASK_STOPPED for ptrace stops); but since
 			 * SIGSTOP is not an RT signal, it can only be queued once.  */
 			kill_lwp (lwpid, SIGSTOP);
-
-			/* Finally, resume the stopped process.  This will deliver the
-			 * SIGSTOP (or a higher priority signal, just like normal
-			 * PTRACE_ATTACH), which we'll catch later on.  */
-			ptrace (PTRACE_CONT, lwpid, 0, 0);
 		}
 
 		return 0;
