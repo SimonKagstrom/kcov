@@ -13,7 +13,12 @@ build_reference:
 	make -C reference/build/
 	cp reference/build/src/kcov /tmp/kcov-reference
 
-build-osx:
+build-osx-xcode:
+	mkdir -p build-xcode
+	cd build-xcode && cmake -G Xcode ..
+	cd build-xcode && xcodebuild
+
+build-osx: build-osx-xcode
 	mkdir -p build build-tests
 	cd build && cmake ..
 	make -C build
