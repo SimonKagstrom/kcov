@@ -142,6 +142,7 @@ set (${KCOV}_SRCS
     reporter.cc
     utils.cc
     writers/cobertura-writer.cc
+    writers/json-writer.cc
     ${coveralls_SRCS}
     writers/html-writer.cc
     writers/sonarqube-xml-writer.cc

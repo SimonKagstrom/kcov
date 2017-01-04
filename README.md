@@ -22,7 +22,9 @@ kcov /path/to/outdir executable [args for the executable]
 */path/to/outdir* will contain lcov-style HTML output generated
 continuously while the application runs. Kcov will also write cobertura-
 compatible XML output and can upload coverage data directly to
-http://coveralls.io for easy integration with travis-ci.
+http://coveralls.io for easy integration with travis-ci. A generic
+coverage.json report is also generated which contains summaries for a given
+binary and each source file.
 
 Filtering output
 ----------------
