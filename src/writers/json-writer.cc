@@ -67,7 +67,8 @@ public:
 					nTotalCodeLines++;
 				}
 			}
-			percentCovered = static_cast<double>(nExecutedLines) / nCodeLines * 100;
+			if (nCodeLines > 0)
+				percentCovered = static_cast<double>(nExecutedLines) / nCodeLines * 100;
 
 			if (firstFile)
 				firstFile = false;
@@ -87,7 +88,9 @@ public:
 					);
 		}
 
-		percentCovered = static_cast<double>(nTotalExecutedLines) / nTotalCodeLines * 100;
+		percentCovered = 0;
+		if (nTotalCodeLines > 0)
+			percentCovered = static_cast<double>(nTotalExecutedLines) / nTotalCodeLines * 100;
 
 		out << fmt("\n"
 				"  ],\n"
