@@ -18,6 +18,7 @@
 
 #include "merge-parser.hh"
 #include "writers/html-writer.hh"
+#include "writers/json-writer.hh"
 #include "writers/coveralls-writer.hh"
 #include "writers/cobertura-writer.hh"
 #include "writers/sonarqube-xml-writer.hh"
@@ -164,6 +165,8 @@ static int runMergeMode()
 	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 			base, base + "/kcov-merged", conf.keyAsString("merged-name"), true);
+	IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
+			base + "kcov-merged/coverage.json");
 	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/cobertura.xml");
 	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
@@ -173,6 +176,7 @@ static int runMergeMode()
 
 	output.registerWriter(mergeParser);
 	output.registerWriter(mergeHtmlWriter);
+	output.registerWriter(mergeJsonWriter);
 	output.registerWriter(mergeCoberturaWriter);
 	output.registerWriter(mergeSonarqubeWriter);
 	output.registerWriter(mergeCoverallsWriter);
@@ -230,6 +234,8 @@ int main(int argc, const char *argv[])
 
 		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
 				base, out, conf.keyAsString("binary-name"));
+		IWriter &jsonWriter = createJsonWriter(*parser, reporter,
+				out + "/coverage.json");
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
 				out + "/cobertura.xml");
 		IWriter &sonarqubeWriter = createSonarqubeWriter(*parser, reporter,
@@ -240,6 +246,8 @@ int main(int argc, const char *argv[])
 		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", conf.keyAsString("merged-name"), false);
+		IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
+				base + "kcov-merged/coverage.json");
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/cobertura.xml");
 		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
@@ -253,6 +261,7 @@ int main(int argc, const char *argv[])
 		// Multiple binaries? Register the merged mode stuff
 		if (countMetadata() > 0) {
 			output.registerWriter(mergeHtmlWriter);
+			output.registerWriter(mergeJsonWriter);
 			output.registerWriter(mergeCoberturaWriter);
 			output.registerWriter(mergeSonarqubeWriter);
 			output.registerWriter(createCoverallsWriter(mergeParser, mergeReporter));
@@ -261,6 +270,7 @@ int main(int argc, const char *argv[])
 		}
 
 		output.registerWriter(htmlWriter);
+		output.registerWriter(jsonWriter);
 		output.registerWriter(coberturaWriter);
 		output.registerWriter(sonarqubeWriter);
 	}
