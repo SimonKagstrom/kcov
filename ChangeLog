@@ -1,7 +1,12 @@
 Kcov (33):
+	* Issue #167: Writers: Add pure JSON writer for gitlabCI (http://gitlab.com)
+	  integration (Bryce Fisher-Fleig)
+
+	* Issue #162: Use Xcode build in addtion to Make for Travis
+
 	* Issue #163: Correct attaching to processes which create threads (ptrace)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Jan 13 09:59:53 CET 2017
 
 Kcov (32):
 	* Issue #135: Covering binaries on OSX is now possible as well!
