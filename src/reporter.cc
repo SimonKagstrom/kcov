@@ -706,7 +706,10 @@ private:
 			if (lineNr >= m_lines.size())
 				return false;
 
-			return (m_lines[lineNr] != NULL) && (!m_lines[lineNr]->isUnreachable());
+			if (!m_lines[lineNr])
+				return false;
+
+			return !m_lines[lineNr]->isUnreachable();
 		}
 
 	private:
