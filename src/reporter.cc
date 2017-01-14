@@ -313,7 +313,7 @@ private:
 			fp = new File(hash);
 
 			// Detect unreachable lines (if requested)
-			if (!m_unreachablePattern.empty()) {
+			if (m_unreachablePattern != "") {
 				std::ifstream in(file);
 				if (in.is_open()) {
 					std::string line;
