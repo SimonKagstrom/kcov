@@ -1,3 +1,7 @@
+Kcov (34):
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (33):
 	* Issue #167: Writers: Add pure JSON writer for gitlabCI (http://gitlab.com)
 	  integration (Bryce Fisher-Fleig)
