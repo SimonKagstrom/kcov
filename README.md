@@ -11,6 +11,13 @@ Kcov, like Bcov, uses DWARF debugging information for compiled programs to
 make it possible to collect coverage information without special compiler
 switches.
 
+Installing
+----------
+Refer to the [INSTALL](INSTALL.md) file for build instructions, or use one of the pre-built Docker images:
+
+* [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) for releases since v31
+* [ragnaroek/kcov_head](https://hub.docker.com/r/ragnaroek/kcov_head/) for the latest git HEAD (might be unstable)
+
 How to use it
 -------------
 Basic usage is straight-forward:
