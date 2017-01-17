@@ -37,6 +37,7 @@ enum
 	x86_64_RIP = 16,
 	ppc_NIP = 32,
 	arm_PC = 15,
+	aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
 };
 
 static unsigned long getAligned(unsigned long addr)
@@ -54,6 +55,8 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 	out = regs[x86_64_RIP] - 1;
 #elif defined(__arm__)
 	out = regs[arm_PC];
+#elif defined(__aarch64__)
+	out = regs[aarch64_PC];
 #elif defined(__powerpc__)
 	out = regs[ppc_NIP];
 #else
@@ -69,7 +72,7 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
-#elif defined(__powerpc__) || defined(__arm__)
+#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
 	// Do nothing
 #else
 # error Unsupported architecture
@@ -92,6 +95,8 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 	val =  0x7fe00008; /* tw */
 #elif defined(__arm__)
 	val = 0xfedeffe7; // Undefined insn
+#elif defined(__aarch64__)
+	val = 0xd4200000;
 #else
 # error Unsupported architecture
 #endif
@@ -110,10 +115,8 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 
 	val = (cur_data & ~(0xffUL << shift)) |
 			(old_byte << shift);
-#elif defined(__powerpc__) || defined(__arm__)
-	val = old_data;
 #else
-# error Unsupported architecture
+	val = old_data;
 #endif
 
 	return val;
@@ -362,7 +365,7 @@ public:
 			int sigill = SIGUNUSED;
 
 			// Arm is using an undefined instruction, so we'll get a SIGILL here
-#if defined(__arm__)
+#if defined(__arm__) || defined(__aarch64__)
 			sigill = SIGILL;
 #endif
 
@@ -704,16 +707,18 @@ private:
 	void skipInstruction()
 	{
 		// Nop on x86, op on PowerPC/ARM
-#if defined(__powerpc__) || defined(__arm__)
+#if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
 		unsigned long regs[1024];
 
 		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
 
 # if defined(__powerpc__)
 		regs[ppc_NIP] += 4;
-#else
+# elif defined(__aarch64__)
+		regs[aarch64_PC] += 4;
+# else
 		regs[arm_PC] += 4;
-#endif
+# endif
 		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
 #endif
 	}
