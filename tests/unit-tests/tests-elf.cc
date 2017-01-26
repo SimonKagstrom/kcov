@@ -15,7 +15,7 @@ class FunctionListener : public IFileParser::ILineListener
 public:
 
 	virtual void onLine(const std::string &file, unsigned int lineNr,
-			unsigned long addr)
+			uint64_t addr)
 	{
 		m_lineMap[constructString(file, lineNr)]++;
 	}

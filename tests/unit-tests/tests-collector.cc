@@ -17,7 +17,7 @@ public:
 	{
 	}
 
-	MAKE_MOCK2(onAddressHit, void(unsigned long addr, unsigned long hits));
+	MAKE_MOCK2(onAddressHit, void(uint64_t addr, unsigned long hits));
 };
 
 DISABLED_TEST(collector)
