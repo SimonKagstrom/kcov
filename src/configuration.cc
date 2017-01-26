@@ -380,12 +380,12 @@ public:
 			  size_t tokenPosFront = tmpArg.find_first_of(":");
 			  size_t tokenPosBack  = tmpArg.find_last_of(":");
 
-			  if ((tokenPosFront != std::string::npos) && 
+			  if ((tokenPosFront != std::string::npos) &&
 			      (tokenPosFront == tokenPosBack)) {
 
 			    std::string originalPathPrefix = tmpArg.substr(0, tokenPosFront);
 			    std::string newPathPrefix = tmpArg.substr(tokenPosFront + 1);
-			    
+
 			    char* rp = ::realpath(newPathPrefix.c_str(), NULL);
 			    if (rp) {
 			      free((void*) rp);
@@ -399,7 +399,7 @@ public:
 			  }
 			  else {
 			    panic("%s is formatted incorrectly\n", tmpArg.c_str());
-			    
+
 			  }
 			  break;
 			}
