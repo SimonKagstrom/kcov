@@ -460,6 +460,71 @@ private:
 
 		free((void*)p);
 
+		IConfiguration &conf = IConfiguration::getInstance();
+
+		if (conf.keyAsInt("bash-use-basic-parser"))
+			parseFileBasic(filename, fileData, crc);
+		else
+			parseFileFull(filename, fileData, crc);
+	}
+
+	void parseFileBasic(const std::string &filename, const std::string &fileData, uint32_t crc)
+	{
+		const std::vector<std::string> &stringList = split_string(fileData, "\n");
+		unsigned int lineNo = 0;
+
+		for (std::vector<std::string>::const_iterator it = stringList.begin();
+				it != stringList.end();
+				++it) {
+			std::string s = trim_string(*it);
+
+			lineNo++;
+
+			kcov_debug(ENGINE_MSG, "bash_line %2d: %s\n", lineNo, s.c_str());
+
+			// Remove comments
+			size_t comment = s.find("#");
+			if (comment != std::string::npos) {
+
+				// But not $# or ${#variable}...
+				if ((comment >= 1 && s[comment - 1] == '$') ||
+						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
+					// Do nothing
+				// Nor if in a string
+				} else if (comment >= 1
+				&& (s.find("\"") < comment || s.find("'") < comment)) {
+					// Do nothing
+				} else {
+					s = trim_string(s);
+					s = s.substr(0, comment);
+				}
+			}
+
+			// Empty line, ignore
+			if (s == "")
+				continue;
+
+			// While, if, switch endings
+			if (s == "esac" ||
+					s == "fi" ||
+					s == "do" ||
+					s == "done" ||
+					s == "else" ||
+					s == "then" ||
+					s == "}" ||
+					s == "{")
+				continue;
+
+			// Functions
+			if (s.find("function") == 0)
+				continue;
+
+			fileLineFound(crc, filename, lineNo);
+		}
+	}
+
+	void parseFileFull(const std::string &filename, const std::string &fileData, uint32_t crc)
+	{
 		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { none, backslash, quote, heredoc } state = none;

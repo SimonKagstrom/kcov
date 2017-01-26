@@ -521,6 +521,7 @@ public:
 		setKey("include-path", StrVecMap_t());
 		setKey("bash-force-stderr-input", 0);
 		setKey("bash-handle-sh-invocation", 0);
+		setKey("bash-use-basic-parser", 0);
 		setKey("bash-use-ps4", 1);
 		setKey("verify", 0);
 		setKey("command-name", "");
@@ -565,7 +566,8 @@ public:
 	void configure(const std::string &key, const std::string &value)
 	{
 		if (key == "low-limit" ||
-				key == "high-limit") {
+				key == "high-limit" ||
+				key == "bash-use-basic-parser") {
 			if (!isInteger(value))
 				panic("Value for %s must be integer\n", key.c_str());
 		}
@@ -573,6 +575,8 @@ public:
 		if (key == "low-limit")
 			setKey(key, stoul(std::string(value)));
 		else if (key == "high-limit")
+			setKey(key, stoul(std::string(value)));
+		else if (key == "bash-use-basic-parser")
 			setKey(key, stoul(std::string(value)));
 		else if (key == "lldb-use-raw-breakpoint-writes")
 			setKey(key, stoul(std::string(value)));
