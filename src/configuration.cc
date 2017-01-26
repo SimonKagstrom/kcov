@@ -593,11 +593,12 @@ public:
 	const char *getConfigurableValues()
 	{
 		return
-		"                           low-limit=NUM    Percentage for low coverage\n"
-		"                           high-limit=NUM   Percentage for high coverage\n"
-		"                           command-name=STR Name of executed command\n"
-		"                           merged-name=STR  Name of [merged] tag in HTML\n"
-		"                           css-file=FILE    Filename of bcov.css file\n";
+		"                           bash-use-basic-parser=1    Enable simple bash parser\n"
+		"                           command-name=STR           Name of executed command\n"
+		"                           css-file=FILE              Filename of bcov.css file\n"
+		"                           high-limit=NUM             Percentage for high coverage\n"
+		"                           low-limit=NUM              Percentage for low coverage\n"
+		"                           merged-name=STR            Name of [merged] tag in HTML\n";
 	}
 
 	std::string uncommonOptions()
