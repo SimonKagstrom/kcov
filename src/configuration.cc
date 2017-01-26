@@ -380,12 +380,12 @@ public:
 			  size_t tokenPosFront = tmpArg.find_first_of(":");
 			  size_t tokenPosBack  = tmpArg.find_last_of(":");
 
-			  if ((tokenPosFront != std::string::npos) && 
+			  if ((tokenPosFront != std::string::npos) &&
 			      (tokenPosFront == tokenPosBack)) {
 
 			    std::string originalPathPrefix = tmpArg.substr(0, tokenPosFront);
 			    std::string newPathPrefix = tmpArg.substr(tokenPosFront + 1);
-			    
+
 			    char* rp = ::realpath(newPathPrefix.c_str(), NULL);
 			    if (rp) {
 			      free((void*) rp);
@@ -399,7 +399,7 @@ public:
 			  }
 			  else {
 			    panic("%s is formatted incorrectly\n", tmpArg.c_str());
-			    
+
 			  }
 			  break;
 			}
@@ -593,11 +593,12 @@ public:
 	const char *getConfigurableValues()
 	{
 		return
-		"                           low-limit=NUM    Percentage for low coverage\n"
-		"                           high-limit=NUM   Percentage for high coverage\n"
-		"                           command-name=STR Name of executed command\n"
-		"                           merged-name=STR  Name of [merged] tag in HTML\n"
-		"                           css-file=FILE    Filename of bcov.css file\n";
+		"                           bash-use-basic-parser=1    Enable simple bash parser\n"
+		"                           command-name=STR           Name of executed command\n"
+		"                           css-file=FILE              Filename of bcov.css file\n"
+		"                           high-limit=NUM             Percentage for high coverage\n"
+		"                           low-limit=NUM              Percentage for low coverage\n"
+		"                           merged-name=STR            Name of [merged] tag in HTML\n";
 	}
 
 	std::string uncommonOptions()
