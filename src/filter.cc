@@ -119,7 +119,7 @@ private:
 			m_ignoreSingleLinePatterns.push_back("LCOV_EXCL_LINE");
 
 			// Handle command line options
-			std::string cmd = IConfiguration::getInstance().keyAsString("unreachable");
+			std::string cmd = IConfiguration::getInstance().keyAsString("exclude-line");
 
 			if (cmd != "") {
 				std::vector<std::string> cmds = split_string(cmd, ",");
