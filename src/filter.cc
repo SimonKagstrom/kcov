@@ -120,8 +120,15 @@ private:
 
 			// Handle command line options
 			std::string cmd = IConfiguration::getInstance().keyAsString("unreachable");
-			if (cmd != "")
-				m_ignoreSingleLinePatterns.push_back(cmd);
+
+			if (cmd != "") {
+				std::vector<std::string> cmds = split_string(cmd, ",");
+
+				for (std::vector<std::string>::iterator it = cmds.begin();
+						it != cmds.end();
+						++it)
+					m_ignoreSingleLinePatterns.push_back(*it);
+			}
 
 			m_excludeStart = 0;
 		}
