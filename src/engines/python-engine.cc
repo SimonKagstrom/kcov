@@ -4,6 +4,7 @@
 #include <output-handler.hh>
 #include <lineid.hh>
 #include <utils.hh>
+#include <source-file-cache.hh>
 #include <generated-data-base.hh>
 
 #include <stdlib.h>
@@ -219,26 +220,19 @@ private:
 		if (!m_listener)
 			return;
 
-		size_t sz;
-		char *p = (char *)read_file(&sz, "%s", filename.c_str());
+		ISourceFileCache &cache = ISourceFileCache::getInstance();
 
-		// Can't handle this file
-		if (!p)
-			return;
-		std::string fileData(p, sz);
+		std::vector<std::string> lines = cache.getLines(filename);
 
 		// Compute hash for this file
-		uint32_t crc = hash_block((const uint8_t *)p, sz);
+		uint32_t crc = cache.getCrc(filename);
 
-		free((void*)p);
-
-		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { start, multiline_active } state = start;
 		bool multiLineStartLine = false;
 
-		for (std::vector<std::string>::const_iterator it = stringList.begin();
-				it != stringList.end();
+		for (std::vector<std::string>::const_iterator it = lines.begin();
+				it != lines.end();
 				++it) {
 			const std::string &s = trim_string(*it);
 

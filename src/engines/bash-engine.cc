@@ -5,6 +5,7 @@
 #include <lineid.hh>
 #include <utils.hh>
 #include <generated-data-base.hh>
+#include <source-file-cache.hh>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -446,35 +447,27 @@ private:
 	{
 		if (!m_listener)
 			return;
+		ISourceFileCache &cache = ISourceFileCache::getInstance();
 
-		size_t sz;
-		char *p = (char *)read_file(&sz, "%s", filename.c_str());
-
-		// Can't handle this file
-		if (!p)
-			return;
-		std::string fileData(p, sz);
+		std::vector<std::string> lines = cache.getLines(filename);
 
 		// Compute hash for this file
-		uint32_t crc = hash_block((const uint8_t *)p, sz);
-
-		free((void*)p);
+		uint32_t crc = cache.getCrc(filename);
 
 		IConfiguration &conf = IConfiguration::getInstance();
 
 		if (conf.keyAsInt("bash-use-basic-parser"))
-			parseFileBasic(filename, fileData, crc);
+			parseFileBasic(filename, lines, crc);
 		else
-			parseFileFull(filename, fileData, crc);
+			parseFileFull(filename, lines, crc);
 	}
 
-	void parseFileBasic(const std::string &filename, const std::string &fileData, uint32_t crc)
+	void parseFileBasic(const std::string &filename, const std::vector<std::string> &lines, uint32_t crc)
 	{
-		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 
-		for (std::vector<std::string>::const_iterator it = stringList.begin();
-				it != stringList.end();
+		for (std::vector<std::string>::const_iterator it = lines.begin();
+				it != lines.end();
 				++it) {
 			std::string s = trim_string(*it);
 
@@ -523,17 +516,16 @@ private:
 		}
 	}
 
-	void parseFileFull(const std::string &filename, const std::string &fileData, uint32_t crc)
+	void parseFileFull(const std::string &filename, const std::vector<std::string> &lines, uint32_t crc)
 	{
-		const std::vector<std::string> &stringList = split_string(fileData, "\n");
 		unsigned int lineNo = 0;
 		enum { none, backslash, quote, heredoc } state = none;
 		bool caseActive = false;
 		bool arithmeticActive = false;
 		std::string heredocMarker;
 
-		for (std::vector<std::string>::const_iterator it = stringList.begin();
-				it != stringList.end();
+		for (std::vector<std::string>::const_iterator it = lines.begin();
+				it != lines.end();
 				++it) {
 			std::string s = trim_string(*it);
 
