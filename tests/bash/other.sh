@@ -42,3 +42,10 @@ echo "Also not covered"
 echo "Also not covered?" # LCOV_EXCL_STOP
 echo "Also not covered?" # LCOV_EXCL_STOP second one
 echo "Covered"
+
+# Custom range CUSTOM_RANGE_START
+echo "Not covered"
+echo "Also not covered"
+echo "Also not covered?"
+# CUSTOM_RANGE_END
+echo "Covered"

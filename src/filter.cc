@@ -130,6 +130,24 @@ private:
 					m_ignoreSingleLinePatterns.push_back(*it);
 			}
 
+			std::string startStop = IConfiguration::getInstance().keyAsString("exclude-region");
+
+			if (startStop != "") {
+				std::vector<std::string> cmds = split_string(startStop, ",");
+
+				for (std::vector<std::string>::iterator it = cmds.begin();
+						it != cmds.end();
+						++it) {
+					std::vector<std::string> entries = split_string(*it, ":");
+
+					if (entries.size() >= 1)
+						m_lineBeginPatterns.push_back(entries[0]);
+					if (entries.size() > 1)
+						m_lineEndPatterns.push_back(entries[1]);
+
+				}
+			}
+
 			m_excludeStart = 0;
 		}
 

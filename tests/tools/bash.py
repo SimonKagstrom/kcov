@@ -258,7 +258,7 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
         self.setUp()
-        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/other.sh")
+        rv,o = self.do(testbase.kcov + " --exclude-region=CUSTOM_RANGE_START:CUSTOM_RANGE_END " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/other.sh")
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/other.sh/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 22) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 23) == 1
@@ -277,3 +277,8 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 40) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 42) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 43) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 47) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 48) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 49) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 51) == 1

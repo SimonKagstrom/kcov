@@ -79,6 +79,8 @@ public:
 				"                         coverage report\n"
 				" --exclude-line=pat[,...] Consider lines that match the patterns to be non-\n"
 				"                         code lines."
+				" --exclude-region=start:stop[,...] Exclude regions of code between start:stop\n"
+				"                         markers (e.g., within comments) as non-code lines.\n"
 				"\n"
 				" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
 				"                         Coveralls.io\n"
@@ -125,6 +127,7 @@ public:
 				{"coveralls-id", required_argument, 0, 'T'},
 				{"strip-path", required_argument, 0, 'Z'},
 				{"exclude-line", required_argument, 0, 'u'},
+				{"exclude-region", required_argument, 0, 'G'},
 				{"debug", required_argument, 0, 'D'},
 				{"debug-force-bash-stderr", no_argument, 0, 'd'},
 				{"bash-handle-sh-invocation", no_argument, 0, 's'},
@@ -316,6 +319,9 @@ public:
 				break;
 			case 'u':
 				setKey("exclude-line", std::string(optarg));
+				break;
+			case 'G':
+				setKey("exclude-region", std::string(optarg));
 				break;
 			case 'x':
 				setKey("exclude-pattern", getCommaSeparatedList(std::string(optarg)));
@@ -513,6 +519,7 @@ public:
 		setKey("coveralls-id", "");
 		setKey("strip-path", "");
 		setKey("exclude-line", "");
+		setKey("exclude-region", "");
 		setKey("orig-path-prefix", "");
 		setKey("new-path-prefix", "");
 		setKey("running-mode", IConfiguration::MODE_COLLECT_AND_REPORT);
