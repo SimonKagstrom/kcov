@@ -26,6 +26,13 @@ public:
 		return true;
 	}
 
+	bool runLineFilters(const std::string &filePath,
+					unsigned int lineNr,
+					const std::string &line)
+	{
+		return true;
+	}
+
 	std::string mangleSourcePath(const std::string &path)
 	{
 		return path;
@@ -40,6 +47,7 @@ public:
 	{
 		m_patternHandler = new PatternHandler();
 		m_pathHandler = new PathHandler();
+		m_fileLineHandler = new FileLineHandler();
 
 		m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
 		m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
@@ -47,6 +55,7 @@ public:
 
 	~Filter()
 	{
+		delete m_fileLineHandler;
 		delete m_patternHandler;
 		delete m_pathHandler;
 	}
@@ -54,6 +63,7 @@ public:
 	// Used by the unit test
 	void setup()
 	{
+		delete m_fileLineHandler;
 		delete m_patternHandler;
 		delete m_pathHandler;
 		m_patternHandler = new PatternHandler();
@@ -90,7 +100,89 @@ public:
 		return filename;
 	}
 
+	bool runLineFilters(const std::string &filePath,
+						unsigned int lineNr,
+						const std::string &line)
+	{
+		return m_fileLineHandler->match(filePath, lineNr, line);
+	}
+
 private:
+	class FileLineHandler
+	{
+	public:
+		FileLineHandler()
+		{
+			m_lineBeginPatterns.push_back("LCOV_EXCL_START");
+			m_lineEndPatterns.push_back("LCOV_EXCL_STOP");
+
+			m_ignoreSingleLinePatterns.push_back("LCOV_EXCL_LINE");
+
+			// Handle command line options
+			std::string cmd = IConfiguration::getInstance().keyAsString("unreachable");
+			if (cmd != "")
+				m_ignoreSingleLinePatterns.push_back(cmd);
+
+			m_excludeStart = 0;
+		}
+
+		bool match(const std::string &filePath,
+				unsigned int lineNr,
+				const std::string &line)
+		{
+			bool out = true;
+
+			// Source file swapped
+			if (m_curFile != filePath) {
+				m_excludeStart = 0;
+				m_curFile = filePath;
+			}
+
+			for (std::vector<std::string>::iterator it = m_ignoreSingleLinePatterns.begin();
+				it != m_ignoreSingleLinePatterns.end();
+				++it) {
+				if (line.find(*it) != std::string::npos)
+					out = false;
+			}
+
+			for (std::vector<std::string>::iterator it = m_lineBeginPatterns.begin();
+				it != m_lineBeginPatterns.end();
+				++it) {
+				if (line.find(*it) != std::string::npos) {
+					m_excludeStart++;
+					break;
+				}
+			}
+
+			// The line including the stop should be covered
+			if (m_excludeStart > 0)
+				out = false;
+
+			for (std::vector<std::string>::iterator it = m_lineEndPatterns.begin();
+				it != m_lineEndPatterns.end();
+				++it) {
+				if (line.find(*it) != std::string::npos) {
+					m_excludeStart--;
+					break;
+				}
+			}
+
+			// Ignore multiple stops
+			if (m_excludeStart < 0)
+				m_excludeStart = 0;
+
+			return out;
+		}
+
+	private:
+		std::string m_curFile;
+		std::vector<std::string> m_ignoreSingleLinePatterns;
+
+		std::vector<std::string> m_lineBeginPatterns;
+		std::vector<std::string> m_lineEndPatterns;
+		int m_excludeStart;
+	};
+
 	class PatternHandler
 	{
 	public:
@@ -214,6 +306,7 @@ private:
 
 	PatternHandler *m_patternHandler;
 	PathHandler *m_pathHandler;
+	FileLineHandler *m_fileLineHandler;
 	std::string m_origRoot;
 	std::string m_newRoot;
 };

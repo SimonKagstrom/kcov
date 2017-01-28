@@ -79,4 +79,7 @@ TEST(filter)
 	ASSERT_FALSE(res);
 	res = filter.runFilters("/tmp");
 	ASSERT_TRUE(res);
+
+	res = filter.runLineFilters("Kalle", 15, "Inget speciellt");
+	ASSERT_TRUE(res);
 }

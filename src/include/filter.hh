@@ -28,6 +28,17 @@ namespace kcov
 		virtual bool runFilters(const std::string &path) = 0;
 
 		/**
+		 * Run filters on file/line pair.
+		 *
+		 * @param path the path to check
+		 *
+		 * @return true if this path should be included in the output, false otherwise.
+		 */
+		virtual bool runLineFilters(const std::string &filePath,
+				unsigned int lineNr,
+				const std::string &line) = 0;
+
+		/**
 		 * Convert source path to a real path and (if configured) run replacement
 		 * on parts of the path (if the source has moved).
 		 *

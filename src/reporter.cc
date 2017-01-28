@@ -4,6 +4,7 @@
 #include <utils.hh>
 #include <filter.hh>
 #include <configuration.hh>
+#include <source-file-cache.hh>
 
 #include <string>
 #include <list>
@@ -47,7 +48,6 @@ public:
 		m_hashFilename = fileParser.getParserType() == "ELF";
 
 		m_dbFileName = IConfiguration::getInstance().keyAsString("target-directory") + "/coverage.db";
-		m_unreachablePattern = IConfiguration::getInstance().keyAsString("unreachable");
 	}
 
 	~Reporter()
@@ -312,32 +312,21 @@ private:
 
 			fp = new File(hash);
 
-			// Detect unreachable lines (if requested)
-			if (m_unreachablePattern != "") {
-				std::ifstream in(file);
-				if (in.is_open()) {
-					std::string line;
-					unsigned lineNr=0;
-					while (getline(in,line)) {
-						++lineNr;
-						if (line.find(m_unreachablePattern)!=std::string::npos) {
-							Line *line = new Line(fp->getFileHash(), lineNr);
-							line->markUnreachable();
-							fp->addLine(lineNr, line);
-						}
-					}
-				}
-			}
-
 			m_files[file] = fp;
 		}
 
 		Line *line = fp->getLine(lineNr);
 
 		if (!line) {
+
 			line = new Line(fp->getFileHash(), lineNr);
 			fp->addLine(lineNr, line);
 		}
+
+		const std::vector<std::string> &lines = ISourceFileCache::getInstance().getLines(file);
+		if (lines.size() >= lineNr - 1 &&
+				!m_filter.runLineFilters(file, lineNr, lines[lineNr - 1]))
+			line->markUnreachable();
 
 		uint64_t lineId = line->lineId();
 
@@ -367,7 +356,7 @@ private:
 		for (ListenerList_t::const_iterator it = m_listeners.begin();
 				it != m_listeners.end();
 				++it)
-			(*it)->onLineReporter(file, lineNr, lineId);
+				(*it)->onLineReporter(file, lineNr, lineId);
 	}
 
 	// Called when a file is added (e.g., a shared library)
@@ -447,11 +436,7 @@ private:
 
 		bool isUnreachable() const
 		{
-			if (!m_unreachable)
-				return false;
-
-			// The line is marked as unreachable, but perhaps it is reachable in reality
-			return !hits();
+			return m_unreachable;
 		}
 
 		uint64_t getOrder() const
@@ -754,7 +739,6 @@ private:
 
 	bool m_unmarshallingDone;
 	std::string m_dbFileName;
-	std::string m_unreachablePattern;
 
 	uint64_t m_order;
 };

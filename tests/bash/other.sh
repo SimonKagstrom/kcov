@@ -18,3 +18,27 @@ for (( ; ; )) do
 	fi
 	echo "hej $round"
 done
+
+echo "Not covered"  # LCOV_EXCL_LINE
+echo "Covered"
+
+# Ranges
+echo "Not covered"  # LCOV_EXCL_START
+echo "Also not covered"
+echo "Also not covered?" # LCOV_EXCL_STOP
+echo "Covered"
+
+# Stacked ranges
+echo "Not covered"  # LCOV_EXCL_START
+echo "Not covered"  # LCOV_EXCL_START
+echo "Also not covered"
+echo "Also not covered?" # LCOV_EXCL_STOP
+echo "Also not covered?" # LCOV_EXCL_STOP
+echo "Covered"
+
+# Unbalanced
+echo "Not covered"  # LCOV_EXCL_START
+echo "Also not covered"
+echo "Also not covered?" # LCOV_EXCL_STOP
+echo "Also not covered?" # LCOV_EXCL_STOP second one
+echo "Covered"

@@ -252,3 +252,28 @@ class bash_exit_status(testbase.KcovTestCase):
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main 5")
 
         assert rv == noKcovRv
+
+# Issue 180
+class bash_ignore_uncovered(testbase.KcovTestCase):
+    @unittest.expectedFailure
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/other.sh")
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/other.sh/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 22) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 23) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 26) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 27) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 28) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 29) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 32) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 34) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 35) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 36) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 37) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 40) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 42) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 43) == 1
