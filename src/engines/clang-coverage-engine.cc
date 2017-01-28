@@ -27,7 +27,8 @@ class ClangEngine : public ScriptEngineBase, IFileParser::ILineListener
 public:
 	ClangEngine() :
 		ScriptEngineBase(),
-		m_child(-1)
+		m_child(-1),
+		m_checksum(0)
 	{
 	}
 
@@ -101,6 +102,11 @@ public:
 		return "clang-sanitizer";
 	}
 
+	virtual uint64_t getChecksum()
+	{
+		return m_checksum;
+	}
+
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
 		if (IConfiguration::getInstance().keyAsInt("clang-sanitizer"))
@@ -125,6 +131,13 @@ public:
 		// Get a list of all possible source lines
 		if (rv)
 			m_dwarfParser.forEachLine(*this);
+
+		size_t sz;
+		uint8_t *p = (uint8_t *)read_file(&sz, "%s", filename.c_str());
+
+		m_checksum = hash_block(p, sz);
+
+		free(p);
 
 		return rv;
 	}
@@ -188,6 +201,7 @@ private:
 
 	pid_t m_child;
 	DwarfParser m_dwarfParser;
+	uint64_t m_checksum;
 };
 
 static ClangEngine *g_clangEngine;
