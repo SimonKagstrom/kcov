@@ -140,6 +140,7 @@ set (${KCOV}_SRCS
     ${ADDRESS_VERIFIER_SRCS}
     parser-manager.cc
     reporter.cc
+	source-file-cache.cc
     utils.cc
     writers/cobertura-writer.cc
     writers/json-writer.cc
