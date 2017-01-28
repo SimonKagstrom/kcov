@@ -53,6 +53,12 @@ Comma-separated list of path patterns to include in the report.
 \fB\-\-exclude\-pattern\fP=\fIP1\fP[\fI,P2\fP...]
 Comma-separated list of path patterns to exclude from the report.
 .TP
+\fB\-\-exclude\-line\fP=\fIP1\fP[\fI,P2\fP...]
+Comma-separated list of line patterns to exclude (mark as non-code)
+.TP
+\fB\-\-exclude\-region\fP=\fISTART:END\fP[\fI,START1:END1\fP...]
+Comma-separated list of regions of lines patterns to exclude (mark as non-code). The region begins with START and ends with END.
+.TP
 \fB\-\-collect\-only
 Only collect coverage data, don't produce HTML/Cobertura output.
 .TP
