@@ -16,9 +16,6 @@ using namespace kcov;
 
 class BfdDisassembler : public IDisassembler
 {
-	typedef std::unordered_map<uint64_t, bool> InstructionAddressMap_t;
-	typedef std::unordered_map<const void *, InstructionAddressMap_t> SectionCache_t;
-
 public:
 	BfdDisassembler()
 	{
@@ -51,52 +48,94 @@ public:
 		// Not visited before, disassemble
 		if (it == m_cache.end()) {
 			// Insert and reference it
-			InstructionAddressMap_t &cur = m_cache[sectionData];
+			Section *cur = new Section(sectionData, sectionSize, 0);
 
-			doDisassemble(cur, sectionData, sectionSize);
+			cur->disassemble(m_info, m_disassembler);
 
+			m_cache[sectionData] = cur;
 			it = m_cache.find(sectionData);
 		}
 
 		// The address is valid there is an instruction starting at it
-		return it->second.find(offset) != it->second.end();
+		return it->second->getInstruction(offset) != NULL;
 	}
 private:
-	/*
-	 * Disassemble the section and note all instruction-start addresses in a map.
-	 */
-	void doDisassemble(InstructionAddressMap_t &insnMap, const void *p, size_t size)
+	class Instruction
 	{
-		uint8_t *data = (uint8_t *)p;
-
-		if (!data || size == 0)
-			return;
-
-		m_info.buffer_vma = 0;
-		m_info.buffer_length = size;
-		m_info.buffer = (bfd_byte *)p;
-		m_info.stream = (void *)this;
-
-		uint64_t pc = 0;
-		int count;
-		do
+	public:
+		Instruction(bool isBranch = false, uint64_t branchTarget = 0) :
+			m_isBranch(isBranch), m_branchTarget(branchTarget)
 		{
-			count = m_disassembler(pc, &m_info);
+		}
 
-			if (count < 0)
-				break;
+	private:
+		bool m_isBranch;
+		uint64_t m_branchTarget;
+	};
 
-			insnMap[pc] = true;
+	class Section
+	{
+	public:
+		Section(const void *data, size_t size, uint64_t startAddress) :
+			m_data(data),
+			m_size(size),
+			m_startAddress(startAddress),
+			m_disassembled(false)
+		{
+		}
 
-			pc += count;
-		} while (count > 0 && pc < size);
-	}
+		void disassemble(struct disassemble_info info, disassembler_ftype disassembler)
+		{
+			if (m_disassembled)
+					return;
+
+			m_disassembled = true;
+
+			info.buffer_vma = 0;
+			info.buffer_length = m_size;
+			info.buffer = (bfd_byte *)m_data;
+			info.stream = (void *)this;
+
+			uint64_t pc = 0;
+			int count;
+			do
+			{
+				count = disassembler(pc, &info);
+
+				if (count < 0)
+					break;
+
+				m_instructions[pc + m_startAddress] = Instruction();
+
+				pc += count;
+			} while (count > 0 && pc < m_size);
+		}
+
+		Instruction *getInstruction(uint64_t address)
+		{
+			if (m_instructions.find(address) == m_instructions.end())
+				return NULL;
+
+			return &m_instructions[address];
+		}
+
+	private:
+		typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
+
+		const void *m_data;
+		const size_t m_size;
+		const uint64_t m_startAddress;
+
+		bool m_disassembled; // Lazy disassembly once it's used
+		InstructionAddressMap_t m_instructions;
+	};
 
 	static int fprintFuncStatic(void *info, const char *fmt, ...)
 	{
 		// Do nothing - we're not interested in the actual encoding
 		return 0;
 	}
+	typedef std::unordered_map<const void *, Section *> SectionCache_t;
 
 	struct disassemble_info m_info;
 	disassembler_ftype m_disassembler;
