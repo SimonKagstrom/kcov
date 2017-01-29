@@ -324,7 +324,8 @@ private:
 		}
 
 		const std::vector<std::string> &lines = ISourceFileCache::getInstance().getLines(file);
-		if (lines.size() >= lineNr - 1 &&
+		if (!lines.empty() &&
+				lines.size() >= lineNr - 1 &&
 				!m_filter.runLineFilters(file, lineNr, lines[lineNr - 1]))
 			line->markUnreachable();
 
