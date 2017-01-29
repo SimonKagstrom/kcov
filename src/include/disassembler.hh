@@ -5,10 +5,10 @@
 
 namespace kcov
 {
-	class IAddressVerifier
+	class IDisassembler
 	{
 	public:
-		virtual ~IAddressVerifier()
+		virtual ~IDisassembler()
 		{
 		}
 
@@ -26,6 +26,6 @@ namespace kcov
 				uint64_t offset) = 0;
 
 
-		static IAddressVerifier *create();
+		static IDisassembler *create();
 	};
 }

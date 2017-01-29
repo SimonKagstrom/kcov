@@ -1,8 +1,8 @@
-#include "address-verifier.hh"
+#include <disassembler.hh>
 
 using namespace kcov;
 
-class AddressVerifier : public IAddressVerifier
+class DummyDisassembler : public IDisassembler
 {
 public:
 	virtual void setup(const void *header, size_t headerSize)
@@ -27,7 +27,7 @@ public:
 	}
 };
 
-IAddressVerifier *IAddressVerifier::create()
+IDisassembler *IDisassembler::create()
 {
-	return new AddressVerifier();
+	return new DummyDisassembler();
 }

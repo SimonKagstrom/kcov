@@ -47,8 +47,8 @@ set (${SOLIB}_SRCS
 	solib-parser/lib.c
 	)
 
-set (ADDRESS_VERIFIER_SRCS
-	parsers/dummy-address-verifier.cc
+set (DISASSEMBLER_SRCS
+	parsers/dummy-disassembler.cc
 )
 
 set (HAS_LIBBFD "0")
@@ -56,10 +56,10 @@ set (HAS_LIBBFD "0")
 if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
 	if(LIBBFD_FOUND)
 		set (HAS_LIBBFD "1")
-		set (ADDRESS_VERIFIER_SRCS
-			parsers/bfd-address-verifier.cc
+		set (DISASSEMBLER_SRCS
+			parsers/bfd-disassembler.cc
 		)
-		set (ADDRESS_VERIFIER_LIBRARIES
+		set (DISASSEMBLER_LIBRARIES
 			${LIBBFD_OPCODES_LIBRARY}
 			${LIBBFD_BFD_LIBRARY}
 			${LIBBFD_IBERTY_LIBRARY}
@@ -137,7 +137,7 @@ set (${KCOV}_SRCS
     main.cc
     merge-file-parser.cc
     output-handler.cc
-    ${ADDRESS_VERIFIER_SRCS}
+    ${DISASSEMBLER_SRCS}
     parser-manager.cc
     reporter.cc
 	source-file-cache.cc
@@ -270,7 +270,7 @@ target_link_libraries(${KCOV}
 	stdc++
 	${LIBCURL_LIBRARIES}
 	m
-	${ADDRESS_VERIFIER_LIBRARIES}
+	${DISASSEMBLER_LIBRARIES}
 	${LIBZ_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
 	dl

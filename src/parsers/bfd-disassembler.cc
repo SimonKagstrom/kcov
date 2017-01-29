@@ -1,4 +1,4 @@
-#include "address-verifier.hh"
+#include <disassembler.hh>
 #include <utils.hh>
 
 #include <unordered_map>
@@ -14,15 +14,15 @@
 
 using namespace kcov;
 
-class BfdAddressVerifier : public IAddressVerifier
+class BfdDisassembler : public IDisassembler
 {
 	typedef std::unordered_map<uint64_t, bool> InstructionAddressMap_t;
 	typedef std::unordered_map<const void *, InstructionAddressMap_t> SectionCache_t;
 
 public:
-	BfdAddressVerifier()
+	BfdDisassembler()
 	{
-		init_disassemble_info(&m_info, (void *)this, BfdAddressVerifier::fprintFuncStatic);
+		init_disassemble_info(&m_info, (void *)this, BfdDisassembler::fprintFuncStatic);
 		m_disassembler = print_insn_i386;
 
 		m_info.arch = bfd_arch_i386;
@@ -104,7 +104,7 @@ private:
 	SectionCache_t m_cache;
 };
 
-IAddressVerifier *IAddressVerifier::create()
+IDisassembler *IDisassembler::create()
 {
 	static bool g_bfdInited;
 
@@ -113,5 +113,5 @@ IAddressVerifier *IAddressVerifier::create()
 		g_bfdInited = true;
 	}
 
-	return new BfdAddressVerifier();
+	return new BfdDisassembler();
 }
