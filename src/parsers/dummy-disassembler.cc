@@ -27,7 +27,12 @@ public:
 	}
 };
 
-IDisassembler *IDisassembler::create()
+IDisassembler &IDisassembler::getInstance()
 {
-	return new DummyDisassembler();
+	static DummyDisassembler *g_p;
+
+	if (!g_p)
+		g_p = new DummyDisassembler();
+
+	return *g_p;
 }

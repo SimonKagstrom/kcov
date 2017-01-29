@@ -104,14 +104,14 @@ private:
 	SectionCache_t m_cache;
 };
 
-IDisassembler *IDisassembler::create()
+IDisassembler &IDisassembler::getInstance()
 {
-	static bool g_bfdInited;
+	static BfdDisassembler *g_p;
 
-	if (!g_bfdInited) {
+	if (!g_p) {
 		bfd_init();
-		g_bfdInited = true;
+		g_p = new BfdDisassembler();
 	}
 
-	return new BfdDisassembler();
+	return *g_p;
 }

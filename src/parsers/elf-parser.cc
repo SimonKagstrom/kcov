@@ -121,10 +121,10 @@ typedef std::vector<Segment> SegmentList_t;
 class ElfInstance : public IFileParser, IFileParser::ILineListener
 {
 public:
-	ElfInstance()
+	ElfInstance() :
+		m_addressVerifier(IDisassembler::getInstance())
 	{
 		m_elf = NULL;
-		m_addressVerifier = IDisassembler::create();
 		m_filename = "";
 		m_checksum = 0;
 		m_elfIs32Bit = true;
@@ -142,7 +142,6 @@ public:
 
 	virtual ~ElfInstance()
 	{
-		delete m_addressVerifier;
 	}
 
 	uint64_t getChecksum()
@@ -451,7 +450,7 @@ out_open:
 				return false;
 		}
 
-		m_addressVerifier->setup(fileData, EI_NIDENT);
+		m_addressVerifier.setup(fileData, EI_NIDENT);
 
 		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
 				error("elf_getshstrndx failed on %s\n", m_filename.c_str());
@@ -647,7 +646,7 @@ private:
 				if (m_verifyAddresses) {
 					uint64_t offset = addr - it->getBase();
 
-					out = m_addressVerifier->verify(it->getData(),it->getSize(), offset);
+					out = m_addressVerifier.verify(it->getData(),it->getSize(), offset);
 
 					if (!out) {
 						kcov_debug(ELF_MSG, "kcov: Address 0x%llx is not at an instruction boundary, skipping\n",
@@ -808,7 +807,7 @@ private:
 	SegmentList_t m_executableSegments;
 	FileList_t m_gcnoFiles;
 
-	IDisassembler *m_addressVerifier;
+	IDisassembler &m_addressVerifier;
 	bool m_verifyAddresses;
 	struct Elf *m_elf;
 	bool m_elfIs32Bit;

@@ -26,6 +26,6 @@ namespace kcov
 				uint64_t offset) = 0;
 
 
-		static IDisassembler *create();
+		static IDisassembler &getInstance();
 	};
 }
