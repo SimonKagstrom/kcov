@@ -312,6 +312,18 @@ private:
 
 			fp = new File(hash);
 
+			// Mark unreachable lines separately (often none)
+			const std::vector<std::string> &lines = ISourceFileCache::getInstance().getLines(file);
+			for (unsigned int nr = 1; nr <= lines.size(); nr++) {
+				if (!m_filter.runLineFilters(file, lineNr, lines[nr - 1])) {
+					Line *line = new Line(fp->getFileHash(), nr);
+
+					fp->addLine(nr, line);
+
+					line->markUnreachable();
+				}
+			}
+
 			m_files[file] = fp;
 		}
 
@@ -322,12 +334,6 @@ private:
 			line = new Line(fp->getFileHash(), lineNr);
 			fp->addLine(lineNr, line);
 		}
-
-		const std::vector<std::string> &lines = ISourceFileCache::getInstance().getLines(file);
-		if (!lines.empty() &&
-				lines.size() >= lineNr - 1 &&
-				!m_filter.runLineFilters(file, lineNr, lines[lineNr - 1]))
-			line->markUnreachable();
 
 		uint64_t lineId = line->lineId();
 
