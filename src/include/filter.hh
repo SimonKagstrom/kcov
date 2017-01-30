@@ -50,7 +50,7 @@ namespace kcov
 
 		static IFilter &create();
 
-		static IFilter &createDummy();
+		static IFilter &createBasic();
 
 
 		virtual ~IFilter() {}

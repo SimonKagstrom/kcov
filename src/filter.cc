@@ -9,15 +9,15 @@
 
 using namespace kcov;
 
-class DummyFilter : public IFilter
+class BasicFilter : public IFilter
 {
 public:
-	DummyFilter()
+	BasicFilter()
 	{
 		m_fileLineHandler = new FileLineHandler();
 	}
 
-	~DummyFilter()
+	~BasicFilter()
 	{
 		delete m_fileLineHandler;
 	}
@@ -144,7 +144,7 @@ protected:
 	FileLineHandler *m_fileLineHandler;
 };
 
-class Filter : public DummyFilter
+class Filter : public BasicFilter
 {
 public:
 	Filter()
@@ -337,7 +337,7 @@ IFilter &IFilter::create()
 	return *new Filter();
 }
 
-IFilter &IFilter::createDummy()
+IFilter &IFilter::createBasic()
 {
-	return *new DummyFilter();
+	return *new BasicFilter();
 }

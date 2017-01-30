@@ -31,7 +31,7 @@ static ICollector *g_collector;
 static IReporter *g_reporter;
 static ISolibHandler *g_solibHandler;
 static IFilter *g_filter;
-static IFilter *g_dummyFilter;
+static IFilter *g_basicFilter;
 
 static void do_cleanup()
 {
@@ -41,7 +41,7 @@ static void do_cleanup()
 	delete g_solibHandler; // Before the engine since a SIGTERM is sent to the thread
 	delete g_engine;
 	delete g_filter;
-	delete g_dummyFilter;
+	delete g_basicFilter;
 }
 
 static void ctrlc(int sig)
@@ -153,7 +153,7 @@ unsigned int countMetadata()
 static int runMergeMode()
 {
 	IFilter &filter = IFilter::create();
-	IFilter &dummyFilter = IFilter::createDummy();
+	IFilter &basicFilter = IFilter::createBasic();
 	IReporter &reporter = IReporter::createDummyReporter();
 	IOutputHandler &output = IOutputHandler::create(reporter, NULL);
 	IConfiguration &conf = IConfiguration::getInstance();
@@ -162,7 +162,7 @@ static int runMergeMode()
 	const std::string &out = output.getOutDirectory();
 
 	IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
-	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
+	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, basicFilter);
 	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 			base, base + "/kcov-merged", conf.keyAsString("merged-name"), true);
 	IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
@@ -218,7 +218,7 @@ int main(int argc, const char *argv[])
 	}
 
 	IFilter &filter = IFilter::create();
-	IFilter &dummyFilter = IFilter::createDummy();
+	IFilter &basicFilter = IFilter::createBasic();
 
 	ICollector &collector = ICollector::create(*parser, *engine, filter);
 	IReporter &reporter = IReporter::create(*parser, collector, filter);
@@ -243,7 +243,7 @@ int main(int argc, const char *argv[])
 
 		// The merge parser is both a parser, a writer and a collector (!)
 		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
-		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, dummyFilter);
+		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, basicFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", conf.keyAsString("merged-name"), false);
 		IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
@@ -281,7 +281,7 @@ int main(int argc, const char *argv[])
 	g_collector = &collector;
 	g_solibHandler = &solibHandler;
 	g_filter = &filter;
-	g_dummyFilter = &dummyFilter;
+	g_basicFilter = &basicFilter;
 	signal(SIGINT, ctrlc);
 	signal(SIGTERM, ctrlc);
 
