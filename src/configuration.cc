@@ -78,7 +78,7 @@ public:
 				" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
 				"                         coverage report\n"
 				" --exclude-line=pat[,...] Consider lines that match the patterns to be non-\n"
-				"                         code lines."
+				"                         code lines.\n"
 				" --exclude-region=start:stop[,...] Exclude regions of code between start:stop\n"
 				"                         markers (e.g., within comments) as non-code lines.\n"
 				"\n"
