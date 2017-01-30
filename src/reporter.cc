@@ -95,7 +95,7 @@ public:
 		if (it != m_files.end()) {
 			const Line *line = it->second->getLine(lineNr);
 
-			if (line) {
+			if (line && !line->isUnreachable()) {
 				hits = line->hits();
 				possibleHits = line->possibleHits(m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 				order = line->getOrder();
@@ -316,11 +316,9 @@ private:
 			const std::vector<std::string> &lines = ISourceFileCache::getInstance().getLines(file);
 			for (unsigned int nr = 1; nr <= lines.size(); nr++) {
 				if (!m_filter.runLineFilters(file, lineNr, lines[nr - 1])) {
-					Line *line = new Line(fp->getFileHash(), nr);
+					Line *line = new Line(fp->getFileHash(), nr, true);
 
 					fp->addLine(nr, line);
-
-					line->markUnreachable();
 				}
 			}
 
@@ -430,15 +428,10 @@ private:
 		// More efficient than an unordered_map
 		typedef std::vector<std::pair<uint64_t, int>> AddrToHitsMap_t;
 
-		Line(uint64_t fileHash, unsigned int lineNr) :
+		Line(uint64_t fileHash, unsigned int lineNr, bool unreachable = false) :
 			m_lineId((fileHash << 32ULL) | lineNr),
-			m_order(0), m_unreachable(false)
+			m_order(0), m_unreachable(unreachable)
 		{
-		}
-
-		void markUnreachable()
-		{
-			m_unreachable = true;
 		}
 
 		bool isUnreachable() const
@@ -624,7 +617,8 @@ private:
 				m_lines.resize(lineNr + 1);
 
 			m_lines[lineNr] = line;
-			m_nrLines++;
+			if (!line->isUnreachable())
+				m_nrLines++;
 		}
 
 		Line *getLine(unsigned int lineNr) const
@@ -679,6 +673,9 @@ private:
 				Line *cur = m_lines[i];
 
 				if (!cur)
+					continue;
+
+				if (cur->isUnreachable())
 					continue;
 
 				// Hits as zero or one (executed or not)
