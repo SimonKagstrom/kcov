@@ -14,100 +14,33 @@ class DummyFilter : public IFilter
 public:
 	DummyFilter()
 	{
+		m_fileLineHandler = new FileLineHandler();
 	}
 
 	~DummyFilter()
 	{
+		delete m_fileLineHandler;
 	}
 
 	// Allow anything
-	bool runFilters(const std::string &file)
+	virtual bool runFilters(const std::string &file)
 	{
 		return true;
 	}
 
-	bool runLineFilters(const std::string &filePath,
-					unsigned int lineNr,
-					const std::string &line)
-	{
-		return true;
-	}
-
-	std::string mangleSourcePath(const std::string &path)
-	{
-		return path;
-	}
-
-};
-
-class Filter : public IFilter
-{
-public:
-	Filter()
-	{
-		m_patternHandler = new PatternHandler();
-		m_pathHandler = new PathHandler();
-		m_fileLineHandler = new FileLineHandler();
-
-		m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
-		m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
-	}
-
-	~Filter()
-	{
-		delete m_fileLineHandler;
-		delete m_patternHandler;
-		delete m_pathHandler;
-	}
-
-	// Used by the unit test
-	void setup()
-	{
-		delete m_fileLineHandler;
-		delete m_patternHandler;
-		delete m_pathHandler;
-		m_patternHandler = new PatternHandler();
-		m_pathHandler = new PathHandler();
-	}
-
-	bool runFilters(const std::string &file)
-	{
-		bool out = true;
-
-		if (m_pathHandler->isSetup())
-			out = m_pathHandler->includeFile(file);
-
-		if (out && m_patternHandler->isSetup())
-			return m_patternHandler->includeFile(file);
-
-		return out;
-	}
-
-	std::string mangleSourcePath(const std::string &path)
-	{
-		std::string filename = get_real_path(path);
-
-		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
-		    std::string path = filename;
-		    size_t index = path.find(m_origRoot);
-
-		    if (index != std::string::npos) {
-		        path.replace(index, m_origRoot.length(), m_newRoot);
-		        filename = get_real_path(path);
-		    }
-		}
-
-		return filename;
-	}
-
-	bool runLineFilters(const std::string &filePath,
+	virtual bool runLineFilters(const std::string &filePath,
 						unsigned int lineNr,
 						const std::string &line)
 	{
 		return m_fileLineHandler->match(filePath, lineNr, line);
 	}
 
-private:
+	virtual std::string mangleSourcePath(const std::string &path)
+	{
+		return path;
+	}
+
+protected:
 	class FileLineHandler
 	{
 	public:
@@ -208,6 +141,69 @@ private:
 		int m_excludeStart;
 	};
 
+	FileLineHandler *m_fileLineHandler;
+};
+
+class Filter : public DummyFilter
+{
+public:
+	Filter()
+	{
+		m_patternHandler = new PatternHandler();
+		m_pathHandler = new PathHandler();
+
+		m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
+		m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
+	}
+
+	~Filter()
+	{
+		delete m_patternHandler;
+		delete m_pathHandler;
+	}
+
+	// Used by the unit test
+	void setup()
+	{
+		delete m_fileLineHandler;
+		delete m_patternHandler;
+		delete m_pathHandler;
+		m_patternHandler = new PatternHandler();
+		m_pathHandler = new PathHandler();
+		m_fileLineHandler = new FileLineHandler();
+	}
+
+	bool runFilters(const std::string &file)
+	{
+		bool out = true;
+
+		if (m_pathHandler->isSetup())
+			out = m_pathHandler->includeFile(file);
+
+		if (out && m_patternHandler->isSetup())
+			return m_patternHandler->includeFile(file);
+
+		return out;
+	}
+
+	std::string mangleSourcePath(const std::string &path)
+	{
+		std::string filename = get_real_path(path);
+
+		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
+		    std::string path = filename;
+		    size_t index = path.find(m_origRoot);
+
+		    if (index != std::string::npos) {
+		        path.replace(index, m_origRoot.length(), m_newRoot);
+		        filename = get_real_path(path);
+		    }
+		}
+
+		return filename;
+	}
+
+private:
 	class PatternHandler
 	{
 	public:
@@ -331,7 +327,6 @@ private:
 
 	PatternHandler *m_patternHandler;
 	PathHandler *m_pathHandler;
-	FileLineHandler *m_fileLineHandler;
 	std::string m_origRoot;
 	std::string m_newRoot;
 };
