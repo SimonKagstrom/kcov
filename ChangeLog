@@ -1,4 +1,7 @@
 Kcov (34):
+	* Issue #180: kcov now honors LCOV_EXCL_LINE/START/STOP, so that regions of
+	  code can be excluded from the report. Command-line options can also set
+	  custom patterns
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 
