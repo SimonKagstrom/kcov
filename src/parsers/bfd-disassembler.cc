@@ -2,6 +2,7 @@
 #include <utils.hh>
 
 #include <unordered_map>
+#include <map>
 
 #ifndef ATTRIBUTE_FPTR_PRINTF_2
 # define ATTRIBUTE_FPTR_PRINTF_2
@@ -43,24 +44,27 @@ public:
 
 	void addSection(const void *sectionData, size_t sectionSize, uint64_t baseAddress)
 	{
-		SectionCache_t::iterator it = m_cache.find(sectionData);
+		SectionCache_t::iterator it = m_cache.find(baseAddress);
 
-		// Not visited before, disassemble
-		if (it == m_cache.end()) {
-			// Insert and reference it
-			Section *cur = new Section(sectionData, sectionSize, baseAddress);
-
-			cur->disassemble(*this, m_info, m_disassembler);
-
-			m_cache[sectionData] = cur;
-		}
+		// Not visited before
+		if (it == m_cache.end())
+			m_cache[baseAddress] = new Section(sectionData, sectionSize, baseAddress);
 	}
 
 	bool verify(uint64_t address)
 	{
+		Section *p = lookupSection(address);
+
+		if (!p)
+			return true;
+
+		if (!p->isDisassembled())
+			p->disassemble(*this, m_info, m_disassembler);
+
 		// The address is valid there is an instruction starting at it
 		return getInstruction(address) != NULL;
 	}
+
 private:
 	class Instruction
 	{
@@ -79,11 +83,27 @@ private:
 	{
 	public:
 		Section(const void *data, size_t size, uint64_t startAddress) :
-			m_data(data),
 			m_size(size),
 			m_startAddress(startAddress),
 			m_disassembled(false)
 		{
+			m_data = xmalloc(size);
+			memcpy(m_data, data, size);
+		}
+
+		uint64_t getBase() const
+		{
+			return m_startAddress;
+		}
+
+		size_t getSize() const
+		{
+			return m_size;
+		}
+
+		bool isDisassembled() const
+		{
+			return m_disassembled;
 		}
 
 		void disassemble(BfdDisassembler &target, struct disassemble_info info, disassembler_ftype disassembler)
@@ -114,13 +134,39 @@ private:
 		}
 
 	private:
-		const void *m_data;
+		void *m_data;
 		const size_t m_size;
 		const uint64_t m_startAddress;
 
 		bool m_disassembled; // Lazy disassembly once it's used
 	};
 
+	Section *lookupSection(uint64_t address)
+	{
+		SectionCache_t::iterator it = m_cache.lower_bound(address);
+
+		if (it == m_cache.end())
+			return NULL;
+		--it;
+
+		// Above the last symbol
+		if (it == m_cache.end())
+			return NULL;
+
+		Section *cur = it->second;
+		uint64_t end = cur->getBase() + cur->getSize() - 1;
+
+		// Below nearest (possible?)
+		if (address < cur->getBase())
+			return NULL;
+
+		// Above section
+		if (address > end)
+			return NULL;
+
+		// Just right!
+		return cur;
+	}
 
 	Instruction *getInstruction(uint64_t address)
 	{
@@ -135,7 +181,7 @@ private:
 		// Do nothing - we're not interested in the actual encoding
 		return 0;
 	}
-	typedef std::unordered_map<const void *, Section *> SectionCache_t;
+	typedef std::map<uint64_t, Section *> SectionCache_t;
 	typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
 
 	struct disassemble_info m_info;
