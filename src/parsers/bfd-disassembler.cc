@@ -2,7 +2,9 @@
 #include <utils.hh>
 
 #include <unordered_map>
+#include <set>
 #include <map>
+#include <algorithm>
 
 #ifndef ATTRIBUTE_FPTR_PRINTF_2
 # define ATTRIBUTE_FPTR_PRINTF_2
@@ -15,12 +17,58 @@
 
 using namespace kcov;
 
+const uint64_t BT_INVALID = 0xfffffffffffffffeull;
+
+const std::set<std::string> x86BranchInstructions =
+{
+		"ja",
+		"jae",
+		"jbe",
+		"jc",
+		"je",
+		"jg",
+		"jge",
+		"jl",
+		"jle",
+		"jna",
+		"jnae",
+		"jnb",
+		"jnbe",
+		"jnc",
+		"jne",
+		"jng",
+		"jnge",
+		"jnl",
+		"jnle",
+		"jno",
+		"jnp",
+		"jns",
+		"jnz",
+		"jo",
+		"jp",
+		"jpe",
+		"jpo",
+		"js",
+		"jz",
+		"jczx"
+		"jezx"
+
+		"loop",
+
+		"jmp",
+
+		"call",
+
+		"ret",
+};
+
 class BfdDisassembler : public IDisassembler
 {
 public:
 	BfdDisassembler()
 	{
-		init_disassemble_info(&m_info, (void *)this, BfdDisassembler::fprintFuncStatic);
+		memset(&m_info, 0, sizeof(m_info));
+		init_disassemble_info(&m_info, (void *)this, BfdDisassembler::opcodesFprintFuncStatic);
 		m_disassembler = print_insn_i386;
 
 		m_info.arch = bfd_arch_i386;
@@ -65,18 +113,83 @@ public:
 		return getInstruction(address) != NULL;
 	}
 
+	const std::vector<uint64_t> &getBasicBlock(uint64_t address)
+	{
+		if (m_bbs.empty())
+			setupBasicBlocks();
+
+		if (m_instructions.find(address) == m_instructions.end())
+			return m_empty;
+
+		return m_instructions[address].getBasicBlock()->getInstructionAddresses();
+	}
+
 private:
-	class Instruction
+	class BasicBlock
 	{
 	public:
-		Instruction(bool isBranch = false, uint64_t branchTarget = 0) :
-			m_isBranch(isBranch), m_branchTarget(branchTarget)
+		BasicBlock()
 		{
 		}
 
+		const std::vector<uint64_t> &getInstructionAddresses() const
+		{
+			return m_instructionAddresses;
+		}
+
+		void addInstructionAddress(uint64_t address)
+		{
+			m_instructionAddresses.push_back(address);
+		}
+
 	private:
-		bool m_isBranch;
+		std::vector<uint64_t> m_instructionAddresses;
+	};
+
+	class Instruction
+	{
+	public:
+		Instruction(uint64_t branchTarget = 0) :
+			m_branchTarget(branchTarget),
+			m_leader(false),
+			m_bb(NULL)
+		{
+		}
+
+		uint64_t getBranchTarget() const
+		{
+			return m_branchTarget;
+		}
+
+		bool isBranch() const
+		{
+			return m_branchTarget != BT_INVALID;
+		}
+
+		bool isLeader() const
+		{
+			return m_leader;
+		}
+
+		void makeLeader()
+		{
+			m_leader = true;
+		}
+
+		const BasicBlock *getBasicBlock() const
+		{
+			return m_bb;
+		}
+
+		void setBasicBlock(const BasicBlock *bb)
+		{
+			m_bb = bb;
+		}
+
+	private:
 		uint64_t m_branchTarget;
+		bool m_leader;
+		const BasicBlock *m_bb;
 	};
 
 	class Section
@@ -116,18 +229,21 @@ private:
 			info.buffer_vma = 0;
 			info.buffer_length = m_size;
 			info.buffer = (bfd_byte *)m_data;
-			info.stream = (void *)this;
+			info.stream = (void *)&target;
 
 			uint64_t pc = 0;
 			int count;
 			do
 			{
+				target.m_instructionVector.clear();
 				count = disassembler(pc, &info);
 
 				if (count < 0)
 					break;
 
-				target.m_instructions[pc + m_startAddress] = Instruction();
+				target.m_instructions[pc + m_startAddress] = target.instructionFactory(pc, target.m_instructionVector);
+				// Point back into the other map
+				target.m_orderedInstructions[pc + m_startAddress] = &target.m_instructions[pc + m_startAddress];
 
 				pc += count;
 			} while (count > 0 && pc < m_size);
@@ -140,6 +256,32 @@ private:
 
 		bool m_disassembled; // Lazy disassembly once it's used
 	};
+
+	// Implementation taken from EmilPRO, https://github.com/SimonKagstrom/emilpro
+	Instruction instructionFactory(uint64_t pc, const std::vector<std::string> &vec)
+	{
+		uint64_t branchTarget = BT_INVALID; // Invalid
+
+		// No encoding???
+		if (vec.size() < 1)
+			return Instruction();
+
+		std::set<std::string>::const_iterator it = x86BranchInstructions.find(vec[0]);
+
+		// Address?
+		if (it != x86BranchInstructions.end() &&
+				vec.size() >= 2 && string_is_integer(vec[1])) {
+			int64_t offset = string_to_integer(vec[1]);
+
+			// FIXME! Check if this is correct
+			if ( (offset & (1 << 31)) )
+				offset |= 0xffffffff00000000ULL;
+
+			branchTarget = pc + offset;
+		}
+
+		return Instruction(branchTarget);
+	}
 
 	Section *lookupSection(uint64_t address)
 	{
@@ -168,6 +310,58 @@ private:
 		return cur;
 	}
 
+	void setupBasicBlocks()
+	{
+		for (SectionCache_t::iterator it = m_cache.begin();
+				it != m_cache.end();
+				++it)
+			it->second->disassemble(*this, m_info, m_disassembler);
+
+		InstructionOrderedMap_t::iterator cur = m_orderedInstructions.begin();
+
+		// The no-instructions program. Uncommon.
+		if (cur == m_orderedInstructions.end())
+			return;
+
+		InstructionOrderedMap_t::iterator next = cur;
+		next++;
+
+		// The first instruction is always a leader
+		cur->second->makeLeader();
+
+		// The one-instructions program. Also uncommon.
+		if (next == m_orderedInstructions.end())
+			return;
+
+		// Iterate the instruction pairs
+		for (; next != m_orderedInstructions.end(); ++cur, ++next) {
+			// Mark branch targets as leaders, as well as the instruction after that
+			if (cur->second->isBranch()) {
+				m_instructions[cur->second->getBranchTarget()].makeLeader();
+				next->second->makeLeader();
+			}
+		}
+
+		// Create and populate basic blocks
+		BasicBlock *bb = NULL;
+
+		m_bbs.push_back(bb);
+		for (InstructionOrderedMap_t::iterator it = m_orderedInstructions.begin();
+				it != m_orderedInstructions.end();
+				++it) {
+			Instruction *cur = it->second;
+
+			if (cur->isLeader()) {
+				bb = new BasicBlock();
+				m_bbs.push_back(bb);
+			}
+
+			cur->setBasicBlock(bb);
+			bb->addInstructionAddress(it->first);
+		}
+	}
+
+
 	Instruction *getInstruction(uint64_t address)
 	{
 		if (m_instructions.find(address) == m_instructions.end())
@@ -176,19 +370,47 @@ private:
 		return &m_instructions[address];
 	}
 
-	static int fprintFuncStatic(void *info, const char *fmt, ...)
+
+
+	void opcodesFprintFunc(const char *str)
 	{
-		// Do nothing - we're not interested in the actual encoding
-		return 0;
+		std::string stdStr(str);
+
+		m_instructionVector.push_back(trim_string(stdStr));
 	}
+
+	static int opcodesFprintFuncStatic(void *info, const char *fmt, ...)
+	{
+		BfdDisassembler *pThis = (BfdDisassembler *)info;
+		char str[64];
+		int out;
+
+		va_list args;
+		va_start (args, fmt);
+		out = vsnprintf( str, sizeof(str) - 1, fmt, args );
+		va_end (args);
+
+		pThis->opcodesFprintFunc(str);
+
+		return out;
+	}
+
 	typedef std::map<uint64_t, Section *> SectionCache_t;
 	typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
+	typedef std::map<uint64_t, Instruction *> InstructionOrderedMap_t;
 
 	struct disassemble_info m_info;
 	disassembler_ftype m_disassembler;
 
+
+	std::vector<std::string> m_instructionVector;
+
 	SectionCache_t m_cache;
 	InstructionAddressMap_t m_instructions;
+	InstructionOrderedMap_t m_orderedInstructions;
+
+	std::vector<BasicBlock *> m_bbs;
+	std::vector<uint64_t> m_empty;
 };
 
 IDisassembler &IDisassembler::getInstance()

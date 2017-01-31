@@ -13,6 +13,11 @@ public:
 	{
 	}
 
+	const std::vector<uint64_t> &getBasicBlock(uint64_t address)
+	{
+		return m_empty;
+	}
+
 	bool verify(uint64_t offset)
 	{
 		/*
@@ -29,6 +34,8 @@ public:
 
 		return true;
 	}
+
+	std::vector<uint64_t> m_empty;
 };
 
 IDisassembler &IDisassembler::getInstance()

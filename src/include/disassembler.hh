@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <vector>
+
 namespace kcov
 {
 	class IDisassembler
@@ -33,6 +35,13 @@ namespace kcov
 		 */
 		virtual bool verify(uint64_t address) = 0;
 
+
+		/**
+		 * Lookup the basic block for an address.
+		 *
+		 * @return a list of instructions in this basic block
+		 */
+		virtual const std::vector<uint64_t> &getBasicBlock(uint64_t address) = 0;
 
 		static IDisassembler &getInstance();
 	};
