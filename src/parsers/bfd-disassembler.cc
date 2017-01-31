@@ -41,23 +41,25 @@ public:
 			m_info.mach = bfd_mach_i386_i386;
 	}
 
-	bool verify(const void *sectionData, size_t sectionSize, uint64_t offset)
+	void addSection(const void *sectionData, size_t sectionSize, uint64_t baseAddress)
 	{
 		SectionCache_t::iterator it = m_cache.find(sectionData);
 
 		// Not visited before, disassemble
 		if (it == m_cache.end()) {
 			// Insert and reference it
-			Section *cur = new Section(sectionData, sectionSize, 0);
+			Section *cur = new Section(sectionData, sectionSize, baseAddress);
 
-			cur->disassemble(m_info, m_disassembler);
+			cur->disassemble(*this, m_info, m_disassembler);
 
 			m_cache[sectionData] = cur;
-			it = m_cache.find(sectionData);
 		}
+	}
 
+	bool verify(uint64_t address)
+	{
 		// The address is valid there is an instruction starting at it
-		return it->second->getInstruction(offset) != NULL;
+		return getInstruction(address) != NULL;
 	}
 private:
 	class Instruction
@@ -84,7 +86,7 @@ private:
 		{
 		}
 
-		void disassemble(struct disassemble_info info, disassembler_ftype disassembler)
+		void disassemble(BfdDisassembler &target, struct disassemble_info info, disassembler_ftype disassembler)
 		{
 			if (m_disassembled)
 					return;
@@ -105,30 +107,28 @@ private:
 				if (count < 0)
 					break;
 
-				m_instructions[pc + m_startAddress] = Instruction();
+				target.m_instructions[pc + m_startAddress] = Instruction();
 
 				pc += count;
 			} while (count > 0 && pc < m_size);
 		}
 
-		Instruction *getInstruction(uint64_t address)
-		{
-			if (m_instructions.find(address) == m_instructions.end())
-				return NULL;
-
-			return &m_instructions[address];
-		}
-
 	private:
-		typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
-
 		const void *m_data;
 		const size_t m_size;
 		const uint64_t m_startAddress;
 
 		bool m_disassembled; // Lazy disassembly once it's used
-		InstructionAddressMap_t m_instructions;
 	};
+
+
+	Instruction *getInstruction(uint64_t address)
+	{
+		if (m_instructions.find(address) == m_instructions.end())
+			return NULL;
+
+		return &m_instructions[address];
+	}
 
 	static int fprintFuncStatic(void *info, const char *fmt, ...)
 	{
@@ -136,11 +136,13 @@ private:
 		return 0;
 	}
 	typedef std::unordered_map<const void *, Section *> SectionCache_t;
+	typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
 
 	struct disassemble_info m_info;
 	disassembler_ftype m_disassembler;
 
 	SectionCache_t m_cache;
+	InstructionAddressMap_t m_instructions;
 };
 
 IDisassembler &IDisassembler::getInstance()

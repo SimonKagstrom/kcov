@@ -9,7 +9,11 @@ public:
 	{
 	}
 
-	bool verify(const void *sectionData, size_t sectionSize, uint64_t offset)
+	void addSection(const void *sectionData, size_t sectionSize, uint64_t baseAddress)
+	{
+	}
+
+	bool verify(uint64_t offset)
 	{
 		/*
 		 * ARM and PowerPC have fixed-length instructions, so this is actually

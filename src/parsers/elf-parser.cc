@@ -303,6 +303,8 @@ out_open:
 		else
 			parseOneDwarf(relocation);
 
+		setupSections();
+
 		return true;
 	}
 
@@ -369,6 +371,15 @@ out_open:
 					++it)
 				(*it)->onLine(cur.m_file, cur.m_line,
 						gcovGetAddress(cur.m_file, cur.m_function, cur.m_basicBlock, cur.m_index) + relocation);
+		}
+	}
+
+	void setupSections()
+	{
+		for (SegmentList_t::const_iterator it = m_executableSegments.begin();
+				it != m_executableSegments.end();
+				++it) {
+			m_addressVerifier.addSection(it->getData(), it->getSize(), it->getBase());
 		}
 	}
 
@@ -593,6 +604,7 @@ out_open:
 			// If we have segments already, we can safely skip this
 			if (setupSegments)
 				m_curSegments.push_back(seg);
+
 			m_executableSegments.push_back(seg);
 		}
 
@@ -644,9 +656,7 @@ private:
 				bool out = true;
 
 				if (m_verifyAddresses) {
-					uint64_t offset = addr - it->getBase();
-
-					out = m_addressVerifier.verify(it->getData(),it->getSize(), offset);
+					out = m_addressVerifier.verify(addr);
 
 					if (!out) {
 						kcov_debug(ELF_MSG, "kcov: Address 0x%llx is not at an instruction boundary, skipping\n",
