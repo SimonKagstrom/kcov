@@ -3,7 +3,8 @@
 #include <configuration.hh>
 #include <capabilities.hh>
 #include <file-parser.hh>
-#include <gcov.hh>
+#include <disassembler.hh>
+#include <elf.hh>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -126,6 +127,17 @@ public:
 
 	bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
 	{
+		IElf *elf = IElf::create(filename);
+
+		if (!elf)
+			return false;
+
+		const std::vector<Segment> &segs = elf->getSegments();
+		for (std::vector<Segment>::const_iterator it = segs.begin();
+				it != segs.end();
+				++it)
+			IDisassembler::getInstance().addSection(it->getData(), it->getSize(), it->getBase());
+
 		bool rv = m_dwarfParser.open(filename);
 
 		// Get a list of all possible source lines
@@ -182,8 +194,8 @@ private:
 			uint64_t *entries = &((uint64_t *)p)[1];
 
 			for (size_t i = 0; i < nEntries; i++) {
-				m_dwarfParser.forAddress(*this, entries[i]);
-				reportEvent(ev_breakpoint, 0, entries[i]);
+				m_dwarfParser.forAddress(*this, entries[i] + 1);
+				reportBreakpoint(entries[i] + 1);
 			}
 		}
 		else if (header == 0xC0BFFFFFFFFFFF32ULL) {
@@ -191,12 +203,28 @@ private:
 			uint32_t *entries = &((uint32_t *)p)[1];
 
 			for (size_t i = 0; i < nEntries; i++) {
-				m_dwarfParser.forAddress(*this, entries[i]);
-				reportEvent(ev_breakpoint, 0, entries[i]);
+				m_dwarfParser.forAddress(*this, entries[i] + 1);
+				reportBreakpoint(entries[i] + 1);
 			}
 		}
 
 		free(p);
+	}
+
+	void reportBreakpoint(uint64_t address)
+	{
+		std::vector<uint64_t> bb = IDisassembler::getInstance().getBasicBlock(address);
+
+		for (std::vector<uint64_t>::iterator it = bb.begin();
+				it != bb.end();
+				++it)
+			reportEvent(ev_breakpoint, 0, *it);
+
+		// Fallback in case kcov is broken
+		if (bb.empty()) {
+			kcov_debug(ENGINE_MSG, "Address 0x%llx not in a basic block\n", (long long)address);
+			reportEvent(ev_breakpoint, 0, address);
+		}
 	}
 
 	pid_t m_child;
