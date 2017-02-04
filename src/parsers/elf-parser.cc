@@ -5,6 +5,7 @@
 #include <gcov.hh>
 #include <phdr_data.h>
 #include <disassembler.hh>
+#include <elf.hh>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,87 +35,6 @@ enum SymbolType
 {
 	SYM_NORMAL = 0,
 	SYM_DYNAMIC = 1,
-};
-
-/**
- * Holder class for address segments
- */
-class Segment
-{
-public:
-	Segment(const void *data, uint64_t paddr, uint64_t vaddr, uint64_t size) :
-		m_data(NULL), m_paddr(paddr), m_vaddr(vaddr), m_size(size)
-{
-
-		if (data) {
-			m_data = xmalloc(size);
-			memcpy(m_data, data, size);
-		}
-}
-
-	Segment(const Segment &other) :
-		m_data(NULL), m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
-	{
-		if (other.m_data) {
-			m_data = xmalloc(other.m_size);
-			memcpy(m_data, other.m_data, other.m_size);
-		}
-	}
-
-	~Segment()
-	{
-		free(m_data);
-	}
-
-	/**
-	 * Check if an address is contained within this segment
-	 *
-	 * @param addr the address to check
-	 *
-	 * @return true if valid
-	 */
-	bool addressIsWithinSegment(uint64_t addr) const
-	{
-		return addr >= m_paddr && addr < m_paddr + m_size;
-	}
-
-	/**
-	 * Adjust an address with the segment.
-	 *
-	 * @param addr the address to adjust
-	 *
-	 * @return the new address
-	 */
-	uint64_t adjustAddress(uint64_t addr) const
-	{
-		if (addressIsWithinSegment(addr))
-			return addr - m_paddr + m_vaddr;
-
-		return addr;
-	}
-
-	uint64_t getBase() const
-	{
-		return m_vaddr;
-	}
-
-	const void *getData() const
-	{
-		return m_data;
-	}
-
-	size_t getSize() const
-	{
-		return m_size;
-	}
-
-private:
-	void *m_data;
-
-	// Should really be const, but GCC 4.6 doesn't like that
-	uint64_t m_paddr;
-	uint64_t m_vaddr;
-	size_t m_size;
 };
 typedef std::vector<Segment> SegmentList_t;
 
@@ -439,197 +359,47 @@ out_open:
 
 	bool parseOneElf()
 	{
-		Elf_Scn *scn = NULL;
-		size_t shstrndx;
-		bool ret = false;
-		bool setupSegments = false;
-		FileList_t gcdaFiles; // List of gcov data files scanned from .rodata
-		bool doScanForGcda = IConfiguration::getInstance().keyAsInt("gcov");
-		char *fileData;
-		size_t fileSize;
-		unsigned int i;
+		m_elf = IElf::create(m_filename);
 
-		fileData = (char *)read_file(&fileSize, "%s", m_filename.c_str());
-		if (!fileData) {
-				error("Cannot open %s\n", m_filename.c_str());
-				return false;
-		}
+		if (!m_elf)
+			return false;
 
-		if (!(m_elf = elf_memory(fileData, fileSize)) ) {
-				error("elf_begin failed on %s\n", m_filename.c_str());
-				free(fileData);
-				return false;
-		}
+		size_t sz;
+		void *p;
 
-		m_addressVerifier.setup(fileData, EI_NIDENT);
+		p = m_elf->getRawData(sz);
+		m_addressVerifier.setup(p, EI_NIDENT);
 
-		if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
-				error("elf_getshstrndx failed on %s\n", m_filename.c_str());
-				goto out_elf_begin;
-		}
+		SegmentList_t segments = m_elf->getSegments();
+		if (m_curSegments.empty())
+			m_curSegments = segments;
 
-		setupSegments = m_curSegments.size() == 0;
-		while ( (scn = elf_nextscn(m_elf, scn)) != NULL )
-		{
-			uint64_t sh_type;
-			uint64_t sh_addr;
-			uint64_t sh_size;
-			uint64_t sh_flags;
-			uint64_t sh_name;
-			uint64_t sh_offset;
-			uint64_t n_namesz;
-			uint64_t n_descsz;
-			uint64_t n_type;
-			char *n_data;
-			char *name;
+		for (SegmentList_t::iterator it = segments.begin();
+				it != segments.end();
+				++it)
+			m_executableSegments.push_back(*it);
 
-			if (m_elfIs32Bit) {
-				Elf32_Shdr *shdr32 = elf32_getshdr(scn);
-
-				sh_type = shdr32->sh_type;
-				sh_addr = shdr32->sh_addr;
-				sh_size = shdr32->sh_size;
-				sh_flags = shdr32->sh_flags;
-				sh_name = shdr32->sh_name;
-				sh_offset = shdr32->sh_offset;
-			} else {
-				Elf64_Shdr *shdr64 = elf64_getshdr(scn);
-
-				sh_type = shdr64->sh_type;
-				sh_addr = shdr64->sh_addr;
-				sh_size = shdr64->sh_size;
-				sh_flags = shdr64->sh_flags;
-				sh_name = shdr64->sh_name;
-				sh_offset = shdr64->sh_offset;
-			}
-
-			Elf_Data *data = elf_getdata(scn, NULL);
-
-			// Nothing there?
-			if (!data)
-				continue;
-
-			if (!data->d_buf)
-				continue;
-
-			name = elf_strptr(m_elf, shstrndx, sh_name);
-			if(!data) {
-					error("elf_getdata failed on section %s in %s\n",
-							name, m_filename.c_str());
-					goto out_elf_begin;
-			}
-
-			// Parse rodata to find gcda files
-			if (doScanForGcda && strcmp(name, ".rodata") == 0) {
-				const char *dataPtr = (const char *)data->d_buf;
-
-				for (size_t i = 0; i < data->d_size - 5; i++) {
-					const char *p = &dataPtr[i];
-
-					if (memcmp(p, (const void *)"gcda\0", 5) != 0)
-						continue;
-
-					const char *gcda = p;
-
-					// Rewind to start of string
-					while (gcda != dataPtr && *gcda != '\0')
-						gcda--;
-
-					// Rewound until start of rodata?
-					if (gcda == dataPtr)
-						continue;
-
-					std::string file(gcda + 1);
-
-					gcdaFiles.push_back(file);
-
-					// Notify listeners that we have found gcda files
-					for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
-							it != m_fileListeners.end();
-							++it)
-						(*it)->onFile(File(file, IFileParser::FLG_TYPE_COVERAGE_DATA));
-				}
-			}
-
-			if (sh_type == SHT_NOTE) {
-				if (m_elfIs32Bit) {
-					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
-
-					n_namesz = nhdr32->n_namesz;
-					n_descsz = nhdr32->n_descsz;
-					n_type = nhdr32->n_type;
-					n_data = (char *)data->d_buf + sizeof (Elf32_Nhdr);
-				} else {
-					Elf64_Nhdr *nhdr64 = (Elf64_Nhdr *)data->d_buf;
-
-					n_namesz = nhdr64->n_namesz;
-					n_descsz = nhdr64->n_descsz;
-					n_type = nhdr64->n_type;
-					n_data = (char *)data->d_buf + sizeof (Elf64_Nhdr);
-				}
-
-				if (::strcmp(n_data, ELF_NOTE_GNU) == 0 &&
-				    n_type == NT_GNU_BUILD_ID) {
-					const char *hex_digits = "0123456789abcdef";
-					unsigned char *build_id;
-
-					build_id = (unsigned char *)n_data + n_namesz;
-					for (i = 0; i < n_descsz; i++) {
-						m_buildId.push_back(hex_digits[(build_id[i] >> 4) & 0xf]);
-						m_buildId.push_back(hex_digits[(build_id[i] >> 0) & 0xf]);
-					}
-				}
-			}
-
-			// Check for debug links
-			if (strcmp(name, ".gnu_debuglink") == 0) {
-				const char *p = (const char *)data->d_buf;
-				m_debuglink.append(p);
-				const char *endOfString = p + strlen(p) + 1;
-
-				// Align address for the CRC32
-				unsigned long addr = (unsigned long)(endOfString - p);
-				unsigned long offs = 0;
-
-				if ((addr & 3) != 0)
-					offs = 4 - (addr & 3);
-				// ... and read out the CRC32
-				memcpy((void *)&m_debuglinkCrc, endOfString + offs, sizeof(m_debuglinkCrc));
-			}
-
-			if ((sh_flags & (SHF_EXECINSTR | SHF_ALLOC)) != (SHF_EXECINSTR | SHF_ALLOC))
-				continue;
-
-			Segment seg(fileData + sh_offset, sh_addr, sh_addr, sh_size);
-			// If we have segments already, we can safely skip this
-			if (setupSegments)
-				m_curSegments.push_back(seg);
-
-			m_executableSegments.push_back(seg);
-		}
-
-		// If we have gcda files, try to find the corresponding gcno dittos
-		for (FileList_t::iterator it = gcdaFiles.begin();
+		// Gcov data
+		std::vector<std::string> gcdaFiles = m_elf->getGcovGcdaFiles();
+		for (std::vector<std::string>::iterator it = gcdaFiles.begin();
 				it != gcdaFiles.end();
 				++it) {
-			std::string &gcno = *it; // Modify in-place
-			size_t sz = gcno.size();
-
-			// .gcda -> .gcno
-			gcno[sz - 2] = 'n';
-			gcno[sz - 1] = 'o';
-
-			if (file_exists(gcno))
-				m_gcnoFiles.push_back(gcno);
+			for (FileListenerList_t::const_iterator lit = m_fileListeners.begin();
+					lit != m_fileListeners.end();
+					++lit)
+				(*lit)->onFile(File(*it, IFileParser::FLG_TYPE_COVERAGE_DATA));
 		}
-		free(fileData);
 
-		ret = true;
+		m_gcnoFiles = m_elf->getGcovGcnoFiles();
+		m_buildId = m_elf->getBuildId();
 
-out_elf_begin:
-		elf_end(m_elf);
+		const std::pair<std::string, uint32_t> *dbgLink = m_elf->getDebugLink();
+		if (dbgLink) {
+			m_debuglink = dbgLink->first;
+			m_debuglinkCrc = dbgLink->second;
+		}
 
-		return ret;
+		return true;
 	}
 
 	void registerLineListener(IFileParser::ILineListener &listener)
@@ -819,7 +589,7 @@ private:
 
 	IDisassembler &m_addressVerifier;
 	bool m_verifyAddresses;
-	struct Elf *m_elf;
+	IElf *m_elf;
 	bool m_elfIs32Bit;
 	bool m_elfIsShared;
 	LineListenerList_t m_lineListeners;

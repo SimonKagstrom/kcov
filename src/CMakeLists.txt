@@ -93,6 +93,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
 		engines/kernel-engine.cc
+		parsers/elf.cc
 		parsers/elf-parser.cc
 		parsers/dwarf.cc
 		solib-handler.cc

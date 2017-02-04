@@ -21,6 +21,7 @@ set (${LINE2ADDR}_SRCS
 	../src/gcov.cc
 	../src/parsers/dwarf.cc
 	../src/parsers/elf-parser.cc
+	../src/parsers/elf.cc
 	../src/parsers/dummy-disassembler.cc
 	../src/parser-manager.cc
 	../src/utils.cc
