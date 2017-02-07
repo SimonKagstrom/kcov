@@ -68,15 +68,15 @@ private:
 
 	const File &lookupFile(const std::string filePath)
 	{
-		std::unordered_map<std::string, File>::iterator it = m_files.find(filePath);
+		std::unordered_map<std::string, File *>::iterator it = m_files.find(filePath);
 
 		if (it != m_files.end())
-			return it->second;
+			return *it->second;
 
 		/* Doesn't exist - put it as empty in the cache */
 		if (!file_exists(filePath))
 		{
-			m_files[filePath] = m_empty;
+			m_files[filePath] = &m_empty;
 
 			return m_empty;
 		}
@@ -86,15 +86,19 @@ private:
 
 		// Can read?
 		if (p)
-			m_files[filePath] = File(p, sz);
+			m_files[filePath] = new File(p, sz);
 		else // Unreadable, populate with empty
-			m_files[filePath] = m_empty;
+			m_files[filePath] = &m_empty;
 
-		return m_files[filePath];
+		return *m_files[filePath];
 	}
 
-	const File m_empty;
-	std::unordered_map<std::string, File> m_files;
+	File m_empty;
+
+	/* Pointer to avoid copies when populating the map. Move semantics
+	 * would be better, but is >= C++11.
+	 */
+	std::unordered_map<std::string, File *> m_files;
 };
 
 ISourceFileCache &ISourceFileCache::getInstance()
