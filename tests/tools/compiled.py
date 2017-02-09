@@ -452,3 +452,24 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
+
+class address_sanitizer_coverage(testbase.KcovTestCase):
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.expectedFailure
+    def runTest(self):
+        self.setUp()
+        if (not os.path.isfile(testbase.testbuild + "/sanitizer-coverage")):
+            print "Clang-only"
+            return True
+        rv,o = self.do(testbase.kcov + " --clang " + testbase.outbase + "/kcov " + testbase.testbuild + "/sanitizer-coverage", False)
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/sanitizer-coverage/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 5) == 1
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 7) == 1
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 8) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 16) == 1
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 18) == 1
+
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 22) == 0
+        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 25) == 0

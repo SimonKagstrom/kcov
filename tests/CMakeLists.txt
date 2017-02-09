@@ -104,6 +104,12 @@ add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
 add_executable(thread-test threads/thread-main.c)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+	add_executable(sanitizer-coverage sanitizer-coverage.c)
+	set_target_properties(sanitizer-coverage PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -fsanitize-coverage=bb")
+	set_target_properties(sanitizer-coverage PROPERTIES LINK_FLAGS "-fsanitize=address -fsanitize-coverage=bb")
+endif()
+
 add_executable(pie pie.c)
 set_target_properties(pie PROPERTIES POISITION_INDEPENDENT_CODE True)
 
