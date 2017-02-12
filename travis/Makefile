@@ -51,7 +51,15 @@ build_gcc: build build_unit_tests build_reference
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
 
-build_clang: build
+build_clang:
+	mkdir -p build build-tests build-tools
+	cd build && CC=clang-3.9 CXX=clang++-3.9 CXXFLAGS=-Werror cmake ..
+	make -C build
+	cd build-tools && cmake ../tools
+	make -C build-tools
+	sudo make -C build install
+	cd build-tests && CC=clang-3.9 CXX=clang++-3.9 cmake ../tests
+	CC=clang-3.9 CXX=clang++-3.9 make -C build-tests
 
 run-performance: build_gcc
 	travis/perf-test.sh build/src/kcov . build >/dev/null
@@ -120,5 +128,8 @@ prepare_linux_gcc:
 
 
 prepare_linux_clang:
+	sudo apt-add-repository -y 'deb http://llvm.org/apt/trusty llvm-toolchain-trusty-3.9 main'
+	sudo apt-get update --force-yes -qq
+	sudo apt-get install -qq --force-yes -y clang-3.9
 
 prepare_environment: prepare_${TRAVIS_OS_NAME} prepare_${TRAVIS_OS_NAME}_${CC}
