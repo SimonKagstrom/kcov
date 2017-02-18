@@ -93,7 +93,7 @@ public:
 					conf.keyAsString("python-command").c_str(),
 					kcov_python_path.c_str());
 			for (unsigned int i = 0; i < argc; i++)
-				s += std::string(argv[i]) + " ";
+				s += "'" + std::string(argv[i]) + "' ";
 
 			int res;
 
