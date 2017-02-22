@@ -1,3 +1,4 @@
+
 ## *Building Kcov*
 
 Installing dependencies
@@ -19,6 +20,18 @@ Install elfutils-libelf-devel
 Mac OS X
 --------
 brew install homebrew/dupes/zlib bash cmake pkgconfig
+
+*Temporary* OSX build instructions due to Issue #166:
+
+Create an empty build dir and do the following steps:
+
+```
+  cd <build-dir>
+  cmake -G Xcode <path/to/kcov/source/dir>
+  xcodebuild -configuration Release
+```
+
+The binary will be in `src/Release/kcov`
 
 Building
 ========
