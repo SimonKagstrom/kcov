@@ -217,13 +217,13 @@ out_open:
 
 		parseOneElf();
 
+		setupSections();
+
 		// Gcov data?
 		if (IConfiguration::getInstance().keyAsInt("gcov") && !m_gcnoFiles.empty())
 			parseGcnoFiles(relocation);
 		else
 			parseOneDwarf(relocation);
-
-		setupSections();
 
 		return true;
 	}
