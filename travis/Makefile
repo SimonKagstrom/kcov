@@ -51,6 +51,24 @@ build_gcc: build run_unit_tests build_reference
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
 
+build_dyninst:
+	cd /tmp && wget https://github.com/dyninst/dyninst/archive/v9.3.1.tar.gz
+	cd /tmp && tar -xf v9.3.1.tar.gz
+	mkdir -p /tmp/dyninst-9.3.1/bld
+	cd /tmp/dyninst-9.3.1/bld && CC=clang-3.9 CXX=clang++-3.9 cmake ..
+	make -C /tmp/dyninst-9.3.1/bld
+	sudo make -C /tmp/dyninst-9.3.1/bld install
+
+build_clang_linux: build_dyninst
+	mkdir -p build build-tests build-tools
+	cd build && CC=clang-3.9 CXX=clang++-3.9 CXXFLAGS=-Werror cmake ..
+	make -C build
+	cd build-tools && cmake ../tools
+	make -C build-tools
+	sudo make -C build install
+	cd build-tests && CC=clang-3.9 CXX=clang++-3.9 cmake ../tests
+	CC=clang-3.9 CXX=clang++-3.9 make -C build-tests
+
 build_clang:
 	mkdir -p build build-tests build-tools
 	cd build && CC=clang-3.9 CXX=clang++-3.9 CXXFLAGS=-Werror cmake ..
@@ -76,7 +94,7 @@ run-tests-linux-gcc: run-performance
 	wget https://codecov.io/bash || true
 	bash bash -s /tmp/kcov-kcov || true
 
-run-tests-linux-clang: build_clang
+run-tests-linux-clang: build_clang_linux
 	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
 
 trompeloeil:
@@ -133,6 +151,6 @@ prepare_linux_gcc:
 prepare_linux_clang:
 	sudo apt-add-repository -y 'deb http://llvm.org/apt/trusty llvm-toolchain-trusty-3.9 main'
 	sudo apt-get update --force-yes -qq
-	sudo apt-get install -qq --force-yes -y clang-3.9
+	sudo apt-get install -qq --force-yes -y clang-3.9 libboost-all-dev binutils-dev
 
 prepare_environment: prepare_${TRAVIS_OS_NAME} prepare_${TRAVIS_OS_NAME}_${CC}

@@ -18,6 +18,8 @@ namespace kcov
 			MODE_REPORT_ONLY        = 2,
 			MODE_COLLECT_AND_REPORT = 3,
 			MODE_MERGE_ONLY         = 4,
+			MODE_SYSTEM_RECORD      = 5,
+			MODE_SYSTEM_REPORT      = 6,
 		} RunMode_t;
 
 		class IListener
@@ -82,6 +84,14 @@ namespace kcov
 		 */
 		virtual const std::vector<std::string> &keyAsList(const std::string &key) = 0;
 
+		/**
+		 * Set a key. Use these with caution.
+		 */
+		virtual void setKey(const std::string &key, const std::string &val) = 0;
+
+		virtual void setKey(const std::string &key, int val) = 0;
+
+		virtual void setKey(const std::string &key, const std::vector<std::string> &val) = 0;
 
 		/**
 		 * Return the coveree argv (i.e., without kcov and kcov options)

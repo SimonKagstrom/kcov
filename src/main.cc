@@ -13,10 +13,12 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <dirent.h>
 #include <unistd.h>
 
 #include "merge-parser.hh"
+#include "engines/dyninst-file-format.hh"
 #include "writers/html-writer.hh"
 #include "writers/json-writer.hh"
 #include "writers/coveralls-writer.hh"
@@ -190,17 +192,9 @@ static int runMergeMode()
 	return 0;
 }
 
-int main(int argc, const char *argv[])
+static int runKcov(IConfiguration::RunMode_t runningMode)
 {
 	IConfiguration &conf = IConfiguration::getInstance();
-
-	if (!conf.parse(argc, argv))
-		return 1;
-
-	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
-
-	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
-		return runMergeMode();
 
 	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
@@ -303,4 +297,221 @@ int main(int argc, const char *argv[])
 	do_cleanup();
 
 	return ret;
+}
+
+static int runSystemModeRecordFile(const std::string &dir, const std::string &file)
+{
+	pid_t child = fork();
+	if (child < 0)
+	{
+		panic("Fork failed?\n");
+	}
+	else if (child == 0)
+	{
+		IConfiguration &conf = IConfiguration::getInstance();
+		std::string rootDir = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+
+		if (dir.size() < rootDir.size())
+		{
+			error("kcov: Something strange with the directories: %s vs %s\n",
+					dir.c_str(), rootDir.c_str());
+			return -1;
+		}
+
+		// FIXME! There are stupid assumptions here...
+		std::string dstDir = conf.keyAsString("out-directory") + "/" + dir.substr(rootDir.size());
+		std::string dstFile = conf.keyAsString("out-directory") + "/" + file.substr(rootDir.size());
+
+		conf.setKey("system-mode-write-file", dstFile);
+		conf.setKey("binary-name", file);
+		conf.setKey("binary-path", ""); // file uses an absolute path
+
+		(void)mkdir(conf.keyAsString("out-directory").c_str(), 0755);
+		(void)mkdir(dstDir.c_str(), 0755);
+
+		runKcov(IConfiguration::MODE_COLLECT_ONLY);
+		exit(0);
+	}
+	else
+	{
+		// Parent
+		int status;
+
+		::waitpid(child, &status, 0);
+	}
+
+	return 0;
+}
+
+static int runSystemModeRecordDirectory(const std::string &base)
+{
+	DIR *dir = ::opendir(base.c_str());
+	if (!dir)
+	{
+		error("Can't open directory %s\n", base.c_str());
+		return -1;
+	}
+
+	// Loop through the directory structure
+	struct dirent *de;
+	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+		std::string cur = base + "/" + de->d_name;
+
+		if (strcmp(de->d_name, ".") == 0)
+			continue;
+
+		if (strcmp(de->d_name, "..") == 0)
+			continue;
+
+		struct stat st;
+
+		if (lstat(cur.c_str(), &st) < 0)
+			continue;
+
+		// Executable file?
+		if (S_ISREG(st.st_mode) &&
+				(st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		{
+			runSystemModeRecordFile(base, cur);
+			continue;
+		}
+
+		if (S_ISDIR(st.st_mode))
+			runSystemModeRecordDirectory(cur);
+	}
+	::closedir(dir);
+
+	return 0;
+}
+
+static int runSystemModeRecord()
+{
+	IConfiguration &conf = IConfiguration::getInstance();
+
+	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+
+	return runSystemModeRecordDirectory(base);
+}
+
+std::vector<std::string> optionsStringToConfigurationVector(const std::string &in)
+{
+	std::vector<std::string> parts = split_string(in, " ");
+	if (parts.size() != 6)
+	{
+		warning("Options vector is not correct: '%s' splits into %zu\n",
+				in.c_str(), parts.size());
+		return std::vector<std::string>();
+	}
+
+	return parts;
+}
+
+static int runSystemModeReportFile(const std::string &file)
+{
+	kcov_dyninst::dyninst_memory *data = kcov_dyninst::diskToMemory(file);
+
+	if (!data)
+	{
+		return -1;
+	}
+
+	pid_t child = fork();
+	if (child < 0)
+	{
+		panic("Fork failed?\n");
+	}
+	else if (child == 0)
+	{
+		IConfiguration &conf = IConfiguration::getInstance();
+		std::pair<std::string, std::string> both = split_path(data->filename); // absolute path
+
+		conf.setKey("system-mode-read-results-file", file);
+		conf.setKey("binary-name", both.second);
+		conf.setKey("binary-path", both.first);
+		conf.setKey("target-directory", conf.keyAsString("out-directory") + "/" + both.second);
+
+		std::vector<std::string> options = optionsStringToConfigurationVector(data->options);
+		if (options.size() == 6)
+		{
+			conf.setKey("include-pattern", options[0]);
+			conf.setKey("exclude-pattern", options[1]);
+			conf.setKey("include-path", options[2]);
+			conf.setKey("exclude-path", options[3]);
+			conf.setKey("exclude-line", options[4]);
+			conf.setKey("exclude-region", options[5]);
+		}
+
+		runKcov(IConfiguration::MODE_COLLECT_AND_REPORT);
+		exit(0);
+	}
+	else
+	{
+		// Parent
+		int status;
+
+		::waitpid(child, &status, 0);
+	}
+
+	delete data;
+
+	return 0;
+}
+
+static int runSystemModeReportDirectory(const std::string &base)
+{
+	DIR *dir = ::opendir(base.c_str());
+	if (!dir)
+	{
+		error("Can't open directory %s\n", base.c_str());
+		return -1;
+	}
+
+	// Loop through the directory structure
+	struct dirent *de;
+	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+		std::string cur = base + "/" + de->d_name;
+		struct stat st;
+
+		if (lstat(cur.c_str(), &st) < 0)
+			continue;
+
+		// Executable file?
+		if (S_ISREG(st.st_mode))
+		{
+			runSystemModeReportFile(cur);
+		}
+	}
+	::closedir(dir);
+
+	return 0;
+}
+
+static int runSystemModeReport()
+{
+	IConfiguration &conf = IConfiguration::getInstance();
+
+	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+
+	return runSystemModeReportDirectory(base);
+}
+
+int main(int argc, const char *argv[])
+{
+	IConfiguration &conf = IConfiguration::getInstance();
+
+	if (!conf.parse(argc, argv))
+		return 1;
+
+	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
+
+	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
+		return runMergeMode();
+
+	if (runningMode == IConfiguration::MODE_SYSTEM_RECORD)
+		return runSystemModeRecord();
+
+	if (runningMode == IConfiguration::MODE_SYSTEM_REPORT)
+		return runSystemModeReport();
+
+	return runKcov(runningMode);
 }

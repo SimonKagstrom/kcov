@@ -94,7 +94,11 @@ public:
 				"                                                       # including /src/frodo\n"
 				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
-				"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2    # Merge the dir1/dir2 reports\n"
+				"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2     # Merge the dir1/dir2 reports\n"
+				"  kcov --system-record /tmp/out-dir sysroot     # Perform full-system in-\n"
+				"                                                  strumentation for sysroot\n"
+				"  kcov --system-report  /tmp/data-dir           # Report all data from a full-\n"
+				"                                                  system run.\n"
 				"",
 				keyAsInt("low-limit"), keyAsInt("high-limit"),
 				uncommonOptions().c_str());
@@ -138,6 +142,8 @@ public:
 				{"python-parser", required_argument, 0, 'P'},
 				{"bash-parser", required_argument, 0, 'B'},
 				{"bash-method", required_argument, 0, '4'},
+				{"system-record", no_argument, 0, '8'},
+				{"system-report", no_argument, 0, '9'},
 				{"verify", no_argument, 0, 'V'},
 				{"version", no_argument, 0, 'v'},
 				{"uncommon-options", no_argument, 0, 'U'},
@@ -371,6 +377,12 @@ public:
 			case 'm':
 				setKey("running-mode", IConfiguration::MODE_MERGE_ONLY);
 				break;
+			case '8': // Full system record
+				setKey("running-mode", IConfiguration::MODE_SYSTEM_RECORD);
+				break;
+			case '9': // Full system report
+				setKey("running-mode", IConfiguration::MODE_SYSTEM_REPORT);
+				break;
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
@@ -537,6 +549,8 @@ public:
 		setKey("merged-name", "[merged]");
 		setKey("css-file", "");
 		setKey("lldb-use-raw-breakpoint-writes", 0);
+		setKey("system-mode-write-file", "");
+		setKey("system-mode-read-results-file", 0);
 	}
 
 
@@ -585,6 +599,10 @@ public:
 			setKey(key, stoul(std::string(value)));
 		else if (key == "high-limit")
 			setKey(key, stoul(std::string(value)));
+		else if (key == "system-mode-write-file")
+			setKey(key, std::string(value));
+		else if (key == "system-mode-read-results-file")
+			setKey(key, stoul(std::string(value)));
 		else if (key == "bash-use-basic-parser")
 			setKey(key, stoul(std::string(value)));
 		else if (key == "lldb-use-raw-breakpoint-writes")
@@ -622,6 +640,8 @@ public:
 				"\n"
 				" --gcov                  use gcov parser instead of DWARF debugging info\n"
 				" --clang                 use Clang Sanitizer-coverage parser\n"
+				" --system-record         perform full-system instrumentation\n"
+				" --system-report         report full-system coverage data\n"
 				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
 				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
 				"                         behavior of daemons (default: wait until last)\n"

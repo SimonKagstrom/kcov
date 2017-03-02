@@ -17,6 +17,7 @@ set (${TGT}_SRCS
     ../../src/capabilities.cc
     ../../src/collector.cc
     ../../src/engine-factory.cc
+    ../../src/engines/dyninst-file-format.cc
     ../../src/gcov.cc
     ../../src/output-handler.cc
     ../../src/parser-manager.cc
@@ -31,6 +32,7 @@ set (${TGT}_SRCS
     tests-elf.cc
     tests-filter.cc
     tests-reporter.cc
+    tests-system-mode.cc
     tests-utils.cc
     tests-writer.cc
     )

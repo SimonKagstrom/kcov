@@ -84,6 +84,11 @@ after_success:
 
 the -s /path/to/outdir part can be skipped if kcov produces output in the current directory.
 
+Full-system instrumentation
+---------------------------
+Using [dyninst](http://www.dyninst.org), Kcov can instrument all binaries with very low overhead for embedded systems.
+Refer to the [full system instrumentation](doc/full-system-instrumentation.md) documentation for details.
+
 More information
 ----------------
 kcov is written by Simon Kagstrom <simon.kagstrom@gmail.com> and more
