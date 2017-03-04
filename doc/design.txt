@@ -41,3 +41,38 @@ implemented by the same class since coverage data is collected during runtime.
 
 Merge parser
 ============
+
+@startuml
+interface FileParser
+interface Engine
+interface Writer
+
+class Configuration
+class Collector
+class Reporter
+class Filter
+
+PtraceEngine -up-|> Engine
+BashEngine -up-|> Engine
+PythonEngine -up-|> Engine
+LLDBEngine -up-|> Engine
+
+BashEngine -down-|> FileParser
+PythonEngine -down-|> FileParser
+LLDBEngine -down-|> FileParser
+
+ElfParser -up-|> FileParser
+
+HTMLWriter -down-|> Writer
+CoberturaWriter -down-|> Writer
+JSONWriter -down-|> Writer
+CoverallsWriter -down-|> Writer
+SonarQubeWriter -down-|> Writer
+
+Collector -- Engine : Sets/collects breakpoints
+Collector -- FileParser : Receives file/line/address
+Collector -- Reporter : Recieves executed lines
+
+Reporter -- Writer : Reports executed lines
+
+@enduml
