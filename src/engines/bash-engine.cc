@@ -355,27 +355,28 @@ private:
 		size_t linecap = 0;
 
 		len = getline(&curLine, &linecap, m_stdout);
-		if (len <= 0)
-			return;
+		while (len > 0)
+		{
+			std::string cur(curLine);
 
-		// No need to filter if the output is sent elsewhere
-		if (m_bashSupportsXtraceFd) {
-			printf("%s", curLine);
-			return;
+			if (!m_bashSupportsXtraceFd) 
+			{
+				/* Check for line markers to filter these away.
+				 *
+				 * For some reason, redirection sometimes give kkcov@..., so filter that
+				 * in addition to the obvious stuff
+				 */
+				size_t kcovMarker = cur.find("kcov@");
+				if (kcovMarker == 0 || kcovMarker == 1)
+				{
+					len = getline(&curLine, &linecap, m_stdout);
+					continue;
+				}
+			}
+			printf("%s", cur.c_str());
+			len = getline(&curLine, &linecap, m_stdout);
 		}
-
-		std::string cur(curLine);
-
-		/* Check for line markers to filter these away.
-		 *
-		 * For some reason, redirection sometimes give kkcov@..., so filter that
-		 * in addition to the obvious stuff
-		 */
-		size_t kcovMarker = cur.find("kcov@");
-		if (kcovMarker == 0 || kcovMarker == 1)
-			return;
-
-		printf("%s", cur.c_str());
+		return;
 	}
 
 	bool bashCanHandleXtraceFd()
