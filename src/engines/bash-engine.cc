@@ -296,8 +296,14 @@ public:
 		int rv;
 
 		rv = waitpid(m_child, &status, WNOHANG);
-		if (rv != m_child)
+		if (rv != m_child) {
 			return true;
+		}
+		else {
+			// Child exited, let's make sure that we have all the events/stdout.
+			checkEvents();
+		}
+
 
 		if (WIFEXITED(status)) {
 			reportEvent(ev_exit_first_process, WEXITSTATUS(status));
