@@ -33,7 +33,7 @@ public:
 	std::unordered_map<unsigned int, unsigned long> m_lineToAddr;
 };
 
-TEST(reporter)
+DISABLED_TEST(reporter)
 {
 	ElfListener elfListener;
 	IFileParser *elf;

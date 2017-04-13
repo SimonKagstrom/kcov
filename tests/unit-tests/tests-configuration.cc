@@ -36,7 +36,7 @@ static bool runParse(std::string args)
 
 TESTSUITE(configuration)
 {
-	TEST(basic)
+	DISABLED_TEST(basic)
 	{
 		std::string filename = std::string(crpcut::get_start_dir()) + "/test-binary";
 

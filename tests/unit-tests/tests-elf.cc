@@ -39,7 +39,7 @@ public:
 	std::map<std::string, int> m_lineMap;
 };
 
-TEST(elf, DEADLINE_REALTIME_MS(30000))
+DISABLED_TEST(elf, DEADLINE_REALTIME_MS(30000))
 {
 	FunctionListener listener;
 	char filename[1024];

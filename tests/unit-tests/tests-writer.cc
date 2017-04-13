@@ -40,7 +40,7 @@ static int filePatternInDir(const char *name, const char *pattern)
 	return out;
 }
 
-TEST(writer, DEADLINE_REALTIME_MS(20000))
+DISABLED_TEST(writer, DEADLINE_REALTIME_MS(20000))
 {
 	IFileParser *elf;
 	bool res;
@@ -128,7 +128,7 @@ TEST(writer, DEADLINE_REALTIME_MS(20000))
 }
 
 
-TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
+DISABLED_TEST(writerSameName, DEADLINE_REALTIME_MS(20000))
 {
 	IFileParser *elf;
 	bool res;
