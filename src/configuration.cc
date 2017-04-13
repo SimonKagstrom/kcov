@@ -149,6 +149,8 @@ public:
 		unsigned int extraNeeded = 2;
 		unsigned int lastArg;
 
+		setupDefaults();
+
 		const char *path = getenv("PATH");
 
 		if (!path)
