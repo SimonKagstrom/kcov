@@ -35,7 +35,7 @@ build:
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc: build build_unit_tests build_reference
+build_gcc: build run_unit_tests build_reference
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
@@ -86,6 +86,9 @@ build_unit_tests: trompeloeil
 	mkdir -p build-ut
 	cd build-ut && CXX=g++-6 CC=gcc-6 cmake ../tests/unit-tests/
 	CXX=g++-6 CC=gcc-6 make -C build-ut
+
+run_unit_tests: build build_unit_tests
+	cd build-ut && ./ut
 
 run-tests-osx-gcc: build-osx
 	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
