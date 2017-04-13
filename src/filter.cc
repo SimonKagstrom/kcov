@@ -299,8 +299,10 @@ private:
 				size_t last = pathPattern.size();
 
 				if (pathStr.find(pathPattern) == 0 &&
-						(pathStr.size() <= last || pathStr[last] == '/'))
+						(pathStr.size() <= last || pathStr[last] == '/')) {
 					out = true;
+					break;
+				}
 			}
 
 			// ... unless it's found in --exclude-path=.
@@ -311,8 +313,10 @@ private:
 				size_t last = pathPattern.size();
 
 				if (pathStr.find(pathPattern) == 0 &&
-						(pathStr.size() <= last || pathStr[last] == '/'))
+						(pathStr.size() <= last || pathStr[last] == '/')) {
 					out = false;
+					break;
+				}
 			}
 
 			return out;
