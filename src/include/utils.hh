@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <list>
 
 #define error(x...) do \
@@ -146,6 +147,9 @@ std::string trim_string(const std::string &strIn, const std::string &trimEndChar
 
 const std::string &get_real_path(const std::string &path);
 
+// Split into path / filename
+std::pair<std::string, std::string> split_path(const std::string &pathStr);
+
 bool string_is_integer(const std::string &str, unsigned base = 0);
 
 int64_t string_to_integer(const std::string &str, unsigned base = 0);
@@ -199,4 +203,3 @@ void mock_file_exists(bool (*callback)(const std::string &path));
 void mock_get_file_timestamp(uint64_t (*callback)(const std::string &path));
 
 uint32_t hash_block(const void *buf, size_t len);
-

@@ -454,7 +454,7 @@ public:
 				}
 			}
 
-			StringPair_t tmp = splitPath(path);
+			std::pair<std::string, std::string> tmp = split_path(path);
 
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
@@ -493,7 +493,6 @@ public:
 
 	// "private", but we ignore that in the unit test
 	typedef std::vector<std::string> StrVecMap_t;
-	typedef std::pair<std::string, std::string> StringPair_t;
 
 	typedef std::unordered_map<std::string, std::string> StringKeyMap_t;
 	typedef std::unordered_map<std::string, int> IntKeyMap_t;
@@ -699,23 +698,6 @@ public:
 			lastPos = pos + 1;
 		}
 		out.push_back(str.substr(lastPos, str.size() - lastPos));
-
-		return out;
-	}
-
-	StringPair_t splitPath(const std::string &pathStr)
-	{
-		StringPair_t out;
-		std::string path(pathStr);
-
-		size_t pos = path.rfind('/');
-
-		out.first = "";
-		out.second = path;
-		if (pos != std::string::npos) {
-			out.first= path.substr(0, pos + 1);
-			out.second = path.substr(pos + 1, std::string::npos);
-		}
 
 		return out;
 	}

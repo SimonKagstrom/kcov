@@ -628,3 +628,20 @@ uint32_t hash_block(const void *buf, size_t len)
 {
 	return crc32(0, (const Bytef *)buf, len);
 }
+
+std::pair<std::string, std::string> split_path(const std::string &pathStr)
+{
+	std::pair<std::string, std::string> out;
+	std::string path(pathStr);
+
+	size_t pos = path.rfind('/');
+
+	out.first = "";
+	out.second = path;
+	if (pos != std::string::npos) {
+		out.first= path.substr(0, pos + 1);
+		out.second = path.substr(pos + 1, std::string::npos);
+	}
+
+	return out;
+}
