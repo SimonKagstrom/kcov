@@ -15,7 +15,7 @@ Install binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev
 
 Fedora / Centos / RHEL
 ----------------------
-Install elfutils-libelf-devel
+Install elfutils-libelf-devel libcurl-devel binutils-devel elfutils-devel
 
 Mac OS X
 --------
