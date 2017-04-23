@@ -18,6 +18,7 @@ struct Instance
 
 	bool initialized;
 	kcov_dyninst::dyninst_memory *data;
+	std::string destination_dir;
 };
 
 static Instance g_instance;
@@ -36,9 +37,9 @@ static void write_report(unsigned int idx)
 		return;
 	}
 
-	(void)mkdir("/tmp/kcov-data", 0755);
+	(void)mkdir(g_instance.destination_dir.c_str(), 0755);
 
-	std::string out = fmt("/tmp/kcov-data/%08lx", (long)g_instance.id);
+	std::string out = fmt("%s/%08lx", g_instance.destination_dir.c_str(), (long)g_instance.id);
 	std::string tmp = fmt("%s.%u", out.c_str(), idx);
 	FILE *fp = fopen(tmp.c_str(), "w");
 
@@ -63,7 +64,7 @@ static void write_at_exit(void)
 
 static kcov_dyninst::dyninst_memory *read_report(size_t expectedSize)
 {
-	std::string in = fmt("/tmp/kcov-data/%08lx", (long)g_instance.id);
+	std::string in = fmt("%s/%08lx", g_instance.destination_dir.c_str(), (long)g_instance.id);
 
 	if (!file_exists(in))
 	{
@@ -93,8 +94,14 @@ static kcov_dyninst::dyninst_memory *read_report(size_t expectedSize)
 
 extern "C" void kcov_dyninst_binary_init(uint32_t id, size_t vectorSize, const char *filename, const char *kcovOptions)
 {
+	const char *path = getenv("KCOV_SYSTEM_DESTINATION_DIR");
+
 	g_instance.id = id;
 	g_instance.last_time = time(NULL);
+	g_instance.destination_dir = "/tmp/kcov-data/";
+
+	if (path)
+		g_instance.destination_dir = path;
 
 	size_t size = (vectorSize + 31) / 32;
 
