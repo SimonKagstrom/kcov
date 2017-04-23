@@ -13,6 +13,8 @@
 #include <sys/param.h>
 #include <signal.h>
 
+#include <elf.h>
+
 #include <list>
 #include <unordered_map>
 #include <vector>
@@ -158,8 +160,14 @@ public:
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
 
-		if (conf.keyAsString("system-mode-write-file") != "" ||
-				conf.keyAsString("system-mode-read-results-file") != "")
+		if (conf.keyAsString("system-mode-write-file") == "" &&
+				conf.keyAsString("system-mode-read-results-file") == "")
+			return match_none;
+
+
+		Elf32_Ehdr *hdr = (Elf32_Ehdr *)data;
+
+		if (memcmp(hdr->e_ident, ELFMAG, strlen(ELFMAG)) == 0)
 			return match_perfect;
 
 		return match_none;
