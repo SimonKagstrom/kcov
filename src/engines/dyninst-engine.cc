@@ -187,7 +187,7 @@ public:
 		m_image = m_addressSpace->getImage();
 
 		if (!m_image) {
-			// FIXME!
+			error("Can't get image for binary %s\n", m_filename.c_str());
 
 			return false;
 		}
