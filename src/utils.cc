@@ -220,10 +220,24 @@ int write_file(const void *data, size_t len, const char *fmt, ...)
 }
 
 
-std::string dir_concat(const std::string &dir, const std::string &filename)
+std::string dir_concat(const std::string &dirIn, const std::string &filenameIn)
 {
-	if (dir == "")
-		return filename;
+	if (dirIn == "")
+		return filenameIn;
+
+	std::string dir = dirIn;
+	std::string filename = filenameIn;
+
+	// Slash extra slashses
+	while (dir[dir.size() - 1] == '/')
+	{
+		dir = dir.substr(0, dir.size() - 1);
+	}
+
+	while (filename[0] == '/')
+	{
+		filename = filename.substr(1);
+	}
 
 	return dir + "/" + filename;
 }

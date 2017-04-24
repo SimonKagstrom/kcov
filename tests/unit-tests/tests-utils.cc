@@ -44,4 +44,26 @@ TESTSUITE(utils)
 		s = escape_json(e);
 		ASSERT_TRUE(s == "var kalle=\\'X\\';");
 	}
+
+	TEST(can_concatenate_directory_and_file_correctly)
+	{
+		std::string empty = "";
+		std::string root = "/";
+		std::string singleNoSlash = "/kalle";
+		std::string singleSlash = "/kalle/";
+		std::string singleDoubleSlashes = "/kalle//";
+		std::string doubleNoSlashes = "/kalle/manne";
+		std::string doubleDoubleSlashes = "/kalle/manne//";
+
+		ASSERT_TRUE(dir_concat(empty, "hej") == "hej");
+		ASSERT_TRUE(dir_concat(root, "hej") == "/hej");
+		ASSERT_TRUE(dir_concat(singleNoSlash, "hej") == "/kalle/hej");
+		ASSERT_TRUE(dir_concat(singleSlash, "hej") == "/kalle/hej");
+		ASSERT_TRUE(dir_concat(singleDoubleSlashes, "hej") == "/kalle/hej");
+		ASSERT_TRUE(dir_concat(doubleNoSlashes, "hej") == "/kalle/manne/hej");
+		ASSERT_TRUE(dir_concat(doubleDoubleSlashes, "hej") == "/kalle/manne/hej");
+
+		// Filename with slash
+		ASSERT_TRUE(dir_concat(singleDoubleSlashes, "/hej") == "/kalle/hej");
+	}
 }
