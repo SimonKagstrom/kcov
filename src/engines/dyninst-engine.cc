@@ -247,6 +247,7 @@ public:
 			}
 
 			m_binaryEdit->writeFile(m_outFile.c_str());
+			chmod(m_outFile.c_str(), IConfiguration::getInstance().keyAsInt("system-mode-write-file-mode"));
 		}
 		else
 		{

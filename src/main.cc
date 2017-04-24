@@ -323,11 +323,11 @@ static int runSystemModeRecordFile(const std::string &dir, const std::string &fi
 		std::string dstFile = dir_concat(conf.keyAsString("out-directory"), file.substr(rootDir.size()));
 
 		conf.setKey("system-mode-write-file", dstFile);
+		conf.setKey("system-mode-write-file-mode", mode & 07777);
 		conf.setKey("binary-name", file);
 		conf.setKey("binary-path", ""); // file uses an absolute path
 
 		(void)mkdir(dstDir.c_str(), dirMode & 07777);
-		creat(dstFile.c_str(), mode & 07777);
 
 		runKcov(IConfiguration::MODE_COLLECT_ONLY);
 		exit(0);

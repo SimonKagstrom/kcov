@@ -550,6 +550,7 @@ public:
 		setKey("css-file", "");
 		setKey("lldb-use-raw-breakpoint-writes", 0);
 		setKey("system-mode-write-file", "");
+		setKey("system-mode-write-file-mode", 0644);
 		setKey("system-mode-read-results-file", 0);
 	}
 
