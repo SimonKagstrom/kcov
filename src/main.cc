@@ -299,7 +299,8 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 	return ret;
 }
 
-static int runSystemModeRecordFile(const std::string &dir, const std::string &file)
+static int runSystemModeRecordFile(const std::string &dir, const std::string &file,
+		mode_t dirMode, mode_t mode)
 {
 	pid_t child = fork();
 	if (child < 0)
@@ -318,16 +319,15 @@ static int runSystemModeRecordFile(const std::string &dir, const std::string &fi
 			return -1;
 		}
 
-		// FIXME! There are stupid assumptions here...
-		std::string dstDir = conf.keyAsString("out-directory") + "/" + dir.substr(rootDir.size());
-		std::string dstFile = conf.keyAsString("out-directory") + "/" + file.substr(rootDir.size());
+		std::string dstDir = dir_concat(conf.keyAsString("out-directory"), dir.substr(rootDir.size()));
+		std::string dstFile = dir_concat(conf.keyAsString("out-directory"), file.substr(rootDir.size()));
 
 		conf.setKey("system-mode-write-file", dstFile);
 		conf.setKey("binary-name", file);
 		conf.setKey("binary-path", ""); // file uses an absolute path
 
-		(void)mkdir(conf.keyAsString("out-directory").c_str(), 0755);
-		(void)mkdir(dstDir.c_str(), 0755);
+		(void)mkdir(dstDir.c_str(), dirMode & 07777);
+		creat(dstFile.c_str(), mode & 07777);
 
 		runKcov(IConfiguration::MODE_COLLECT_ONLY);
 		exit(0);
@@ -343,7 +343,7 @@ static int runSystemModeRecordFile(const std::string &dir, const std::string &fi
 	return 0;
 }
 
-static int runSystemModeRecordDirectory(const std::string &base)
+static int runSystemModeRecordDirectory(const std::string &base, mode_t mode)
 {
 	DIR *dir = ::opendir(base.c_str());
 	if (!dir)
@@ -368,16 +368,16 @@ static int runSystemModeRecordDirectory(const std::string &base)
 		if (lstat(cur.c_str(), &st) < 0)
 			continue;
 
-		// Executable file?
-		if (S_ISREG(st.st_mode) &&
+		if (S_ISDIR(st.st_mode))
+		{
+			runSystemModeRecordDirectory(cur, st.st_mode);
+		}
+		else if (S_ISREG(st.st_mode) &&
 				(st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
 		{
-			runSystemModeRecordFile(base, cur);
-			continue;
+			// Executable file?
+			runSystemModeRecordFile(base, cur, mode, st.st_mode);
 		}
-
-		if (S_ISDIR(st.st_mode))
-			runSystemModeRecordDirectory(cur);
 	}
 	::closedir(dir);
 
@@ -390,7 +390,9 @@ static int runSystemModeRecord()
 
 	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
 
-	return runSystemModeRecordDirectory(base);
+	umask(~0777);
+	(void)mkdir(conf.keyAsString("out-directory").c_str(), 0755);
+	return runSystemModeRecordDirectory(base, 0755);
 }
 
 std::vector<std::string> optionsStringToConfigurationVector(const std::string &in)
