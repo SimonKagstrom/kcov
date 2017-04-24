@@ -11,7 +11,7 @@ TESTSUITE(system_mode_formats)
 {
 	TEST(can_marshal_empty_struct)
 	{
-		struct dyninst_memory mem("kalle-anka", "--include-pattern=anka --exclude-pattern=hejbo", 0);
+		class dyninst_memory mem("kalle-anka", "--include-pattern=anka --exclude-pattern=hejbo", 0);
 
 		size_t size;
 		auto file = memoryToFile(mem, size);
@@ -33,7 +33,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_marshal_single_entry_struct)
 	{
-		struct dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
 
 		mem.data[0] = 0x12345678;
 
@@ -54,7 +54,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_marshal_multi_entry_struct)
 	{
-		struct dyninst_memory mem("", "simon", 3);
+		class dyninst_memory mem("", "simon", 3);
 
 		mem.data[0] = 0x12345678;
 		mem.data[1] = 0x56789abc;
@@ -193,8 +193,8 @@ TESTSUITE(system_mode_formats)
 
 	TEST(out_of_bounds_indexes_are_not_hit)
 	{
-		struct dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
-		struct dyninst_memory memEmpty("roy-gunnar-ramstedt", "moa", 0);
+		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class dyninst_memory memEmpty("roy-gunnar-ramstedt", "moa", 0);
 
 		// 0..31 are possible
 		ASSERT_FALSE(mem.indexIsHit(32));
@@ -203,7 +203,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_report_single_hit)
 	{
-		struct dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
 
 		mem.reportIndex(1);
 
@@ -213,7 +213,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_report_multiple_hits)
 	{
-		struct dyninst_memory mem("roy-gunnar-ramstedt", "moa", 4);
+		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 4);
 
 		for (unsigned i = 0; i < 4 * 32; i += 2)
 		{
