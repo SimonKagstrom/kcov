@@ -305,8 +305,6 @@ out_open:
 
 	bool parseOneDwarf(unsigned long relocation)
 	{
-		unsigned invalidBreakpoints = 0;
-
 		m_invalidBreakpoints = 0;
 		m_relocation = relocation;
 
@@ -351,7 +349,7 @@ out_open:
 
 		if (m_invalidBreakpoints > 0) {
 			kcov_debug(STATUS_MSG, "kcov: %u invalid breakpoints skipped in %s\n",
-					invalidBreakpoints, m_filename.c_str());
+					m_invalidBreakpoints, m_filename.c_str());
 		}
 
 		return true;
