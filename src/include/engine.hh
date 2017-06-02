@@ -95,7 +95,7 @@ namespace kcov
 		public:
 			IEngineCreator();
 
-			virtual IEngine *create(IFileParser &parser) = 0;
+			virtual IEngine *create() = 0;
 
 			/**
 			 * See if a particular file can be matched with this engine.

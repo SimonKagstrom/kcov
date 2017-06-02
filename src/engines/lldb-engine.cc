@@ -450,7 +450,7 @@ public:
 	{
 	}
 
-	virtual IEngine *create(IFileParser &parser)
+	virtual IEngine *create()
 	{
 		return g_lldbEngine;
 	}

@@ -205,7 +205,7 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 
 	// Match and create an engine
 	IEngineFactory::IEngineCreator &engineCreator = IEngineFactory::getInstance().matchEngine(file);
-	IEngine *engine = engineCreator.create(*parser);
+	IEngine *engine = engineCreator.create();
 	if (!engine) {
 		conf.printUsage();
 		return 1;
