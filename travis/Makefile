@@ -51,15 +51,7 @@ build_gcc: build run_unit_tests build_reference
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
 
-build_dyninst:
-	cd /tmp && wget https://github.com/dyninst/dyninst/archive/v9.3.1.tar.gz
-	cd /tmp && tar -xf v9.3.1.tar.gz
-	mkdir -p /tmp/dyninst-9.3.1/bld
-	cd /tmp/dyninst-9.3.1/bld && CC=clang-3.9 CXX=clang++-3.9 cmake ..
-	make -C /tmp/dyninst-9.3.1/bld
-	sudo make -C /tmp/dyninst-9.3.1/bld install
-
-build_clang_linux: build_dyninst
+build_clang_linux:
 	mkdir -p build build-tests build-tools
 	cd build && CC=clang-3.9 CXX=clang++-3.9 CXXFLAGS=-Werror cmake ..
 	make -C build
@@ -100,6 +92,11 @@ run-tests-linux-clang: build_clang_linux
 trompeloeil:
 	git submodule update --recursive --remote
 
+patchelf:
+	wget https://github.com/NixOS/patchelf/archive/0.9.tar.gz
+	tar -xf 0.9.tar.gz
+	cd patchelf-0.9 && ./bootstrap.sh && ./configure && make && sudo make install
+
 build_unit_tests: trompeloeil
 	mkdir -p build-ut
 	cd build-ut && CXX=g++-6 CC=gcc-6 cmake ../tests/unit-tests/
@@ -128,7 +125,7 @@ prepare_osx:
 	brew install python3
 	brew install bash
 
-prepare_linux:
+prepare_linux: patchelf
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
 	sudo add-apt-repository ppa:jonlar/crpcut -y
 	sudo apt-get update -q

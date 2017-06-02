@@ -9,6 +9,7 @@ from basic import *
 from compiled import *
 if sys.platform.startswith("linux"):
     from bash_linux_only import *
+    from system_mode import *
 from filter import *
 from accumulate import *
 from python import *

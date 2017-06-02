@@ -7,6 +7,7 @@
 #include <output-handler.hh>
 #include <file-parser.hh>
 #include <solib-handler.hh>
+#include <generated-data-base.hh>
 #include <utils.hh>
 
 #include <string.h>
@@ -18,7 +19,7 @@
 #include <unistd.h>
 
 #include "merge-parser.hh"
-#include "engines/dyninst-file-format.hh"
+#include "engines/system-mode-file-format.hh"
 #include "writers/html-writer.hh"
 #include "writers/json-writer.hh"
 #include "writers/coveralls-writer.hh"
@@ -26,6 +27,8 @@
 #include "writers/sonarqube-xml-writer.hh"
 
 using namespace kcov;
+
+extern GeneratedData kcov_system_library_data;
 
 static IEngine *g_engine;
 static IOutputHandler *g_output;
@@ -389,9 +392,24 @@ static int runSystemModeRecord()
 	IConfiguration &conf = IConfiguration::getInstance();
 
 	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+	std::string out = conf.keyAsString("out-directory");
+	std::string lib = out + "/lib";
 
 	umask(~0777);
-	(void)mkdir(conf.keyAsString("out-directory").c_str(), 0755);
+	(void)mkdir(out.c_str(), 0755);
+	(void)mkdir(lib.c_str(), 0755);
+
+	std::string library = fmt("%s/libkcov_system.so", lib.c_str());
+
+	if (write_file(kcov_system_library_data.data(), kcov_system_library_data.size(),
+			"%s", library.c_str()) < 0)
+	{
+		error("Can't write binary library at %s", library.c_str());
+
+		return -1;
+	}
+	chmod(library.c_str(), 0755);
+
 	return runSystemModeRecordDirectory(base, 0755);
 }
 
@@ -410,7 +428,7 @@ std::vector<std::string> optionsStringToConfigurationVector(const std::string &i
 
 static int runSystemModeReportFile(const std::string &file)
 {
-	kcov_dyninst::dyninst_memory *data = kcov_dyninst::diskToMemory(file);
+	kcov_system_mode::system_mode_memory *data = kcov_system_mode::diskToMemory(file);
 
 	if (!data)
 	{

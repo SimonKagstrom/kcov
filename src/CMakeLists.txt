@@ -5,7 +5,6 @@ set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (Threads)
 find_package (Bfd)
-find_package (Dyninst)
 
 include(TargetArch)
 target_architecture(CMAKE_TARGET_ARCHITECTURES)
@@ -52,9 +51,6 @@ set (DISASSEMBLER_SRCS
 	parsers/dummy-disassembler.cc
 )
 
-set (DYNINST_SRCS
-)
-
 set (HAS_LIBBFD "0")
 
 if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
@@ -69,13 +65,6 @@ if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTU
 			${LIBBFD_IBERTY_LIBRARY}
 		)
 	endif()
-endif()
-
-
-if(DYNINST_FOUND)
-	set (DYNINST_SRCS
-		engines/dyninst-engine.cc
-	)
 endif()
 
 set (coveralls_SRCS writers/coveralls-writer.cc)
@@ -95,7 +84,6 @@ set (ELF_SRCS
 set (MACHO_SRCS
 )
 set (SOLIB_generated )
-set (DYNINST_SOLIB_generated )
 
 # Linux-specific sources
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
@@ -143,6 +131,7 @@ set (${KCOV}_SRCS
     configuration.cc
     engine-factory.cc
     engines/bash-engine.cc
+    engines/system-mode-engine.cc
     engines/system-mode-file-format.cc
     engines/python-engine.cc
     filter.cc
@@ -180,51 +169,39 @@ set (${KCOV}_SRCS
     include/writer.hh
     include/filter.hh
     include/phdr_data.h
+    system-mode/file-data.cc
     )
 
-# Should be some better way of doing this...
-set (KCOV_DYNINST_SRCS
-    capabilities.cc
-    collector.cc
+set (KCOV_SYSTEM_MODE_SRCS
     configuration.cc
-    dummy-solib-handler.cc
+	dummy-solib-handler.cc
     engine-factory.cc
-    engines/bash-engine.cc
-    engines/dyninst-engine.cc
     engines/system-mode-file-format.cc
-    engines/python-engine.cc
+    engines/ptrace.cc
     filter.cc
     gcov.cc
-    main.cc
-    merge-file-parser.cc
-    output-handler.cc
-    parser-manager.cc
-    reporter.cc
-    source-file-cache.cc
-    utils.cc
-    writers/cobertura-writer.cc
-    writers/json-writer.cc
-    ${coveralls_SRCS}
-    writers/html-writer.cc
-    writers/sonarqube-xml-writer.cc
-    writers/writer-base.cc
     include/capabilities.hh
-    include/gcov.hh
-    include/reporter.hh
     include/collector.hh
-    include/generated-data-base.hh
-    include/solib-handler.hh
     include/configuration.hh
-    include/lineid.hh
-    include/swap-endian.hh
     include/engine.hh
-    include/manager.hh
-    include/utils.hh
     include/file-parser.hh
-    include/output-handler.hh
-    include/writer.hh
     include/filter.hh
+    include/gcov.hh
+    include/generated-data-base.hh
+    include/lineid.hh
+    include/manager.hh
+    include/output-handler.hh
     include/phdr_data.h
+    include/reporter.hh
+    include/solib-handler.hh
+    include/swap-endian.hh
+    include/utils.hh
+    include/writer.hh
+    main-system-daemon.cc
+    parser-manager.cc
+	system-mode/file-data.cc
+	system-mode/registration.cc
+    utils.cc
 )
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
@@ -238,15 +215,18 @@ include_directories(
 	${LIBDW_INCLUDE_DIRS}
 	${LIBZ_INCLUDE_DIRS}
 	${LIBCURL_INCLUDE_DIRS}
-	${DYNINST_INCLUDE_DIRS}
 	)
 
 link_directories (/home/ska/local/lib)
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
-
 target_link_libraries(bash_execve_redirector dl)
+
+add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
+set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
+target_link_libraries(kcov_system_lib dl ${LIBZ_LIBRARIES})
+
 
 add_custom_command(
    OUTPUT library.cc
@@ -255,15 +235,15 @@ add_custom_command(
    )
 
 add_custom_command(
-   OUTPUT dyninst-binary-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py libkcov-binary-dyninst.so __dyninst_binary_library > dyninst-binary-library.cc
-   DEPENDS kcov-binary-dyninst ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
-
-add_custom_command(
    OUTPUT bash-redirector-library.cc
    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:bash_execve_redirector> bash_redirector_library > bash-redirector-library.cc
    DEPENDS bash_execve_redirector ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
+   )
+
+add_custom_command(
+   OUTPUT kcov-system-library.cc
+   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:kcov_system_lib> kcov_system_library > kcov-system-library.cc
+   DEPENDS kcov_system_lib ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
    )
 
 add_custom_command(
@@ -326,7 +306,7 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc html-data-files.cc version.c)
+add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 target_link_libraries(${KCOV}
 	${LIBDW_LIBRARIES}
@@ -341,25 +321,17 @@ target_link_libraries(${KCOV}
 	${LLDB_LIBRARY}
 )
 
-if(DYNINST_FOUND)
-	add_library (kcov-binary-dyninst SHARED engines/dyninst-binary-lib.cc engines/dyninst-file-format.cc utils.cc)
-	set_target_properties(kcov-binary-dyninst PROPERTIES SUFFIX ".so")
+if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+    add_executable (kcov-system-daemon ${KCOV_SYSTEM_MODE_SRCS} version.c)
 
-    add_executable (kcov-system ${KCOV_DYNINST_SRCS} ${SOLIB_generated} bash-redirector-library.cc dyninst-binary-library.cc python-helper.cc bash-helper.cc html-data-files.cc version.c)
-
-    target_link_libraries(kcov-system
-        ${DYNINST_LIBRARIES}
+    target_link_libraries(kcov-system-daemon
         ${LIBELF_LIBRARIES}
         stdc++
-        ${LIBCURL_LIBRARIES}
         m
-        ${DISASSEMBLER_LIBRARIES}
         ${LIBZ_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         dl
-        ${LLDB_LIBRARY}
-)
+	)
 endif()
-
 
 install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
