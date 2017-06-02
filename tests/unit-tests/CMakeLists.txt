@@ -22,6 +22,8 @@ set (${TGT}_SRCS
     ../../src/output-handler.cc
     ../../src/parser-manager.cc
     ../../src/source-file-cache.cc
+    ../../src/system-mode/registration.cc
+    ../../src/system-mode/file-data.cc
     ../../src/utils.cc
     ../../src/writers/cobertura-writer.cc
     ../../src/writers/html-writer.cc

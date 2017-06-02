@@ -1,5 +1,4 @@
 ## *Full system instrumentation with kcov*
-Using [dyninst](http://www.dyninst.org), Kcov can instrument all binaries with very low overhead for embedded systems.
 
 Instrumenting binaries for a target system
 ------------------------------------------

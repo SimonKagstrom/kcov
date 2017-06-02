@@ -35,7 +35,7 @@ build:
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc: build run_unit_tests build_reference
+build_gcc: build run_unit_tests build_reference patchelf-i386-chroot
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
@@ -51,15 +51,7 @@ build_gcc: build run_unit_tests build_reference
 	sudo i386 chroot ${chroot} sh -c "mkdir -p /tmp/kcov/build-static && cd /tmp/kcov/build-static && cmake -DKCOV_STATIC_BUILD=1 .."
 	sudo i386 chroot ${chroot} sh -c "make -C /tmp/kcov/build-static"
 
-build_dyninst:
-	cd /tmp && wget https://github.com/dyninst/dyninst/archive/v9.3.1.tar.gz
-	cd /tmp && tar -xf v9.3.1.tar.gz
-	mkdir -p /tmp/dyninst-9.3.1/bld
-	cd /tmp/dyninst-9.3.1/bld && CC=clang-3.9 CXX=clang++-3.9 cmake ..
-	make -C /tmp/dyninst-9.3.1/bld
-	sudo make -C /tmp/dyninst-9.3.1/bld install
-
-build_clang_linux: build_dyninst
+build_clang_linux:
 	mkdir -p build build-tests build-tools
 	cd build && CC=clang-3.9 CXX=clang++-3.9 CXXFLAGS=-Werror cmake ..
 	make -C build
@@ -100,6 +92,17 @@ run-tests-linux-clang: build_clang_linux
 trompeloeil:
 	git submodule update --recursive --remote
 
+patchelf:
+	wget https://github.com/NixOS/patchelf/archive/0.9.tar.gz
+	tar -xf 0.9.tar.gz
+	cd patchelf-0.9 && ./bootstrap.sh && ./configure && make && sudo make install
+
+patchelf-i386-chroot: patchelf
+	wget https://github.com/NixOS/patchelf/archive/0.9.tar.gz
+	sudo cp 0.9.tar.gz ${chroot}
+	sudo i386 chroot ${chroot} sh -c "tar -xf 0.9.tar.gz"
+	sudo i386 chroot ${chroot} sh -c "cd patchelf-0.9 && ./bootstrap.sh && ./configure && make && make install"
+
 build_unit_tests: trompeloeil
 	mkdir -p build-ut
 	cd build-ut && CXX=g++-6 CC=gcc-6 cmake ../tests/unit-tests/
@@ -128,7 +131,7 @@ prepare_osx:
 	brew install python3
 	brew install bash
 
-prepare_linux:
+prepare_linux: patchelf
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
 	sudo add-apt-repository ppa:jonlar/crpcut -y
 	sudo apt-get update -q
@@ -141,7 +144,7 @@ prepare_linux_gcc:
 
 	sudo i386 debootstrap --arch=i386 --components=main,universe  precise $(chroot)
 	sudo i386 chroot "${chroot}" apt-get update
-	sudo i386 chroot "${chroot}" apt-get install -y build-essential
+	sudo i386 chroot "${chroot}" apt-get install -y build-essential autoconf
 	sudo i386 chroot "${chroot}" apt-get install -y ${kcov_deps}
 	sudo cp -r "$(shell pwd)" "${chroot}/tmp/"
 	sudo i386 chroot "${chroot}" sh -c "mount -t proc procfs /proc"

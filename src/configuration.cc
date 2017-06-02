@@ -140,6 +140,7 @@ public:
 				{"report-only", no_argument, 0, 'r'},
 				{"merge", no_argument, 0, 'm'},
 				{"python-parser", required_argument, 0, 'P'},
+				{"patchelf", required_argument, 0, 'e'},
 				{"bash-parser", required_argument, 0, 'B'},
 				{"bash-method", required_argument, 0, '4'},
 				{"system-record", no_argument, 0, '8'},
@@ -315,6 +316,9 @@ public:
 				break;
 			case 'P':
 				setKey("python-command", optarg);
+				break;
+			case 'e':
+				setKey("patchelf-command", optarg);
 				break;
 			case 'B':
 				setKey("bash-command", optarg);
@@ -553,7 +557,8 @@ public:
 		setKey("lldb-use-raw-breakpoint-writes", 0);
 		setKey("system-mode-write-file", "");
 		setKey("system-mode-write-file-mode", 0644);
-		setKey("system-mode-read-results-file", 0);
+		setKey("system-mode-read-results-file", "");
+		setKey("patchelf-command", "patchelf");
 	}
 
 
@@ -662,12 +667,15 @@ public:
 				"                         default: %s\n"
 				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
 				"                         default: %s\n"
+				" --patchelf=cmd          patchelf binary to use (for system mode),\n"
+				"                         default: %s\n"
 				" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
 				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
 				"                         execve replacement. Buggy on some systems\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"),
 				getConfigurableValues(),
-				keyAsString("python-command").c_str(), keyAsString("bash-command").c_str()
+				keyAsString("python-command").c_str(), keyAsString("bash-command").c_str(),
+				keyAsString("patchelf-command").c_str()
 				);
 	}
 

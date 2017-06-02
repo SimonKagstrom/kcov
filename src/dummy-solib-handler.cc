@@ -10,6 +10,10 @@ public:
 	}
 };
 
+void kcov::blockUntilSolibDataRead()
+{
+}
+
 ISolibHandler &kcov::createSolibHandler(IFileParser &parser, ICollector &collector)
 {
 	return *new DummySolibHandler();

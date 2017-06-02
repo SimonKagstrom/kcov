@@ -8,13 +8,15 @@ import time
 import threading
 
 kcov = ""
+kcov_system_daemon = ""
 outbase = ""
 testbuild = ""
 sources = ""
 
 def configure(k, o, t, s):
-    global kcov, outbase, testbuild, sources
+    global kcov, outbase, testbuild, sources, kcov_system_daemon
     kcov = k
+    kcov_system_daemon = k + "-system-daemon"
     outbase = o
     testbuild = t
     sources = s

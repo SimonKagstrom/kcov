@@ -253,3 +253,197 @@ TESTSUITE(system_mode_formats)
 		ASSERT_TRUE(mem.isDirty());
 	}
 }
+
+TESTSUITE(system_mode_file_data)
+{
+	TEST(file_with_no_entries_will_not_have_a_trailer)
+	{
+		uint8_t data[1];
+
+		auto f = SystemModeFile::fromRawFile(1, "", "", (void *)data, sizeof(data));
+		ASSERT_TRUE(f);
+
+		size_t sz;
+		auto processed = f->getProcessedData(sz);
+		ASSERT_TRUE(processed);
+		ASSERT_TRUE(sz == sizeof(data));
+
+		ASSERT_TRUE(f->getOptions() == "");
+		ASSERT_TRUE(f->getFilename() == "");
+
+		ASSERT_TRUE(f->getId() == 1U);
+	}
+
+	TEST(can_add_entries)
+	{
+		uint8_t data[1];
+
+		data[0] = 0xf2;
+
+		auto f = SystemModeFile::fromRawFile(2, "manne.elf", "kalle-anka", (void *)data, sizeof(data));
+		ASSERT_TRUE(f);
+
+		ASSERT_TRUE(f->getFilename() == "manne.elf");
+		ASSERT_TRUE(f->getOptions() == "kalle-anka");
+		ASSERT_TRUE(f->getId() == 2U);
+
+		f->addEntry(0, 0x12345678);
+		f->addEntry(1000, 0x98765432);
+
+		auto entries = f->getEntries();
+		ASSERT_TRUE(entries.size() == 1001);
+		ASSERT_TRUE(entries[0] == 0x12345678);
+		ASSERT_TRUE(entries[1] == 0); // Not set
+		ASSERT_TRUE(entries[1000] == 0x98765432);
+
+		size_t sz;
+		auto processed = f->getProcessedData(sz);
+		ASSERT_TRUE(processed);
+		ASSERT_TRUE(sz > sizeof(data));
+
+		// Verify the actual data
+		ASSERT_TRUE(memcmp(data, processed, sizeof(data)) == 0);
+
+		auto f2 = SystemModeFile::fromProcessedFile(processed, sz);
+		ASSERT_TRUE(f2);
+
+		entries = f2->getEntries();
+
+		// Should be the same as in f
+		ASSERT_TRUE(entries.size() == 1001);
+		ASSERT_TRUE(entries[0] == 0x12345678);
+		ASSERT_TRUE(entries[1] == 0); // Still not set
+		ASSERT_TRUE(entries[1000] == 0x98765432);
+
+		ASSERT_TRUE(f2->getFilename() == "manne.elf");
+		ASSERT_TRUE(f2->getOptions() == "kalle-anka");
+		ASSERT_TRUE(f2->getId() == 2U);
+	}
+
+	TEST(cannot_create_system_mode_file_if_trailer_isnt_8_byte_aligned)
+	{
+		for (unsigned i = 0; i < 7; i++)
+		{
+			uint8_t data[i];
+
+			auto f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+			ASSERT_FALSE(f);
+		}
+	}
+
+	TEST(cannot_create_system_mode_file_if_options_or_filename_size_isnt_8_byte_aligned)
+	{
+		uint8_t data[sizeof(uint64_t) + sizeof(struct trailer)];
+		struct trailer *trailer = (struct trailer *)&data[sizeof(uint64_t)];
+
+		memset(data, 0, sizeof(data));
+
+		trailer->compressed_size = 0;
+		trailer->uncompressed_size = 0;
+		trailer->options_size = 7;
+		trailer->filename_size = 8;
+		trailer->magic = TRAILER_MAGIC;
+		trailer->version = TRAILER_VERSION;
+		trailer->n_entries = 0;
+
+		auto f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_FALSE(f);
+
+		trailer->options_size = 15;
+		f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_FALSE(f);
+
+		trailer->options_size = 24;
+		f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_TRUE(f);
+
+		trailer->filename_size = 7;
+		f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_FALSE(f);
+	}
+
+	TEST(cannot_create_system_mode_file_if_trailer_magic_or_version_is_wrong)
+	{
+		uint8_t data[sizeof(uint64_t) * 2 + sizeof(struct trailer)];
+		struct trailer *trailer = (struct trailer *)&data[sizeof(uint64_t) * 2];
+
+		memset(data, 0, sizeof(data));
+		char *filename = (char *)data;
+		filename[0] = 'x';
+		filename[1] = '\0';
+
+		char *options = (char *)data + 8;
+		options[0] = 'a';
+		options[1] = 'b';
+		options[2] = 'c';
+		options[3] = '\0';
+
+		trailer->compressed_size = 0;
+		trailer->uncompressed_size = 0;
+		trailer->filename_size = 8;
+		trailer->options_size = 8;
+		trailer->magic = TRAILER_MAGIC;
+		trailer->version = TRAILER_VERSION;
+		trailer->n_entries = 0;
+
+		auto f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_TRUE(f);
+		ASSERT_TRUE(f->getOptions() == "abc");
+
+		trailer->magic++;
+		f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_FALSE(f);
+
+		trailer->magic--;
+		trailer->version++;
+		f = SystemModeFile::fromProcessedFile(data, sizeof(data));
+		ASSERT_FALSE(f);
+	}
+}
+
+TESTSUITE(system_mode_registration)
+{
+	TEST(can_parse_entries_it_created)
+	{
+		auto entry = createProcessEntry(5, "simon");
+		ASSERT_TRUE(entry);
+
+		uint16_t op;
+		std::string of;
+		auto rv = parseProcessEntry(entry, op, of);
+		ASSERT_TRUE(rv);
+		ASSERT_TRUE(op == 5);
+		ASSERT_TRUE(of == "simon");
+	}
+
+	TEST(cannot_parse_entries_with_wrong_magic_or_version)
+	{
+		auto entry = createProcessEntry(3, "linda");
+		uint16_t op;
+		std::string of;
+
+		entry->magic++;
+		auto rv = parseProcessEntry(entry, op, of);
+		ASSERT_FALSE(rv);
+
+		entry->magic--;
+		entry->version++;
+		rv = parseProcessEntry(entry, op, of);
+		ASSERT_FALSE(rv);
+
+		entry->version--;
+		rv = parseProcessEntry(entry, op, of);
+		ASSERT_TRUE(rv);
+	}
+
+	TEST(cannot_parse_entries_with_size_smaller_than_filename)
+	{
+		auto entry = createProcessEntry(3, "linda");
+		uint16_t op;
+		std::string of;
+
+		entry->entry_size = sizeof(struct new_process_entry) - 1;
+		auto rv = parseProcessEntry(entry, op, of);
+		ASSERT_FALSE(rv);
+	}
+}
