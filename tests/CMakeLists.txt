@@ -113,10 +113,6 @@ endif()
 add_executable(pie pie.c)
 set_target_properties(pie PROPERTIES POISITION_INDEPENDENT_CODE True)
 
-add_executable(main-tests-gcov ${main_tests_SRCS})
-set_target_properties(main-tests-gcov PROPERTIES COMPILE_FLAGS "--coverage")
-set_target_properties(main-tests-gcov PROPERTIES LINK_FLAGS "--coverage")
-
 add_executable(pie-test argv-dependent.c)
 set_target_properties(pie-test PROPERTIES POISITION_INDEPENDENT_CODE True)
 

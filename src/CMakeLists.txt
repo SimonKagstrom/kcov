@@ -144,7 +144,6 @@ set (${KCOV}_SRCS
     engine-factory.cc
     engines/bash-engine.cc
     engines/dyninst-file-format.cc
-    engines/gcov-engine.cc
     engines/python-engine.cc
     filter.cc
     gcov.cc
@@ -193,7 +192,6 @@ set (KCOV_DYNINST_SRCS
     engines/bash-engine.cc
     engines/dyninst-engine.cc
     engines/dyninst-file-format.cc
-    engines/gcov-engine.cc
     engines/python-engine.cc
     filter.cc
     gcov.cc
