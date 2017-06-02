@@ -39,6 +39,15 @@ T to_be(T u)
 }
 
 template <typename T>
+T to_le(T u)
+{
+	if (cpu_is_little_endian())
+		return u;
+	else
+		return swap_endian<T>(u);
+}
+
+template <typename T>
 T be_to_host(T u)
 {
 	if (cpu_is_little_endian())
