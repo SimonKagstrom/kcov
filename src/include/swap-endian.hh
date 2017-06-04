@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdlib.h>
 #include <stdint.h>
 
 // From http://stackoverflow.com/questions/105252/how-do-i-convert-between-big-endian-and-little-endian-values-in-c
