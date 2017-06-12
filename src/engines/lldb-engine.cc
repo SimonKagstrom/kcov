@@ -2,6 +2,7 @@
 #include <engine.hh>
 #include <configuration.hh>
 #include <output-handler.hh>
+#include <filter.hh>
 #include <utils.hh>
 
 #include <stdlib.h>
@@ -30,7 +31,8 @@ public:
 	LLDBEngine() :
 		m_useLoadAddresses(false),
 		m_listener(NULL),
-		m_useLLDBBreakpoints(true)
+		m_useLLDBBreakpoints(true),
+		m_filter(NULL)
 	{
 		SBDebugger::Initialize();
 		m_debugger = SBDebugger::Create();
@@ -124,6 +126,7 @@ public:
 
 	virtual void setupParser(IFilter *filter)
 	{
+		m_filter = filter;
 	}
 
 	std::string getParserType()
@@ -399,10 +402,12 @@ private:
 
 			std::string filename = fmt("%s/%s", fs.GetDirectory(), fs.GetFilename());
 
+			std::string rp = m_filter->mangleSourcePath(filename);
+
 			for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
 				lit != m_lineListeners.end();
 				++lit)
-				(*lit)->onLine(filename, cur.GetLine(), getAddress(addr));
+				(*lit)->onLine(rp, cur.GetLine(), getAddress(addr));
 		}
 
 	}
@@ -434,6 +439,8 @@ private:
 
 	InstructionMap_t m_instructionMap;
 	bool m_useLLDBBreakpoints;
+
+	IFilter *m_filter;
 };
 
 
