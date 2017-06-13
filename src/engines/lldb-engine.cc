@@ -110,7 +110,17 @@ public:
 
 	virtual bool parse()
 	{
-		// Handled when the program is launched
+		// Parse the file/line -> address mappings
+		for (uint32_t i = 0; i < m_target.GetNumModules(); i++)
+		{
+			SBModule cur = m_target.GetModuleAtIndex(i);
+
+			if (!cur.IsValid())
+				continue;
+
+			handleModule(cur);
+		}
+
 		return true;
 	}
 
@@ -207,17 +217,6 @@ public:
 			sigs.SetShouldNotify(i, false);
 			sigs.SetShouldStop(i, true);
 			sigs.SetShouldSuppress(i, false);
-		}
-
-		// Parse the file/line -> address mappings
-		for (uint32_t i = 0; i < m_target.GetNumModules(); i++)
-		{
-			SBModule cur = m_target.GetModuleAtIndex(i);
-
-			if (!cur.IsValid())
-				continue;
-
-			handleModule(cur);
 		}
 
 		return true;
