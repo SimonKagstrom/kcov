@@ -223,11 +223,6 @@ public:
 		return true;
 	}
 
-	bool checkEvents()
-	{
-		return false;
-	}
-
 	bool continueExecution()
 	{
 		StateType state = m_process.GetState();
@@ -411,15 +406,6 @@ private:
 		}
 
 	}
-
-	void reportEvent(enum event_type type, int data = -1, uint64_t address = 0)
-	{
-		if (!m_listener)
-			return;
-
-		m_listener->onEvent(Event(type, data, address));
-	}
-
 
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;
