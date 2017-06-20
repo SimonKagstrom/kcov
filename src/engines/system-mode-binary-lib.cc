@@ -17,7 +17,7 @@ struct Instance
 	time_t last_time;
 
 	bool initialized;
-	kcov_dyninst::dyninst_memory *data;
+	kcov_system_mode::system_mode_memory *data;
 	std::string destination_dir;
 };
 
@@ -29,7 +29,7 @@ static uint32_t early_hits_index;
 static void write_report(unsigned int idx)
 {
 	size_t size;
-	struct kcov_dyninst::dyninst_file *dst = kcov_dyninst::memoryToFile(*g_instance.data, size);
+	struct kcov_system_mode::system_mode_file *dst = kcov_system_mode::memoryToFile(*g_instance.data, size);
 
 	if (!dst)
 	{
@@ -62,7 +62,7 @@ static void write_at_exit(void)
 	write_report(0);
 }
 
-static kcov_dyninst::dyninst_memory *read_report(size_t expectedSize)
+static kcov_system_mode::system_mode_memory *read_report(size_t expectedSize)
 {
 	std::string in = fmt("%s/%08lx", g_instance.destination_dir.c_str(), (long)g_instance.id);
 
@@ -72,7 +72,7 @@ static kcov_dyninst::dyninst_memory *read_report(size_t expectedSize)
 	}
 
 	size_t sz;
-	struct kcov_dyninst::dyninst_file *src = (struct kcov_dyninst::dyninst_file *)read_file(&sz, "%s", in.c_str());
+	struct kcov_system_mode::system_mode_file *src = (struct kcov_system_mode::system_mode_file *)read_file(&sz, "%s", in.c_str());
 	if (!src)
 	{
 		printf("Can't read\n");
@@ -86,7 +86,7 @@ static kcov_dyninst::dyninst_memory *read_report(size_t expectedSize)
 		return NULL;
 	}
 
-	kcov_dyninst::dyninst_memory *out = kcov_dyninst::fileToMemory(*src);
+	kcov_system_mode::system_mode_memory *out = kcov_system_mode::fileToMemory(*src);
 	free(src);
 
 	return out;
@@ -106,10 +106,10 @@ extern "C" void kcov_dyninst_binary_init(uint32_t id, size_t vectorSize, const c
 	size_t size = (vectorSize + 31) / 32;
 
 	g_instance.data = read_report(strlen(filename) + strlen(kcovOptions) + 2 + size * sizeof(uint32_t) +
-			sizeof(struct kcov_dyninst::dyninst_file));
+			sizeof(struct kcov_system_mode::system_mode_file));
 	if (!g_instance.data)
 	{
-		g_instance.data = new kcov_dyninst::dyninst_memory(filename, kcovOptions, size);
+		g_instance.data = new kcov_system_mode::system_mode_memory(filename, kcovOptions, size);
 	}
 
 	atexit(write_at_exit);

@@ -6,12 +6,12 @@
 
 #include <utils.hh>
 
-const uint32_t DYNINST_MAGIC = 0x4d455247; // "MERG"
-const uint32_t DYNINST_VERSION = 1;
+const uint32_t SYSTEM_MODE_FILE_MAGIC = 0x4d455247; // "MERG"
+const uint32_t SYSTEM_MODE_FILE_VERSION = 1;
 
-namespace kcov_dyninst
+namespace kcov_system_mode
 {
-	struct dyninst_file
+	struct system_mode_file
 	{
 		uint32_t magic;
 		uint32_t version;
@@ -22,10 +22,10 @@ namespace kcov_dyninst
 		uint32_t data[];
 	};
 
-	class dyninst_memory
+	class system_mode_memory
 	{
 	public:
-		dyninst_memory(const std::string &fn, const std::string &opts, uint32_t n) :
+		system_mode_memory(const std::string &fn, const std::string &opts, uint32_t n) :
 			filename(fn),
 			options(opts),
 			n_entries(n)
@@ -40,7 +40,7 @@ namespace kcov_dyninst
 			}
 		}
 
-		~dyninst_memory()
+		~system_mode_memory()
 		{
 			if (mapped)
 			{
@@ -65,9 +65,9 @@ namespace kcov_dyninst
 		bool mapped;
 	};
 
-	struct dyninst_file *memoryToFile(const class dyninst_memory &mem, size_t &outSize);
+	struct system_mode_file *memoryToFile(const class system_mode_memory &mem, size_t &outSize);
 
-	class dyninst_memory *fileToMemory(const struct dyninst_file &file);
+	class system_mode_memory *fileToMemory(const struct system_mode_file &file);
 
-	class dyninst_memory *diskToMemory(const std::string &src);
+	class system_mode_memory *diskToMemory(const std::string &src);
 };

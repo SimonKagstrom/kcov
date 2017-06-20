@@ -5,21 +5,25 @@
 
 #include "../../src/engines/system-mode-file-format.hh"
 
-using namespace kcov_dyninst;
+#include <system-mode/file-data.hh>
+#include <system-mode/registration.hh>
+
+using namespace kcov_system_mode;
+using namespace kcov;
 
 TESTSUITE(system_mode_formats)
 {
 	TEST(can_marshal_empty_struct)
 	{
-		class dyninst_memory mem("kalle-anka", "--include-pattern=anka --exclude-pattern=hejbo", 0);
+		class system_mode_memory mem("kalle-anka", "--include-pattern=anka --exclude-pattern=hejbo", 0);
 
 		size_t size;
 		auto file = memoryToFile(mem, size);
 		char *p = (char *)file;
 		ASSERT_TRUE(file);
 
-		ASSERT_TRUE(file->magic == DYNINST_MAGIC);
-		ASSERT_TRUE(file->version == DYNINST_VERSION);
+		ASSERT_TRUE(file->magic == SYSTEM_MODE_FILE_MAGIC);
+		ASSERT_TRUE(file->version == SYSTEM_MODE_FILE_VERSION);
 		ASSERT_TRUE(file->n_entries == 0);
 		ASSERT_TRUE(file->filename_offset == sizeof(*file));
 		ASSERT_TRUE(file->kcov_options_offset == file->filename_offset + mem.filename.size() + 1);
@@ -33,7 +37,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_marshal_single_entry_struct)
 	{
-		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class system_mode_memory mem("roy-gunnar-ramstedt", "moa", 1);
 
 		mem.data[0] = 0x12345678;
 
@@ -54,7 +58,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_marshal_multi_entry_struct)
 	{
-		class dyninst_memory mem("", "simon", 3);
+		class system_mode_memory mem("", "simon", 3);
 
 		mem.data[0] = 0x12345678;
 		mem.data[1] = 0x56789abc;
@@ -79,10 +83,10 @@ TESTSUITE(system_mode_formats)
 
 	TEST(cannot_unmarshal_with_invalid_magic)
 	{
-		struct dyninst_file f{};
+		struct system_mode_file f{};
 
-		f.magic = DYNINST_MAGIC+1;
-		f.version = DYNINST_VERSION;
+		f.magic = SYSTEM_MODE_FILE_MAGIC+1;
+		f.version = SYSTEM_MODE_FILE_VERSION;
 
 		auto mem = fileToMemory(f);
 		ASSERT_FALSE(mem);
@@ -90,10 +94,10 @@ TESTSUITE(system_mode_formats)
 
 	TEST(cannot_unmarshal_with_invalid_version)
 	{
-		struct dyninst_file f{};
+		struct system_mode_file f{};
 
-		f.magic = DYNINST_MAGIC;
-		f.version = DYNINST_VERSION + 1;
+		f.magic = SYSTEM_MODE_FILE_MAGIC;
+		f.version = SYSTEM_MODE_FILE_VERSION + 1;
 
 		auto mem = fileToMemory(f);
 		ASSERT_FALSE(mem);
@@ -101,10 +105,10 @@ TESTSUITE(system_mode_formats)
 
 	TEST(cannot_unmarshal_with_invalid_string_offsets)
 	{
-		struct dyninst_file f{};
+		struct system_mode_file f{};
 
-		f.magic = DYNINST_MAGIC;
-		f.version = DYNINST_VERSION;
+		f.magic = SYSTEM_MODE_FILE_MAGIC;
+		f.version = SYSTEM_MODE_FILE_VERSION;
 
 		f.filename_offset = 0; // Should be atleast sizeof(f)
 
@@ -120,10 +124,10 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_unmarshal_empty_struct)
 	{
-		struct dyninst_file *f = (struct dyninst_file *)xmalloc(sizeof(struct dyninst_file) + 2);
+		struct system_mode_file *f = (struct system_mode_file *)xmalloc(sizeof(struct system_mode_file) + 2);
 
-		f->magic = DYNINST_MAGIC;
-		f->version = DYNINST_VERSION;
+		f->magic = SYSTEM_MODE_FILE_MAGIC;
+		f->version = SYSTEM_MODE_FILE_VERSION;
 		f->filename_offset = sizeof(*f);
 		f->kcov_options_offset = f->filename_offset + 1;
 
@@ -137,13 +141,13 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_unmarshal_single_entry_struct)
 	{
-		struct dyninst_file *f = (struct dyninst_file *)xmalloc(sizeof(struct dyninst_file) +
+		struct system_mode_file *f = (struct system_mode_file *)xmalloc(sizeof(struct system_mode_file) +
 				sizeof(uint32_t) +
 				strlen("hej") + strlen("hopp") + 2);
 		char *p = (char *)f;
 
-		f->magic = DYNINST_MAGIC;
-		f->version = DYNINST_VERSION;
+		f->magic = SYSTEM_MODE_FILE_MAGIC;
+		f->version = SYSTEM_MODE_FILE_VERSION;
 		f->n_entries = 1;
 		f->filename_offset = sizeof(*f) + sizeof(uint32_t);
 		f->kcov_options_offset = f->filename_offset + strlen("hej") + 1;
@@ -163,13 +167,13 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_unmarshal_multi_entry_struct)
 	{
-		struct dyninst_file *f = (struct dyninst_file *)xmalloc(sizeof(struct dyninst_file) +
+		struct system_mode_file *f = (struct system_mode_file *)xmalloc(sizeof(struct system_mode_file) +
 				sizeof(uint32_t) * 3 +
 				strlen("a") + strlen("b") + 2);
 		char *p = (char *)f;
 
-		f->magic = DYNINST_MAGIC;
-		f->version = DYNINST_VERSION;
+		f->magic = SYSTEM_MODE_FILE_MAGIC;
+		f->version = SYSTEM_MODE_FILE_VERSION;
 		f->n_entries = 3;
 		f->filename_offset = sizeof(*f) + sizeof(uint32_t) * 3;
 		f->kcov_options_offset = f->filename_offset + strlen("hej") + 1;
@@ -193,8 +197,8 @@ TESTSUITE(system_mode_formats)
 
 	TEST(out_of_bounds_indexes_are_not_hit)
 	{
-		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
-		class dyninst_memory memEmpty("roy-gunnar-ramstedt", "moa", 0);
+		class system_mode_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class system_mode_memory memEmpty("roy-gunnar-ramstedt", "moa", 0);
 
 		// 0..31 are possible
 		ASSERT_FALSE(mem.indexIsHit(32));
@@ -203,7 +207,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_report_single_hit)
 	{
-		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 1);
+		class system_mode_memory mem("roy-gunnar-ramstedt", "moa", 1);
 
 		mem.reportIndex(1);
 
@@ -213,7 +217,7 @@ TESTSUITE(system_mode_formats)
 
 	TEST(can_report_multiple_hits)
 	{
-		class dyninst_memory mem("roy-gunnar-ramstedt", "moa", 4);
+		class system_mode_memory mem("roy-gunnar-ramstedt", "moa", 4);
 
 		for (unsigned i = 0; i < 4 * 32; i += 2)
 		{

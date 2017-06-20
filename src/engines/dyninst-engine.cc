@@ -86,7 +86,7 @@ public:
 		{
 			std::string src = conf.keyAsString("system-mode-read-results-file");
 
-			m_resultsData = kcov_dyninst::diskToMemory(src);
+			m_resultsData = kcov_system_mode::diskToMemory(src);
 
 			if (!m_resultsData)
 			{
@@ -453,7 +453,7 @@ private:
 	enum mode m_mode;
 	std::string m_filename;
 	std::string m_outFile;
-	kcov_dyninst::dyninst_memory *m_resultsData;
+	kcov_system_mode::system_mode_memory *m_resultsData;
 
 	LineListenerList_t m_lineListeners;
 	FileListenerList_t m_fileListeners;

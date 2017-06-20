@@ -2,15 +2,15 @@
 
 #include <utils.hh>
 
-struct kcov_dyninst::dyninst_file *kcov_dyninst::memoryToFile(const class kcov_dyninst::dyninst_memory &mem, size_t &outSize)
+struct kcov_system_mode::system_mode_file *kcov_system_mode::memoryToFile(const class kcov_system_mode::system_mode_memory &mem, size_t &outSize)
 {
-	outSize = sizeof(struct dyninst_file) + mem.n_entries * sizeof(uint32_t) +
+	outSize = sizeof(struct system_mode_file) + mem.n_entries * sizeof(uint32_t) +
 			mem.filename.size() + mem.options.size() + 2;
-	struct dyninst_file *out = (struct dyninst_file *)xmalloc(outSize);
+	struct system_mode_file *out = (struct system_mode_file *)xmalloc(outSize);
 	char *p = (char *)out;
 
-	out->magic = DYNINST_MAGIC;
-	out->version = DYNINST_VERSION;
+	out->magic = SYSTEM_MODE_FILE_MAGIC;
+	out->version = SYSTEM_MODE_FILE_VERSION;
 	out->n_entries = mem.n_entries;
 	out->filename_offset = mem.n_entries * sizeof(uint32_t) + sizeof(*out);
 	out->kcov_options_offset = out->filename_offset + mem.filename.size() + 1;
@@ -23,14 +23,14 @@ struct kcov_dyninst::dyninst_file *kcov_dyninst::memoryToFile(const class kcov_d
 	return out;
 }
 
-class kcov_dyninst::dyninst_memory *kcov_dyninst::fileToMemory(const struct kcov_dyninst::dyninst_file &file)
+class kcov_system_mode::system_mode_memory *kcov_system_mode::fileToMemory(const struct kcov_system_mode::system_mode_file &file)
 {
-	if (file.magic != DYNINST_MAGIC)
+	if (file.magic != SYSTEM_MODE_FILE_MAGIC)
 	{
 		return NULL;
 	}
 
-	if (file.version != DYNINST_VERSION)
+	if (file.version != SYSTEM_MODE_FILE_VERSION)
 	{
 		return NULL;
 	}
@@ -48,7 +48,7 @@ class kcov_dyninst::dyninst_memory *kcov_dyninst::fileToMemory(const struct kcov
 	}
 	char *p = (char *)&file;
 
-	kcov_dyninst::dyninst_memory *out = new kcov_dyninst::dyninst_memory(std::string(&p[file.filename_offset]),
+	kcov_system_mode::system_mode_memory *out = new kcov_system_mode::system_mode_memory(std::string(&p[file.filename_offset]),
 			std::string(&p[file.kcov_options_offset]),
 			file.n_entries);
 
@@ -57,23 +57,23 @@ class kcov_dyninst::dyninst_memory *kcov_dyninst::fileToMemory(const struct kcov
 	return out;
 }
 
-class kcov_dyninst::dyninst_memory *kcov_dyninst::diskToMemory(const std::string &src)
+class kcov_system_mode::system_mode_memory *kcov_system_mode::diskToMemory(const std::string &src)
 {
 	size_t sz;
-	kcov_dyninst::dyninst_file *p = (kcov_dyninst::dyninst_file *)read_file(&sz, "%s", src.c_str());
+	kcov_system_mode::system_mode_file *p = (kcov_system_mode::system_mode_file *)read_file(&sz, "%s", src.c_str());
 
 	if (!p)
 	{
 		return NULL;
 	}
 
-	kcov_dyninst::dyninst_memory *out = kcov_dyninst::fileToMemory(*p);
+	kcov_system_mode::system_mode_memory *out = kcov_system_mode::fileToMemory(*p);
 	free(p);
 
 	return out;
 }
 
-bool kcov_dyninst::dyninst_memory::indexIsHit(uint32_t index)
+bool kcov_system_mode::system_mode_memory::indexIsHit(uint32_t index)
 {
 	if (index / 32 >= n_entries)
 	{
@@ -86,7 +86,7 @@ bool kcov_dyninst::dyninst_memory::indexIsHit(uint32_t index)
 	return !!(cur & (1 << bit));
 }
 
-void kcov_dyninst::dyninst_memory::reportIndex(uint32_t index)
+void kcov_system_mode::system_mode_memory::reportIndex(uint32_t index)
 {
 	unsigned int wordIdx = index / 32;
 	unsigned int bit = index % 32;
