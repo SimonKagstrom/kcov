@@ -9,7 +9,7 @@
 #include <utils.hh>
 #include <swap-endian.hh>
 
-#include "dyninst-file-format.hh"
+#include "system-mode-file-format.hh"
 
 struct Instance
 {

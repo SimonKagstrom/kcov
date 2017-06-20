@@ -26,7 +26,7 @@
 #include <BPatch_point.h>
 #include <BPatch_function.h>
 
-#include "dyninst-file-format.hh"
+#include "system-mode-file-format.hh"
 
 using namespace kcov;
 

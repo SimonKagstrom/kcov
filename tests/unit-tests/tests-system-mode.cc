@@ -3,7 +3,7 @@
 #include <configuration.hh>
 #include <utils.hh>
 
-#include "../../src/engines/dyninst-file-format.hh"
+#include "../../src/engines/system-mode-file-format.hh"
 
 using namespace kcov_dyninst;
 

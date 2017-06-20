@@ -17,7 +17,7 @@ set (${TGT}_SRCS
     ../../src/capabilities.cc
     ../../src/collector.cc
     ../../src/engine-factory.cc
-    ../../src/engines/dyninst-file-format.cc
+    ../../src/engines/system-mode-file-format.cc
     ../../src/gcov.cc
     ../../src/output-handler.cc
     ../../src/parser-manager.cc
