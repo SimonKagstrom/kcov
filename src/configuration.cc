@@ -379,9 +379,11 @@ public:
 				break;
 			case '8': // Full system record
 				setKey("running-mode", IConfiguration::MODE_SYSTEM_RECORD);
+				setKey("parse-solibs", 0); // Not applicable
 				break;
 			case '9': // Full system report
 				setKey("running-mode", IConfiguration::MODE_SYSTEM_REPORT);
+				setKey("parse-solibs", 0);
 				break;
 			case 'l': {
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
