@@ -167,11 +167,11 @@ private:
     std::string m_name;
     
 public:
-	Semaphore()
+	Semaphore(int initial = 1)
 	{
 		m_name = fmt("/kcov-sem.%p", this);
 
-		m_sem = sem_open(m_name.c_str(), O_CREAT, 0644, 1);
+		m_sem = sem_open(m_name.c_str(), O_CREAT, 0644, initial);
         if (!m_sem)
             panic("Can't create semaphore");
 	}
