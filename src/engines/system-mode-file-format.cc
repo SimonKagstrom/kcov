@@ -73,7 +73,7 @@ class kcov_system_mode::system_mode_memory *kcov_system_mode::diskToMemory(const
 	return out;
 }
 
-bool kcov_system_mode::system_mode_memory::indexIsHit(uint32_t index)
+bool kcov_system_mode::system_mode_memory::indexIsHit(uint32_t index) const
 {
 	if (index / 32 >= n_entries)
 	{
@@ -110,4 +110,16 @@ void kcov_system_mode::system_mode_memory::reportIndex(uint32_t index)
 		newVal = val | (1 << bit);
 
 	} while (!__sync_bool_compare_and_swap(p, val, newVal));
+
+	__sync_fetch_and_add(dirtyCount, 1);
+}
+
+bool kcov_system_mode::system_mode_memory::isDirty() const
+{
+	return *dirtyCount != *cleanCount;
+}
+
+void kcov_system_mode::system_mode_memory::markClean()
+{
+	*cleanCount = *dirtyCount;
 }

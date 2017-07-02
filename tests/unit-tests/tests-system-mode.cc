@@ -236,4 +236,20 @@ TESTSUITE(system_mode_formats)
 			}
 		}
 	}
+
+	TEST(can_detect_dirtyness)
+	{
+		class system_mode_memory mem("roy-gunnar-ramstedt", "moa", 4);
+
+		ASSERT_FALSE(mem.isDirty());
+
+		mem.reportIndex(4 * 32 - 1);
+		ASSERT_TRUE(mem.isDirty());
+
+		mem.markClean();
+		ASSERT_FALSE(mem.isDirty());
+
+		mem.reportIndex(4 * 32 - 2);
+		ASSERT_TRUE(mem.isDirty());
+	}
 }

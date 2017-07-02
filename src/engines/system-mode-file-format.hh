@@ -31,13 +31,19 @@ namespace kcov_system_mode
 			n_entries(n)
 		{
 			mapped = true;
-			data = (uint32_t *)::mmap(NULL, n_entries * sizeof(uint32_t), PROT_READ | PROT_WRITE,
+			data = (uint32_t *)::mmap(NULL, (n_entries + 2) * sizeof(uint32_t), PROT_READ | PROT_WRITE,
 					MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 			if (!data)
 			{
 				// Fallback to plain malloc - won't work with forks
-				data = (uint32_t *)xmalloc(n_entries * sizeof(uint32_t));
+				data = (uint32_t *)xmalloc((n_entries + 2) * sizeof(uint32_t));
 			}
+
+			dirtyCount = &data[n_entries];
+			cleanCount = &data[n_entries + 1];
+
+			*dirtyCount = 0;
+			*cleanCount = 0;
 		}
 
 		~system_mode_memory()
@@ -54,12 +60,19 @@ namespace kcov_system_mode
 
 		void reportIndex(uint32_t index);
 
-		bool indexIsHit(uint32_t index);
+		bool indexIsHit(uint32_t index) const;
+
+		bool isDirty() const;
+
+		void markClean();
 
 		const std::string filename;
 		const std::string options;
 		const uint32_t n_entries;
 		uint32_t *data;
+
+		uint32_t *dirtyCount;
+		uint32_t *cleanCount;
 
 	private:
 		bool mapped;
