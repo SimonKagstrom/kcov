@@ -352,37 +352,24 @@ private:
 	// Printout lines to stdout, except kcov markers
 	void handleStdout()
 	{
-		// Has input?
-		if (!file_readable(m_stdout, 0))
-			return;
-
 		char *curLine = NULL;
-		ssize_t len;
 		size_t linecap = 0;
 
-		len = getline(&curLine, &linecap, m_stdout);
-		while (len > 0)
+		while (file_readable(m_stdout, 0) && getline(&curLine, &linecap, m_stdout) > 0)
 		{
-			std::string cur(curLine);
+			/* Check for line markers to filter these away.
+			 *
+			 * For some reason, redirection sometimes give kkcov@..., so filter that
+			 * in addition to the obvious stuff
+			 */
+			size_t kcovMarker = m_bashSupportsXtraceFd ? -1 : std::string(curLine).find("kcov@");
 
-			if (!m_bashSupportsXtraceFd) 
+			if (kcovMarker != 0 && kcovMarker != 1)
 			{
-				/* Check for line markers to filter these away.
-				 *
-				 * For some reason, redirection sometimes give kkcov@..., so filter that
-				 * in addition to the obvious stuff
-				 */
-				size_t kcovMarker = cur.find("kcov@");
-				if (kcovMarker == 0 || kcovMarker == 1)
-				{
-					len = getline(&curLine, &linecap, m_stdout);
-					continue;
-				}
+				printf("%s", curLine);
 			}
-			printf("%s", cur.c_str());
-			len = getline(&curLine, &linecap, m_stdout);
 		}
-		return;
+		free(curLine);
 	}
 
 	bool bashCanHandleXtraceFd()

@@ -235,14 +235,23 @@ class bash_eof_backtick(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 180) == 1
 
 class bash_subshell(testbase.KcovTestCase):
-    @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/subshell.sh")
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/subshell.sh/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "subshell.sh", 1) == None
-        assert parse_cobertura.hitsPerLine(dom, "subshell.sh", 4) == 2
-        assert parse_cobertura.hitsPerLine(dom, "subshell.sh", 8) == None
+        self.assertIsNone(parse_cobertura.hitsPerLine(dom, "subshell.sh", 1))
+        self.assertEqual(2, parse_cobertura.hitsPerLine(dom, "subshell.sh", 4))
+        self.assertEqual(0, parse_cobertura.hitsPerLine(dom, "subshell.sh", 8))
+
+class bash_handle_all_output(testbase.KcovTestCase):
+    def runTest(self):
+        script = "handle-all-output.sh"
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " +
+            testbase.sources + "/tests/bash/" + script,
+            timeout=5.0)
+        self.assertEqual(0, rv, "kcov exited unsuccessfully")
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/" + script + "/cobertura.xml")
+        self.assertIsNone(parse_cobertura.hitsPerLine(dom, script, 1))
+        self.assertEqual(1000, parse_cobertura.hitsPerLine(dom, script, 4))
 
 class bash_exit_status(testbase.KcovTestCase):
     @unittest.expectedFailure

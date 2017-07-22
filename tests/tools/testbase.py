@@ -5,6 +5,7 @@ import os
 import sys
 import subprocess
 import time
+import threading
 
 kcov = ""
 outbase = ""
@@ -32,7 +33,7 @@ class KcovTestCase(unittest.TestCase):
 
         return rv, output
 
-    def do(self, cmdline, kcovKcov = True):
+    def do(self, cmdline, kcovKcov = True, timeout = None):
         output = ""
         rv = 0
 
@@ -43,7 +44,19 @@ class KcovTestCase(unittest.TestCase):
 
         cmdline = extra + cmdline
         child = subprocess.Popen(cmdline.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        timer = None
+
+        if timeout is not None:
+            def stopChild():
+                print("\n  didn't finish within %s seconds; killing ..." % timeout)
+                child.terminate()
+
+            timer = threading.Timer(timeout, stopChild)
+            timer.start()
+
         out, err = child.communicate()
+        if timer is not None:
+            timer.cancel()
         output = out + err
         rv = child.returncode
 
