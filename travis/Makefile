@@ -124,7 +124,7 @@ prepare_osx_gcc:
 
 prepare_osx:
 	brew update
-	brew install homebrew/dupes/zlib
+	brew install zlib
 	brew install python3
 	brew install bash
 

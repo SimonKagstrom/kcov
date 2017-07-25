@@ -22,7 +22,7 @@ Install elfutils-libelf-devel libcurl-devel binutils-devel elfutils-devel dynins
 
 Mac OS X
 --------
-brew install homebrew/dupes/zlib bash cmake pkgconfig
+brew install zlib bash cmake pkgconfig
 
 *Temporary* OSX build instructions due to Issue #166:
 
