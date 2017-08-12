@@ -362,7 +362,7 @@ public:
 		// A signal?
 		if (WIFSTOPPED(status)) {
 			int sig = WSTOPSIG(status);
-			int sigill = SIGUNUSED;
+			int sigill = SIGSYS;
 
 			// Arm is using an undefined instruction, so we'll get a SIGILL here
 #if defined(__arm__) || defined(__aarch64__)
