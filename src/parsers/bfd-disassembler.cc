@@ -62,6 +62,13 @@ const std::set<std::string> x86BranchInstructions =
 		"ret",
 };
 
+/*
+ * Since binutils >= 2.29 or so, print_insn_i386 is no longer defined in
+ * dis-asm.h. I'm not sure what the correct and backwards compatible way
+ * of handling this is, so define it here.
+ */
+extern int print_insn_i386              (bfd_vma, disassemble_info *);
+
 class BfdDisassembler : public IDisassembler
 {
 public:
