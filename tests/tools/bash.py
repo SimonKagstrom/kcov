@@ -264,7 +264,6 @@ class bash_exit_status(testbase.KcovTestCase):
 
 # Issue 180
 class bash_ignore_uncovered(testbase.KcovTestCase):
-    @unittest.expectedFailure
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --exclude-region=CUSTOM_RANGE_START:CUSTOM_RANGE_END " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/other.sh")
