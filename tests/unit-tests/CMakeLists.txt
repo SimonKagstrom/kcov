@@ -73,6 +73,7 @@ add_custom_command(
 
 include_directories(
 	../../src/include/
+	trompeloeil/include
 	${LIBCRPCUT_INCLUDE_DIRS}
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDW_INCLUDE_DIRS}
