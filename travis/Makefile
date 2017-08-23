@@ -35,7 +35,7 @@ build:
 	cd build-tests && cmake ../tests
 	make -C build-tests
 
-build_gcc: build run_unit_tests build_reference
+build_gcc: build run_unit_tests build_reference patchelf-i386-chroot
 	sudo rm -rf ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests
 	sudo mkdir -p ${chroot}/tmp/kcov/build ${chroot}/tmp/kcov/build-tests ${chroot}/tmp/kcov/build-tools
 	sudo i386 chroot ${chroot} sh -c "cd /tmp/kcov/build && cmake .."
@@ -96,6 +96,12 @@ patchelf:
 	wget https://github.com/NixOS/patchelf/archive/0.9.tar.gz
 	tar -xf 0.9.tar.gz
 	cd patchelf-0.9 && ./bootstrap.sh && ./configure && make && sudo make install
+
+patchelf-i386-chroot: patchelf
+	wget https://github.com/NixOS/patchelf/archive/0.9.tar.gz
+	sudo cp 0.9.tar.gz ${chroot}
+	sudo i386 chroot ${chroot} sh -c "tar -xf 0.9.tar.gz"
+	sudo i386 chroot ${chroot} sh -c "cd patchelf-0.9 && ./bootstrap.sh && ./configure && make && make install"
 
 build_unit_tests: trompeloeil
 	mkdir -p build-ut
