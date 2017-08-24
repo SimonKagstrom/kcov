@@ -2,6 +2,7 @@ import testbase
 import os
 import time
 import unittest
+import platform
 import parse_cobertura
 
 class SystemModeBase(testbase.KcovTestCase):
@@ -39,7 +40,9 @@ class system_mode_can_instrument_binary(SystemModeBase):
         assert os.path.getsize(dst) > os.path.getsize(src)
 
 class system_mode_can_record_and_report_binary(SystemModeBase):
+    @unittest.skipIf(platform.machine() == "i686", "x86_64-only")
     def runTest(self):
+        print platform.machine()
         self.setUp()
         try:
             os.makedirs(testbase.outbase + "/kcov")
