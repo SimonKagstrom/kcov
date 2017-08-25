@@ -67,7 +67,7 @@ const std::set<std::string> x86BranchInstructions =
  * dis-asm.h. I'm not sure what the correct and backwards compatible way
  * of handling this is, so define it here.
  */
-extern int print_insn_i386              (bfd_vma, disassemble_info *);
+extern "C" int print_insn_i386              (bfd_vma, disassemble_info *);
 
 class BfdDisassembler : public IDisassembler
 {
