@@ -181,7 +181,7 @@ bool SystemModeFile::parse(const void *fileData, size_t fileSize, bool isRaw)
 	{
 		addEntry(i, entries[i]);
 	}
-
+	free(entries);
 
 	return true;
 }
