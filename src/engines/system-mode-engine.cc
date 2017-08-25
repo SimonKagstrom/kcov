@@ -131,7 +131,10 @@ private:
 		if (data)
 		{
 			write_file(data, processedSize, "%s", dst.c_str());
-			chmod(dst.c_str(), st.st_mode);
+			if (chmod(dst.c_str(), st.st_mode) < 0)
+			{
+				error("Can't chmod???\n");
+			}
 		}
 
 		free((void *)data);
