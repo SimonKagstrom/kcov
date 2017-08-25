@@ -47,6 +47,7 @@ void connectToDaemon(void)
 		fprintf(stderr, "kcov-system-lib: Can't read /proc/self/exe link\n");
 		return;
 	}
+	buf[sizeof(buf) - 1] = '\0';
 	std::string filename = buf;
 
 
