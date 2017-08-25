@@ -172,6 +172,8 @@ private:
 				reportEvent(ev_breakpoint, 0, m_indexToAddress[i]);
 			}
 		}
+
+		delete results;
 	}
 
 	std::string getKcovOptionsString()
