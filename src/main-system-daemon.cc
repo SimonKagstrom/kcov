@@ -423,6 +423,7 @@ int main(int argc, const char *argv[])
 			break;
 		}
 
+		memset(buf, 0, sizeof(buf));
 		int r = ::read(fd, buf, sizeof(buf));
 
 		if (r <= 0)
