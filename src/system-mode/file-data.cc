@@ -273,5 +273,8 @@ const void *SystemModeFile::getProcessedData(size_t &outSize) const
 
 	marshalTrailer(trailer);
 
+	// Not yet implemented
+	free(compressed);
+
 	return out;
 }
