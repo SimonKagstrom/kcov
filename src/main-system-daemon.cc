@@ -192,6 +192,7 @@ static void processOne(const std::string &destinationDir, const std::string &fil
 	{
 		kcov_debug(INFO_MSG, "Can't fork?");
 
+		delete sysFile;
 		return;
 	}
 	else if (child == 0)

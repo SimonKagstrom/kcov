@@ -70,6 +70,12 @@ SystemModeFile::SystemModeFile() :
 {
 }
 
+SystemModeFile::~SystemModeFile()
+{
+	free(m_data);
+}
+
+
 SystemModeFile *SystemModeFile::fromRawFile(uint32_t id, const std::string &filename, const std::string &options,
 		const void *fileData, size_t fileSize)
 {

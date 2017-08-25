@@ -29,6 +29,8 @@ namespace kcov
 	class SystemModeFile
 	{
 	public:
+		~SystemModeFile();
+
 		void addEntry(uint32_t index, uint64_t value);
 
 		/**
