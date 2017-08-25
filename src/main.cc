@@ -408,7 +408,10 @@ static int runSystemModeRecord()
 
 		return -1;
 	}
-	chmod(library.c_str(), 0755);
+	if (chmod(library.c_str(), 0755) < 0)
+	{
+		error("Can't chmod??\n");
+	}
 
 	return runSystemModeRecordDirectory(base, 0755);
 }
