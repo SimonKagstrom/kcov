@@ -1,7 +1,35 @@
 Kcov (34):
+	* Issue #215: Correct build with binutils >= 2.29
+
+	* Issue #216: Don't use SIGUNUSED (Dridi Boukelmoune)
+
+	* Issue #211: Avoid blocking bash write (Mike Bland)
+
+	* Issue #198: Correct skipped breakpoint count
+
+	* Issue #92: kcov can now perform full-system instrumentation via a
+	  daemon and statically instrumented binaries
+
+	* Issue #193: Handle all available bash output (Ashley Straw)
+
+	* Issue #187: Fix crash regression due to address verifier changes
+
+	* Issue #166, Issue #209: Describe workaround for OSX build problems
+
+	* Issue #183: python: Quote argument strings to avoid argv issues (Bashkar Rana)
+
+	* Unit tests build again
+
+	* Issue #165: bash: Provide basic parser mode to workaround bugs in the
+	  parser
+
+	* Issue #178: Port to AArch64 (though untested!)
+
 	* Issue #180: kcov now honors LCOV_EXCL_LINE/START/STOP, so that regions of
 	  code can be excluded from the report. Command-line options can also set
-	  custom patterns
+	  custom patterns (Me, Keith Wansbrough)
+
+	* Issue #175: kcov can now ignore unreachable lines (Thomas Neumann)
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 
