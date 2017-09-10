@@ -31,7 +31,7 @@ Kcov (34):
 
 	* Issue #175: kcov can now ignore unreachable lines (Thomas Neumann)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Sep 10 13:11:34 CEST 2017
 
 Kcov (33):
 	* Issue #167: Writers: Add pure JSON writer for gitlabCI (http://gitlab.com)
