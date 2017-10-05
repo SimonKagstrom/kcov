@@ -160,7 +160,7 @@ public:
 
 		m_listener = &listener;
 
-		if (getcwd(buf, sizeof(buf)) < 0) {
+		if (!getcwd(buf, sizeof(buf))) {
 			error("No current WD?\n");
 
 			return false;
