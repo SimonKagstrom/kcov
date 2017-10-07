@@ -151,17 +151,6 @@ class bash_merge_data_issue_38(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "unitundertest.sh", 33) == 1
         assert parse_cobertura.hitsPerLine(dom, "unitundertest.sh", 36) == 1
 
-class bash_output_crc(testbase.KcovTestCase):
-    def runTest(self):
-        self.setUp()
-        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/first-dir/a.sh")
-        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/second-dir/a.sh")
-        rv,a_lines = self.doShell("ls " + testbase.outbase + "/kcov/a.sh/a.sh.*.json")
-        rv,b_lines = self.doShell("ls " + testbase.outbase + "/kcov/a.sh/b.sh.*.json")
-
-        assert len(a_lines.split()) == 2
-        assert len(b_lines.split()) == 2
-
 class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
