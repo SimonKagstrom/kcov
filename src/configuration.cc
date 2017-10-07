@@ -472,12 +472,13 @@ public:
 				}
 			}
 
+			path = get_real_path(path);
 			std::pair<std::string, std::string> tmp = split_path(path);
 
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
 
-			setKey("target-directory", outDirectory + "/" + binaryName);
+			setKey("target-directory", fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(), std::hash<std::string>()(tmp.first)));
 
 			setKey("binary-name", binaryName);
 

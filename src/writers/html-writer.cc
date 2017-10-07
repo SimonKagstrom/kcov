@@ -239,7 +239,21 @@ private:
 		std::string merged;
 
 		for (de = readdir(dir); de; de = readdir(dir)) {
-			std::string cur = idx + de->d_name + "/summary.db";
+			std::string curDir = idx + de->d_name;
+			std::string cur = curDir + "/summary.db";
+			struct stat st;
+
+			if (lstat(curDir.c_str(), &st) < 0)
+			{
+				continue;
+			}
+
+			if (S_ISLNK(st.st_mode))
+			{
+				printf("XXX: %s\n", de->d_name);
+				// Skip human friendly names
+				continue;
+			}
 
 			if (!file_exists(cur))
 				continue;

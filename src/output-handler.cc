@@ -32,8 +32,11 @@ namespace kcov
 
 			m_lastTimestamp = get_ms_timestamp();
 
+			std::string readableName = fmt("%s/%s", m_baseDirectory.c_str(),  conf.keyAsString("binary-name").c_str());
+
 			(void)mkdir(m_baseDirectory.c_str(), 0755);
 			(void)mkdir(m_outDirectory.c_str(), 0755);
+			(void)symlink(m_outDirectory.c_str(), readableName.c_str());
 
 			if (collector)
 				collector->registerEventTickListener(*this);
