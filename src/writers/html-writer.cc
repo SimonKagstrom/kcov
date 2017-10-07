@@ -250,7 +250,6 @@ private:
 
 			if (S_ISLNK(st.st_mode))
 			{
-				printf("XXX: %s\n", de->d_name);
 				// Skip human friendly names
 				continue;
 			}
