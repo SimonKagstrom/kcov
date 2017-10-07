@@ -36,7 +36,12 @@ namespace kcov
 
 			(void)mkdir(m_baseDirectory.c_str(), 0755);
 			(void)mkdir(m_outDirectory.c_str(), 0755);
-			(void)symlink(m_outDirectory.c_str(), readableName.c_str());
+
+			(void)unlink(readableName.c_str());
+			if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
+			{
+				printf("Can't symlink readable name\n");
+			}
 
 			if (collector)
 				collector->registerEventTickListener(*this);
