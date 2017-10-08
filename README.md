@@ -54,35 +54,18 @@ kcov --exclude-path=/usr/include /path/to/outdir executable
 
 Does the same thing, but with proper path lookups.
 
-Travis-ci / coveralls integration
----------------------------------
-kcov coverage collection is easy to integrate with [travis-ci](http://travis-ci.org) and
-[coveralls.io](http://coveralls.io). To upload data from the travis build to coveralls,
-run kcov with
+Use from continuous integration systems
+---------------------------------------
+kcov is easy to integrate with [travis-ci](http://travis-ci.org) together with
+[coveralls.io](http://coveralls.io) or [codecov.io](http://codecov.io). It can also
+be used from Jenkins, [SonarQube](http://sonarqube.org) and [GitLab CI](http://gitlab.com).
+Refer to
 
-```
-kcov --coveralls-id=$TRAVIS_JOB_ID /path/to/outdir executable
-```
-
-which in addition to regular coverage collection uploads to coveralls.
-
-Travis-ci / codecov integration
----------------------------------
-Integrating with [codecov](http://codecov.io) is also simple. To upload data from the travis build to codecov, run kcov normally, and then upload using the codecov uploader
-
-```
-kcov /path/to/outdir executable
-bash <(curl -s https://codecov.io/bash) -s /path/to/outdir
-```
-
-The easiest way to achieve this is to run the codecov uploader on travis success:
-
-```
-after_success:
-  - bash <(curl -s https://codecov.io/bash) -s /path/to/outdir
-```
-
-the -s /path/to/outdir part can be skipped if kcov produces output in the current directory.
+* [coveralls](doc/coveralls.md) for details about travis-ci + coveralls, or
+* [codecov](doc/coveralls.md) for details about travis-ci + codecov
+* [jenkins](doc/jenkins.md) for details about how to integrate in Jenkins
+* [sonarqube](doc/sonarqube.md) for how to use kcov and sonarqube together
+* [gitlab](doc/gitlab.md) for use with GitLab
 
 Full-system instrumentation
 ---------------------------
