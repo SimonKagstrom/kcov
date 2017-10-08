@@ -11,7 +11,7 @@ target_architecture(CMAKE_TARGET_ARCHITECTURES)
 message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 
 pkg_check_modules(LIBZ REQUIRED zlib)
-pkg_check_modules(LIBCURL REQUIRED libcurl)
+pkg_check_modules(LIBCURL libcurl)
 
 # ====================================
 # project name and version
@@ -67,7 +67,11 @@ if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTU
 	endif()
 endif()
 
-set (coveralls_SRCS writers/coveralls-writer.cc)
+set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
+
+if (LIBCURL_FOUND)
+	set (coveralls_SRCS writers/coveralls-writer.cc)
+endif()
 
 if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
 	message(STATUS "Building a static binary (no coveralls support)")
