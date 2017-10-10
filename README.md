@@ -62,7 +62,7 @@ be used from Jenkins, [SonarQube](http://sonarqube.org) and [GitLab CI](http://g
 Refer to
 
 * [coveralls](doc/coveralls.md) for details about travis-ci + coveralls, or
-* [codecov](doc/coveralls.md) for details about travis-ci + codecov
+* [codecov](doc/codecov.md) for details about travis-ci + codecov
 * [jenkins](doc/jenkins.md) for details about how to integrate in Jenkins
 * [sonarqube](doc/sonarqube.md) for how to use kcov and sonarqube together
 * [gitlab](doc/gitlab.md) for use with GitLab
