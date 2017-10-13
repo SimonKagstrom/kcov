@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <libelf.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <sched.h>
