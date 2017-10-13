@@ -1,3 +1,11 @@
+Kcov (35):
+	* Only build the system daemon if libelf isn't available
+
+	* Issue #208: Allow covering multiple binaries with the same name in the same
+	  report
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (34):
 	* Issue #215: Correct build with binutils >= 2.29
 
