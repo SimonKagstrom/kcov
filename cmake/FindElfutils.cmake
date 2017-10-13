@@ -9,7 +9,7 @@
 
 # Locate libelf library at first
 if (NOT LIBELF_FOUND)
-   find_package (LibElf REQUIRED)
+   find_package (LibElf)
 endif (NOT LIBELF_FOUND)
 
 if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)

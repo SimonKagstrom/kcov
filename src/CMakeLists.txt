@@ -91,8 +91,8 @@ set (SOLIB_generated )
 
 # Linux-specific sources
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
-	find_package (LibElf REQUIRED)
-	find_package (Elfutils REQUIRED)
+	find_package (LibElf)
+	find_package (Elfutils)
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
@@ -123,6 +123,9 @@ else()
 		ENV LD_LIBRARY_PATH
 	)
 	mark_as_advanced(LLDB_LIBRARY)
+
+	# Not really true, but anyway
+	set(LIBELF_FOUND 1)
 
 	set (MACHO_SRCS
 		engines/lldb-engine.cc
@@ -215,11 +218,27 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -D_GLIBCXX_USE_NANO
 include_directories(
 	include/
 	../external/lldb/include/
-	${LIBELF_INCLUDE_DIRS}
-	${LIBDW_INCLUDE_DIRS}
 	${LIBZ_INCLUDE_DIRS}
+	)
+
+if (LIBDW_FOUND)
+include_directories(
+	${LIBDW_INCLUDE_DIRS}
+	)
+endif()
+
+if (LIBELF_FOUND)
+include_directories(
+	${LIBELF_INCLUDE_DIRS}
+	)
+endif()
+
+if (LIBCURL_FOUND)
+include_directories(
 	${LIBCURL_INCLUDE_DIRS}
 	)
+endif()
+
 
 link_directories (/home/ska/local/lib)
 
@@ -310,32 +329,33 @@ if(SPECIFY_RPATH)
 	ENDIF("${isSystemDir}" STREQUAL "-1")
 endif(SPECIFY_RPATH)
 
-add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
+if (LIBELF_FOUND)
+	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
-target_link_libraries(${KCOV}
-	${LIBDW_LIBRARIES}
-	${LIBELF_LIBRARIES}
-	stdc++
-	${LIBCURL_LIBRARIES}
-	m
-	${DISASSEMBLER_LIBRARIES}
-	${LIBZ_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT}
-	dl
-	${LLDB_LIBRARY}
-)
+	target_link_libraries(${KCOV}
+		${LIBDW_LIBRARIES}
+		${LIBELF_LIBRARIES}
+		stdc++
+		${LIBCURL_LIBRARIES}
+		m
+		${DISASSEMBLER_LIBRARIES}
+		${LIBZ_LIBRARIES}
+		${CMAKE_THREAD_LIBS_INIT}
+		dl
+		${LLDB_LIBRARY}
+	)
+	install (TARGETS ${KCOV} ${INSTALL_TARGETS_PATH})
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
     add_executable (kcov-system-daemon ${KCOV_SYSTEM_MODE_SRCS} version.c)
 
     target_link_libraries(kcov-system-daemon
-        ${LIBELF_LIBRARIES}
         stdc++
         m
         ${LIBZ_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         dl
 	)
+	install (TARGETS kcov-system-daemon ${INSTALL_TARGETS_PATH})
 endif()
-
-install (TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_PATH})
