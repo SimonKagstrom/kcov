@@ -40,7 +40,7 @@ namespace kcov
 			(void)unlink(readableName.c_str());
 			if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
 			{
-				printf("Can't symlink readable name\n");
+				kcov_debug(INFO_MSG, "Can't symlink readable name\n");
 			}
 
 			if (collector)
