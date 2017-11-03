@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include <list>
 #include <unordered_map>
@@ -57,6 +58,7 @@ public:
 
 	bool start(IEventListener &listener, const std::string &executable)
 	{
+		IConfiguration &conf = IConfiguration::getInstance();
 		int stderrPipe[2];
 		int stdoutPipe[2];
 
@@ -127,7 +129,6 @@ public:
 			}
 
 		} else if (m_child == 0) {
-			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
@@ -201,6 +202,21 @@ public:
 			return false;
 		}
 
+
+		std::vector<std::string> dirsToParse = conf.keyAsList("bash-parse-file-dir");
+
+		for (std::vector<std::string>::iterator it = dirsToParse.begin();
+				it != dirsToParse.end();
+				++it)
+		{
+			parseDirectoryForFiles(*it);
+		}
+
+		// Parse the directory where the script-under-test is for other bash scripts
+		if (conf.keyAsInt("bash-parse-binary-dir"))
+		{
+			parseDirectoryForFiles(conf.keyAsString("binary-path"));
+		}
 		parseFile(executable);
 
 		return true;
@@ -349,6 +365,56 @@ public:
 
 
 private:
+	void parseDirectoryForFiles(const std::string &base)
+	{
+		DIR *dir = ::opendir(base.c_str());
+		if (!dir)
+		{
+			error("Can't open directory %s\n", base.c_str());
+			return;
+		}
+
+		// Loop through the directory structure
+		struct dirent *de;
+		for (de = ::readdir(dir); de; de = ::readdir(dir))
+		{
+			std::string cur = base + "/" + de->d_name;
+
+			if (strcmp(de->d_name, ".") == 0)
+				continue;
+
+			if (strcmp(de->d_name, "..") == 0)
+				continue;
+
+			struct stat st;
+
+			if (lstat(cur.c_str(), &st) < 0)
+				continue;
+
+			if (S_ISDIR(st.st_mode))
+			{
+				parseDirectoryForFiles(cur);
+			}
+			else
+			{
+				size_t sz;
+				uint8_t *p = (uint8_t *)read_file(&sz, "%s", cur.c_str());
+
+				if (p)
+				{
+					// Bash file?
+					if (matchParser(cur, p, sz) != match_none)
+					{
+						parseFile(cur);
+					}
+
+				}
+				free((void *)p);
+			}
+		}
+		::closedir(dir);
+	}
+
 	// Printout lines to stdout, except kcov markers
 	void handleStdout()
 	{

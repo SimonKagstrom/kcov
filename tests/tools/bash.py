@@ -279,3 +279,35 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 48) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 49) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 51) == 1
+
+# Issue #224
+class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/first-dir/a.sh 5")
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "a.sh", 5) == 1
+        # Not executed
+        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) == 0
+
+class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --bash-parse-files-in-dir=" + testbase.sources + "/tests/bash " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/first-dir/a.sh 5")
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        # Not executed
+        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) == 0
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 3) == 0
+
+class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --bash-dont-parse-binary-dir " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/first-dir/a.sh 5")
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "a.sh", 5) == 1
+        # Not included in report
+        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 3) == None

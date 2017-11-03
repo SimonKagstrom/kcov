@@ -135,6 +135,8 @@ public:
 				{"debug", required_argument, 0, 'D'},
 				{"debug-force-bash-stderr", no_argument, 0, 'd'},
 				{"bash-handle-sh-invocation", no_argument, 0, 's'},
+				{"bash-dont-parse-binary-dir", no_argument, 0, 'j'},
+				{"bash-parse-files-in-dirs", required_argument, 0, 'J'},
 				{"replace-src-path", required_argument, 0, 'R'},
 				{"collect-only", no_argument, 0, 'C'},
 				{"report-only", no_argument, 0, 'r'},
@@ -402,6 +404,16 @@ public:
 				setKey("high-limit", stoul(vec[1]));
 				break;
 			}
+			case 'j':
+				setKey("bash-parse-binary-dir", 0);
+				break;
+			case 'J':
+			{
+				StrVecMap_t bashFilesInPath = getCommaSeparatedList(std::string(optarg));
+
+				setKey("bash-parse-file-dir", bashFilesInPath);
+				break;
+			}
 			case 'R': {
 			  std::string tmpArg = std::string(optarg);
 			  size_t tokenPosFront = tmpArg.find_first_of(":");
@@ -551,6 +563,8 @@ public:
 		setKey("bash-handle-sh-invocation", 0);
 		setKey("bash-use-basic-parser", 0);
 		setKey("bash-use-ps4", 1);
+		setKey("bash-parse-file-dir", StrVecMap_t());
+		setKey("bash-parse-binary-dir", 1);
 		setKey("verify", 0);
 		setKey("command-name", "");
 		setKey("merged-name", "[merged]");
@@ -672,7 +686,9 @@ public:
 				"                         default: %s\n"
 				" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
 				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
-				"                         execve replacement. Buggy on some systems\n",
+				"                         execve replacement. Buggy on some systems\n"
+				" --bash-dont-parse-binary-dir Don't parse the binary directory for other scripts\n"
+				" --bash-parse-files-in-dir=dir[,...]  Parse bash scripts in dir(s)\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"),
 				getConfigurableValues(),
 				keyAsString("python-command").c_str(), keyAsString("bash-command").c_str(),

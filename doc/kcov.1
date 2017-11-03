@@ -103,6 +103,13 @@ the PS4 environment variable, or DEBUG for use of the DEBUG trap.
 Handle invocations of /bin/sh scripts via using a LD_PRELOADed library that replaces execve (i.e., /bin/sh is
 executed as /bin/bash). Does not work well on some systems, so the default is not to use this.
 .TP
+\fB\-\-bash\-dont\-parse\-binary\-dir
+Kcov parses the directory of the binary for other scripts and add these to the report. If you don't
+want this behavior, this option turns that off.
+.TP
+\fB\-\-bash\-parse\-files\-in\-dir\fP=\fIP1\fP[\fI,P2\fP...]
+Parse directories for bash scripts.
+.TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
 .TP
