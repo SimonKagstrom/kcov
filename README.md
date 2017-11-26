@@ -76,7 +76,3 @@ More information
 ----------------
 kcov is written by Simon Kagstrom <simon.kagstrom@gmail.com> and more
 information can be found at [the web page](http://simonkagstrom.github.com/kcov/index.html)
-
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/xwwdAkPFUq2E5FR2au745CiZ/SimonKagstrom/kcov'>
-  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/xwwdAkPFUq2E5FR2au745CiZ/SimonKagstrom/kcov.svg' />
-</a>
