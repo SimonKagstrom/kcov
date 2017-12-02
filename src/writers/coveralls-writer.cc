@@ -153,7 +153,7 @@ public:
 		if (isRepoToken(id)) {
 			out << " \"repo_token\": \"" + id + "\",\n";
 		} else {
-			out << " \"service_name\": \"travis-ci\",\n";
+			out << " \"service_name\": \"" + conf.keyAsString("coveralls-service-name") + "\",\n";
 			out << " \"service_job_id\": \"" + id + "\",\n";
 		}
 		out << " \"source_files\": [\n";

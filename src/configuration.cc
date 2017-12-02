@@ -574,6 +574,7 @@ public:
 		setKey("system-mode-write-file-mode", 0644);
 		setKey("system-mode-read-results-file", "");
 		setKey("patchelf-command", "patchelf");
+		setKey("coveralls-service-name", "travis-ci");
 	}
 
 
@@ -636,6 +637,8 @@ public:
 			setKey(key, std::string(value));
 		else if (key == "merged-name")
 			setKey(key, std::string(value));
+		else if (key == "coveralls-service-name")
+			setKey(key, std::string(value));
 		else
 			panic("Unknown key %s\n", key.c_str());
 	}
@@ -648,7 +651,9 @@ public:
 		"                           css-file=FILE              Filename of bcov.css file\n"
 		"                           high-limit=NUM             Percentage for high coverage\n"
 		"                           low-limit=NUM              Percentage for low coverage\n"
-		"                           merged-name=STR            Name of [merged] tag in HTML\n";
+		"                           merged-name=STR            Name of [merged] tag in HTML\n"
+		"                           coveralls-service-name=STR Service name for coveralls\n"
+		;
 	}
 
 	std::string uncommonOptions()
