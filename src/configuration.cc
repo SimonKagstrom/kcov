@@ -81,6 +81,7 @@ public:
 				"                         code lines.\n"
 				" --exclude-region=start:stop[,...] Exclude regions of code between start:stop\n"
 				"                         markers (e.g., within comments) as non-code lines.\n"
+				" --clean                 don't accumulate data from multiple runs\n"
 				"\n"
 				" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
 				"                         Coveralls.io\n"
@@ -124,6 +125,7 @@ public:
 				{"gcov", no_argument, 0, 'g'},
 				{"clang", no_argument, 0, 'c'},
 				{"configure", required_argument, 0, 'M'},
+				{"clean", no_argument, 0, 'E'},
 				{"exclude-pattern", required_argument, 0, 'x'},
 				{"include-pattern", required_argument, 0, 'i'},
 				{"exclude-path", required_argument, 0, 'X'},
@@ -254,6 +256,9 @@ public:
 				break;
 			case 'c':
 				setKey("clang-sanitizer", 1);
+				break;
+			case 'E':
+				setKey("clean-output", 1);
 				break;
 			case 'p':
 			{
@@ -544,6 +549,7 @@ public:
 		setKey("parse-solibs", 1);
 		setKey("gcov", 0);
 		setKey("clang-sanitizer", 0);
+		setKey("clean-output", 0);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);

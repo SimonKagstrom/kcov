@@ -371,17 +371,19 @@ private:
 		if (m_unmarshallingDone)
 			return;
 
-		void *data;
-		size_t sz;
+		if (!IConfiguration::getInstance().keyAsInt("clean-output"))
+		{
+			void *data;
+			size_t sz;
 
-		data = read_file(&sz, "%s", m_dbFileName.c_str());
+			data = read_file(&sz, "%s", m_dbFileName.c_str());
 
-		if (data && !unMarshal(data, sz))
-			kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
+			if (data && !unMarshal(data, sz))
+				kcov_debug(INFO_MSG, "Can't unmarshal %s\n", m_dbFileName.c_str());
 
+			free(data);
+		}
 		m_unmarshallingDone = true;
-
-		free(data);
 	}
 
 	/* Called during runtime */
