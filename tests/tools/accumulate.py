@@ -18,6 +18,22 @@ class accumulate_data(testbase.KcovTestCase):
         self.failIf(parse_cobertura.hitsPerLine(dom, "main", 19) != 1)
         self.failIf(parse_cobertura.hitsPerLine(dom, "main", 14) != 2)
 
+class dont_accumulate_data_with_clean(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/main")
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 16) != 1)
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 19) != 0)
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 14) != 1)
+
+        rv,o = self.do(testbase.kcov + " --clean "+ testbase.outbase + "/kcov " + testbase.sources + "/tests/python/main 5")
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 16) != 0)
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 19) != 1)
+        self.failIf(parse_cobertura.hitsPerLine(dom, "main", 14) != 1)
+
 class merge_basic(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
