@@ -18,4 +18,8 @@ set (CPACK_SOURCE_IGNORE_FILES
   .*~  .*.log
 )
 
+set (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    /usr/share/man /usr/share/man/man1
+    /usr/local/share/man /usr/local/share/man/man1)
+
 include (CPack)
