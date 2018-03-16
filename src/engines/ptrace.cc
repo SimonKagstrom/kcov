@@ -19,6 +19,10 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#if defined(__aarch64__)
+#  include <sys/uio.h>
+#endif
+
 #include <map>
 #include <unordered_map>
 #include <list>
@@ -323,15 +327,37 @@ public:
 		return true;
 	}
 
+	long getRegs(pid_t pid, void *addr, void *regs, size_t len)
+	{
+#if defined(__aarch64__)
+		struct iovec iov = { regs, len };
+		return ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov);
+#else
+		(void)len;
+		return ptrace((__ptrace_request)PTRACE_GETREGS, pid, NULL, regs);
+#endif
+	}
+
+	long setRegs(pid_t pid, void *addr, void *regs, size_t len)
+	{
+#if defined(__aarch64__)
+		struct iovec iov = { regs, len };
+		return ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov);
+#else
+		(void)len;
+		return ptrace((__ptrace_request)PTRACE_SETREGS, pid, NULL, regs);
+#endif
+	}
+
 	void singleStep()
 	{
 		unsigned long regs[1024];
 
-		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
+		getRegs(m_activeChild, NULL, regs, sizeof regs);
 
 		// Step back one instruction
 		arch_adjustPcAfterBreakpoint(regs);
-		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
+		setRegs(m_activeChild, NULL, regs, sizeof regs);
 	}
 
 	const Event waitEvent()
@@ -709,7 +735,7 @@ private:
 #if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
 		unsigned long regs[1024];
 
-		ptrace((__ptrace_request)PTRACE_GETREGS, m_activeChild, 0, &regs);
+		getRegs(m_activeChild, NULL, regs, sizeof regs);
 
 # if defined(__powerpc__)
 		regs[ppc_NIP] += 4;
@@ -718,7 +744,7 @@ private:
 # else
 		regs[arm_PC] += 4;
 # endif
-		ptrace((__ptrace_request)PTRACE_SETREGS, m_activeChild, 0, &regs);
+		setRegs(m_activeChild, NULL, regs, sizeof regs);
 #endif
 	}
 
@@ -731,8 +757,8 @@ private:
 	{
 		unsigned long regs[1024];
 
-		memset(&regs, 0, sizeof(regs));
-		ptrace((__ptrace_request)PTRACE_GETREGS, pid, 0, &regs);
+		memset(regs, 0, sizeof regs);
+		getRegs(pid, NULL, regs, sizeof regs);
 
 		return getPcFromRegs(regs);
 	}
