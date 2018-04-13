@@ -137,7 +137,7 @@ static void tie_process_to_cpu(pid_t pid, int cpu)
 	// Switching CPU while running will cause icache
 	// conflicts. So let's just forbid that.
 
-	int max_cpu = cpu + 1;
+	int max_cpu = 4096;
 	cpu_set_t *set = CPU_ALLOC(max_cpu);
 	panic_if (!set,
 			"Can't allocate CPU set!\n");
