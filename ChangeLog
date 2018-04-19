@@ -1,10 +1,19 @@
 Kcov (35):
+	* Issue #240: Allow running on systems with > 32/64 CPUs
+	  (Alexandra Ghecenco)
+
+	* Issue #178: Fix build for Aarch64 (Dridi Boukelmoune)
+
+	* Issue #223: Add --clean to make turn off accumulation
+
+	* Issue #224: Show uncovered scripts in bash reports
+
 	* Only build the system daemon if libelf isn't available
 
-	* Issue #208: Allow covering multiple binaries with the same name in the same
-	  report
+	* Issue #208: Allow covering multiple binaries with the same name
+	  in the same report
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Apr 19 20:22:30 CEST 2018
 
 Kcov (34):
 	* Issue #215: Correct build with binutils >= 2.29
