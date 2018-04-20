@@ -29,7 +29,6 @@ class LLDBEngine : public IEngine, public IFileParser
 {
 public:
 	LLDBEngine() :
-		m_useLoadAddresses(false),
 		m_listener(NULL),
 		m_useLLDBBreakpoints(true),
 		m_filter(NULL)
@@ -79,7 +78,9 @@ public:
 		m_filename = filename;
 
 		// This now assumes we have only one file, i.e., no shared libraries
-		m_target = m_debugger.CreateTarget(m_filename.c_str());
+//		m_target = m_debugger.CreateTarget(m_filename.c_str());
+		SBError error;
+		m_target = m_debugger.CreateTarget(m_filename.c_str(), NULL, NULL, true, error);
 
 		if (!m_target.IsValid())
 			return false;
@@ -117,6 +118,26 @@ public:
 
 			if (!cur.IsValid())
 				continue;
+
+			// Have we already parsed this module?
+			auto fs = cur.GetFileSpec();
+			if (!fs.IsValid())
+				continue;
+
+			std::string key = fmt("%s/%s", fs.GetDirectory(), fs.GetFilename());
+
+			if (m_parsedModules[key])
+			{
+				continue;
+			}
+
+			m_parsedModules[key] = true;
+
+			// Skip this big and unneeded module
+			if (key == "/usr/lib/dyld")
+			{
+				continue;
+			}
 
 			handleModule(cur);
 		}
@@ -172,13 +193,8 @@ public:
 		unsigned int pid = conf.keyAsInt("attach-pid");
 
 		if (pid != 0) {
-			// Attach to running process, use load addresses in this case
-			m_useLoadAddresses = true;
-
 			m_process = m_target.AttachToProcessWithID(l, (lldb::pid_t)pid, error);
 		} else {
-			m_useLoadAddresses = false;
-
 			// Launch process
 			m_process = m_target.Launch(l,
 					&IConfiguration::getInstance().getArgv()[1], // Minus the executable
@@ -226,6 +242,12 @@ public:
 	{
 		StateType state = m_process.GetState();
 		Event ev;
+
+		// If shared libraries has been added, parse again
+		if (m_target.GetNumModules() != m_parsedModules.size())
+		{
+			parse();
+		}
 
 		kcov_debug(BP_MSG, "STOPPED in state %d\n", state);
 
@@ -357,10 +379,7 @@ private:
 
 	unsigned long getAddress(const SBAddress &addr) const
 	{
-		if (m_useLoadAddresses)
-			return addr.GetLoadAddress(m_target);
-
-		return addr.GetFileAddress();
+		return addr.GetLoadAddress(m_target);
 	}
 
 	void handleModule(SBModule &module)
@@ -372,12 +391,12 @@ private:
 			if (!cu.IsValid())
 				continue;
 
-			handleCompileUnit(cu);
+			handleCompileUnit(module, cu);
 		}
 	}
 
 	// The file:line -> address mappings are in the compile units
-	void handleCompileUnit(SBCompileUnit &cu)
+	void handleCompileUnit(SBModule &module, SBCompileUnit &cu)
 	{
 		for (uint32_t i = 0; i < cu.GetNumLineEntries(); i++)
 		{
@@ -410,7 +429,6 @@ private:
 	typedef std::vector<IFileListener *> FileListenerList_t;
 	typedef std::unordered_map<unsigned long, unsigned long > InstructionMap_t;
 
-	bool m_useLoadAddresses;
 	std::string m_filename;
 
 	LineListenerList_t m_lineListeners;
@@ -426,6 +444,9 @@ private:
 	bool m_useLLDBBreakpoints;
 
 	IFilter *m_filter;
+
+
+	std::unordered_map<std::string, bool> m_parsedModules;
 };
 
 

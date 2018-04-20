@@ -60,7 +60,6 @@ class vfork(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
 
 class shared_library(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/shared_library_test", False)
