@@ -128,7 +128,7 @@ prepare_osx_gcc:
 prepare_osx:
 	brew update
 	brew install zlib
-	brew install python3
+	brew upgrade python
 	brew install bash
 
 prepare_linux: patchelf
