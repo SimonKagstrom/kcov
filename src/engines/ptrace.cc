@@ -21,6 +21,7 @@
 
 #if defined(__aarch64__)
 #  include <sys/uio.h>
+#  include <elf.h>
 #endif
 
 #include <map>
