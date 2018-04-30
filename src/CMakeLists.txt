@@ -9,8 +9,8 @@ include(TargetArch)
 target_architecture(CMAKE_TARGET_ARCHITECTURES)
 message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 
-pkg_check_modules(LIBZ REQUIRED zlib)
-pkg_check_modules(LIBCURL libcurl)
+find_package (ZLIB REQUIRED)
+find_package (CURL)
 
 # ====================================
 # project name and version
@@ -68,14 +68,14 @@ endif()
 
 set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 
-if (LIBCURL_FOUND)
+if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
 endif()
 
 if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
 	message(STATUS "Building a static binary (no coveralls support)")
 
-	set (LIBCURL_LIBRARIES "")
+	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
@@ -217,7 +217,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -D_GLIBCXX_USE_NANO
 include_directories(
 	include/
 	../external/lldb/include/
-	${LIBZ_INCLUDE_DIRS}
+	${ZLIB_INCLUDE_DIR}
 	)
 
 if (LIBDW_FOUND)
@@ -232,9 +232,9 @@ include_directories(
 	)
 endif()
 
-if (LIBCURL_FOUND)
+if (CURL_FOUND)
 include_directories(
-	${LIBCURL_INCLUDE_DIRS}
+	${CURL_INCLUDE_DIRS}
 	)
 endif()
 
@@ -247,7 +247,7 @@ target_link_libraries(bash_execve_redirector dl)
 
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
-target_link_libraries(kcov_system_lib dl ${LIBZ_LIBRARIES})
+target_link_libraries(kcov_system_lib dl ${ZLIB_LIBRARIES})
 
 
 add_custom_command(
@@ -335,10 +335,10 @@ if (LIBELF_FOUND)
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
 		stdc++
-		${LIBCURL_LIBRARIES}
+		${CURL_LIBRARIES}
 		m
 		${DISASSEMBLER_LIBRARIES}
-		${LIBZ_LIBRARIES}
+		${ZLIB_LIBRARIES}
 		${CMAKE_THREAD_LIBS_INIT}
 		dl
 		${LLDB_LIBRARY}
@@ -352,7 +352,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
     target_link_libraries(kcov-system-daemon
         stdc++
         m
-        ${LIBZ_LIBRARIES}
+        ${ZLIB_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         dl
 	)

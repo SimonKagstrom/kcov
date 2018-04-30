@@ -16,7 +16,6 @@ add_definitions(-DPACKAGE_VERSION)
 # configuring
 # ====================================
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package (PkgConfig REQUIRED)
 
 set (SPECIFY_RPATH OFF CACHE BOOL "Specify RPATH for installed executables")
 
