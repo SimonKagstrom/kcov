@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 
+# ====================================
+# project name and version
+# ====================================
 project (kcov)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 find_package (Threads)
@@ -12,10 +15,6 @@ message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 find_package (ZLIB REQUIRED)
 find_package (CURL)
 
-# ====================================
-# project name and version
-# ====================================
-project (kcov)
 set (KCOV kcov)
 
 
