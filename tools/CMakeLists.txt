@@ -1,13 +1,18 @@
 cmake_minimum_required (VERSION 2.6)
 
 project (kcov-tools)
-set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 find_package (PkgConfig REQUIRED)
 find_package (Threads)
-pkg_check_modules(LIBZ REQUIRED zlib)
+find_package (ZLIB REQUIRED)
 
 # ====================================
 # project name and version
@@ -35,7 +40,7 @@ include_directories(
 	../src/include/
 	${LIBELF_INCLUDE_DIRS}
 	${LIBDW_INCLUDE_DIRS}
-	${LIBZ_INCLUDE_DIRS}
+	${ZLIB_INCLUDE_DIR}
 )
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
@@ -59,7 +64,7 @@ target_link_libraries(${LINE2ADDR}
 	dl
 	${CMAKE_THREAD_LIBS_INIT}
 	m
-	${LIBZ_LIBRARIES})
+	${ZLIB_LIBRARIES})
 
 file ( GLOB kcov-merge kcov-merge )
 

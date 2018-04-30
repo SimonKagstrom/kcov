@@ -6,18 +6,31 @@ cmake_minimum_required (VERSION 2.6)
 # ====================================
 project (kcov)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE  Release)
-endif(NOT CMAKE_BUILD_TYPE)
+set (PROJECT_VERSION_MAJOR 35)
+set (PROJECT_VERSION_MINOR 0)
+set (PROJECT_VERSION_PATCH 0)
+set (PROJECT_VERSION
+     "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set (CMAKE_BUILD_TYPE Release CACHE STRING
+       "Choose the type of build, options are None Debug Release RelWithDebInfo MinSizeRel"
+       FORCE)
+  set_property (CACHE CMAKE_BUILD_TYPE PROPERTY
+                STRINGS None Debug Release RelWithDebInfo MinSizeRel)
+endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 add_definitions(-DPACKAGE)
 add_definitions(-DPACKAGE_VERSION)
 # ====================================
 # configuring
 # ====================================
-set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-find_package (PkgConfig REQUIRED)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set (SPECIFY_RPATH OFF CACHE BOOL "Specify RPATH for installed executables")
 

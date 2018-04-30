@@ -1,8 +1,16 @@
 cmake_minimum_required (VERSION 2.6)
 
+# ====================================
+# project name and version
+# ====================================
 project (kcov)
-set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
 find_package (Threads)
 find_package (Bfd)
 
@@ -10,13 +18,9 @@ include(TargetArch)
 target_architecture(CMAKE_TARGET_ARCHITECTURES)
 message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 
-pkg_check_modules(LIBZ REQUIRED zlib)
-pkg_check_modules(LIBCURL libcurl)
+find_package (ZLIB REQUIRED)
+find_package (CURL)
 
-# ====================================
-# project name and version
-# ====================================
-project (kcov)
 set (KCOV kcov)
 
 
@@ -69,14 +73,14 @@ endif()
 
 set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 
-if (LIBCURL_FOUND)
+if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
 endif()
 
 if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
 	message(STATUS "Building a static binary (no coveralls support)")
 
-	set (LIBCURL_LIBRARIES "")
+	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
@@ -118,6 +122,7 @@ else()
         "/usr/local/lib64"
         "/opt/local/lib"
         "/opt/usr/lib64"
+		"/Library/Developer/CommandLineTools/Library/PrivateFrameworks"
 		"/Applications/Xcode.app/Contents/SharedFrameworks"
 		ENV LIBRARY_PATH
 		ENV LD_LIBRARY_PATH
@@ -218,7 +223,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -D_GLIBCXX_USE_NANO
 include_directories(
 	include/
 	../external/lldb/include/
-	${LIBZ_INCLUDE_DIRS}
+	${ZLIB_INCLUDE_DIR}
 	)
 
 if (LIBDW_FOUND)
@@ -233,14 +238,11 @@ include_directories(
 	)
 endif()
 
-if (LIBCURL_FOUND)
+if (CURL_FOUND)
 include_directories(
-	${LIBCURL_INCLUDE_DIRS}
+	${CURL_INCLUDE_DIRS}
 	)
 endif()
-
-
-link_directories (/home/ska/local/lib)
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
@@ -248,7 +250,7 @@ target_link_libraries(bash_execve_redirector dl)
 
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
-target_link_libraries(kcov_system_lib dl ${LIBZ_LIBRARIES})
+target_link_libraries(kcov_system_lib dl ${ZLIB_LIBRARIES})
 
 
 add_custom_command(
@@ -336,15 +338,15 @@ if (LIBELF_FOUND)
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
 		stdc++
-		${LIBCURL_LIBRARIES}
+		${CURL_LIBRARIES}
 		m
 		${DISASSEMBLER_LIBRARIES}
-		${LIBZ_LIBRARIES}
+		${ZLIB_LIBRARIES}
 		${CMAKE_THREAD_LIBS_INIT}
 		dl
 		${LLDB_LIBRARY}
 	)
-	install (TARGETS ${KCOV} ${INSTALL_TARGETS_PATH})
+	install (TARGETS ${KCOV} DESTINATION ${INSTALL_TARGETS_PATH})
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
@@ -353,9 +355,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
     target_link_libraries(kcov-system-daemon
         stdc++
         m
-        ${LIBZ_LIBRARIES}
+        ${ZLIB_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         dl
 	)
-	install (TARGETS kcov-system-daemon ${INSTALL_TARGETS_PATH})
+	install (TARGETS kcov-system-daemon DESTINATION ${INSTALL_TARGETS_PATH})
 endif()

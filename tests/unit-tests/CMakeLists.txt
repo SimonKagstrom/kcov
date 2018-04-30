@@ -81,8 +81,6 @@ include_directories(
 	${LIBDW_INCLUDE_DIRS}
 	)
 
-link_directories (/home/ska/local/lib)
-
 add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
