@@ -122,6 +122,7 @@ else()
         "/usr/local/lib64"
         "/opt/local/lib"
         "/opt/usr/lib64"
+		"/Library/Developer/CommandLineTools/Library/PrivateFrameworks"
 		"/Applications/Xcode.app/Contents/SharedFrameworks"
 		ENV LIBRARY_PATH
 		ENV LD_LIBRARY_PATH
