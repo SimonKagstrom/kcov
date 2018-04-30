@@ -243,9 +243,6 @@ include_directories(
 	)
 endif()
 
-
-link_directories (/home/ska/local/lib)
-
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
 target_link_libraries(bash_execve_redirector dl)
