@@ -22,4 +22,8 @@ set (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     /usr/share/man /usr/share/man/man1
     /usr/local/share/man /usr/local/share/man/man1)
 
+set (CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE https://simonkagstrom.github.io/kcov/)
+
 include (CPack)
