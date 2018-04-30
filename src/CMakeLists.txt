@@ -5,6 +5,12 @@ cmake_minimum_required (VERSION 2.6)
 # ====================================
 project (kcov)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
 find_package (Threads)
 find_package (Bfd)
 

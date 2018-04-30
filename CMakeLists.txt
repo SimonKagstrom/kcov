@@ -6,6 +6,11 @@ cmake_minimum_required (VERSION 2.6)
 # ====================================
 project (kcov)
 
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE  Release)
 endif(NOT CMAKE_BUILD_TYPE)

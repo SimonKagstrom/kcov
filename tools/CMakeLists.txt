@@ -2,6 +2,12 @@ cmake_minimum_required (VERSION 2.6)
 
 project (kcov-tools)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+
+if(POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
+  cmake_policy (SET CMP0042 NEW)
+endif()
+
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 find_package (PkgConfig REQUIRED)
