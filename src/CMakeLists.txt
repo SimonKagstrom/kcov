@@ -342,7 +342,7 @@ if (LIBELF_FOUND)
 		dl
 		${LLDB_LIBRARY}
 	)
-	install (TARGETS ${KCOV} ${INSTALL_TARGETS_PATH})
+	install (TARGETS ${KCOV} DESTINATION ${INSTALL_TARGETS_PATH})
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
@@ -355,5 +355,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
         ${CMAKE_THREAD_LIBS_INIT}
         dl
 	)
-	install (TARGETS kcov-system-daemon ${INSTALL_TARGETS_PATH})
+	install (TARGETS kcov-system-daemon DESTINATION ${INSTALL_TARGETS_PATH})
 endif()
