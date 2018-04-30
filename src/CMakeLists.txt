@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 project (kcov)
-set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 find_package (Threads)
 find_package (Bfd)
 
