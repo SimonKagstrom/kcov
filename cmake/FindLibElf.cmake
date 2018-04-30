@@ -13,14 +13,22 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-
 if (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
   set (LibElf_FIND_QUIETLY TRUE)
 endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
 
+find_package(PkgConfig QUIET)
+
+if(PKG_CONFIG_FOUND)
+  set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON)
+  pkg_check_modules(PC_LIBELF QUIET libelf)
+endif()
+
 find_path (LIBELF_INCLUDE_DIR
     NAMES
       libelf.h
+    HINTS
+      ${PC_LIBELF_INCLUDE_DIRS}
     PATHS
       /usr/include
       /usr/include/libelf
@@ -35,6 +43,8 @@ find_path (LIBELF_INCLUDE_DIR
 find_library (LIBELF_LIBRARY
     NAMES
       elf
+    HINTS
+      ${PC_LIBELF_LIBRARY_DIRS}
     PATHS
       /usr/lib
       /usr/local/lib

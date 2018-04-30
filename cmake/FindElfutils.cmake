@@ -16,9 +16,18 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
   set (LibDwarf_FIND_QUIETLY TRUE)
 endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
+find_package(PkgConfig QUIET)
+
+if(PKG_CONFIG_FOUND)
+  set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON)
+  pkg_check_modules(PC_LIBDW QUIET libdw)
+endif()
+
 find_path (DWARF_INCLUDE_DIR
     NAMES
       dwarf.h
+    HINTS
+      ${PC_LIBDW_INCLUDE_DIRS}
     PATHS
       /usr/include
       /usr/local/include
@@ -28,6 +37,8 @@ find_path (DWARF_INCLUDE_DIR
 find_path (LIBDW_INCLUDE_DIR
     NAMES
       elfutils/libdw.h
+    HINTS
+      ${PC_LIBDW_INCLUDE_DIRS}
     PATHS
       /usr/include
       /usr/local/include
@@ -41,6 +52,8 @@ endif (DWARF_INCLUDE_DIR AND LIBDW_INCLUDE_DIR)
 find_library (LIBDW_LIBRARY
     NAMES
       dw
+    HINTS
+      ${PC_LIBDW_LIBRARY_DIRS}
     PATHS
       /usr/lib
       /usr/local/lib
