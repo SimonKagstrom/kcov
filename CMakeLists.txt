@@ -11,9 +11,13 @@ if(POLICY CMP0042)
   cmake_policy (SET CMP0042 NEW)
 endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE  Release)
-endif(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set (CMAKE_BUILD_TYPE Release CACHE STRING
+       "Choose the type of build, options are None Debug Release RelWithDebInfo MinSizeRel"
+       FORCE)
+  set_property (CACHE CMAKE_BUILD_TYPE PROPERTY
+                STRINGS None Debug Release RelWithDebInfo MinSizeRel)
+endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 add_definitions(-DPACKAGE)
 add_definitions(-DPACKAGE_VERSION)
