@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 
 project (kcov-unit-tests)
-set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
+
 find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
