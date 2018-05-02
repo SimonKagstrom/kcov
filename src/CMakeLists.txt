@@ -8,6 +8,16 @@ message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 find_package (ZLIB REQUIRED)
 find_package (CURL)
 
+find_library (DL_LIBRARY NAMES dl)
+if (NOT DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find dl library")
+endif (NOT DL_LIBRARY)
+
+find_library (M_LIBRARY NAMES m)
+if (NOT M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find m library")
+endif (NOT M_LIBRARY)
+
 set (KCOV kcov)
 
 
@@ -237,7 +247,10 @@ target_link_libraries(bash_execve_redirector dl)
 
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
-target_link_libraries(kcov_system_lib dl ${ZLIB_LIBRARIES})
+target_link_libraries(kcov_system_lib
+    "${DL_LIBRARY}"
+    ${ZLIB_LIBRARIES}
+)
 
 
 add_custom_command(
@@ -322,16 +335,16 @@ if (LIBELF_FOUND)
 	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 	target_link_libraries(${KCOV}
+		stdc++
+		${CMAKE_THREAD_LIBS_INIT}
+		${CURL_LIBRARIES}
+        "${DL_LIBRARY}"
+		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
-		stdc++
-		${CURL_LIBRARIES}
-		m
-		${DISASSEMBLER_LIBRARIES}
-		${ZLIB_LIBRARIES}
-		${CMAKE_THREAD_LIBS_INIT}
-		dl
 		${LLDB_LIBRARY}
+        "${M_LIBRARY}"
+		${ZLIB_LIBRARIES}
 	)
 	install (TARGETS ${KCOV} DESTINATION ${INSTALL_TARGETS_PATH})
 endif()
@@ -341,10 +354,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 
     target_link_libraries(kcov-system-daemon
         stdc++
-        m
-        ${ZLIB_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        dl
+        "${DL_LIBRARY}"
+        "${M_LIBRARY}"
+        ${ZLIB_LIBRARIES}
 	)
 	install (TARGETS kcov-system-daemon DESTINATION ${INSTALL_TARGETS_PATH})
 endif()

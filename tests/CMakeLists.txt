@@ -17,6 +17,16 @@ endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
 
+find_library (DL_LIBRARY NAMES dl)
+if (NOT DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find dl library")
+endif (NOT DL_LIBRARY)
+
+find_library (M_LIBRARY NAMES m)
+if (NOT M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find m library")
+endif (NOT M_LIBRARY)
+
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	../src/include
@@ -91,7 +101,9 @@ add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
 add_executable(vfork fork/vfork.c)
 add_executable(signals ${signals_SRCS})
+
 add_executable(multi_fork ${multi_fork_SRCS})
+target_link_libraries(multi_fork "${M_LIBRARY}")
 
 add_executable(shared_library_test ${shared_library_test_SRCS})
 target_link_libraries(shared_library_test shared_library)
@@ -111,6 +123,8 @@ add_executable(issue31 daemon/test-issue31.cc)
 target_link_libraries(issue31 ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
+target_link_libraries(dlopen "${DL_LIBRARY}")
+
 add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
 
@@ -129,8 +143,6 @@ set_target_properties(pie PROPERTIES POISITION_INDEPENDENT_CODE True)
 add_executable(pie-test argv-dependent.c)
 set_target_properties(pie-test PROPERTIES POISITION_INDEPENDENT_CODE True)
 
-target_link_libraries(dlopen dl)
-
 if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 	add_custom_target (illegal-insn ALL
@@ -142,8 +154,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	)
 endif()
 
-target_link_libraries(multi_fork
-	m)
 target_link_libraries(setpgid-kill
 	z)
 

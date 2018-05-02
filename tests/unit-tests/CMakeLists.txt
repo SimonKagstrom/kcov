@@ -20,6 +20,11 @@ find_package (Elfutils REQUIRED)
 set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
 
+find_library (DL_LIBRARY NAMES dl)
+if (NOT DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find dl library")
+endif (NOT DL_LIBRARY)
+
 set (TGT ut)
 
 set (${TGT}_SRCS
@@ -93,10 +98,10 @@ add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
     ${CMAKE_THREAD_LIBS_INIT}
+	"${DL_LIBRARY}"
 	${LIBCRPCUT_LIBRARIES}
 	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
-	dl
 	z)
 
 add_executable (same-name-test

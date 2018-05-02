@@ -14,6 +14,16 @@ find_package (PkgConfig REQUIRED)
 find_package (Threads)
 find_package (ZLIB REQUIRED)
 
+find_library (DL_LIBRARY NAMES dl)
+if (NOT DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find dl library")
+endif (NOT DL_LIBRARY)
+
+find_library (M_LIBRARY NAMES m)
+if (NOT M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find m library")
+endif (NOT M_LIBRARY)
+
 # ====================================
 # project name and version
 # ====================================
@@ -58,12 +68,12 @@ endif(SPECIFY_RPATH)
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 
 target_link_libraries(${LINE2ADDR}
+    "${DL_LIBRARY}"
 	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
+    "${M_LIBRARY}"
 	stdc++
-	dl
 	${CMAKE_THREAD_LIBS_INIT}
-	m
 	${ZLIB_LIBRARIES})
 
 file ( GLOB kcov-merge kcov-merge )
