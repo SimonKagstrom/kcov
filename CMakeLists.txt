@@ -1,9 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
-
-
-# ====================================
-# project name and version
-# ====================================
+cmake_minimum_required (VERSION 2.8.4)
 project (kcov)
 
 set (PROJECT_VERSION_MAJOR 35)
