@@ -22,17 +22,17 @@ set (KCOV kcov)
 
 
 # See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
-if( EXISTS "${CMAKE_SOURCE_DIR}/.git" )
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
        execute_process(COMMAND git --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/../.git describe --abbrev=4 HEAD
                OUTPUT_VARIABLE POD_VERSION
                OUTPUT_STRIP_TRAILING_WHITESPACE)
-else()
+else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
        execute_process(COMMAND head -n 1 ${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog
                COMMAND cut -d \( -f 2
                COMMAND cut -d \) -f 1
                OUTPUT_VARIABLE POD_VERSION
                OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
+endif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
 add_custom_command(
    OUTPUT version.c
@@ -54,8 +54,8 @@ set (DISASSEMBLER_SRCS
 
 set (HAS_LIBBFD "0")
 
-if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
-	if(LIBBFD_FOUND)
+if (CMAKE_TARGET_ARCHITECTURES STREQUAL "i386" OR CMAKE_TARGET_ARCHITECTURES STREQUAL "x86_64")
+	if (LIBBFD_FOUND)
 		set (HAS_LIBBFD "1")
 		set (DISASSEMBLER_SRCS
 			parsers/bfd-disassembler.cc
@@ -65,23 +65,23 @@ if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTU
 			${LIBBFD_BFD_LIBRARY}
 			${LIBBFD_IBERTY_LIBRARY}
 		)
-	endif()
-endif()
+	endif (LIBBFD_FOUND)
+endif (CMAKE_TARGET_ARCHITECTURES STREQUAL "i386" OR CMAKE_TARGET_ARCHITECTURES STREQUAL "x86_64")
 
 set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 
 if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
-endif()
+endif (CURL_FOUND)
 
-if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
+if (KCOV_STATIC_BUILD STREQUAL "1")
 	message(STATUS "Building a static binary (no coveralls support)")
 
 	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
-endif()
+endif (KCOV_STATIC_BUILD STREQUAL "1")
 
 set (ELF_SRCS
 	dummy-solib-handler.cc
@@ -91,7 +91,7 @@ set (MACHO_SRCS
 set (SOLIB_generated )
 
 # Linux-specific sources
-if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package (LibElf)
 	find_package (Elfutils)
 	set (ELF_SRCS
@@ -108,7 +108,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
-else()
+else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_library(LLDB_LIBRARY
       NAMES
 	    LLDB
@@ -132,7 +132,7 @@ else()
 	set (MACHO_SRCS
 		engines/lldb-engine.cc
 	)
-endif ()
+endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set (${KCOV}_SRCS
     capabilities.cc
@@ -224,22 +224,16 @@ include_directories(
 	)
 
 if (LIBDW_FOUND)
-include_directories(
-	${LIBDW_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${LIBDW_INCLUDE_DIRS})
+endif (LIBDW_FOUND)
 
 if (LIBELF_FOUND)
-include_directories(
-	${LIBELF_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${LIBELF_INCLUDE_DIRS})
+endif (LIBELF_FOUND)
 
 if (CURL_FOUND)
-include_directories(
-	${CURL_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${CURL_INCLUDE_DIRS})
+endif (CURL_FOUND)
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
@@ -320,16 +314,16 @@ add_custom_command(
    )
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
-if(SPECIFY_RPATH)
+if (SPECIFY_RPATH)
 	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
 	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 	# the RPATH to be used when installing, but only if it's not a system directory
-	LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-	IF("${isSystemDir}" STREQUAL "-1")
-	  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	ENDIF("${isSystemDir}" STREQUAL "-1")
-endif(SPECIFY_RPATH)
+	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
+	if (IS_SYSTEM_DIR STREQUAL "-1")
+	    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	endif (IS_SYSTEM_DIR STREQUAL "-1")
+endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
 	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
@@ -347,9 +341,9 @@ if (LIBELF_FOUND)
 		${ZLIB_LIBRARIES}
 	)
 	install (TARGETS ${KCOV} DESTINATION ${INSTALL_TARGETS_PATH})
-endif()
+endif (LIBELF_FOUND)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable (kcov-system-daemon ${KCOV_SYSTEM_MODE_SRCS} version.c)
 
     target_link_libraries(kcov-system-daemon
@@ -360,4 +354,4 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
         ${ZLIB_LIBRARIES}
 	)
 	install (TARGETS kcov-system-daemon DESTINATION ${INSTALL_TARGETS_PATH})
-endif()
+endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")

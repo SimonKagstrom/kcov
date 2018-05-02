@@ -2,10 +2,10 @@ cmake_minimum_required (VERSION 2.8.4)
 project (kcov-tools)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 
-if(POLICY CMP0042)
-  # MACOSX_RPATH is enabled by default.
-  cmake_policy (SET CMP0042 NEW)
-endif()
+if (POLICY CMP0042)
+    # MACOSX_RPATH is enabled by default.
+    cmake_policy (SET CMP0042 NEW)
+endif (POLICY CMP0042)
 
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
@@ -53,16 +53,16 @@ include_directories(
 )
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
-if(SPECIFY_RPATH)
+if (SPECIFY_RPATH)
 	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
 	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 	# the RPATH to be used when installing, but only if it's not a system directory
-	LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-	IF("${isSystemDir}" STREQUAL "-1")
-	  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	ENDIF("${isSystemDir}" STREQUAL "-1")
-endif(SPECIFY_RPATH)
+	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
+	if (IS_SYSTEM_DIR STREQUAL "-1")
+	    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	endif (IS_SYSTEM_DIR STREQUAL "-1")
+endif (SPECIFY_RPATH)
 
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 

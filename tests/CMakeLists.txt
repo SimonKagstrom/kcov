@@ -139,11 +139,11 @@ add_executable(fork+exec fork/fork+exec.c)
 add_executable(thread-test threads/thread-main.c)
 target_link_libraries(thread-test ${CMAKE_THREAD_LIBS_INIT})
 
-#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-#	add_executable(sanitizer-coverage sanitizer-coverage.c)
-#	set_target_properties(sanitizer-coverage PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -fsanitize-coverage=bb")
-#	set_target_properties(sanitizer-coverage PROPERTIES LINK_FLAGS "-fsanitize=address -fsanitize-coverage=bb")
-#endif()
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#    add_executable(sanitizer-coverage sanitizer-coverage.c)
+#    set_target_properties(sanitizer-coverage PROPERTIES COMPILE_FLAGS "-g -fsanitize=address -fsanitize-coverage=bb")
+#    set_target_properties(sanitizer-coverage PROPERTIES LINK_FLAGS "-fsanitize=address -fsanitize-coverage=bb")
+#endif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 add_executable (pie pie.c)
 if (CMAKE_VERSION VERSION_LESS "2.8.9")
@@ -159,7 +159,7 @@ else (CMAKE_VERSION VERSION_LESS "2.8.9")
     set_target_properties (pie-test PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif (CMAKE_VERSION VERSION_LESS "2.8.9")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 	add_custom_target (illegal-insn ALL
   		COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_CURRENT_BINARY_DIR}/illegal-insn
@@ -168,7 +168,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	add_custom_target (fork-32 ALL
   		COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_CURRENT_BINARY_DIR}/fork-32
 	)
-endif()
+endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 add_custom_target(tests-stripped ALL
 	COMMAND "${CMAKE_STRIP}" -o tests-stripped main-tests
