@@ -119,5 +119,7 @@ add_executable (same-name-test
 )
 
 add_executable (test-binary test-source.c second-source.c)
-SET_TARGET_PROPERTIES(test-binary PROPERTIES COMPILE_FLAGS "-nostdinc")
-SET_TARGET_PROPERTIES(test-binary PROPERTIES LINK_FLAGS "-nostdlib")
+set_target_properties(test-binary PROPERTIES
+    COMPILE_FLAGS "-nostdinc"
+    LINK_FLAGS "-nostdlib"
+)
