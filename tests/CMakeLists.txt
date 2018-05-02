@@ -4,6 +4,16 @@ project (kcov-tests)
 
 enable_language(ASM)
 
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set (CMAKE_BUILD_TYPE Debug CACHE STRING
+        "Choose the type of build, options are None Debug Release RelWithDebInfo MinSizeRel"
+        FORCE
+    )
+    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY
+        STRINGS None Debug Release RelWithDebInfo MinSizeRel
+    )
+endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+
 include_directories(
 	${CMAKE_BINARY_DIR}
 	../src/include
@@ -72,11 +82,6 @@ add_library(shared_library SHARED
 	shared-library/big-symbol.S
 	shared-library/solib.c
 )
-
-set(CMAKE_BUILD_TYPE distribution)
-set(CMAKE_C_FLAGS_DISTRIBUTION "-g")
-set(CMAKE_CXX_FLAGS_DISTRIBUTION "-g")
-
 
 find_library(shared_library_LIBRARY
   NAMES shared_library
