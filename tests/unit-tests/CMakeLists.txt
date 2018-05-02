@@ -57,7 +57,7 @@ set (${TGT}_SRCS
     tests-system-mode.cc
     tests-utils.cc
     tests-writer.cc
-    )
+)
 
 set (CMAKE_CXX_FLAGS "-std=c++1y -Wall -D_GLIBCXX_USE_NANOSLEEP")
 
@@ -92,29 +92,29 @@ add_custom_command(OUTPUT html-data-files.cc
 )
 
 include_directories(
-	../../src/include/
-	trompeloeil/include
-	${LIBCRPCUT_INCLUDE_DIRS}
-	${LIBELF_INCLUDE_DIRS}
-	${LIBDW_INCLUDE_DIRS}
-	${ZLIB_INCLUDE_DIR}
-	)
+    ../../src/include/
+    trompeloeil/include
+    ${LIBCRPCUT_INCLUDE_DIRS}
+    ${LIBELF_INCLUDE_DIRS}
+    ${LIBDW_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIR}
+)
 
 add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
     ${CMAKE_THREAD_LIBS_INIT}
-	"${DL_LIBRARY}"
-	${LIBCRPCUT_LIBRARIES}
-	${LIBDW_LIBRARIES}
-	${LIBELF_LIBRARIES}
-	${ZLIB_LIBRARIES}
+    "${DL_LIBRARY}"
+    ${LIBCRPCUT_LIBRARIES}
+    ${LIBDW_LIBRARIES}
+    ${LIBELF_LIBRARIES}
+    ${ZLIB_LIBRARIES}
 )
 
 add_executable (same-name-test
-	../main.cc
-	../subdir/file.c
-	../subdir2/file.c
+    ../main.cc
+    ../subdir/file.c
+    ../subdir2/file.c
 )
 
 add_executable (test-binary test-source.c second-source.c)

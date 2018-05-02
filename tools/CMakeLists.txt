@@ -30,47 +30,47 @@ set (LINE2ADDR line2addr)
 
 set (${LINE2ADDR}_SRCS
     ../src/capabilities.cc
-	../src/configuration.cc
-	../src/filter.cc
-	../src/gcov.cc
-	../src/parsers/dwarf.cc
-	../src/parsers/elf-parser.cc
-	../src/parsers/elf.cc
-	../src/parsers/dummy-disassembler.cc
-	../src/parser-manager.cc
-	../src/utils.cc
-	line2addr.cc
-	)
+    ../src/configuration.cc
+    ../src/filter.cc
+    ../src/gcov.cc
+    ../src/parsers/dwarf.cc
+    ../src/parsers/elf-parser.cc
+    ../src/parsers/elf.cc
+    ../src/parsers/dummy-disassembler.cc
+    ../src/parser-manager.cc
+    ../src/utils.cc
+    line2addr.cc
+)
 
 
 set (CMAKE_CXX_FLAGS "-std=c++0x -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
 include_directories(
-	../src/include/
-	${LIBELF_INCLUDE_DIRS}
-	${LIBDW_INCLUDE_DIRS}
-	${ZLIB_INCLUDE_DIR}
+    ../src/include/
+    ${LIBELF_INCLUDE_DIRS}
+    ${LIBDW_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIR}
 )
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
 if (SPECIFY_RPATH)
-	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
-	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-	# the RPATH to be used when installing, but only if it's not a system directory
-	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
-	if (IS_SYSTEM_DIR STREQUAL "-1")
-	    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	endif (IS_SYSTEM_DIR STREQUAL "-1")
+    set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+    set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # the RPATH to be used when installing, but only if it's not a system directory
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
+    if (IS_SYSTEM_DIR STREQUAL "-1")
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    endif (IS_SYSTEM_DIR STREQUAL "-1")
 endif (SPECIFY_RPATH)
 
 add_executable (${LINE2ADDR} ${${LINE2ADDR}_SRCS})
 
 target_link_libraries(${LINE2ADDR}
     "${DL_LIBRARY}"
-	${LIBDW_LIBRARIES}
-	${LIBELF_LIBRARIES}
+    ${LIBDW_LIBRARIES}
+    ${LIBELF_LIBRARIES}
     "${M_LIBRARY}"
-	stdc++
-	${CMAKE_THREAD_LIBS_INIT}
-	${ZLIB_LIBRARIES})
+    stdc++
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${ZLIB_LIBRARIES})

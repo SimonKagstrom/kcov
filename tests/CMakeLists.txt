@@ -34,8 +34,8 @@ if (NOT M_LIBRARY)
 endif (NOT M_LIBRARY)
 
 include_directories(
-	${CMAKE_CURRENT_BINARY_DIR}
-	../src/include
+    "${CMAKE_CURRENT_BINARY_DIR}"
+    ../src/include
 )
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
@@ -49,7 +49,7 @@ add_custom_command (OUTPUT multi-fork-generated.c
 )
 
 add_custom_target(multi-fork-generated ALL
-	DEPENDS multi-fork-generated.c
+    DEPENDS multi-fork-generated.c
 )
 set_property(SOURCE multi-fork/test-multi-fork.c APPEND PROPERTY
     OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/multi-fork-generated.c"
@@ -57,54 +57,54 @@ set_property(SOURCE multi-fork/test-multi-fork.c APPEND PROPERTY
 
 
 set (main_tests_SRCS
-	main.cc
-	subdir/file.c
-	subdir2/file2.c
+    main.cc
+    subdir/file.c
+    subdir2/file2.c
 )
 
 set (argv_dependent_SRCS
-	argv-dependent.c
+    argv-dependent.c
 )
 
 set (fork_SRCS
-	fork/fork.c
+    fork/fork.c
 )
 
 set (fork_no_wait_SRCS
-	fork/fork-no-wait.c
+    fork/fork-no-wait.c
 )
 
 set (signals_SRCS
-	signals/test-signals.c
+    signals/test-signals.c
 )
 
 set (multi_fork_SRCS
-	multi-fork/test-multi-fork.c
+    multi-fork/test-multi-fork.c
 )
 
 set (recursive-ptrace_SRCS
-	recursive-ptrace/main.cc
+    recursive-ptrace/main.cc
 )
 
 set (shared_library_test_SRCS
-	shared-library/main.c
+    shared-library/main.c
 )
 
 set (test_popen_SRCS
-	popen/test-popen.c
+    popen/test-popen.c
 )
 
 set (global_constructors_SRCS
-	global-constructors/test-global-ctors.cc
+    global-constructors/test-global-ctors.cc
 )
 
 set (daemon_SRCS
-	daemon/test-daemon.cc
+    daemon/test-daemon.cc
 )
 
 add_library(shared_library SHARED
-	shared-library/big-symbol.S
-	shared-library/solib.c
+    shared-library/big-symbol.S
+    shared-library/solib.c
 )
 
 add_executable(main-tests ${main_tests_SRCS})
@@ -166,20 +166,20 @@ endif (CMAKE_VERSION VERSION_LESS "2.8.9")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
-	add_custom_target (illegal-insn ALL
-  		COMMAND "${CMAKE_C_COMPILER}"
-  		    -nostdlib
-  		    "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
-  		    -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
-	)
+    add_custom_target (illegal-insn ALL
+        COMMAND "${CMAKE_C_COMPILER}"
+            -nostdlib
+            "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
+    )
 
-	add_custom_target (fork-32 ALL
-  		COMMAND "${CMAKE_C_COMPILER}" -g -m32
-  		    "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
-  		    -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
-	)
+    add_custom_target (fork-32 ALL
+        COMMAND "${CMAKE_C_COMPILER}" -g -m32
+            "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
+    )
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 add_custom_target(tests-stripped ALL
-	COMMAND "${CMAKE_STRIP}" -o tests-stripped main-tests
+    COMMAND "${CMAKE_STRIP}" -o tests-stripped main-tests
     DEPENDS main-tests)
