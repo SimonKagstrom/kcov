@@ -3,6 +3,11 @@ cmake_minimum_required (VERSION 2.6)
 project (kcov-unit-tests)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
 
+if (POLICY CMP0042)
+    # MACOSX_RPATH is enabled by default.
+    cmake_policy (SET CMP0042 NEW)
+endif (POLICY CMP0042)
+
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set (CMAKE_BUILD_TYPE Debug CACHE STRING
         "Choose the type of build, options are None Debug Release RelWithDebInfo MinSizeRel"
