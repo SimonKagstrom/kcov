@@ -17,6 +17,8 @@ endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
 
+find_package (ZLIB REQUIRED)
+
 find_library (DL_LIBRARY NAMES dl)
 if (NOT DL_LIBRARY)
     message (FATAL_ERROR "Could NOT find dl library")
@@ -117,7 +119,9 @@ target_link_libraries(global-constructors shared_library)
 add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
+
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
+target_link_libraries(setpgid-kill ${ZLIB_LIBRARIES})
 
 add_executable(issue31 daemon/test-issue31.cc)
 target_link_libraries(issue31 ${CMAKE_THREAD_LIBS_INIT})
@@ -153,9 +157,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
   		COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_CURRENT_BINARY_DIR}/fork-32
 	)
 endif()
-
-target_link_libraries(setpgid-kill
-	z)
 
 add_custom_target(tests-stripped ALL
 	COMMAND strip -o tests-stripped main-tests
