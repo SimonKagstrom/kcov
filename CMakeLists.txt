@@ -27,7 +27,8 @@ add_definitions(-DPACKAGE_VERSION)
 # ====================================
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set (SPECIFY_RPATH OFF CACHE BOOL "Specify RPATH for installed executables")
+option (SPECIFY_RPATH  "Specify RPATH for installed executables" OFF)
+mark_as_advanced (SPECIFY_RPATH)
 
 # ====================================
 # default install paths for targets
