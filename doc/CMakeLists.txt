@@ -1,3 +1,1 @@
-file (GLOB man_files_1  *.1)
-
-install (FILES ${man_files_1} ${INSTALL_MAN_PATH}/man1)
+install (FILES kcov.1 ${INSTALL_MAN_PATH}/man1)

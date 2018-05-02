@@ -74,7 +74,3 @@ target_link_libraries(${LINE2ADDR}
 	stdc++
 	${CMAKE_THREAD_LIBS_INIT}
 	${ZLIB_LIBRARIES})
-
-file ( GLOB kcov-merge kcov-merge )
-
-install (PROGRAMS ${kcov-merge} DESTINATION bin )
