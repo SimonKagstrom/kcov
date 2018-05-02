@@ -171,5 +171,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 endif()
 
 add_custom_target(tests-stripped ALL
-	COMMAND strip -o tests-stripped main-tests
+	COMMAND "${CMAKE_STRIP}" -o tests-stripped main-tests
     DEPENDS main-tests)
