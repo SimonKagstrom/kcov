@@ -17,6 +17,9 @@ find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 
+set (CMAKE_THREAD_PREFER_PTHREAD ON)
+find_package (Threads REQUIRED)
+
 set (TGT ut)
 
 set (${TGT}_SRCS
@@ -89,12 +92,12 @@ include_directories(
 add_executable (${TGT} ${${TGT}_SRCS} html-data-files.cc)
 
 target_link_libraries(${TGT}
+    ${CMAKE_THREAD_LIBS_INIT}
 	${LIBCRPCUT_LIBRARIES}
 	${LIBDW_LIBRARIES}
 	${LIBELF_LIBRARIES}
 	dl
-	z
-	pthread)
+	z)
 
 add_executable (same-name-test
 	../main.cc

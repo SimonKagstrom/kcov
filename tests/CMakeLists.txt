@@ -14,6 +14,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     )
 endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
+set (CMAKE_THREAD_PREFER_PTHREAD ON)
+find_package (Threads REQUIRED)
+
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	../src/include
@@ -103,11 +106,16 @@ add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
+
 add_executable(issue31 daemon/test-issue31.cc)
+target_link_libraries(issue31 ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(dlopen dlopen/dlopen.cc dlopen/dlopen-main.cc)
 add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
+
 add_executable(thread-test threads/thread-main.c)
+target_link_libraries(thread-test ${CMAKE_THREAD_LIBS_INIT})
 
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 #	add_executable(sanitizer-coverage sanitizer-coverage.c)
@@ -138,11 +146,6 @@ target_link_libraries(multi_fork
 	m)
 target_link_libraries(setpgid-kill
 	z)
-target_link_libraries(issue31
-	pthread)
-target_link_libraries(thread-test
-	pthread)
-
 
 add_custom_target(tests-stripped ALL
 	COMMAND strip -o tests-stripped main-tests
