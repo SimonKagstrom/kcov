@@ -23,7 +23,12 @@ set (KCOV kcov)
 
 # See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
 if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
-    execute_process (COMMAND git
+    find_program (GIT_EXECUTABLE NAMES git)
+    if (NOT GIT_EXECUTABLE)
+        message (FATAL_ERROR "Could NOT find git executable")
+    endif (NOT GIT_EXECUTABLE)
+
+    execute_process (COMMAND "${GIT_EXECUTABLE}"
             "--git-dir=${CMAKE_SOURCE_DIR}/.git"
             describe
             --abbrev=4
