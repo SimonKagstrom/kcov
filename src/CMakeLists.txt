@@ -9,14 +9,18 @@ find_package (ZLIB REQUIRED)
 find_package (CURL)
 
 find_library (DL_LIBRARY NAMES dl)
-if (NOT DL_LIBRARY)
-    message (FATAL_ERROR "Could NOT find dl library")
-endif (NOT DL_LIBRARY)
+if (DL_LIBRARY)
+    message (STATUS "Found DL: ${DL_LIBRARY}")
+else (DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find DL")
+endif (DL_LIBRARY)
 
 find_library (M_LIBRARY NAMES m)
-if (NOT M_LIBRARY)
-    message (FATAL_ERROR "Could NOT find m library")
-endif (NOT M_LIBRARY)
+if (M_LIBRARY)
+    message (STATUS "Found M: ${M_LIBRARY}")
+else (M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find M")
+endif (M_LIBRARY)
 
 set (KCOV kcov)
 
@@ -24,9 +28,11 @@ set (KCOV kcov)
 # See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
 if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
     find_program (GIT_EXECUTABLE NAMES git)
-    if (NOT GIT_EXECUTABLE)
-        message (FATAL_ERROR "Could NOT find git executable")
-    endif (NOT GIT_EXECUTABLE)
+    if (GIT_EXECUTABLE)
+        message (STATUS "Found Git: ${GIT_EXECUTABLE}")
+    else (GIT_EXECUTABLE)
+        message (FATAL_ERROR "Could NOT find Git")
+    endif (GIT_EXECUTABLE)
 
     execute_process (COMMAND "${GIT_EXECUTABLE}"
             "--git-dir=${CMAKE_SOURCE_DIR}/.git"
@@ -39,7 +45,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process (COMMAND head
             -n 1
-            "${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog"
+            "${CMAKE_SOURCE_DIR}/ChangeLog"
         COMMAND cut -d \( -f 2
         COMMAND cut -d \) -f 1
         OUTPUT_VARIABLE POD_VERSION

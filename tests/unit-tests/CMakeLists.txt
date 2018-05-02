@@ -27,9 +27,11 @@ find_package (Threads REQUIRED)
 find_package (ZLIB REQUIRED)
 
 find_library (DL_LIBRARY NAMES dl)
-if (NOT DL_LIBRARY)
-    message (FATAL_ERROR "Could NOT find dl library")
-endif (NOT DL_LIBRARY)
+if (DL_LIBRARY)
+    message (STATUS "Found DL: ${DL_LIBRARY}")
+else (DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find DL")
+endif (DL_LIBRARY)
 
 set (TGT ut)
 

@@ -14,14 +14,18 @@ find_package (Threads)
 find_package (ZLIB REQUIRED)
 
 find_library (DL_LIBRARY NAMES dl)
-if (NOT DL_LIBRARY)
-    message (FATAL_ERROR "Could NOT find dl library")
-endif (NOT DL_LIBRARY)
+if (DL_LIBRARY)
+    message (STATUS "Found DL: ${DL_LIBRARY}")
+else (DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find DL")
+endif (DL_LIBRARY)
 
 find_library (M_LIBRARY NAMES m)
-if (NOT M_LIBRARY)
-    message (FATAL_ERROR "Could NOT find m library")
-endif (NOT M_LIBRARY)
+if (M_LIBRARY)
+    message (STATUS "Found M: ${M_LIBRARY}")
+else (M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find M")
+endif (M_LIBRARY)
 
 # ====================================
 # project name and version
