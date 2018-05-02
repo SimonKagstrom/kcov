@@ -33,14 +33,14 @@ set (SPECIFY_RPATH OFF CACHE BOOL "Specify RPATH for installed executables")
 # default install paths for targets
 # ====================================
 include (CPack.local.cmake OPTIONAL)
-set (INSTALL_TARGETS_PATH RUNTIME DESTINATION bin
-                          LIBRARY DESTINATION lib${LIB_SUFFIX}
-                          ARCHIVE DESTINATION lib${LIB_SUFFIX})
-if (NOT MAN_DIR)
-  set (MAN_DIR share/man)
-endif (NOT MAN_DIR)
-set (INSTALL_MAN_PATH  DESTINATION ${MAN_DIR})
 
+set (KCOV_INSTALL_BINDIR "bin" CACHE STRING "Install destination for user executables")
+set (KCOV_INSTALL_DOCDIR "share/doc/kcov" CACHE STRING "Install destination for documentation")
+set (KCOV_INSTALL_MANDIR "share/man" CACHE STRING "Install destination for man documentation")
+mark_as_advanced (KCOV_INSTALL_BINDIR KCOV_INSTALL_DOCDIR KCOV_INSTALL_MANDIR)
+
+install (FILES ChangeLog COPYING COPYING.externals
+         DESTINATION "${KCOV_INSTALL_DOCDIR}")
 
 # ====================================
 # build all

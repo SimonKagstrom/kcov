@@ -1,1 +1,1 @@
-install (FILES kcov.1 ${INSTALL_MAN_PATH}/man1)
+install (FILES kcov.1 DESTINATION "${KCOV_INSTALL_MANDIR}/man1" )
