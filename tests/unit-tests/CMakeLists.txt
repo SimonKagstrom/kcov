@@ -1,16 +1,12 @@
 cmake_minimum_required (VERSION 2.6)
 
-project (kcov-ut)
+project (kcov-unit-tests)
 set (CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH}
                         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
 find_package (Elfutils REQUIRED)
 
-# ====================================
-# project name and version
-# ====================================
-project (unit-test)
 set (TGT ut)
 
 set (${TGT}_SRCS
@@ -96,7 +92,7 @@ add_executable (same-name-test
 	../subdir/file.c
 	../subdir2/file.c
 )
-  
+
 add_executable (test-binary test-source.c second-source.c)
 SET_TARGET_PROPERTIES(test-binary PROPERTIES COMPILE_FLAGS "-nostdinc")
 SET_TARGET_PROPERTIES(test-binary PROPERTIES LINK_FLAGS "-nostdlib")
