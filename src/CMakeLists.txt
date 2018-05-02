@@ -23,23 +23,32 @@ set (KCOV kcov)
 
 # See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
 if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
-       execute_process(COMMAND git --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/../.git describe --abbrev=4 HEAD
-               OUTPUT_VARIABLE POD_VERSION
-               OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process (COMMAND git
+            "--git-dir=${CMAKE_SOURCE_DIR}/.git"
+            describe
+            --abbrev=4
+            HEAD
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
-       execute_process(COMMAND head -n 1 ${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog
-               COMMAND cut -d \( -f 2
-               COMMAND cut -d \) -f 1
-               OUTPUT_VARIABLE POD_VERSION
-               OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process (COMMAND head
+            -n 1
+            "${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog"
+        COMMAND cut -d \( -f 2
+        COMMAND cut -d \) -f 1
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 endif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
 add_custom_command(
-   OUTPUT version.c
-   COMMAND ${CMAKE_COMMAND} -E echo "const char *kcov_version = \\\"${POD_VERSION}\\\"\;"
-  > version.c
+    OUTPUT version.c
+    COMMAND "${CMAKE_COMMAND}"
+           -E echo
+           "const char *kcov_version = \\\"${POD_VERSION}\\\"\;"
+        > version.c
 )
-
 
 set (SOLIB kcov_sowrapper)
 
@@ -248,70 +257,92 @@ target_link_libraries(kcov_system_lib
 
 
 add_custom_command(
-   OUTPUT library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.cc
-   DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            lib${SOLIB}.so
+            __library
+        > library.cc
+    DEPENDS
+        ${SOLIB}
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT bash-redirector-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:bash_execve_redirector> bash_redirector_library > bash-redirector-library.cc
-   DEPENDS bash_execve_redirector ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT bash-redirector-library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            $<TARGET_FILE:bash_execve_redirector>
+            bash_redirector_library
+        > bash-redirector-library.cc
+    DEPENDS
+        bash_execve_redirector
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT kcov-system-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:kcov_system_lib> kcov_system_library > kcov-system-library.cc
-   DEPENDS kcov_system_lib ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT kcov-system-library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            $<TARGET_FILE:kcov_system_lib>
+            kcov_system_library
+        > kcov-system-library.cc
+    DEPENDS
+        kcov_system_lib
+       "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT python-helper.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py  python_helper > python-helper.cc
-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT python-helper.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py"
+            python_helper
+        > python-helper.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT bash-helper.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh bash_helper
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh bash_helper_debug_trap
-   > bash-helper.cc
-   DEPENDS
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh
-     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT bash-helper.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
+            bash_helper
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
+            bash_helper_debug_trap
+        > bash-helper.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT html-data-files.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png icon_glass
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html source_file_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html index_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js handlebars_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js kcov_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js jquery_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js tablesorter_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js tablesorter_widgets_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css tablesorter_theme_text
-   > html-data-files.cc
-   DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css
-    ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT html-data-files.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css" css_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png" icon_amber
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png" icon_glass
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html" source_file_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html" index_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js" handlebars_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js" kcov_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js" jquery_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js" tablesorter_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js" tablesorter_widgets_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css" tablesorter_theme_text
+        > html-data-files.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
 if (SPECIFY_RPATH)

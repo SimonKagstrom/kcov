@@ -40,15 +40,20 @@ include_directories(
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX}")
 
 add_custom_command (OUTPUT multi-fork-generated.c
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/generate-functions.py ${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/code-template.c 1024 > ${CMAKE_CURRENT_BINARY_DIR}/multi-fork-generated.c
-  DEPENDS
-	${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/generate-functions.py
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/generate-functions.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/code-template.c"
+            1024
+        > "${CMAKE_CURRENT_BINARY_DIR}/multi-fork-generated.c"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/multi-fork/generate-functions.py"
 )
 
 add_custom_target(multi-fork-generated ALL
 	DEPENDS multi-fork-generated.c
 )
-set_property(SOURCE multi-fork/test-multi-fork.c APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/multi-fork-generated.c)
+set_property(SOURCE multi-fork/test-multi-fork.c APPEND PROPERTY
+    OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/multi-fork-generated.c"
+)
 
 
 set (main_tests_SRCS
@@ -160,13 +165,18 @@ else (CMAKE_VERSION VERSION_LESS "2.8.9")
 endif (CMAKE_VERSION VERSION_LESS "2.8.9")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
+    add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
 	add_custom_target (illegal-insn ALL
-  		COMMAND ${CMAKE_C_COMPILER} -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S -o ${CMAKE_CURRENT_BINARY_DIR}/illegal-insn
+  		COMMAND "${CMAKE_C_COMPILER}"
+  		    -nostdlib
+  		    "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
+  		    -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
 	)
 
 	add_custom_target (fork-32 ALL
-  		COMMAND ${CMAKE_C_COMPILER} -g -m32 ${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c -o ${CMAKE_CURRENT_BINARY_DIR}/fork-32
+  		COMMAND "${CMAKE_C_COMPILER}" -g -m32
+  		    "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
+  		    -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
 	)
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
