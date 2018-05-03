@@ -1,9 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
-
-
-# ====================================
-# project name and version
-# ====================================
+cmake_minimum_required (VERSION 2.8.4)
 project (kcov)
 
 set (PROJECT_VERSION_MAJOR 35)
@@ -12,10 +7,10 @@ set (PROJECT_VERSION_PATCH 0)
 set (PROJECT_VERSION
      "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
-if(POLICY CMP0042)
+if (POLICY CMP0042)
   # MACOSX_RPATH is enabled by default.
   cmake_policy (SET CMP0042 NEW)
-endif()
+endif (POLICY CMP0042)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set (CMAKE_BUILD_TYPE Release CACHE STRING
@@ -32,20 +27,21 @@ add_definitions(-DPACKAGE_VERSION)
 # ====================================
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set (SPECIFY_RPATH OFF CACHE BOOL "Specify RPATH for installed executables")
+option (SPECIFY_RPATH  "Specify RPATH for installed executables" OFF)
+mark_as_advanced (SPECIFY_RPATH)
 
 # ====================================
 # default install paths for targets
 # ====================================
 include (CPack.local.cmake OPTIONAL)
-set (INSTALL_TARGETS_PATH RUNTIME DESTINATION bin
-                          LIBRARY DESTINATION lib${LIB_SUFFIX}
-                          ARCHIVE DESTINATION lib${LIB_SUFFIX})
-if (NOT MAN_DIR)
-  set (MAN_DIR share/man)
-endif (NOT MAN_DIR)
-set (INSTALL_MAN_PATH  DESTINATION ${MAN_DIR})
 
+set (KCOV_INSTALL_BINDIR "bin" CACHE STRING "Install destination for user executables")
+set (KCOV_INSTALL_DOCDIR "share/doc/kcov" CACHE STRING "Install destination for documentation")
+set (KCOV_INSTALL_MANDIR "share/man" CACHE STRING "Install destination for man documentation")
+mark_as_advanced (KCOV_INSTALL_BINDIR KCOV_INSTALL_DOCDIR KCOV_INSTALL_MANDIR)
+
+install (FILES ChangeLog COPYING COPYING.externals
+         DESTINATION "${KCOV_INSTALL_DOCDIR}")
 
 # ====================================
 # build all

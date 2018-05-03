@@ -1,16 +1,3 @@
-cmake_minimum_required (VERSION 2.6)
-
-# ====================================
-# project name and version
-# ====================================
-project (kcov)
-list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
-
-if(POLICY CMP0042)
-  # MACOSX_RPATH is enabled by default.
-  cmake_policy (SET CMP0042 NEW)
-endif()
-
 find_package (Threads)
 find_package (Bfd)
 
@@ -21,28 +8,58 @@ message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 find_package (ZLIB REQUIRED)
 find_package (CURL)
 
+find_library (DL_LIBRARY NAMES dl)
+if (DL_LIBRARY)
+    message (STATUS "Found DL: ${DL_LIBRARY}")
+else (DL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find DL")
+endif (DL_LIBRARY)
+
+find_library (M_LIBRARY NAMES m)
+if (M_LIBRARY)
+    message (STATUS "Found M: ${M_LIBRARY}")
+else (M_LIBRARY)
+    message (FATAL_ERROR "Could NOT find M")
+endif (M_LIBRARY)
+
 set (KCOV kcov)
 
 
 # See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
-if( EXISTS "${CMAKE_SOURCE_DIR}/.git" )
-       execute_process(COMMAND git --git-dir=${CMAKE_CURRENT_SOURCE_DIR}/../.git describe --abbrev=4 HEAD
-               OUTPUT_VARIABLE POD_VERSION
-               OUTPUT_STRIP_TRAILING_WHITESPACE)
-else()
-       execute_process(COMMAND head -n 1 ${CMAKE_CURRENT_SOURCE_DIR}/../ChangeLog
-               COMMAND cut -d \( -f 2
-               COMMAND cut -d \) -f 1
-               OUTPUT_VARIABLE POD_VERSION
-               OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    find_program (GIT_EXECUTABLE NAMES git)
+    if (GIT_EXECUTABLE)
+        message (STATUS "Found Git: ${GIT_EXECUTABLE}")
+    else (GIT_EXECUTABLE)
+        message (FATAL_ERROR "Could NOT find Git")
+    endif (GIT_EXECUTABLE)
+
+    execute_process (COMMAND "${GIT_EXECUTABLE}"
+            "--git-dir=${CMAKE_SOURCE_DIR}/.git"
+            describe
+            --abbrev=4
+            HEAD
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process (COMMAND head
+            -n 1
+            "${CMAKE_SOURCE_DIR}/ChangeLog"
+        COMMAND cut -d \( -f 2
+        COMMAND cut -d \) -f 1
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
 add_custom_command(
-   OUTPUT version.c
-   COMMAND ${CMAKE_COMMAND} -E echo "const char *kcov_version = \\\"${POD_VERSION}\\\"\;"
-  > version.c
+    OUTPUT version.c
+    COMMAND "${CMAKE_COMMAND}"
+           -E echo
+           "const char *kcov_version = \\\"${POD_VERSION}\\\"\;"
+        > version.c
 )
-
 
 set (SOLIB kcov_sowrapper)
 
@@ -57,8 +74,8 @@ set (DISASSEMBLER_SRCS
 
 set (HAS_LIBBFD "0")
 
-if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "x86_64")
-	if(LIBBFD_FOUND)
+if (CMAKE_TARGET_ARCHITECTURES STREQUAL "i386" OR CMAKE_TARGET_ARCHITECTURES STREQUAL "x86_64")
+	if (LIBBFD_FOUND)
 		set (HAS_LIBBFD "1")
 		set (DISASSEMBLER_SRCS
 			parsers/bfd-disassembler.cc
@@ -68,23 +85,23 @@ if("${CMAKE_TARGET_ARCHITECTURES}" STREQUAL "i386" OR "${CMAKE_TARGET_ARCHITECTU
 			${LIBBFD_BFD_LIBRARY}
 			${LIBBFD_IBERTY_LIBRARY}
 		)
-	endif()
-endif()
+	endif (LIBBFD_FOUND)
+endif (CMAKE_TARGET_ARCHITECTURES STREQUAL "i386" OR CMAKE_TARGET_ARCHITECTURES STREQUAL "x86_64")
 
 set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 
 if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
-endif()
+endif (CURL_FOUND)
 
-if ("${KCOV_STATIC_BUILD}" STREQUAL "1")
+if (KCOV_STATIC_BUILD STREQUAL "1")
 	message(STATUS "Building a static binary (no coveralls support)")
 
 	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
-endif()
+endif (KCOV_STATIC_BUILD STREQUAL "1")
 
 set (ELF_SRCS
 	dummy-solib-handler.cc
@@ -94,7 +111,7 @@ set (MACHO_SRCS
 set (SOLIB_generated )
 
 # Linux-specific sources
-if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package (LibElf)
 	find_package (Elfutils)
 	set (ELF_SRCS
@@ -111,7 +128,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
-else()
+else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_library(LLDB_LIBRARY
       NAMES
 	    LLDB
@@ -135,7 +152,7 @@ else()
 	set (MACHO_SRCS
 		engines/lldb-engine.cc
 	)
-endif ()
+endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set (${KCOV}_SRCS
     capabilities.cc
@@ -227,22 +244,16 @@ include_directories(
 	)
 
 if (LIBDW_FOUND)
-include_directories(
-	${LIBDW_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${LIBDW_INCLUDE_DIRS})
+endif (LIBDW_FOUND)
 
 if (LIBELF_FOUND)
-include_directories(
-	${LIBELF_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${LIBELF_INCLUDE_DIRS})
+endif (LIBELF_FOUND)
 
 if (CURL_FOUND)
-include_directories(
-	${CURL_INCLUDE_DIRS}
-	)
-endif()
+    include_directories(${CURL_INCLUDE_DIRS})
+endif (CURL_FOUND)
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
@@ -250,114 +261,139 @@ target_link_libraries(bash_execve_redirector dl)
 
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
-target_link_libraries(kcov_system_lib dl ${ZLIB_LIBRARIES})
+target_link_libraries(kcov_system_lib
+    "${DL_LIBRARY}"
+    ${ZLIB_LIBRARIES}
+)
 
 
 add_custom_command(
-   OUTPUT library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py lib${SOLIB}.so __library > library.cc
-   DEPENDS ${SOLIB} ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            lib${SOLIB}.so
+            __library
+        > library.cc
+    DEPENDS
+        ${SOLIB}
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT bash-redirector-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:bash_execve_redirector> bash_redirector_library > bash-redirector-library.cc
-   DEPENDS bash_execve_redirector ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT bash-redirector-library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            $<TARGET_FILE:bash_execve_redirector>
+            bash_redirector_library
+        > bash-redirector-library.cc
+    DEPENDS
+        bash_execve_redirector
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT kcov-system-library.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py $<TARGET_FILE:kcov_system_lib> kcov_system_library > kcov-system-library.cc
-   DEPENDS kcov_system_lib ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT kcov-system-library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            $<TARGET_FILE:kcov_system_lib>
+            kcov_system_library
+        > kcov-system-library.cc
+    DEPENDS
+        kcov_system_lib
+       "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT python-helper.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py  python_helper > python-helper.cc
-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT python-helper.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py"
+            python_helper
+        > python-helper.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/python-helper.py"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT bash-helper.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh bash_helper
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh bash_helper_debug_trap
-   > bash-helper.cc
-   DEPENDS
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh
-     ${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh
-     ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT bash-helper.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
+            bash_helper
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
+            bash_helper_debug_trap
+        > bash-helper.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 add_custom_command(
-   OUTPUT html-data-files.cc
-   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css css_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png icon_amber
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png icon_glass
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html source_file_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html index_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js handlebars_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js kcov_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js jquery_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js tablesorter_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js tablesorter_widgets_text
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css tablesorter_theme_text
-   > html-data-files.cc
-   DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css
-    ${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py
-   )
+    OUTPUT html-data-files.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css" css_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png" icon_amber
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png" icon_glass
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html" source_file_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html" index_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js" handlebars_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js" kcov_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js" jquery_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js" tablesorter_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js" tablesorter_widgets_text
+            "${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css" tablesorter_theme_text
+        > html-data-files.cc
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/bcov.css"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/amber.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/glass.png"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/source-file.html"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/index.html"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/handlebars.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/kcov.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/js/jquery.tablesorter.widgets.min.js"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../data/tablesorter-theme.css"
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
-if(SPECIFY_RPATH)
+if (SPECIFY_RPATH)
 	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
 	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 	# the RPATH to be used when installing, but only if it's not a system directory
-	LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-	IF("${isSystemDir}" STREQUAL "-1")
-	  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	ENDIF("${isSystemDir}" STREQUAL "-1")
-endif(SPECIFY_RPATH)
+	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
+	if (IS_SYSTEM_DIR STREQUAL "-1")
+	    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	endif (IS_SYSTEM_DIR STREQUAL "-1")
+endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
 	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 	target_link_libraries(${KCOV}
+		stdc++
+		${CMAKE_THREAD_LIBS_INIT}
+		${CURL_LIBRARIES}
+        "${DL_LIBRARY}"
+		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
-		stdc++
-		${CURL_LIBRARIES}
-		m
-		${DISASSEMBLER_LIBRARIES}
-		${ZLIB_LIBRARIES}
-		${CMAKE_THREAD_LIBS_INIT}
-		dl
 		${LLDB_LIBRARY}
+        "${M_LIBRARY}"
+		${ZLIB_LIBRARIES}
 	)
-	install (TARGETS ${KCOV} DESTINATION ${INSTALL_TARGETS_PATH})
-endif()
+	install (TARGETS ${KCOV} DESTINATION "${KCOV_INSTALL_BINDIR}")
+endif (LIBELF_FOUND)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable (kcov-system-daemon ${KCOV_SYSTEM_MODE_SRCS} version.c)
 
     target_link_libraries(kcov-system-daemon
         stdc++
-        m
-        ${ZLIB_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        dl
+        "${DL_LIBRARY}"
+        "${M_LIBRARY}"
+        ${ZLIB_LIBRARIES}
 	)
-	install (TARGETS kcov-system-daemon DESTINATION ${INSTALL_TARGETS_PATH})
-endif()
+	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
+endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
