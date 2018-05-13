@@ -1,4 +1,4 @@
-#/bin/bash
+#/bin/sh
 eval "(echo Stuff in subshell
 echo More stuff in subshell
       ) "

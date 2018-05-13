@@ -12,6 +12,21 @@
 #define KCOV_MAGIC         0x6b636f76 /* "kcov" */
 #define KCOV_SOLIB_VERSION 3
 
+// Add symbols missing from FreeBSD's elfutils
+#ifndef __ELF_NATIVE_CLASS
+#ifdef __LP64__
+#define __ELF_NATIVE_CLASS 64
+#else
+#define __ELF_NATIVE_CLASS 32
+#endif
+#endif
+#ifndef ElfW
+// Copied from glibc's elf/link.h
+#define ElfW(type)	_ElfW (Elf, __ELF_NATIVE_CLASS, type)
+#define _ElfW(e,w,t)	_ElfW_1 (e, w, _##t)
+#define _ElfW_1(e,w,t) e##w##t
+#endif
+
 static uint8_t data_area[4 * 1024 * 1024];
 
 struct phdr_data *phdr_data_new(size_t allocSize)

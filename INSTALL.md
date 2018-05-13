@@ -8,6 +8,10 @@ and (optional) binutils and libiberty to build kcov. Note that elfutils is
 found in multiple variants, and at least in RH/Centos/Fedora you'll need
 elfutils-devel and *not* elfutils-libelf-devel.
 
+FreeBSD
+-------
+pkg install binutils cmake elfutils python
+
 Ubuntu
 ------
 Install binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev

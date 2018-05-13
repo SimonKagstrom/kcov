@@ -23,12 +23,16 @@ find_package (Threads REQUIRED)
 
 find_package (ZLIB REQUIRED)
 
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+SET (DL_LIBRARY "")
+else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
     message (STATUS "Found DL: ${DL_LIBRARY}")
 else (DL_LIBRARY)
     message (FATAL_ERROR "Could NOT find DL")
 endif (DL_LIBRARY)
+endif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 find_library (M_LIBRARY NAMES m)
 if (M_LIBRARY)

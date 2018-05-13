@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 #unitundertest.sh
 
-function block1()
+block1()
 {
     echo "In block1()"
 
@@ -11,7 +11,7 @@ function block1()
     done
 }
 
-function block2()
+block2()
 {
     echo "In block2()"
 

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <file-parser.hh>
 #include <engine.hh>
 #include <configuration.hh>
@@ -14,6 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <dirent.h>
+#include <stdio.h>
 
 #include <list>
 #include <unordered_map>
