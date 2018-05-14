@@ -542,7 +542,11 @@ public:
 	{
 		setKey("binary-path", "");
 		setKey("python-command", "python");
+#ifdef __FreeBSD__
+		setKey("bash-command", "/usr/local/bin/bash");
+#else
 		setKey("bash-command", "/bin/bash");
+#endif
 		setKey("kernel-coverage-path", "/sys/kernel/debug/kprobe-coverage");
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
