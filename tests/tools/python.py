@@ -10,6 +10,20 @@ class python_exit_status(testbase.KcovTestCase):
 
         assert rv == noKcovRv
 
+class python_can_set_illegal_parser(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --python-parser=python7 " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/main 5")
+
+        assert o.find("Cannot find Python parser 'python7'") != -1
+
+class python_can_set_legal_parser(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --python-parser=python3 " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/main 5")
+
+        assert o.find("Cannot find Python parser 'python3'") == -1
+
 class python_unittest(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()

@@ -288,6 +288,32 @@ bool file_exists(const std::string &path)
 	return out;
 }
 
+bool executable_exists_in_path(const std::string &executableName)
+{
+	// Full path to it
+	if (file_exists(executableName))
+	{
+		return true;
+	}
+
+	std::string path = getenv("PATH");
+	std::vector<std::string> parts = split_string(path, ":");
+
+	for (std::vector<std::string>::iterator it = parts.begin();
+			it != parts.end();
+			++it)
+	{
+		std::string cur = fmt("%s/%s", it->c_str(), executableName.c_str());
+
+		if (file_exists(cur))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void mock_read_file(void *(*callback)(size_t *out_size, const char *path))
 {
 	mocked_read_callback = callback;

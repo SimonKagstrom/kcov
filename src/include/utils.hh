@@ -112,6 +112,8 @@ extern std::string dir_concat(const std::string &dir, const std::string &filenam
 
 extern bool file_exists(const std::string &path);
 
+extern bool executable_exists_in_path(const std::string &path);
+
 extern uint64_t get_file_timestamp(const std::string &path);
 
 extern int concat_files(const char *dst, const char *file_a, const char *file_b);

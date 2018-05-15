@@ -55,10 +55,20 @@ public:
 
 	bool start(IEventListener &listener, const std::string &executable)
 	{
+		IConfiguration &conf = IConfiguration::getInstance();
+		std::string command = conf.keyAsString("python-command");
+
 		std::string kcov_python_pipe_path =
 				IOutputHandler::getInstance().getOutDirectory() + "kcov-python.pipe";
 		std::string kcov_python_path =
 				IOutputHandler::getInstance().getBaseDirectory() + "python-helper.py";
+
+		if (!executable_exists_in_path(command))
+		{
+			error("Cannot find Python parser '%s'", command.c_str());
+
+			return false;
+		}
 
 		if (write_file(python_helper_data.data(), python_helper_data.size(),
 				"%s", kcov_python_path.c_str()) < 0) {
@@ -85,12 +95,11 @@ public:
 		/* Launch the python helper */
 		m_child = fork();
 		if (m_child == 0) {
-			IConfiguration &conf = IConfiguration::getInstance();
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
 			std::string s = fmt("%s %s ",
-					conf.keyAsString("python-command").c_str(),
+					command.c_str(),
 					kcov_python_path.c_str());
 			for (unsigned int i = 0; i < argc; i++)
 				s += "'" + std::string(argv[i]) + "' ";
