@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	if (child == 0)
+	if (child > 0)
 		printf("Parent %d\n", getpid());
 	else {
 		pid_t grand_child = fork();
