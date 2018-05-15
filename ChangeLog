@@ -1,3 +1,8 @@
+Kcov (36):
+	* Issue #157: OSX now supports covering shared libraries
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Apr 19 20:22:30 CEST 2018
+
 Kcov (35):
 	* Issue #240: Allow running on systems with > 32/64 CPUs
 	  (Alexandra Ghecenco)
