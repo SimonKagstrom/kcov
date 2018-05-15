@@ -132,6 +132,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
+		engines/ptrace_linux.cc
 		engines/kernel-engine.cc
 		parsers/elf.cc
 		parsers/elf-parser.cc
@@ -149,6 +150,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
+		engines/ptrace_freebsd.cc
 		parsers/elf.cc
 		parsers/elf-parser.cc
 		parsers/dwarf.cc
@@ -237,6 +239,7 @@ set (KCOV_SYSTEM_MODE_SRCS
     engine-factory.cc
     engines/system-mode-file-format.cc
     engines/ptrace.cc
+    engines/ptrace_linux.cc
     filter.cc
     gcov.cc
     include/capabilities.hh
