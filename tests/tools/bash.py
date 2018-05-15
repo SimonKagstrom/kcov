@@ -243,7 +243,6 @@ class bash_handle_all_output(testbase.KcovTestCase):
         self.assertEqual(1000, parse_cobertura.hitsPerLine(dom, script, 4))
 
 class bash_exit_status(testbase.KcovTestCase):
-    @unittest.expectedFailure
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.sources + "/tests/bash/shell-main 5", False)
