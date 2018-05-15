@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
 	if (child > 0)
 		printf("Parent %d\n", getpid());
 	else {
-		execle("/bin/ls", "/bin/ls", "/proc/self/exe", NULL, NULL);
+		execle("/bin/ls", "/bin/ls", "/bin/ls", NULL, NULL);
 	}
 
 	wait(&status);
