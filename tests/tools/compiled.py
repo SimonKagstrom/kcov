@@ -5,7 +5,7 @@ import sys
 import os
 
 class illegal_insn(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/illegal-insn", False)
@@ -13,7 +13,7 @@ class illegal_insn(testbase.KcovTestCase):
         assert output.find("Illegal instructions are") != -1
 
 class fork_no_wait(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/fork_no_wait", False)
@@ -40,12 +40,12 @@ class ForkBase(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "fork.c", 46) >= 1
 
 class fork_64(ForkBase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.doTest("fork")
 
 class fork_32(ForkBase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.doTest("fork-32")
 
@@ -71,7 +71,7 @@ class shared_library(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
 class shared_library_skip(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --skip-solibs " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test", False)
@@ -83,7 +83,7 @@ class shared_library_skip(testbase.KcovTestCase):
 
 
 class shared_library_filter_out(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --exclude-pattern=solib " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test", False)
@@ -95,7 +95,7 @@ class shared_library_filter_out(testbase.KcovTestCase):
 
 
 class shared_library_accumulate(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #157")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/shared_library_test 5", False)
@@ -201,7 +201,7 @@ class global_ctors(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
 
 class daemon_wait_for_last_child(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #158")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/test_daemon", False)
@@ -245,7 +245,7 @@ class SignalsBase(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
 
 class signals(SignalsBase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only, Issue #158")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
 
     def runTest(self):
         self.m_self = ""
@@ -268,7 +268,7 @@ class signals_crash(testbase.KcovTestCase):
 
 class collect_and_report_only(testbase.KcovTestCase):
     # Cannot work with combined Engine / Parser
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/main-tests ", False)
@@ -295,7 +295,7 @@ class setpgid_kill(testbase.KcovTestCase):
         assert o.find("SUCCESS") != -1
 
 class attach_process_with_threads(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/issue31", False)
@@ -305,7 +305,7 @@ class attach_process_with_threads(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
 
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.sources + "/tests/daemon/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/thread-test", False)
@@ -334,7 +334,7 @@ class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
 
 
 class debuglink(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
         os.system("rm -rf %s/.debug" % (testbase.outbase))
@@ -435,7 +435,7 @@ class dlopen_in_ignored_source_file(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "solib.c", 12) == 0
 
 class daemon_no_wait_for_last_child(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
         self.setUp()
@@ -453,7 +453,7 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
 
 
 class address_sanitizer_coverage(testbase.KcovTestCase):
-    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
         self.setUp()
