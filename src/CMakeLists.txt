@@ -148,6 +148,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	find_package (Elfutils)
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
+		engines/ptrace.cc
 		parsers/elf.cc
 		parsers/elf-parser.cc
 		parsers/dwarf.cc
