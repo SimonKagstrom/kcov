@@ -31,7 +31,7 @@ int main(int argc, const char *argv[])
 		if (grand_child < 0)
 			fprintf(stderr, "fork gc failed\n");
 		else if (grand_child == 0) {
-			printf("Grand child %d\n", getpid());
+			printf("Grandchild %d\n", getpid());
 			mibb();
 		} else
 			printf("Child %d\n", getpid());
