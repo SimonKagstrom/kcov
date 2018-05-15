@@ -302,7 +302,7 @@ class attach_process_with_threads(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 8) == 0
+        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
 
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
     @unittest.skipIf(not sys.platform.startswith("linux"), "Linux-only")
