@@ -9,7 +9,7 @@ kill -TERM %1
 sleep 2
 
 pid=`cat /tmp/setpgid.pid`
-if [ -e /proc/$pid/cmdline ] ; then
+if ps -p $pid > /dev/null ; then
 	echo "FAIL"
 else
 	echo "SUCCESS"
