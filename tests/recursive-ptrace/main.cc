@@ -1,10 +1,11 @@
-#include <unistd.h>
-#include <stdio.h>
+#include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <signal.h>
 #include <sched.h>
+#include <stdio.h>
 
 int forkAndAttach()
 {
@@ -21,7 +22,11 @@ int forkAndAttach()
 		int res;
 
 		/* We're in the child, set me as traced */
+#ifdef __linux__
 		res = ptrace(PTRACE_TRACEME, 0, 0, 0);
+#elif defined(__FreeBSD__)
+		res = ptrace(PT_TRACE_ME, 0, 0, 0);
+#endif
 		if (res < 0) {
 			fprintf(stderr, "Can't set me as ptraced\n");
 			return -1;
@@ -41,7 +46,11 @@ int forkAndAttach()
 		fprintf(stderr, "Child hasn't stopped: %x\n", status);
 		return -1;
 	}
+#ifdef __linux__
 	ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK);
+#elif defined(__FreeBSD__)
+	ptrace(PT_FOLLOW_FORK, child, NULL, 1);
+#endif
 
 	return child;
 }
