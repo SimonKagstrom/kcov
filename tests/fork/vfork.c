@@ -11,7 +11,7 @@ int main(int argc, const char *argv[])
 
 	child = vfork();
 	if (child < 0) {
-		fprintf(stderr, "fork failed!\n");
+		fprintf(stderr, "vfork failed!\n");
 		return -1;
 	}
 
