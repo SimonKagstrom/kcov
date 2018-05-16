@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#define _WITH_GETLINE	// Needed on FreeBSD < 12.0
 #include "writer-base.hh"
 #include <utils.hh>
 

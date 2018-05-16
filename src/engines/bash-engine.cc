@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#define _WITH_GETLINE	// Needed on FreeBSD < 12.0
 #include <file-parser.hh>
 #include <engine.hh>
 #include <configuration.hh>
