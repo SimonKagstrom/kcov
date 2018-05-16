@@ -23,12 +23,16 @@ find_package (Threads REQUIRED)
 
 find_package (ZLIB REQUIRED)
 
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+SET (DL_LIBRARY "")
+else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
     message (STATUS "Found DL: ${DL_LIBRARY}")
 else (DL_LIBRARY)
     message (FATAL_ERROR "Could NOT find DL")
 endif (DL_LIBRARY)
+endif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 find_library (M_LIBRARY NAMES m)
 if (M_LIBRARY)
@@ -168,7 +172,7 @@ else (CMAKE_VERSION VERSION_LESS "2.8.9")
     set_target_properties (pie-test PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif (CMAKE_VERSION VERSION_LESS "2.8.9")
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
     add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
     add_custom_target (illegal-insn ALL
         COMMAND "${CMAKE_C_COMPILER}"
@@ -182,7 +186,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
             "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
             -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
     )
-endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+endif (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
 
 add_custom_target(tests-stripped ALL
     COMMAND "${CMAKE_STRIP}" -o tests-stripped main-tests

@@ -11,14 +11,14 @@ int main(int argc, const char *argv[])
 
 	child = vfork();
 	if (child < 0) {
-		fprintf(stderr, "fork failed!\n");
+		fprintf(stderr, "vfork failed!\n");
 		return -1;
 	}
 
 	if (child > 0)
 		printf("Parent %d\n", getpid());
 	else {
-		execle("/bin/ls", "/bin/ls", "/proc/self/exe", NULL, NULL);
+		execle("/bin/ls", "/bin/ls", "/bin/ls", NULL, NULL);
 	}
 
 	wait(&status);

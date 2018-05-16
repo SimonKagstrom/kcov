@@ -1,6 +1,6 @@
-#!/bin/bash
-function some_test
-    {
+#!/bin/sh
+some_test()
+{
     test "${1}" == "--quiet" &&
         { quiet=${1} ; shift ; }
-    }
+}

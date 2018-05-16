@@ -1,3 +1,5 @@
+#include <sys/types.h>
+
 #include <engine.hh>
 #include <utils.hh>
 #include <configuration.hh>
@@ -5,24 +7,11 @@
 #include <solib-handler.hh>
 #include <file-parser.hh>
 #include <phdr_data.h>
+#include "ptrace_sys.hh"
 
-#include <unistd.h>
-#include <sys/personality.h>
-#include <sys/ptrace.h>
-#include <sys/user.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <fcntl.h>
-#include <sched.h>
-#include <sys/types.h>
-#include <dirent.h>
-
-#if defined(__aarch64__)
-#  include <sys/uio.h>
-#  include <elf.h>
-#endif
+#include <unistd.h>
 
 #include <map>
 #include <unordered_map>
@@ -35,52 +24,9 @@ using namespace kcov;
 #define str(s) #s
 #define xstr(s) str(s)
 
-enum
-{
-	i386_EIP = 12,
-	x86_64_RIP = 16,
-	ppc_NIP = 32,
-	arm_PC = 15,
-	aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
-};
-
 static unsigned long getAligned(unsigned long addr)
 {
 	return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
-}
-
-static unsigned long arch_getPcFromRegs(unsigned long *regs)
-{
-	unsigned long out;
-
-#if defined(__i386__)
-	out = regs[i386_EIP] - 1;
-#elif defined(__x86_64__)
-	out = regs[x86_64_RIP] - 1;
-#elif defined(__arm__)
-	out = regs[arm_PC];
-#elif defined(__aarch64__)
-	out = regs[aarch64_PC];
-#elif defined(__powerpc__)
-	out = regs[ppc_NIP];
-#else
-# error Unsupported architecture
-#endif
-
-	return out;
-}
-
-static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
-{
-#if defined(__i386__)
-	regs[i386_EIP]--;
-#elif defined(__x86_64__)
-	regs[x86_64_RIP]--;
-#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
-	// Do nothing
-#else
-# error Unsupported architecture
-#endif
 }
 
 
@@ -127,121 +73,6 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 }
 
 
-
-static int get_current_cpu(void)
-{
-	return sched_getcpu();
-}
-
-static void tie_process_to_cpu(pid_t pid, int cpu)
-{
-	// Switching CPU while running will cause icache
-	// conflicts. So let's just forbid that.
-
-	int max_cpu = 4096;
-	cpu_set_t *set = CPU_ALLOC(max_cpu);
-	panic_if (!set,
-			"Can't allocate CPU set!\n");
-	CPU_ZERO_S(CPU_ALLOC_SIZE(max_cpu), set);
-	CPU_SET(cpu, set);
-	panic_if (sched_setaffinity(pid, CPU_ALLOC_SIZE(max_cpu), set) < 0,
-			"Can't set CPU affinity. Coincident won't work");
-	CPU_FREE(set);
-}
-
-
-/* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
-static int linux_proc_get_int (pid_t lwpid, const char *field)
-{
-	size_t field_len = strlen (field);
-	FILE *status_file;
-	char buf[100];
-	int retval = -1;
-
-	snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
-	status_file = fopen(buf, "r");
-	if (status_file == NULL)
-	{
-		warning("unable to open /proc file '%s'", buf);
-		return -1;
-	}
-
-	while (fgets (buf, sizeof (buf), status_file)) {
-		if (strncmp (buf, field, field_len) == 0 && buf[field_len] == ':') {
-			retval = (int)strtol (&buf[field_len + 1], NULL, 10);
-			break;
-		}
-	}
-
-	fclose (status_file);
-
-	return retval;
-}
-
-static int linux_proc_pid_has_state (pid_t pid, const char *state)
-{
-	char buffer[100];
-	FILE *procfile;
-	int retval;
-	int have_state;
-
-	xsnprintf (buffer, sizeof (buffer), "/proc/%d/status", (int) pid);
-	procfile = fopen(buffer, "r");
-	if (procfile == NULL) {
-		warning("unable to open /proc file '%s'", buffer);
-		return 0;
-	}
-
-	have_state = 0;
-	while (fgets (buffer, sizeof (buffer), procfile) != NULL) {
-		if (strncmp (buffer, "State:", 6) == 0) {
-			have_state = 1;
-			break;
-		}
-	}
-	retval = (have_state && strstr (buffer, state) != NULL);
-	fclose (procfile);
-	return retval;
-}
-
-/* Detect `T (stopped)' in `/proc/PID/status'.
- * Other states including `T (tracing stop)' are reported as false.
- */
-static int linux_proc_pid_is_stopped (pid_t pid)
-{
-	return linux_proc_pid_has_state (pid, "T (stopped)");
-}
-
-static int linux_proc_get_tgid (pid_t lwpid)
-{
-	return linux_proc_get_int (lwpid, "Tgid");
-}
-
-static int kill_lwp (unsigned long lwpid, int signo)
-{
-	/* Use tkill, if possible, in case we are using nptl threads.  If tkill
-	 * fails, then we are not using nptl threads and we should be using kill. */
-
-#ifdef __NR_tkill
-	{
-		static int tkill_failed;
-
-		if (!tkill_failed)
-		{
-			int ret;
-
-			errno = 0;
-			ret = syscall (__NR_tkill, lwpid, signo);
-			if (errno != ENOSYS)
-				return ret;
-			tkill_failed = 1;
-		}
-	}
-#endif
-
-	return kill (lwpid, signo);
-}
-
 class Ptrace : public IEngine
 {
 public:
@@ -259,7 +90,7 @@ public:
 	~Ptrace()
 	{
 		kill(SIGTERM);
-		ptrace(PTRACE_DETACH, m_activeChild, 0, 0);
+		ptrace_sys::detach(m_activeChild);
 	}
 
 
@@ -268,8 +99,8 @@ public:
 	{
 		m_listener = &listener;
 
-		m_parentCpu = get_current_cpu();
-		tie_process_to_cpu(getpid(), m_parentCpu);
+		m_parentCpu = ptrace_sys::get_current_cpu();
+		ptrace_sys::tie_process_to_cpu(getpid(), m_parentCpu);
 
 		m_instructionMap.clear();
 
@@ -299,7 +130,7 @@ public:
 		if (m_instructionMap.find(addr) != m_instructionMap.end())
 			return 0;
 
-		data = peekWord(addr);
+		data = ptrace_sys::peekWord(m_activeChild, getAligned(addr));
 
 		m_instructionMap[addr] = data;
 		m_pendingBreakpoints.push_back(addr);
@@ -322,44 +153,12 @@ public:
 
 		// Clear the actual breakpoint instruction
 		unsigned long val = m_instructionMap[addr];
-		val = arch_clearBreakpoint(addr, val, peekWord(addr));
+		val = arch_clearBreakpoint(addr, val,
+		    ptrace_sys::peekWord(m_activeChild, getAligned(addr)));
 
-		pokeWord(addr, val);
+		ptrace_sys::pokeWord(m_activeChild, getAligned(addr), val);
 
 		return true;
-	}
-
-	long getRegs(pid_t pid, void *addr, void *regs, size_t len)
-	{
-#if defined(__aarch64__)
-		struct iovec iov = { regs, len };
-		return ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov);
-#else
-		(void)len;
-		return ptrace((__ptrace_request)PTRACE_GETREGS, pid, NULL, regs);
-#endif
-	}
-
-	long setRegs(pid_t pid, void *addr, void *regs, size_t len)
-	{
-#if defined(__aarch64__)
-		struct iovec iov = { regs, len };
-		return ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov);
-#else
-		(void)len;
-		return ptrace((__ptrace_request)PTRACE_SETREGS, pid, NULL, regs);
-#endif
-	}
-
-	void singleStep()
-	{
-		unsigned long regs[1024];
-
-		getRegs(m_activeChild, NULL, regs, sizeof regs);
-
-		// Step back one instruction
-		arch_adjustPcAfterBreakpoint(regs);
-		setRegs(m_activeChild, NULL, regs, sizeof regs);
 	}
 
 	const Event waitEvent()
@@ -367,13 +166,14 @@ public:
 		static uint64_t lastSignalAddress;
 		Event out;
 		int status;
-		int who;
+		pid_t who;
 
 		// Assume error
 		out.type = ev_error;
 		out.data = -1;
 
-		who = waitpid(-1, &status, __WALL);
+		who = ptrace_sys::wait_all(&status);
+
 		if (who == -1) {
 			kcov_debug(ENGINE_MSG, "Returning error\n");
 			return out;
@@ -382,7 +182,7 @@ public:
 		m_children[who] = 1;
 
 		m_activeChild = who;
-		out.addr = getPc(m_activeChild);
+		out.addr = ptrace_sys::getPc(m_activeChild);
 
 		kcov_debug(ENGINE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
 
@@ -398,34 +198,40 @@ public:
 
 			out.type = ev_signal;
 			out.data = sig;
-			if ((sig == SIGTRAP) &&
-					((status >> 16) == PTRACE_EVENT_CLONE || (status >> 16) == PTRACE_EVENT_FORK || (status >> 16) == PTRACE_EVENT_VFORK)) {
-				kcov_debug(ENGINE_MSG, "PT clone at 0x%llx for %d\n",
+			int event = ptrace_sys::getEvent(who, status);
+			if (ptrace_sys::eventIsNewChild(sig, event)) {
+				// Activate tracing on a new child
+				kcov_debug(ENGINE_MSG, "PT new child %d\n", m_activeChild);
+				ptrace_sys::follow_child(m_activeChild);
+				out.data = 0;
+			} else if (ptrace_sys::eventIsForky(sig, event)) {
+				kcov_debug(ENGINE_MSG, "PT fork/clone at 0x%llx for %d\n",
 						(unsigned long long)out.addr, m_activeChild);
 				out.data = 0;
 			} else if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill) {
 				// A trap?
-						out.type = ev_breakpoint;
-						out.data = -1;
+				out.type = ev_breakpoint;
+				out.data = -1;
 
-						kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
-								(unsigned long long)out.addr, out.data, m_activeChild);
+				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
+						(unsigned long long)out.addr, out.data, m_activeChild);
 
-						bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
+				kcov_debug(ENGINE_MSG, "Looking for instruction %zx.\n", out.addr);
+				bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
 
-						// Single-step if we have this BP
-						if (insnFound)
-							singleStep();
-						else if (sig != SIGSTOP)
-							skipInstruction();
+				// Single-step if we have this BP
+				if (insnFound)
+					ptrace_sys::singleStep(m_activeChild);
+				else if (sig != SIGSTOP)
+					ptrace_sys::skipInstruction(m_activeChild);
 
-						// Wait for solib data if this is the first time
-						if (m_firstBreakpoint && insnFound) {
-							blockUntilSolibDataRead();
-							m_firstBreakpoint = false;
-						}
+				// Wait for solib data if this is the first time
+				if (m_firstBreakpoint && insnFound) {
+					blockUntilSolibDataRead();
+					m_firstBreakpoint = false;
+				}
 
-						return out;
+				return out;
 			}
 
 			kcov_debug(ENGINE_MSG, "PT signal %d at 0x%llx for %d\n",
@@ -481,8 +287,8 @@ public:
 
 		setupAllBreakpoints();
 
-		kcov_debug(ENGINE_MSG, "PT continuing %d with signal %lu\n", m_activeChild, m_signal);
-		res = ptrace(PTRACE_CONT, m_activeChild, 0, m_signal);
+		kcov_debug(ENGINE_MSG, "PT continuing %d with signal %d\n", m_activeChild, m_signal);
+		res = ptrace_sys::cont(m_activeChild, m_signal);
 		if (res < 0) {
 			kcov_debug(ENGINE_MSG, "PT error for %d: %d\n", m_activeChild, res);
 			m_children.erase(m_activeChild);
@@ -519,10 +325,12 @@ private:
 				addrIt != m_pendingBreakpoints.end();
 				++addrIt) {
 			unsigned long addr = *addrIt;
-			unsigned long cur_data = peekWord(addr);
+			unsigned long cur_data = ptrace_sys::peekWord(m_activeChild,
+			    getAligned(addr));
 
 			// Set the breakpoint
-			pokeWord(addr,	arch_setupBreakpoint(addr, cur_data));
+			ptrace_sys::pokeWord(m_activeChild, getAligned(addr),
+					     arch_setupBreakpoint(addr, cur_data));
 		}
 
 		m_pendingBreakpoints.clear();
@@ -537,28 +345,19 @@ private:
 
 		/* Executable exists, try to launch it */
 		if ((child = fork()) == 0) {
-			int persona;
 			int res;
 
 			/* Avoid address randomization */
-			persona = personality(0xffffffff);
-			if (persona < 0) {
-				perror("Can't get personality");
+			if (!ptrace_sys::disable_aslr())
 				return false;
-			}
-			persona |= 0x0040000; /* ADDR_NO_RANDOMIZE */
-			if (personality(persona) < 0) {
-				perror("Can't set personality");
-				return false;
-			}
 
 			/* And launch the process */
-			res = ptrace(PTRACE_TRACEME, 0, 0, 0);
+			res = ptrace_sys::trace_me();
 			if (res < 0) {
 				perror("Can't set me as ptraced");
 				return false;
 			}
-			tie_process_to_cpu(getpid(), m_parentCpu);
+			ptrace_sys::tie_process_to_cpu(getpid(), m_parentCpu);
 			execv(executable, argv);
 
 			/* Exec failed */
@@ -573,7 +372,7 @@ private:
 		m_child = m_activeChild = m_firstChild = child;
 		// Might not be completely necessary (the child should inherit this
 		// from the parent), but better safe than sorry
-		tie_process_to_cpu(m_child, m_parentCpu);
+		ptrace_sys::tie_process_to_cpu(m_child, m_parentCpu);
 
 		kcov_debug(ENGINE_MSG, "PT forked %d\n", child);
 
@@ -588,7 +387,7 @@ private:
 			return false;
 		}
 
-		ptrace(PTRACE_SETOPTIONS, m_activeChild, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
+		ptrace_sys::follow_fork(m_activeChild);
 
 		return true;
 	}
@@ -600,7 +399,7 @@ private:
 		m_child = m_activeChild = m_firstChild = pid;
 
 		errno = 0;
-		rv = linuxAttach(m_activeChild);
+		rv = ptrace_sys::attachAll(m_activeChild);
 		//rv = ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
 		if (rv < 0) {
 			const char *err = strerror(errno);
@@ -620,161 +419,9 @@ private:
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
-		tie_process_to_cpu(m_activeChild, m_parentCpu);
+		ptrace_sys::tie_process_to_cpu(m_activeChild, m_parentCpu);
 
 		return true;
-	}
-
-	/* Taken from GDB (loop through all threads and attach to each one)  */
-	int linuxAttach (pid_t pid)
-	{
-		int err;
-
-		/* Attach to PID.  We will check for other threads soon. */
-		err = attachLwp (pid);
-		if (err != 0)
-			error ("Cannot attach to process %d\n", pid);
-
-		if (linux_proc_get_tgid (pid) != pid)
-		{
-			return 0;
-		}
-
-		DIR *dir;
-		char pathname[128];
-
-		sprintf (pathname, "/proc/%d/task", pid);
-
-		dir = opendir (pathname);
-
-		if (!dir) {
-			error("Could not open /proc/%d/task.\n", pid);
-
-			return 0;
-		}
-
-		/* At this point we attached to the tgid.  Scan the task for
-		 * existing threads. */
-		int new_threads_found;
-		int iterations = 0;
-
-		std::unordered_map<unsigned long, bool> threads;
-		threads[pid] = true;
-
-		while (iterations < 2)
-		{
-			struct dirent *dp;
-
-			new_threads_found = 0;
-			/* Add all the other threads.  While we go through the
-			 * threads, new threads may be spawned.  Cycle through
-			 * the list of threads until we have done two iterations without
-			 * finding new threads.  */
-			while ((dp = readdir (dir)) != NULL)
-			{
-				int lwp;
-
-				/* Fetch one lwp.  */
-				lwp = strtoul (dp->d_name, NULL, 10);
-
-				/* Is this a new thread?  */
-				if (lwp != 0 && threads.find(lwp) == threads.end())
-				{
-					int err;
-					threads[lwp] = true;
-
-					err = attachLwp (lwp);
-					if (err != 0)
-						warning ("Cannot attach to lwp %d\n", lwp);
-
-					new_threads_found++;
-				}
-			}
-
-			if (!new_threads_found)
-				iterations++;
-			else
-				iterations = 0;
-
-			rewinddir (dir);
-		}
-		closedir (dir);
-
-		return 0;
-	}
-
-	/* Attach to an inferior process. */
-	int attachLwp (int lwpid)
-	{
-		int rv;
-
-		rv = ptrace (PTRACE_ATTACH, lwpid, 0, 0);
-
-		if (rv < 0)
-			return errno;
-		ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
-
-		if (!linux_proc_pid_is_stopped (lwpid)) {
-			/*
-			 * First make sure there is a pending SIGSTOP.  Since we are
-			 * already attached, the process can not transition from stopped
-			 * to running without a PTRACE_CONT; so we know this signal will
-			 * go into the queue.  The SIGSTOP generated by PTRACE_ATTACH is
-			 * probably already in the queue (unless this kernel is old
-			 * enough to use TASK_STOPPED for ptrace stops); but since
-			 * SIGSTOP is not an RT signal, it can only be queued once.  */
-			kill_lwp (lwpid, SIGSTOP);
-		}
-
-		return 0;
-	}
-
-
-	// Skip over this instruction
-	void skipInstruction()
-	{
-		// Nop on x86, op on PowerPC/ARM
-#if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
-		unsigned long regs[1024];
-
-		getRegs(m_activeChild, NULL, regs, sizeof regs);
-
-# if defined(__powerpc__)
-		regs[ppc_NIP] += 4;
-# elif defined(__aarch64__)
-		regs[aarch64_PC] += 4;
-# else
-		regs[arm_PC] += 4;
-# endif
-		setRegs(m_activeChild, NULL, regs, sizeof regs);
-#endif
-	}
-
-	unsigned long getPcFromRegs(unsigned long *regs)
-	{
-		return arch_getPcFromRegs(regs);
-	}
-
-	unsigned long getPc(int pid)
-	{
-		unsigned long regs[1024];
-
-		memset(regs, 0, sizeof regs);
-		getRegs(pid, NULL, regs, sizeof regs);
-
-		return getPcFromRegs(regs);
-	}
-
-	unsigned long peekWord(unsigned long addr)
-	{
-		unsigned long aligned = getAligned(addr);
-
-		return ptrace((__ptrace_request)PTRACE_PEEKTEXT, m_activeChild, aligned, 0);
-	}
-
-	void pokeWord(unsigned long addr, unsigned long val)
-	{
-		ptrace((__ptrace_request)PTRACE_POKETEXT, m_activeChild, getAligned(addr), val);
 	}
 
 	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
@@ -793,7 +440,7 @@ private:
 	int m_parentCpu;
 
 	IEventListener *m_listener;
-	unsigned long m_signal;
+	int m_signal;
 };
 
 

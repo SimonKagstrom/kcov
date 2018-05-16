@@ -6,6 +6,14 @@
 #include <utility>
 #include <string>
 
+// Add symbols missing from FreeBSD's elfutils.
+#ifndef ELF_NOTE_GNU
+#define ELF_NOTE_GNU "GNU"
+#endif
+#ifndef NT_GNU_BUILD_ID
+#define NT_GNU_BUILD_ID 3
+#endif
+
 namespace kcov
 {
 

@@ -8,12 +8,27 @@ message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 find_package (ZLIB REQUIRED)
 find_package (CURL)
 
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+SET (DL_LIBRARY "")
+else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
     message (STATUS "Found DL: ${DL_LIBRARY}")
 else (DL_LIBRARY)
     message (FATAL_ERROR "Could NOT find DL")
 endif (DL_LIBRARY)
+endif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+find_library (INTL_LIBRARY NAMES intl)
+if (INTL_LIBRARY)
+    message (STATUS "Found INTL: ${INTL_LIBRARY}")
+else (INTL_LIBRARY)
+    message (FATAL_ERROR "Could NOT find INTL")
+endif (INTL_LIBRARY)
+else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+SET (INTL_LIBRARY "")
+endif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 find_library (M_LIBRARY NAMES m)
 if (M_LIBRARY)
@@ -117,6 +132,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
+		engines/ptrace_linux.cc
 		engines/kernel-engine.cc
 		parsers/elf.cc
 		parsers/elf-parser.cc
@@ -128,6 +144,22 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+	find_package (LibElf)
+	find_package (Elfutils)
+	set (ELF_SRCS
+		engines/clang-coverage-engine.cc
+		engines/ptrace.cc
+		engines/ptrace_freebsd.cc
+		parsers/elf.cc
+		parsers/elf-parser.cc
+		parsers/dwarf.cc
+		solib-handler.cc
+		solib-parser/phdr_data.c
+	)
+	set (SOLIB_generated library.cc)
+	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
+	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_library(LLDB_LIBRARY
       NAMES
@@ -207,6 +239,7 @@ set (KCOV_SYSTEM_MODE_SRCS
     engine-factory.cc
     engines/system-mode-file-format.cc
     engines/ptrace.cc
+    engines/ptrace_linux.cc
     filter.cc
     gcov.cc
     include/capabilities.hh
@@ -257,7 +290,7 @@ endif (CURL_FOUND)
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
-target_link_libraries(bash_execve_redirector dl)
+target_link_libraries(bash_execve_redirector ${DL_LIBRARY})
 
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
@@ -374,12 +407,13 @@ if (LIBELF_FOUND)
 		stdc++
 		${CMAKE_THREAD_LIBS_INIT}
 		${CURL_LIBRARIES}
-        "${DL_LIBRARY}"
+		"${DL_LIBRARY}"
+		"${INTL_LIBRARY}"
 		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
 		${LLDB_LIBRARY}
-        "${M_LIBRARY}"
+		"${M_LIBRARY}"
 		${ZLIB_LIBRARIES}
 	)
 	install (TARGETS ${KCOV} DESTINATION "${KCOV_INSTALL_BINDIR}")

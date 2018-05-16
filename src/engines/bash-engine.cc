@@ -1,3 +1,4 @@
+#define _WITH_GETLINE	// Needed on FreeBSD < 12.0
 #include <file-parser.hh>
 #include <engine.hh>
 #include <configuration.hh>
@@ -14,6 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <dirent.h>
+#include <stdio.h>
 
 #include <list>
 #include <unordered_map>
