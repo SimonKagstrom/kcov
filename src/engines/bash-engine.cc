@@ -123,7 +123,7 @@ public:
 				return false;
 			}
 			m_stdout = fdopen(stdoutPipe[0], "r");
-			if (!m_stderr) {
+			if (!m_stdout) {
 				error("Can't reopen the stdout pipe");
 				fclose(m_stderr);
 
@@ -147,7 +147,7 @@ public:
 			    return false;
 			}
 			if (dup2(stdoutPipe[1], 1) < 0) {
-			    perror("Failed to exchange stderr for pipe");
+			    perror("Failed to exchange stdout for pipe");
 			    return false;
 			}
 
@@ -420,24 +420,25 @@ private:
 	// Printout lines to stdout, except kcov markers
 	void handleStdout()
 	{
-		char *curLine = NULL;
-		size_t linecap = 0;
+		/* use a small buffer for the reason that a large buffer will also lead
+		 * to hanging when fgets read the m_stdout with not eough charaters
+		 */
+		char line[10];
 
-		while (file_readable(m_stdout, 0) && getline(&curLine, &linecap, m_stdout) > 0)
+		while (file_readable(m_stdout, 0) && fgets(line, 10, m_stdout) == line)
 		{
 			/* Check for line markers to filter these away.
 			 *
 			 * For some reason, redirection sometimes give kkcov@..., so filter that
 			 * in addition to the obvious stuff
 			 */
-			size_t kcovMarker = m_bashSupportsXtraceFd ? -1 : std::string(curLine).find("kcov@");
+			size_t kcovMarker = m_bashSupportsXtraceFd ? -1 : std::string(line).find("kcov@");
 
 			if (kcovMarker != 0 && kcovMarker != 1)
 			{
-				printf("%s", curLine);
+				printf("%s", line);
 			}
 		}
-		free(curLine);
 	}
 
 	bool bashCanHandleXtraceFd()
