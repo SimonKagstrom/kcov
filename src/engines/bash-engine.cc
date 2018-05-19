@@ -420,6 +420,12 @@ private:
 	// Printout lines to stdout, except kcov markers
 	void handleStdout()
 	{
+		// No need if we have xtrace fd support
+		if (m_bashSupportsXtraceFd)
+		{
+			return;
+		}
+
 		char *curLine = NULL;
 		size_t linecap = 0;
 
@@ -430,7 +436,7 @@ private:
 			 * For some reason, redirection sometimes give kkcov@..., so filter that
 			 * in addition to the obvious stuff
 			 */
-			size_t kcovMarker = m_bashSupportsXtraceFd ? -1 : std::string(curLine).find("kcov@");
+			size_t kcovMarker = std::string(curLine).find("kcov@");
 
 			if (kcovMarker != 0 && kcovMarker != 1)
 			{
