@@ -1,6 +1,6 @@
 #pragma once
 
-#include "trompeloeil.hpp"
+#include "trompeloeil/trompeloeil.hpp"
 #include <crpcut.hpp>
 
 using trompeloeil::_;
