@@ -647,6 +647,11 @@ private:
 			// fn() { .... Yes, regexes would have been better
 			size_t fnPos = s.find("()");
 			if (fnPos != std::string::npos) {
+				// Trim valid last spaces between function name and parenthesis
+				while (fnPos > 1 && ' ' == s[fnPos - 1]) {
+					--fnPos;
+				}
+
 				std::string substr = s.substr(0, fnPos);
 
 				// Should be a single word (the function name)
