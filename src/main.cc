@@ -158,7 +158,6 @@ unsigned int countMetadata()
 static int runMergeMode()
 {
 	IFilter &filter = IFilter::create();
-	IFilter &basicFilter = IFilter::createBasic();
 	IReporter &reporter = IReporter::createDummyReporter();
 	IOutputHandler &output = IOutputHandler::create(reporter, NULL);
 	IConfiguration &conf = IConfiguration::getInstance();
@@ -167,7 +166,7 @@ static int runMergeMode()
 	const std::string &out = output.getOutDirectory();
 
 	IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
-	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, basicFilter);
+	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, filter);
 	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 			base, base + "/kcov-merged", conf.keyAsString("merged-name"), true);
 	IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
