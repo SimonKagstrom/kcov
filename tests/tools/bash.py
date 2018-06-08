@@ -310,3 +310,14 @@ class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
         # Not included in report
         assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 3) == None
+
+class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
+    def runTest(self):
+        rv,o = self.do(testbase.kcov + " --bash-dont-parse-binary-dir " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/function-with-spaces.sh")
+
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/function-with-spaces.sh/cobertura.xml")
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 5) == None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 6) == 1
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 9) == None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 10) == None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 11) == 1
