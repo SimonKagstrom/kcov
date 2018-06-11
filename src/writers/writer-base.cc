@@ -56,7 +56,7 @@ WriterBase::File::File(const std::string &filename) :
 	readFile(filename);
 
 	m_outFileName = fmt("%s.%x.html", m_fileName.c_str(), m_crc);
-	m_jsonOutFileName = fmt("%s.%x.json", m_fileName.c_str(), m_crc);
+	m_jsonOutFileName = fmt("%s.%x.js", m_fileName.c_str(), m_crc);
 }
 
 void WriterBase::File::readFile(const std::string &filename)

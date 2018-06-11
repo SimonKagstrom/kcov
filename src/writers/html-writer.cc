@@ -141,7 +141,7 @@ private:
 		unsigned int nTotalCodeLines = 0;
 
 		// Out-file for JSON data
-		std::ofstream outJson(m_outDirectory + "index.json");
+		std::ofstream outJson(m_outDirectory + "index.js");
 		outJson << "var data = {files:[\n"; // Not really json, but anyway
 
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -233,7 +233,7 @@ private:
 		dir = opendir(idx.c_str());
 		panic_if(!dir, "Can't open directory %s\n", idx.c_str());
 
-		std::ofstream outJson(m_indexDirectory + "index.json");
+		std::ofstream outJson(m_indexDirectory + "index.js");
 
 		outJson << "var data = {files:[\n";
 		std::string merged;
