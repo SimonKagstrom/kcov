@@ -122,10 +122,13 @@ unsigned int countMetadata()
 
 	// Count metadata directories
 	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
-		std::string cur = base + de->d_name + "/metadata";
+		std::string name = de->d_name;
+		std::string cur = base + name + "/metadata";
+		std::string binaryName = conf.keyAsString("binary-name");
 
-		// ... except for the current coveree
-		if (de->d_name == conf.keyAsString("binary-name"))
+		// ... except for the current coveree and coveree.CHECKSUM
+		if (binaryName == name ||
+				(name.size() > binaryName.size() && name.find(binaryName) == 0 && name[binaryName.size()] == '.'))
 			continue;
 
 		DIR *metadataDir;
