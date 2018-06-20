@@ -123,6 +123,8 @@ set (ELF_SRCS
 )
 set (MACHO_SRCS
 )
+set (SYSTEM_MODE_SRCS
+)
 set (SOLIB_generated )
 
 # Linux-specific sources
@@ -140,6 +142,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		solib-handler.cc
 		solib-parser/phdr_data.c
 	)
+
+	set (SYSTEM_MODE_SRCS	
+		engines/system-mode-engine.cc
+		engines/system-mode-file-format.cc
+    )
+
 	set (SOLIB_generated library.cc)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
@@ -192,8 +200,6 @@ set (${KCOV}_SRCS
     configuration.cc
     engine-factory.cc
     engines/bash-engine.cc
-    engines/system-mode-engine.cc
-    engines/system-mode-file-format.cc
     engines/python-engine.cc
     filter.cc
     gcov.cc
@@ -212,6 +218,7 @@ set (${KCOV}_SRCS
     writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
     ${ELF_SRCS}
+    ${SYSTEM_MODE_SRCS}
     ${MACHO_SRCS}
     include/capabilities.hh
     include/gcov.hh
@@ -291,20 +298,6 @@ endif (CURL_FOUND)
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
 target_link_libraries(bash_execve_redirector ${DL_LIBRARY})
-
-add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
-set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
-target_link_libraries(kcov_system_lib
-    "${DL_LIBRARY}"
-    ${ZLIB_LIBRARIES}
-)
-
-add_library (kcov_system_lib_32 SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
-set_target_properties(kcov_system_lib_32 PROPERTIES SUFFIX ".so" COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-target_link_libraries(kcov_system_lib_32
-    "${DL_LIBRARY}"
-)
-
 
 add_custom_command(
     OUTPUT library.cc
@@ -437,6 +430,19 @@ if (LIBELF_FOUND)
 endif (LIBELF_FOUND)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+	add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
+	set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
+	target_link_libraries(kcov_system_lib
+    	"${DL_LIBRARY}"
+    	${ZLIB_LIBRARIES}
+	)
+
+	add_library (kcov_system_lib_32 SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
+	set_target_properties(kcov_system_lib_32 PROPERTIES SUFFIX ".so" COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+	target_link_libraries(kcov_system_lib_32
+	    "${DL_LIBRARY}"
+	)
     add_executable (kcov-system-daemon ${KCOV_SYSTEM_MODE_SRCS} version.c)
 
     target_link_libraries(kcov-system-daemon
