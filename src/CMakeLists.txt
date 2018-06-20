@@ -296,7 +296,6 @@ add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc s
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
 target_link_libraries(kcov_system_lib
     "${DL_LIBRARY}"
-    ${ZLIB_LIBRARIES}
 )
 
 add_library (kcov_system_lib_32 SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
