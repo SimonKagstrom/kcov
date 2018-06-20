@@ -3,6 +3,7 @@
 #include <configuration.hh>
 #include <output-handler.hh>
 #include <utils.hh>
+#include <capabilities.hh>
 #include <generated-data-base.hh>
 
 #include <stdlib.h>
@@ -139,8 +140,10 @@ private:
 
 		free((void *)data);
 
+		ICapabilities &capabilities = ICapabilities::getInstance();
+
 		std::string patchelf = conf.keyAsString("patchelf-command");
-		std::string lib = "libkcov_system.so";
+		std::string lib = capabilities.hasCapability("64bit") ? "libkcov_system.so" : "libkcov_system_32.so";
 		std::string cmd = fmt("%s --add-needed %s %s", patchelf.c_str(), lib.c_str(), dst.c_str());
 
 		// FIXME! Check if patchelf exists

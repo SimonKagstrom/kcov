@@ -29,6 +29,7 @@
 using namespace kcov;
 
 extern GeneratedData kcov_system_library_data;
+extern GeneratedData kcov_system_library_32_data;
 
 static IEngine *g_engine;
 static IOutputHandler *g_output;
@@ -402,15 +403,18 @@ static int runSystemModeRecord()
 	(void)mkdir(lib.c_str(), 0755);
 
 	std::string library = fmt("%s/libkcov_system.so", lib.c_str());
+	std::string library32 = fmt("%s/libkcov_system_32.so", lib.c_str());
 
 	if (write_file(kcov_system_library_data.data(), kcov_system_library_data.size(),
-			"%s", library.c_str()) < 0)
+			"%s", library.c_str()) < 0 ||
+		write_file(kcov_system_library_32_data.data(), kcov_system_library_32_data.size(),
+			"%s", library32.c_str()) < 0)
 	{
-		error("Can't write binary library at %s", library.c_str());
+		error("Can't write binary library at %s/%s", library.c_str(), library32.c_str());
 
 		return -1;
 	}
-	if (chmod(library.c_str(), 0755) < 0)
+	if (chmod(library.c_str(), 0755) < 0 || chmod(library32.c_str(), 0755) < 0)
 	{
 		error("Can't chmod??\n");
 	}
