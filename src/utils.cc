@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <limits.h>
 #include <time.h>
-#include <zlib.h>
 
 #include <utils.hh>
 
@@ -662,11 +661,6 @@ std::string escape_json(const std::string &str)
 	}
 
 	return out;
-}
-
-uint32_t hash_block(const void *buf, size_t len)
-{
-	return crc32(0, (const Bytef *)buf, len);
 }
 
 std::pair<std::string, std::string> split_path(const std::string &pathStr)
