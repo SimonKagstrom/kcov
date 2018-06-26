@@ -166,16 +166,6 @@ public:
 
 				m_elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
 
-				if (m_elfIs32Bit)
-				{
-					capabilities.removeCapability("64bit");
-				}
-				else
-				{
-					capabilities.addCapability("64bit");
-				}
-
-
 				if (elfIs64Bit() != machine_is_64bit())
 					capabilities.removeCapability("handle-solibs");
 				else

@@ -298,12 +298,6 @@ target_link_libraries(kcov_system_lib
     "${DL_LIBRARY}"
 )
 
-add_library (kcov_system_lib_32 SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
-set_target_properties(kcov_system_lib_32 PROPERTIES SUFFIX ".so" COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-target_link_libraries(kcov_system_lib_32
-    "${DL_LIBRARY}"
-)
-
 
 add_custom_command(
     OUTPUT library.cc
@@ -335,17 +329,6 @@ add_custom_command(
         > kcov-system-library.cc
     DEPENDS
         kcov_system_lib
-       "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
-)
-
-add_custom_command(
-    OUTPUT kcov-system-library-32.cc
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
-            $<TARGET_FILE:kcov_system_lib_32>
-            kcov_system_library_32
-        > kcov-system-library-32.cc
-    DEPENDS
-        kcov_system_lib_32
        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
 )
 
@@ -417,7 +400,7 @@ if (SPECIFY_RPATH)
 endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
-	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc kcov-system-library-32.cc html-data-files.cc version.c)
+	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 	target_link_libraries(${KCOV}
 		stdc++
