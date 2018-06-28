@@ -430,3 +430,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	)
 	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	message(STATUS "OSX: Changing LLDB rpath")
+	add_custom_command(TARGET ${KCOV}
+        POST_BUILD COMMAND
+        gi${CMAKE_INSTALL_NAME_TOOL} -change @rpath/LLDB.framework/LLDB /Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/LLDB $<TARGET_FILE:${KCOV}>)
+endif()
