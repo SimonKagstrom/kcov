@@ -140,10 +140,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		solib-handler.cc
 		solib-parser/phdr_data.c
 	)
-	set (SOLIB_generated library.cc)
+	set (SOLIB_generated library.cc library_32.cc)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
+    add_library (${SOLIB}_32 SHARED ${${SOLIB}_SRCS})
+
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 	target_link_libraries(${SOLIB} dl)
+
+    set_target_properties(${SOLIB}_32 PROPERTIES SUFFIX ".so" COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+    target_link_libraries(${SOLIB}_32 dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	find_package (LibElf)
 	find_package (Elfutils)
@@ -159,7 +164,10 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	)
 	set (SOLIB_generated library.cc)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
+    add_library (${SOLIB}_32 SHARED ${${SOLIB}_SRCS})
+
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
+    set_target_properties(${SOLIB}_32 PROPERTIES SUFFIX ".so" COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_library(LLDB_LIBRARY
       NAMES
@@ -307,6 +315,17 @@ add_custom_command(
         > library.cc
     DEPENDS
         ${SOLIB}
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
+
+add_custom_command(
+    OUTPUT library_32.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            lib${SOLIB}_32.so
+            __library_32
+        > library_32.cc
+    DEPENDS
+        ${SOLIB}_32
         "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
 )
 

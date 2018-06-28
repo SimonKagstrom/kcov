@@ -25,6 +25,7 @@
 using namespace kcov;
 
 extern GeneratedData __library_data;
+extern GeneratedData __library_32_data;
 
 class SolibHandler : public ISolibHandler, ICollector::IEventTickListener
 {
@@ -90,11 +91,15 @@ public:
 		std::string kcov_solib_path =
 				IOutputHandler::getInstance().getBaseDirectory() +
 				"libkcov_sowrapper.so";
+		std::string kcov_solib_path_32 =
+				IOutputHandler::getInstance().getBaseDirectory() +
+				"libkcov_sowrapper_32.so";
 
 		// Skip this very special library
 		m_foundSolibs[get_real_path(kcov_solib_path)] = true;
 
 		write_file(__library_data.data(), __library_data.size(), "%s", kcov_solib_path.c_str());
+		write_file(__library_32_data.data(), __library_32_data.size(), "%s", kcov_solib_path_32.c_str());
 
 		unlink(kcov_solib_pipe_path.c_str());
 
