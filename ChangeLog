@@ -1,7 +1,19 @@
 Kcov (36):
-	* Issue #157: OSX now supports covering shared libraries
+    * Issue #253: Kcov has been ported to FreeBSD (Alan Somers)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Apr 19 20:22:30 CEST 2018
+    * Issue #243: ptrace build fixes (Leo Gaspard)
+
+    * Issue #245: Major cmake build system fixes (Jamie Snape)
+
+    * Issue #250: Improve checks for Python command
+
+    * Issue #259: Use --include-pattern in merge mode
+
+    * Issue #166: Fix make-based builds on OSX
+
+    * Issue #157: OSX now supports covering shared libraries
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Aug 23 12:46:49 CEST 2018
 
 Kcov (35):
 	* Issue #240: Allow running on systems with > 32/64 CPUs
