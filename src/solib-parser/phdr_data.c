@@ -61,7 +61,8 @@ void phdr_data_add(struct phdr_data *p, struct dl_phdr_info *info)
 	strncpy(cur->name, info->dlpi_name, sizeof(cur->name) - 1);
 
 	cur->n_segments = 0;
-	for (phdr = 0; phdr < info->dlpi_phnum; phdr++) {
+	for (phdr = 0; phdr < info->dlpi_phnum; phdr++)
+	{
 		const ElfW(Phdr) *curHdr = &info->dlpi_phdr[phdr];
 		struct phdr_data_segment *seg = &cur->segments[cur->n_segments];
 

@@ -29,7 +29,6 @@ static unsigned long getAligned(unsigned long addr)
 	return (addr / sizeof(unsigned long)) * sizeof(unsigned long);
 }
 
-
 static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_data)
 {
 	unsigned long val;
@@ -39,10 +38,9 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 	unsigned long offs = addr - aligned_addr;
 	unsigned long shift = 8 * offs;
 
-	val = (old_data & ~(0xffUL << shift)) |
-			(0xccUL << shift);
+	val = (old_data & ~(0xffUL << shift)) | (0xccUL << shift);
 #elif defined(__powerpc__)
-	val =  0x7fe00008; /* tw */
+	val = 0x7fe00008; /* tw */
 #elif defined(__arm__)
 	val = 0xfedeffe7; // Undefined insn
 #elif defined(__aarch64__)
@@ -63,8 +61,7 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 	unsigned long shift = 8 * offs;
 	unsigned long old_byte = (old_data >> shift) & 0xffUL;
 
-	val = (cur_data & ~(0xffUL << shift)) |
-			(old_byte << shift);
+	val = (cur_data & ~(0xffUL << shift)) | (old_byte << shift);
 #else
 	val = old_data;
 #endif
@@ -72,18 +69,11 @@ static unsigned long arch_clearBreakpoint(unsigned long addr, unsigned long old_
 	return val;
 }
 
-
 class Ptrace : public IEngine
 {
 public:
-	Ptrace() :
-		m_firstBreakpoint(true),
-		m_activeChild(0),
-		m_child(0),
-		m_firstChild(0),
-		m_parentCpu(0),
-		m_listener(NULL),
-		m_signal(0)
+	Ptrace() : m_firstBreakpoint(true), m_activeChild(0), m_child(0), m_firstChild(0),
+		m_parentCpu(0), m_listener(NULL), m_signal(0)
 	{
 	}
 
@@ -92,8 +82,6 @@ public:
 		kill(SIGTERM);
 		ptrace_sys::detach(m_activeChild);
 	}
-
-
 
 	bool start(IEventListener &listener, const std::string &executable)
 	{
@@ -142,7 +130,8 @@ public:
 
 	bool clearBreakpoint(unsigned long addr)
 	{
-		if (m_instructionMap.find(addr) == m_instructionMap.end()) {
+		if (m_instructionMap.find(addr) == m_instructionMap.end())
+		{
 			kcov_debug(BP_MSG, "Can't find breakpoint at 0x%lx\n", addr);
 
 			// Stupid workaround for avoiding the solib thread race
@@ -153,8 +142,7 @@ public:
 
 		// Clear the actual breakpoint instruction
 		unsigned long val = m_instructionMap[addr];
-		val = arch_clearBreakpoint(addr, val,
-		    ptrace_sys::peekWord(m_activeChild, getAligned(addr)));
+		val = arch_clearBreakpoint(addr, val, ptrace_sys::peekWord(m_activeChild, getAligned(addr)));
 
 		ptrace_sys::pokeWord(m_activeChild, getAligned(addr), val);
 
@@ -174,7 +162,8 @@ public:
 
 		who = ptrace_sys::wait_all(&status);
 
-		if (who == -1) {
+		if (who == -1)
+		{
 			kcov_debug(ENGINE_MSG, "Returning error\n");
 			return out;
 		}
@@ -187,7 +176,8 @@ public:
 		kcov_debug(ENGINE_MSG, "PT stopped PID %d 0x%08x\n", m_activeChild, status);
 
 		// A signal?
-		if (WIFSTOPPED(status)) {
+		if (WIFSTOPPED(status))
+		{
 			int sig = WSTOPSIG(status);
 			int sigill = SIGSYS;
 
@@ -199,22 +189,26 @@ public:
 			out.type = ev_signal;
 			out.data = sig;
 			int event = ptrace_sys::getEvent(who, status);
-			if (ptrace_sys::eventIsNewChild(sig, event)) {
+			if (ptrace_sys::eventIsNewChild(sig, event))
+			{
 				// Activate tracing on a new child
 				kcov_debug(ENGINE_MSG, "PT new child %d\n", m_activeChild);
 				ptrace_sys::follow_child(m_activeChild);
 				out.data = 0;
-			} else if (ptrace_sys::eventIsForky(sig, event)) {
-				kcov_debug(ENGINE_MSG, "PT fork/clone at 0x%llx for %d\n",
-						(unsigned long long)out.addr, m_activeChild);
+			}
+			else if (ptrace_sys::eventIsForky(sig, event))
+			{
+				kcov_debug(ENGINE_MSG, "PT fork/clone at 0x%llx for %d\n", (unsigned long long) out.addr, m_activeChild);
 				out.data = 0;
-			} else if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill) {
+			}
+			else if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill)
+			{
 				// A trap?
 				out.type = ev_breakpoint;
 				out.data = -1;
 
-				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n",
-						(unsigned long long)out.addr, out.data, m_activeChild);
+				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n", (unsigned long long) out.addr, out.data,
+						m_activeChild);
 
 				kcov_debug(ENGINE_MSG, "Looking for instruction %zx.\n", out.addr);
 				bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
@@ -226,7 +220,8 @@ public:
 					ptrace_sys::skipInstruction(m_activeChild);
 
 				// Wait for solib data if this is the first time
-				if (m_firstBreakpoint && insnFound) {
+				if (m_firstBreakpoint && insnFound)
+				{
 					blockUntilSolibDataRead();
 					m_firstBreakpoint = false;
 				}
@@ -234,10 +229,12 @@ public:
 				return out;
 			}
 
-			kcov_debug(ENGINE_MSG, "PT signal %d at 0x%llx for %d\n",
-					WSTOPSIG(status), (unsigned long long)out.addr, m_activeChild);
+			kcov_debug(ENGINE_MSG, "PT signal %d at 0x%llx for %d\n", WSTOPSIG(status), (unsigned long long) out.addr,
+					m_activeChild);
 			lastSignalAddress = out.addr;
-		} else if (WIFSIGNALED(status)) {
+		}
+		else if (WIFSIGNALED(status))
+		{
 			// Crashed/killed
 			int sig = WTERMSIG(status);
 
@@ -245,18 +242,20 @@ public:
 			out.data = sig;
 			out.addr = lastSignalAddress;
 
-			kcov_debug(ENGINE_MSG, "PT terminating signal %d at 0x%llx for %d\n",
-					sig, (unsigned long long)out.addr, m_activeChild);
+			kcov_debug(ENGINE_MSG, "PT terminating signal %d at 0x%llx for %d\n", sig, (unsigned long long) out.addr,
+					m_activeChild);
 			m_children.erase(who);
 
 			if (!childrenLeft())
 				out.type = ev_signal_exit;
 
-		} else if (WIFEXITED(status)) {
+		}
+		else if (WIFEXITED(status))
+		{
 			int exitStatus = WEXITSTATUS(status);
 
-			kcov_debug(ENGINE_MSG, "PT exit %d at 0x%llx for %d%s\n",
-					exitStatus, (unsigned long long)out.addr, m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
+			kcov_debug(ENGINE_MSG, "PT exit %d at 0x%llx for %d%s\n", exitStatus, (unsigned long long) out.addr,
+					m_activeChild, m_activeChild == m_firstChild ? " (first child)" : "");
 
 			m_children.erase(who);
 
@@ -273,10 +272,8 @@ public:
 
 	bool childrenLeft()
 	{
-		return m_children.size() > 0 &&
-				 m_children.find(m_firstChild) != m_children.end();
+		return m_children.size() > 0 && m_children.find(m_firstChild) != m_children.end();
 	}
-
 
 	/**
 	 * Continue execution with an event
@@ -289,11 +286,11 @@ public:
 
 		kcov_debug(ENGINE_MSG, "PT continuing %d with signal %d\n", m_activeChild, m_signal);
 		res = ptrace_sys::cont(m_activeChild, m_signal);
-		if (res < 0) {
+		if (res < 0)
+		{
 			kcov_debug(ENGINE_MSG, "PT error for %d: %d\n", m_activeChild, res);
 			m_children.erase(m_activeChild);
 		}
-
 
 		Event ev = waitEvent();
 		m_signal = ev.type == ev_signal ? ev.data : 0;
@@ -322,29 +319,27 @@ private:
 	void setupAllBreakpoints()
 	{
 		for (PendingBreakpointList_t::const_iterator addrIt = m_pendingBreakpoints.begin();
-				addrIt != m_pendingBreakpoints.end();
-				++addrIt) {
+				addrIt != m_pendingBreakpoints.end(); ++addrIt)
+		{
 			unsigned long addr = *addrIt;
-			unsigned long cur_data = ptrace_sys::peekWord(m_activeChild,
-			    getAligned(addr));
+			unsigned long cur_data = ptrace_sys::peekWord(m_activeChild, getAligned(addr));
 
 			// Set the breakpoint
-			ptrace_sys::pokeWord(m_activeChild, getAligned(addr),
-					     arch_setupBreakpoint(addr, cur_data));
+			ptrace_sys::pokeWord(m_activeChild, getAligned(addr), arch_setupBreakpoint(addr, cur_data));
 		}
 
 		m_pendingBreakpoints.clear();
 	}
 
-
 	bool forkChild(const char *executable)
 	{
-		char *const *argv = (char *const *)IConfiguration::getInstance().getArgv();
+		char * const *argv = (char * const *) IConfiguration::getInstance().getArgv();
 		pid_t child, who;
 		int status;
 
 		/* Executable exists, try to launch it */
-		if ((child = fork()) == 0) {
+		if ((child = fork()) == 0)
+		{
 			int res;
 
 			/* Avoid address randomization */
@@ -353,7 +348,8 @@ private:
 
 			/* And launch the process */
 			res = ptrace_sys::trace_me();
-			if (res < 0) {
+			if (res < 0)
+			{
 				perror("Can't set me as ptraced");
 				return false;
 			}
@@ -365,7 +361,8 @@ private:
 		}
 
 		/* Fork error? */
-		if (child < 0) {
+		if (child < 0)
+		{
 			perror("fork");
 			return false;
 		}
@@ -378,11 +375,13 @@ private:
 
 		/* Wait for the initial stop */
 		who = waitpid(child, &status, 0);
-		if (who < 0) {
+		if (who < 0)
+		{
 			perror("waitpid");
 			return false;
 		}
-		if (!WIFSTOPPED(status)) {
+		if (!WIFSTOPPED(status))
+		{
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
@@ -401,7 +400,8 @@ private:
 		errno = 0;
 		rv = ptrace_sys::attachAll(m_activeChild);
 		//rv = ptrace(PTRACE_ATTACH, m_activeChild, 0, 0);
-		if (rv < 0) {
+		if (rv < 0)
+		{
 			const char *err = strerror(errno);
 
 			fprintf(stderr, "Can't attach to %d. Error %s\n", pid, err);
@@ -411,11 +411,13 @@ private:
 		/* Wait for the initial stop */
 		int status;
 		int who = waitpid(m_activeChild, &status, 0);
-		if (who < 0) {
+		if (who < 0)
+		{
 			perror("waitpid");
 			return false;
 		}
-		if (!WIFSTOPPED(status)) {
+		if (!WIFSTOPPED(status))
+		{
 			fprintf(stderr, "Child hasn't stopped: %x\n", status);
 			return false;
 		}
@@ -424,7 +426,7 @@ private:
 		return true;
 	}
 
-	typedef std::unordered_map<unsigned long, unsigned long > instructionMap_t;
+	typedef std::unordered_map<unsigned long, unsigned long> instructionMap_t;
 	typedef std::vector<unsigned long> PendingBreakpointList_t;
 	typedef std::unordered_map<pid_t, int> ChildMap_t;
 
@@ -442,8 +444,6 @@ private:
 	IEventListener *m_listener;
 	int m_signal;
 };
-
-
 
 class PtraceEngineCreator : public IEngineFactory::IEngineCreator
 {

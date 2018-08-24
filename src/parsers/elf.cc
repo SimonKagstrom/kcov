@@ -10,7 +10,7 @@ class ElfImpl : public IElf
 {
 public:
 	ElfImpl(void *data, size_t size) :
-		m_debugLinkValid(false), m_fileData((char *)data), m_fileSize(size)
+			m_debugLinkValid(false), m_fileData((char *) data), m_fileSize(size)
 	{
 		parse();
 	}
@@ -69,12 +69,14 @@ private:
 		char *raw;
 		size_t sz;
 
-		if (!(elf = elf_memory((char *)m_fileData, m_fileSize)) ) {
+		if (!(elf = elf_memory((char *) m_fileData, m_fileSize)))
+		{
 			error("elf_begin failed\n");
 			return false;
 		}
 
-		if (elf_getshdrstrndx(elf, &shstrndx) < 0) {
+		if (elf_getshdrstrndx(elf, &shstrndx) < 0)
+		{
 			error("elf_getshstrndx failed\n");
 			goto out_elf_begin;
 		}
@@ -84,7 +86,7 @@ private:
 		if (raw && sz > EI_CLASS)
 			elfIs32Bit = raw[EI_CLASS] == ELFCLASS32;
 
-		while ( (scn = elf_nextscn(elf, scn)) != NULL )
+		while ((scn = elf_nextscn(elf, scn)) != NULL)
 		{
 			uint64_t sh_type;
 			uint64_t sh_addr;
@@ -98,7 +100,8 @@ private:
 			char *n_data;
 			char *name;
 
-			if (elfIs32Bit) {
+			if (elfIs32Bit)
+			{
 				Elf32_Shdr *shdr32 = elf32_getshdr(scn);
 
 				sh_type = shdr32->sh_type;
@@ -107,7 +110,9 @@ private:
 				sh_flags = shdr32->sh_flags;
 				sh_name = shdr32->sh_name;
 				sh_offset = shdr32->sh_offset;
-			} else {
+			}
+			else
+			{
 				Elf64_Shdr *shdr64 = elf64_getshdr(scn);
 
 				sh_type = shdr64->sh_type;
@@ -128,19 +133,22 @@ private:
 				continue;
 
 			name = elf_strptr(elf, shstrndx, sh_name);
-			if(!data) {
-				error("elf_getdata failed on section %s\n",	name);
+			if (!data)
+			{
+				error("elf_getdata failed on section %s\n", name);
 				goto out_elf_begin;
 			}
 
 			// Parse rodata to find gcda files
-			if (doScanForGcda && strcmp(name, ".rodata") == 0) {
-				const char *dataPtr = (const char *)data->d_buf;
+			if (doScanForGcda && strcmp(name, ".rodata") == 0)
+			{
+				const char *dataPtr = (const char *) data->d_buf;
 
-				for (size_t i = 0; i < data->d_size - 5; i++) {
+				for (size_t i = 0; i < data->d_size - 5; i++)
+				{
 					const char *p = &dataPtr[i];
 
-					if (memcmp(p, (const void *)"gcda\0", 5) != 0)
+					if (memcmp(p, (const void *) "gcda\0", 5) != 0)
 						continue;
 
 					const char *gcda = p;
@@ -159,30 +167,35 @@ private:
 				}
 			}
 
-			if (sh_type == SHT_NOTE) {
-				if (elfIs32Bit) {
-					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *)data->d_buf;
+			if (sh_type == SHT_NOTE)
+			{
+				if (elfIs32Bit)
+				{
+					Elf32_Nhdr *nhdr32 = (Elf32_Nhdr *) data->d_buf;
 
 					n_namesz = nhdr32->n_namesz;
 					n_descsz = nhdr32->n_descsz;
 					n_type = nhdr32->n_type;
-					n_data = (char *)data->d_buf + sizeof (Elf32_Nhdr);
-				} else {
-					Elf64_Nhdr *nhdr64 = (Elf64_Nhdr *)data->d_buf;
+					n_data = (char *) data->d_buf + sizeof(Elf32_Nhdr);
+				}
+				else
+				{
+					Elf64_Nhdr *nhdr64 = (Elf64_Nhdr *) data->d_buf;
 
 					n_namesz = nhdr64->n_namesz;
 					n_descsz = nhdr64->n_descsz;
 					n_type = nhdr64->n_type;
-					n_data = (char *)data->d_buf + sizeof (Elf64_Nhdr);
+					n_data = (char *) data->d_buf + sizeof(Elf64_Nhdr);
 				}
 
-				if (::strcmp(n_data, ELF_NOTE_GNU) == 0 &&
-						n_type == NT_GNU_BUILD_ID) {
+				if (::strcmp(n_data, ELF_NOTE_GNU) == 0 && n_type == NT_GNU_BUILD_ID)
+				{
 					const char *hex_digits = "0123456789abcdef";
 					unsigned char *build_id;
 
-					build_id = (unsigned char *)n_data + n_namesz;
-					for (i = 0; i < n_descsz; i++) {
+					build_id = (unsigned char *) n_data + n_namesz;
+					for (i = 0; i < n_descsz; i++)
+					{
 						m_buildId.push_back(hex_digits[(build_id[i] >> 4) & 0xf]);
 						m_buildId.push_back(hex_digits[(build_id[i] >> 0) & 0xf]);
 					}
@@ -190,19 +203,20 @@ private:
 			}
 
 			// Check for debug links
-			if (strcmp(name, ".gnu_debuglink") == 0) {
-				const char *p = (const char *)data->d_buf;
+			if (strcmp(name, ".gnu_debuglink") == 0)
+			{
+				const char *p = (const char *) data->d_buf;
 				m_debugLink.first.append(p);
 				const char *endOfString = p + strlen(p) + 1;
 
 				// Align address for the CRC32
-				unsigned long addr = (unsigned long)(endOfString - p);
+				unsigned long addr = (unsigned long) (endOfString - p);
 				unsigned long offs = 0;
 
 				if ((addr & 3) != 0)
 					offs = 4 - (addr & 3);
 				// ... and read out the CRC32
-				memcpy((void *)&m_debugLink.second, endOfString + offs, sizeof(m_debugLink.second));
+				memcpy((void *) &m_debugLink.second, endOfString + offs, sizeof(m_debugLink.second));
 				m_debugLinkValid = true;
 			}
 
@@ -215,9 +229,8 @@ private:
 		}
 
 		// If we have gcda files, try to find the corresponding gcno dittos
-		for (FileList_t::iterator it = m_gcdaFiles.begin();
-				it != m_gcdaFiles.end();
-				++it) {
+		for (FileList_t::iterator it = m_gcdaFiles.begin(); it != m_gcdaFiles.end(); ++it)
+		{
 			std::string &gcno = *it; // Modify in-place
 			size_t sz = gcno.size();
 

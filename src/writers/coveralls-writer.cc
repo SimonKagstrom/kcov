@@ -75,7 +75,8 @@ public:
 		if (res != CURLE_OK)
 			return false;
 
-		if (m_writtenData.find("Job #") == std::string::npos) {
+		if (m_writtenData.find("Job #") == std::string::npos)
+		{
 			warning("coveralls write failed: %s\n", m_writtenData.c_str());
 			return false;
 		}
@@ -150,9 +151,12 @@ public:
 			return;
 
 		out << "{\n";
-		if (isRepoToken(id)) {
+		if (isRepoToken(id))
+		{
 			out << " \"repo_token\": \"" + id + "\",\n";
-		} else {
+		}
+		else
+		{
 			out << " \"service_name\": \"" + conf.keyAsString("coveralls-service-name") + "\",\n";
 			out << " \"service_job_id\": \"" + id + "\",\n";
 		}
@@ -160,7 +164,8 @@ public:
 		setupCommonPaths();
 		
 		std::string strip_path = conf.keyAsString("strip-path");
-		if (strip_path.size() == 0) {
+		if (strip_path.size() == 0)
+		{
 			setupCommonPaths();
 			strip_path = m_commonPath + "/";
 		}
@@ -168,7 +173,8 @@ public:
 		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
 				it != m_files.end();
-				++it) {
+				++it)
+		{
 			File *file = it->second;
 			std::string fileName;
 
@@ -185,10 +191,14 @@ public:
 			out << "   \"coverage\": [";
 
 			// And coverage
-			for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
-				if (!m_reporter.lineIsCode(file->m_name, n)) {
+			for (unsigned int n = 1; n < file->m_lastLineNr; n++)
+			{
+				if (!m_reporter.lineIsCode(file->m_name, n))
+				{
 					out << "null";
-				} else {
+				}
+				else
+				{
 					IReporter::LineExecutionCount cnt =
 							m_reporter.getLineExecutionCount(file->m_name, n);
 

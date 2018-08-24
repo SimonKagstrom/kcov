@@ -27,7 +27,7 @@ class ScriptEngineBase : public IEngine, public IFileParser
 {
 public:
 	ScriptEngineBase() :
-		m_listener(NULL)
+			m_listener(NULL)
 	{
 		IParserManager::getInstance().registerParser(*this);
 	}
@@ -42,7 +42,6 @@ public:
 		// No breakpoints
 		return 0;
 	}
-
 
 	// From IFileParser
 	virtual bool addFile(const std::string &filename, struct phdr_data_entry *phdr_data)
@@ -96,16 +95,13 @@ protected:
 	void fileLineFound(uint32_t crc, const std::string &filename, unsigned int lineNo)
 	{
 		uint64_t id = getLineId(filename, lineNo);
-		uint64_t address = (uint64_t)crc | ((uint64_t)lineNo << 32ULL);
+		uint64_t address = (uint64_t) crc | ((uint64_t) lineNo << 32ULL);
 
 		m_lineIdToAddress[id] = address;
 
-		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin();
-				lit != m_lineListeners.end();
-				++lit)
+		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin(); lit != m_lineListeners.end(); ++lit)
 			(*lit)->onLine(get_real_path(filename).c_str(), lineNo, address);
 	}
-
 
 	typedef std::vector<ILineListener *> LineListenerList_t;
 	typedef std::vector<IFileListener *> FileListenerList_t;

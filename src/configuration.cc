@@ -29,19 +29,18 @@ public:
 		setupDefaults();
 	}
 
-
 	const std::string &keyAsString(const std::string &key)
 	{
-		panic_if(m_strings.find(key) == m_strings.end(),
-				"key %s not found", key.c_str());
+		panic_if(m_strings.find(key) == m_strings.end(), "key %s not found",
+				key.c_str());
 
 		return m_strings[key];
 	}
 
 	int keyAsInt(const std::string &key)
 	{
-		panic_if(m_ints.find(key) == m_ints.end(),
-				"key %s not found", key.c_str());
+		panic_if(m_ints.find(key) == m_ints.end(), "key %s not found",
+				key.c_str());
 
 		return m_ints[key];
 	}
@@ -56,52 +55,52 @@ public:
 
 	bool usage(void)
 	{
-		printf("Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
-				"\n"
-				"Where [OPTIONS] are\n"
-				" -h, --help              this text\n"
-				" --version               print the version of kcov\n"
-				" -p, --pid=PID           trace PID instead of executing in-file,\n"
-				"                         in-file is optional on Linux in this case\n"
-				" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
-				"\n"
-				" --collect-only          Only collect coverage data (don't produce HTML/\n"
-				"                         Cobertura output)\n"
-				" --report-only           Produce output from stored databases, don't collect\n"
-				" --merge                 Merge output from multiple source dirs\n"
-				"\n"
-				" --include-path=path     comma-separated paths to include in the coverage report\n"
-				" --exclude-path=path     comma-separated paths to exclude from the coverage\n"
-				"                         report\n"
-				" --include-pattern=pat   comma-separated path patterns to include in the\n"
-				"                         coverage report\n"
-				" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
-				"                         coverage report\n"
-				" --exclude-line=pat[,...] Consider lines that match the patterns to be non-\n"
-				"                         code lines.\n"
-				" --exclude-region=start:stop[,...] Exclude regions of code between start:stop\n"
-				"                         markers (e.g., within comments) as non-code lines.\n"
-				" --clean                 don't accumulate data from multiple runs\n"
-				"\n"
-				" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
-				"                         Coveralls.io\n"
-				" --strip-path=path       If not set, max common path will be stripped away.\n"
-				"%s"
-				"\n"
-				"Examples:\n"
-				"  kcov /tmp/kcov ./frodo                        # Check coverage for ./frodo\n"
-				"  kcov --pid=1000 /tmp/kcov                     # Check coverage for PID 1000\n"
-				"  kcov --include-pattern=/src/frodo/ /tmp/kcov ./frodo # Only include files\n"
-				"                                                       # including /src/frodo\n"
-				"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
-				"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
-				"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2     # Merge the dir1/dir2 reports\n"
-				"  kcov --system-record /tmp/out-dir sysroot     # Perform full-system in-\n"
-				"                                                  strumentation for sysroot\n"
-				"  kcov --system-report  /tmp/data-dir           # Report all data from a full-\n"
-				"                                                  system run.\n"
-				"",
-				keyAsInt("low-limit"), keyAsInt("high-limit"),
+		printf(
+				"Usage: kcov [OPTIONS] out-dir in-file [args...]\n"
+						"\n"
+						"Where [OPTIONS] are\n"
+						" -h, --help              this text\n"
+						" --version               print the version of kcov\n"
+						" -p, --pid=PID           trace PID instead of executing in-file,\n"
+						"                         in-file is optional on Linux in this case\n"
+						" -l, --limits=low,high   setup limits for low/high coverage (default %u,%u)\n"
+						"\n"
+						" --collect-only          Only collect coverage data (don't produce HTML/\n"
+						"                         Cobertura output)\n"
+						" --report-only           Produce output from stored databases, don't collect\n"
+						" --merge                 Merge output from multiple source dirs\n"
+						"\n"
+						" --include-path=path     comma-separated paths to include in the coverage report\n"
+						" --exclude-path=path     comma-separated paths to exclude from the coverage\n"
+						"                         report\n"
+						" --include-pattern=pat   comma-separated path patterns to include in the\n"
+						"                         coverage report\n"
+						" --exclude-pattern=pat   comma-separated path patterns to exclude from the \n"
+						"                         coverage report\n"
+						" --exclude-line=pat[,...] Consider lines that match the patterns to be non-\n"
+						"                         code lines.\n"
+						" --exclude-region=start:stop[,...] Exclude regions of code between start:stop\n"
+						"                         markers (e.g., within comments) as non-code lines.\n"
+						" --clean                 don't accumulate data from multiple runs\n"
+						"\n"
+						" --coveralls-id=id       Travis CI job ID or secret repo_token for uploads to\n"
+						"                         Coveralls.io\n"
+						" --strip-path=path       If not set, max common path will be stripped away.\n"
+						"%s"
+						"\n"
+						"Examples:\n"
+						"  kcov /tmp/kcov ./frodo                        # Check coverage for ./frodo\n"
+						"  kcov --pid=1000 /tmp/kcov                     # Check coverage for PID 1000\n"
+						"  kcov --include-pattern=/src/frodo/ /tmp/kcov ./frodo # Only include files\n"
+						"                                                       # including /src/frodo\n"
+						"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
+						"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
+						"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2     # Merge the dir1/dir2 reports\n"
+						"  kcov --system-record /tmp/out-dir sysroot     # Perform full-system in-\n"
+						"                                                  strumentation for sysroot\n"
+						"  kcov --system-report  /tmp/data-dir           # Report all data from a full-\n"
+						"                                                  system run.\n"
+						"", keyAsInt("low-limit"), keyAsInt("high-limit"),
 				uncommonOptions().c_str());
 
 		return false;
@@ -114,48 +113,48 @@ public:
 
 	bool parse(unsigned int argc, const char *argv[])
 	{
-		static const struct option long_options[] = {
-				{"help", no_argument, 0, 'h'},
-				{"pid", required_argument, 0, 'p'},
-				{"limits", required_argument, 0, 'l'},
-				{"output-interval", required_argument, 0, 'O'},
-				{"path-strip-level", required_argument, 0, 'S'},
-				{"skip-solibs", no_argument, 0, 'L'},
-				{"exit-first-process", no_argument, 0, 'F'},
-				{"gcov", no_argument, 0, 'g'},
-				{"clang", no_argument, 0, 'c'},
-				{"configure", required_argument, 0, 'M'},
-				{"clean", no_argument, 0, 'E'},
-				{"exclude-pattern", required_argument, 0, 'x'},
-				{"include-pattern", required_argument, 0, 'i'},
-				{"exclude-path", required_argument, 0, 'X'},
-				{"include-path", required_argument, 0, 'I'},
-				{"coveralls-id", required_argument, 0, 'T'},
-				{"strip-path", required_argument, 0, 'Z'},
-				{"exclude-line", required_argument, 0, 'u'},
-				{"exclude-region", required_argument, 0, 'G'},
-				{"debug", required_argument, 0, 'D'},
-				{"debug-force-bash-stderr", no_argument, 0, 'd'},
-				{"bash-handle-sh-invocation", no_argument, 0, 's'},
-				{"bash-dont-parse-binary-dir", no_argument, 0, 'j'},
-				{"bash-parse-files-in-dirs", required_argument, 0, 'J'},
-				{"replace-src-path", required_argument, 0, 'R'},
-				{"collect-only", no_argument, 0, 'C'},
-				{"report-only", no_argument, 0, 'r'},
-				{"merge", no_argument, 0, 'm'},
-				{"python-parser", required_argument, 0, 'P'},
-				{"patchelf", required_argument, 0, 'e'},
-				{"bash-parser", required_argument, 0, 'B'},
-				{"bash-method", required_argument, 0, '4'},
-				{"system-record", no_argument, 0, '8'},
-				{"system-report", no_argument, 0, '9'},
-				{"verify", no_argument, 0, 'V'},
-				{"version", no_argument, 0, 'v'},
-				{"uncommon-options", no_argument, 0, 'U'},
-				/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
-				/*{"read-file", required_argument, 0, 'r'}, Ditto */
-				{0,0,0,0}
-		};
+		static const struct option long_options[] =
+		{
+		{ "help", no_argument, 0, 'h' },
+		{ "pid", required_argument, 0, 'p' },
+		{ "limits", required_argument, 0, 'l' },
+		{ "output-interval", required_argument, 0, 'O' },
+		{ "path-strip-level", required_argument, 0, 'S' },
+		{ "skip-solibs", no_argument, 0, 'L' },
+		{ "exit-first-process", no_argument, 0, 'F' },
+		{ "gcov", no_argument, 0, 'g' },
+		{ "clang", no_argument, 0, 'c' },
+		{ "configure", required_argument, 0, 'M' },
+		{ "clean", no_argument, 0, 'E' },
+		{ "exclude-pattern", required_argument, 0, 'x' },
+		{ "include-pattern", required_argument, 0, 'i' },
+		{ "exclude-path", required_argument, 0, 'X' },
+		{ "include-path", required_argument, 0, 'I' },
+		{ "coveralls-id", required_argument, 0, 'T' },
+		{ "strip-path", required_argument, 0, 'Z' },
+		{ "exclude-line", required_argument, 0, 'u' },
+		{ "exclude-region", required_argument, 0, 'G' },
+		{ "debug", required_argument, 0, 'D' },
+		{ "debug-force-bash-stderr", no_argument, 0, 'd' },
+		{ "bash-handle-sh-invocation", no_argument, 0, 's' },
+		{ "bash-dont-parse-binary-dir", no_argument, 0, 'j' },
+		{ "bash-parse-files-in-dirs", required_argument, 0, 'J' },
+		{ "replace-src-path", required_argument, 0, 'R' },
+		{ "collect-only", no_argument, 0, 'C' },
+		{ "report-only", no_argument, 0, 'r' },
+		{ "merge", no_argument, 0, 'm' },
+		{ "python-parser", required_argument, 0, 'P' },
+		{ "patchelf", required_argument, 0, 'e' },
+		{ "bash-parser", required_argument, 0, 'B' },
+		{ "bash-method", required_argument, 0, '4' },
+		{ "system-record", no_argument, 0, '8' },
+		{ "system-report", no_argument, 0, '9' },
+		{ "verify", no_argument, 0, 'V' },
+		{ "version", no_argument, 0, 'v' },
+		{ "uncommon-options", no_argument, 0, 'U' },
+		/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
+		/*{"read-file", required_argument, 0, 'r'}, Ditto */
+		{ 0, 0, 0, 0 } };
 		unsigned int afterOpts = 0;
 		unsigned int extraNeeded = 2;
 		unsigned int lastArg;
@@ -174,16 +173,18 @@ public:
 		 *
 		 * After that it's arguments to the external program.
 		 */
-		for (lastArg = 1; lastArg < argc; lastArg++) {
+		for (lastArg = 1; lastArg < argc; lastArg++)
+		{
 			if (IParserManager::getInstance().matchParser(argv[lastArg]))
 				break;
 
 			bool found = false;
 			for (std::vector<std::string>::const_iterator it = paths.begin();
-					it != paths.end();
-					++it) {
+					it != paths.end(); ++it)
+			{
 				const std::string &curPath = *it;
-				const std::string cur = get_real_path(curPath + "/" + argv[lastArg]);
+				const std::string cur = get_real_path(
+						curPath + "/" + argv[lastArg]);
 				struct stat st;
 
 				if (lstat(cur.c_str(), &st) < 0)
@@ -197,7 +198,8 @@ public:
 				if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
 					continue;
 
-				if (IParserManager::getInstance().matchParser(cur)) {
+				if (IParserManager::getInstance().matchParser(cur))
+				{
 					// Intentional memory leak
 					argv[lastArg] = xstrdup(cur.c_str());
 					found = true;
@@ -214,18 +216,20 @@ public:
 		/* Hooray for reentrancy... */
 		optind = 0;
 		optarg = 0;
-		while (1) {
+		while (1)
+		{
 			int option_index = 0;
 			int c;
 
-			c = getopt_long (lastArg, (char **)argv,
-					"hp:s:l:t:", long_options, &option_index);
+			c = getopt_long(lastArg, (char **) argv, "hp:s:l:t:", long_options,
+					&option_index);
 
 			/* No more options */
 			if (c == -1)
 				break;
 
-			switch (c) {
+			switch (c)
+			{
 			case 0:
 				break;
 			case 'h':
@@ -237,8 +241,9 @@ public:
 			case 'V':
 				setKey("verify", 1);
 #if KCOV_HAS_LIBBFD == 0
-				warning("kcov: WARNING: kcov has been built without libbfd-dev (or\n"
-						"kcov: binutils-dev), so the --verify option will not do anything.\n");
+				warning(
+						"kcov: WARNING: kcov has been built without libbfd-dev (or\n"
+								"kcov: binutils-dev), so the --verify option will not do anything.\n");
 #endif
 				break;
 			case 'v':
@@ -301,9 +306,8 @@ public:
 			{
 				std::vector<std::string> values = split_string(optarg, ",");
 
-				for (std::vector<std::string>::const_iterator it = values.begin();
-						it != values.end();
-						++it)
+				for (std::vector<std::string>::const_iterator it =
+						values.begin(); it != values.end(); ++it)
 				{
 					std::vector<std::string> keyValue = split_string(*it, "=");
 
@@ -319,7 +323,8 @@ public:
 				break;
 			}
 			case 'i':
-				setKey("include-pattern", getCommaSeparatedList(std::string(optarg)));
+				setKey("include-pattern",
+						getCommaSeparatedList(std::string(optarg)));
 				break;
 			case 'P':
 				setKey("python-command", optarg);
@@ -343,11 +348,13 @@ public:
 				setKey("exclude-region", std::string(optarg));
 				break;
 			case 'x':
-				setKey("exclude-pattern", getCommaSeparatedList(std::string(optarg)));
+				setKey("exclude-pattern",
+						getCommaSeparatedList(std::string(optarg)));
 				break;
 			case 'I':
 			{
-				StrVecMap_t onlyIncludePath = getCommaSeparatedList(std::string(optarg));
+				StrVecMap_t onlyIncludePath = getCommaSeparatedList(
+						std::string(optarg));
 				expandPath(onlyIncludePath);
 
 				setKey("include-path", onlyIncludePath);
@@ -355,7 +362,8 @@ public:
 			}
 			case 'X':
 			{
-				StrVecMap_t excludePath = getCommaSeparatedList(std::string(optarg));
+				StrVecMap_t excludePath = getCommaSeparatedList(
+						std::string(optarg));
 				expandPath(excludePath);
 
 				setKey("exclude-path", excludePath);
@@ -372,13 +380,14 @@ public:
 			{
 				std::string s(optarg);
 
-				if (s== "DEBUG")
+				if (s == "DEBUG")
 					setKey("bash-use-ps4", 0);
 				else if (s == "PS4")
 					setKey("bash-use-ps4", 1);
 				else
 					panic("Invalid bash method: Use PS4 or DEBUG\n");
-			} break;
+			}
+				break;
 			case 'C':
 				setKey("running-mode", IConfiguration::MODE_COLLECT_ONLY);
 				break;
@@ -396,7 +405,8 @@ public:
 				setKey("running-mode", IConfiguration::MODE_SYSTEM_REPORT);
 				setKey("parse-solibs", 0);
 				break;
-			case 'l': {
+			case 'l':
+			{
 				StrVecMap_t vec = getCommaSeparatedList(std::string(optarg));
 
 				if (vec.size() != 2)
@@ -414,38 +424,47 @@ public:
 				break;
 			case 'J':
 			{
-				StrVecMap_t bashFilesInPath = getCommaSeparatedList(std::string(optarg));
+				StrVecMap_t bashFilesInPath = getCommaSeparatedList(
+						std::string(optarg));
 
 				setKey("bash-parse-file-dir", bashFilesInPath);
 				break;
 			}
-			case 'R': {
-			  std::string tmpArg = std::string(optarg);
-			  size_t tokenPosFront = tmpArg.find_first_of(":");
-			  size_t tokenPosBack  = tmpArg.find_last_of(":");
+			case 'R':
+			{
+				std::string tmpArg = std::string(optarg);
+				size_t tokenPosFront = tmpArg.find_first_of(":");
+				size_t tokenPosBack = tmpArg.find_last_of(":");
 
-			  if ((tokenPosFront != std::string::npos) &&
-			      (tokenPosFront == tokenPosBack)) {
+				if ((tokenPosFront != std::string::npos)
+						&& (tokenPosFront == tokenPosBack))
+				{
 
-			    std::string originalPathPrefix = tmpArg.substr(0, tokenPosFront);
-			    std::string newPathPrefix = tmpArg.substr(tokenPosFront + 1);
+					std::string originalPathPrefix = tmpArg.substr(0,
+							tokenPosFront);
+					std::string newPathPrefix = tmpArg.substr(
+							tokenPosFront + 1);
 
-			    char* rp = ::realpath(newPathPrefix.c_str(), NULL);
-			    if (rp) {
-			      free((void*) rp);
-			    }
-			    else {
-			      panic("%s is not a valid path.\n", newPathPrefix.c_str());
-			    }
+					char* rp = ::realpath(newPathPrefix.c_str(), NULL);
+					if (rp)
+					{
+						free((void*) rp);
+					}
+					else
+					{
+						panic("%s is not a valid path.\n",
+								newPathPrefix.c_str());
+					}
 
-			    setKey("orig-path-prefix", originalPathPrefix);
-			    setKey("new-path-prefix", newPathPrefix);
-			  }
-			  else {
-			    panic("%s is formatted incorrectly\n", tmpArg.c_str());
+					setKey("orig-path-prefix", originalPathPrefix);
+					setKey("new-path-prefix", newPathPrefix);
+				}
+				else
+				{
+					panic("%s is formatted incorrectly\n", tmpArg.c_str());
 
-			  }
-			  break;
+				}
+				break;
 			}
 			default:
 				error("Unrecognized option: -%c\n", optopt);
@@ -467,22 +486,29 @@ public:
 			outDirectory += "/";
 
 		setKey("out-directory", outDirectory);
-		if (keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY) {
+		if (keyAsInt("running-mode") == IConfiguration::MODE_MERGE_ONLY)
+		{
 			// argv contains the directories to merge in this case, but we have no binary name etc
 			setKey("binary-name", "merged-kcov-output");
 			setKey("target-directory", outDirectory + "/merged-kcov-output");
-		} else {
+		}
+		else
+		{
 			std::string binaryName;
 			std::string path;
 
-			if (keyAsInt("attach-pid") == 0) {
+			if (keyAsInt("attach-pid") == 0)
+			{
 				path = argv[afterOpts + 1];
-			} else {
+			}
+			else
+			{
 				// Trace by PID - derive from /proc/$pid/exe on Linux
 				int pid = keyAsInt("attach-pid");
 				path = get_real_path(fmt("/proc/%d/exe", pid));
 
-				if (!file_exists(path)) {
+				if (!file_exists(path))
+				{
 					if (argc < afterOpts + 1)
 						usage();
 					path = argv[afterOpts + 1];
@@ -495,7 +521,9 @@ public:
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
 
-			setKey("target-directory", fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(), std::hash<std::string>()(tmp.first)));
+			setKey("target-directory",
+					fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
+							std::hash<std::string>()(tmp.first)));
 
 			setKey("binary-name", binaryName);
 
@@ -519,11 +547,11 @@ public:
 		return m_argc;
 	}
 
-	void registerListener(IListener &listener, const std::vector<std::string> &keys)
+	void registerListener(IListener &listener,
+			const std::vector<std::string> &keys)
 	{
 		for (std::vector<std::string>::const_iterator it = keys.begin();
-				it != keys.end();
-				++it)
+				it != keys.end(); ++it)
 			m_listeners[*it] = &listener;
 	}
 
@@ -535,7 +563,6 @@ public:
 	typedef std::unordered_map<std::string, StrVecMap_t> StrVecKeyMap_t;
 
 	typedef std::unordered_map<std::string, IListener *> ListenerMap_t;
-
 
 	// Setup the default key:value pairs
 	void setupDefaults()
@@ -587,7 +614,6 @@ public:
 		setKey("coveralls-service-name", "travis-ci");
 	}
 
-
 	void setKey(const std::string &key, const std::string &val)
 	{
 		m_strings[key] = val;
@@ -622,9 +648,9 @@ public:
 
 	void configure(const std::string &key, const std::string &value)
 	{
-		if (key == "low-limit" ||
-				key == "high-limit" ||
-				key == "bash-use-basic-parser") {
+		if (key == "low-limit" || key == "high-limit"
+				|| key == "bash-use-basic-parser")
+		{
 			if (!isInteger(value))
 				panic("Value for %s must be integer\n", key.c_str());
 		}
@@ -655,15 +681,13 @@ public:
 
 	const char *getConfigurableValues()
 	{
-		return
-		"                           bash-use-basic-parser=1    Enable simple bash parser\n"
-		"                           command-name=STR           Name of executed command\n"
-		"                           css-file=FILE              Filename of bcov.css file\n"
-		"                           high-limit=NUM             Percentage for high coverage\n"
-		"                           low-limit=NUM              Percentage for low coverage\n"
-		"                           merged-name=STR            Name of [merged] tag in HTML\n"
-		"                           coveralls-service-name=STR Service name for coveralls\n"
-		;
+		return "                           bash-use-basic-parser=1    Enable simple bash parser\n"
+				"                           command-name=STR           Name of executed command\n"
+				"                           css-file=FILE              Filename of bcov.css file\n"
+				"                           high-limit=NUM             Percentage for high coverage\n"
+				"                           low-limit=NUM              Percentage for low coverage\n"
+				"                           merged-name=STR            Name of [merged] tag in HTML\n"
+				"                           coveralls-service-name=STR Service name for coveralls\n";
 	}
 
 	std::string uncommonOptions()
@@ -673,42 +697,41 @@ public:
 
 		return fmt(
 				" --replace-src-path=path replace the string found before the : with the string \n"
-				"                         found after the :\n"
-				" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
-				"\n"
-				" --gcov                  use gcov parser instead of DWARF debugging info\n"
-				" --clang                 use Clang Sanitizer-coverage parser\n"
-				" --system-record         perform full-system instrumentation\n"
-				" --system-report         report full-system coverage data\n"
-				" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
-				" --exit-first-process    exit when the first process exits, i.e., honor the\n"
-				"                         behavior of daemons (default: wait until last)\n"
-				" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
-				"                         only output when kcov terminates, default %d)\n"
-				"\n"
-				" --debug=X               set kcov debugging level (max 31, default 0)\n"
-				"\n"
-				" --configure=key=value,... Manually set configuration values. Possible values:\n"
-				"%s"
-				"\n"
-				" --verify                verify breakpoint setup (to catch compiler bugs)\n"
-				"\n"
-				" --python-parser=cmd     Python parser to use (for python script coverage),\n"
-				"                         default: %s\n"
-				" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
-				"                         default: %s\n"
-				" --patchelf=cmd          patchelf binary to use (for system mode),\n"
-				"                         default: %s\n"
-				" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
-				" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
-				"                         execve replacement. Buggy on some systems\n"
-				" --bash-dont-parse-binary-dir Don't parse the binary directory for other scripts\n"
-				" --bash-parse-files-in-dir=dir[,...]  Parse bash scripts in dir(s)\n",
+						"                         found after the :\n"
+						" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
+						"\n"
+						" --gcov                  use gcov parser instead of DWARF debugging info\n"
+						" --clang                 use Clang Sanitizer-coverage parser\n"
+						" --system-record         perform full-system instrumentation\n"
+						" --system-report         report full-system coverage data\n"
+						" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
+						" --exit-first-process    exit when the first process exits, i.e., honor the\n"
+						"                         behavior of daemons (default: wait until last)\n"
+						" --output-interval=ms    Interval to produce output in milliseconds (0 to\n"
+						"                         only output when kcov terminates, default %d)\n"
+						"\n"
+						" --debug=X               set kcov debugging level (max 31, default 0)\n"
+						"\n"
+						" --configure=key=value,... Manually set configuration values. Possible values:\n"
+						"%s"
+						"\n"
+						" --verify                verify breakpoint setup (to catch compiler bugs)\n"
+						"\n"
+						" --python-parser=cmd     Python parser to use (for python script coverage),\n"
+						"                         default: %s\n"
+						" --bash-parser=cmd       Bash parser to use (for bash/sh script coverage),\n"
+						"                         default: %s\n"
+						" --patchelf=cmd          patchelf binary to use (for system mode),\n"
+						"                         default: %s\n"
+						" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
+						" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
+						"                         execve replacement. Buggy on some systems\n"
+						" --bash-dont-parse-binary-dir Don't parse the binary directory for other scripts\n"
+						" --bash-parse-files-in-dir=dir[,...]  Parse bash scripts in dir(s)\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"),
-				getConfigurableValues(),
-				keyAsString("python-command").c_str(), keyAsString("bash-command").c_str(),
-				keyAsString("patchelf-command").c_str()
-				);
+				getConfigurableValues(), keyAsString("python-command").c_str(),
+				keyAsString("bash-command").c_str(),
+				keyAsString("patchelf-command").c_str());
 	}
 
 	bool isInteger(std::string str)
@@ -718,8 +741,7 @@ public:
 		try
 		{
 			stoul(str, &pos);
-		}
-		catch(std::invalid_argument &e)
+		} catch (std::invalid_argument &e)
 		{
 			return false;
 		}
@@ -729,9 +751,8 @@ public:
 
 	void expandPath(StrVecMap_t &paths)
 	{
-		for (StrVecMap_t::iterator it = paths.begin();
-				it != paths.end();
-				++it) {
+		for (StrVecMap_t::iterator it = paths.begin(); it != paths.end(); ++it)
+		{
 			std::string &s = *it;
 
 			if (s[0] == '~')
@@ -744,7 +765,8 @@ public:
 	{
 		StrVecMap_t out;
 
-		if (str.find(',') == std::string::npos) {
+		if (str.find(',') == std::string::npos)
+		{
 			out.push_back(str);
 			return out;
 		}
@@ -752,9 +774,9 @@ public:
 		size_t pos, lastPos;
 
 		lastPos = 0;
-		for (pos = str.find_first_of(",");
-				pos != std::string::npos;
-				pos = str.find_first_of(",", pos + 1)) {
+		for (pos = str.find_first_of(","); pos != std::string::npos;
+				pos = str.find_first_of(",", pos + 1))
+		{
 			std::string cur = str.substr(lastPos, pos - lastPos);
 
 			out.push_back(cur);
@@ -775,7 +797,6 @@ public:
 
 	ListenerMap_t m_listeners;
 };
-
 
 IConfiguration & IConfiguration::getInstance()
 {

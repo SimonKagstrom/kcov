@@ -19,27 +19,22 @@
 
 enum
 {
-	i386_EIP = 12,
-	x86_64_RIP = 16,
-	ppc_NIP = 32,
-	arm_PC = 15,
-	aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
+	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
 };
 
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs);
 static unsigned long arch_getPcFromRegs(unsigned long *regs);
-static int attachLwp (int lwpid);
+static int attachLwp(int lwpid);
 static unsigned long getPcFromRegs(unsigned long *regs);
 static long getRegs(pid_t pid, void *addr, void *regs, size_t len);
-static int kill_lwp (unsigned long lwpid, int signo);
-static int linux_proc_get_int (pid_t lwpid, const char *field);
-static int linux_proc_pid_has_state (pid_t pid, const char *state);
-static int linux_proc_pid_is_stopped (pid_t pid);
-static int linux_proc_get_tgid (pid_t lwpid);
+static int kill_lwp(unsigned long lwpid, int signo);
+static int linux_proc_get_int(pid_t lwpid, const char *field);
+static int linux_proc_pid_has_state(pid_t pid, const char *state);
+static int linux_proc_pid_is_stopped(pid_t pid);
+static int linux_proc_get_tgid(pid_t lwpid);
 static long setRegs(pid_t pid, void *addr, void *regs, size_t len);
 
-static void
-arch_adjustPcAfterBreakpoint(unsigned long *regs)
+static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 {
 #if defined(__i386__)
 	regs[i386_EIP]--;
@@ -52,8 +47,7 @@ arch_adjustPcAfterBreakpoint(unsigned long *regs)
 #endif
 }
 
-static unsigned long
-arch_getPcFromRegs(unsigned long *regs)
+static unsigned long arch_getPcFromRegs(unsigned long *regs)
 {
 	unsigned long out;
 
@@ -74,17 +68,16 @@ arch_getPcFromRegs(unsigned long *regs)
 	return out;
 }
 
-int
-ptrace_sys::attachAll (pid_t pid)
+int ptrace_sys::attachAll(pid_t pid)
 {
 	int err;
 
 	/* Attach to PID.  We will check for other threads soon. */
-	err = attachLwp (pid);
+	err = attachLwp(pid);
 	if (err != 0)
-		error ("Cannot attach to process %d\n", pid);
+		error("Cannot attach to process %d\n", pid);
 
-	if (linux_proc_get_tgid (pid) != pid)
+	if (linux_proc_get_tgid(pid) != pid)
 	{
 		return 0;
 	}
@@ -92,11 +85,12 @@ ptrace_sys::attachAll (pid_t pid)
 	DIR *dir;
 	char pathname[128];
 
-	sprintf (pathname, "/proc/%d/task", pid);
+	sprintf(pathname, "/proc/%d/task", pid);
 
-	dir = opendir (pathname);
+	dir = opendir(pathname);
 
-	if (!dir) {
+	if (!dir)
+	{
 		error("Could not open /proc/%d/task.\n", pid);
 
 		return 0;
@@ -119,12 +113,12 @@ ptrace_sys::attachAll (pid_t pid)
 		 * threads, new threads may be spawned.  Cycle through
 		 * the list of threads until we have done two iterations without
 		 * finding new threads.  */
-		while ((dp = readdir (dir)) != NULL)
+		while ((dp = readdir(dir)) != NULL)
 		{
 			int lwp;
 
 			/* Fetch one lwp.  */
-			lwp = strtoul (dp->d_name, NULL, 10);
+			lwp = strtoul(dp->d_name, NULL, 10);
 
 			/* Is this a new thread?  */
 			if (lwp != 0 && threads.find(lwp) == threads.end())
@@ -132,9 +126,9 @@ ptrace_sys::attachAll (pid_t pid)
 				int err;
 				threads[lwp] = true;
 
-				err = attachLwp (lwp);
+				err = attachLwp(lwp);
 				if (err != 0)
-					warning ("Cannot attach to lwp %d\n", lwp);
+					warning("Cannot attach to lwp %d\n", lwp);
 
 				new_threads_found++;
 			}
@@ -145,26 +139,26 @@ ptrace_sys::attachAll (pid_t pid)
 		else
 			iterations = 0;
 
-		rewinddir (dir);
+		rewinddir(dir);
 	}
-	closedir (dir);
+	closedir(dir);
 
 	return 0;
 }
 
 /* Attach to an inferior process. */
-static int
-attachLwp (int lwpid)
+static int attachLwp(int lwpid)
 {
 	int rv;
 
-	rv = ptrace (PTRACE_ATTACH, lwpid, 0, 0);
+	rv = ptrace(PTRACE_ATTACH, lwpid, 0, 0);
 
 	if (rv < 0)
 		return errno;
 	ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
 
-	if (!linux_proc_pid_is_stopped (lwpid)) {
+	if (!linux_proc_pid_is_stopped(lwpid))
+	{
 		/*
 		 * First make sure there is a pending SIGSTOP.  Since we are
 		 * already attached, the process can not transition from stopped
@@ -173,77 +167,68 @@ attachLwp (int lwpid)
 		 * probably already in the queue (unless this kernel is old
 		 * enough to use TASK_STOPPED for ptrace stops); but since
 		 * SIGSTOP is not an RT signal, it can only be queued once.  */
-		kill_lwp (lwpid, SIGSTOP);
+		kill_lwp(lwpid, SIGSTOP);
 	}
 
 	return 0;
 }
 
-int
-ptrace_sys::cont(pid_t pid, int signal)
+int ptrace_sys::cont(pid_t pid, int signal)
 {
 	return ptrace(PTRACE_CONT, pid, 0, signal);
 }
 
-void
-ptrace_sys::detach(pid_t pid)
+void ptrace_sys::detach(pid_t pid)
 {
 	ptrace(PTRACE_DETACH, pid, 0, 0);
 }
 
-bool
-ptrace_sys::disable_aslr(void)
+bool ptrace_sys::disable_aslr(void)
 {
 	int persona = personality(0xffffffff);
-	if (persona < 0) {
+	if (persona < 0)
+	{
 		perror("Can't get personality");
 		return false;
 	}
 	persona |= 0x0040000; /* ADDR_NO_RANDOMIZE */
-	if (personality(persona) < 0) {
+	if (personality(persona) < 0)
+	{
 		perror("Can't set personality");
 		return false;
 	}
 	return true;
 }
 
-bool
-ptrace_sys::eventIsForky(int signal, int event)
+bool ptrace_sys::eventIsForky(int signal, int event)
 {
-    return (signal == SIGTRAP && (event == PTRACE_EVENT_CLONE ||
-				  event == PTRACE_EVENT_FORK ||
-				  event == PTRACE_EVENT_VFORK));
+	return (signal == SIGTRAP && (event == PTRACE_EVENT_CLONE || event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK));
 }
 
-bool
-ptrace_sys::eventIsNewChild(int signal, int event)
+bool ptrace_sys::eventIsNewChild(int signal, int event)
 {
 	return false;
 }
 
-int
-ptrace_sys::follow_child(pid_t pid)
+int ptrace_sys::follow_child(pid_t pid)
 {
 	return 0;
 }
 
-int
-ptrace_sys::follow_fork(pid_t pid)
+int ptrace_sys::follow_fork(pid_t pid)
 {
-	return ptrace(PTRACE_SETOPTIONS, pid, 0,
-		      PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
+	return ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
 }
 
 /* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
-static int
-linux_proc_get_int (pid_t lwpid, const char *field)
+static int linux_proc_get_int(pid_t lwpid, const char *field)
 {
-	size_t field_len = strlen (field);
+	size_t field_len = strlen(field);
 	FILE *status_file;
 	char buf[100];
 	int retval = -1;
 
-	snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
+	snprintf(buf, sizeof(buf), "/proc/%d/status", (int) lwpid);
 	status_file = fopen(buf, "r");
 	if (status_file == NULL)
 	{
@@ -251,74 +236,73 @@ linux_proc_get_int (pid_t lwpid, const char *field)
 		return -1;
 	}
 
-	while (fgets (buf, sizeof (buf), status_file)) {
-		if (strncmp (buf, field, field_len) == 0 && buf[field_len] == ':') {
-			retval = (int)strtol (&buf[field_len + 1], NULL, 10);
+	while (fgets(buf, sizeof(buf), status_file))
+	{
+		if (strncmp(buf, field, field_len) == 0 && buf[field_len] == ':')
+		{
+			retval = (int) strtol(&buf[field_len + 1], NULL, 10);
 			break;
 		}
 	}
 
-	fclose (status_file);
+	fclose(status_file);
 
 	return retval;
 }
 
-static int
-linux_proc_pid_has_state (pid_t pid, const char *state)
+static int linux_proc_pid_has_state(pid_t pid, const char *state)
 {
 	char buffer[100];
 	FILE *procfile;
 	int retval;
 	int have_state;
 
-	xsnprintf (buffer, sizeof (buffer), "/proc/%d/status", (int) pid);
+	xsnprintf(buffer, sizeof(buffer), "/proc/%d/status", (int ) pid);
 	procfile = fopen(buffer, "r");
-	if (procfile == NULL) {
+	if (procfile == NULL)
+	{
 		warning("unable to open /proc file '%s'", buffer);
 		return 0;
 	}
 
 	have_state = 0;
-	while (fgets (buffer, sizeof (buffer), procfile) != NULL) {
-		if (strncmp (buffer, "State:", 6) == 0) {
+	while (fgets(buffer, sizeof(buffer), procfile) != NULL)
+	{
+		if (strncmp(buffer, "State:", 6) == 0)
+		{
 			have_state = 1;
 			break;
 		}
 	}
-	retval = (have_state && strstr (buffer, state) != NULL);
-	fclose (procfile);
+	retval = (have_state && strstr(buffer, state) != NULL);
+	fclose(procfile);
 	return retval;
 }
 
 /* Detect `T (stopped)' in `/proc/PID/status'.
  * Other states including `T (tracing stop)' are reported as false.
  */
-static int
-linux_proc_pid_is_stopped (pid_t pid)
+static int linux_proc_pid_is_stopped(pid_t pid)
 {
-	return linux_proc_pid_has_state (pid, "T (stopped)");
+	return linux_proc_pid_has_state(pid, "T (stopped)");
 }
 
-static int
-linux_proc_get_tgid (pid_t lwpid)
+static int linux_proc_get_tgid(pid_t lwpid)
 {
-	return linux_proc_get_int (lwpid, "Tgid");
+	return linux_proc_get_int(lwpid, "Tgid");
 }
 
-int
-ptrace_sys::get_current_cpu(void)
+int ptrace_sys::get_current_cpu(void)
 {
 	return sched_getcpu();
 }
 
-int
-ptrace_sys::getEvent(pid_t pid, int status)
+int ptrace_sys::getEvent(pid_t pid, int status)
 {
 	return (status >> 16);
 }
 
-unsigned long
-ptrace_sys::getPc(int pid)
+unsigned long ptrace_sys::getPc(int pid)
 {
 	unsigned long regs[1024];
 
@@ -327,26 +311,24 @@ ptrace_sys::getPc(int pid)
 	return getPcFromRegs(regs);
 }
 
-static unsigned long
-getPcFromRegs(unsigned long *regs)
+static unsigned long getPcFromRegs(unsigned long *regs)
 {
 	return arch_getPcFromRegs(regs);
 }
 
-static long
-getRegs(pid_t pid, void *addr, void *regs, size_t len)
+static long getRegs(pid_t pid, void *addr, void *regs, size_t len)
 {
 #if defined(__aarch64__)
-	struct iovec iov = { regs, len };
+	struct iovec iov =
+	{	regs, len};
 	return ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov);
 #else
-	(void)len;
-	return ptrace((__ptrace_request)PTRACE_GETREGS, pid, NULL, regs);
+	(void) len;
+	return ptrace((__ptrace_request ) PTRACE_GETREGS, pid, NULL, regs);
 #endif
 }
 
-static int
-kill_lwp (unsigned long lwpid, int signo)
+static int kill_lwp(unsigned long lwpid, int signo)
 {
 	/* Use tkill, if possible, in case we are using nptl threads.  If tkill
 	 * fails, then we are not using nptl threads and we should be using kill. */
@@ -362,42 +344,39 @@ kill_lwp (unsigned long lwpid, int signo)
 			errno = 0;
 			ret = syscall (__NR_tkill, lwpid, signo);
 			if (errno != ENOSYS)
-				return ret;
+			return ret;
 			tkill_failed = 1;
 		}
 	}
 #endif
 
-	return kill (lwpid, signo);
+	return kill(lwpid, signo);
 }
 
-unsigned long
-ptrace_sys::peekWord(pid_t pid, unsigned long aligned_addr)
+unsigned long ptrace_sys::peekWord(pid_t pid, unsigned long aligned_addr)
 {
 
-	return ptrace((__ptrace_request)PTRACE_PEEKTEXT, pid, aligned_addr, 0);
+	return ptrace((__ptrace_request ) PTRACE_PEEKTEXT, pid, aligned_addr, 0);
 }
 
-void
-ptrace_sys::pokeWord(pid_t pid, unsigned long aligned_addr, unsigned long value)
+void ptrace_sys::pokeWord(pid_t pid, unsigned long aligned_addr, unsigned long value)
 {
-	ptrace((__ptrace_request)PTRACE_POKETEXT, pid, aligned_addr, value);
+	ptrace((__ptrace_request ) PTRACE_POKETEXT, pid, aligned_addr, value);
 }
 
-static long
-setRegs(pid_t pid, void *addr, void *regs, size_t len)
+static long setRegs(pid_t pid, void *addr, void *regs, size_t len)
 {
 #if defined(__aarch64__)
-	struct iovec iov = { regs, len };
+	struct iovec iov =
+	{	regs, len};
 	return ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov);
 #else
-	(void)len;
-	return ptrace((__ptrace_request)PTRACE_SETREGS, pid, NULL, regs);
+	(void) len;
+	return ptrace((__ptrace_request ) PTRACE_SETREGS, pid, NULL, regs);
 #endif
 }
 
-void
-ptrace_sys::singleStep(pid_t pid)
+void ptrace_sys::singleStep(pid_t pid)
 {
 	// Step back one instruction
 	unsigned long regs[1024];
@@ -407,8 +386,7 @@ ptrace_sys::singleStep(pid_t pid)
 }
 
 // Skip over this instruction
-void
-ptrace_sys::skipInstruction(pid_t pid)
+void ptrace_sys::skipInstruction(pid_t pid)
 {
 	// Nop on x86, op on PowerPC/ARM
 #if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
@@ -427,31 +405,26 @@ ptrace_sys::skipInstruction(pid_t pid)
 #endif
 }
 
-void
-ptrace_sys::tie_process_to_cpu(pid_t pid, int cpu)
+void ptrace_sys::tie_process_to_cpu(pid_t pid, int cpu)
 {
 	// Switching CPU while running will cause icache
 	// conflicts. So let's just forbid that.
 
 	int max_cpu = 4096;
 	cpu_set_t *set = CPU_ALLOC(max_cpu);
-	panic_if (!set,
-			"Can't allocate CPU set!\n");
+	panic_if(!set, "Can't allocate CPU set!\n");
 	CPU_ZERO_S(CPU_ALLOC_SIZE(max_cpu), set);
 	CPU_SET(cpu, set);
-	panic_if (sched_setaffinity(pid, CPU_ALLOC_SIZE(max_cpu), set) < 0,
-			"Can't set CPU affinity. Coincident won't work");
+	panic_if(sched_setaffinity(pid, CPU_ALLOC_SIZE(max_cpu), set) < 0, "Can't set CPU affinity. Coincident won't work");
 	CPU_FREE(set);
 }
 
-int
-ptrace_sys::trace_me(void)
+int ptrace_sys::trace_me(void)
 {
 	return ptrace(PTRACE_TRACEME, 0, 0, 0);
 }
 
-pid_t
-ptrace_sys::wait_all(int *status)
+pid_t ptrace_sys::wait_all(int *status)
 {
 	return waitpid(-1, status, __WALL);
 }

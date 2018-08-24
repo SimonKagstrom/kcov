@@ -44,12 +44,8 @@ class BashEngine : public ScriptEngineBase
 {
 public:
 	BashEngine() :
-		ScriptEngineBase(),
-		m_child(0),
-		m_stderr(NULL),
-		m_stdout(NULL),
-		m_bashSupportsXtraceFd(false),
-		m_inputType(INPUT_NORMAL)
+			ScriptEngineBase(), m_child(0), m_stderr(NULL), m_stdout(NULL), m_bashSupportsXtraceFd(false),
+			m_inputType(INPUT_NORMAL)
 	{
 	}
 
@@ -64,13 +60,15 @@ public:
 		int stderrPipe[2];
 		int stdoutPipe[2];
 
-		if (pipe(stderrPipe) < 0) {
+		if (pipe(stderrPipe) < 0)
+		{
 			error("Failed to open pipe");
 
 			return false;
 		}
 
-		if (pipe(stdoutPipe) < 0) {
+		if (pipe(stdoutPipe) < 0)
+		{
 			error("Failed to open pipe");
 			close(stderrPipe[0]);
 			close(stderrPipe[1]);
@@ -80,37 +78,37 @@ public:
 
 		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
 
-		std::string helperPath =
-				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
-		std::string helperDebugTrapPath =
-				IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
-		std::string redirectorPath =
-				IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
+		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
+		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
+		std::string redirectorPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
 
-		if (write_file(bash_helper_data.data(), bash_helper_data.size(),
-				"%s", helperPath.c_str()) < 0) {
-				error("Can't write helper");
+		if (write_file(bash_helper_data.data(), bash_helper_data.size(), "%s", helperPath.c_str()) < 0)
+		{
+			error("Can't write helper");
 
-				return false;
+			return false;
 		}
-		if (write_file(bash_helper_debug_trap_data.data(), bash_helper_debug_trap_data.size(),
-				"%s", helperDebugTrapPath.c_str()) < 0) {
-				error("Can't write helper");
+		if (write_file(bash_helper_debug_trap_data.data(), bash_helper_debug_trap_data.size(), "%s",
+				helperDebugTrapPath.c_str()) < 0)
+		{
+			error("Can't write helper");
 
-				return false;
+			return false;
 		}
-		if (write_file(bash_redirector_library_data.data(), bash_redirector_library_data.size(),
-				"%s", redirectorPath.c_str()) < 0) {
-				error("Can't write redirector library at %s", redirectorPath.c_str());
+		if (write_file(bash_redirector_library_data.data(), bash_redirector_library_data.size(), "%s",
+				redirectorPath.c_str()) < 0)
+		{
+			error("Can't write redirector library at %s", redirectorPath.c_str());
 
-				return false;
+			return false;
 		}
 
 		m_listener = &listener;
 
 		/* Launch child */
 		m_child = fork();
-		if (m_child > 0) {
+		if (m_child > 0)
+		{
 
 			// Close the parents write end of the pipe
 			close(stderrPipe[1]);
@@ -118,19 +116,23 @@ public:
 
 			// And open a FILE * to stderr
 			m_stderr = fdopen(stderrPipe[0], "r");
-			if (!m_stderr) {
+			if (!m_stderr)
+			{
 				error("Can't reopen the stderr pipe");
 				return false;
 			}
 			m_stdout = fdopen(stdoutPipe[0], "r");
-			if (!m_stderr) {
+			if (!m_stderr)
+			{
 				error("Can't reopen the stdout pipe");
 				fclose(m_stderr);
 
 				return false;
 			}
 
-		} else if (m_child == 0) {
+		}
+		else if (m_child == 0)
+		{
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
@@ -142,13 +144,15 @@ public:
 			if (usePS4 && !m_bashSupportsXtraceFd)
 				xtraceFd = 2;
 
-			if (dup2(stderrPipe[1], xtraceFd) < 0) {
-			    perror("Failed to exchange stderr for pipe");
-			    return false;
+			if (dup2(stderrPipe[1], xtraceFd) < 0)
+			{
+				perror("Failed to exchange stderr for pipe");
+				return false;
 			}
-			if (dup2(stdoutPipe[1], 1) < 0) {
-			    perror("Failed to exchange stderr for pipe");
-			    return false;
+			if (dup2(stdoutPipe[1], 1) < 0)
+			{
+				perror("Failed to exchange stderr for pipe");
+				return false;
 			}
 
 			/* Close the childs old write end of the pipe */
@@ -164,16 +168,18 @@ public:
 			doSetenv(fmt("KCOV_BASH_COMMAND=%s", command.c_str()));
 
 			/* Set up PS4 for tracing */
-			if (usePS4) {
+			if (usePS4)
+			{
 				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
 				doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
-			} else {
+			}
+			else
+			{
 				// Use DEBUG trap
 				doSetenv(fmt("BASH_ENV=%s", helperDebugTrapPath.c_str()));
 				doSetenv(fmt("KCOV_BASH_USE_DEBUG_TRAP=1"));
 			}
-
 
 			// And preload it!
 			if (conf.keyAsInt("bash-handle-sh-invocation"))
@@ -182,7 +188,7 @@ public:
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
 			int argcStart = usePS4 ? 2 : 1;
-			vec = (char **)xmalloc(sizeof(char *) * (argc + 3));
+			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
 
 			if (usePS4)
@@ -191,25 +197,25 @@ public:
 				vec[argcStart + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
-			if (execv(vec[0], vec)) {
+			if (execv(vec[0], vec))
+			{
 				perror("Failed to execute script");
 
 				free(vec);
 
 				return false;
 			}
-		} else if (m_child < 0) {
+		}
+		else if (m_child < 0)
+		{
 			perror("fork");
 
 			return false;
 		}
 
-
 		std::vector<std::string> dirsToParse = conf.keyAsList("bash-parse-file-dir");
 
-		for (std::vector<std::string>::iterator it = dirsToParse.begin();
-				it != dirsToParse.end();
-				++it)
+		for (std::vector<std::string>::iterator it = dirsToParse.begin(); it != dirsToParse.end(); ++it)
 		{
 			parseDirectoryForFiles(*it);
 		}
@@ -242,7 +248,8 @@ public:
 
 		size_t kcovStr = cur.find("kcov@");
 		enum InputType ip = getInputType(cur);
-		if (kcovStr == std::string::npos) {
+		if (kcovStr == std::string::npos)
+		{
 			if (m_inputType == INPUT_NORMAL)
 				fprintf(stderr, "%s", cur.c_str());
 			if (ip == INPUT_SINGLE_QUOTE && m_inputType == INPUT_SINGLE_QUOTE)
@@ -269,24 +276,25 @@ public:
 		if (filename.find("bash-helper-debug-trap.sh") != std::string::npos)
 			return true;
 
-		if (!string_is_integer(lineNo)) {
+		if (!string_is_integer(lineNo))
+		{
 			error("%s is not an integer", lineNo.c_str());
 
 			return false;
 		}
 
-		if (!m_reportedFiles[filename]) {
+		if (!m_reportedFiles[filename])
+		{
 			m_reportedFiles[filename] = true;
 
-			for (FileListenerList_t::const_iterator it = m_fileListeners.begin();
-					it != m_fileListeners.end();
-					++it)
+			for (FileListenerList_t::const_iterator it = m_fileListeners.begin(); it != m_fileListeners.end(); ++it)
 				(*it)->onFile(File(filename, IFileParser::FLG_NONE));
 
 			parseFile(filename);
 		}
 
-		if (m_listener) {
+		if (m_listener)
+		{
 			uint64_t address = 0;
 			Event ev;
 
@@ -314,18 +322,22 @@ public:
 		int rv;
 
 		rv = waitpid(m_child, &status, WNOHANG);
-		if (rv != m_child) {
+		if (rv != m_child)
+		{
 			return true;
 		}
-		else {
+		else
+		{
 			// Child exited, let's make sure that we have all the events/stdout.
 			checkEvents();
 		}
 
-
-		if (WIFEXITED(status)) {
+		if (WIFEXITED(status))
+		{
 			reportEvent(ev_exit_first_process, WEXITSTATUS(status));
-		} else {
+		}
+		else
+		{
 			warning("Other status: 0x%x\n", status);
 			reportEvent(ev_error, -1);
 		}
@@ -348,7 +360,7 @@ public:
 
 	unsigned int matchParser(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
-		std::string s((const char *)data, 80);
+		std::string s((const char *) data, 80);
 
 		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".sh")
 			return 200;
@@ -364,7 +376,6 @@ public:
 
 		return match_none;
 	}
-
 
 private:
 	void parseDirectoryForFiles(const std::string &base)
@@ -400,7 +411,7 @@ private:
 			else
 			{
 				size_t sz;
-				uint8_t *p = (uint8_t *)read_file(&sz, "%s", cur.c_str());
+				uint8_t *p = (uint8_t *) read_file(&sz, "%s", cur.c_str());
 
 				if (p)
 				{
@@ -411,7 +422,7 @@ private:
 					}
 
 				}
-				free((void *)p);
+				free((void *) p);
 			}
 		}
 		::closedir(dir);
@@ -470,10 +481,12 @@ private:
 
 		len = getline(&line, &linecap, fp);
 		// Let's play safe
-		if (len > 0) {
+		if (len > 0)
+		{
 			std::string cur(line);
 			size_t where = cur.find("version ");
-			if (where != std::string::npos) {
+			if (where != std::string::npos)
+			{
 				std::string versionStr = cur.substr(where + strlen("version "));
 
 				// Bash 4.2 and above supports BASH_XTRACEFD
@@ -486,7 +499,6 @@ private:
 
 		return out;
 	}
-
 
 	enum InputType getInputType(const std::string &str)
 	{
@@ -503,7 +515,7 @@ private:
 	void doSetenv(const std::string &val)
 	{
 		// "Leak" some bytes, but the environment needs that
-		char *envString = (char *)xmalloc(val.size() + 1);
+		char *envString = (char *) xmalloc(val.size() + 1);
 
 		strcpy(envString, val.c_str());
 
@@ -534,9 +546,8 @@ private:
 	{
 		unsigned int lineNo = 0;
 
-		for (std::vector<std::string>::const_iterator it = lines.begin();
-				it != lines.end();
-				++it) {
+		for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		{
 			std::string s = trim_string(*it);
 
 			lineNo++;
@@ -545,17 +556,23 @@ private:
 
 			// Remove comments
 			size_t comment = s.find("#");
-			if (comment != std::string::npos) {
+			if (comment != std::string::npos)
+			{
 
 				// But not $# or ${#variable}...
-				if ((comment >= 1 && s[comment - 1] == '$') ||
-						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
+				if ((comment >= 1 && s[comment - 1] == '$')
+						|| (comment >= 2 && s.rfind("${", comment) != std::string::npos
+								&& s.find("}", comment) != std::string::npos))
+				{
 					// Do nothing
-				// Nor if in a string
-				} else if (comment >= 1
-				&& (s.find("\"") < comment || s.find("'") < comment)) {
+					// Nor if in a string
+				}
+				else if (comment >= 1 && (s.find("\"") < comment || s.find("'") < comment))
+				{
 					// Do nothing
-				} else {
+				}
+				else
+				{
 					s = trim_string(s);
 					s = s.substr(0, comment);
 				}
@@ -566,14 +583,7 @@ private:
 				continue;
 
 			// While, if, switch endings
-			if (s == "esac" ||
-					s == "fi" ||
-					s == "do" ||
-					s == "done" ||
-					s == "else" ||
-					s == "then" ||
-					s == "}" ||
-					s == "{")
+			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then" || s == "}" || s == "{")
 				continue;
 
 			// Functions
@@ -587,14 +597,16 @@ private:
 	void parseFileFull(const std::string &filename, const std::vector<std::string> &lines, uint32_t crc)
 	{
 		unsigned int lineNo = 0;
-		enum { none, backslash, quote, heredoc } state = none;
+		enum
+		{
+			none, backslash, quote, heredoc
+		} state = none;
 		bool caseActive = false;
 		bool arithmeticActive = false;
 		std::string heredocMarker;
 
-		for (std::vector<std::string>::const_iterator it = lines.begin();
-				it != lines.end();
-				++it) {
+		for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		{
 			std::string s = trim_string(*it);
 
 			lineNo++;
@@ -603,17 +615,23 @@ private:
 
 			// Remove comments
 			size_t comment = s.find("#");
-			if (comment != std::string::npos) {
+			if (comment != std::string::npos)
+			{
 
 				// But not $# or ${#variable}...
-				if ((comment >= 1 && s[comment - 1] == '$') ||
-						(comment >= 2 && s.rfind("${", comment) != std::string::npos && s.find("}", comment) != std::string::npos)) {
+				if ((comment >= 1 && s[comment - 1] == '$')
+						|| (comment >= 2 && s.rfind("${", comment) != std::string::npos
+								&& s.find("}", comment) != std::string::npos))
+				{
 					// Do nothing
-				// Nor if in a string
-				} else if (comment >= 1
-				&& (s.find("\"") < comment || s.find("'") < comment)) {
+					// Nor if in a string
+				}
+				else if (comment >= 1 && (s.find("\"") < comment || s.find("'") < comment))
+				{
 					// Do nothing
-				} else {
+				}
+				else
+				{
 					s = trim_string(s);
 					s = s.substr(0, comment);
 				}
@@ -623,8 +641,7 @@ private:
 			if (s == "")
 				continue;
 
-			if (s.size() >= 2 &&
-					s[0] == ';' && s[1] == ';')
+			if (s.size() >= 2 && s[0] == ';' && s[1] == ';')
 				continue;
 
 			// Empty braces
@@ -632,12 +649,7 @@ private:
 				continue;
 
 			// While, if, switch endings
-			if (s == "esac" ||
-					s == "fi" ||
-					s == "do" ||
-					s == "done" ||
-					s == "else" ||
-					s == "then")
+			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then")
 				continue;
 
 			// Functions
@@ -646,9 +658,11 @@ private:
 
 			// fn() { .... Yes, regexes would have been better
 			size_t fnPos = s.find("()");
-			if (fnPos != std::string::npos) {
+			if (fnPos != std::string::npos)
+			{
 				// Trim valid last spaces between function name and parenthesis
-				while (fnPos > 1 && ' ' == s[fnPos - 1]) {
+				while (fnPos > 1 && ' ' == s[fnPos - 1])
+				{
 					--fnPos;
 				}
 
@@ -659,16 +673,17 @@ private:
 					continue;
 			}
 
-
 			// Handle backslashes - only the first line is code
-			if (state == backslash) {
+			if (state == backslash)
+			{
 				if (s[s.size() - 1] != '\\')
 					state = none;
 				continue;
 			}
 
 			// Multi-line quote - only the last line is code
-			if (state == quote) {
+			if (state == quote)
+			{
 				if (s.find('"') == s.size() - 1) // String ends with "
 					state = none;
 				else
@@ -676,7 +691,8 @@ private:
 			}
 
 			// HERE documents
-			if (state == heredoc) {
+			if (state == heredoc)
+			{
 				std::string trimmed = trim_string(s, " \t\r\n`");
 
 				if (trimmed == heredocMarker)
@@ -687,47 +703,51 @@ private:
 			if (s.find("$((") != std::string::npos || s.find("$[") != std::string::npos)
 				arithmeticActive = true;
 
-			if (s[s.size() - 1] == '\\') {
+			if (s[s.size() - 1] == '\\')
+			{
 				state = backslash;
-			} else if ((s.find("=\"") != std::string::npos || // Handle multi-line string assignments
-					s.find("= \"") != std::string::npos) &&
-					std::count(s.begin(), s.end(), '"') == 1) {
+			}
+			else if ((s.find("=\"") != std::string::npos || // Handle multi-line string assignments
+					s.find("= \"") != std::string::npos) && std::count(s.begin(), s.end(), '"') == 1)
+			{
 				state = quote;
 				continue;
-			} else {
+			}
+			else
+			{
 				size_t heredocStart = s.find("<<");
 
-				if (!arithmeticActive &&
-						s.find("let ") != 0 &&
-						s.find("$((") == std::string::npos &&
-						s.find("))") == std::string::npos &&
-						heredocStart != std::string::npos) {
+				if (!arithmeticActive && s.find("let ") != 0 && s.find("$((") == std::string::npos
+						&& s.find("))") == std::string::npos && heredocStart != std::string::npos)
+				{
 					// Skip << and remove spaces before and after "EOF"
 					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
 
 					// Make sure the heredoc marker is a word
-					for (unsigned int i = 0; i < heredocMarker.size(); i++) {
-						if (heredocMarker[i] == ' ' || heredocMarker[i] == '\t') {
+					for (unsigned int i = 0; i < heredocMarker.size(); i++)
+					{
+						if (heredocMarker[i] == ' ' || heredocMarker[i] == '\t')
+						{
 							heredocMarker = heredocMarker.substr(0, i);
 							break;
 						}
 					}
 
-					if (heredocMarker[0] == '-') {
+					if (heredocMarker[0] == '-')
+					{
 						// '-' marks tab-suppression in heredoc
 						heredocMarker = heredocMarker.substr(1);
 					}
 
-					if (heredocMarker.length() > 2
-					&& (heredocMarker[0] == '"' || heredocMarker[0] == '\'')
-					&&  heredocMarker[0] == heredocMarker[heredocMarker.length()-1]) {
+					if (heredocMarker.length() > 2 && (heredocMarker[0] == '"' || heredocMarker[0] == '\'')
+							&& heredocMarker[0] == heredocMarker[heredocMarker.length() - 1])
+					{
 						// remove enclosing in quotes
-						heredocMarker = heredocMarker.substr(1, heredocMarker.length()-2);
+						heredocMarker = heredocMarker.substr(1, heredocMarker.length() - 2);
 					}
 
 					if (heredocMarker.size() > 0 && heredocMarker[0] != '<')
 						state = heredoc;
-
 
 					std::string beforeHeredoc = trim_string(s.substr(0, heredocStart));
 					/*
@@ -759,9 +779,10 @@ private:
 				continue;
 
 			// Case switches are nocode
-			if (caseActive && s[s.size() - 1] == ')') {
+			if (caseActive && s[s.size() - 1] == ')')
+			{
 				// But let functions be (albeit not with balanced parentheses)
-			        size_t startParenthesis = s.find("(");
+				size_t startParenthesis = s.find("(");
 				if (startParenthesis == std::string::npos || startParenthesis == 0)
 					continue;
 			}
@@ -789,7 +810,7 @@ public:
 };
 static BashCtor g_bashCtor;
 
-class BashEngineCreator : public IEngineFactory::IEngineCreator
+class BashEngineCreator: public IEngineFactory::IEngineCreator
 {
 public:
 	virtual ~BashEngineCreator()
@@ -801,10 +822,9 @@ public:
 		return g_bashEngine;
 	}
 
-
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
-		std::string s((const char *)data, 80);
+		std::string s((const char *) data, 80);
 
 		if (filename.size() >= 3 && filename.substr(filename.size() - 3, filename.size()) == ".sh")
 			return 200;

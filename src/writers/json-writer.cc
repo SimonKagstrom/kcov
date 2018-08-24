@@ -1,4 +1,7 @@
-namespace std { class type_info; }
+namespace std
+{
+class type_info;
+}
 
 #include <reporter.hh>
 #include <file-parser.hh>
@@ -19,10 +22,8 @@ using namespace kcov;
 class JsonWriter : public WriterBase
 {
 public:
-	JsonWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &outFile) :
-		WriterBase(parser, reporter),
-		m_outFile(outFile)
+	JsonWriter(IFileParser &parser, IReporter &reporter, const std::string &outFile) :
+			WriterBase(parser, reporter), m_outFile(outFile)
 	{
 	}
 
@@ -51,16 +52,17 @@ public:
 		double percentCovered = 0.0;
 		bool firstFile = true;
 
-		for (FileMap_t::const_iterator it = m_files.begin();
-				it != m_files.end();
-				++it) {
+		for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+		{
 			File *file = it->second;
 			unsigned int nExecutedLines = 0;
 			unsigned int nCodeLines = 0;
 
-			for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
+			for (unsigned int n = 1; n < file->m_lastLineNr; n++)
+			{
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
-				if (m_reporter.lineIsCode(file->m_name, n)) {
+				if (m_reporter.lineIsCode(file->m_name, n))
+				{
 					nExecutedLines += !!cnt.m_hits;
 					nCodeLines++;
 					nTotalExecutedLines += !!cnt.m_hits;
@@ -80,37 +82,26 @@ public:
 					"\"percent_covered\": \"%.2f\", "
 					"\"covered_lines\": \"%d\", "
 					"\"total_lines\": \"%d\""
-					"}",
-					file->m_name.c_str(),
-					percentCovered,
-					nExecutedLines,
-					nCodeLines
-					);
+					"}", file->m_name.c_str(), percentCovered, nExecutedLines, nCodeLines);
 		}
 
 		percentCovered = 0;
 		if (nTotalCodeLines > 0)
 			percentCovered = static_cast<double>(nTotalExecutedLines) / nTotalCodeLines * 100;
 
-		out << fmt("\n"
-				"  ],\n"
-				"  \"percent_covered\": \"%.2f\",\n"
-				"  \"covered_lines\": %d,\n"
-				"  \"total_lines\": %d,\n"
-				"  \"percent_low\": %d,\n"
-				"  \"percent_high\": %d,\n"
-				"  \"command\": \"%s\",\n"
-				"  \"date\": \"%s\"\n"
-				"}\n",
-				percentCovered,
-				nTotalExecutedLines,
-				nTotalCodeLines,
-				conf.keyAsInt("low-limit"),
-				conf.keyAsInt("high-limit"),
-				escape_json(conf.keyAsString("command-name")).c_str(),
-				getDateNow().c_str()
-				);
-
+		out
+				<< fmt("\n"
+						"  ],\n"
+						"  \"percent_covered\": \"%.2f\",\n"
+						"  \"covered_lines\": %d,\n"
+						"  \"total_lines\": %d,\n"
+						"  \"percent_low\": %d,\n"
+						"  \"percent_high\": %d,\n"
+						"  \"command\": \"%s\",\n"
+						"  \"date\": \"%s\"\n"
+						"}\n", percentCovered, nTotalExecutedLines, nTotalCodeLines, conf.keyAsInt("low-limit"),
+						conf.keyAsInt("high-limit"), escape_json(conf.keyAsString("command-name")).c_str(),
+						getDateNow().c_str());
 
 	}
 
@@ -133,8 +124,7 @@ private:
 
 namespace kcov
 {
-	IWriter &createJsonWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &outFile)
+	IWriter &createJsonWriter(IFileParser &parser, IReporter &reporter, const std::string &outFile)
 	{
 		return *new JsonWriter(parser, reporter, outFile);
 	}

@@ -30,19 +30,14 @@ class SolibHandler : public ISolibHandler, ICollector::IEventTickListener
 {
 public:
 	SolibHandler(IFileParser &parser, ICollector &collector) :
-		m_ldPreloadString(NULL),
-		m_envString(NULL),
-		m_solibFd(-1),
-		m_solibThreadValid(false),
-		m_threadShouldExit(false),
-		m_parser(&parser),
-		m_hasSetupRelocation(false)
-{
+			m_ldPreloadString(NULL), m_envString(NULL), m_solibFd(-1), m_solibThreadValid(false), m_threadShouldExit(false),
+			m_parser(&parser), m_hasSetupRelocation(false)
+	{
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
 		// Only useful for ELF binaries
-		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov") &&
-				!IConfiguration::getInstance().keyAsInt("clang-sanitizer"))
+		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov")
+				&& !IConfiguration::getInstance().keyAsInt("clang-sanitizer"))
 			collector.registerEventTickListener(*this);
 	}
 
@@ -65,7 +60,8 @@ public:
 		 *
 		 * Only do this if it has been started, naturally
 		 */
-		if (m_solibThreadValid) {
+		if (m_solibThreadValid)
+		{
 			pthread_cancel(m_solibThread);
 			pthread_kill(m_solibThread, SIGTERM);
 			pthread_join(m_solibThread, &rv);
@@ -78,18 +74,13 @@ public:
 		checkSolibData();
 	}
 
-
 	void startup()
 	{
 		if (m_parser->getParserType() != "ELF")
 			return;
 
-		std::string kcov_solib_pipe_path =
-				IOutputHandler::getInstance().getOutDirectory() +
-				"kcov-solib.pipe";
-		std::string kcov_solib_path =
-				IOutputHandler::getInstance().getBaseDirectory() +
-				"libkcov_sowrapper.so";
+		std::string kcov_solib_pipe_path = IOutputHandler::getInstance().getOutDirectory() + "kcov-solib.pipe";
+		std::string kcov_solib_path = IOutputHandler::getInstance().getBaseDirectory() + "libkcov_sowrapper.so";
 
 		// Skip this very special library
 		m_foundSolibs[get_real_path(kcov_solib_path)] = true;
@@ -99,7 +90,8 @@ public:
 		unlink(kcov_solib_pipe_path.c_str());
 
 		int rv = mkfifo(kcov_solib_pipe_path.c_str(), 0644);
-		if (rv < 0) {
+		if (rv < 0)
+		{
 			char buf[1024];
 
 			const char* tmpdir = getenv("TMPDIR");
@@ -121,28 +113,27 @@ public:
 				panic("Can't create kcov fifo in temp dir %s\n", dir);
 		}
 
-		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" +
-				kcov_solib_pipe_path;
+		std::string kcov_solib_env = "KCOV_SOLIB_PATH=" + kcov_solib_pipe_path;
 
 		free(m_envString);
-		m_envString = (char *)xmalloc(kcov_solib_env.size() + 1);
+		m_envString = (char *) xmalloc(kcov_solib_env.size() + 1);
 		strcpy(m_envString, kcov_solib_env.c_str());
 
 		std::string preloadEnv = std::string("LD_PRELOAD=" + kcov_solib_path).c_str();
 		free(m_ldPreloadString);
-		m_ldPreloadString = (char *)xmalloc(preloadEnv.size() + 1);
+		m_ldPreloadString = (char *) xmalloc(preloadEnv.size() + 1);
 		strcpy(m_ldPreloadString, preloadEnv.c_str());
 
-		if (IConfiguration::getInstance().keyAsInt("parse-solibs") &&
-				ICapabilities::getInstance().hasCapability("handle-solibs")) {
+		if (IConfiguration::getInstance().keyAsInt("parse-solibs")
+				&& ICapabilities::getInstance().hasCapability("handle-solibs"))
+		{
 			if (file_exists(kcov_solib_path))
 				putenv(m_ldPreloadString);
 		}
 		putenv(m_envString);
 
 		m_solibPath = kcov_solib_pipe_path;
-		pthread_create(&m_solibThread, NULL,
-				SolibHandler::threadStatic, (void *)this);
+		pthread_create(&m_solibThread, NULL, SolibHandler::threadStatic, (void *) this);
 
 	}
 
@@ -156,21 +147,22 @@ public:
 		if (m_solibFd < 0)
 			return;
 
-		while (1) {
+		while (1)
+		{
 			int r = read(m_solibFd, buf, sizeof(buf));
 
 			// The destructor will close m_solibFd, so we'll exit here in that case
 			if (r <= 0)
 				break;
 
-			panic_if ((unsigned)r >= sizeof(buf),
-					"Too much solib data read");
+			panic_if((unsigned )r >= sizeof(buf), "Too much solib data read");
 
 			struct phdr_data *p = phdr_data_unmarshal(buf);
 
-			if (p) {
+			if (p)
+			{
 				size_t sz = sizeof(struct phdr_data) + p->n_entries * sizeof(struct phdr_data_entry);
-				struct phdr_data *cpy = (struct phdr_data*)xmalloc(sz);
+				struct phdr_data *cpy = (struct phdr_data*) xmalloc(sz);
 
 				memcpy(cpy, p, sz);
 
@@ -187,7 +179,8 @@ public:
 
 	void solibThreadMain()
 	{
-		while (1) {
+		while (1)
+		{
 			if (m_threadShouldExit)
 				break;
 
@@ -198,7 +191,7 @@ public:
 	// Wrapper for ptrace
 	static void *threadStatic(void *pThis)
 	{
-		SolibHandler *p = (SolibHandler *)pThis;
+		SolibHandler *p = (SolibHandler *) pThis;
 
 		p->solibThreadMain();
 
@@ -213,7 +206,8 @@ public:
 			return;
 
 		m_phdrListMutex.lock();
-		if (!m_phdrs.empty()) {
+		if (!m_phdrs.empty())
+		{
 			p = m_phdrs.front();
 			m_phdrs.pop_front();
 		}
@@ -223,7 +217,8 @@ public:
 			return;
 
 		// Setup where the main file is relocated once (for PIEs)
-		if (!m_hasSetupRelocation) {
+		if (!m_hasSetupRelocation)
+		{
 			m_hasSetupRelocation = true;
 			m_parser->setMainFileRelocation(p->relocation);
 		}
@@ -247,7 +242,6 @@ public:
 		free(p);
 	}
 
-
 //private:
 
 	typedef std::list<struct phdr_data *> PhdrList_t;
@@ -269,7 +263,6 @@ public:
 	IFileParser *m_parser;
 	bool m_hasSetupRelocation;
 };
-
 
 static SolibHandler *g_handler;
 ISolibHandler &kcov::createSolibHandler(IFileParser &parser, ICollector &collector)

@@ -65,7 +65,8 @@ private:
 	{
 		out << fmt("	<file path=\"%s\">\n", file->m_name.c_str());
 
-		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
+		for (unsigned int n = 1; n < file->m_lastLineNr; n++)
+		{
 			if (!m_reporter.lineIsCode(file->m_name, n))
 					continue;
 

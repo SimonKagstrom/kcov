@@ -32,22 +32,14 @@ extern GeneratedData tablesorter_text_data;
 extern GeneratedData tablesorter_widgets_text_data;
 extern GeneratedData tablesorter_theme_text_data;
 
-
 class HtmlWriter : public WriterBase
 {
 public:
-	HtmlWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &indexDirectory,
-			const std::string &outDirectory,
-			const std::string &name,
-			bool includeInTotals) :
-		WriterBase(parser, reporter),
-		m_outDirectory(outDirectory + "/"),
-		m_indexDirectory(indexDirectory + "/"),
-		m_summaryDbFileName(outDirectory + "/summary.db"),
-		m_name(name),
-		m_includeInTotals(includeInTotals),
-		m_maxPossibleHits(parser.maxPossibleHits())
+	HtmlWriter(IFileParser &parser, IReporter &reporter, const std::string &indexDirectory, const std::string &outDirectory,
+			const std::string &name, bool includeInTotals) :
+			WriterBase(parser, reporter), m_outDirectory(outDirectory + "/"), m_indexDirectory(indexDirectory + "/"), m_summaryDbFileName(
+					outDirectory + "/summary.db"), m_name(name), m_includeInTotals(includeInTotals), m_maxPossibleHits(
+					parser.maxPossibleHits())
 	{
 	}
 
@@ -72,42 +64,38 @@ private:
 		outJson << "var data = {lines:[\n";
 
 		// Produce each line in the file
-		for (unsigned int n = 1; n < file->m_lastLineNr; n++) {
+		for (unsigned int n = 1; n < file->m_lastLineNr; n++)
+		{
 			const std::string &line = file->m_lineMap[n];
 
-			outJson << fmt(
-					"{\"lineNum\":\"%5u\","
-					"\"line\":\"",
-					n
-					);
+			outJson << fmt("{\"lineNum\":\"%5u\","
+					"\"line\":\"", n);
 			outJson << escape_json(line) << "\"";
 
-			if (m_reporter.lineIsCode(file->m_name, n)) {
+			if (m_reporter.lineIsCode(file->m_name, n))
+			{
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
 				std::string lineClass = "lineNoCov";
 
-				if (m_maxPossibleHits == IFileParser::HITS_UNLIMITED ||
-						m_maxPossibleHits == IFileParser::HITS_SINGLE) {
+				if (m_maxPossibleHits == IFileParser::HITS_UNLIMITED || m_maxPossibleHits == IFileParser::HITS_SINGLE)
+				{
 					if (cnt.m_hits)
 						lineClass = "lineCov";
-				} else { // One or multiple for a line
+				}
+				else
+				{ // One or multiple for a line
 					if (cnt.m_hits == cnt.m_possibleHits)
 						lineClass = "lineCov";
 					else if (cnt.m_hits)
 						lineClass = "linePartCov";
 				}
 
-				outJson << fmt(
-					",\"class\":\"%s\","
-					"\"hits\":\"%u\",",
-					lineClass.c_str(),
-					cnt.m_hits);
+				outJson << fmt(",\"class\":\"%s\","
+						"\"hits\":\"%u\",", lineClass.c_str(), cnt.m_hits);
 
 				// Don't report order for zeroes
 				if (cnt.m_order)
-					outJson << fmt(
-					"\"order\":\"%llu\",",
-					(unsigned long long)cnt.m_order);
+					outJson << fmt("\"order\":\"%llu\",", (unsigned long long) cnt.m_order);
 
 				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
 					outJson << fmt("\"possible_hits\":\"%u\",", cnt.m_possibleHits);
@@ -128,10 +116,8 @@ private:
 		outJson << "var merged_data = [];\n";
 
 		// Produce HTML out-file
-		outHtml << fmt(
-				"<script type=\"text/javascript\" src=\"%s\"></script>\n",
-				file->m_jsonOutFileName.c_str());
-		outHtml.write((const char *)source_file_text_data.data(), source_file_text_data.size());
+		outHtml << fmt("<script type=\"text/javascript\" src=\"%s\"></script>\n", file->m_jsonOutFileName.c_str());
+		outHtml.write((const char *) source_file_text_data.data(), source_file_text_data.size());
 	}
 
 	void writeIndex()
@@ -144,9 +130,8 @@ private:
 		std::ofstream outJson(m_outDirectory + "index.js");
 		outJson << "var data = {files:[\n"; // Not really json, but anyway
 
-		for (FileMap_t::const_iterator it = m_files.begin();
-				it != m_files.end();
-				++it) {
+		for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+		{
 			File *file = it->second;
 			unsigned int nExecutedLines = file->m_executedLines;
 			unsigned int nCodeLines = file->m_codeLines;
@@ -159,10 +144,12 @@ private:
 			size_t pos = listName.find(m_commonPath);
 			unsigned int stripLevel = IConfiguration::getInstance().keyAsInt("path-strip-level");
 
-			if (pos != std::string::npos && m_commonPath.size() != 0 && stripLevel != ~0U) {
+			if (pos != std::string::npos && m_commonPath.size() != 0 && stripLevel != ~0U)
+			{
 				std::string pathToRemove = m_commonPath;
 
-				for (unsigned int i = 0; i < stripLevel; i++) {
+				for (unsigned int i = 0; i < stripLevel; i++)
+				{
 					size_t slashPos = pathToRemove.rfind("/");
 
 					if (slashPos == std::string::npos)
@@ -180,39 +167,32 @@ private:
 			outJson << getIndexHeader(file->m_outFileName, file->m_fileName, listName, nCodeLines, nExecutedLines);
 		}
 
-
 		// Add the header
-		outJson << fmt("]};\n"
-				"var percent_low = %d;"
-				"var percent_high = %d;"
-				"\n"
-				"var header = {"
-				" \"command\" : \"%s\","
-				" \"date\" : \"%s\","
-				" \"instrumented\" : %d,"
-				" \"covered\" : %d,"
-				"};"
-				"\n",
-				conf.keyAsInt("low-limit"),
-				conf.keyAsInt("high-limit"),
-				escape_json(conf.keyAsString("command-name")).c_str(),
-				getDateNow().c_str(),
-				nTotalCodeLines,
-				nTotalExecutedLines
-				) +
-				"var merged_data = [];\n";
+		outJson
+				<< fmt("]};\n"
+						"var percent_low = %d;"
+						"var percent_high = %d;"
+						"\n"
+						"var header = {"
+						" \"command\" : \"%s\","
+						" \"date\" : \"%s\","
+						" \"instrumented\" : %d,"
+						" \"covered\" : %d,"
+						"};"
+						"\n", conf.keyAsInt("low-limit"), conf.keyAsInt("high-limit"),
+						escape_json(conf.keyAsString("command-name")).c_str(), getDateNow().c_str(), nTotalCodeLines,
+						nTotalExecutedLines) + "var merged_data = [];\n";
 
 		// Produce HTML outfile
 		std::ofstream outHtml(m_outDirectory + "index.html");
-		outHtml.write((const char *)index_text_data.data(), index_text_data.size());
+		outHtml.write((const char *) index_text_data.data(), index_text_data.size());
 
 		// Produce a summary
 		IReporter::ExecutionSummary summary = m_reporter.getExecutionSummary();
 		summary.m_includeInTotals = m_includeInTotals;
 		size_t sz;
 
-		void *data = marshalSummary(summary,
-				m_name, &sz);
+		void *data = marshalSummary(summary, m_name, &sz);
 
 		if (data)
 			write_file(data, sz, "%s", m_summaryDbFileName.c_str());
@@ -238,7 +218,8 @@ private:
 		outJson << "var data = {files:[\n";
 		std::string merged;
 
-		for (de = readdir(dir); de; de = readdir(dir)) {
+		for (de = readdir(dir); de; de = readdir(dir))
+		{
 			std::string curDir = idx + de->d_name;
 			std::string cur = curDir + "/summary.db";
 			struct stat st;
@@ -272,12 +253,14 @@ private:
 				continue;
 
 			// Skip entries (merged ones) that shouldn't be included in the totals
-			if (summary.m_includeInTotals) {
+			if (summary.m_includeInTotals)
+			{
 				nTotalCodeLines += summary.m_lines;
 				nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines, summary.m_executedLines);
+			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines,
+					summary.m_executedLines);
 
 			if (name == conf.keyAsString("merged-name"))
 				merged += datum;
@@ -290,16 +273,14 @@ private:
 
 		// Produce HTML outfile
 		std::ofstream outHtml(m_indexDirectory + "index.html");
-		outHtml.write((const char *)index_text_data.data(), index_text_data.size());
+		outHtml.write((const char *) index_text_data.data(), index_text_data.size());
 
 		closedir(dir);
 	}
 
 	void write()
 	{
-		for (FileMap_t::const_iterator it = m_files.begin();
-				it != m_files.end();
-				++it)
+		for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
 			writeOne(it->second);
 
 		setupCommonPaths();
@@ -310,13 +291,11 @@ private:
 			writeGlobalIndex();
 	}
 
-
 	std::string getHeader(unsigned int lines, unsigned int executedLines)
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
 
-		return fmt(
-				"var percent_low = %d;"
+		return fmt("var percent_low = %d;"
 				"var percent_high = %d;"
 				"\n"
 				"var header = {"
@@ -325,41 +304,28 @@ private:
 				" \"instrumented\" : %d,"
 				" \"covered\" : %d,"
 				"};"
-				"\n",
-				conf.keyAsInt("low-limit"),
-				conf.keyAsInt("high-limit"),
-				escape_json(conf.keyAsString("command-name")).c_str(),
-				getDateNow().c_str(),
-				lines,
-				executedLines);
+				"\n", conf.keyAsInt("low-limit"), conf.keyAsInt("high-limit"),
+				escape_json(conf.keyAsString("command-name")).c_str(), getDateNow().c_str(), lines, executedLines);
 	}
 
 	// Return a header for index-type JSON files
-	std::string getIndexHeader(const std::string &linkName, const std::string titleName,
-			const std::string summaryName, unsigned int lines, unsigned int executedLines)
+	std::string getIndexHeader(const std::string &linkName, const std::string titleName, const std::string summaryName,
+			unsigned int lines, unsigned int executedLines)
 	{
 		double percent = 0;
 
 		if (lines != 0)
-			percent = (executedLines / (double)lines) * 100;
+			percent = (executedLines / (double) lines) * 100;
 
-		return fmt(
-				"{\"link\":\"%s\","
+		return fmt("{\"link\":\"%s\","
 				"\"title\":\"%s\","
 				"\"summary_name\":\"%s\","
 				"\"covered_class\":\"%s\","
 				"\"covered\":\"%.1f\","
 				"\"covered_lines\":\"%d\","
 				"\"uncovered_lines\":\"%d\","
-				"\"total_lines\" : \"%d\"},\n",
-				linkName.c_str(),
-				titleName.c_str(),
-				summaryName.c_str(),
-				colorFromPercent(percent).c_str(),
-				percent,
-				executedLines,
-				lines - executedLines,
-				lines);
+				"\"total_lines\" : \"%d\"},\n", linkName.c_str(), titleName.c_str(), summaryName.c_str(),
+				colorFromPercent(percent).c_str(), percent, executedLines, lines - executedLines, lines);
 	}
 
 	std::string colorFromPercent(double percent)
@@ -393,9 +359,10 @@ private:
 		GeneratedData css = css_text_data;
 
 		std::string cssFileName = conf.keyAsString("css-file");
-		if (cssFileName != "") {
+		if (cssFileName != "")
+		{
 			size_t sz;
-			uint8_t *p = (uint8_t *)read_file(&sz, "%s", cssFileName.c_str());
+			uint8_t *p = (uint8_t *) read_file(&sz, "%s", cssFileName.c_str());
 
 			if (p)
 				css = GeneratedData(p, sz);
@@ -407,8 +374,8 @@ private:
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/glass.png", dir.c_str());
 		write_file(css.data(), css.size(), "%s/bcov.css", dir.c_str());
 
-		(void)mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
-		(void)mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
+		(void) mkdir(fmt("%s/data", dir.c_str()).c_str(), 0755);
+		(void) mkdir(fmt("%s/data/js", dir.c_str()).c_str(), 0755);
 		write_file(icon_amber_data.data(), icon_amber_data.size(), "%s/data/amber.png", dir.c_str());
 		write_file(icon_glass_data.data(), icon_glass_data.size(), "%s/data/glass.png", dir.c_str());
 		write_file(css.data(), css.size(), "%s/data/bcov.css", dir.c_str());
@@ -416,8 +383,10 @@ private:
 		write_file(kcov_text_data.data(), kcov_text_data.size(), "%s/data/js/kcov.js", dir.c_str());
 		write_file(jquery_text_data.data(), jquery_text_data.size(), "%s/data/js/jquery.min.js", dir.c_str());
 		write_file(tablesorter_text_data.data(), tablesorter_text_data.size(), "%s/data/js/tablesorter.min.js", dir.c_str());
-		write_file(tablesorter_widgets_text_data.data(), tablesorter_widgets_text_data.size(), "%s/data/js/jquery.tablesorter.widgets.min.js", dir.c_str());
-		write_file(tablesorter_theme_text_data.data(), tablesorter_theme_text_data.size(), "%s/data/tablesorter-theme.css", dir.c_str());
+		write_file(tablesorter_widgets_text_data.data(), tablesorter_widgets_text_data.size(),
+				"%s/data/js/jquery.tablesorter.widgets.min.js", dir.c_str());
+		write_file(tablesorter_theme_text_data.data(), tablesorter_theme_text_data.size(), "%s/data/tablesorter-theme.css",
+				dir.c_str());
 	}
 
 	void onStartup()
@@ -425,7 +394,6 @@ private:
 		writeHelperFiles(m_indexDirectory);
 		writeHelperFiles(m_outDirectory);
 	}
-
 
 	std::string m_outDirectory;
 	std::string m_indexDirectory;
@@ -437,13 +405,9 @@ private:
 
 namespace kcov
 {
-	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter,
-			const std::string &indexDirectory,
-			const std::string &outDirectory,
-			const std::string &name,
-			bool includeInTotals)
+	IWriter &createHtmlWriter(IFileParser &parser, IReporter &reporter, const std::string &indexDirectory,
+			const std::string &outDirectory, const std::string &name, bool includeInTotals)
 	{
-		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory,
-				name, includeInTotals);
+		return *new HtmlWriter(parser, reporter, indexDirectory, outDirectory, name, includeInTotals);
 	}
 }

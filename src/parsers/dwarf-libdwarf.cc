@@ -49,7 +49,8 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 	Dwarf_Unsigned header;
 
 	/* Iterate over the headers */
-	while (dwarf_next_cu_header(m_impl->m_dwarf, 0, 0, 0, 0, &header, 0) == DW_DLV_OK) {
+	while (dwarf_next_cu_header(m_impl->m_dwarf, 0, 0, 0, 0, &header, 0) == DW_DLV_OK)
+	{
 		Dwarf_Line* line_buffer;
 		Dwarf_Signed line_count;
 		Dwarf_Die die;
@@ -63,7 +64,8 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 			continue;
 
 		/* Store them */
-		for (i = 0; i < line_count; i++) {
+		for (i = 0; i < line_count; i++)
+		{
 			Dwarf_Unsigned line_nr;
 			char* line_source;
 			Dwarf_Bool is_code;
@@ -80,7 +82,8 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 			if (dwarf_lineaddr(line_buffer[i], &addr, 0) != DW_DLV_OK)
 				continue;
 
-			if (line_nr && is_code) {
+			if (line_nr && is_code)
+			{
 				static char *srcDirs[1] = {NULL};
 				listener.onLine(fullPath(srcDirs, line_source), line_nr, addr);
 			}
@@ -124,7 +127,8 @@ bool DwarfParser::open(const std::string& filename)
 
 	/* Initialize libdwarf */
 	int err = dwarf_init(m_impl->m_fd, DW_DLC_READ, dwarf_error_handler, 0, &m_impl->m_dwarf,0);
-	if (err == DW_DLV_ERROR) {
+	if (err == DW_DLV_ERROR)
+	{
 		::close(m_impl->m_fd);
 		m_impl->m_fd = -1;
 

@@ -1,4 +1,5 @@
-namespace ptrace_sys {
+namespace ptrace_sys
+{
 
 int attachAll (pid_t pid);
 int cont(pid_t pid, int signal);

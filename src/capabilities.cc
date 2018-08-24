@@ -36,7 +36,7 @@ private:
 	void validateCapability(const std::string &name)
 	{
 		panic_if(m_capabilities.find(name) == m_capabilities.end(),
-			"Capability %s not present", name.c_str());
+				"Capability %s not present", name.c_str());
 	}
 
 	std::unordered_map<std::string, bool> m_capabilities;

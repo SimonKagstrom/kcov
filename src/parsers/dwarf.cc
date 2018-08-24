@@ -46,7 +46,8 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 	size_t headerSize;
 
 	/* Iterate over the headers */
-	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
+	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0)
+	{
 		Dwarf_Lines* lines;
 		Dwarf_Files *files;
 		size_t lineCount;
@@ -78,7 +79,8 @@ void DwarfParser::forEachLine(IFileParser::ILineListener& listener)
 			continue;
 
 		/* Iterate through the source lines */
-		for (i = 0; i < lineCount; i++) {
+		for (i = 0; i < lineCount; i++)
+		{
 			Dwarf_Line *line;
 			int lineNr = 0;
 			const char* lineSource;
@@ -127,10 +129,12 @@ void DwarfParser::forAddress(IFileParser::ILineListener& listener, uint64_t addr
 		return;
 
 	/* Iterate over the headers */
-	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0) {
+	while (dwarf_nextcu(m_impl->m_dwarf, offset, &offset, &headerSize, 0, 0, 0) == 0)
+	{
 		Dwarf_Die die;
 
-		if (dwarf_offdie(m_impl->m_dwarf, lastOffset + headerSize, &die) == NULL) {
+		if (dwarf_offdie(m_impl->m_dwarf, lastOffset + headerSize, &die) == NULL)
+		{
 			lastOffset = offset;
 			continue;
 		}
@@ -201,7 +205,8 @@ bool DwarfParser::open(const std::string& filename)
 	/* Initialize libdwarf from the file descriptor */
 	m_impl->m_dwarf = dwarf_begin(m_impl->m_fd, DWARF_C_READ);
 
-	if (!m_impl->m_dwarf) {
+	if (!m_impl->m_dwarf)
+	{
 		::close(m_impl->m_fd);
 		m_impl->m_fd = -1;
 

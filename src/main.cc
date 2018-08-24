@@ -66,23 +66,30 @@ static void daemonize(void)
 	unlink(fifoName.c_str());
 	res = mkfifo(fifoName.c_str(), 0600);
 
-	panic_if(res < 0,
-			"Can't create FIFO");
+	panic_if(res < 0, "Can't create FIFO");
 
 	child = fork();
 
-	if (child < 0) {
+	if (child < 0)
+	{
 		panic("Fork failed?\n");
-	} else if (child == 0) {
+	}
+	else if (child == 0)
+	{
 		child = fork();
 
-		if (child < 0) {
+		if (child < 0)
+		{
 			panic("Fork failed?\n");
-		} else if (child > 0) {
+		}
+		else if (child > 0)
+		{
 			// Second parent
 			exit(0);
 		}
-	} else {
+	}
+	else
+	{
 		// Parent
 		FILE *fp;
 		char buf[255];
@@ -91,12 +98,9 @@ static void daemonize(void)
 		unsigned long out;
 
 		fp = fopen(fifoName.c_str(), "r");
-		panic_if (!fp,
-				"Can't open FIFO");
+		panic_if(!fp, "Can't open FIFO");
 		p = fgets(buf, sizeof(buf), fp);
-		panic_if (!p,
-				"Can't read FIFO");
-
+		panic_if(!p, "Can't read FIFO");
 
 		out = strtoul(p, &endp, 10);
 		if (p == endp)
@@ -121,14 +125,17 @@ unsigned int countMetadata()
 	unsigned int out = 0;
 
 	// Count metadata directories
-	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+	for (de = ::readdir(dir); de; de = ::readdir(dir))
+	{
 		std::string name = de->d_name;
 		std::string cur = base + name + "/metadata";
 		std::string binaryName = conf.keyAsString("binary-name");
 
 		// ... except for the current coveree and coveree.CHECKSUM
-		if (binaryName == name ||
-				(name.size() > binaryName.size() && name.find(binaryName) == 0 && name[binaryName.size()] == '.'))
+		if (binaryName == name
+				|| (name.size() > binaryName.size()
+						&& name.find(binaryName) == 0
+						&& name[binaryName.size()] == '.'))
 			continue;
 
 		DIR *metadataDir;
@@ -140,7 +147,8 @@ unsigned int countMetadata()
 
 		// Count metadata files
 		unsigned int datum = 0;
-		for (de2 = ::readdir(metadataDir); de2; de2 = ::readdir(metadataDir)) {
+		for (de2 = ::readdir(metadataDir); de2; de2 = ::readdir(metadataDir))
+		{
 			if (de2->d_name[0] == '.')
 				continue;
 
@@ -168,18 +176,20 @@ static int runMergeMode()
 	const std::string &base = output.getBaseDirectory();
 	const std::string &out = output.getOutDirectory();
 
-	IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
-	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, filter);
+	IMergeParser &mergeParser = createMergeParser(reporter, base, out, filter);
+	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser,
+			filter);
 	IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 			base, base + "/kcov-merged", conf.keyAsString("merged-name"), true);
 	IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/coverage.json");
-	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
-			base + "kcov-merged/cobertura.xml");
-	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
-			base + "kcov-merged/sonarqube.xml");
-	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser, mergeReporter);
-	(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser,
+			mergeReporter, base + "kcov-merged/cobertura.xml");
+	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
+			mergeReporter, base + "kcov-merged/sonarqube.xml");
+	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser,
+			mergeReporter);
+	(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 	output.registerWriter(mergeParser);
 	output.registerWriter(mergeHtmlWriter);
@@ -201,17 +211,21 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 {
 	IConfiguration &conf = IConfiguration::getInstance();
 
-	std::string file = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+	std::string file = conf.keyAsString("binary-path")
+			+ conf.keyAsString("binary-name");
 	IFileParser *parser = IParserManager::getInstance().matchParser(file);
-	if (!parser) {
+	if (!parser)
+	{
 		error("Can't find or open %s\n", file.c_str());
 		return 1;
 	}
 
 	// Match and create an engine
-	IEngineFactory::IEngineCreator &engineCreator = IEngineFactory::getInstance().matchEngine(file);
+	IEngineFactory::IEngineCreator &engineCreator =
+			IEngineFactory::getInstance().matchEngine(file);
 	IEngine *engine = engineCreator.create();
-	if (!engine) {
+	if (!engine)
+	{
 		conf.printUsage();
 		return 1;
 	}
@@ -227,12 +241,13 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 	parser->addFile(file);
 
 	// Register writers
-	if (runningMode != IConfiguration::MODE_COLLECT_ONLY) {
+	if (runningMode != IConfiguration::MODE_COLLECT_ONLY)
+	{
 		const std::string &base = output.getBaseDirectory();
 		const std::string &out = output.getOutDirectory();
 
-		IWriter &htmlWriter = createHtmlWriter(*parser, reporter,
-				base, out, conf.keyAsString("binary-name"));
+		IWriter &htmlWriter = createHtmlWriter(*parser, reporter, base, out,
+				conf.keyAsString("binary-name"));
 		IWriter &jsonWriter = createJsonWriter(*parser, reporter,
 				out + "/coverage.json");
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
@@ -241,30 +256,37 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 				out + "/sonarqube.xml");
 
 		// The merge parser is both a parser, a writer and a collector (!)
-		IMergeParser &mergeParser = createMergeParser(reporter,	base, out, filter);
-		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser, basicFilter);
+		IMergeParser &mergeParser = createMergeParser(reporter, base, out,
+				filter);
+		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser,
+				basicFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
-				base, base + "/kcov-merged", conf.keyAsString("merged-name"), false);
+				base, base + "/kcov-merged", conf.keyAsString("merged-name"),
+				false);
 		IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/coverage.json");
-		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser, mergeReporter,
-				base + "kcov-merged/cobertura.xml");
-		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser, mergeReporter,
-				base + "kcov-merged/sonarqube.xml");
-		(void)mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser,
+				mergeReporter, base + "kcov-merged/cobertura.xml");
+		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
+				mergeReporter, base + "kcov-merged/sonarqube.xml");
+		(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 		reporter.registerListener(mergeParser);
 
 		output.registerWriter(mergeParser);
 
 		// Multiple binaries? Register the merged mode stuff
-		if (countMetadata() > 0) {
+		if (countMetadata() > 0)
+		{
 			output.registerWriter(mergeHtmlWriter);
 			output.registerWriter(mergeJsonWriter);
 			output.registerWriter(mergeCoberturaWriter);
 			output.registerWriter(mergeSonarqubeWriter);
-			output.registerWriter(createCoverallsWriter(mergeParser, mergeReporter));
-		} else {
+			output.registerWriter(
+					createCoverallsWriter(mergeParser, mergeReporter));
+		}
+		else
+		{
 			output.registerWriter(createCoverallsWriter(*parser, reporter));
 		}
 
@@ -293,9 +315,12 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 
 	int ret = 0;
 
-	if (runningMode != IConfiguration::MODE_REPORT_ONLY) {
+	if (runningMode != IConfiguration::MODE_REPORT_ONLY)
+	{
 		ret = collector.run(file);
-	} else {
+	}
+	else
+	{
 		parser->parse();
 	}
 
@@ -304,8 +329,8 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 	return ret;
 }
 
-static int runSystemModeRecordFile(const std::string &dir, const std::string &file,
-		mode_t dirMode, mode_t mode)
+static int runSystemModeRecordFile(const std::string &dir,
+		const std::string &file, mode_t dirMode, mode_t mode)
 {
 	pid_t child = fork();
 	if (child < 0)
@@ -315,7 +340,8 @@ static int runSystemModeRecordFile(const std::string &dir, const std::string &fi
 	else if (child == 0)
 	{
 		IConfiguration &conf = IConfiguration::getInstance();
-		std::string rootDir = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+		std::string rootDir = conf.keyAsString("binary-path")
+				+ conf.keyAsString("binary-name");
 
 		if (dir.size() < rootDir.size())
 		{
@@ -324,15 +350,17 @@ static int runSystemModeRecordFile(const std::string &dir, const std::string &fi
 			return -1;
 		}
 
-		std::string dstDir = dir_concat(conf.keyAsString("out-directory"), dir.substr(rootDir.size()));
-		std::string dstFile = dir_concat(conf.keyAsString("out-directory"), file.substr(rootDir.size()));
+		std::string dstDir = dir_concat(conf.keyAsString("out-directory"),
+				dir.substr(rootDir.size()));
+		std::string dstFile = dir_concat(conf.keyAsString("out-directory"),
+				file.substr(rootDir.size()));
 
 		conf.setKey("system-mode-write-file", dstFile);
 		conf.setKey("system-mode-write-file-mode", mode & 07777);
 		conf.setKey("binary-name", file);
 		conf.setKey("binary-path", ""); // file uses an absolute path
 
-		(void)mkdir(dstDir.c_str(), dirMode & 07777);
+		(void) mkdir(dstDir.c_str(), dirMode & 07777);
 
 		runKcov(IConfiguration::MODE_COLLECT_ONLY);
 		exit(0);
@@ -359,7 +387,8 @@ static int runSystemModeRecordDirectory(const std::string &base, mode_t mode)
 
 	// Loop through the directory structure
 	struct dirent *de;
-	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+	for (de = ::readdir(dir); de; de = ::readdir(dir))
+	{
 		std::string cur = base + "/" + de->d_name;
 
 		if (strcmp(de->d_name, ".") == 0)
@@ -377,8 +406,8 @@ static int runSystemModeRecordDirectory(const std::string &base, mode_t mode)
 		{
 			runSystemModeRecordDirectory(cur, st.st_mode);
 		}
-		else if (S_ISREG(st.st_mode) &&
-				(st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		else if (S_ISREG(st.st_mode)
+				&& (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
 		{
 			// Executable file?
 			runSystemModeRecordFile(base, cur, mode, st.st_mode);
@@ -393,18 +422,19 @@ static int runSystemModeRecord()
 {
 	IConfiguration &conf = IConfiguration::getInstance();
 
-	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+	std::string base = conf.keyAsString("binary-path")
+			+ conf.keyAsString("binary-name");
 	std::string out = conf.keyAsString("out-directory");
 	std::string lib = out + "/lib";
 
 	umask(~0777);
-	(void)mkdir(out.c_str(), 0755);
-	(void)mkdir(lib.c_str(), 0755);
+	(void) mkdir(out.c_str(), 0755);
+	(void) mkdir(lib.c_str(), 0755);
 
 	std::string library = fmt("%s/libkcov_system.so", lib.c_str());
 
-	if (write_file(kcov_system_library_data.data(), kcov_system_library_data.size(),
-			"%s", library.c_str()) < 0)
+	if (write_file(kcov_system_library_data.data(),
+			kcov_system_library_data.size(), "%s", library.c_str()) < 0)
 	{
 		error("Can't write binary library at %s", library.c_str());
 
@@ -418,7 +448,8 @@ static int runSystemModeRecord()
 	return runSystemModeRecordDirectory(base, 0755);
 }
 
-std::vector<std::string> optionsStringToConfigurationVector(const std::string &in)
+std::vector<std::string> optionsStringToConfigurationVector(
+		const std::string &in)
 {
 	std::vector<std::string> parts = split_string(in, " ");
 	if (parts.size() != 6)
@@ -433,7 +464,8 @@ std::vector<std::string> optionsStringToConfigurationVector(const std::string &i
 
 static int runSystemModeReportFile(const std::string &file)
 {
-	kcov_system_mode::system_mode_memory *data = kcov_system_mode::diskToMemory(file);
+	kcov_system_mode::system_mode_memory *data = kcov_system_mode::diskToMemory(
+			file);
 
 	if (!data)
 	{
@@ -453,9 +485,11 @@ static int runSystemModeReportFile(const std::string &file)
 		conf.setKey("system-mode-read-results-file", file);
 		conf.setKey("binary-name", both.second);
 		conf.setKey("binary-path", both.first);
-		conf.setKey("target-directory", conf.keyAsString("out-directory") + "/" + both.second);
+		conf.setKey("target-directory",
+				conf.keyAsString("out-directory") + "/" + both.second);
 
-		std::vector<std::string> options = optionsStringToConfigurationVector(data->options);
+		std::vector<std::string> options = optionsStringToConfigurationVector(
+				data->options);
 		if (options.size() == 6)
 		{
 			conf.setKey("include-pattern", options[0]);
@@ -493,7 +527,8 @@ static int runSystemModeReportDirectory(const std::string &base)
 
 	// Loop through the directory structure
 	struct dirent *de;
-	for (de = ::readdir(dir); de; de = ::readdir(dir)) {
+	for (de = ::readdir(dir); de; de = ::readdir(dir))
+	{
 		std::string cur = base + "/" + de->d_name;
 		struct stat st;
 
@@ -515,7 +550,8 @@ static int runSystemModeReport()
 {
 	IConfiguration &conf = IConfiguration::getInstance();
 
-	std::string base = conf.keyAsString("binary-path") + conf.keyAsString("binary-name");
+	std::string base = conf.keyAsString("binary-path")
+			+ conf.keyAsString("binary-name");
 
 	return runSystemModeReportDirectory(base);
 }
@@ -527,7 +563,8 @@ int main(int argc, const char *argv[])
 	if (!conf.parse(argc, argv))
 		return 1;
 
-	IConfiguration::RunMode_t runningMode = (IConfiguration::RunMode_t)conf.keyAsInt("running-mode");
+	IConfiguration::RunMode_t runningMode =
+			(IConfiguration::RunMode_t) conf.keyAsInt("running-mode");
 
 	if (runningMode == IConfiguration::MODE_MERGE_ONLY)
 		return runMergeMode();

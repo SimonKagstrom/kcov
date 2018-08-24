@@ -5,7 +5,7 @@
 
 using namespace kcov;
 
-class ParserManager : public IParserManager
+class ParserManager: public IParserManager
 {
 public:
 	ParserManager()
@@ -22,14 +22,13 @@ public:
 		IFileParser *best = NULL;
 		size_t sz;
 
-		uint8_t *data = (uint8_t *)peek_file(&sz, "%s", fileName.c_str());
+		uint8_t *data = (uint8_t *) peek_file(&sz, "%s", fileName.c_str());
 
 		if (!data)
 			return NULL;
 
-		for (ParserList_t::const_iterator it = m_parsers.begin();
-				it != m_parsers.end();
-				++it) {
+		for (ParserList_t::const_iterator it = m_parsers.begin(); it != m_parsers.end(); ++it)
+		{
 			unsigned int myVal = (*it)->matchParser(fileName, data, sz);
 			if (myVal == match_none)
 				continue;
@@ -43,7 +42,7 @@ public:
 				best = *it;
 		}
 
-		free((void *)data);
+		free((void *) data);
 
 		return best;
 	}
@@ -53,7 +52,6 @@ private:
 
 	ParserList_t m_parsers;
 };
-
 
 static ParserManager *g_instance;
 IParserManager &IParserManager::getInstance()

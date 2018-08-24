@@ -22,17 +22,15 @@ struct summaryStruct
 };
 
 WriterBase::WriterBase(IFileParser &parser, IReporter &reporter) :
-		m_fileParser(parser), m_reporter(reporter),
-		m_commonPath("not set")
+		m_fileParser(parser), m_reporter(reporter), m_commonPath("not set")
 {
-		m_fileParser.registerLineListener(*this);
+	m_fileParser.registerLineListener(*this);
 }
 
 WriterBase::~WriterBase()
 {
-	for (FileMap_t::iterator it = m_files.begin();
-			it != m_files.end();
-			++it) {
+	for (FileMap_t::iterator it = m_files.begin(); it != m_files.end(); ++it)
+	{
 		File *cur = it->second;
 
 		delete cur;
@@ -42,7 +40,7 @@ WriterBase::~WriterBase()
 }
 
 WriterBase::File::File(const std::string &filename) :
-						m_name(filename), m_codeLines(0), m_executedLines(0), m_lastLineNr(0)
+		m_name(filename), m_codeLines(0), m_executedLines(0), m_lastLineNr(0)
 {
 	size_t pos = m_name.rfind('/');
 
@@ -76,10 +74,10 @@ void WriterBase::File::readFile(const std::string &filename)
 		if (res < 0)
 			break;
 		std::string s(lineptr);
-		s.erase(s.find_last_not_of(" \n\r\t")+1);
+		s.erase(s.find_last_not_of(" \n\r\t") + 1);
 		m_lineMap[lineNr] = s;
 
-		free((void *)lineptr);
+		free((void *) lineptr);
 		lineNr++;
 	}
 
@@ -87,7 +85,6 @@ void WriterBase::File::readFile(const std::string &filename)
 
 	fclose(fp);
 }
-
 
 void WriterBase::onLine(const std::string &file, unsigned int lineNr, uint64_t addr)
 {
@@ -103,13 +100,11 @@ void WriterBase::onLine(const std::string &file, unsigned int lineNr, uint64_t a
 	m_files[file] = new File(file);
 }
 
-
-void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary,
-		const std::string &name, size_t *sz)
+void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary, const std::string &name, size_t *sz)
 {
 	struct summaryStruct *p;
 
-	p = (struct summaryStruct *)xmalloc(sizeof(struct summaryStruct));
+	p = (struct summaryStruct *) xmalloc(sizeof(struct summaryStruct));
 	memset(p, 0, sizeof(*p));
 
 	p->magic = to_be<uint32_t>(SUMMARY_MAGIC);
@@ -121,14 +116,12 @@ void *WriterBase::marshalSummary(IReporter::ExecutionSummary &summary,
 
 	*sz = sizeof(*p);
 
-	return (void *)p;
+	return (void *) p;
 }
 
-bool WriterBase::unMarshalSummary(void *data, size_t sz,
-		IReporter::ExecutionSummary &summary,
-		std::string &name)
+bool WriterBase::unMarshalSummary(void *data, size_t sz, IReporter::ExecutionSummary &summary, std::string &name)
 {
-	struct summaryStruct *p = (struct summaryStruct *)data;
+	struct summaryStruct *p = (struct summaryStruct *) data;
 
 	if (sz != sizeof(*p))
 		return false;
@@ -149,9 +142,8 @@ bool WriterBase::unMarshalSummary(void *data, size_t sz,
 
 void WriterBase::setupCommonPaths()
 {
-	for (FileMap_t::const_iterator it = m_files.begin();
-			it != m_files.end();
-			++it) {
+	for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+	{
 		File *file = it->second;
 
 		if (m_commonPath == "not set")
@@ -161,7 +153,8 @@ void WriterBase::setupCommonPaths()
 		if (file->m_name.find(m_commonPath) == 0)
 			continue;
 
-		while (1) {
+		while (1)
+		{
 			size_t pos = m_commonPath.rfind('/');
 			if (pos == std::string::npos)
 				break;

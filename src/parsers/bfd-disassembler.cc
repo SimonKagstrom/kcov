@@ -277,7 +277,8 @@ private:
 
 		// Address?
 		if (it != x86BranchInstructions.end() &&
-				vec.size() >= 2 && string_is_integer(vec[1])) {
+				vec.size() >= 2 && string_is_integer(vec[1]))
+		{
 			int64_t offset = string_to_integer(vec[1]);
 
 			// FIXME! Check if this is correct
@@ -341,9 +342,11 @@ private:
 			return;
 
 		// Iterate the instruction pairs
-		for (; next != m_orderedInstructions.end(); ++cur, ++next) {
+		for (; next != m_orderedInstructions.end(); ++cur, ++next)
+		{
 			// Mark branch targets as leaders, as well as the instruction after that
-			if (cur->second->isBranch()) {
+			if (cur->second->isBranch())
+			{
 				m_instructions[cur->second->getBranchTarget()].makeLeader();
 				next->second->makeLeader();
 			}
@@ -355,10 +358,12 @@ private:
 		m_bbs.push_back(bb);
 		for (InstructionOrderedMap_t::iterator it = m_orderedInstructions.begin();
 				it != m_orderedInstructions.end();
-				++it) {
+				++it)
+		{
 			Instruction *cur = it->second;
 
-			if (cur->isLeader()) {
+			if (cur->isLeader())
+			{
 				bb = new BasicBlock();
 				m_bbs.push_back(bb);
 			}
@@ -424,7 +429,8 @@ IDisassembler &IDisassembler::getInstance()
 {
 	static BfdDisassembler *g_p;
 
-	if (!g_p) {
+	if (!g_p)
+	{
 		bfd_init();
 		g_p = new BfdDisassembler();
 	}

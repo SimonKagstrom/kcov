@@ -1,3 +1,8 @@
+Kcov (37):
+    * Issue #190: Code style changed to K&R
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Kcov (36):
     * Issue #253: Kcov has been ported to FreeBSD (Alan Somers)
 

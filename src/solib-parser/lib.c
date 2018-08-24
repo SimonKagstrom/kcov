@@ -21,7 +21,8 @@ static int phdrCallback(struct dl_phdr_info *info, size_t size, void *data)
 {
 	// the first entry is used to determine the executable's "base address"
 	// (which is actually the relocation for PIE)
-	if (phdr_data->n_entries == 0) {
+	if (phdr_data->n_entries == 0)
+	{
 		phdr_data->relocation = info->dlpi_addr;
 	}
 
@@ -56,7 +57,8 @@ static void parse_solibs(void)
 	dl_iterate_phdr(phdrSizeCallback, &allocSize);
 
 	phdr_data = phdr_data_new(allocSize);
-	if (!phdr_data) {
+	if (!phdr_data)
+	{
 		fprintf(stderr, "kcov-solib: Can't allocate %zu bytes\n", allocSize);
 		return;
 	}
@@ -67,7 +69,8 @@ static void parse_solibs(void)
 	p = phdr_data_marshal(phdr_data, &sz);
 
 	fd = open(kcov_solib_path, O_WRONLY);
-	if (fd < 0) {
+	if (fd < 0)
+	{
 		fprintf(stderr, "kcov-solib: Can't open %s\n", kcov_solib_path);
 		return;
 	}

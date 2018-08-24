@@ -53,7 +53,8 @@ static void *read_file_int(size_t *out_size, uint64_t timeout, const char *path)
 		return mocked_read_callback(out_size, path);
 
 	fd = open(path, O_RDONLY | O_NONBLOCK);
-	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK)) {
+	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK))
+	{
 		msleep(timeout);
 
 		fd = open(path, O_RDONLY | O_NONBLOCK);
@@ -68,14 +69,18 @@ static void *read_file_int(size_t *out_size, uint64_t timeout, const char *path)
 	FD_ZERO(&rfds);
 	FD_SET(fd, &rfds);
 
-	do {
+	do
+	{
 		ret = select(fd + 1, &rfds, NULL, NULL, &tv);
-		if (ret == -1) {
+		if (ret == -1)
+		{
 			close(fd);
 			free(data);
 
 			return NULL;
-		} else if (ret == 0) { // Timeout
+		}
+		else if (ret == 0)
+		{ // Timeout
 			close(fd);
 			free(data);
 
@@ -85,7 +90,8 @@ static void *read_file_int(size_t *out_size, uint64_t timeout, const char *path)
 		memset(data + pos, 0, chunk);
 
 		n = read(fd, data + pos, chunk);
-		if (n < 0) {
+		if (n < 0)
+		{
 			close(fd);
 			free(data);
 
@@ -138,20 +144,26 @@ void *peek_file(size_t *out_size, const char *fmt, ...)
 	char *out = static_cast<char*>(xmalloc(to_read));
     
 	std::ifstream str(path);
-	if (str.is_open()) {
+	if (str.is_open())
+	{
 		str.read(out,to_read);
 		// If successful (all desired characters) or
 		// a non-zero number of characters were read, then succeed
-		if (str || str.gcount() > 0) {
+		if (str || str.gcount() > 0)
+		{
 			*out_size = str.gcount();
-		} else {
+		}
+		else
+		{
 			// No characters read, so fail
 			free(out);
 			out = NULL;
 		}
 		str.close();
 
-	} else {
+	}
+	else
+	{
 		free(out);
 		out = NULL;
 	}
@@ -170,7 +182,8 @@ static int write_file_int(const void *data, size_t len, uint64_t timeout, const 
 	tv.tv_usec = (timeout % 1000) * 10;
 
 	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
-	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK)) {
+	if (fd < 0 && (errno == ENXIO || errno == EWOULDBLOCK))
+	{
 		msleep(timeout);
 
 		fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
@@ -184,11 +197,15 @@ static int write_file_int(const void *data, size_t len, uint64_t timeout, const 
 	FD_SET(fd, &wfds);
 
 	ret = select(fd + 1, NULL, &wfds, NULL, &tv);
-	if (ret == -1) {
+	if (ret == -1)
+	{
 		close(fd);
 
 		return ret;
-	} else if (ret == 0) { // Timeout
+	}
+	else if (ret == 0)
+	{
+		// Timeout
 		close(fd);
 
 		return -2;
@@ -274,13 +291,16 @@ bool file_exists(const std::string &path)
 
 	bool out;
 
-	if (statCache.find(path) == statCache.end()) {
+	if (statCache.find(path) == statCache.end())
+	{
 		struct stat st;
 
 		out = lstat(path.c_str(), &st) == 0;
 
 		statCache[path] = out;
-	} else {
+	}
+	else
+	{
 		out = statCache[path];
 	}
 
@@ -359,7 +379,8 @@ static void read_write(FILE *dst, FILE *src)
 {
 	char buf[1024];
 
-	while (!feof(src)) {
+	while (!feof(src))
+	{
 		int n = fread(buf, sizeof(char), sizeof(buf), src);
 
 		fwrite(buf, sizeof(char), n, dst);
@@ -414,7 +435,8 @@ std::string fmt(const char *fmt, ...)
 	res = vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-        if (res >= (int)sizeof(buf)) {
+	if (res >= (int)sizeof(buf))
+	{
 		std::string result;
 		result.resize(res+1);
 
@@ -467,7 +489,8 @@ static std::vector<std::string> &split(const std::string &s, char delim,
     std::stringstream ss(s);
     std::string item;
 
-    while (std::getline(ss, item, delim)) {
+    while (std::getline(ss, item, delim))
+    {
         elems.push_back(item);
     }
 
@@ -572,16 +595,19 @@ std::string escape_html(const std::string &str)
 	size_t i;
 
 	// Truncate long lines (or entries)
-	if (len > 512) {
+	if (len > 512)
+	{
 		len = 512;
 		truncated = true;
 	}
 
 	memset(buf, 0, sizeof(buf));
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < len; i++)
+	{
 		char c = s[i];
 
-		switch (c) {
+		switch (c)
+		{
 		case '<':
 			dst = escape_helper(dst, "&lt;");
 			break;
@@ -624,8 +650,10 @@ std::string escape_json(const std::string &str)
 	const std::string escapeChars = "\"\\\t\015'";
 	size_t n_escapes = 0;
 
-	for (unsigned i = 0; i < str.size(); i++) {
-		for (unsigned int n = 0; n < escapeChars.size(); n++) {
+	for (unsigned i = 0; i < str.size(); i++)
+	{
+		for (unsigned int n = 0; n < escapeChars.size(); n++)
+		{
 			if (str[i] == escapeChars[n])
 				n_escapes++;
 		}
@@ -638,11 +666,13 @@ std::string escape_json(const std::string &str)
 	out.resize(str.size() + n_escapes);
 	unsigned cur = 0;
 
-	for (unsigned i = 0; i < str.size(); i++) {
+	for (unsigned i = 0; i < str.size(); i++)
+	{
 		out[cur] = str[i];
 
 		// Special-case tabs
-		if (str[i] == '\t') {
+		if (str[i] == '\t')
+		{
 			out[cur] = '\\';
 			cur++;
 			out[cur] = 't';
@@ -650,8 +680,10 @@ std::string escape_json(const std::string &str)
 			continue;
 		}
 		// Quote quotes and backslashes
-		for (unsigned int n = 0; n < escapeChars.size(); n++) {
-			if (str[i] == escapeChars[n]) {
+		for (unsigned int n = 0; n < escapeChars.size(); n++)
+		{
+			if (str[i] == escapeChars[n])
+			{
 				out[cur] = '\\';
 				cur++;
 				out[cur] = str[i];
@@ -672,7 +704,8 @@ std::pair<std::string, std::string> split_path(const std::string &pathStr)
 
 	out.first = "";
 	out.second = path;
-	if (pos != std::string::npos) {
+	if (pos != std::string::npos)
+	{
 		out.first= path.substr(0, pos + 1);
 		out.second = path.substr(pos + 1, std::string::npos);
 	}

@@ -20,9 +20,7 @@ class KernelEngine : public IEngine
 {
 public:
 	KernelEngine() :
-		m_control(NULL),
-		m_show(NULL),
-		m_listener(NULL)
+			m_control(NULL), m_show(NULL), m_listener(NULL)
 	{
 	}
 
@@ -40,11 +38,10 @@ public:
 
 		m_addresses[addr] = true;
 
-		std::string s = fmt("%s0x%llx\n", m_module.c_str(), (unsigned long long)addr);
+		std::string s = fmt("%s0x%llx\n", m_module.c_str(), (unsigned long long) addr);
 
-		kcov_debug(ENGINE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long)addr);
-		panic_if (!m_control,
-				"Control file not open???");
+		kcov_debug(ENGINE_MSG, "KNRL set BP at 0x%llx\n", (unsigned long long) addr);
+		panic_if(!m_control, "Control file not open???");
 
 		fprintf(m_control, "%s", s.c_str());
 		fflush(m_control);
@@ -73,7 +70,8 @@ public:
 		m_control = fopen(control.c_str(), "w");
 		m_show = fopen(show.c_str(), "r");
 
-		if (!m_control || !m_show) {
+		if (!m_control || !m_show)
+		{
 			error("Can't open kprobe-coverage files. Is the kprobe-coverage module loaded?");
 
 			kill(0);
@@ -102,7 +100,8 @@ public:
 
 	void kill(int sig)
 	{
-		if (m_control) {
+		if (m_control)
+		{
 			fprintf(m_control, "clear\n");
 			fclose(m_control);
 		}
@@ -121,10 +120,13 @@ private:
 
 		size_t pos = line.find(":");
 
-		if (pos != std::string::npos) {
+		if (pos != std::string::npos)
+		{
 			moduleName = line.substr(0, pos);
 			addr = line.substr(pos + 1);
-		} else {
+		}
+		else
+		{
 			addr = line;
 		}
 
@@ -134,7 +136,7 @@ private:
 
 		uint64_t value = string_to_integer(addr, 16);
 
-		kcov_debug(ENGINE_MSG, "KNRL BP at 0x%llx\n", (unsigned long long)value);
+		kcov_debug(ENGINE_MSG, "KNRL BP at 0x%llx\n", (unsigned long long) value);
 
 		m_listener->onEvent(Event(ev_breakpoint, 0, value));
 	}
@@ -173,9 +175,9 @@ public:
 		m_module = filename;
 		size_t slashPos = m_module.rfind("/");
 		if (slashPos == std::string::npos)
-			slashPos = 0;
+		slashPos = 0;
 		else
-			slashPos++; // Skip the actual slash
+		slashPos++; // Skip the actual slash
 
 		// Remove path before and .ko after the name
 		m_module = m_module.substr(slashPos, m_module.size() - slashPos - 3) + ":";

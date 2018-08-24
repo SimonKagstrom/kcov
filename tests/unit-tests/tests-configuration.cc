@@ -14,7 +14,8 @@ static bool runParse(std::string args)
 	argList.push_back(std::string(crpcut::get_start_dir()) + "/test-binary");
 
 	cur = strtok(p, " ");
-	while (cur) {
+	while (cur)
+	{
 		argList.push_back(std::string(cur));
 		cur = strtok(NULL, " ");
 	}
@@ -25,7 +26,8 @@ static bool runParse(std::string args)
 	int i = 0;
 	for (std::list<std::string>::iterator it = argList.begin();
 			it != argList.end();
-			it++) {
+			it++)
+	{
 		// Yes, these are memory leaks.
 		argv[i] = strdup((*it).c_str());
 		i++;

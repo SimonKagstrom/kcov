@@ -26,7 +26,8 @@ namespace kcov
 		Segment(const void *data, uint64_t paddr, uint64_t vaddr, uint64_t size) :
 			m_data(NULL), m_paddr(paddr), m_vaddr(vaddr), m_size(size)
 		{
-			if (data) {
+			if (data)
+			{
 				m_data = xmalloc(size);
 				memcpy(m_data, data, size);
 			}
@@ -35,7 +36,8 @@ namespace kcov
 		Segment(const Segment &other) :
 			m_data(NULL), m_paddr(other.m_paddr), m_vaddr(other.m_vaddr), m_size(other.m_size)
 		{
-			if (other.m_data) {
+			if (other.m_data)
+			{
 				m_data = xmalloc(other.m_size);
 				memcpy(m_data, other.m_data, other.m_size);
 			}

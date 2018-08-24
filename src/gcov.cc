@@ -76,7 +76,6 @@ using namespace kcov;
 #define GCOV_ARC_FAKE		 (1 << 1)
 #define GCOV_ARC_FALLTHROUGH (1 << 2)
 
-
 struct file_header
 {
 	int32_t magic;
@@ -91,13 +90,13 @@ struct header
 };
 
 GcovParser::GcovParser(const uint8_t *data, size_t dataSize) :
-        m_data(data), m_dataSize(dataSize)
+		m_data(data), m_dataSize(dataSize)
 {
 }
 
 GcovParser::~GcovParser()
 {
-	free((void *)m_data);
+	free((void *) m_data);
 }
 
 bool GcovParser::parse()
@@ -107,11 +106,12 @@ bool GcovParser::parse()
 		return false;
 
 	const uint8_t *cur = m_data + sizeof(struct file_header);
-	ssize_t left = (ssize_t)(m_dataSize - sizeof(struct file_header));
+	ssize_t left = (ssize_t) (m_dataSize - sizeof(struct file_header));
 
 	// Iterate through the headers
-	while (1) {
-		const struct header *header = (struct header *)cur;
+	while (1)
+	{
+		const struct header *header = (struct header *) cur;
 
 		if (!onRecord(header, cur + sizeof(*header)))
 			return false;
@@ -130,7 +130,7 @@ bool GcovParser::parse()
 
 bool GcovParser::verify()
 {
-	const struct file_header *header = (const struct file_header *)m_data;
+	const struct file_header *header = (const struct file_header *) m_data;
 
 	if (header->magic != GCOV_DATA_MAGIC && header->magic != GCOV_NOTE_MAGIC)
 		return false;
@@ -140,8 +140,8 @@ bool GcovParser::verify()
 
 const uint8_t *GcovParser::readString(const uint8_t *p, std::string &out)
 {
-	int32_t length = *(const int32_t*)p;
-	const char *c_str = (const char *)&p[4];
+	int32_t length = *(const int32_t*) p;
+	const char *c_str = (const char *) &p[4];
 
 	out = std::string(c_str);
 
@@ -151,13 +151,12 @@ const uint8_t *GcovParser::readString(const uint8_t *p, std::string &out)
 // Convenience when using 32-bit pointers
 const int32_t *GcovParser::readString(const int32_t *p, std::string &out)
 {
-	return (const int32_t *)readString((const uint8_t *)p, out);
+	return (const int32_t *) readString((const uint8_t *) p, out);
 }
-
 
 const uint8_t *GcovParser::padPointer(const uint8_t *p)
 {
-	unsigned long addr = (unsigned long)p;
+	unsigned long addr = (unsigned long) p;
 
 	if ((addr & 3) != 0)
 		p += 4 - (addr & 3);
@@ -166,33 +165,31 @@ const uint8_t *GcovParser::padPointer(const uint8_t *p)
 }
 
 GcnoParser::BasicBlockMapping::BasicBlockMapping(const BasicBlockMapping &other) :
-        m_function(other.m_function), m_basicBlock(other.m_basicBlock),
-        m_file(other.m_file), m_line(other.m_line), m_index(other.m_index)
+		m_function(other.m_function), m_basicBlock(other.m_basicBlock),
+		m_file(other.m_file), m_line(other.m_line), m_index(other.m_index)
 {
 }
 
-GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function, int32_t basicBlock,
-		const std::string &file, int32_t line, int32_t index) :
-        m_function(function), m_basicBlock(basicBlock),
-        m_file(file), m_line(line), m_index(index)
+GcnoParser::BasicBlockMapping::BasicBlockMapping(int32_t function,
+		int32_t basicBlock, const std::string &file, int32_t line,
+		int32_t index) :
+		m_function(function), m_basicBlock(basicBlock), m_file(file), m_line(line), m_index(index)
 {
 }
 
 GcnoParser::Arc::Arc(const Arc &other) :
-        m_function(other.m_function), m_srcBlock(other.m_srcBlock), m_dstBlock(other.m_dstBlock)
+		m_function(other.m_function), m_srcBlock(other.m_srcBlock), m_dstBlock(
+				other.m_dstBlock)
 {
 }
 
 GcnoParser::Arc::Arc(int32_t function, int32_t srcBlock, int32_t dstBlock) :
-        m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
+		m_function(function), m_srcBlock(srcBlock), m_dstBlock(dstBlock)
 {
 }
 
-
-
 GcnoParser::GcnoParser(const uint8_t *data, size_t dataSize) :
-        GcovParser(data, dataSize),
-        m_functionId(-1)
+		GcovParser(data, dataSize), m_functionId(-1)
 {
 }
 
@@ -213,8 +210,8 @@ const GcnoParser::ArcList_t &GcnoParser::getArcs()
 
 bool GcnoParser::onRecord(const struct header *header, const uint8_t *data)
 {
-	kcov_debug(ENGINE_MSG, "GCNO record: 0x%08x (%d bytes)\n",
-			header->tag, header->length * 4);
+	kcov_debug(ENGINE_MSG, "GCNO record: 0x%08x (%d bytes)\n", header->tag,
+			header->length * 4);
 
 	switch (header->tag)
 	{
@@ -237,9 +234,10 @@ bool GcnoParser::onRecord(const struct header *header, const uint8_t *data)
 	return true;
 }
 
-void GcnoParser::onAnnounceFunction(const struct header *header, const uint8_t *data)
+void GcnoParser::onAnnounceFunction(const struct header *header,
+		const uint8_t *data)
 {
-	const int32_t *p32 = (const int32_t *)data;
+	const int32_t *p32 = (const int32_t *) data;
 	const uint8_t *p8 = data;
 	int32_t ident = p32[0];
 
@@ -249,7 +247,8 @@ void GcnoParser::onAnnounceFunction(const struct header *header, const uint8_t *
 
 	m_functions.push_back(m_functionId);
 
-	kcov_debug(ENGINE_MSG, "GCNO function %d: %s\n", m_functionId, m_file.c_str());
+	kcov_debug(ENGINE_MSG, "GCNO function %d: %s\n", m_functionId,
+			m_file.c_str());
 	// The first line of this function comes next, but let's ignore that
 }
 
@@ -260,7 +259,7 @@ void GcnoParser::onBlocks(const struct header *header, const uint8_t *data)
 
 void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 {
-	const int32_t *p32 = (const int32_t *)data;
+	const int32_t *p32 = (const int32_t *) data;
 	int32_t blockNo = p32[0];
 	const int32_t *last = &p32[header->length];
 	int32_t n = 0; // index
@@ -268,11 +267,13 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 	p32++; // Skip blockNo
 
 	// Iterate through lines
-	while (p32 < last) {
+	while (p32 < last)
+	{
 		int32_t line = *p32;
 
 		// File name
-		if (line == 0) {
+		if (line == 0)
+		{
 			std::string name;
 
 			// Setup current file name
@@ -287,7 +288,8 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 
 		kcov_debug(ENGINE_MSG, "GCNO basic block in function %d, nr %d %s:%d\n",
 				m_functionId, blockNo, m_file.c_str(), line);
-		m_basicBlocks.push_back(BasicBlockMapping(m_functionId, blockNo, m_file, line, n));
+		m_basicBlocks.push_back(
+				BasicBlockMapping(m_functionId, blockNo, m_file, line, n));
 
 		n++;
 	}
@@ -295,7 +297,7 @@ void GcnoParser::onLines(const struct header *header, const uint8_t *data)
 
 void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 {
-	const int32_t *p32 = (const int32_t *)data;
+	const int32_t *p32 = (const int32_t *) data;
 	int32_t blockNo = p32[0];
 	const int32_t *last = &p32[header->length];
 	unsigned int arc = 0;
@@ -303,7 +305,8 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 	p32++; // Skip blockNo
 
 	// Iterate through lines
-	while (p32 < last) {
+	while (p32 < last)
+	{
 		int32_t destBlock = p32[0];
 		int32_t flags = p32[1];
 
@@ -312,7 +315,8 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 			m_arcs.push_back(Arc(m_functionId, blockNo, destBlock));
 
 		kcov_debug(ENGINE_MSG, "GCNO arc in function %d, %d->%d (flags %d%s)\n",
-				m_functionId, blockNo, destBlock, flags, flags & GCOV_ARC_ON_TREE ? " OT" : "");
+				m_functionId, blockNo, destBlock, flags,
+				flags & GCOV_ARC_ON_TREE ? " OT" : "");
 
 		p32 += 2;
 		arc++;
@@ -320,8 +324,7 @@ void GcnoParser::onArcs(const struct header *header, const uint8_t *data)
 }
 
 GcdaParser::GcdaParser(const uint8_t *data, size_t dataSize) :
-        GcovParser(data, dataSize),
-        m_functionId(-1)
+		GcovParser(data, dataSize), m_functionId(-1)
 {
 }
 
@@ -347,7 +350,7 @@ int64_t GcdaParser::getCounter(int32_t function, int32_t counter)
 
 	// List of counters
 	CounterList_t &cur = m_functionToCounters[function];
-	if ((size_t)counter >= cur.size())
+	if ((size_t) counter >= cur.size())
 		return -1;
 
 	return cur[counter];
@@ -355,8 +358,8 @@ int64_t GcdaParser::getCounter(int32_t function, int32_t counter)
 
 bool GcdaParser::onRecord(const struct header *header, const uint8_t *data)
 {
-	kcov_debug(ENGINE_MSG, "GCDA record: 0x%08x (%d bytes)\n",
-			header->tag, header->length * 4);
+	kcov_debug(ENGINE_MSG, "GCDA record: 0x%08x (%d bytes)\n", header->tag,
+			header->length * 4);
 
 	switch (header->tag)
 	{
@@ -373,9 +376,10 @@ bool GcdaParser::onRecord(const struct header *header, const uint8_t *data)
 	return true;
 }
 
-void GcdaParser::onAnnounceFunction(const struct header *header, const uint8_t *data)
+void GcdaParser::onAnnounceFunction(const struct header *header,
+		const uint8_t *data)
 {
-	const int32_t *p32 = (const int32_t *)data;
+	const int32_t *p32 = (const int32_t *) data;
 	int32_t ident = p32[0];
 
 	// FIXME! Handle checksums after this
@@ -386,17 +390,19 @@ void GcdaParser::onAnnounceFunction(const struct header *header, const uint8_t *
 
 void GcdaParser::onCounterBase(const struct header *header, const uint8_t *data)
 {
-	const int32_t *p32 = (const int32_t *)data;
+	const int32_t *p32 = (const int32_t *) data;
 	int32_t count = header->length; // 32-bit data with 64-bit values
 
 	// Store all counters in a list
 	CounterList_t counters;
-	for (int32_t i = 0; i < count; i += 2) {
-		uint64_t v64 = (uint64_t)p32[i] | ((uint64_t)p32[i + 1] << 32ULL);
+	for (int32_t i = 0; i < count; i += 2)
+	{
+		uint64_t v64 = (uint64_t) p32[i] | ((uint64_t) p32[i + 1] << 32ULL);
 
 		counters.push_back(v64);
 
-		kcov_debug(ENGINE_MSG, "GCDA counter %d %lld\n", i, (long long)counters.back());
+		kcov_debug(ENGINE_MSG, "GCDA counter %d %lld\n", i,
+				(long long) counters.back());
 	}
 
 	m_functionToCounters[m_functionId] = counters;

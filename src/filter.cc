@@ -29,8 +29,7 @@ public:
 	}
 
 	virtual bool runLineFilters(const std::string &filePath,
-						unsigned int lineNr,
-						const std::string &line)
+			unsigned int lineNr, const std::string &line)
 	{
 		return m_fileLineHandler->match(filePath, lineNr, line);
 	}
@@ -52,25 +51,28 @@ protected:
 			m_ignoreSingleLinePatterns.push_back("LCOV_EXCL_LINE");
 
 			// Handle command line options
-			std::string cmd = IConfiguration::getInstance().keyAsString("exclude-line");
+			std::string cmd = IConfiguration::getInstance().keyAsString(
+					"exclude-line");
 
-			if (cmd != "") {
+			if (cmd != "")
+			{
 				std::vector<std::string> cmds = split_string(cmd, ",");
 
 				for (std::vector<std::string>::iterator it = cmds.begin();
-						it != cmds.end();
-						++it)
+						it != cmds.end(); ++it)
 					m_ignoreSingleLinePatterns.push_back(*it);
 			}
 
-			std::string startStop = IConfiguration::getInstance().keyAsString("exclude-region");
+			std::string startStop = IConfiguration::getInstance().keyAsString(
+					"exclude-region");
 
-			if (startStop != "") {
+			if (startStop != "")
+			{
 				std::vector<std::string> cmds = split_string(startStop, ",");
 
 				for (std::vector<std::string>::iterator it = cmds.begin();
-						it != cmds.end();
-						++it) {
+						it != cmds.end(); ++it)
+				{
 					std::vector<std::string> entries = split_string(*it, ":");
 
 					if (entries.size() >= 1)
@@ -84,29 +86,32 @@ protected:
 			m_excludeStart = 0;
 		}
 
-		bool match(const std::string &filePath,
-				unsigned int lineNr,
+		bool match(const std::string &filePath, unsigned int lineNr,
 				const std::string &line)
 		{
 			bool out = true;
 
 			// Source file swapped
-			if (m_curFile != filePath) {
+			if (m_curFile != filePath)
+			{
 				m_excludeStart = 0;
 				m_curFile = filePath;
 			}
 
-			for (std::vector<std::string>::iterator it = m_ignoreSingleLinePatterns.begin();
-				it != m_ignoreSingleLinePatterns.end();
-				++it) {
+			for (std::vector<std::string>::iterator it =
+					m_ignoreSingleLinePatterns.begin();
+					it != m_ignoreSingleLinePatterns.end(); ++it)
+			{
 				if (line.find(*it) != std::string::npos)
 					out = false;
 			}
 
-			for (std::vector<std::string>::iterator it = m_lineBeginPatterns.begin();
-				it != m_lineBeginPatterns.end();
-				++it) {
-				if (line.find(*it) != std::string::npos) {
+			for (std::vector<std::string>::iterator it =
+					m_lineBeginPatterns.begin();
+					it != m_lineBeginPatterns.end(); ++it)
+			{
+				if (line.find(*it) != std::string::npos)
+				{
 					m_excludeStart++;
 					break;
 				}
@@ -116,10 +121,12 @@ protected:
 			if (m_excludeStart > 0)
 				out = false;
 
-			for (std::vector<std::string>::iterator it = m_lineEndPatterns.begin();
-				it != m_lineEndPatterns.end();
-				++it) {
-				if (line.find(*it) != std::string::npos) {
+			for (std::vector<std::string>::iterator it =
+					m_lineEndPatterns.begin(); it != m_lineEndPatterns.end();
+					++it)
+			{
+				if (line.find(*it) != std::string::npos)
+				{
 					m_excludeStart--;
 					break;
 				}
@@ -144,7 +151,7 @@ protected:
 	FileLineHandler *m_fileLineHandler;
 };
 
-class Filter : public BasicFilter
+class Filter: public BasicFilter
 {
 public:
 	Filter()
@@ -152,8 +159,10 @@ public:
 		m_patternHandler = new PatternHandler();
 		m_pathHandler = new PathHandler();
 
-		m_origRoot = IConfiguration::getInstance().keyAsString("orig-path-prefix");
-		m_newRoot  = IConfiguration::getInstance().keyAsString("new-path-prefix");
+		m_origRoot = IConfiguration::getInstance().keyAsString(
+				"orig-path-prefix");
+		m_newRoot = IConfiguration::getInstance().keyAsString(
+				"new-path-prefix");
 	}
 
 	~Filter()
@@ -190,14 +199,16 @@ public:
 	{
 		std::string filename = get_real_path(path);
 
-		if (m_origRoot.length() > 0 && m_newRoot.length() > 0) {
-		    std::string path = filename;
-		    size_t index = path.find(m_origRoot);
+		if (m_origRoot.length() > 0 && m_newRoot.length() > 0)
+		{
+			std::string path = filename;
+			size_t index = path.find(m_origRoot);
 
-		    if (index != std::string::npos) {
-		        path.replace(index, m_origRoot.length(), m_newRoot);
-		        filename = get_real_path(path);
-		    }
+			if (index != std::string::npos)
+			{
+				path.replace(index, m_origRoot.length(), m_newRoot);
+				filename = get_real_path(path);
+			}
 		}
 
 		return filename;
@@ -208,14 +219,18 @@ private:
 	{
 	public:
 		PatternHandler() :
-			m_includePatterns(IConfiguration::getInstance().keyAsList("include-pattern")),
-			m_excludePatterns(IConfiguration::getInstance().keyAsList("exclude-pattern"))
+				m_includePatterns(
+						IConfiguration::getInstance().keyAsList(
+								"include-pattern")), m_excludePatterns(
+						IConfiguration::getInstance().keyAsList(
+								"exclude-pattern"))
 		{
 		}
 
 		bool isSetup()
 		{
-			return !(m_includePatterns.size() == 0 && m_excludePatterns.size() == 0);
+			return !(m_includePatterns.size() == 0
+					&& m_excludePatterns.size() == 0);
 		}
 
 		bool includeFile(std::string file)
@@ -229,8 +244,8 @@ private:
 				out = false;
 
 			for (PatternMap_t::const_iterator it = m_includePatterns.begin();
-					it != m_includePatterns.end();
-					++it) {
+					it != m_includePatterns.end(); ++it)
+			{
 				const std::string &pattern = *it;
 
 				if (file.find(pattern) != std::string::npos)
@@ -238,8 +253,8 @@ private:
 			}
 
 			for (PatternMap_t::const_iterator it = m_excludePatterns.begin();
-					it != m_excludePatterns.end();
-					++it) {
+					it != m_excludePatterns.end(); ++it)
+			{
 				const std::string &pattern = *it;
 
 				if (file.find(pattern) != std::string::npos)
@@ -255,22 +270,21 @@ private:
 		const PatternMap_t &m_excludePatterns;
 	};
 
-
 	class PathHandler
 	{
 	public:
 		PathHandler() :
-			m_includePaths(IConfiguration::getInstance().keyAsList("include-path")),
-			m_excludePaths(IConfiguration::getInstance().keyAsList("exclude-path"))
+				m_includePaths(
+						IConfiguration::getInstance().keyAsList(
+								"include-path")), m_excludePaths(
+						IConfiguration::getInstance().keyAsList("exclude-path"))
 		{
 			for (PathMap_t::iterator it = m_includePaths.begin();
-					it != m_includePaths.end();
-					++it)
+					it != m_includePaths.end(); ++it)
 				*it = get_real_path(*it);
 
 			for (PathMap_t::iterator it = m_excludePaths.begin();
-					it != m_excludePaths.end();
-					++it)
+					it != m_excludePaths.end(); ++it)
 				*it = get_real_path(*it);
 		}
 
@@ -293,13 +307,14 @@ private:
 
 			// If found in --include-path=, accept this path
 			for (PathMap_t::const_iterator it = m_includePaths.begin();
-					it != m_includePaths.end();
-					++it) {
+					it != m_includePaths.end(); ++it)
+			{
 				const std::string &pathPattern = *it;
 				size_t last = pathPattern.size();
 
-				if (pathStr.find(pathPattern) == 0 &&
-						(pathStr.size() <= last || pathStr[last] == '/')) {
+				if (pathStr.find(pathPattern) == 0
+						&& (pathStr.size() <= last || pathStr[last] == '/'))
+				{
 					out = true;
 					break;
 				}
@@ -307,13 +322,14 @@ private:
 
 			// ... unless it's found in --exclude-path=.
 			for (PathMap_t::const_iterator it = m_excludePaths.begin();
-					it != m_excludePaths.end();
-					++it) {
+					it != m_excludePaths.end(); ++it)
+			{
 				const std::string &pathPattern = *it;
 				size_t last = pathPattern.size();
 
-				if (pathStr.find(pathPattern) == 0 &&
-						(pathStr.size() <= last || pathStr[last] == '/')) {
+				if (pathStr.find(pathPattern) == 0
+						&& (pathStr.size() <= last || pathStr[last] == '/'))
+				{
 					out = false;
 					break;
 				}
@@ -328,13 +344,11 @@ private:
 		PathMap_t m_excludePaths;
 	};
 
-
 	PatternHandler *m_patternHandler;
 	PathHandler *m_pathHandler;
 	std::string m_origRoot;
 	std::string m_newRoot;
 };
-
 
 IFilter &IFilter::create()
 {

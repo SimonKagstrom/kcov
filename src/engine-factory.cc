@@ -5,7 +5,7 @@
 
 using namespace kcov;
 
-class EngineFactory : public IEngineFactory
+class EngineFactory: public IEngineFactory
 {
 public:
 	EngineFactory()
@@ -22,18 +22,19 @@ public:
 		IEngineCreator *best = NULL;
 		size_t sz;
 
-		uint8_t *data = (uint8_t *)peek_file(&sz, "%s", fileName.c_str());
+		uint8_t *data = (uint8_t *) peek_file(&sz, "%s", fileName.c_str());
 
 		for (EngineList_t::iterator it = m_engines.begin();
-				it != m_engines.end();
-				++it) {
+				it != m_engines.end(); ++it)
+		{
 			if (!best)
 				best = *it;
 
-			if ((*it)->matchFile(fileName, data, sz) > best->matchFile(fileName, data, sz))
+			if ((*it)->matchFile(fileName, data, sz)
+					> best->matchFile(fileName, data, sz))
 				best = *it;
 		}
-		free((void *)data);
+		free((void *) data);
 
 		if (!best)
 			panic("No engines registered");

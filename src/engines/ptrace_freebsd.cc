@@ -119,7 +119,8 @@ ptrace_sys::peekWord(pid_t pid, unsigned long aligned_addr)
 {
 	unsigned long val;
 
-	struct ptrace_io_desc ptiod = {
+	struct ptrace_io_desc ptiod =
+	{
 		.piod_op = PIOD_READ_I,
 		.piod_offs = (void*)aligned_addr,
 		.piod_addr = &val,
@@ -132,7 +133,8 @@ ptrace_sys::peekWord(pid_t pid, unsigned long aligned_addr)
 void
 ptrace_sys::pokeWord(pid_t pid, unsigned long aligned_addr, unsigned long value)
 {
-	struct ptrace_io_desc ptiod = {
+	struct ptrace_io_desc ptiod =
+	{
 		.piod_op = PIOD_WRITE_I,
 		.piod_offs = (void*)aligned_addr,
 		.piod_addr = &value,

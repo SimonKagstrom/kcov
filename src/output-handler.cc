@@ -54,7 +54,8 @@ namespace kcov
 			// Delete all writers
 			for (WriterList_t::iterator it = m_writers.begin();
 					it != m_writers.end();
-					++it) {
+					++it)
+			{
 				IWriter *cur = *it;
 
 				delete cur;
@@ -110,7 +111,8 @@ namespace kcov
 			if (m_outputInterval == 0)
 				return;
 
-			if (get_ms_timestamp() - m_lastTimestamp >= m_outputInterval) {
+			if (get_ms_timestamp() - m_lastTimestamp >= m_outputInterval)
+			{
 				produce();
 
 				// Take a new timestamp since producing might take a long time
