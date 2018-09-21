@@ -10,3 +10,4 @@
 *.mod.c
 kcov
 build
+obj-*/
