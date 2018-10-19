@@ -16,10 +16,12 @@ switches.
 
 Installing
 ----------
-Refer to the [INSTALL](INSTALL.md) file for build instructions, or use one of the pre-built Docker images:
+Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our official Docker images:
 
-* [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) for releases since v31
-* [ragnaroek/kcov_head](https://hub.docker.com/r/ragnaroek/kcov_head/) for the latest git HEAD (might be unstable)
+* [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
+
+__Note: tags v31-v33 are re-tags of [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) which are were not automated builds.__
+
 
 How to use it
 -------------
