@@ -1,4 +1,10 @@
-[![Build Status](https://travis-ci.org/SimonKagstrom/kcov.svg?branch=master)](https://travis-ci.org/SimonKagstrom/kcov) [![Coveralls coverage status](https://img.shields.io/coveralls/SimonKagstrom/kcov.svg)](https://coveralls.io/r/SimonKagstrom/kcov?branch=master) [![Codecov coverage status](https://codecov.io/gh/SimonKagstrom/kcov/branch/master/graph/badge.svg)](https://codecov.io/gh/SimonKagstrom/kcov) [![Coverity Scan Build Status](https://scan.coverity.com/projects/2844/badge.svg)](https://scan.coverity.com/projects/2844)
+[![Build Status](https://travis-ci.org/SimonKagstrom/kcov.svg?branch=master)](https://travis-ci.org/SimonKagstrom/kcov)
+[![Coveralls coverage status](https://img.shields.io/coveralls/SimonKagstrom/kcov.svg)](https://coveralls.io/r/SimonKagstrom/kcov?branch=master)
+[![Codecov coverage status](https://codecov.io/gh/SimonKagstrom/kcov/branch/master/graph/badge.svg)](https://codecov.io/gh/SimonKagstrom/kcov)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/2844/badge.svg)](https://scan.coverity.com/projects/2844)
+![Docker Build Status](https://img.shields.io/docker/build/kcov/kcov.svg)
+![MicroBadger Size](https://img.shields.io/microbadger/image-size/kcov/kcov.svg)
+![Docker Pulls](https://img.shields.io/docker/pulls/kcov/kcov.svg)
 
 [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=simon.kagstrom%40gmail%2ecom&lc=US&item_name=Simon%20Kagstrom&item_number=kcov&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted) [![Github All Releases](https://img.shields.io/github/downloads/atom/atom/total.svg)](https://github.com/SimonKagstrom/kcov/)
 
@@ -13,10 +19,12 @@ switches.
 
 Installing
 ----------
-Refer to the [INSTALL](INSTALL.md) file for build instructions, or use one of the pre-built Docker images:
+Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our official Docker images:
 
-* [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) for releases since v31
-* [ragnaroek/kcov_head](https://hub.docker.com/r/ragnaroek/kcov_head/) for the latest git HEAD (might be unstable)
+* [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
+
+__Note: tags v31-v33 are re-tags of [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) which are were not automated builds.__
+
 
 How to use it
 -------------
