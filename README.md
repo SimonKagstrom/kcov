@@ -23,7 +23,15 @@ Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our offic
 
 * [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
 
-__Note: tags v31-v33 are re-tags of [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) which are were not automated builds.__
+_Note:_
+
+_Tags v31-v33 are re-tags of [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) which were not automated builds._
+
+_Tags v34-v35 are non automated builds using the Dockerfile in master with 1 minor [modification](https://github.com/SimonKagstrom/kcov/pull/274#issuecomment-432827976)._
+
+_Tag v36 is a non automated build using the Dockerfile in master._
+
+
 
 
 How to use it
