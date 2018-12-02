@@ -49,6 +49,7 @@ protected:
 			m_lineEndPatterns.push_back("LCOV_EXCL_STOP");
 
 			m_ignoreSingleLinePatterns.push_back("LCOV_EXCL_LINE");
+			m_ignoreSingleLinePatterns.push_back("#[should_panic]");
 
 			// Handle command line options
 			std::string cmd = IConfiguration::getInstance().keyAsString(

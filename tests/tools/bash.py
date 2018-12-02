@@ -279,6 +279,10 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 49) == None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 51) == 1
 
+        # Rust stuff
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 54) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 55) == 1
+
 # Issue #224
 class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
     def runTest(self):

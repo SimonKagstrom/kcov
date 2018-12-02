@@ -49,3 +49,7 @@ echo "Also not covered"
 echo "Also not covered?"
 # CUSTOM_RANGE_END
 echo "Covered"
+
+# Rust stuff
+echo "Not covered"  # #[should_panic]
+echo "Maybe covered"  # unreachable!
