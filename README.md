@@ -17,6 +17,8 @@ Kcov, like Bcov, uses DWARF debugging information for compiled programs to
 make it possible to collect coverage information without special compiler
 switches.
 
+For a video introduction, [look at this presentation from SwedenCPP](https://www.youtube.com/watch?v=1QMHbp5LUKg)
+
 Installing
 ----------
 Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our official Docker images:
