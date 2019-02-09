@@ -32,10 +32,10 @@ Create an empty build dir and do the following steps:
 ```
   cd <build-dir>
   cmake -G Xcode <path/to/kcov/source/dir>
-  xcodebuild -configuration Release
+  xcodebuild -target kcov -configuration Release
 ```
 
-The binary will be in `src/Release/kcov`
+The binary will be `src/Release/kcov`
 
 Building
 ========
