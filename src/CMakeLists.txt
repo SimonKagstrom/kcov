@@ -177,6 +177,9 @@ else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		ENV LD_LIBRARY_PATH
 	)
 	mark_as_advanced(LLDB_LIBRARY)
+	if(LLDB_LIBRARY)
+	  message (STATUS "Found LLDB: ${LLDB_LIBRARY}")
+	endif()
 
 	# Not really true, but anyway
 	set(LIBELF_FOUND 1)
@@ -432,10 +435,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	message(STATUS "OSX: Changing LLDB rpath")
-	add_custom_command(TARGET ${KCOV}
+    get_filename_component(LLDB_LIBRARY_NAME "${LLDB_LIBRARY}" NAME)
+    if(LLDB_LIBRARY_NAME STREQUAL "LLDB.framework")
+      set(LLDB_LIBRARY_INSTALL_NAME "${LLDB_LIBRARY}/Versions/Current/LLDB")
+	  add_custom_command(TARGET ${KCOV}
         POST_BUILD COMMAND
-        ${CMAKE_INSTALL_NAME_TOOL} -change @rpath/LLDB.framework/LLDB /Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/LLDB $<TARGET_FILE:${KCOV}>)
+        "${CMAKE_INSTALL_NAME_TOOL}" -change @rpath/LLDB.framework/LLDB "${LLDB_LIBRARY_INSTALL_NAME}" $<TARGET_FILE:${KCOV}>
+        COMMENT "Changing LLDB install name from @rpath/LLDB.framework/LLDB to ${LLDB_LIBRARY_INSTALL_NAME}")
+	endif()
 endif()
 
 # uninstall target
