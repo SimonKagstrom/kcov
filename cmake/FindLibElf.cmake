@@ -57,7 +57,7 @@ include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBELF_FOUND to TRUE if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
+find_package_handle_standard_args(LibElf DEFAULT_MSG
     LIBELF_LIBRARY
     LIBELF_INCLUDE_DIR)
 

@@ -51,7 +51,7 @@ include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBCRPCUT_FOUND to TRUE if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibCRPCUT DEFAULT_MSG
+find_package_handle_standard_args(LibCRPCUT DEFAULT_MSG
     LIBCRPCUT_LIBRARIES
     LIBCRPCUT_INCLUDE_DIRS)
 
