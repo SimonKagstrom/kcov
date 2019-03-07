@@ -109,14 +109,17 @@ if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
 endif (CURL_FOUND)
 
-if (KCOV_STATIC_BUILD STREQUAL "1")
-	message(STATUS "Building a static binary (no coveralls support)")
+option (KCOV_STATIC_BUILD "Build a static binary" OFF)
+mark_as_advanced (KCOV_STATIC_BUILD)
+
+if (KCOV_STATIC_BUILD)
+	message (STATUS "Building a static binary (no Coveralls support)")
 
 	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
-endif (KCOV_STATIC_BUILD STREQUAL "1")
+endif (KCOV_STATIC_BUILD)
 
 set (ELF_SRCS
 	dummy-solib-handler.cc
