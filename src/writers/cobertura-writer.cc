@@ -138,20 +138,23 @@ private:
 		tm = localtime(&t);
 		strftime(date_buf, sizeof(date_buf), "%s", tm);
 
+		std::string linesCovered = fmt("%u", nExecutedLines);
+		std::string linesValid = fmt("%u", nCodeLines);
+
 		if (nCodeLines == 0)
 			nCodeLines = 1;
 
 		std::string lineRate = fmt("%.3f", nExecutedLines / (float) nCodeLines);
 
 		return "<?xml version=\"1.0\" ?>\n"
-				"<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-03.dtd'>\n"
+				"<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>\n"
 				"<coverage line-rate=\"" + lineRate + "\" version=\"1.9\" timestamp=\"" + std::string(date_buf) + "\">\n"
 				"	<sources>\n"
 				"		<source>" + m_commonPath + "/</source>\n"
 				"	</sources>\n"
 				"	<packages>\n"
 				"		<package name=\"" + mangleFileName(IConfiguration::getInstance().keyAsString("command-name"))
-				+ "\" line-rate=\"" + lineRate + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
+				+ "\" line-rate=\"" + lineRate + "\" lines-covered=\"" + linesCovered + "\" lines-valid=\"" + linesValid + "\"branch-rate=\"1.0\" complexity=\"1.0\">\n"
 						"			<classes>\n";
 	}
 
