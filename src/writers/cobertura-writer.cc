@@ -154,7 +154,7 @@ private:
 				"	</sources>\n"
 				"	<packages>\n"
 				"		<package name=\"" + mangleFileName(IConfiguration::getInstance().keyAsString("command-name"))
-				+ "\" line-rate=\"" + lineRate + "\" lines-covered=\"" + linesCovered + "\" lines-valid=\"" + linesValid + "\"branch-rate=\"1.0\" complexity=\"1.0\">\n"
+				+ "\" line-rate=\"" + lineRate + "\" lines-covered=\"" + linesCovered + "\" lines-valid=\"" + linesValid + "\" branch-rate=\"1.0\" complexity=\"1.0\">\n"
 						"			<classes>\n";
 	}
 
