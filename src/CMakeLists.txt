@@ -392,9 +392,9 @@ add_custom_command(
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
 if (SPECIFY_RPATH)
-	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
-	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+	set (CMAKE_SKIP_BUILD_RPATH OFF)
+	set (CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 	# the RPATH to be used when installing, but only if it's not a system directory
 	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
 	if (IS_SYSTEM_DIR STREQUAL "-1")
