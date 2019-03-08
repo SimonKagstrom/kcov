@@ -13,7 +13,7 @@ if (NOT LIBELF_FOUND)
 endif (NOT LIBELF_FOUND)
 
 if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
-  set (LibDwarf_FIND_QUIETLY TRUE)
+  set (LibDwarf_FIND_QUIETLY ON)
 endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
 find_package(PkgConfig QUIET)
@@ -67,7 +67,7 @@ include (FindPackageHandleStandardArgs)
 
 # handle the QUIETLY and REQUIRED arguments and set LIBDWARF_FOUND to TRUE
 # if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ElfUtils DEFAULT_MSG
+find_package_handle_standard_args(ElfUtils DEFAULT_MSG
     LIBDW_LIBRARY
     LIBDW_INCLUDE_DIR)
 

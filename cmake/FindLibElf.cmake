@@ -14,7 +14,7 @@
 #
 
 if (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
-  set (LibElf_FIND_QUIETLY TRUE)
+  set (LibElf_FIND_QUIETLY ON)
 endif (LIBELF_LIBRARIES AND LIBELF_INCLUDE_DIRS)
 
 find_package(PkgConfig QUIET)
@@ -57,7 +57,7 @@ include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBELF_FOUND to TRUE if all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibElf DEFAULT_MSG
+find_package_handle_standard_args(LibElf DEFAULT_MSG
     LIBELF_LIBRARY
     LIBELF_INCLUDE_DIR)
 

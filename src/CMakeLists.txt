@@ -9,7 +9,7 @@ find_package (ZLIB REQUIRED)
 find_package (CURL)
 
 if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
-SET (DL_LIBRARY "")
+set (DL_LIBRARY "")
 else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
@@ -27,7 +27,7 @@ else (INTL_LIBRARY)
     message (FATAL_ERROR "Could NOT find INTL")
 endif (INTL_LIBRARY)
 else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
-SET (INTL_LIBRARY "")
+set (INTL_LIBRARY "")
 endif (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 find_library (M_LIBRARY NAMES m)
@@ -109,14 +109,17 @@ if (CURL_FOUND)
 	set (coveralls_SRCS writers/coveralls-writer.cc)
 endif (CURL_FOUND)
 
-if (KCOV_STATIC_BUILD STREQUAL "1")
-	message(STATUS "Building a static binary (no coveralls support)")
+option (KCOV_STATIC_BUILD "Build a static binary" OFF)
+mark_as_advanced (KCOV_STATIC_BUILD)
+
+if (KCOV_STATIC_BUILD)
+	message (STATUS "Building a static binary (no Coveralls support)")
 
 	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
 	set (CMAKE_EXE_LINKER_FLAGS "-static")
-endif (KCOV_STATIC_BUILD STREQUAL "1")
+endif (KCOV_STATIC_BUILD)
 
 set (ELF_SRCS
 	dummy-solib-handler.cc
@@ -392,14 +395,14 @@ add_custom_command(
 
 # Reference: http://www.cmake.org/Wiki/CMake_RPATH_handling
 if (SPECIFY_RPATH)
-	set (CMAKE_SKIP_BUILD_RPATH  FALSE)
-	set (CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+	set (CMAKE_SKIP_BUILD_RPATH OFF)
+	set (CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 	# the RPATH to be used when installing, but only if it's not a system directory
 	list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IS_SYSTEM_DIR)
-	if (IS_SYSTEM_DIR STREQUAL "-1")
+	if (IS_SYSTEM_DIR EQUAL -1)
 	    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	endif (IS_SYSTEM_DIR STREQUAL "-1")
+	endif (IS_SYSTEM_DIR EQUAL -1)
 endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
