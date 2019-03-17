@@ -184,7 +184,7 @@ static int runMergeMode()
 	IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
 			base + "kcov-merged/coverage.json");
 	IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser,
-			mergeReporter, base + "kcov-merged/cobertura.xml");
+			mergeReporter, base + "kcov-merged");
 	IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
 			mergeReporter, base + "kcov-merged/sonarqube.xml");
 	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser,
@@ -251,7 +251,7 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		IWriter &jsonWriter = createJsonWriter(*parser, reporter,
 				out + "/coverage.json");
 		IWriter &coberturaWriter = createCoberturaWriter(*parser, reporter,
-				out + "/cobertura.xml");
+				out);
 		IWriter &sonarqubeWriter = createSonarqubeWriter(*parser, reporter,
 				out + "/sonarqube.xml");
 
@@ -266,7 +266,7 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		IWriter &mergeJsonWriter = createJsonWriter(mergeParser, mergeReporter,
 				base + "kcov-merged/coverage.json");
 		IWriter &mergeCoberturaWriter = createCoberturaWriter(mergeParser,
-				mergeReporter, base + "kcov-merged/cobertura.xml");
+				mergeReporter, base + "kcov-merged");
 		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
 				mergeReporter, base + "kcov-merged/sonarqube.xml");
 		(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);

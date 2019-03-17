@@ -11,9 +11,11 @@ class type_info;
 
 #include <string>
 #include <list>
+#include <vector>
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "writer-base.hh"
 
@@ -22,9 +24,11 @@ using namespace kcov;
 class CoberturaWriter : public WriterBase
 {
 public:
-	CoberturaWriter(IFileParser &parser, IReporter &reporter, const std::string &outFile) :
-			WriterBase(parser, reporter), m_outFile(outFile), m_maxPossibleHits(parser.maxPossibleHits())
+	CoberturaWriter(IFileParser &parser, IReporter &reporter, const std::string &outDir) :
+			WriterBase(parser, reporter), m_maxPossibleHits(parser.maxPossibleHits())
 	{
+		m_outFiles.push_back(outDir + "/cobertura.xml");
+		m_outFiles.push_back(outDir + "/cov.xml"); // For vscode coverage gutters
 	}
 
 	void onStartup()
@@ -37,11 +41,7 @@ public:
 
 	void write()
 	{
-		std::ofstream out(m_outFile);
-
-		// Output directory not writable?
-		if (!out.is_open())
-			return;
+		std::stringstream out;
 
 		unsigned int nTotalExecutedLines = 0;
 		unsigned int nTotalCodeLines = 0;
@@ -65,6 +65,13 @@ public:
 		}
 
 		out << getFooter();
+		for (std::vector<std::string>::iterator it = m_outFiles.begin();
+			it != m_outFiles.end();
+			++it)
+		{
+			std::ofstream cur(*it);
+			cur << out.str();
+		}
 	}
 
 private:
@@ -166,7 +173,7 @@ private:
 				"</coverage>\n";
 	}
 
-	std::string m_outFile;
+	std::vector<std::string> m_outFiles;
 	IFileParser::PossibleHits m_maxPossibleHits;
 };
 

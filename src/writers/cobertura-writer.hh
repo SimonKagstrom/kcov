@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace kcov
 {
 	class IFileParser;
@@ -7,5 +9,5 @@ namespace kcov
 	class IOutputHandler;
 
 	IWriter &createCoberturaWriter(IFileParser &elf, IReporter &reporter,
-			const std::string &outFile);
+			const std::string &outDirectory);
 }
