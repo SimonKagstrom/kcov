@@ -340,7 +340,7 @@ private:
 		uint64_t lineId = line->lineId();
 
 		line->addAddress(addr);
-		m_addrToLine[addr] = line;
+		m_addrToLine[addr].push_back(line);
 		m_lineIdToFileMap[lineId] = line;
 
 		// Report pending addresses for this file/line
@@ -405,19 +405,19 @@ private:
 		if (it == m_addrToLine.end())
 			return;
 
-		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long) addr);
-		Line *line = it->second;
+		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long)addr);
 
-		line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
+		for (Line* line : it->second) {
+			line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
-		// Setup the hit order
-		if (line->getOrder() == 0)
-		{
-			line->setOrder(m_order);
-			m_order++;
+			// Setup the hit order
+			if (line->getOrder() == 0) {
+				line->setOrder(m_order);
+				m_order++;
+			}
+
+			reportAddress(line->lineId(), hits);
 		}
-
-		reportAddress(line->lineId(), hits);
 	}
 
 	// From IReporter::IListener - report recursively
@@ -719,7 +719,7 @@ private:
 	};
 
 	typedef std::unordered_map<std::string, File *> FileMap_t;
-	typedef std::unordered_map<uint64_t, Line *> AddrToLineMap_t;
+	typedef std::unordered_map<uint64_t, std::vector<Line *>> AddrToLineMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
 	typedef std::unordered_map<uint64_t, Line *> LineIdToFileMap_t;
