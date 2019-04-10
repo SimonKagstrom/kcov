@@ -405,9 +405,13 @@ private:
 		if (it == m_addrToLine.end())
 			return;
 
-		kcov_debug(INFO_MSG, "REPORT hit at 0x%llx\n", (unsigned long long)addr);
+		kcov_debug(INFO_MSG, "%p REPORT hit at 0x%llx\n", this, (unsigned long long)addr);
 
-		for (Line* line : it->second) {
+		for (LineList_t::iterator lit = it->second.begin();
+                            lit != it->second.end();
+                            ++it) {
+                        Line* line = *lit;
+
 			line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
 
 			// Setup the hit order
@@ -718,8 +722,9 @@ private:
 		unsigned long m_hits;
 	};
 
+	typedef std::vector<Line *> LineList_t;
 	typedef std::unordered_map<std::string, File *> FileMap_t;
-	typedef std::unordered_map<uint64_t, std::vector<Line *>> AddrToLineMap_t;
+	typedef std::unordered_map<uint64_t, LineList_t> AddrToLineMap_t;
 	typedef std::unordered_map<uint64_t, unsigned long> AddrToHitsMap_t;
 	typedef std::vector<IReporter::IListener *> ListenerList_t;
 	typedef std::unordered_map<uint64_t, Line *> LineIdToFileMap_t;
