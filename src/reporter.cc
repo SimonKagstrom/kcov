@@ -409,7 +409,7 @@ private:
 
 		for (LineList_t::iterator lit = it->second.begin();
                             lit != it->second.end();
-                            ++it) {
+                            ++lit) {
                         Line* line = *lit;
 
 			line->registerHit(addr, hits, m_maxPossibleHits != IFileParser::HITS_UNLIMITED);
