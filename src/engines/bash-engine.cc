@@ -462,7 +462,7 @@ private:
 		FILE *fp;
 		bool out = false;
 		IConfiguration &conf = IConfiguration::getInstance();
-		std::string cmd = conf.keyAsString("bash-command") + " --version";
+		std::string cmd = conf.keyAsString("bash-command") + " -c 'echo \"$BASH_VERSION\"'";
 
 		/* Has input via stderr been forced regardless of bash version?
 		 * Basically for testing only
@@ -474,25 +474,14 @@ private:
 		if (!fp)
 			return false;
 
+		int major = 0;
+		int minor = 0;
+
 		// Read the first line
-		char *line = NULL;
-		ssize_t len;
-		size_t linecap = 0;
-
-		len = getline(&line, &linecap, fp);
-		// Let's play safe
-		if (len > 0)
-		{
-			std::string cur(line);
-			size_t where = cur.find("version ");
-			if (where != std::string::npos)
-			{
-				std::string versionStr = cur.substr(where + strlen("version "));
-
-				// Bash 4.2 and above supports BASH_XTRACEFD
-				if (versionStr.size() > 4 && versionStr[0] >= '4' && versionStr[2] >= '2')
-					out = true;
-			}
+		if (fscanf(fp, "%d.%d", &major, &minor) != EOF) {
+			// Bash 4.2 and above supports BASH_XTRACEFD
+			if (major > 4 || (major == 4 && minor >= 2))
+				out = true;
 		}
 
 		pclose(fp);
