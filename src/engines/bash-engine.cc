@@ -256,19 +256,18 @@ public:
 		std::string cur(curLine);
 		// Line markers always start with kcov@
 
-		size_t kcovStr = cur.find("kcov@");
-		enum InputType ip = getInputType(cur);
-		if (kcovStr == std::string::npos)
-		{
-			if (m_inputType == INPUT_NORMAL)
-				fprintf(stderr, "%s", cur.c_str());
-			if (ip == INPUT_SINGLE_QUOTE && m_inputType == INPUT_SINGLE_QUOTE)
-				m_inputType = INPUT_NORMAL;
-
+		if (m_inputType == INPUT_SINGLE_QUOTE) {
+			m_inputType = getInputType(cur);
 			return true;
 		}
 
-		m_inputType = ip;
+		size_t kcovStr = cur.find("kcov@");
+		if (kcovStr == std::string::npos)
+		{
+			fprintf(stderr, "%s", cur.c_str());
+			return true;
+		}
+		m_inputType = getInputType(cur);
 
 		std::vector<std::string> parts = split_string(cur.substr(kcovStr), "@");
 
@@ -501,12 +500,14 @@ private:
 
 	enum InputType getInputType(const std::string &str)
 	{
-		enum InputType out = INPUT_NORMAL;
+		enum InputType out = m_inputType;
 
-		size_t singleQuotes = std::count(str.begin(), str.end(), '\'');
-
-		if (singleQuotes == 1)
-			out = INPUT_SINGLE_QUOTE;
+		for(std::string::size_type i = 0; i < str.size(); ++i) {
+			if (str[i] == '\\' && out == INPUT_NORMAL)
+				i++;
+			else if (str[i] == '\'')
+				out = (out == INPUT_NORMAL ? INPUT_SINGLE_QUOTE : INPUT_NORMAL);
+		}
 
 		return out;
 	}
