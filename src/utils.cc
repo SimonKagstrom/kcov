@@ -139,6 +139,14 @@ void *peek_file(size_t *out_size, const char *fmt, ...)
 	panic_if (r >= 2048,
 			"Too long string!");
 
+	/* Get the file status */
+	struct stat st;
+	if (lstat(path, &st) < 0)
+		return NULL;
+	// Regular file?
+	if (S_ISREG(st.st_mode) == 0)
+		return NULL;
+
 	// Read a little bit of the file    
 	const size_t to_read = 512;    
 	char *out = static_cast<char*>(xmalloc(to_read));
