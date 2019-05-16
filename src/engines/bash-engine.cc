@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <signal.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -122,7 +123,7 @@ public:
 				return false;
 			}
 			m_stdout = fdopen(stdoutPipe[0], "r");
-			if (!m_stderr)
+			if (!m_stdout)
 			{
 				error("Can't reopen the stdout pipe");
 				fclose(m_stderr);
@@ -136,7 +137,16 @@ public:
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
-
+			{
+				// However, the range of fd numbers that this process can use is limited by the caller of this process.
+				// The following code specification will require discussion with many kcov users.
+				struct rlimit rlim;
+				if (getrlimit(RLIMIT_NOFILE, &rlim) < 0) {
+					perror("Failed to get the maximum number of open file descriptors.");
+					return false;
+				}
+				xtraceFd = rlim.rlim_cur - 1;
+			}
 			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");
 
