@@ -52,6 +52,9 @@ public:
 		{
 			File *file = it->second;
 
+			// Fixup file->m_codeLines etc
+			sumOne(file);
+
 			nTotalCodeLines += file->m_codeLines;
 			nTotalExecutedLines += file->m_executedLines;
 		}
@@ -88,12 +91,8 @@ private:
 		return out;
 	}
 
-	std::string writeOne(File *file)
+	void sumOne(File *file)
 	{
-		std::string out;
-
-		std::string mangledName = mangleFileName(file->m_fileName);
-
 		unsigned int nExecutedLines = 0;
 		unsigned int nCodeLines = 0;
 
@@ -112,13 +111,34 @@ private:
 			if (hits && m_maxPossibleHits == IFileParser::HITS_SINGLE)
 				hits = 1;
 
-			out = out + "						<line number=\"" + fmt("%u", n) + "\" hits=\"" + fmt("%u", hits) + "\"/>\n";
-
 			// Update the execution count
 			file->m_executedLines = nExecutedLines;
 			file->m_codeLines = nCodeLines;
 		}
+	}
 
+	std::string writeOne(File *file)
+	{
+		std::string out;
+
+		std::string mangledName = mangleFileName(file->m_fileName);
+
+		for (unsigned int n = 1; n < file->m_lastLineNr; n++)
+		{
+			if (!m_reporter.lineIsCode(file->m_name, n))
+				continue;
+
+			IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
+
+			unsigned int hits = cnt.m_hits;
+
+			if (hits && m_maxPossibleHits == IFileParser::HITS_SINGLE)
+				hits = 1;
+
+			out = out + "						<line number=\"" + fmt("%u", n) + "\" hits=\"" + fmt("%u", hits) + "\"/>\n";
+		}
+
+		unsigned nCodeLines = file->m_codeLines;
 		if (nCodeLines == 0)
 			nCodeLines = 1;
 
@@ -129,7 +149,7 @@ private:
 			filename = filename.substr(m_commonPath.size() + 1);
 
 		out = "				<class name=\"" + mangledName + "\" filename=\"" + filename + "\" line-rate=\""
-				+ fmt("%.3f", nExecutedLines / (float) nCodeLines) + "\">\n" + "					<lines>\n" + out + "					</lines>\n"
+				+ fmt("%.3f", file->m_executedLines / (float) nCodeLines) + "\">\n" + "					<lines>\n" + out + "					</lines>\n"
 						"				</class>\n";
 
 		return out;
