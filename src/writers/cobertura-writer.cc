@@ -175,7 +175,7 @@ private:
 
 		return "<?xml version=\"1.0\" ?>\n"
 				"<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>\n"
-				"<coverage line-rate=\"" + lineRate + "\" version=\"1.9\" timestamp=\"" + std::string(date_buf) + "\">\n"
+				"<coverage line-rate=\"" + lineRate + "\" lines-covered=\"" + linesCovered + "\" version=\"1.9\" timestamp=\"" + std::string(date_buf) + "\">\n"
 				"	<sources>\n"
 				"		<source>" + m_commonPath + "/</source>\n"
 				"	</sources>\n"
