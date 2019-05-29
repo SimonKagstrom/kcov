@@ -145,7 +145,7 @@ public:
 					perror("Failed to get the maximum number of open file descriptors.");
 					return false;
 				}
-				xtraceFd = rlim.rlim_cur - 1;
+				xtraceFd = rlim.rlim_cur / 4;
 			}
 			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");
