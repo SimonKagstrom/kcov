@@ -31,7 +31,7 @@ class bash_coverage(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 135) == 1
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 136) == 1
 
-        assert o.find("I'm echoing to stderr via some") != -1
+        assert b"I'm echoing to stderr via some" in o
 
 
 # Very limited, will expand once it's working better
@@ -167,7 +167,7 @@ class bash_multiline_quotes(testbase.KcovTestCase):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/multiline-alias.sh")
 
-        assert o.find("echo called test_alias") == -1
+        assert b"echo called test_alias" not in o
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/multiline-alias.sh/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "multiline-alias.sh", 6) == 1
 
@@ -176,14 +176,14 @@ class bash_multiline_backslashes(testbase.KcovTestCase):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/multiline-backslash.sh")
 
-        assert o.find("function_name") == -1
+        assert b"function_name" not in o
 
 class bash_no_executed_lines(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/no-executed-statements.sh")
 
-        assert o.find("echo called test_alias") == -1
+        assert b"echo called test_alias" not in o
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/no-executed-statements.sh/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "no-executed-statements.sh", 4) == 0
 
@@ -192,9 +192,9 @@ class bash_stderr_redirection(testbase.KcovTestCase):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/redirect-stderr.sh")
 
-        assert o.find("kcov") == -1
+        assert b"kcov" not in o
         rv,o = self.do(testbase.kcov + " --debug-force-bash-stderr " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/redirect-stderr.sh")
-        assert o.find("kcov") == -1
+        assert b"kcov" not in o
 
 class bash_dollar_var_replacement(testbase.KcovTestCase):
     def runTest(self):
