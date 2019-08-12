@@ -36,7 +36,6 @@ class bash_coverage(testbase.KcovTestCase):
 
 # Very limited, will expand once it's working better
 class bash_coverage_debug_trap(testbase.KcovTestCase):
-    @unittest.expectedFailure
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " --bash-method=DEBUG " + testbase.outbase + "/kcov " + testbase.sources + "/tests/bash/shell-main 5")
