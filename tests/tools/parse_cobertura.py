@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 import xml.dom.minidom
@@ -61,7 +61,7 @@ def hitsPerLine(dom, fileName, lineNr):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print "Usage: lookup-class-line <in-file> <filename> <lineNr>"
+        print("Usage: lookup-class-line <in-file> <filename> <lineNr>")
         sys.exit(1)
 
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     if fileTag != None:
         hits = lookupHitsByLine(fileTag, line)
         if hits != None:
-            print hits
+            print(hits)
             sys.exit(0)
 
-    print "nocode"
+    print("nocode")

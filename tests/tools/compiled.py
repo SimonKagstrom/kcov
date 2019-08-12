@@ -10,7 +10,7 @@ class illegal_insn(testbase.KcovTestCase):
         self.setUp()
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/illegal-insn", False)
         assert rv != 0
-        assert output.find("Illegal instructions are") != -1
+        assert b'Illegal instructions are' in output
 
 class fork_no_wait(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
@@ -142,7 +142,7 @@ class popen_test(testbase.KcovTestCase):
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/test_popen", False)
         assert rv == noKcovRv
 
-        assert o.find("popen OK") != -1
+        assert b"popen OK" in o
 
 class short_filename(testbase.KcovTestCase):
     @unittest.expectedFailure
@@ -261,10 +261,10 @@ class signals_crash(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals segv self", False)
-        assert o.find("kcov: Process exited with signal 11") != -1
+        assert b"kcov: Process exited with signal 11" in o
 
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals abrt self", False)
-        assert o.find("kcov: Process exited with signal 6") != -1
+        assert b"kcov: Process exited with signal 6" in o
 
 class collect_and_report_only(testbase.KcovTestCase):
     # Cannot work with combined Engine / Parser
@@ -290,9 +290,9 @@ class setpgid_kill(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.sources + "/tests/setpgid-kill/test-script.sh " + testbase.testbuild + "/setpgid-kill", False)
-        assert o.find("SUCCESS") != -1
+        assert b"SUCCESS" in o
         rv,o = self.do(testbase.sources + "/tests/setpgid-kill/test-script.sh " + testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/setpgid-kill", False)
-        assert o.find("SUCCESS") != -1
+        assert b"SUCCESS" in o
 
 class attach_process_with_threads(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
@@ -458,8 +458,8 @@ class address_sanitizer_coverage(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         if (not os.path.isfile(testbase.testbuild + "/sanitizer-coverage")):
-            print "Clang-only"
-            return True
+            print("Clang-only")
+            assert False
         rv,o = self.do(testbase.kcov + " --clang " + testbase.outbase + "/kcov " + testbase.testbuild + "/sanitizer-coverage", False)
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/sanitizer-coverage/cobertura.xml")
