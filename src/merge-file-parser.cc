@@ -43,7 +43,7 @@ struct file_data
 	uint32_t file_name_offset;
 
 	struct line_entry entries[];
-}__attribute__((packed));
+};
 
 // Unit test stuff
 namespace merge_parser
