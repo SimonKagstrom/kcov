@@ -1,7 +1,31 @@
 Kcov (37):
+    * Issue #312: Avoid unaligned access warnings for merged data
+      (Didri Boukelmoune)
+
+    * Issue #309: Correct encoding for non-english charsets (Zhenwei Ding)
+
+    * Issues #307, #308: Python 3 cleanup (Didri Boukelmoune)
+
+    * Issue #304: Bash: Correct PS4 parsing (Koichi Nakashima)
+
+    * Issues #295, #296: Comply with Cobertura coverage-04.dtd (Arnaud Botella)
+
+    * Issues #292, #294 : bash: Correct peek_file, xtrace-fd handling (kimkim19642004)
+
+    * Issues #282, #286, #287 Lots of build system fixes (Jamie Snape,
+      Akos Somfai)
+
+    * Issue #285: Cobertura schema fixed
+
+    * Issue #279: Rust: #[should_panic] files are now ignored
+
+    * Issue #274: Automated docker builds (Manuel Mendez)
+
+    * Issues #268, #310: A Debian packate file has been added (Paul Dreik)
+
     * Issue #190: Code style changed to K&R
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Tue Oct  1 09:14:07 CEST 2019
 
 Kcov (36):
     * Issue #253: Kcov has been ported to FreeBSD (Alan Somers)
