@@ -19,7 +19,7 @@
 
 enum
 {
-	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 33, // See Linux arch/arm64/include/asm/ptrace.h
+	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 32, // See Linux arch/arm64/include/asm/ptrace.h
 };
 
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs);
