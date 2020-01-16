@@ -44,7 +44,11 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 #elif defined(__arm__)
 	val = 0xfedeffe7; // Undefined insn
 #elif defined(__aarch64__)
-	val = 0xd4200000;
+	unsigned long aligned_addr = getAligned(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+
+	val = (old_data & ~(0xffffffffUL << shift)) | (0xd4200000UL << shift);
 #else
 # error Unsupported architecture
 #endif
