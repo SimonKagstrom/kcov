@@ -1,3 +1,8 @@
+Kcov (38):
+	* Issue #267: Fix hang on Aarch64 (Julian Stecklina)
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Jan 17 12:10:17 CET 2020
+
 Kcov (37):
     * Issue #312: Avoid unaligned access warnings for merged data
       (Didri Boukelmoune)
