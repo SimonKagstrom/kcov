@@ -118,7 +118,10 @@ if (KCOV_STATIC_BUILD)
 	set (CURL_LIBRARIES "")
 	# Coveralls doesn't work in a static setting
 	set (coveralls_SRCS writers/dummy-coveralls-writer.cc)
-	set (CMAKE_EXE_LINKER_FLAGS "-static")
+    set (CMAKE_EXE_LINKER_FLAGS "-static")
+else()
+    find_package(OpenSSL REQUIRED)
+    list( APPEND CURL_LIBRARIES ${OPENSSL_LIBRARIES} )
 endif (KCOV_STATIC_BUILD)
 
 set (ELF_SRCS
