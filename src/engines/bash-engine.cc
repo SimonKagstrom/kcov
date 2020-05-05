@@ -32,6 +32,7 @@ using namespace kcov;
 extern GeneratedData bash_helper_data;
 extern GeneratedData bash_helper_debug_trap_data;
 extern GeneratedData bash_redirector_library_data;
+extern GeneratedData bash_cloexec_library_data;
 
 enum InputType
 {
@@ -82,6 +83,7 @@ public:
 		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
 		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
 		std::string redirectorPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
+		std::string cloexecPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_tracefd_cloexec.so";
 
 		if (write_file(bash_helper_data.data(), bash_helper_data.size(), "%s", helperPath.c_str()) < 0)
 		{
@@ -100,6 +102,14 @@ public:
 				redirectorPath.c_str()) < 0)
 		{
 			error("Can't write redirector library at %s", redirectorPath.c_str());
+
+			return false;
+		}
+
+		if (write_file(bash_cloexec_library_data.data(), bash_cloexec_library_data.size(), "%s",
+				cloexecPath.c_str()) < 0)
+		{
+			error("Can't write tracefd-cloexec library at %s", cloexecPath.c_str());
 
 			return false;
 		}
@@ -192,8 +202,17 @@ public:
 			}
 
 			// And preload it!
-			if (conf.keyAsInt("bash-handle-sh-invocation"))
-				doSetenv(std::string("LD_PRELOAD=" + redirectorPath));
+			if (conf.keyAsInt("bash-handle-sh-invocation") ||
+			    conf.keyAsInt("bash-tracefd-cloexec"))
+			{
+				std::string preloadStr;
+				if (conf.keyAsInt("bash-handle-sh-invocation"))
+						preloadStr += redirectorPath;
+				if (conf.keyAsInt("bash-tracefd-cloexec"))
+						preloadStr += (preloadStr.size() ? ":" : "") + cloexecPath;
+
+				doSetenv(std::string("LD_PRELOAD=" + preloadStr));
+                        }
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;

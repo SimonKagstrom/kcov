@@ -298,6 +298,10 @@ add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
 target_link_libraries(bash_execve_redirector ${DL_LIBRARY})
 
+add_library (bash_tracefd_cloexec SHARED engines/bash-tracefd-cloexec.c)
+set_target_properties(bash_tracefd_cloexec PROPERTIES SUFFIX ".so")
+target_link_libraries(bash_tracefd_cloexec ${DL_LIBRARY})
+
 add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc system-mode/registration.cc)
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
 target_link_libraries(kcov_system_lib
@@ -324,6 +328,17 @@ add_custom_command(
         > bash-redirector-library.cc
     DEPENDS
         bash_execve_redirector
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+)
+
+add_custom_command(
+    OUTPUT bash-cloexec-library.cc
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
+            $<TARGET_FILE:bash_tracefd_cloexec>
+            bash_cloexec_library
+        > bash-cloexec-library.cc
+    DEPENDS
+        bash_tracefd_cloexec
         "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
 )
 
@@ -406,7 +421,7 @@ if (SPECIFY_RPATH)
 endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
-	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
+	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc bash-cloexec-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 	target_link_libraries(${KCOV}
 		stdc++
