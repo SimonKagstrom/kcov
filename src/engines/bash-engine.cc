@@ -130,6 +130,11 @@ public:
 
 				return false;
 			}
+			// If xtrace fd is supported, make m_stdout
+			// non blocking to drain it as soon as data
+			// are available (without waiting for \n)
+			if (m_bashSupportsXtraceFd)
+				make_file_non_blocking(m_stdout);
 
 		}
 		else if (m_child == 0)
@@ -440,9 +445,21 @@ private:
 	// Printout lines to stdout, except kcov markers
 	void handleStdout()
 	{
-		// No need if we have xtrace fd support
+		// If we have xtrace fd support, no kcov marker
+		// is present in stdout. So there is no need to
+		// parse it, we can just drain it.
 		if (m_bashSupportsXtraceFd)
 		{
+			const int size = 4096;
+			static char drainedOutput[size];
+
+			clearerr(m_stdout);
+			while (!feof(m_stdout) && !ferror(m_stdout) && file_readable(m_stdout, 0))
+			{
+				size_t len = fread(drainedOutput, 1, size, m_stdout);
+				if (len)
+					fwrite(drainedOutput, 1, len, stdout);
+			}
 			return;
 		}
 
