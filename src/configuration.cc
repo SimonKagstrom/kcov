@@ -137,6 +137,7 @@ public:
 		{ "debug", required_argument, 0, 'D' },
 		{ "debug-force-bash-stderr", no_argument, 0, 'd' },
 		{ "bash-handle-sh-invocation", no_argument, 0, 's' },
+		{ "bash-tracefd-cloexec", no_argument, 0, 't' },
 		{ "bash-dont-parse-binary-dir", no_argument, 0, 'j' },
 		{ "bash-parse-files-in-dirs", required_argument, 0, 'J' },
 		{ "replace-src-path", required_argument, 0, 'R' },
@@ -376,6 +377,9 @@ public:
 			case 's':
 				setKey("bash-handle-sh-invocation", 1);
 				break;
+			case 't':
+				setKey("bash-tracefd-cloexec", 1);
+				break;
 			case '4':
 			{
 				std::string s(optarg);
@@ -598,6 +602,7 @@ public:
 		setKey("include-path", StrVecMap_t());
 		setKey("bash-force-stderr-input", 0);
 		setKey("bash-handle-sh-invocation", 0);
+		setKey("bash-tracefd-cloexec", 0);
 		setKey("bash-use-basic-parser", 0);
 		setKey("bash-use-ps4", 1);
 		setKey("bash-parse-file-dir", StrVecMap_t());
@@ -726,6 +731,8 @@ public:
 						" --bash-method=method    Bash coverage collection method, PS4 (default) or DEBUG\n"
 						" --bash-handle-sh-invocation  Try to handle #!/bin/sh scripts by a LD_PRELOAD\n"
 						"                         execve replacement. Buggy on some systems\n"
+						" --bash-tracefd-cloexec  Force children to not be traced by configuring the trace\n"
+						"                         fd as non-cloneable with LD_PRELOAD. Buggy on some systems\n"
 						" --bash-dont-parse-binary-dir Don't parse the binary directory for other scripts\n"
 						" --bash-parse-files-in-dir=dir[,...]  Parse bash scripts in dir(s)\n",
 				keyAsInt("path-strip-level"), keyAsInt("output-interval"),

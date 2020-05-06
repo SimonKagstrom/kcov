@@ -35,7 +35,7 @@ class KcovTestCase(unittest.TestCase):
 
         return rv, output
 
-    def do(self, cmdline, kcovKcov = True, timeout = None):
+    def do(self, cmdline, kcovKcov = True, timeout = None, kill = False):
         output = ""
         rv = 0
 
@@ -51,7 +51,10 @@ class KcovTestCase(unittest.TestCase):
         if timeout is not None:
             def stopChild():
                 print("\n  didn't finish within %s seconds; killing ..." % timeout)
-                child.terminate()
+                if kill:
+                    child.kill()
+                else:
+                    child.terminate()
 
             timer = threading.Timer(timeout, stopChild)
             timer.start()
