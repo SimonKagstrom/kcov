@@ -324,3 +324,13 @@ class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 9) == None
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 10) == None
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 11) == 1
+
+class bash_drain_stdout_without_return(testbase.KcovTestCase):
+    def runTest(self):
+        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " +
+            testbase.sources + "/tests/bash/long-output-without-return.sh",
+            timeout=5.0)
+        self.assertEqual(0, rv, "kcov exited unsuccessfully")
+        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/long-output-without-return.sh/cobertura.xml")
+        self.assertIsNone(parse_cobertura.hitsPerLine(dom, "long-output-without-return.sh", 1))
+        self.assertEqual(32768, parse_cobertura.hitsPerLine(dom, "long-output-without-return.sh", 4))

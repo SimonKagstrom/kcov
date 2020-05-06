@@ -122,6 +122,15 @@ extern int concat_files(const char *dst, const char *file_a, const char *file_b)
 extern const char *get_home();
 
 /**
+ * Make a FILE * non blocking when not enough data can be read from it
+ *
+ * @param fp the file to read
+ *
+ * @return true if the file could be made non blocking, false otherwise
+ */
+bool make_file_non_blocking(FILE *fp);
+
+/**
  * Return true if a FILE * is readable without blocking.
  *
  * @param fp the file to read

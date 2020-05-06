@@ -271,6 +271,16 @@ const char *get_home(void)
 	return getenv("HOME");
 }
 
+bool make_file_non_blocking(FILE *fp)
+{
+	int fd = fileno(fp);
+	int flags = fcntl(fd, F_GETFL, 0);
+	if (flags == -1)
+		return false;
+	else
+		return fcntl(fd, F_SETFL, flags | O_NONBLOCK) != -1;
+}
+
 bool file_readable(FILE *fp, unsigned int ms)
 {
 	fd_set rfds;
