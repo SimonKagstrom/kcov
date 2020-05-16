@@ -29,8 +29,8 @@
 
 using namespace kcov;
 
-extern GeneratedData bash_helper_data;
-extern GeneratedData bash_helper_debug_trap_data;
+extern GeneratedData shell_helper_data;
+extern GeneratedData shell_helper_debug_trap_data;
 extern GeneratedData bash_redirector_library_data;
 extern GeneratedData bash_cloexec_library_data;
 
@@ -80,18 +80,18 @@ public:
 
 		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
 
-		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
-		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
+		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "shell-helper.sh";
+		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "shell-helper-debug-trap.sh";
 		std::string redirectorPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
 		std::string cloexecPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_tracefd_cloexec.so";
 
-		if (write_file(bash_helper_data.data(), bash_helper_data.size(), "%s", helperPath.c_str()) < 0)
+		if (write_file(shell_helper_data.data(), shell_helper_data.size(), "%s", helperPath.c_str()) < 0)
 		{
 			error("Can't write helper");
 
 			return false;
 		}
-		if (write_file(bash_helper_debug_trap_data.data(), bash_helper_debug_trap_data.size(), "%s",
+		if (write_file(shell_helper_debug_trap_data.data(), shell_helper_debug_trap_data.size(), "%s",
 				helperDebugTrapPath.c_str()) < 0)
 		{
 			error("Can't write helper");
@@ -197,6 +197,7 @@ public:
 			{
 				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
+				doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
 			}
 			else
 			{
@@ -220,10 +221,12 @@ public:
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
-			int argcStart = 1;
+			int argcStart = usePS4 ? 2 : 1;
 			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
 
+			if (usePS4)
+				vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
 				vec[argcStart + i] = xstrdup(argv[i]);
 

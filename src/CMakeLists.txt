@@ -200,7 +200,7 @@ set (${KCOV}_SRCS
     collector.cc
     configuration.cc
     engine-factory.cc
-    engines/bash-engine.cc
+    engines/shell-engine.cc
     engines/system-mode-engine.cc
     engines/system-mode-file-format.cc
     engines/python-engine.cc
@@ -369,16 +369,16 @@ add_custom_command(
 )
 
 add_custom_command(
-    OUTPUT bash-helper.cc
+    OUTPUT shell-helper.cc
     COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
-            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
-            bash_helper
-            "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
-            bash_helper_debug_trap
-        > bash-helper.cc
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/shell-helper.sh"
+            shell_helper
+            "${CMAKE_CURRENT_SOURCE_DIR}/engines/shell-helper-debug-trap.sh"
+            shell_helper_debug_trap
+        > shell-helper.cc
     DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper.sh"
-        "${CMAKE_CURRENT_SOURCE_DIR}/engines/bash-helper-debug-trap.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/shell-helper.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/engines/shell-helper-debug-trap.sh"
         "${CMAKE_CURRENT_SOURCE_DIR}/bin-to-c-source.py"
 )
 
@@ -425,7 +425,7 @@ if (SPECIFY_RPATH)
 endif (SPECIFY_RPATH)
 
 if (LIBELF_FOUND)
-	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc bash-cloexec-library.cc python-helper.cc bash-helper.cc kcov-system-library.cc html-data-files.cc version.c)
+	add_executable (${KCOV} ${${KCOV}_SRCS} ${SOLIB_generated} bash-redirector-library.cc bash-cloexec-library.cc python-helper.cc shell-helper.cc kcov-system-library.cc html-data-files.cc version.c)
 
 	target_link_libraries(${KCOV}
 		stdc++
