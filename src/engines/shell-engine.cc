@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
+#include <errno.h>
 
 #include <swap-endian.hh>
 
@@ -42,12 +43,19 @@ enum InputType
 	INPUT_MULTILINE,    // backslash backslash
 };
 
+enum ShellType
+{
+       SHELL_BASH,
+       SHELL_KSH,
+       SHELL_ZSH,
+};
+
 class BashEngine : public ScriptEngineBase
 {
 public:
 	BashEngine() :
 			ScriptEngineBase(), m_child(0), m_stderr(NULL), m_stdout(NULL), m_bashSupportsXtraceFd(false),
-			m_inputType(INPUT_NORMAL)
+			m_inputType(INPUT_NORMAL), m_shellType(SHELL_BASH)
 	{
 	}
 
@@ -61,6 +69,8 @@ public:
 		IConfiguration &conf = IConfiguration::getInstance();
 		int stderrPipe[2];
 		int stdoutPipe[2];
+
+		determineShellType(executable);
 
 		if (pipe(stderrPipe) < 0)
 		{
@@ -84,6 +94,7 @@ public:
 		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "shell-helper-debug-trap.sh";
 		std::string redirectorPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_execve_redirector.so";
 		std::string cloexecPath = IOutputHandler::getInstance().getBaseDirectory() + "libbash_tracefd_cloexec.so";
+		std::string dotZshenvPath = IOutputHandler::getInstance().getBaseDirectory() + ".zshenv";
 
 		if (write_file(shell_helper_data.data(), shell_helper_data.size(), "%s", helperPath.c_str()) < 0)
 		{
@@ -165,6 +176,13 @@ public:
 			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");
 
+
+			if (m_shellType != SHELL_BASH)
+			{
+				// Use the debug trap always for ksh/zsh
+				usePS4 = false;
+			}
+
 			// Revert to stderr if this bash version can't handle BASH_XTRACE
 			if (usePS4 && !m_bashSupportsXtraceFd)
 				xtraceFd = 2;
@@ -202,7 +220,21 @@ public:
 			else
 			{
 				// Use DEBUG trap
-				doSetenv(fmt("BASH_ENV=%s", helperDebugTrapPath.c_str()));
+				if (m_shellType == SHELL_BASH)
+				{
+					doSetenv(fmt("BASH_ENV=%s", helperDebugTrapPath.c_str()));
+				}
+				else if (m_shellType == SHELL_KSH)
+				{
+					doSetenv(fmt("ENV=%s", helperDebugTrapPath.c_str()));
+				}
+				else // ZSH
+				{
+					std::string zshenv = fmt("ENV=%s", helperDebugTrapPath.c_str());
+
+					doSetenv(fmt("ZDOTDIR=%s", IOutputHandler::getInstance().getBaseDirectory().c_str()));
+					write_file(zshenv.c_str(), zshenv.size() + 1, "%s/.zshenv", IOutputHandler::getInstance().getBaseDirectory().c_str());
+				}
 				doSetenv(fmt("KCOV_BASH_USE_DEBUG_TRAP=1"));
 			}
 
@@ -225,15 +257,29 @@ public:
 			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
 
-			if (usePS4)
-				vec[1] = xstrdup("-x");
+			if (m_shellType == SHELL_KSH)
+			{
+				vec[0] = xstrdup("/bin/ksh");
+				vec[1] = xstrdup("-E");
+				argcStart++;
+			}
+			else if (m_shellType == SHELL_ZSH)
+			{
+				vec[0] = xstrdup("/bin/zsh");
+			}
+			else
+			{
+				if (usePS4)
+					vec[1] = xstrdup("-x");
+			}
+
 			for (unsigned i = 0; i < argc; i++)
 				vec[argcStart + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
 			if (execv(vec[0], vec))
 			{
-				perror("Failed to execute script");
+				fprintf(stderr, "Failed to execute script %s, %s: %s\n", vec[0], vec[1], strerror(errno));
 
 				free(vec);
 
@@ -827,11 +873,53 @@ private:
 		}
 	}
 
+	void determineShellType(const std::string &executable)
+	{
+		m_shellType = SHELL_BASH;
+
+		size_t sz;
+		char *data = (char *)peek_file(&sz, "%s", executable.c_str());
+		if (data)
+		{
+			std::string firstLine(data);
+			int end = firstLine.find('\n');
+
+			// If the hash-bang is a symlink, try to find out which interpreter it uses
+			if (end != std::string::npos && firstLine[0] == '!' && firstLine[1] == '#')
+			{
+				std::string rp = get_real_path(firstLine.substr(2, end));
+
+				if (rp.find("ksh") != std::string::npos)
+				{
+					m_shellType = SHELL_KSH;
+				}
+				else if (rp.find("zsh") != std::string::npos)
+				{
+					m_shellType = SHELL_ZSH;
+				}
+			}
+			else
+			{
+				// No hash bang, go by the executable name
+				if (executable.find(".ksh") != std::string::npos)
+				{
+					m_shellType = SHELL_KSH;
+				}
+				else if (executable.find(".zsh") != std::string::npos)
+				{
+					m_shellType = SHELL_ZSH;
+				}
+			}
+		}
+		free(data);
+	}
+
 	pid_t m_child;
 	FILE *m_stderr;
 	FILE *m_stdout;
 	bool m_bashSupportsXtraceFd;
 	enum InputType m_inputType;
+	enum ShellType m_shellType;
 };
 
 // This ugly stuff should be fixed

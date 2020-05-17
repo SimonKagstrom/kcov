@@ -128,12 +128,14 @@ prepare_osx:
 	brew install zlib
 	brew upgrade python
 	brew install bash
+	brew install ksh
+	brew install zsh
 
 prepare_linux: patchelf
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
 	sudo add-apt-repository ppa:jonlar/crpcut -y
 	sudo apt-get update -q
-	sudo apt-get install -y --allow-unauthenticated ${kcov_deps} gcc-multilib debootstrap git time curl crpcut crpcut-dev
+	sudo apt-get install -y --allow-unauthenticated ${kcov_deps} gcc-multilib debootstrap git time curl crpcut crpcut-dev zsh ksh
 
 prepare_linux_gcc:
 	sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
