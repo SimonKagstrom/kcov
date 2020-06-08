@@ -96,6 +96,7 @@ public:
 						"  kcov --collect-only /tmp/kcov ./frodo  # Collect coverage, don't report\n"
 						"  kcov --report-only /tmp/kcov ./frodo   # Report coverage collected above\n"
 						"  kcov --merge /tmp/out /tmp/dir1 /tmp/dir2     # Merge the dir1/dir2 reports\n"
+						"  kcov --merge /tmp/out /tmp/dir*               # same as above (wildcard)\n"
 						"  kcov --system-record /tmp/out-dir sysroot     # Perform full-system in-\n"
 						"                                                  strumentation for sysroot\n"
 						"  kcov --system-report  /tmp/data-dir           # Report all data from a full-\n"

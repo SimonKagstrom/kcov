@@ -72,6 +72,17 @@ kcov --exclude-path=/usr/include /path/to/outdir executable
 
 Does the same thing, but with proper path lookups.
 
+Merging multiple kcov runs
+--------------------------
+Kcov can also merge the results of multiple earlier runs. To use this mode,
+call kcov with `--merge`, an output path and one or more paths to an earlier
+run, e.g.,
+
+```
+kcov --merge /tmp/merged-output /tmp/kcov-output1 /tmp/kcov-output2
+kcov --merge /tmp/merged-output /tmp/kcov-output*    # With a wildcard
+```
+
 Use from continuous integration systems
 ---------------------------------------
 kcov is easy to integrate with [travis-ci](http://travis-ci.org) together with
