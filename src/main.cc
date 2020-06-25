@@ -240,12 +240,18 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 
 	parser->addFile(file);
 
+	const std::string &base = output.getBaseDirectory();
+	const std::string &out = output.getOutDirectory();
+	// The merge parser is both a parser, a writer and a collector (!)
+	IMergeParser &mergeParser = createMergeParser(reporter, base, out,
+			filter);
+	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser,
+			basicFilter);
+	(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY)
 	{
-		const std::string &base = output.getBaseDirectory();
-		const std::string &out = output.getOutDirectory();
-
 		IWriter &htmlWriter = createHtmlWriter(*parser, reporter, base, out,
 				conf.keyAsString("binary-name"));
 		IWriter &jsonWriter = createJsonWriter(*parser, reporter,
@@ -255,11 +261,6 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		IWriter &sonarqubeWriter = createSonarqubeWriter(*parser, reporter,
 				out + "/sonarqube.xml");
 
-		// The merge parser is both a parser, a writer and a collector (!)
-		IMergeParser &mergeParser = createMergeParser(reporter, base, out,
-				filter);
-		IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser,
-				basicFilter);
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", conf.keyAsString("merged-name"),
 				false);
@@ -269,11 +270,6 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 				mergeReporter, base + "kcov-merged");
 		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
 				mergeReporter, base + "kcov-merged/sonarqube.xml");
-		(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
-
-		reporter.registerListener(mergeParser);
-
-		output.registerWriter(mergeParser);
 
 		// Multiple binaries? Register the merged mode stuff
 		if (countMetadata() > 0)
@@ -295,6 +291,9 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		output.registerWriter(coberturaWriter);
 		output.registerWriter(sonarqubeWriter);
 	}
+
+	reporter.registerListener(mergeParser);
+	output.registerWriter(mergeParser);
 
 	g_engine = engine;
 	g_output = &output;
