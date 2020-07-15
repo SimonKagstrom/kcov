@@ -197,7 +197,6 @@ public:
 			{
 				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
-				doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
 			}
 			else
 			{
