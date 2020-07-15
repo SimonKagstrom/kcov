@@ -197,7 +197,6 @@ public:
 			{
 				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
 				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
-				doSetenv("PS4=kcov@${BASH_SOURCE}@${LINENO}@");
 			}
 			else
 			{
@@ -221,12 +220,10 @@ public:
 
 			// Make a copy of the vector, now with "bash -x" first
 			char **vec;
-			int argcStart = usePS4 ? 2 : 1;
+			int argcStart = 1;
 			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
 			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
 
-			if (usePS4)
-				vec[1] = xstrdup("-x");
 			for (unsigned i = 0; i < argc; i++)
 				vec[argcStart + i] = xstrdup(argv[i]);
 
