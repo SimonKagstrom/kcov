@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <regex>
 
 using namespace kcov;
 
@@ -199,19 +200,12 @@ public:
 	std::string mangleSourcePath(const std::string &path)
 	{
 		std::string filename = get_real_path(path);
-
 		if (m_origRoot.length() > 0 && m_newRoot.length() > 0)
 		{
-			std::string path = filename;
-			size_t index = path.find(m_origRoot);
-
-			if (index != std::string::npos)
-			{
-				path.replace(index, m_origRoot.length(), m_newRoot);
-				filename = get_real_path(path);
-			}
+			std::regex regexRoot(m_origRoot);
+			filename = get_real_path(regex_replace (filename,regexRoot,m_newRoot));
+			
 		}
-
 		return filename;
 	}
 
