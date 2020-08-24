@@ -1,0 +1,58 @@
+name: CI
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build executable
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [i386, amd64, armv7, aarch64, ppc64le]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare
+        run: chmod u+x .github/workflows/generic-build.sh
+
+      - name: Build for matrix.arch == amd64
+        if: ${{ matrix.arch == 'amd64' }}
+        run: sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
+
+      - name: Build for matrix.arch == i386
+        if: ${{ matrix.arch == 'i386' }}
+        run: |
+          chmod u+x ./.github/workflows/setup-i386.sh
+          sudo .github/workflows/setup-i386.sh
+          sudo schroot -c mychroot -- ./.github/workflows/generic-build.sh ${{ matrix.arch }}
+
+      - name: Build for matrix.arch == armv7, aarch64, ppc64le
+        if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
+        uses: uraimo/run-on-arch-action@v1.0.9
+        with:
+          architecture: ${{ matrix.arch }}
+          distribution: ubuntu18.04
+          run: .github/workflows/generic-build.sh ${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kcov-${{ matrix.arch }}.tar.gz
+          path: kcov-${{ matrix.arch }}.tar.gz
+
+  create_release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: kcov-*/kcov-*.tar.gz
+          artifactContentType: application/gzip
+          token: ${{ secrets.GITHUB_TOKEN }}
