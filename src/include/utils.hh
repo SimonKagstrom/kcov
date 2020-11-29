@@ -219,3 +219,5 @@ static inline uint32_t hash_block(const void *buf, size_t len)
 {
 	return crc32(0, (const Bytef *)buf, len);
 }
+
+uint32_t hash_file(const std::string &filename);

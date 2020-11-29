@@ -528,7 +528,7 @@ public:
 
 			setKey("target-directory",
 					fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
-							std::hash<std::string>()(tmp.first)));
+							(size_t)hash_file(path)));
 
 			setKey("binary-name", binaryName);
 
