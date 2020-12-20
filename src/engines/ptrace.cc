@@ -215,7 +215,6 @@ public:
 				kcov_debug(ENGINE_MSG, "PT BP at 0x%llx:%d for %d\n", (unsigned long long) out.addr, out.data,
 						m_activeChild);
 
-				kcov_debug(ENGINE_MSG, "Looking for instruction %zx.\n", out.addr);
 				bool insnFound = m_instructionMap.find(out.addr) != m_instructionMap.end();
 
 				// Single-step if we have this BP
