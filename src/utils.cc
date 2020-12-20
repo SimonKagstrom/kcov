@@ -730,3 +730,18 @@ std::pair<std::string, std::string> split_path(const std::string &pathStr)
 
 	return out;
 }
+
+uint32_t hash_file(const std::string &filename)
+{
+	size_t sz;
+	void *p = read_file(&sz, "%s", filename.c_str());
+	if (!p)
+	{
+		return 0;
+	}
+
+	uint32_t out = hash_block(p, sz);
+	free(p);
+
+	return out;
+}

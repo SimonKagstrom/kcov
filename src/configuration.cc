@@ -528,7 +528,14 @@ public:
 
 			setKey("target-directory",
 					fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
-							std::hash<std::string>()(tmp.first)));
+							(size_t)hash_file(path)));
+
+			if (keyAsInt("running-mode") == IConfiguration::MODE_REPORT_ONLY &&
+				!file_exists(keyAsString("target-directory")))
+			{
+				error("report-only selected, but the target directory %s does not exist\n", keyAsString("target-directory").c_str());
+				return usage();
+			}
 
 			setKey("binary-name", binaryName);
 
