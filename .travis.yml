@@ -5,6 +5,7 @@
 
 sudo: required
 dist: trusty
+osx_image: xcode12.2
 
 before_install: make -f travis/Makefile prepare_environment
 

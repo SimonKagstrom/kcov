@@ -126,7 +126,7 @@ prepare_osx_clang:
 prepare_osx_gcc:
 
 prepare_osx:
-#	brew update
+	brew update
 	brew install zlib
 	brew upgrade python
 	brew install bash
