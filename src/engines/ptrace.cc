@@ -6,6 +6,7 @@
 #include <output-handler.hh>
 #include <solib-handler.hh>
 #include <file-parser.hh>
+#include <libelf.h>
 #include <phdr_data.h>
 #include "ptrace_sys.hh"
 
@@ -463,6 +464,13 @@ public:
 
 	unsigned int matchFile(const std::string &filename, uint8_t *data, size_t dataSize)
 	{
+		Elf32_Ehdr *hdr = (Elf32_Ehdr *) data;
+
+		if (memcmp(hdr->e_ident, ELFMAG, strlen(ELFMAG)) == 0)
+		{
+			return match_perfect;
+		}
+
 		// Unless #!/bin/sh etc, this should win
 		return 1;
 	}
