@@ -28,5 +28,6 @@ int main() {
     ofs << ++i << std::endl;
     sleep(1);
   }
+  printf("Over and out\n");
   return 0;
 }
