@@ -24,8 +24,8 @@ def configure(k, o, t, s):
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
         if outbase != "":
-            os.system("rm -rf %s/kcov" % (outbase))
-        os.system("mkdir -p %s/kcov/" % (outbase))
+            os.system("/bin/rm -rf %s/kcov" % (outbase))
+        os.system("/bin/mkdir -p %s/kcov/" % (outbase))
 
     def doShell(self, cmdline):
         child = subprocess.Popen(cmdline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
