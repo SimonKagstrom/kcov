@@ -11,11 +11,9 @@ before_install: make -f travis/Makefile prepare_environment
 
 os:
   - linux
-#  - osx
 
 language: cpp
 compiler:
-  - gcc
   - clang
 
 
