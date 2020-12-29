@@ -40,3 +40,23 @@ jobs:
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
             .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
+
+  build-osx:
+    name: Build and test OSX executable
+    runs-on: macOS-latest
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare
+        run: |
+          chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
+          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1
+
+      - name: Build for OSX
+        run: |
+          sudo .github/workflows/osx-build.sh
+          sudo .github/workflows/ci-run-tests.sh
