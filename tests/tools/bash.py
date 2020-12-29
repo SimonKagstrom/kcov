@@ -2,6 +2,7 @@ import testbase
 import os
 import unittest
 import platform
+import sys
 import parse_cobertura
 
 class BashBase(testbase.KcovTestCase):
@@ -329,6 +330,7 @@ class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 11) == 1
 
 class bash_drain_stdout_without_return(testbase.KcovTestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " +
             testbase.sources + "/tests/bash/long-output-without-return.sh",
