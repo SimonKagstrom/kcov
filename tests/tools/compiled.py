@@ -2,10 +2,12 @@ import testbase
 import unittest
 import parse_cobertura
 import sys
+import platform
 import os
 
 class illegal_insn(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         self.setUp()
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/illegal-insn", False)
@@ -46,6 +48,7 @@ class fork_64(ForkBase):
 
 class fork_32(ForkBase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
+    @unittest.skipUnless(platform.machine().startswith("x86_64"), "Only for x86_64")
     def runTest(self):
         self.doTest("fork-32")
 
@@ -136,6 +139,7 @@ class main_test_lldb_raw_breakpoints(MainTestBase):
         self.doTest("--configure=lldb-use-raw-breakpoint-writes=1")
 
 class popen_test(testbase.KcovTestCase):
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/test_popen", False)
@@ -202,6 +206,7 @@ class global_ctors(testbase.KcovTestCase):
 
 class daemon_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/test_daemon", False)

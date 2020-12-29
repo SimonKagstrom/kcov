@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 2.8.4)
 project (kcov-tests)
 
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+include(TargetArch)
+target_architecture(CMAKE_TARGET_ARCHITECTURES)
+message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
+
 enable_language(ASM)
 
 if (POLICY CMP0042)
@@ -172,19 +177,21 @@ else (CMAKE_VERSION VERSION_LESS "2.8.9")
 endif (CMAKE_VERSION VERSION_LESS "2.8.9")
 
 if (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
-    add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
-    add_custom_target (illegal-insn ALL
-        COMMAND "${CMAKE_C_COMPILER}"
-            -nostdlib
-            "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
-            -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
-    )
+    if (CMAKE_TARGET_ARCHITECTURES STREQUAL "i386" OR CMAKE_TARGET_ARCHITECTURES STREQUAL "x86_64")
+        add_executable(recursive-ptrace ${recursive-ptrace_SRCS})
+        add_custom_target (illegal-insn ALL
+            COMMAND "${CMAKE_C_COMPILER}"
+                -nostdlib
+                "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
+                -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
+        )
 
-    add_custom_target (fork-32 ALL
-        COMMAND "${CMAKE_C_COMPILER}" -g -m32
-            "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
-            -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
-    )
+        add_custom_target (fork-32 ALL
+            COMMAND "${CMAKE_C_COMPILER}" -g -m32
+                "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
+                -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
+        )
+    endif()
 endif (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
 
 add_custom_target(tests-stripped ALL
