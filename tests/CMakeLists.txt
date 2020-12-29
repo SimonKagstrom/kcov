@@ -111,7 +111,6 @@ set (daemon_SRCS
 )
 
 add_library(shared_library SHARED
-    shared-library/big-symbol.S
     shared-library/solib.c
 )
 
