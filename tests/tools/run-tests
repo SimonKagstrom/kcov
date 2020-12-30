@@ -7,7 +7,9 @@ import platform
 
 # The actual tests
 from basic import *
-from compiled import *
+from compiled_basic import *
+if platform.machine() in ["x86_64", "i386", "i686"]:
+    from compiled import *
 if sys.platform.startswith("linux"):
     from bash_linux_only import *
     if platform.machine() in ["x86_64", "i386", "i686"]:
