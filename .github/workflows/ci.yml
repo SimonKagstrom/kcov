@@ -60,3 +60,20 @@ jobs:
         run: |
           sudo .github/workflows/osx-build.sh
           sudo .github/workflows/ci-run-tests.sh
+
+  build-freebsd:
+    runs-on: macos-latest
+    name: Build and test FreeBSD executable
+    steps:
+    - uses: actions/checkout@v2
+    - name: FreeBSD
+      id: test
+      uses: vmactions/freebsd-vm@v0.0.9
+      with:
+        usesh: true
+        sync: rsync
+        prepare: pkg install -y binutils cmake elfutils python bash git
+        run: |
+          chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
+          .github/workflows/freebsd-build.sh x86_64
+          .github/workflows/ci-run-tests.sh
