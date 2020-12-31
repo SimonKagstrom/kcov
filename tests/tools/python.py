@@ -32,14 +32,6 @@ class python_unittest(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/testdriver/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "testdriver", 14) == 1
 
-class python_short_file(testbase.KcovTestCase):
-    def runTest(self):
-        self.setUp()
-        rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/short-test.py")
-
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/short-test.py/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "short-test.py", 6) == 1
-
 class PythonBase(testbase.KcovTestCase):
     def doTest(self, extra):
         self.setUp()
