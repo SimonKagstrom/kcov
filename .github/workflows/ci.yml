@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Prepare
-        run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
+        run: chmod u+x .github/workflows/*.sh
 
       - name: Build for matrix.arch == amd64
         if: ${{ matrix.arch == 'amd64' }}
