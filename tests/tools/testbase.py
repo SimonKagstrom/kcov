@@ -6,6 +6,7 @@ import sys
 import subprocess
 import time
 import threading
+import platform
 
 kcov = ""
 kcov_system_daemon = ""
@@ -24,8 +25,8 @@ def configure(k, o, t, s):
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
         if outbase != "":
-            os.system("rm -rf %s/kcov" % (outbase))
-        os.system("mkdir -p %s/kcov/" % (outbase))
+            os.system("/bin/rm -rf %s/kcov" % (outbase))
+        os.system("/bin/mkdir -p %s/kcov/" % (outbase))
 
     def doShell(self, cmdline):
         child = subprocess.Popen(cmdline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -40,7 +41,7 @@ class KcovTestCase(unittest.TestCase):
         rv = 0
 
         extra = ""
-        if kcovKcov and sys.platform.startswith("linux"):
+        if kcovKcov and sys.platform.startswith("linux") and platform.machine() in ["x86_64", "i386", "i686"]:
             extra = kcov + " --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc " + outbase + "/kcov-kcov "
 
 

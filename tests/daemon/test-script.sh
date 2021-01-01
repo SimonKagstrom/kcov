@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 3 ] ; then
 	echo "Usage: <kcov-binary> <out-dir> <program-to-run>"
