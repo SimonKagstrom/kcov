@@ -9,6 +9,7 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         libdw-dev \
         libiberty-dev \
+    libssl-dev \
         ninja-build \
         python3 \
         zlib1g-dev \
