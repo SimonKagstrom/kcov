@@ -625,6 +625,7 @@ public:
 		setKey("system-mode-read-results-file", "");
 		setKey("patchelf-command", "patchelf");
 		setKey("coveralls-service-name", "travis-ci");
+		setKey("cobertura-full-paths", 0);
 	}
 
 	void setKey(const std::string &key, const std::string &val)
@@ -662,7 +663,8 @@ public:
 	void configure(const std::string &key, const std::string &value)
 	{
 		if (key == "low-limit" || key == "high-limit"
-				|| key == "bash-use-basic-parser")
+				|| key == "bash-use-basic-parser"
+				|| key == "cobertura-full-paths")
 		{
 			if (!isInteger(value))
 				panic("Value for %s must be integer\n", key.c_str());
@@ -688,6 +690,8 @@ public:
 			setKey(key, std::string(value));
 		else if (key == "coveralls-service-name")
 			setKey(key, std::string(value));
+		else if (key == "cobertura-full-paths")
+			setKey(key, stoul(std::string(value)));
 		else
 			panic("Unknown key %s\n", key.c_str());
 	}

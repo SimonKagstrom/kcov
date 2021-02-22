@@ -145,8 +145,11 @@ private:
 		std::string filename = file->m_name;
 		size_t pos = filename.find(m_commonPath);
 
-		if (pos != std::string::npos && filename.size() > m_commonPath.size())
-			filename = filename.substr(m_commonPath.size() + 1);
+		if (IConfiguration::getInstance().keyAsInt("cobertura-full-paths") == 0)
+		{
+			if (pos != std::string::npos && filename.size() > m_commonPath.size())
+				filename = filename.substr(m_commonPath.size() + 1);
+		}
 
 		out = "				<class name=\"" + mangledName + "\" filename=\"" + filename + "\" branch-rate=\"1.0\" complexity=\"1.0\" line-rate=\""
 				+ fmt("%.3f", file->m_executedLines / (float) nCodeLines) + "\">\n" + "					<lines>\n" + out + "					</lines>\n"
