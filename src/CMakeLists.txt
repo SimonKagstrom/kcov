@@ -1,5 +1,7 @@
 find_package (Threads)
-find_package (Bfd)
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD OR CMAKE_SYSTEM_NAME STREQUAL Linux)
+    find_package (Bfd REQUIRED)
+endif()
 
 include(TargetArch)
 target_architecture(CMAKE_TARGET_ARCHITECTURES)
