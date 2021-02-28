@@ -21,6 +21,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <curl/curl.h>
+
+
 int g_kcov_debug_mask = STATUS_MSG;
 static void* (*mocked_read_callback)(size_t* out_size, const char* path);
 static int (*mocked_write_callback)(const void* data, size_t size, const char* path);
@@ -522,6 +525,33 @@ std::vector<std::string> split_string(const std::string &s, const char *delims)
     split(s, *delims, elems);
 
     return elems;
+}
+
+std::string escape_url(const std::string &s)
+{
+	std::vector<std::string> elems = split_string(s, "/");
+	std::string out;
+
+	// Yes, inefficient, but the number of invocations is fairly limited in kcov
+	CURL *curl = curl_easy_init();
+	std::string delim = "";
+
+	for (std::vector<std::string>::iterator it = elems.begin(); it != elems.end(); ++it)
+	{
+		char *p = curl_easy_escape(curl, it->c_str(), 0);
+		std::string cur = *it;
+
+		if (p)
+		{
+			cur = p;
+		}
+		out = out + delim + cur;
+		delim = "/";
+		free(p);
+	}
+	curl_easy_cleanup(curl);
+
+	return out;
 }
 
 std::string trim_string(const std::string &strIn, const std::string &trimEndChars)

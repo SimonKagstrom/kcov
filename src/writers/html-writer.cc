@@ -324,7 +324,7 @@ private:
 				"\"covered\":\"%.1f\","
 				"\"covered_lines\":\"%d\","
 				"\"uncovered_lines\":\"%d\","
-				"\"total_lines\" : \"%d\"},\n", linkName.c_str(), titleName.c_str(), summaryName.c_str(),
+				"\"total_lines\" : \"%d\"},\n", escape_url(linkName).c_str(), titleName.c_str(), summaryName.c_str(),
 				colorFromPercent(percent).c_str(), percent, executedLines, lines - executedLines, lines);
 	}
 

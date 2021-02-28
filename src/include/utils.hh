@@ -170,6 +170,8 @@ std::string escape_html(const std::string &str);
 
 std::string escape_json(const std::string &str);
 
+std::string escape_url(const std::string &s);
+
 void msleep(uint64_t ms);
 
 class Semaphore

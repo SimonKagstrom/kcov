@@ -8,7 +8,7 @@ target_architecture(CMAKE_TARGET_ARCHITECTURES)
 message(STATUS "Target architectures: ${CMAKE_TARGET_ARCHITECTURES}")
 
 find_package (ZLIB REQUIRED)
-find_package (CURL)
+find_package (CURL REQUIRED)
 
 if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 set (DL_LIBRARY "")
@@ -311,6 +311,7 @@ add_library (kcov_system_lib SHARED engines/system-mode-binary-lib.cc utils.cc s
 set_target_properties(kcov_system_lib PROPERTIES SUFFIX ".so")
 target_link_libraries(kcov_system_lib
     "${DL_LIBRARY}"
+    ${CURL_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 
