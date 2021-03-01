@@ -15,6 +15,7 @@ find_package (Elfutils REQUIRED)
 find_package (PkgConfig REQUIRED)
 find_package (Threads)
 find_package (ZLIB REQUIRED)
+find_package (CURL REQUIRED)
 
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
@@ -77,6 +78,7 @@ target_link_libraries(${LINE2ADDR}
     "${DL_LIBRARY}"
     ${LIBDW_LIBRARIES}
     ${LIBELF_LIBRARIES}
+    ${CURL_LIBRARIES}
     "${M_LIBRARY}"
     stdc++
     ${CMAKE_THREAD_LIBS_INIT}
