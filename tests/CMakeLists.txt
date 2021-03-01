@@ -27,6 +27,7 @@ set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
 
 find_package (ZLIB REQUIRED)
+find_package (CURL REQUIRED)
 
 if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 set (DL_LIBRARY "")
@@ -142,7 +143,7 @@ add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
-target_link_libraries(setpgid-kill ${ZLIB_LIBRARIES})
+target_link_libraries(setpgid-kill ${ZLIB_LIBRARIES} ${CURL_LIBRARIES})
 
 add_executable(issue31 daemon/test-issue31.cc)
 target_link_libraries(issue31 ${CMAKE_THREAD_LIBS_INIT})
