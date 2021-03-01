@@ -25,6 +25,7 @@ set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
 
 find_package (ZLIB REQUIRED)
+find_package (CURL REQUIRED)
 
 find_library (DL_LIBRARY NAMES dl)
 if (DL_LIBRARY)
@@ -111,6 +112,7 @@ target_link_libraries(${TGT}
     ${LIBDW_LIBRARIES}
     ${LIBELF_LIBRARIES}
     ${ZLIB_LIBRARIES}
+    ${CURL_LIBRARIES}
 )
 
 add_executable (same-name-test
