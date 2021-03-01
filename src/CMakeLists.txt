@@ -454,6 +454,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${CMAKE_THREAD_LIBS_INIT}
         "${DL_LIBRARY}"
         "${M_LIBRARY}"
+        ${CURL_LIBRARIES}
         ${ZLIB_LIBRARIES}
 	)
 	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
