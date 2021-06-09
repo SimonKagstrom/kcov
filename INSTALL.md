@@ -25,13 +25,13 @@ Mac OS X
 --------
 brew install zlib bash cmake pkgconfig
 
-*Temporary* OSX build instructions due to Issue #166:
+* OSX build instructions (see Issue #166 / Issue #357):
 
 Create an empty build dir and do the following steps:
 
 ```
   cd <build-dir>
-  cmake -G Xcode <path/to/kcov/source/dir>
+  cmake -G Xcode -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib <path/to/kcov/source/dir>
   xcodebuild -target kcov -configuration Release
 ```
 
