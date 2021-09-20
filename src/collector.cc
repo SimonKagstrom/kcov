@@ -135,7 +135,7 @@ private:
 						"kcov: binutils-dev), so the --verify option will not do anything."
 #endif
 						);
-
+			m_exitCode = ev.data;
 			break;
 
 		case ev_exit_first_process:
