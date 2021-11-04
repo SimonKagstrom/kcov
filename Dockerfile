@@ -1,4 +1,4 @@
-FROM debian:stable-slim AS builder
+FROM debian:bullseye-slim AS builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -23,7 +23,7 @@ RUN mkdir /src/build && \
     cmake --build . && \
     cmake --build . --target install
 
-FROM debian:stable-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update && \
     apt-get install -y \
