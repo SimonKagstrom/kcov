@@ -13,18 +13,6 @@ build_reference:
 	make -C reference/build/
 	cp reference/build/src/kcov /tmp/kcov-reference
 
-build-osx-xcode:
-	mkdir -p build-xcode
-	cd build-xcode && cmake -G Xcode ..
-	cd build-xcode && xcodebuild
-
-build-osx: build-osx-xcode
-	mkdir -p build build-tests
-	cd build && cmake ..
-	make -C build
-	cd build-tests && cmake ../tests
-	make -C build-tests
-
 build:
 	mkdir -p build build-tests build-tools
 	cd build && CXXFLAGS=-Werror cmake ..
@@ -107,25 +95,7 @@ build_unit_tests: trompeloeil
 run_unit_tests: build build_unit_tests
 	cd build-ut && ./ut
 
-run-tests-osx-gcc: build-osx
-	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
-
-run-tests-osx-clang: build-osx
-	tests/tools/run-tests build/src/kcov /tmp/ build-tests/ `pwd` -v
-
-
 run-tests: run-tests-${TRAVIS_OS_NAME}-${CC}
-
-
-prepare_osx_clang:
-
-prepare_osx_gcc:
-
-prepare_osx:
-	brew update
-	brew install zlib
-	brew upgrade python
-	brew install bash
 
 prepare_linux: patchelf
 	sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
