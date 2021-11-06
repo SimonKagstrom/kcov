@@ -97,6 +97,12 @@ protected:
 		uint64_t id = getLineId(filename, lineNo);
 		uint64_t address = (uint64_t) crc | ((uint64_t) lineNo << 32ULL);
 
+		if (m_lineIdToAddress.find(id) != m_lineIdToAddress.end())
+		{
+			// Already reported
+			return;
+		}
+
 		m_lineIdToAddress[id] = address;
 
 		for (LineListenerList_t::const_iterator lit = m_lineListeners.begin(); lit != m_lineListeners.end(); ++lit)
