@@ -61,13 +61,13 @@ jobs:
           sudo .github/workflows/ci-run-tests.sh
 
   build-freebsd:
-    runs-on: macos-latest
+    runs-on: macos-10.15
     name: Build and test FreeBSD executable
     steps:
     - uses: actions/checkout@v2
     - name: FreeBSD
       id: test
-      uses: vmactions/freebsd-vm@v0.0.9
+      uses: vmactions/freebsd-vm@v0.1.5
       with:
         usesh: true
         sync: rsync
