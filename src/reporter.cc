@@ -340,7 +340,20 @@ private:
 		uint64_t lineId = line->lineId();
 
 		line->addAddress(addr);
-		m_addrToLine[addr].push_back(line);
+		bool dup = false;
+		for (LineList_t::iterator it = m_addrToLine[addr].begin();
+			it != m_addrToLine[addr].end();
+			++it)
+		{
+			if (line->lineId() == (*it)->lineId())
+			{
+				dup = true;
+			}
+		}
+		if (!dup)
+		{
+			m_addrToLine[addr].push_back(line);
+		}
 		m_lineIdToFileMap[lineId] = line;
 
 		// Report pending addresses for this file/line
