@@ -1,8 +1,7 @@
 name: Release
 on:
-  push:
-    tags:
-      - "*"
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -15,18 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Prepare
-        run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
-
-      - name: Build for matrix.arch == amd64
-        run: |
-          sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
-          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kcov-${{ matrix.arch }}.tar.gz
-          path: kcov-${{ matrix.arch }}.tar.gz
+#      - name: Prepare
+#        run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
+#
+#      - name: Build for matrix.arch == amd64
+#        run: |
+#          sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
+#          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
+#
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: kcov-${{ matrix.arch }}.tar.gz
+#          path: kcov-${{ matrix.arch }}.tar.gz
 
 
   build-and-push-docker-image:
