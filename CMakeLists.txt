@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.4)
 project (kcov)
 
-set (PROJECT_VERSION_MAJOR 35)
+set (PROJECT_VERSION_MAJOR 39)
 set (PROJECT_VERSION_MINOR 0)
 set (PROJECT_VERSION_PATCH 0)
 set (PROJECT_VERSION
