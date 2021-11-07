@@ -76,3 +76,24 @@ jobs:
           chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
           .github/workflows/freebsd-build.sh x86_64
           .github/workflows/ci-run-tests.sh
+
+  build-and-push-docker-image:
+    needs: [build-linux, build-osx, build-freebsd]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Docker Hub login
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+    - name: Build docker image
+      run: docker build -t kcov/kcov:latest .
+
+    - name: Push to Docker Hub
+      run: docker push kcov/kcov:latest
