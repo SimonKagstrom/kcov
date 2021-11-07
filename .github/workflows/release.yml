@@ -15,18 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Prepare
-        run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
-
-      - name: Build for matrix.arch == amd64
-        run: |
-          sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
-          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kcov-${{ matrix.arch }}.tar.gz
-          path: kcov-${{ matrix.arch }}.tar.gz
+#      - name: Prepare
+#        run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
+#
+#      - name: Build for matrix.arch == amd64
+#        run: |
+#          sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
+#          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
+#
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: kcov-${{ matrix.arch }}.tar.gz
+#          path: kcov-${{ matrix.arch }}.tar.gz
 
 
   build-and-push-docker-image:
@@ -37,6 +37,10 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get git tag
+      id: tag
+      uses: dawidd6/action-get-tag@v1
+
     - name: Docker Hub login
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -44,10 +48,10 @@ jobs:
       run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
 
     - name: Build docker image
-      run: docker build -t kcov/kcov:${{ github.event.release.tag_name }} .
+      run: docker build -t kcov/kcov:${{ steps.tag.outputs.tag }} .
 
     - name: Push to Docker Hub
-      run: docker push kcov/kcov:${{ github.event.release.tag_name }}
+      run: docker push kcov/kcov:${{ steps.tag.outputs.tag }}
 
   create_release:
     name: Create release
