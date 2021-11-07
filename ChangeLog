@@ -1,3 +1,34 @@
+Kcov (39):
+	* Issue #366: Allow an address to map to multiple lines in the binary
+	  (Richard Whitehouse)
+
+	* Issue #314: Correct abort signal return value (David Steele)
+
+	* Issue #353: Escape json URLs
+
+	* Issue #339: Match ELF perfect if it has the ELF magic
+
+	* Issue #342: Correct --collect-only, --report-only on non-identical
+	  machines
+
+	* Issue #334, #347: Auto build via github actions (Tom Shaver)
+
+	* Issue #333: Allow regex in --replace-src-path (Matteo Cattani)
+
+	* Issue #331: bash: Set PS4 in bash_helper for modern bashes to allow root
+	  usage (Orycterope)
+
+	* Issue #327: Fix --merge with two --collect-only runs
+
+	* Issue #325: bash: Add --bash-tracefd-cloexec to avoid leaking trace fd
+	  to children (Damien Ciabrini)
+
+	* Issue #323: bash: Drain stdout when on xtrace-fd (Damien Ciabrini)
+
+	* Issue #322: Make kcov conan-ready (David Tazy)
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (38):
 	* Issue #267: Fix hang on Aarch64 (Julian Stecklina)
 
