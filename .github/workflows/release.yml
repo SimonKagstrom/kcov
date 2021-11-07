@@ -28,9 +28,30 @@ jobs:
           name: kcov-${{ matrix.arch }}.tar.gz
           path: kcov-${{ matrix.arch }}.tar.gz
 
+
+  build-and-push-docker-image:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Docker Hub login
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+    - name: Build docker image
+      run: docker build -t kcov/kcov:${{ github.event.release.tag_name }} .
+
+    - name: Push to Docker Hub
+      run: docker push kcov/kcov:${{ github.event.release.tag_name }}
+
   create_release:
     name: Create release
-    needs: build
+    needs: [build-and-push-docker-image]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
