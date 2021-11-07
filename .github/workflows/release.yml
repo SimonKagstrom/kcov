@@ -61,3 +61,26 @@ jobs:
           artifacts: kcov-*/kcov-*.tar.gz
           artifactContentType: application/gzip
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-push-docker-image:
+    needs: [create_release]
+    runs-on: ubuntu-latest
+    with:
+      tag_name: ${{ github.ref }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Docker Hub login
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+    - name: Build docker image
+      run: docker build -t kcov/kcov:${{ github.event.release.tag_name }} .
+
+    - name: Push to Docker Hub
+      run: docker push kcov/kcov:${{ github.event.release.tag_name }}
