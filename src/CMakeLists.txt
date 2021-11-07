@@ -59,6 +59,8 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
         OUTPUT_VARIABLE POD_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
+    message (STATUS "kcov version: ${POD_VERSION}")
 else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process (COMMAND head
             -n 1
@@ -68,6 +70,8 @@ else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
         OUTPUT_VARIABLE POD_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
+    message (STATUS "kcov version: ${POD_VERSION} (from changelog)")
 endif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
 add_custom_command(
