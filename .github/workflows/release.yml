@@ -40,7 +40,6 @@ jobs:
           distribution: ubuntu18.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
-            .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
 
       - uses: actions/upload-artifact@v2
         with:
