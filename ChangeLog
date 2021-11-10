@@ -27,7 +27,7 @@ Kcov (39):
 
 	* Issue #322: Make kcov conan-ready (David Tazy)
 
-    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Wed Nov 10 20:55:31 CET 2021
 
 Kcov (38):
 	* Issue #267: Fix hang on Aarch64 (Julian Stecklina)
