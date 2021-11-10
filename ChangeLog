@@ -1,3 +1,7 @@
+Kcov (40):
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (39):
 	* Issue #366: Allow an address to map to multiple lines in the binary
 	  (Richard Whitehouse)
