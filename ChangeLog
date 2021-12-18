@@ -1,6 +1,7 @@
 Kcov (40):
+	* Make libbfd non-required to avoid GPLv3
 
-    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Dec 18 09:25:21 CET 2021
 
 Kcov (39):
 	* Issue #366: Allow an address to map to multiple lines in the binary
