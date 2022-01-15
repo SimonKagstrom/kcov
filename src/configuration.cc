@@ -177,7 +177,7 @@ public:
 		 */
 		for (lastArg = 1; lastArg < argc; lastArg++)
 		{
-			if (IParserManager::getInstance().matchParser(argv[lastArg]))
+			if (IParserManager::getInstance().matchParser(get_real_path(argv[lastArg])))
 				break;
 
 			bool found = false;

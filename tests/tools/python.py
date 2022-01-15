@@ -24,6 +24,13 @@ class python_can_set_legal_parser(testbase.KcovTestCase):
 
         assert b"Cannot find Python parser 'python3'" not in o
 
+class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --python-parser=python3 " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/link_main 5 --foo")
+
+        assert b"unrecognized option '--foo'" not in o
+
 class python_unittest(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
