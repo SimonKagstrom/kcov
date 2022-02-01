@@ -20,6 +20,7 @@
 
 #include "merge-parser.hh"
 #include "engines/system-mode-file-format.hh"
+#include "writers/codecov-writer.hh"
 #include "writers/html-writer.hh"
 #include "writers/json-writer.hh"
 #include "writers/coveralls-writer.hh"
@@ -189,6 +190,8 @@ static int runMergeMode()
 			mergeReporter, base + "kcov-merged/sonarqube.xml");
 	IWriter &mergeCoverallsWriter = createCoverallsWriter(mergeParser,
 			mergeReporter);
+	IWriter &mergeCodecovWriter = createCodecovWriter(mergeParser, mergeReporter,
+			base + "kcov-merged/codecov.json");
 	(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
 
 	output.registerWriter(mergeParser);
@@ -197,6 +200,7 @@ static int runMergeMode()
 	output.registerWriter(mergeCoberturaWriter);
 	output.registerWriter(mergeSonarqubeWriter);
 	output.registerWriter(mergeCoverallsWriter);
+	output.registerWriter(mergeCodecovWriter);
 
 	output.start();
 	output.stop();
@@ -269,6 +273,8 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 				out);
 		IWriter &sonarqubeWriter = createSonarqubeWriter(*parser, reporter,
 				out + "/sonarqube.xml");
+		IWriter &codecovWriter = createCodecovWriter(*parser, reporter,
+				out + "/codecov.json");
 
 		IWriter &mergeHtmlWriter = createHtmlWriter(mergeParser, mergeReporter,
 				base, base + "/kcov-merged", conf.keyAsString("merged-name"),
@@ -279,6 +285,8 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 				mergeReporter, base + "kcov-merged");
 		IWriter &mergeSonarqubeWriter = createSonarqubeWriter(mergeParser,
 				mergeReporter, base + "kcov-merged/sonarqube.xml");
+		IWriter &mergeCodecovWriter = createCodecovWriter(mergeParser,
+				mergeReporter, base + "kcov-merged/codecov.json");
 
 		// Multiple binaries? Register the merged mode stuff
 		if (countMetadata() > 0)
@@ -289,6 +297,7 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 			output.registerWriter(mergeSonarqubeWriter);
 			output.registerWriter(
 					createCoverallsWriter(mergeParser, mergeReporter));
+			output.registerWriter(mergeCodecovWriter);
 		}
 		else
 		{
@@ -299,6 +308,7 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		output.registerWriter(jsonWriter);
 		output.registerWriter(coberturaWriter);
 		output.registerWriter(sonarqubeWriter);
+		output.registerWriter(codecovWriter);
 	}
 
 	reporter.registerListener(mergeParser);
