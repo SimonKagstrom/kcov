@@ -598,6 +598,7 @@ public:
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
 		setKey("coveralls-id", "");
+		setKey("coveralls-source", 0);
 		setKey("strip-path", "");
 		setKey("exclude-line", "");
 		setKey("exclude-region", "");
@@ -690,6 +691,8 @@ public:
 			setKey(key, std::string(value));
 		else if (key == "coveralls-service-name")
 			setKey(key, std::string(value));
+		else if (key == "coveralls-source")
+			setKey(key, stoul(value));
 		else if (key == "cobertura-full-paths")
 			setKey(key, stoul(std::string(value)));
 		else
@@ -704,7 +707,9 @@ public:
 				"                           high-limit=NUM             Percentage for high coverage\n"
 				"                           low-limit=NUM              Percentage for low coverage\n"
 				"                           merged-name=STR            Name of [merged] tag in HTML\n"
-				"                           coveralls-service-name=STR Service name for coveralls\n";
+				"                           coveralls-service-name=STR Service name for coveralls\n"
+				"                           coveralls-source=1         Upload actual source code\n"
+				;
 	}
 
 	std::string uncommonOptions()

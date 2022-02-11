@@ -208,7 +208,32 @@ public:
 				if (n != file->m_lastLineNr - 1)
 					out << ",";
 			}
-			out << "]\n";
+			out << "]";
+
+			if (conf.keyAsInt("coveralls-source"))
+			{
+				out << ",\n";
+
+				size_t sz = 0;
+				char *p = (char *)read_file(&sz, "%s", file->m_name.c_str());
+				if (p)
+				{
+					std::vector<std::string> lines = split_string(std::string(p), "\n");
+					out << "   \"source\": [";
+					for (unsigned i = 0; i < lines.size(); i++)
+					{
+						std::string line = escape_json(lines[i]);
+						out << "\"" + line + "\"";
+						if (i != lines.size() - 1)
+						{
+							out << ",";
+						}
+					}
+					out << "]";
+				}
+				free(p);
+			}
+			out << "\n";
 
 			// Add comma or not on the last run
 			filesLeft--;
