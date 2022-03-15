@@ -221,6 +221,7 @@ set (${KCOV}_SRCS
     source-file-cache.cc
     utils.cc
     writers/cobertura-writer.cc
+    writers/codecov-writer.cc
     writers/json-writer.cc
     ${coveralls_SRCS}
     writers/html-writer.cc
