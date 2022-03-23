@@ -101,4 +101,4 @@ Refer to the [full system instrumentation](doc/full-system-instrumentation.md) d
 More information
 ----------------
 kcov is written by Simon Kagstrom <simon.kagstrom@gmail.com> and more
-information can be found at [the web page](http://simonkagstrom.github.com/kcov/index.html)
+information can be found at [the web page](http://simonkagstrom.github.io/kcov/index.html)
