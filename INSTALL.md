@@ -14,8 +14,11 @@ pkg install binutils cmake elfutils python
 
 Ubuntu
 ------
-Install binutils-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev
+Install
 
+```
+  apt-get install binutils-dev libssl-dev libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev
+```
 
 Fedora / Centos / RHEL
 ----------------------
