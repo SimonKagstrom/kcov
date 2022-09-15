@@ -3,6 +3,7 @@
 #include <string>
 
 #include <stddef.h>
+#include <stdint.h>
 
 namespace kcov
 {

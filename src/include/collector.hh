@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <stdint.h>
+
 namespace kcov
 {
 	class IFileParser;
