@@ -75,7 +75,11 @@ public:
 	BfdDisassembler()
 	{
 		memset(&m_info, 0, sizeof(m_info));
+#if KCOV_LIBFD_DISASM_STYLED
+		init_disassemble_info(&m_info, (void *)this, BfdDisassembler::opcodesFprintFuncStatic, BfdDisassembler::opcodesFprintStyledFuncStatic);
+#else
 		init_disassemble_info(&m_info, (void *)this, BfdDisassembler::opcodesFprintFuncStatic);
+#endif
 		m_disassembler = print_insn_i386;
 
 		m_info.arch = bfd_arch_i386;
@@ -406,6 +410,25 @@ private:
 
 		return out;
 	}
+
+#if KCOV_LIBFD_DISASM_STYLED
+	static int opcodesFprintStyledFuncStatic(void *info, enum disassembler_style style, const char *fmt, ...)
+	{
+		(void)style;
+		BfdDisassembler *pThis = (BfdDisassembler *)info;
+		char str[64];
+		int out;
+
+		va_list args;
+		va_start (args, fmt);
+		out = vsnprintf( str, sizeof(str) - 1, fmt, args );
+		va_end (args);
+
+		pThis->opcodesFprintFunc(str);
+
+		return out;
+	}
+#endif
 
 	typedef std::map<uint64_t, Section *> SectionCache_t;
 	typedef std::unordered_map<uint64_t, Instruction> InstructionAddressMap_t;
