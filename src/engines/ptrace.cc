@@ -50,6 +50,8 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 	unsigned long shift = 8 * offs;
 
 	val = (old_data & ~(0xffffffffUL << shift)) | (0xd4200000UL << shift);
+#elif defined(__riscv)
+	val = 0x00100073; /* ebreak */ // No width problem, prefer ebreak than c.ebreak for ISA w/o C extension.
 #else
 # error Unsupported architecture
 #endif
