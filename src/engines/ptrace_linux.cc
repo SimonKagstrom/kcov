@@ -20,6 +20,7 @@
 enum
 {
 	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 32, // See Linux arch/arm64/include/asm/ptrace.h
+	riscv_EPC = 0
 };
 
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs);
@@ -40,7 +41,7 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
-#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
+#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv)
 	// Do nothing
 #else
 # error Unsupported architecture
@@ -61,6 +62,8 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 	out = regs[aarch64_PC];
 #elif defined(__powerpc__)
 	out = regs[ppc_NIP];
+#elif defined(__riscv)
+	out = regs[riscv_EPC];
 #else
 # error Unsupported architecture
 #endif
