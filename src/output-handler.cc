@@ -37,10 +37,13 @@ namespace kcov
 			(void)mkdir(m_baseDirectory.c_str(), 0755);
 			(void)mkdir(m_outDirectory.c_str(), 0755);
 
-			(void)unlink(readableName.c_str());
-			if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
+			if (!conf.keyAsInt("cobertura-only"))
 			{
-				kcov_debug(INFO_MSG, "Can't symlink readable name\n");
+				(void)unlink(readableName.c_str());
+				if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
+				{
+					kcov_debug(INFO_MSG, "Can't symlink readable name\n");
+				}
 			}
 
 			if (collector)

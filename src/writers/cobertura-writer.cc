@@ -27,7 +27,11 @@ public:
 	CoberturaWriter(IFileParser &parser, IReporter &reporter, const std::string &outDir) :
 			WriterBase(parser, reporter), m_maxPossibleHits(parser.maxPossibleHits())
 	{
-		m_outFiles.push_back(outDir + "/cobertura.xml");
+		if (!IConfiguration::getInstance().keyAsInt("cobertura-only"))
+		{
+			// cobertura-only is used for vscode, normally
+			m_outFiles.push_back(outDir + "/cobertura.xml");
+		}
 		m_outFiles.push_back(outDir + "/cov.xml"); // For vscode coverage gutters
 	}
 

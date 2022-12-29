@@ -88,6 +88,11 @@ Verify that breakpoints are setup on instruction boundaries. This will slow down
 exit when the first process exits, i.e., honor the behavior of daemons. The default behavior
 is to return to the console when the last process exits.
 .TP
+\fB\-\-cobertura\-only
+Generate only cobertura output, as cov.xml, in the output directory. The intended usage is for e.g.,
+vscode coverage gutters, where the output directory can then be pointed to somewhere in the project
+directory to get coverage with little droppings.
+.TP
 \fB\-\-python\-parser\fP=\fIPARSER\fP
 Set the python parser to use for Python programs (the default is python). Can be used to
 run with Python 3 on systems where Python 2 is the default.

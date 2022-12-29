@@ -127,6 +127,7 @@ public:
 		{ "clang", no_argument, 0, 'c' },
 		{ "configure", required_argument, 0, 'M' },
 		{ "clean", no_argument, 0, 'E' },
+		{ "cobertura-only", no_argument, 0, 'o' },
 		{ "exclude-pattern", required_argument, 0, 'x' },
 		{ "include-pattern", required_argument, 0, 'i' },
 		{ "exclude-path", required_argument, 0, 'X' },
@@ -287,6 +288,9 @@ public:
 					return usage();
 
 				setKey("output-interval", stoul(std::string(optarg)));
+				break;
+			case 'o':
+				setKey("cobertura-only", 1);
 				break;
 			case 'S':
 			{
@@ -526,10 +530,17 @@ public:
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
 
-			setKey("target-directory",
-					fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
-							(size_t)hash_file(path)));
-
+			if (!keyAsInt("cobertura-only"))
+			{
+				setKey("target-directory",
+						fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
+								(size_t)hash_file(path)));
+			}
+			else
+			{
+				// No directory structure if only cobertura is used
+				setKey("target-directory", outDirectory);
+			}
 			if (keyAsInt("running-mode") == IConfiguration::MODE_REPORT_ONLY &&
 				!file_exists(keyAsString("target-directory")))
 			{
@@ -627,6 +638,7 @@ public:
 		setKey("coveralls-service-name", "travis-ci");
 		setKey("cobertura-full-paths", 0);
 		setKey("codecov-full-paths", 0);
+		setKey("cobertura-only", 0);
 	}
 
 	void setKey(const std::string &key, const std::string &val)
@@ -721,6 +733,7 @@ public:
 						"                         found after the :\n"
 						" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 						"\n"
+						" --cobertura-only        Only produce cobertura output in the output dir\n"
 						" --gcov                  use gcov parser instead of DWARF debugging info\n"
 						" --clang                 use Clang Sanitizer-coverage parser\n"
 						" --system-record         perform full-system instrumentation\n"

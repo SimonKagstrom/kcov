@@ -224,8 +224,9 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		return 1;
 	}
 
-	if (parser->getParserType() == "bash" ||
-		parser->getParserType() == "python")
+	if ((parser->getParserType() == "bash" ||
+		parser->getParserType() == "python") &&
+		!conf.keyAsInt("cobertura-only"))
 	{
 		// Use the path as the hash for non-compiled languages
 		conf.setKey("target-directory",
@@ -260,7 +261,10 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 			filter);
 	IReporter &mergeReporter = IReporter::create(mergeParser, mergeParser,
 			basicFilter);
-	(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+	if (!conf.keyAsInt("cobertura-only"))
+	{
+		(void) mkdir(fmt("%s/kcov-merged", base.c_str()).c_str(), 0755);
+	}
 
 	// Register writers
 	if (runningMode != IConfiguration::MODE_COLLECT_ONLY)
@@ -288,31 +292,42 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		IWriter &mergeCodecovWriter = createCodecovWriter(mergeParser,
 				mergeReporter, base + "kcov-merged/codecov.json");
 
-		// Multiple binaries? Register the merged mode stuff
-		if (countMetadata() > 0)
+		if (!conf.keyAsInt("cobertura-only"))
 		{
-			output.registerWriter(mergeHtmlWriter);
-			output.registerWriter(mergeJsonWriter);
-			output.registerWriter(mergeCoberturaWriter);
-			output.registerWriter(mergeSonarqubeWriter);
-			output.registerWriter(
-					createCoverallsWriter(mergeParser, mergeReporter));
-			output.registerWriter(mergeCodecovWriter);
+			// Multiple binaries? Register the merged mode stuff
+			if (countMetadata() > 0)
+			{
+				output.registerWriter(mergeHtmlWriter);
+				output.registerWriter(mergeJsonWriter);
+				output.registerWriter(mergeCoberturaWriter);
+				output.registerWriter(mergeSonarqubeWriter);
+				output.registerWriter(
+						createCoverallsWriter(mergeParser, mergeReporter));
+				output.registerWriter(mergeCodecovWriter);
+			}
+			else
+			{
+				output.registerWriter(createCoverallsWriter(*parser, reporter));
+			}
+
+			output.registerWriter(coberturaWriter);
+			output.registerWriter(htmlWriter);
+			output.registerWriter(jsonWriter);
+			output.registerWriter(sonarqubeWriter);
+			output.registerWriter(codecovWriter);
 		}
 		else
 		{
-			output.registerWriter(createCoverallsWriter(*parser, reporter));
+			// Nothing else, if only cobertura is requested
+			output.registerWriter(coberturaWriter);
 		}
-
-		output.registerWriter(htmlWriter);
-		output.registerWriter(jsonWriter);
-		output.registerWriter(coberturaWriter);
-		output.registerWriter(sonarqubeWriter);
-		output.registerWriter(codecovWriter);
 	}
 
 	reporter.registerListener(mergeParser);
-	output.registerWriter(mergeParser);
+	if (!conf.keyAsInt("cobertura-only"))
+	{
+		output.registerWriter(mergeParser);
+	}
 
 	g_engine = engine;
 	g_output = &output;
