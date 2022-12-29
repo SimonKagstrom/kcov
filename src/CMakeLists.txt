@@ -39,6 +39,8 @@ else (M_LIBRARY)
     message (FATAL_ERROR "Could NOT find M")
 endif (M_LIBRARY)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set (KCOV kcov)
 
 
