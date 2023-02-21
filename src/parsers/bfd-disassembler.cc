@@ -90,6 +90,12 @@ public:
 
 	virtual void setup(const void *header, size_t headerSize)
 	{
+		// New ELF file, clear any state from the previous instance
+		m_cache.clear();
+		m_instructions.clear();
+		m_orderedInstructions.clear();
+		m_bbs.clear();
+
 		const uint8_t *data = (const uint8_t *)header;
 
 		panic_if(headerSize <= EI_CLASS,
@@ -377,7 +383,6 @@ private:
 		}
 	}
 
-
 	Instruction *getInstruction(uint64_t address)
 	{
 		if (m_instructions.find(address) == m_instructions.end())
@@ -385,8 +390,6 @@ private:
 
 		return &m_instructions[address];
 	}
-
-
 
 	void opcodesFprintFunc(const char *str)
 	{
@@ -436,7 +439,6 @@ private:
 
 	struct disassemble_info m_info;
 	disassembler_ftype m_disassembler;
-
 
 	std::vector<std::string> m_instructionVector;
 
