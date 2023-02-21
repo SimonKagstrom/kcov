@@ -50,15 +50,11 @@ const std::set<std::string> x86BranchInstructions =
 		"jpo",
 		"js",
 		"jz",
-		"jczx"
-		"jezx"
-
+		"jczx",
+		"jezx",
 		"loop",
-
 		"jmp",
-
 		"call",
-
 		"ret",
 };
 
