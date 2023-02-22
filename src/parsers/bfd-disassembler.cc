@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <algorithm>
+#include <stdexcept>
 
 #ifndef ATTRIBUTE_FPTR_PRINTF_2
 # define ATTRIBUTE_FPTR_PRINTF_2
@@ -50,15 +51,11 @@ const std::set<std::string> x86BranchInstructions =
 		"jpo",
 		"js",
 		"jz",
-		"jczx"
-		"jezx"
-
+		"jczx",
+		"jezx",
 		"loop",
-
 		"jmp",
-
 		"call",
-
 		"ret",
 };
 
@@ -90,6 +87,12 @@ public:
 
 	virtual void setup(const void *header, size_t headerSize)
 	{
+		// New ELF file, clear any state from the previous instance
+		m_cache.clear();
+		m_instructions.clear();
+		m_orderedInstructions.clear();
+		m_bbs.clear();
+
 		const uint8_t *data = (const uint8_t *)header;
 
 		panic_if(headerSize <= EI_CLASS,
@@ -297,24 +300,35 @@ private:
 
 	Section *lookupSection(uint64_t address)
 	{
+		// Iterator to the lowest-addressed section that starts at or above
+		// `address`
 		SectionCache_t::iterator it = m_cache.lower_bound(address);
 
-		if (it == m_cache.end())
-			return NULL;
+		// Rare case, the searched for address might be exactly the base address of
+		// this section
+		if (it != m_cache.end() && it->first == address) {
+			return it->second;
+		}
+
+		// Go back one section (this might be too far, but we'll check later)
 		--it;
 
-		// Above the last symbol
+		// If there was no previous section, the address isn't in a section (it's
+		// before the lowest section's baseAddress)
 		if (it == m_cache.end())
 			return NULL;
 
+		// We've found the highest-starting section that's lower than the target
+		// address, check it actually contains the address
 		Section *cur = it->second;
 		uint64_t end = cur->getBase() + cur->getSize() - 1;
 
-		// Below nearest (possible?)
+		// Address is below the section's baseAddress (impossible from the above
+		// logic)
 		if (address < cur->getBase())
-			return NULL;
+			throw std::logic_error("Section search invariant broken");
 
-		// Above section
+		// Address is above section's end
 		if (address > end)
 			return NULL;
 
@@ -377,7 +391,6 @@ private:
 		}
 	}
 
-
 	Instruction *getInstruction(uint64_t address)
 	{
 		if (m_instructions.find(address) == m_instructions.end())
@@ -385,8 +398,6 @@ private:
 
 		return &m_instructions[address];
 	}
-
-
 
 	void opcodesFprintFunc(const char *str)
 	{
@@ -436,7 +447,6 @@ private:
 
 	struct disassemble_info m_info;
 	disassembler_ftype m_disassembler;
-
 
 	std::vector<std::string> m_instructionVector;
 
