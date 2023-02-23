@@ -1,4 +1,12 @@
+Kcov (42):
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Kcov (41):
+	* Output the codecov file format (Nate Gallaher)
+
+	* Fix handling of symlinks (Rick Poyner)
+
 	* Add support for RISC-V (rvalue)
 
 	* Fix gcc-13 build (Sergei Trofimovich)
