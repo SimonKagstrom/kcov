@@ -1,4 +1,21 @@
+Kcov (41):
+	* Add support for RISC-V (rvalue)
+
+	* Fix gcc-13 build (Sergei Trofimovich)
+
+	* Correct the license for Debian (Rui Chen)
+
+	* Add --cobertura-only output option
+
+	* Fix build with binutils >= 2.39 (oreo639)
+
+	* Clear BFD state between files to avoid breakpoint trashing atomic
+          instructions (Andy Caldwell)
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Thu Feb 23 13:52:46 CET 2023
+
 Kcov (40):
+
 	* Make libbfd non-required to avoid GPLv3
 
     -- Simon Kagstrom <simon.kagstrom@gmail.com>, Sat Dec 18 09:25:21 CET 2021
