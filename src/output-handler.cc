@@ -6,8 +6,10 @@
 #include <file-parser.hh>
 #include <utils.hh>
 
+#include <cstring>
 #include <list>
 
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -40,10 +42,18 @@ namespace kcov
 			if (!conf.keyAsInt("cobertura-only"))
 			{
 				(void)unlink(readableName.c_str());
-				if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
-				{
-					kcov_debug(INFO_MSG, "Can't symlink readable name\n");
-				}
+
+                char buf[MAXPATHLEN + 1];
+                char *out_path = realpath(m_outDirectory.c_str(), buf);
+                if (out_path == NULL) {
+                    kcov_debug(INFO_MSG, "Can't get realpath of out-directory, errno => %s\n", std::strerror(errno));
+                } else {
+                    if (symlink(out_path, readableName.c_str()) < 0)
+                    {
+                        kcov_debug(INFO_MSG, "Can't symlink readable name\n");
+                    }
+                }
+
 			}
 
 			if (collector)
@@ -69,7 +79,6 @@ namespace kcov
 		{
 			return m_baseDirectory;
 		}
-
 
 		const std::string &getOutDirectory()
 		{
@@ -122,7 +131,6 @@ namespace kcov
 				m_lastTimestamp = get_ms_timestamp();
 			}
 		}
-
 
 	private:
 		typedef std::vector<IWriter *> WriterList_t;
