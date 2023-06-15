@@ -6,10 +6,8 @@
 #include <file-parser.hh>
 #include <utils.hh>
 
-#include <cstring>
 #include <list>
 
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -43,15 +41,10 @@ namespace kcov
 			{
 				(void)unlink(readableName.c_str());
 
-                char buf[MAXPATHLEN + 1];
-                char *out_path = realpath(m_outDirectory.c_str(), buf);
-                if (out_path == NULL) {
-                    kcov_debug(INFO_MSG, "Can't get realpath of out-directory, errno => %s\n", std::strerror(errno));
-                } else {
-                    if (symlink(out_path, readableName.c_str()) < 0)
-                    {
-                        kcov_debug(INFO_MSG, "Can't symlink readable name\n");
-                    }
+                std::string out_path = get_real_path(m_outDirectory);
+                if (symlink(out_path.c_str(), readableName.c_str()) < 0)
+                {
+                    kcov_debug(INFO_MSG, "Can't symlink readable name\n");
                 }
 
 			}
