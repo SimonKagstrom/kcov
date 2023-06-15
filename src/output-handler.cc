@@ -41,11 +41,11 @@ namespace kcov
 			{
 				(void)unlink(readableName.c_str());
 
-                std::string out_path = get_real_path(m_outDirectory);
-                if (symlink(out_path.c_str(), readableName.c_str()) < 0)
-                {
-                    kcov_debug(INFO_MSG, "Can't symlink readable name\n");
-                }
+				std::string out_path = get_real_path(m_outDirectory);
+				if (symlink(out_path.c_str(), readableName.c_str()) < 0)
+				{
+					kcov_debug(INFO_MSG, "Can't symlink readable name\n");
+				}
 
 			}
 
