@@ -40,10 +40,13 @@ namespace kcov
 			if (!conf.keyAsInt("cobertura-only"))
 			{
 				(void)unlink(readableName.c_str());
-				if (symlink(m_outDirectory.c_str(), readableName.c_str()) < 0)
+
+				std::string out_path = get_real_path(m_outDirectory);
+				if (symlink(out_path.c_str(), readableName.c_str()) < 0)
 				{
 					kcov_debug(INFO_MSG, "Can't symlink readable name\n");
 				}
+
 			}
 
 			if (collector)
@@ -69,7 +72,6 @@ namespace kcov
 		{
 			return m_baseDirectory;
 		}
-
 
 		const std::string &getOutDirectory()
 		{
@@ -122,7 +124,6 @@ namespace kcov
 				m_lastTimestamp = get_ms_timestamp();
 			}
 		}
-
 
 	private:
 		typedef std::vector<IWriter *> WriterList_t;
