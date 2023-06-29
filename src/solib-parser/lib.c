@@ -97,6 +97,8 @@ static void force_breakpoint(void)
 			".long 0xd4200000\n" /* From https://github.com/scottt/debugbreak */
 #elif defined(__riscv)
 			"ebreak\n"
+#elif defined(__loongarch__)
+			"break 0x4\n"
 #else
 # error Unsupported architecture
 #endif
