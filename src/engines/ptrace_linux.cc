@@ -3,7 +3,7 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(__loongarch__)
 #  include <sys/uio.h>
 #  include <elf.h>
 #endif
@@ -20,7 +20,7 @@
 enum
 {
 	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 32, // See Linux arch/arm64/include/asm/ptrace.h
-	riscv_EPC = 0
+	riscv_EPC = 0, loongarch_ERA = 33
 };
 
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs);
@@ -41,7 +41,7 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
-#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv)
+#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv) || defined(__loongarch__)
 	// Do nothing
 #else
 # error Unsupported architecture
@@ -64,6 +64,8 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 	out = regs[ppc_NIP];
 #elif defined(__riscv)
 	out = regs[riscv_EPC];
+#elif defined(__loongarch__)
+	out = regs[loongarch_ERA];
 #else
 # error Unsupported architecture
 #endif
@@ -321,7 +323,7 @@ static unsigned long getPcFromRegs(unsigned long *regs)
 
 static long getRegs(pid_t pid, void *addr, void *regs, size_t len)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(__loongarch__)
 	struct iovec iov =
 	{	regs, len};
 	return ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov);
@@ -369,7 +371,7 @@ void ptrace_sys::pokeWord(pid_t pid, unsigned long aligned_addr, unsigned long v
 
 static long setRegs(pid_t pid, void *addr, void *regs, size_t len)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(__loongarch__)
 	struct iovec iov =
 	{	regs, len};
 	return ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov);
@@ -392,7 +394,7 @@ void ptrace_sys::singleStep(pid_t pid)
 void ptrace_sys::skipInstruction(pid_t pid)
 {
 	// Nop on x86, op on PowerPC/ARM
-#if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__)
+#if defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__loongarch__)
 	unsigned long regs[1024];
 
 	getRegs(pid, NULL, regs, sizeof regs);
@@ -401,8 +403,10 @@ void ptrace_sys::skipInstruction(pid_t pid)
 	regs[ppc_NIP] += 4;
 # elif defined(__aarch64__)
 	regs[aarch64_PC] += 4;
-# else
+# elif defined(__arm__)
 	regs[arm_PC] += 4;
+# else
+	regs[loongarch_ERA] += 4;
 # endif
 	setRegs(pid, NULL, regs, sizeof regs);
 #endif
