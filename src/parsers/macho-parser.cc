@@ -4,9 +4,8 @@
  *
  * Based on https://github.com/facebookarchive/atosl
  */
-#include "dwarf.hh"
-
 #include <capabilities.hh>
+#include <configuration.hh>
 #include <dwarf.h>
 #include <fcntl.h>
 #include <file-parser.hh>
@@ -44,6 +43,7 @@ public:
 private:
     bool addFile(const std::string& filename, struct phdr_data_entry* phdr_data) final
     {
+        m_filename = filename;
 
         return true;
     }
@@ -70,9 +70,13 @@ private:
 
     bool parse() final
     {
-        auto hack = "./src/kcov.dSYM/Contents/Resources/DWARF/kcov";
+        auto& conf = IConfiguration::getInstance();
+        auto name = fmt("%s/%s.dSYM/Contents/Resources/DWARF/%s",
+                        conf.keyAsString("binary-path").c_str(),
+                        conf.keyAsString("binary-name").c_str(),
+                        conf.keyAsString("binary-name").c_str());
 
-        m_fileData = static_cast<uint8_t*>(read_file(&m_fileSize, "%s", hack));
+        m_fileData = static_cast<uint8_t*>(read_file(&m_fileSize, "%s", name.c_str()));
         if (!m_fileData)
         {
             return false;
@@ -97,8 +101,6 @@ private:
         for (auto i = 0; i < hdr->ncmds; i++)
         {
             auto cmd = reinterpret_cast<load_command*>(m_readPtr);
-
-            printf("cmd: 0x%08x, size %d\n", cmd->cmd, cmd->cmdsize);
 
             switch (cmd->cmd)
             {
@@ -178,53 +180,12 @@ private:
 
             for (auto i = 0u; i < linecount; i++)
             {
-                Dwarf_Line prevline;
-                Dwarf_Line nextline;
                 Dwarf_Line line = linebuf[i];
-
-                Dwarf_Addr lineaddr;
-                Dwarf_Addr lowaddr;
-                Dwarf_Addr highaddr;
-
-                ret = dwarf_lineaddr(line, &lineaddr, &err);
-                if (ret != DW_DLV_OK)
-                {
-                    continue;
-                }
-
-                if (i > 0)
-                {
-                    prevline = linebuf[i - 1];
-                    ret = dwarf_lineaddr(prevline, &lowaddr, &err);
-                    if (ret != DW_DLV_OK)
-                    {
-                        continue;
-                    }
-                    lowaddr += 1;
-                }
-                else
-                {
-                    lowaddr = lineaddr;
-                }
-
-                if (i < linecount - 1)
-                {
-                    nextline = linebuf[i + 1];
-                    ret = dwarf_lineaddr(nextline, &highaddr, &err);
-                    if (ret != DW_DLV_OK)
-                    {
-                        continue;
-                    }
-                    highaddr -= 1;
-                }
-                else
-                {
-                    highaddr = lineaddr;
-                }
 
                 char* filename;
                 Dwarf_Unsigned lineno;
                 char* diename;
+                Dwarf_Bool is_code = false;
                 Dwarf_Addr addr = 0;
 
                 ret = dwarf_linesrc(line, &filename, &err);
@@ -239,6 +200,12 @@ private:
                     continue;
                 }
 
+                if (dwarf_linebeginstatement(line, &is_code, 0) != DW_DLV_OK)
+                {
+                    continue;
+                }
+
+
                 ret = dwarf_diename(cu_die, &diename, &err);
                 if (ret != DW_DLV_OK)
                 {
@@ -250,12 +217,13 @@ private:
                     continue;
                 }
 
-                for (auto &listener : m_lineListeners)
+                if (lineno && is_code)
                 {
-                    listener->onLine(filename, lineno, addr);
+                    for (auto& listener : m_lineListeners)
+                    {
+                        listener->onLine(filename, lineno, addr);
+                    }
                 }
-
-//                printf("0x%012llx <--> %s:%d\n", addr, filename, (int)lineno);
 
                 dwarf_dealloc(dbg, diename, DW_DLA_STRING);
                 dwarf_dealloc(dbg, filename, DW_DLA_STRING);
@@ -263,8 +231,8 @@ private:
             dwarf_srclines_dealloc_b(line_context);
         }
 
-
         dwarf_object_finish(dbg);
+
         return true;
     }
 
@@ -280,6 +248,11 @@ private:
 
     unsigned int matchParser(const std::string& filename, uint8_t* data, size_t dataSize) final
     {
+        if (IConfiguration::getInstance().keyAsInt("low-limit") == 26)
+        {
+            printf("NOT MACHO PARSER\n");
+            return match_none;
+        }
         auto hdr = reinterpret_cast<mach_header_64*>(data);
 
         // Don't handle big endian machines, or 32-bit binaries
@@ -306,16 +279,6 @@ private:
             return;
         }
 
-        printf("segname: %s, flags: 0x%08x\n"
-               "vmaddr: 0x%016llx, vmsize: 0x%016llx\n"
-               "fileoff: 0x%016llx, filesize: 0x%016llx\n",
-               segment->segname,
-               segment->flags,
-               segment->vmaddr,
-               segment->vmsize,
-               segment->fileoff,
-               segment->filesize);
-
         m_readPtr += sizeof(struct segment_command_64);
         for (auto i = 0; i < segment->nsects; i++)
         {
@@ -328,7 +291,6 @@ private:
     {
         auto section = reinterpret_cast<struct section_64*>(m_readPtr);
 
-        printf("sectname: %s, segname: %s\n", section->sectname, section->segname);
         m_dwarfSections.push_back(section);
         m_readPtr += sizeof(*section);
     }
@@ -369,8 +331,6 @@ private:
                                            Dwarf_Small** section_data,
                                            int* error)
     {
-        printf("dwarfCb_object_access_load_section\n");
-
         if (section_index >= m_dwarfSections.size())
         {
             *error = DW_DLE_MDE;
@@ -397,13 +357,11 @@ private:
 
     Dwarf_Small dwarfCb_object_access_get_pointer_size() const
     {
-        printf("dwarfCb_object_access_get_pointer_size\n");
         return 8;
     }
 
     Dwarf_Unsigned dwarfCb_object_access_get_file_size() const
     {
-        printf("dwarfCb_object_access_get_file_size\n");
         return m_fileSize;
     }
 

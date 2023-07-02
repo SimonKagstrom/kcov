@@ -80,7 +80,7 @@ public:
 		// This now assumes we have only one file, i.e., no shared libraries
 //		m_target = m_debugger.CreateTarget(m_filename.c_str());
 		SBError error;
-		m_target = m_debugger.CreateTarget(m_filename.c_str(), NULL, NULL, true, error);
+		m_target = m_debugger.CreateTarget(m_filename.c_str(), NULL, NULL, false, error);
 
 		if (!m_target.IsValid())
 			return false;
@@ -112,7 +112,10 @@ public:
 	virtual bool parse()
 	{
 		// Hack to use the Macho-parser
-		return true;
+        if (IConfiguration::getInstance().keyAsInt("low-limit") != 26)
+        {
+			return true;
+        }
 
 		// Parse the file/line -> address mappings
 		for (uint32_t i = 0; i < m_target.GetNumModules(); i++)
@@ -181,7 +184,7 @@ public:
 
 		if (!m_target.IsValid())
 		{
-			m_target = m_debugger.CreateTarget(executable.c_str(), NULL, NULL, true, error);
+			m_target = m_debugger.CreateTarget(executable.c_str(), NULL, NULL, false, error);
 		}
 
 		IConfiguration &conf = IConfiguration::getInstance();
