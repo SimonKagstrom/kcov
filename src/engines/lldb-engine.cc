@@ -111,6 +111,9 @@ public:
 
 	virtual bool parse()
 	{
+		// Hack to use the Macho-parser
+		return true;
+
 		// Parse the file/line -> address mappings
 		for (uint32_t i = 0; i < m_target.GetNumModules(); i++)
 		{
@@ -175,6 +178,11 @@ public:
 		char buf[MAXPATHLEN + 1];
 		SBError error;
 		SBListener l;
+
+		if (!m_target.IsValid())
+		{
+			m_target = m_debugger.CreateTarget(executable.c_str(), NULL, NULL, true, error);
+		}
 
 		IConfiguration &conf = IConfiguration::getInstance();
 

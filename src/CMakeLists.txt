@@ -218,6 +218,7 @@ else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 	set (MACHO_SRCS
 		engines/lldb-engine.cc
+        parsers/macho-parser.cc
 	)
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
@@ -310,6 +311,8 @@ include_directories(
 	include/
 	../external/lldb/include/
 	${ZLIB_INCLUDE_DIR}
+    # FIXME! Dont commit
+    /usr/local/opt/dwarfutils/include/libdwarf-0/
 	)
 
 if (LIBDW_FOUND)
@@ -465,6 +468,7 @@ if (LIBELF_FOUND)
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
 		${LLDB_LIBRARY}
+        /usr/local/opt/dwarfutils/lib/libdwarf.a
 		"${M_LIBRARY}"
 		${ZLIB_LIBRARIES}
 	)
