@@ -26,11 +26,15 @@ Install elfutils-libelf-devel libcurl-devel binutils-devel elfutils-devel
 
 Mac OS X
 --------
-brew install zlib bash cmake pkgconfig
+Install dependencies:
+
+```
+brew install zlib bash cmake pkgconfig dwarfutils openssl
+```
 
 * OSX build instructions (see Issue #166 / Issue #357):
 
-Create an empty build dir and do the following steps:
+Create an empty build dir and do the following steps (adjust openssl path, can also be in /opt):
 
 ```
   cd <build-dir>

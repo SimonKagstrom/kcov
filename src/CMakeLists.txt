@@ -218,9 +218,11 @@ else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(LIBELF_FOUND 1)
 
 	set (MACHO_SRCS
-		engines/lldb-engine.cc
+#		engines/lldb-engine.cc
         parsers/macho-parser.cc
-	)
+        engines/mach-engine.cc
+        engines/osx/mach_excServer.c
+    )
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set (${KCOV}_SRCS

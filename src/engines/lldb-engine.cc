@@ -15,6 +15,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <set>
 #include <vector>
 
 #include <lldb/API/LLDB.h>
@@ -48,27 +49,8 @@ public:
 	// From IEngine
 	virtual int registerBreakpoint(unsigned long addr)
 	{
-		if (m_useLLDBBreakpoints) {
-			SBBreakpoint bp = m_target.BreakpointCreateByAddress(addr);
-
-			if (!bp.IsValid())
-				return -1;
-
-			return bp.GetID();
-		}
-
-		// Use raw writes, faster but x86-only
-		int data;
-
-		// There already?
-		if (m_instructionMap.find(addr) != m_instructionMap.end())
-			return 0;
-
-		data = peekByte(addr);
-		m_instructionMap[addr] = data;
-		pokeByte(addr, 0xcc);
-
-		return m_instructionMap.size();
+		m_instructionAddressSet.insert(addr);
+		return m_instructionAddressSet.size();
 	}
 
 
@@ -244,6 +226,21 @@ public:
 			sigs.SetShouldNotify(i, false);
 			sigs.SetShouldStop(i, true);
 			sigs.SetShouldSuppress(i, false);
+		}
+
+		auto start_address = m_instructionAddressSet.begin();
+		for (auto addr : m_instructionAddressSet)
+		{
+			// Use raw writes, faster but x86-only
+			int data;
+
+			// There already?
+			if (m_instructionMap.find(addr) == m_instructionMap.end())
+			{
+				data = peekByte(addr);
+				m_instructionMap[addr] = data;
+				pokeByte(addr, 0xcc);
+			}
 		}
 
 		return true;
@@ -452,6 +449,8 @@ private:
 	SBBreakpoint m_forkBreakpoint;
 
 	InstructionMap_t m_instructionMap;
+	std::set<uint64_t> m_instructionAddressSet;
+
 	bool m_useLLDBBreakpoints;
 
 	IFilter *m_filter;

@@ -217,7 +217,12 @@ private:
                     continue;
                 }
 
-                if (lineno && is_code)
+                Dwarf_Bool is_end_seq = false;
+
+                dwarf_lineendsequence(line, &is_end_seq, &err);
+                /* End line table operations */
+
+                if (lineno && is_code && is_end_seq == false)
                 {
                     for (auto& listener : m_lineListeners)
                     {
