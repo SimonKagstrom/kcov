@@ -139,7 +139,7 @@ public:
 
 	void solibThreadParse()
 	{
-        auto buf_ = std::vector<uint8_t>(1024 * 1024 * 100);
+                auto buf_ = std::vector<uint8_t>(1024 * 1024 * 100);
 		uint8_t* buf = buf_.data();
 
 		m_solibFd = ::open(m_solibPath.c_str(), O_RDONLY);
@@ -150,13 +150,13 @@ public:
 
 		while (1)
 		{
-			int r = read(m_solibFd, buf, sizeof(buf));
+			int r = read(m_solibFd, buf, buf_.size());
 
 			// The destructor will close m_solibFd, so we'll exit here in that case
 			if (r <= 0)
 				break;
 
-			panic_if((unsigned )r >= sizeof(buf), "Too much solib data read");
+			panic_if((unsigned )r >= buf_.size(), "Too much solib data read");
 
 			struct phdr_data *p = phdr_data_unmarshal(buf);
 
