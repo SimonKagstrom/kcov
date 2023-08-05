@@ -139,7 +139,8 @@ public:
 
 	void solibThreadParse()
 	{
-		uint8_t buf[1024 * 1024];
+        auto buf_ = std::vector<uint8_t>(1024 * 1024 * 100);
+		uint8_t* buf = buf_.data();
 
 		m_solibFd = ::open(m_solibPath.c_str(), O_RDONLY);
 		m_solibThreadValid = true;
