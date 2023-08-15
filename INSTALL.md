@@ -32,7 +32,7 @@ Install dependencies:
 brew install zlib bash cmake pkgconfig dwarfutils openssl
 ```
 
-* OSX build instructions (see Issue #166 / Issue #357):
+OSX build instructions (see Issue #166 / Issue #357):
 
 First get a code signing identity, since debug support is needed to run as non-root:
 

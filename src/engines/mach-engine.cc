@@ -28,6 +28,7 @@
 #include <spawn.h>
 #include <sys/ptrace.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <utils.hh>
 
 using namespace kcov;
@@ -48,11 +49,11 @@ constexpr auto pc_offset = x86_rip_offset;
 constexpr auto regs_flavor = x86_THREAD_STATE64;
 
 #elif defined(__arm64__)
-constexpr auto arm64_pc_offset = 33;
+constexpr auto arm64_pc_offset = 32;
 
-static_assert(offsetof(arm_thread_state64_t, __pc) == arm_pc_offset * sizeof(uint64_t));
+static_assert(offsetof(arm_thread_state64_t, __pc) == arm64_pc_offset * sizeof(uint64_t));
 
-constexpr auto pc_offset = arm64_rip_offset;
+constexpr auto pc_offset = arm64_pc_offset;
 constexpr auto regs_flavor = ARM_THREAD_STATE64;
 
 #else
