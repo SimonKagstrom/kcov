@@ -193,8 +193,16 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	set (SOLIB_generated library.cc)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
-else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	find_library(LLDB_LIBRARY
+else() # Mac OSX
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
+        MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/engines/osx/mach_exc.defs
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND mig ${CMAKE_CURRENT_SOURCE_DIR}/engines/osx/mach_exc.defs
+        VERBATIM)
+
+    find_library(LLDB_LIBRARY
       NAMES
 	    LLDB
 	  PATHS
@@ -221,7 +229,7 @@ else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 #		engines/lldb-engine.cc
         parsers/macho-parser.cc
         engines/mach-engine.cc
-        engines/osx/mach_excServer.c
+        ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
     )
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
