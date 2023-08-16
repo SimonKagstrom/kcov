@@ -53,7 +53,7 @@ jobs:
       - name: Prepare
         run: |
           chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
-          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1
+          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1 dwarfutils
 
       - name: Build for OSX
         run: |

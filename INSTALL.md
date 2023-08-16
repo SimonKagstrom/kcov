@@ -26,16 +26,28 @@ Install elfutils-libelf-devel libcurl-devel binutils-devel elfutils-devel
 
 Mac OS X
 --------
-brew install zlib bash cmake pkgconfig
+Install dependencies:
 
-* OSX build instructions (see Issue #166 / Issue #357):
+```
+brew install zlib bash cmake pkgconfig dwarfutils openssl
+```
 
-Create an empty build dir and do the following steps:
+OSX build instructions (see Issue #166 / Issue #357):
+
+First get a code signing identity, since debug support is needed to run as non-root:
+
+```
+security find-identity
+export IDENTITY="Apple Development: <some_email@address.com> (XXXXXXXX)"
+```
+
+Create an empty build dir and do the following steps (adjust openssl path, can also be in /opt):
 
 ```
   cd <build-dir>
   cmake -G Xcode -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib <path/to/kcov/source/dir>
   xcodebuild -target kcov -configuration Release
+  codesign -s "$IDENTITY" --entitlements <path/to/kcov/source/dir>/osx-entitlements.xml -f ./src/kcov
 ```
 
 The binary will be `src/Release/kcov`

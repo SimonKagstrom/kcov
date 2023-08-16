@@ -92,7 +92,6 @@ set (${SOLIB}_SRCS
 	)
 
 set (DISASSEMBLER_SRCS
-	parsers/dummy-disassembler.cc
 )
 
 set (HAS_LIBBFD "0")
@@ -192,33 +191,24 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	set (SOLIB_generated library.cc)
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
-else (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	find_library(LLDB_LIBRARY
-      NAMES
-	    LLDB
-	  PATHS
-        "/usr/lib"
-        "/usr/lib64"
-        "/usr/local/lib"
-        "/usr/local/lib64"
-        "/opt/local/lib"
-        "/opt/usr/lib64"
-		"/Library/Developer/CommandLineTools/Library/PrivateFrameworks"
-		"/Applications/Xcode.app/Contents/SharedFrameworks"
-		ENV LIBRARY_PATH
-		ENV LD_LIBRARY_PATH
-	)
-	mark_as_advanced(LLDB_LIBRARY)
-	if(LLDB_LIBRARY)
-	  message (STATUS "Found LLDB: ${LLDB_LIBRARY}")
-	endif()
+else() # Mac OSX
+    find_package (dwarfutils REQUIRED)
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
+        MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/engines/osx/mach_exc.defs
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND mig ${CMAKE_CURRENT_SOURCE_DIR}/engines/osx/mach_exc.defs
+        VERBATIM)
 
 	# Not really true, but anyway
 	set(LIBELF_FOUND 1)
 
 	set (MACHO_SRCS
-		engines/lldb-engine.cc
-	)
+        parsers/macho-parser.cc
+        engines/mach-engine.cc
+        ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
+    )
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set (${KCOV}_SRCS
@@ -304,11 +294,10 @@ set (KCOV_SYSTEM_MODE_SRCS
 
 set (KCOV_LIBRARY_PREFIX "/tmp")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX} -DKCOV_HAS_LIBBFD=${HAS_LIBBFD} -DKCOV_LIBFD_DISASM_STYLED=${HAS_LIBBFD_DISASM_STYLED}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -Wall -D_GLIBCXX_USE_NANOSLEEP -DKCOV_LIBRARY_PREFIX=${KCOV_LIBRARY_PREFIX} -DKCOV_HAS_LIBBFD=${HAS_LIBBFD} -DKCOV_LIBFD_DISASM_STYLED=${HAS_LIBBFD_DISASM_STYLED}")
 
 include_directories(
 	include/
-	../external/lldb/include/
 	${ZLIB_INCLUDE_DIR}
 	)
 
@@ -323,6 +312,10 @@ endif (LIBELF_FOUND)
 if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
 endif (CURL_FOUND)
+
+if (DWARFUTILS_FOUND)
+    include_directories(${DWARFUTILS_INCLUDE_DIRS})
+endif ()
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
@@ -464,7 +457,7 @@ if (LIBELF_FOUND)
 		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
-		${LLDB_LIBRARY}
+		${DWARFUTILS_LIBRARIES}
 		"${M_LIBRARY}"
 		${ZLIB_LIBRARIES}
 	)
@@ -484,17 +477,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	)
 	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    get_filename_component(LLDB_LIBRARY_NAME "${LLDB_LIBRARY}" NAME)
-    if(LLDB_LIBRARY_NAME STREQUAL "LLDB.framework")
-      set(LLDB_LIBRARY_INSTALL_NAME "${LLDB_LIBRARY}/Versions/Current/LLDB")
-	  add_custom_command(TARGET ${KCOV}
-        POST_BUILD COMMAND
-        "${CMAKE_INSTALL_NAME_TOOL}" -change @rpath/LLDB.framework/LLDB "${LLDB_LIBRARY_INSTALL_NAME}" $<TARGET_FILE:${KCOV}>
-        COMMENT "Changing LLDB install name from @rpath/LLDB.framework/LLDB to ${LLDB_LIBRARY_INSTALL_NAME}")
-	endif()
-endif()
 
 # uninstall target
 if(NOT TARGET uninstall)
