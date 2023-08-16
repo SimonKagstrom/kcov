@@ -92,8 +92,6 @@ set (${SOLIB}_SRCS
 	)
 
 set (DISASSEMBLER_SRCS
-# FIXME! TMP
-	parsers/lldb-disassembler.cc
 )
 
 set (HAS_LIBBFD "0")
@@ -202,31 +200,10 @@ else() # Mac OSX
         COMMAND mig ${CMAKE_CURRENT_SOURCE_DIR}/engines/osx/mach_exc.defs
         VERBATIM)
 
-    find_library(LLDB_LIBRARY
-      NAMES
-	    LLDB
-	  PATHS
-        "/usr/lib"
-        "/usr/lib64"
-        "/usr/local/lib"
-        "/usr/local/lib64"
-        "/opt/local/lib"
-        "/opt/usr/lib64"
-		"/Library/Developer/CommandLineTools/Library/PrivateFrameworks"
-		"/Applications/Xcode.app/Contents/SharedFrameworks"
-		ENV LIBRARY_PATH
-		ENV LD_LIBRARY_PATH
-	)
-	mark_as_advanced(LLDB_LIBRARY)
-	if(LLDB_LIBRARY)
-	  message (STATUS "Found LLDB: ${LLDB_LIBRARY}")
-	endif()
-
 	# Not really true, but anyway
 	set(LIBELF_FOUND 1)
 
 	set (MACHO_SRCS
-#		engines/lldb-engine.cc
         parsers/macho-parser.cc
         engines/mach-engine.cc
         ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
@@ -320,7 +297,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -Wall -D_GLIBCXX_USE_NANO
 
 include_directories(
 	include/
-	../external/lldb/include/
 	${ZLIB_INCLUDE_DIR}
     # FIXME! Dont commit
     /usr/local/opt/dwarfutils/include/libdwarf-0/
@@ -478,7 +454,6 @@ if (LIBELF_FOUND)
 		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
-		${LLDB_LIBRARY}
         /usr/local/opt/dwarfutils/lib/libdwarf.a
 		"${M_LIBRARY}"
 		${ZLIB_LIBRARIES}
@@ -499,17 +474,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	)
 	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    get_filename_component(LLDB_LIBRARY_NAME "${LLDB_LIBRARY}" NAME)
-    if(LLDB_LIBRARY_NAME STREQUAL "LLDB.framework")
-      set(LLDB_LIBRARY_INSTALL_NAME "${LLDB_LIBRARY}/Versions/Current/LLDB")
-	  add_custom_command(TARGET ${KCOV}
-        POST_BUILD COMMAND
-        "${CMAKE_INSTALL_NAME_TOOL}" -change @rpath/LLDB.framework/LLDB "${LLDB_LIBRARY_INSTALL_NAME}" $<TARGET_FILE:${KCOV}>
-        COMMENT "Changing LLDB install name from @rpath/LLDB.framework/LLDB to ${LLDB_LIBRARY_INSTALL_NAME}")
-	endif()
-endif()
 
 # uninstall target
 if(NOT TARGET uninstall)
