@@ -192,6 +192,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	add_library (${SOLIB} SHARED ${${SOLIB}_SRCS})
 	set_target_properties(${SOLIB} PROPERTIES SUFFIX ".so")
 else() # Mac OSX
+    find_package (dwarfutils REQUIRED)
     add_custom_command(
         OUTPUT
             ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
@@ -298,8 +299,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -Wall -D_GLIBCXX_USE_NANO
 include_directories(
 	include/
 	${ZLIB_INCLUDE_DIR}
-    # FIXME! Dont commit
-    /usr/local/opt/dwarfutils/include/libdwarf-0/
 	)
 
 if (LIBDW_FOUND)
@@ -313,6 +312,10 @@ endif (LIBELF_FOUND)
 if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
 endif (CURL_FOUND)
+
+if (DWARFUTILS_FOUND)
+    include_directories(${DWARFUTILS_INCLUDE_DIRS})
+endif ()
 
 add_library (bash_execve_redirector SHARED engines/bash-execve-redirector.c)
 set_target_properties(bash_execve_redirector PROPERTIES SUFFIX ".so")
@@ -454,7 +457,7 @@ if (LIBELF_FOUND)
 		${DISASSEMBLER_LIBRARIES}
 		${LIBDW_LIBRARIES}
 		${LIBELF_LIBRARIES}
-        /usr/local/opt/dwarfutils/lib/libdwarf.a
+		${DWARFUTILS_LIBRARIES}
 		"${M_LIBRARY}"
 		${ZLIB_LIBRARIES}
 	)

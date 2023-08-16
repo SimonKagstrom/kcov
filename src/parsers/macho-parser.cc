@@ -253,11 +253,6 @@ private:
 
     unsigned int matchParser(const std::string& filename, uint8_t* data, size_t dataSize) final
     {
-        if (IConfiguration::getInstance().keyAsInt("low-limit") == 26)
-        {
-            printf("NOT MACHO PARSER\n");
-            return match_none;
-        }
         auto hdr = reinterpret_cast<mach_header_64*>(data);
 
         // Don't handle big endian machines, or 32-bit binaries
