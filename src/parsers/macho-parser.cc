@@ -271,6 +271,15 @@ private:
 
     void setupParser(IFilter* filter) final
     {
+        auto& conf = IConfiguration::getInstance();
+
+        // Run dsymutil to make sure the DWARF info is avaiable
+        auto dsymutil_command = fmt("dsymutil %s/%s",
+                                    conf.keyAsString("binary-path").c_str(),
+                                    conf.keyAsString("binary-name").c_str());
+        kcov_debug(ELF_MSG, "running %s\n", dsymutil_command.c_str());
+
+        system(dsymutil_command.c_str());
     }
 
     // Mach-O command handlers
