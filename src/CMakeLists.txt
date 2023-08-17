@@ -92,6 +92,7 @@ set (${SOLIB}_SRCS
 	)
 
 set (DISASSEMBLER_SRCS
+    parsers/dummy-disassembler.cc
 )
 
 set (HAS_LIBBFD "0")
