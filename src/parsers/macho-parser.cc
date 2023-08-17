@@ -256,7 +256,12 @@ private:
         auto hdr = reinterpret_cast<mach_header_64*>(data);
 
         // Don't handle big endian machines, or 32-bit binaries
-        if (hdr->magic == MH_MAGIC_64 || hdr->magic == FAT_MAGIC_64)
+        if (hdr->magic == FAT_MAGIC_64)
+        {
+            error("kcov doesn't support FAT binaries");
+            return match_none;
+        }
+        if (hdr->magic == MH_MAGIC_64)
         {
             return match_perfect;
         }
