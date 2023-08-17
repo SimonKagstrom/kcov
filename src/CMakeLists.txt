@@ -210,6 +210,7 @@ else() # Mac OSX
         engines/mach-engine.cc
         ${CMAKE_CURRENT_BINARY_DIR}/mach_excServer.c
     )
+
 endif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
 set (${KCOV}_SRCS
@@ -488,4 +489,11 @@ if(NOT TARGET uninstall)
 
     add_custom_target(uninstall
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
+
+# Use an ad-hoc certificate to sign OSX binaries
+if (APPLE)
+    add_custom_command(TARGET ${KCOV} POST_BUILD VERBATIM
+        COMMAND cmake -E echo Signing the kcov binary with an ad-hoc certificate
+        COMMAND codesign -s - --entitlements ${CMAKE_CURRENT_SOURCE_DIR}/../osx-entitlements.xml -f ${KCOV})
 endif()
