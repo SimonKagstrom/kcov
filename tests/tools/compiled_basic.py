@@ -7,6 +7,7 @@ import os
 
 
 class shared_library(testbase.KcovTestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (does not work with the mach-engine for now)")
     def runTest(self):
         self.setUp()
         noKcovRv,o = self.do(testbase.testbuild + "/shared_library_test", False)

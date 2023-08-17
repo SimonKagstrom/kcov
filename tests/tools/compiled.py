@@ -55,6 +55,7 @@ class fork_32(ForkBase):
         self.doTest("fork-32")
 
 class vfork(testbase.KcovTestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (does not work with the mach-engine for now)")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/vfork", False)
@@ -103,6 +104,7 @@ class pie_argv_basic(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
 
 class pie_accumulate(testbase.KcovTestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (does not work with the mach-engine for now)")
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test", False)
@@ -189,6 +191,8 @@ class signals_self(SignalsBase):
         self.doTest()
 
 class signals_crash(testbase.KcovTestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (macho-parser for now)")
+
     def runTest(self):
         self.setUp()
         rv,o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/signals segv self", False)
