@@ -1,4 +1,6 @@
 Kcov (42):
+	* OSX: Replace the lldb-engine/parser with a macho-parser and a mach-engine
+	  for improved performance (~20x) (Simon Kagstrom)
 
     -- Simon Kagstrom <simon.kagstrom@gmail.com>
 
