@@ -1,3 +1,8 @@
+Kcov (43):
+
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+
+
 Kcov (42):
 	* Issue #317: Correct handling of large amounts of solib data (Steven Lu)
 
