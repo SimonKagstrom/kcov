@@ -212,6 +212,8 @@ private:
         m_instructionMap[addr] = data;
         m_pendingBreakpoints.insert(addr);
 
+        kcov_debug(BP_MSG, "BP registered at 0x%lx\n", addr);
+
         return m_instructionMap.size();
     }
 
