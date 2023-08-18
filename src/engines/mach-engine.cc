@@ -234,7 +234,8 @@ private:
         }
 
         // Fork the process, in suspended mode
-        auto argv = IConfiguration::getInstance().getArgv();
+        auto &conf = IConfiguration::getInstance();
+        auto argv = conf.getArgv();
         rv = posix_spawn(&m_pid, argv[0], nullptr, &attr, (char* const*)argv, environ);
         if (rv != 0)
         {
@@ -247,7 +248,20 @@ private:
         auto kret = task_for_pid(mach_task_self(), m_pid, &m_task);
         if (kret != KERN_SUCCESS)
         {
-            error("task_for_pid");
+            auto kcov_path = get_real_path(conf.keyAsString("kcov-binary-path"));
+
+            error("task_for_pid failed with %d\n"
+            "\n"
+            "This usually means that the kcov binary needs to be signed with codesign, when\n"
+            "not running as root. See https://github.com/SimonKagstrom/kcov/blob/master/INSTALL.md\n"
+            "for instructions on how to do that.\n"
+            "\n"
+            "Then run\n"
+            "\n"
+            "  codesign -s \"Apple Development: your.email@address.com (XXXXXXXXX)\" --entitlements <kcov-source>/osx-entitlements.xml -f %s"
+            , kret, kcov_path.c_str());
+
+            exit(1);
             return false;
         }
 

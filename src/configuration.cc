@@ -171,6 +171,8 @@ public:
 
 		std::vector<std::string> paths = split_string(path, ":");
 
+		setKey("kcov-binary-path", get_real_path(argv[0]));
+
 		/* Scan through the parameters for an ELF file: That will be the
 		 * second last argument in the list.
 		 *
@@ -590,6 +592,7 @@ public:
 	// Setup the default key:value pairs
 	void setupDefaults()
 	{
+		setKey("kcov-binary-path", "");
 		setKey("binary-path", "");
 		setKey("python-command", "python");
 #ifdef __FreeBSD__

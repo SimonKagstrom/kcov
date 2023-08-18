@@ -491,9 +491,9 @@ if(NOT TARGET uninstall)
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-# Use an ad-hoc certificate to sign OSX binaries
+# Sign OSX binaries (needed since it's a debugger)
 if (APPLE)
     add_custom_command(TARGET ${KCOV} POST_BUILD VERBATIM
-        COMMAND cmake -E echo Signing the kcov binary with an ad-hoc certificate
+        COMMAND cmake -E echo Signing the kcov binary with an ad-hoc identity
         COMMAND codesign -s - --entitlements ${CMAKE_CURRENT_SOURCE_DIR}/../osx-entitlements.xml -f ${KCOV})
 endif()
