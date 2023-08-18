@@ -22,16 +22,6 @@ Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our offic
 
 * [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
 
-_Note:_
-
-_Tags v31-v33 are re-tags of [ragnaroek/kcov](https://hub.docker.com/r/ragnaroek/kcov/) which were not automated builds._
-
-_Tags v34-v35 are non automated builds using the Dockerfile in master with 1 minor [modification](https://github.com/SimonKagstrom/kcov/pull/274#issuecomment-432827976)._
-
-_Tag v36 is a non automated build using the Dockerfile in master._
-
-
-
 
 How to use it
 -------------
@@ -43,10 +33,8 @@ kcov /path/to/outdir executable [args for the executable]
 
 */path/to/outdir* will contain lcov-style HTML output generated
 continuously while the application runs. Kcov will also write cobertura-
-compatible XML output and can upload coverage data directly to
-http://coveralls.io for easy integration with travis-ci. A generic
-coverage.json report is also generated which contains summaries for a given
-binary and each source file.
+compatible XML output and generic JSON coverage information and can easily
+be integrated in various CI systems.
 
 Filtering output
 ----------------
@@ -92,11 +80,6 @@ Refer to
 * [jenkins](doc/jenkins.md) for details about how to integrate in Jenkins
 * [sonarqube](doc/sonarqube.md) for how to use kcov and sonarqube together
 * [gitlab](doc/gitlab.md) for use with GitLab
-
-Full-system instrumentation
----------------------------
-Kcov can instrument all binaries with very low overhead for embedded systems.
-Refer to the [full system instrumentation](doc/full-system-instrumentation.md) documentation for details.
 
 More information
 ----------------
