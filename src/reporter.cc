@@ -49,7 +49,11 @@ public:
 
 	~Reporter()
 	{
-		writeCoverageDatabase();
+		if (IConfiguration::getInstance().keyAsInt("running-mode") !=
+            IConfiguration::MODE_REPORT_ONLY)
+        {
+			writeCoverageDatabase();
+		}
 
 		for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
 		{
@@ -414,6 +418,8 @@ private:
 	void onAddressHit(uint64_t addr, unsigned long hits)
 	{
 		AddrToLineMap_t::iterator it = m_addrToLine.find(addr);
+
+//		kcov_debug(INFO_MSG, "%p (bef) REPORT hit at 0x%llx, %d lines\n", this, (unsigned long long)addr, m_addrToLine.size());
 
 		if (it == m_addrToLine.end())
 			return;

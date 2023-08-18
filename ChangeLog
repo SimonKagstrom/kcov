@@ -1,8 +1,14 @@
 Kcov (42):
+	* Issue #317: Correct handling of large amounts of solib data (Steven Lu)
+
+	* Issue #399: Suppor for the LoongArch architecture (Feiyang Chen)
+
+	* Issue #397: Correct symlinks if the out-directory is a relative path (Hanaasagi)
+
 	* OSX: Replace the lldb-engine/parser with a macho-parser and a mach-engine
 	  for improved performance (~20x) (Simon Kagstrom)
 
-    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Aug 18 20:38:38 CEST 2023
 
 Kcov (41):
 	* Output the codecov file format (Nate Gallaher)
