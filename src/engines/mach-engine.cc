@@ -198,13 +198,17 @@ private:
     // From IEngine
     virtual int registerBreakpoint(unsigned long addr) override
     {
-        uint32_t data;
+        uint32_t data = 0;
 
         // There already?
         if (m_instructionMap.find(addr) != m_instructionMap.end())
             return 0;
 
-        data = peekWord(getAligned(addr));
+        if (IConfiguration::getInstance().keyAsInt("running-mode") !=
+            IConfiguration::MODE_REPORT_ONLY)
+        {
+            data = peekWord(getAligned(addr));
+        }
         m_instructionMap[addr] = data;
         m_pendingBreakpoints.insert(addr);
 
@@ -215,6 +219,13 @@ private:
     bool start(IEventListener& listener, const std::string& executable) final
     {
         m_listener = &listener;
+
+        if (IConfiguration::getInstance().keyAsInt("attach-pid") != 0)
+        {
+            error("the mach-engine does not support --pid (on OSX)");
+            exit(1);
+        }
+
 
         posix_spawnattr_t attr;
 
@@ -234,7 +245,7 @@ private:
         }
 
         // Fork the process, in suspended mode
-        auto &conf = IConfiguration::getInstance();
+        auto& conf = IConfiguration::getInstance();
         auto argv = conf.getArgv();
         rv = posix_spawn(&m_pid, argv[0], nullptr, &attr, (char* const*)argv, environ);
         if (rv != 0)
@@ -251,15 +262,18 @@ private:
             auto kcov_path = get_real_path(conf.keyAsString("kcov-binary-path"));
 
             error("task_for_pid failed with %d\n"
-            "\n"
-            "This usually means that the kcov binary needs to be signed with codesign, when\n"
-            "not running as root. See https://github.com/SimonKagstrom/kcov/blob/master/INSTALL.md\n"
-            "for instructions on how to do that.\n"
-            "\n"
-            "Then run\n"
-            "\n"
-            "  codesign -s \"Apple Development: your.email@address.com (XXXXXXXXX)\" --entitlements <kcov-source>/osx-entitlements.xml -f %s"
-            , kret, kcov_path.c_str());
+                  "\n"
+                  "This usually means that the kcov binary needs to be signed with codesign, when\n"
+                  "not running as root. See "
+                  "https://github.com/SimonKagstrom/kcov/blob/master/INSTALL.md\n"
+                  "for instructions on how to do that.\n"
+                  "\n"
+                  "Then run\n"
+                  "\n"
+                  "  codesign -s \"Apple Development: your.email@address.com (XXXXXXXXX)\" "
+                  "--entitlements <kcov-source>/osx-entitlements.xml -f %s",
+                  kret,
+                  kcov_path.c_str());
 
             exit(1);
             return false;
