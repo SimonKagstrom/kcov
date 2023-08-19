@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <spawn.h>
 #include <sys/ptrace.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <unordered_map>
 #include <utils.hh>
