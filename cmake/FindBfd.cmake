@@ -76,7 +76,7 @@ include (FindPackageHandleStandardArgs)
 
 
 # handle the QUIETLY and REQUIRED arguments and set LIBBFD_FOUND to TRUE if all listed variables are TRUE
-find_package_handle_standard_args(LIBBFD DEFAULT_MSG
+find_package_handle_standard_args(Bfd DEFAULT_MSG
     LIBBFD_BFD_LIBRARY
     LIBBFD_IBERTY_LIBRARY
     LIBBFD_OPCODES_LIBRARY

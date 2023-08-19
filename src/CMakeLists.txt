@@ -160,7 +160,7 @@ set (SOLIB_generated )
 # Linux-specific sources
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package (LibElf)
-	find_package (Elfutils)
+	find_package (ElfUtils)
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
