@@ -41,13 +41,38 @@ jobs:
             .github/workflows/generic-build.sh ${{ matrix.arch }}
 
   build-osx:
-    name: Build and test OSX executable
+    name: Build and test OSX executable (macOS-latest)
     runs-on: macOS-latest
     env:
       CC: clang
       CXX: clang++
 
     steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare
+        run: |
+          chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
+          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1 dwarfutils
+
+      - name: Build for OSX
+        run: |
+          sudo .github/workflows/osx-build.sh
+          sudo .github/workflows/ci-run-tests.sh
+
+
+  build-osx-big-sur:
+    name: Build and test OSX executable (Big Sur)
+    runs-on: macOS-11
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '11.7.0'
+
       - uses: actions/checkout@v2
 
       - name: Prepare

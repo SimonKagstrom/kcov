@@ -26,8 +26,12 @@
 #include <set>
 #include <signal.h>
 #include <spawn.h>
-#include <sys/ptrace.h>
+#include <sys/errno.h>
+// clang-format off
+// sys/ptrace.h needs sys/types.h, so make sure clang-format doesn't change the order
 #include <sys/types.h>
+#include <sys/ptrace.h>
+// clang-format on
 #include <unistd.h>
 #include <unordered_map>
 #include <utils.hh>
