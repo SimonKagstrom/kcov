@@ -1,4 +1,5 @@
 Kcov (43):
+	* cmake: Correct FindXXX package names
 
     -- Simon Kagstrom <simon.kagstrom@gmail.com>
 
@@ -6,7 +7,7 @@ Kcov (43):
 Kcov (42):
 	* Issue #317: Correct handling of large amounts of solib data (Steven Lu)
 
-	* Issue #399: Suppor for the LoongArch architecture (Feiyang Chen)
+	* Issue #399: Support for the LoongArch architecture (Feiyang Chen)
 
 	* Issue #397: Correct symlinks if the out-directory is a relative path (Hanaasagi)
 
