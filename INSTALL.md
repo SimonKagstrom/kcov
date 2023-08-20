@@ -49,10 +49,7 @@ If the binary needs to be signed, try these instructions:
 First get a code signing identity, since debug support is needed to run as non-root:
 
 ```
-security find-identity
-export IDENTITY="Apple Development: <some_email@address.com> (XXXXXXXX)"
-
-codesign -s "$IDENTITY" --entitlements <path/to/kcov/source/dir>/osx-entitlements.xml -f ./src/Release/kcov
+codesign -s - --entitlements <path/to/kcov/source/dir>/osx-entitlements.xml -f ./src/Release/kcov
 ```
 
 Building

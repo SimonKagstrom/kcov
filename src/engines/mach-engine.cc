@@ -271,14 +271,13 @@ private:
             error("task_for_pid failed with %d\n"
                   "\n"
                   "This usually means that the kcov binary needs to be signed with codesign, when\n"
-                  "not running as root. See "
-                  "https://github.com/SimonKagstrom/kcov/blob/master/INSTALL.md\n"
-                  "for instructions on how to do that.\n"
+                  "not running as root. It should be enough to run\n"
                   "\n"
-                  "Then run\n"
+                  "  codesign -s - --entitlements <kcov-source>/osx-entitlements.xml -f %s\n"
                   "\n"
-                  "  codesign -s \"Apple Development: your.email@address.com (XXXXXXXXX)\" "
-                  "--entitlements <kcov-source>/osx-entitlements.xml -f %s",
+                  "See "
+                  "https://github.com/SimonKagstrom/kcov/blob/master/INSTALL.md for more\n"
+                  "instructions.\n",
                   kret,
                   kcov_path.c_str());
 
