@@ -38,8 +38,8 @@ Create an empty build dir and do the following steps (adjust openssl path, can a
 
 ```
   cd <build-dir>
-  cmake -G Xcode -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib <path/to/kcov/source/dir>
-  xcodebuild -target kcov -configuration Release
+  cmake -G make -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib <path/to/kcov/source/dir>
+  make
 ```
 
 The binary will be `src/Release/kcov`
