@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <utils.hh>
 #include <vector>
+#include <iostream>
 
 using namespace kcov;
 
@@ -71,9 +72,8 @@ private:
     bool parse() final
     {
         auto& conf = IConfiguration::getInstance();
-        auto name = fmt("%s/%s.dSYM/Contents/Resources/DWARF/%s",
+        auto name = fmt("%s/%s",
                         conf.keyAsString("binary-path").c_str(),
-                        conf.keyAsString("binary-name").c_str(),
                         conf.keyAsString("binary-name").c_str());
 
         m_fileData = static_cast<uint8_t*>(read_file(&m_fileSize, "%s", name.c_str()));
@@ -90,7 +90,8 @@ private:
             return false;
         }
 
-        if (hdr->filetype != MH_DSYM)
+        // std::cout << std::hex << "filetype: " << hdr->filetype << std::endl;
+        if (hdr->filetype != MH_DSYM && hdr->filetype != MH_EXECUTE)
         {
             error("Not a debug file");
             return false;
@@ -271,15 +272,15 @@ private:
 
     void setupParser(IFilter* filter) final
     {
-        auto& conf = IConfiguration::getInstance();
+        // auto& conf = IConfiguration::getInstance();
 
         // Run dsymutil to make sure the DWARF info is avaiable
-        auto dsymutil_command = fmt("dsymutil %s/%s",
-                                    conf.keyAsString("binary-path").c_str(),
-                                    conf.keyAsString("binary-name").c_str());
-        kcov_debug(ELF_MSG, "running %s\n", dsymutil_command.c_str());
+        // auto dsymutil_command = fmt("dsymutil %s/%s",
+        //                             conf.keyAsString("binary-path").c_str(),
+        //                             conf.keyAsString("binary-name").c_str());
+        // kcov_debug(ELF_MSG, "running %s\n", dsymutil_command.c_str());
 
-        system(dsymutil_command.c_str());
+        // system(dsymutil_command.c_str());
     }
 
     // Mach-O command handlers

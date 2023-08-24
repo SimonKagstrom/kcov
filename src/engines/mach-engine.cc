@@ -16,6 +16,7 @@
 #include <engine.hh>
 #include <mach-o/loader.h>
 #include <mach/mach.h>
+#include <mach/mach_error.h>
 #include <mach/mach_init.h>
 #include <mach/mach_types.h>
 #include <mach/port.h>
@@ -35,6 +36,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <utils.hh>
+#include <iostream>
 
 using namespace kcov;
 extern char** environ;
@@ -493,12 +495,13 @@ private:
         size_t size = 0;
 
         // FIXME! Is this really true?
-        auto patch_addr = m_imageBase + (aligned_addr & 0xffffffff);
+        auto patch_addr = (aligned_addr & 0xffffffff);
+        // std::cout << std::hex << "m_imageBase: 0x" << m_imageBase << " patch_addr: 0x" << patch_addr << std::endl;
 
         auto kr = vm_read_overwrite(m_task, patch_addr, sizeof(val), (vm_offset_t)&val, &size);
         if (kr != KERN_SUCCESS)
         {
-            panic("vm_read_overwrite failed for peekWord for addr 0x%llx", patch_addr);
+            panic("vm_read_overwrite failed for peekWord for addr 0x%llx, msg: %s", patch_addr, mach_error_string(kr));
             return 0;
         }
 
@@ -510,7 +513,7 @@ private:
         assert((aligned_addr & 3) == 0 && "The poked address must be aligned");
 
         // FIXME! Is this really true?
-        auto patch_addr = m_imageBase + (aligned_addr & 0xffffffff);
+        auto patch_addr = (aligned_addr & 0xffffffff);
 
         // VM_PROT_COPY forces COW, probably, see vm_map_protect in vm_map.c
         kern_return_t kr;
@@ -521,6 +524,7 @@ private:
                         VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY);
         if (kr != KERN_SUCCESS)
         {
+            printf("%s ", mach_error_string(kr));
             panic("vm_protect failed\n");
         }
 
@@ -534,6 +538,7 @@ private:
             m_task, trunc_page(patch_addr), vm_page_size, false, VM_PROT_READ | VM_PROT_EXECUTE);
         if (kr != KERN_SUCCESS)
         {
+            printf("%s ", mach_error_string(kr));
             panic("vm_protect failed\n");
         }
     }
