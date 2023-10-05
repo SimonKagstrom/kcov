@@ -323,7 +323,6 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		}
 	}
 
-	reporter.registerListener(mergeParser);
 	if (!conf.keyAsInt("cobertura-only"))
 	{
 		output.registerWriter(mergeParser);
