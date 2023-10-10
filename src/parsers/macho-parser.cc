@@ -262,26 +262,26 @@ private:
         size_t read_size = 0;
         auto full_file_content = static_cast<uint8_t*>(read_file(&read_size, "%s", filename.c_str()));
         auto hdr = reinterpret_cast<mach_header_64*>(full_file_content);
-        auto ptr = full_file_content + sizeof(mach_header_64);
+        auto cmd_ptr = full_file_content + sizeof(mach_header_64);
         for (auto i = 0; i < hdr->ncmds; i++)
         {
-            auto cmd = reinterpret_cast<load_command*>(ptr);
+            auto cmd = reinterpret_cast<load_command*>(cmd_ptr);
             switch (cmd->cmd)
             {
             case LC_SEGMENT_64:
                 {
-                    auto segment = reinterpret_cast<const struct segment_command_64*>(ptr);
+                    auto segment = reinterpret_cast<const struct segment_command_64*>(cmd_ptr);
                     if (strcmp(segment->segname, "__DATA") == 0) {
-                        ptr += sizeof(struct segment_command_64);
+                        auto section_ptr = cmd_ptr + sizeof(struct segment_command_64);
                         for (auto i = 0; i < segment->nsects; i++)
                         {
-                            auto section = reinterpret_cast<struct section_64*>(ptr);
+                            auto section = reinterpret_cast<struct section_64*>(section_ptr);
                             if (strcmp(section->sectname, "__go_buildinfo") == 0)
                             {
                                 free((void *) full_file_content);
                                 return true;
                             }
-                            ptr += sizeof(*section);
+                            section_ptr += sizeof(*section);
                         }
                     }
                 }
@@ -289,7 +289,7 @@ private:
             default:
                 break;
             }
-            ptr += cmd->cmdsize;
+            cmd_ptr += cmd->cmdsize;
         }
         free((void *) full_file_content);
         return false;
