@@ -27,19 +27,17 @@ public:
 		if (!data)
 			return NULL;
 
+		size_t preVal = -1;
 		for (ParserList_t::const_iterator it = m_parsers.begin(); it != m_parsers.end(); ++it)
 		{
 			unsigned int myVal = (*it)->matchParser(fileName, data, sz);
 			if (myVal == match_none)
 				continue;
 
-			if (!best)
+			if (!best || myVal > preVal) {
 				best = *it;
-
-			unsigned int bestVal = best->matchParser(fileName, data, sz);
-
-			if (myVal > bestVal)
-				best = *it;
+				preVal = myVal;
+			}
 		}
 
 		free((void *) data);
