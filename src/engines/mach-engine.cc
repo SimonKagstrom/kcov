@@ -287,7 +287,9 @@ private:
             return false;
         }
 
-        m_imageBase = findImageAddress();
+        if (!conf.keyAsInt("is-go-binary")) {
+            m_imageBase = findImageAddress();
+        }
 
         rv = task_get_exception_ports(m_task,
                                       EXC_MASK_ALL,
@@ -495,8 +497,7 @@ private:
         size_t size = 0;
 
         // FIXME! Is this really true?
-        auto patch_addr = (aligned_addr & 0xffffffff);
-        // std::cout << std::hex << "m_imageBase: 0x" << m_imageBase << " patch_addr: 0x" << patch_addr << std::endl;
+        auto patch_addr = m_imageBase + (aligned_addr & 0xffffffff);
 
         auto kr = vm_read_overwrite(m_task, patch_addr, sizeof(val), (vm_offset_t)&val, &size);
         if (kr != KERN_SUCCESS)
@@ -513,7 +514,7 @@ private:
         assert((aligned_addr & 3) == 0 && "The poked address must be aligned");
 
         // FIXME! Is this really true?
-        auto patch_addr = (aligned_addr & 0xffffffff);
+        auto patch_addr = m_imageBase + (aligned_addr & 0xffffffff);
 
         // VM_PROT_COPY forces COW, probably, see vm_map_protect in vm_map.c
         kern_return_t kr;
