@@ -642,6 +642,7 @@ public:
 		setKey("cobertura-full-paths", 0);
 		setKey("codecov-full-paths", 0);
 		setKey("cobertura-only", 0);
+		setKey("is-go-binary", 0);
 	}
 
 	void setKey(const std::string &key, const std::string &val)

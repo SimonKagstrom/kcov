@@ -16,6 +16,7 @@
 #include <engine.hh>
 #include <mach-o/loader.h>
 #include <mach/mach.h>
+#include <mach/mach_error.h>
 #include <mach/mach_init.h>
 #include <mach/mach_types.h>
 #include <mach/port.h>
@@ -35,6 +36,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <utils.hh>
+#include <iostream>
 
 using namespace kcov;
 extern char** environ;
@@ -285,7 +287,9 @@ private:
             return false;
         }
 
-        m_imageBase = findImageAddress();
+        if (!conf.keyAsInt("is-go-binary")) {
+            m_imageBase = findImageAddress();
+        }
 
         rv = task_get_exception_ports(m_task,
                                       EXC_MASK_ALL,
@@ -498,7 +502,7 @@ private:
         auto kr = vm_read_overwrite(m_task, patch_addr, sizeof(val), (vm_offset_t)&val, &size);
         if (kr != KERN_SUCCESS)
         {
-            panic("vm_read_overwrite failed for peekWord for addr 0x%llx", patch_addr);
+            panic("vm_read_overwrite failed for peekWord for addr 0x%llx, msg: %s", patch_addr, mach_error_string(kr));
             return 0;
         }
 
@@ -521,6 +525,7 @@ private:
                         VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY);
         if (kr != KERN_SUCCESS)
         {
+            printf("%s ", mach_error_string(kr));
             panic("vm_protect failed\n");
         }
 
@@ -534,6 +539,7 @@ private:
             m_task, trunc_page(patch_addr), vm_page_size, false, VM_PROT_READ | VM_PROT_EXECUTE);
         if (kr != KERN_SUCCESS)
         {
+            printf("%s ", mach_error_string(kr));
             panic("vm_protect failed\n");
         }
     }
