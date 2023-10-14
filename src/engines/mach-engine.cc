@@ -33,10 +33,11 @@
 #include <sys/types.h>
 #include <sys/ptrace.h>
 // clang-format on
+#include <cassert>
+#include <iostream>
 #include <unistd.h>
 #include <unordered_map>
 #include <utils.hh>
-#include <iostream>
 
 using namespace kcov;
 extern char** environ;
@@ -287,7 +288,8 @@ private:
             return false;
         }
 
-        if (!conf.keyAsInt("is-go-binary")) {
+        if (!conf.keyAsInt("is-go-binary"))
+        {
             m_imageBase = findImageAddress();
         }
 
@@ -502,7 +504,9 @@ private:
         auto kr = vm_read_overwrite(m_task, patch_addr, sizeof(val), (vm_offset_t)&val, &size);
         if (kr != KERN_SUCCESS)
         {
-            panic("vm_read_overwrite failed for peekWord for addr 0x%llx, msg: %s", patch_addr, mach_error_string(kr));
+            panic("vm_read_overwrite failed for peekWord for addr 0x%llx, msg: %s",
+                  patch_addr,
+                  mach_error_string(kr));
             return 0;
         }
 
