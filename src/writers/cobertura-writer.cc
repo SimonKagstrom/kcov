@@ -123,9 +123,10 @@ private:
 
 	std::string writeOne(File *file)
 	{
+		static uint32_t counter;
 		std::string out;
 
-		std::string mangledName = mangleFileName(file->m_fileName);
+		std::string mangledName = mangleFileName(file->m_fileName) + "__" + std::to_string(counter++);
 
 		for (unsigned int n = 1; n < file->m_lastLineNr; n++)
 		{
