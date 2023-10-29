@@ -17,7 +17,7 @@ def lookupClassName(dom, name):
     tags = dom.getElementsByTagName('class')
 
     for tag in tags:
-        nameAttr = tag.attributes["name"]
+        nameAttr = tag.attributes["filename"]
         if nameAttr.value == name:
             return tag
 
@@ -48,7 +48,6 @@ def parseFile(filename):
     return dom
 
 def hitsPerLine(dom, fileName, lineNr):
-    fileName = fileName.replace(".", "_").replace("-", "_")
 
     fileTag = lookupClassName(dom, fileName)
 
