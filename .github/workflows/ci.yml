@@ -35,8 +35,8 @@ jobs:
         if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
         uses: uraimo/run-on-arch-action@v2.6.0
         with:
-          architecture: ${{ matrix.arch }}
-          distribution: ubuntu22.04
+          arch: ${{ matrix.arch }}
+          distro: ubuntu22.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
 
