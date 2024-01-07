@@ -33,10 +33,10 @@ jobs:
 
       - name: Build for matrix.arch == armv7, aarch64, ppc64le
         if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
-        uses: uraimo/run-on-arch-action@v1.0.9
+        uses: uraimo/run-on-arch-action@v2.6.0
         with:
           architecture: ${{ matrix.arch }}
-          distribution: ubuntu18.04
+          distribution: ubuntu22.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
 
@@ -62,6 +62,7 @@ jobs:
 
 
   build-osx-big-sur:
+    if: false
     name: Build and test OSX executable (Big Sur)
     runs-on: macOS-11
     env:

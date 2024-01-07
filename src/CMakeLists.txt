@@ -453,7 +453,7 @@ if (LIBELF_FOUND)
 	target_link_libraries(${KCOV}
 		stdc++
 		${CMAKE_THREAD_LIBS_INIT}
-		${CURL_LIBRARIES}
+		CURL::libcurl
 		"${DL_LIBRARY}"
 		"${INTL_LIBRARY}"
 		${DISASSEMBLER_LIBRARIES}
@@ -474,7 +474,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${CMAKE_THREAD_LIBS_INIT}
         "${DL_LIBRARY}"
         "${M_LIBRARY}"
-        ${CURL_LIBRARIES}
+        CURL::libcurl
         ${ZLIB_LIBRARIES}
 	)
 	install (TARGETS kcov-system-daemon DESTINATION "${KCOV_INSTALL_BINDIR}")
