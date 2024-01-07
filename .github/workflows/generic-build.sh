@@ -37,9 +37,9 @@ run () {
   fi
 
   chmod u+x .github/workflows/test-executable.sh
-  kcov --include-path=.github/workflows/test-executable.sh coverage .github/workflows/test-executable.sh
+  kcov --include-pattern=test-executable.sh coverage .github/workflows/test-executable.sh
 
-  local coverage="$(<coverage/test*.sh*/coverage.json)"
+  local coverage="$(<coverage/test-executable.sh/coverage.json)"
   local percent="${coverage##*percent_covered\": \"}"
   local total_lines="${coverage##*total_lines\": }"
   local covered_lines="${coverage##*covered_lines\": }"

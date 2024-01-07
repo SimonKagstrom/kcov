@@ -178,7 +178,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	target_link_libraries(${SOLIB} dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	find_package (LibElf)
-	find_package (Elfutils)
+	find_package (ElfUtils)
 	set (ELF_SRCS
 		engines/clang-coverage-engine.cc
 		engines/ptrace.cc

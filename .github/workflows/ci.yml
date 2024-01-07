@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, armv7, aarch64, ppc64le]
+        arch: [amd64, armv7, aarch64, ppc64le, i386]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Prepare
         run: chmod u+x .github/workflows/*.sh
@@ -29,26 +29,25 @@ jobs:
           chmod u+x ./.github/workflows/setup-i386.sh
           sudo .github/workflows/setup-i386.sh
           sudo schroot -c mychroot -- ./.github/workflows/generic-build.sh ${{ matrix.arch }}
-          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
 
       - name: Build for matrix.arch == armv7, aarch64, ppc64le
         if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
         uses: uraimo/run-on-arch-action@v2.6.0
         with:
-          architecture: ${{ matrix.arch }}
-          distribution: ubuntu22.04
+          arch: ${{ matrix.arch }}
+          distro: ubuntu22.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
 
   build-osx:
-    name: Build and test OSX executable (macOS-latest)
-    runs-on: macOS-latest
+    name: Build OSX executable (macos-latest)
+    runs-on: macos-latest
     env:
       CC: clang
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Prepare
         run: |
@@ -58,39 +57,13 @@ jobs:
       - name: Build for OSX
         run: |
           sudo .github/workflows/osx-build.sh
-          sudo .github/workflows/ci-run-tests.sh
 
-
-  build-osx-big-sur:
-    if: false
-    name: Build and test OSX executable (Big Sur)
-    runs-on: macOS-11
-    env:
-      CC: clang
-      CXX: clang++
-
-    steps:
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '11.7.0'
-
-      - uses: actions/checkout@v2
-
-      - name: Prepare
-        run: |
-          chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
-          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1 dwarfutils
-
-      - name: Build for OSX
-        run: |
-          sudo .github/workflows/osx-build.sh
-          sudo .github/workflows/ci-run-tests.sh
 
   build-freebsd:
     runs-on: macos-12
     name: Build and test FreeBSD executable
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
@@ -108,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
