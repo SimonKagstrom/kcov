@@ -63,7 +63,7 @@ jobs:
     runs-on: macos-12
     name: Build and test FreeBSD executable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
