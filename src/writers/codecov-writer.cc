@@ -18,6 +18,7 @@ class type_info;
 #include <sstream>
 
 #include "writer-base.hh"
+#include "nocover.hh"
 
 namespace kcov
 {
@@ -134,6 +135,12 @@ private:
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
 				std::string hitScore = "0";
 
+				std::string& line_str = file->m_lineMap.at(n);
+				std::string& file_name = file->m_fileName;
+				if (!shouldCover(line_str, file_name)) {
+					continue;
+				}
+
 				if (m_maxPossibleHits == IFileParser::HITS_UNLIMITED || m_maxPossibleHits == IFileParser::HITS_SINGLE)
 				{
 					if (cnt.m_hits) {
@@ -167,7 +174,7 @@ private:
 		linesBlock += "\n";
 
 
-		std::string out = 
+		std::string out =
 			"    \"" + filename + "\": {\n" +
 			linesBlock +
 			"    }";
