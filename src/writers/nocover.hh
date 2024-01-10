@@ -5,7 +5,7 @@
 namespace kcov
 {
 
-bool shouldCover(std::string& line, std::string& file_name);
+bool shouldCover(const std::string& line, const std::string& file_name);
 
 }
 

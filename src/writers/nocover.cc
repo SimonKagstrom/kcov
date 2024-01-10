@@ -20,7 +20,7 @@ bool endsWith(const std::string& full_string, const std::string& ending) {
     }
 }
 
-FileType getFileExt(std::string& file_name) {
+FileType getFileExt(const std::string& file_name) {
   const std::string zig_ending = ".zig";
   const std::string c_ending = ".c";
   const std::string cpp_ending1 = ".cpp";
@@ -43,7 +43,7 @@ FileType getFileExt(std::string& file_name) {
   std::abort();
 }
 
-bool shouldCover(std::string& line, std::string& file_name) {
+bool shouldCover(const std::string& line, const std::string& file_name) {
   FileType t = getFileExt(file_name);
 
   switch(t) {

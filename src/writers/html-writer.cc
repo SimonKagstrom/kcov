@@ -261,15 +261,29 @@ private:
 			if (!res)
 				continue;
 
+			// since we may ignored some from previous individual writeOne functions for each file, here use the sum from
+			// files instead of summary
+			int inFilesTotalCodeLines = 0;
+			int inFilesTotalExecutedLines = 0;
+			for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+			{
+				inFilesTotalCodeLines += it->second->m_codeLines;
+				inFilesTotalExecutedLines += it->second->m_executedLines;
+			}
+
 			// Skip entries (merged ones) that shouldn't be included in the totals
 			if (summary.m_includeInTotals)
 			{
-				nTotalCodeLines += summary.m_lines;
-				nTotalExecutedLines += summary.m_executedLines;
+					nTotalCodeLines += inFilesTotalCodeLines;
+					nTotalExecutedLines += inFilesTotalExecutedLines;
+					// nTotalCodeLines += summary.m_lines;
+					// nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines,
-					summary.m_executedLines);
+			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, inFilesTotalCodeLines,
+					inFilesTotalExecutedLines);
+			// std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines,
+			// summary.m_executedLines);
 
 			if (name == conf.keyAsString("merged-name"))
 				merged += datum;

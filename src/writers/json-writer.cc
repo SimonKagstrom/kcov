@@ -16,6 +16,7 @@ class type_info;
 #include <fstream>
 
 #include "writer-base.hh"
+#include "nocover.hh"
 
 using namespace kcov;
 
@@ -61,12 +62,21 @@ public:
 			for (unsigned int n = 1; n < file->m_lastLineNr; n++)
 			{
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
+
+				const std::string& line_str = file->m_lineMap[n];
+				const std::string& file_name = it->first;
+				bool should_cover = shouldCover(line_str, file_name);
+
 				if (m_reporter.lineIsCode(file->m_name, n))
 				{
-					nExecutedLines += !!cnt.m_hits;
-					nCodeLines++;
-					nTotalExecutedLines += !!cnt.m_hits;
-					nTotalCodeLines++;
+					if (should_cover) {
+						nExecutedLines += !!cnt.m_hits;
+						nCodeLines++;
+						nTotalExecutedLines += !!cnt.m_hits;
+						nTotalCodeLines++;
+					} else {
+						// skip this from counting
+					}
 				}
 			}
 			if (nCodeLines > 0)
