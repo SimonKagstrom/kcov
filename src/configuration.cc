@@ -180,20 +180,27 @@ public:
 		 */
 		for (lastArg = 1; lastArg < argc; lastArg++)
 		{
-			if (IParserManager::getInstance().matchParser(get_real_path(argv[lastArg])))
-				break;
-
 			bool found = false;
 			for (std::vector<std::string>::const_iterator it = paths.begin();
 					it != paths.end(); ++it)
 			{
 				const std::string &curPath = *it;
-				const std::string cur = get_real_path(
-						curPath + "/" + argv[lastArg]);
+				std::string cur = argv[lastArg];
 				struct stat st;
 
-				if (lstat(cur.c_str(), &st) < 0)
+				// Skip options.
+				if ((cur.size() > 0) && (cur[0] == '-'))
 					continue;
+
+				// Don't expand the path unless lstat fails, since it may
+				// incorrectly expand the out-dir argument, in case it has the
+				// same name as of an existing executable.
+				if (lstat(argv[lastArg], &st) < 0) {
+					cur = get_real_path(curPath + "/" + cur);
+
+					if (lstat(cur.c_str(), &st) < 0)
+						continue;
+				}
 
 				// Regular file?
 				if (S_ISREG(st.st_mode) == 0)
@@ -203,7 +210,7 @@ public:
 				if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
 					continue;
 
-				if (IParserManager::getInstance().matchParser(cur))
+				if (IParserManager::getInstance().matchParser(get_real_path(cur)))
 				{
 					// Intentional memory leak
 					argv[lastArg] = xstrdup(cur.c_str());
