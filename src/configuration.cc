@@ -13,9 +13,18 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <iostream>
+
 using namespace kcov;
 
 extern "C" const char *kcov_version;
+
+// This function can't be defined in utils.cc due to the use of the singleton
+// pattern. It will cause a linker error when buildind tests, since the utils.cc
+// file is also included in the test source files.
+static bool is_supported_executable(const std::string path)
+{
+	return kcov::IParserManager::getInstance().matchParser(path) != 0;
+}
 
 class Configuration : public IConfiguration
 {
@@ -164,56 +173,33 @@ public:
 
 		setupDefaults();
 
-		const char *path = getenv("PATH");
-
-		if (!path)
-			path = "";
-
-		std::vector<std::string> paths = split_string(path, ":");
-
 		setKey("kcov-binary-path", get_real_path(argv[0]));
 
-		/* Scan through the parameters for an ELF file: That will be the
-		 * second last argument in the list.
+		/* Scan through the parameters for a supported executable file: That
+		 * will be the second last argument in the list.
 		 *
 		 * After that it's arguments to the external program.
 		 */
 		for (lastArg = 1; lastArg < argc; lastArg++)
 		{
-			if (IParserManager::getInstance().matchParser(get_real_path(argv[lastArg])))
-				break;
+			std::string arg = std::string(argv[lastArg]);
+			int ret;
+			std::string path;
 
-			bool found = false;
-			for (std::vector<std::string>::const_iterator it = paths.begin();
-					it != paths.end(); ++it)
+			// Skip options.
+			if ((arg.size() > 0) && (arg[0] == '-'))
+				continue;
+
+			ret = look_path(arg, &path);
+			if (ret < 0)
+				continue;
+
+			if (is_supported_executable(path))
 			{
-				const std::string &curPath = *it;
-				const std::string cur = get_real_path(
-						curPath + "/" + argv[lastArg]);
-				struct stat st;
-
-				if (lstat(cur.c_str(), &st) < 0)
-					continue;
-
-				// Regular file?
-				if (S_ISREG(st.st_mode) == 0)
-					continue;
-
-				// Executable?
-				if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
-					continue;
-
-				if (IParserManager::getInstance().matchParser(cur))
-				{
-					// Intentional memory leak
-					argv[lastArg] = xstrdup(cur.c_str());
-					found = true;
-					break;
-				}
-			}
-
-			if (found)
+				// Intentional memory leak
+				argv[lastArg] = xstrdup(path.c_str());
 				break;
+			}
 		}
 
 		bool printUsage = false;

@@ -775,3 +775,36 @@ uint32_t hash_file(const std::string &filename)
 
 	return out;
 }
+
+int look_path(const std::string &file, std::string *out)
+{
+	const char *sys_path = getenv("PATH");
+	if (!sys_path)
+		return -1;
+
+	const std::vector<std::string> sys_paths = split_string(sys_path, ":");
+	for (std::vector<std::string>::const_iterator it = sys_paths.begin();
+			it != sys_paths.end(); ++it)
+	{
+		const std::string root = *it;
+		const std::string path = get_real_path(root + "/" + file);
+		struct stat st;
+
+		if (lstat(path.c_str(), &st) < 0)
+			continue;
+
+		// Regular file?
+		if (S_ISREG(st.st_mode) == 0)
+			continue;
+
+		// Executable?
+		if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
+			continue;
+
+		*out = path;
+
+		return 0;
+	}
+
+	return -1;
+}
