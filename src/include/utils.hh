@@ -223,3 +223,7 @@ static inline uint32_t hash_block(const void *buf, size_t len)
 }
 
 uint32_t hash_file(const std::string &filename);
+
+// Searches for an executable named file in the directories named by the PATH
+// environment variable.
+int look_path(const std::string &file, std::string *out);
