@@ -224,6 +224,12 @@ static inline uint32_t hash_block(const void *buf, size_t len)
 
 uint32_t hash_file(const std::string &filename);
 
+int find_executable(const std::string &file);
+
 // Searches for an executable named file in the directories named by the PATH
 // environment variable.
+// The named file is first tried directly without consulting PATH.
+//
+// Don't use this function when expanding the first argument of the exec()
+// family of functions, since it is insecure.
 int look_path(const std::string &file, std::string *out);
