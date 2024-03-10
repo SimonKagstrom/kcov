@@ -13,4 +13,4 @@ root-groups=root
 preserve-environment=true
 personality=linux32" >> /etc/schroot/schroot.conf
 
-debootstrap --variant=buildd --arch i386 focal /chroots/i386 http://archive.ubuntu.com/ubuntu/
+debootstrap --variant=buildd --arch i386 --components=main,universe jammy /chroots/i386 http://archive.ubuntu.com/ubuntu/
