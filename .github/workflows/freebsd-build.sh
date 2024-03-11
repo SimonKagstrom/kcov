@@ -14,6 +14,10 @@ run () {
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../tests || exit 64
   make || exit 64
   cd ..
+
+  chmod u+x .github/workflows/test-executable.sh
+  kcov --include-pattern=test-executable.sh coverage .github/workflows/test-executable.sh
+  cat coverage/test-executable.sh/coverage.json
 }
 
 run "$@"

@@ -153,6 +153,8 @@ public:
 			unsigned int argc = conf.getArgc();
 			int xtraceFd = 782; // Typical bash users use 3,4 etc but not high fd numbers (?)
 			{
+// This doesn't work on (recent?) FreeBSDs, so disable for now
+#ifndef __FreeBSD__
 				// However, the range of fd numbers that this process can use is limited by the caller of this process.
 				// The following code specification will require discussion with many kcov users.
 				struct rlimit rlim;
@@ -161,6 +163,7 @@ public:
 					return false;
 				}
 				xtraceFd = rlim.rlim_cur / 4;
+#endif
 			}
 			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");

@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <map>
