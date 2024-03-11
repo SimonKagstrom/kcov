@@ -69,7 +69,6 @@ jobs:
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
-        sync: rsync
         prepare: pkg install -y binutils cmake elfutils python bash git python2
         run: |
           chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
