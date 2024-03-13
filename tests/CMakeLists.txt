@@ -143,7 +143,7 @@ add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
 
 add_executable(setpgid-kill setpgid-kill/setpgid-kill-main.cc ../src/utils.cc)
-target_link_libraries(setpgid-kill ${ZLIB_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(setpgid-kill ${ZLIB_LIBRARIES} CURL::libcurl)
 
 add_executable(issue31 daemon/test-issue31.cc)
 target_link_libraries(issue31 ${CMAKE_THREAD_LIBS_INIT})

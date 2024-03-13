@@ -60,17 +60,16 @@ jobs:
 
 
   build-freebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-22.04
     name: Build and test FreeBSD executable
     steps:
     - uses: actions/checkout@v3
     - name: FreeBSD
       id: test
-      uses: vmactions/freebsd-vm@v0
+      uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
-        sync: rsync
-        prepare: pkg install -y binutils cmake elfutils python bash git
+        prepare: pkg install -y binutils cmake elfutils python bash git python2
         run: |
           chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
           .github/workflows/freebsd-build.sh x86_64

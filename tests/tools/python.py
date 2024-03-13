@@ -24,6 +24,13 @@ class python_can_set_legal_parser(testbase.KcovTestCase):
 
         assert b"Cannot find Python parser 'python3'" not in o
 
+class python2_can_set_legal_parser(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " --python-parser=python2 " + testbase.outbase + "/kcov " + testbase.sources + "/tests/python/main 5")
+
+        assert b"Cannot find Python parser 'python2'" not in o
+
 class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
@@ -83,6 +90,10 @@ class python_accumulate_data(testbase.KcovTestCase):
 class python3_coverage(PythonBase):
     def runTest(self):
         self.doTest("--python-parser=python3")
+
+class python2_coverage(PythonBase):
+    def runTest(self):
+        self.doTest("--python-parser=python2")
 
 class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
     def runTest(self):

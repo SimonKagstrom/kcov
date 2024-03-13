@@ -18,7 +18,7 @@ run () {
   apt-get update
   apt-mark hold php* google* libobjc* libpq* libidn* postgresql* python3-httplib2 samba* >/dev/null
   apt-get upgrade -y
-  apt-get install -y binutils-dev libcurl4-openssl-dev libdw-dev libiberty-dev gcc g++ make cmake libssl-dev git python3 $EXTRA_PACKAGES
+  apt-get install -y binutils-dev libcurl4-openssl-dev libdw-dev libiberty-dev gcc g++ make cmake libssl-dev git python3 python2 $EXTRA_PACKAGES
   export PATH="${PATH}:${HOME}/kcov/bin"
   mkdir build build-tests
   cd build

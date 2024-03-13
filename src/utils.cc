@@ -146,8 +146,9 @@ void *peek_file(size_t *out_size, const char *fmt, ...)
 	struct stat st;
 	if (lstat(path, &st) < 0)
 		return NULL;
-	// Regular file?
-	if (S_ISREG(st.st_mode) == 0)
+
+	// Not a directory?
+	if (S_ISDIR(st.st_mode) > 0)
 		return NULL;
 
 	// Read a little bit of the file    
@@ -774,4 +775,55 @@ uint32_t hash_file(const std::string &filename)
 	free(p);
 
 	return out;
+}
+
+int find_executable(const std::string &file)
+{
+	struct stat st;
+
+	if (lstat(file.c_str(), &st) < 0)
+		return -1;
+
+	// Not a directory?
+	if (S_ISDIR(st.st_mode) > 0)
+		return -1;
+
+	// Executable?
+	if ((st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0)
+		return -1;
+
+	return 0;
+}
+
+
+int look_path(const std::string &file, std::string *out)
+{
+	// First check if the relative file is an executable.
+	if (find_executable(file) == 0)
+	{
+		*out = file;
+
+		return 0;
+	}
+
+	const char *sys_path = getenv("PATH");
+	if (!sys_path)
+		return -1;
+
+	const std::vector<std::string> sys_paths = split_string(sys_path, ":");
+	for (std::vector<std::string>::const_iterator it = sys_paths.begin();
+			it != sys_paths.end(); ++it)
+	{
+		const std::string root = *it;
+		const std::string path = get_real_path(root + "/" + file);
+
+		if (find_executable(path) == 0)
+		{
+			*out = path;
+
+			return 0;
+		}
+	}
+
+	return -1;
 }
