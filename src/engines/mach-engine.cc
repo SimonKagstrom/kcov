@@ -257,7 +257,7 @@ private:
         // Fork the process, in suspended mode
         auto& conf = IConfiguration::getInstance();
         auto argv = conf.getArgv();
-        rv = posix_spawn(&m_pid, argv[0], nullptr, &attr, (char* const*)argv, environ);
+        rv = posix_spawn(&m_pid, executable.c_str(), nullptr, &attr, (char* const*)argv, environ);
         if (rv != 0)
         {
             error("posix_spawn");
