@@ -19,14 +19,6 @@ using namespace kcov;
 
 extern "C" const char *kcov_version;
 
-// This function can't be defined in utils.cc due to the use of the singleton
-// pattern. It will cause a linker error when buildind tests, since the utils.cc
-// file is also included in the test source files.
-static bool is_supported_executable(const std::string path)
-{
-	return kcov::IParserManager::getInstance().matchParser(path) != 0;
-}
-
 class Configuration : public IConfiguration
 {
 public:
@@ -170,40 +162,11 @@ public:
 		{ 0, 0, 0, 0 } };
 		unsigned int afterOpts = 0;
 		unsigned int extraNeeded = 2;
-		unsigned int lastArg;
+		bool printUsage = false;
 
 		setupDefaults();
 
 		setKey("kcov-binary-path", get_real_path(argv[0]));
-
-		/* Scan through the parameters for a supported executable file: That
-		 * will be the second last argument in the list.
-		 *
-		 * After that it's arguments to the external program.
-		 */
-		for (lastArg = 1; lastArg < argc; lastArg++)
-		{
-			std::string arg = std::string(argv[lastArg]);
-			int ret;
-			std::string path;
-
-			// Skip options.
-			if ((arg.size() > 0) && (arg[0] == '-'))
-				continue;
-
-			ret = look_path(arg, &path);
-			if (ret < 0)
-				continue;
-
-			if (is_supported_executable(path))
-			{
-				// Intentional memory leak
-				argv[lastArg] = xstrdup(path.c_str());
-				break;
-			}
-		}
-
-		bool printUsage = false;
 
 		/* Hooray for reentrancy... */
 		optind = 0;
@@ -213,7 +176,11 @@ public:
 			int option_index = 0;
 			int c;
 
-			c = getopt_long(lastArg, (char **) argv, "hp:s:l:t:", long_options,
+			// Force getopt_long to stop as soon as a nonoption argument is
+			// encountered.  This will ensure correct parsing of positional
+			// arguments without having to use "--" to stop parsing the
+			// executable arguments.
+			c = getopt_long(argc, (char **) argv, "+hp:s:l:t:", long_options,
 					&option_index);
 
 			/* No more options */
@@ -492,7 +459,6 @@ public:
 		}
 		else
 		{
-			std::string binaryName;
 			std::string path;
 
 			if (keyAsInt("attach-pid") == 0)
@@ -513,8 +479,11 @@ public:
 				}
 			}
 
-			path = get_real_path(path);
-			std::pair<std::string, std::string> tmp = split_path(path);
+			std::string binaryName;
+			std::string binaryPath = path;
+
+			(void)look_path(path, &binaryPath);
+			std::pair<std::string, std::string> tmp = split_path(binaryPath);
 
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
@@ -523,7 +492,7 @@ public:
 			{
 				setKey("target-directory",
 						fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
-								(size_t)hash_file(path)));
+								(size_t)hash_file(get_real_path(binaryPath))));
 			}
 			else
 			{

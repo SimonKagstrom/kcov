@@ -26,3 +26,11 @@ class LookupBinaryInPath(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "second.py", 34) == 2
         assert noKcovRv, rv
+
+# Issue #414
+class OutDirectoryIsExecutable(testbase.KcovTestCase):
+    def runTest(self):
+        self.setUp()
+        rv,o = self.do(testbase.kcov + " echo python -V")
+
+        assert rv == 0
