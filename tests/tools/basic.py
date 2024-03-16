@@ -31,6 +31,8 @@ class LookupBinaryInPath(testbase.KcovTestCase):
 class OutDirectoryIsExecutable(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
-        rv,o = self.do(testbase.kcov + " echo python -V")
+        kcov_path = os.path.realpath(testbase.kcov)
+        os.chdir(os.path.realpath(testbase.outbase))
+        rv,o = self.do(kcov_path + " echo python -V")
 
         assert rv == 0
