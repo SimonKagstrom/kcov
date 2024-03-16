@@ -7,12 +7,16 @@ class TooFewArguments(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov")
+
+        assert b"Usage: kcov" in output
         assert rv == 1
 
 class WrongArguments(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
         rv, output = self.do(testbase.kcov + " --abc=efg " + testbase.outbase + "/kcov " + testbase.testbuild + "/tests-stripped")
+
+        assert b"kcov: error: Unrecognized option: --abc=efg" in output
         assert rv == 1
 
 class LookupBinaryInPath(testbase.KcovTestCase):
