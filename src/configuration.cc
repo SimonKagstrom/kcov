@@ -171,6 +171,7 @@ public:
 		/* Hooray for reentrancy... */
 		optind = 0;
 		optarg = 0;
+		opterr = 0;
 		while (1)
 		{
 			int option_index = 0;
@@ -180,7 +181,7 @@ public:
 			// encountered.  This will ensure correct parsing of positional
 			// arguments without having to use "--" to stop parsing the
 			// executable arguments.
-			c = getopt_long(argc, (char **) argv, "+hp:s:l:t:", long_options,
+			c = getopt_long(argc, (char **) argv, "+:hp:s:l:t:", long_options,
 					&option_index);
 
 			/* No more options */
@@ -431,9 +432,16 @@ public:
 				}
 				break;
 			}
-			default:
-				error("Unrecognized option: -%c\n", optopt);
+			case ':':
+				error("Option %s requires an argument\n", argv[optind - 1]);
 				return usage();
+			case '?':
+			{
+				error("Unrecognized option: %s\n", argv[optind - 1]);
+				return usage();
+			}
+			default:
+				panic("unreachable");
 			}
 		}
 
