@@ -8,10 +8,12 @@ import platform
 # The actual tests
 from basic import *
 from compiled_basic import *
+
 if platform.machine() in ["x86_64", "i386", "i686"]:
     from compiled import *
 if sys.platform.startswith("linux"):
     from bash_linux_only import *
+
     if platform.machine() in ["x86_64", "i386", "i686"]:
         from system_mode import *
 from filter import *
@@ -21,7 +23,9 @@ from bash import *
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: run-tests <path-to-kcov-binary> <kcov-output> <path-to-test-builds> <path-to-kcov-source>")
+        print(
+            "Usage: run-tests <path-to-kcov-binary> <kcov-output> <path-to-test-builds> <path-to-kcov-source>"
+        )
         sys.exit(1)
 
     testbase.configure(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

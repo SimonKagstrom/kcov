@@ -5,16 +5,18 @@ import unittest
 import platform
 import parse_cobertura
 
+
 class SystemModeBase(testbase.KcovTestCase):
     def writeToPipe(self, str):
         f = open("/tmp/kcov-system.pipe", "w")
         f.write(str)
         f.close()
 
+
 class system_mode_can_start_and_stop_daemon(SystemModeBase):
     def runTest(self):
         self.setUp()
-        rv,o = self.do(testbase.kcov_system_daemon + " -d", False)
+        rv, o = self.do(testbase.kcov_system_daemon + " -d", False)
 
         pf = "/tmp/kcov-system.pid"
         assert os.path.isfile(pf)
@@ -25,10 +27,18 @@ class system_mode_can_start_and_stop_daemon(SystemModeBase):
 
         assert os.path.isfile(pf) == False
 
+
 class system_mode_can_instrument_binary(SystemModeBase):
     def runTest(self):
         self.setUp()
-        rv,o = self.do(testbase.kcov + " --system-record " + testbase.outbase + "/kcov " + testbase.testbuild + "/")
+        rv, o = self.do(
+            testbase.kcov
+            + " --system-record "
+            + testbase.outbase
+            + "/kcov "
+            + testbase.testbuild
+            + "/"
+        )
         assert rv == 0
 
         src = testbase.testbuild + "/main-tests"
@@ -39,6 +49,7 @@ class system_mode_can_instrument_binary(SystemModeBase):
 
         assert os.path.getsize(dst) > os.path.getsize(src)
 
+
 class system_mode_can_record_and_report_binary(SystemModeBase):
     @unittest.skipIf(platform.machine() == "i686", "x86_64-only")
     def runTest(self):
@@ -48,12 +59,19 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
             os.makedirs(testbase.outbase + "/kcov")
         except:
             pass
-        rv,o = self.do(testbase.kcov + " --system-record " + testbase.outbase + "/kcov " + testbase.testbuild + "/")
+        rv, o = self.do(
+            testbase.kcov
+            + " --system-record "
+            + testbase.outbase
+            + "/kcov "
+            + testbase.testbuild
+            + "/"
+        )
 
-        rv,o = self.do(testbase.kcov_system_daemon + " -d", False)
+        rv, o = self.do(testbase.kcov_system_daemon + " -d", False)
 
         os.environ["LD_LIBRARY_PATH"] = testbase.outbase + "/kcov/lib"
-        rv,o = self.do(testbase.outbase + "/kcov/main-tests", False)
+        rv, o = self.do(testbase.outbase + "/kcov/main-tests", False)
         print("Fickle test, ignoring")
         return
         assert rv == 0
@@ -61,7 +79,9 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
         time.sleep(3)
         self.writeToPipe("STOPME")
 
-        rv,o = self.do(testbase.kcov + " --system-report " + testbase.outbase + "/kcov-report /tmp/kcov-data")
+        rv, o = self.do(
+            testbase.kcov + " --system-report " + testbase.outbase + "/kcov-report /tmp/kcov-data"
+        )
         assert rv == 0
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov-report/main-tests/cobertura.xml")
