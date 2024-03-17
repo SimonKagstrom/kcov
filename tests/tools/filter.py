@@ -1,6 +1,6 @@
-import testbase
-import unittest
+
 import parse_cobertura
+import testbase
 
 
 class include_exclude_pattern(testbase.KcovTestCase):

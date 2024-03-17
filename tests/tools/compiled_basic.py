@@ -1,9 +1,8 @@
-import testbase
-import unittest
-import parse_cobertura
 import sys
-import platform
-import os
+import unittest
+
+import parse_cobertura
+import testbase
 
 
 class shared_library(testbase.KcovTestCase):

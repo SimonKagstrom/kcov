@@ -1,9 +1,10 @@
-import testbase
 import os
-import unittest
 import platform
 import sys
+import unittest
+
 import parse_cobertura
+import testbase
 
 
 class BashBase(testbase.KcovTestCase):

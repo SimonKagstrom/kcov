@@ -1,9 +1,10 @@
-import testbase
 import os
+import platform
 import time
 import unittest
-import platform
+
 import parse_cobertura
+import testbase
 
 
 class SystemModeBase(testbase.KcovTestCase):

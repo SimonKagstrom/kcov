@@ -1,7 +1,6 @@
-import testbase
-import os
-import unittest
+
 import parse_cobertura
+import testbase
 
 
 class bash_sh_shebang(testbase.KcovTestCase):

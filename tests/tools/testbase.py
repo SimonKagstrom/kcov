@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import unittest
 import os
-import sys
-import subprocess
-import time
-import threading
 import platform
+import subprocess
+import sys
+import threading
+import unittest
 
 kcov = ""
 kcov_system_daemon = ""

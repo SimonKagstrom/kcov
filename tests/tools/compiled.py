@@ -1,9 +1,10 @@
-import testbase
-import unittest
-import parse_cobertura
-import sys
-import platform
 import os
+import platform
+import sys
+import unittest
+
+import parse_cobertura
+import testbase
 
 
 class illegal_insn(testbase.KcovTestCase):

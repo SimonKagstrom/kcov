@@ -1,6 +1,6 @@
-import testbase
-import unittest
+
 import parse_cobertura
+import testbase
 
 
 class accumulate_data(testbase.KcovTestCase):

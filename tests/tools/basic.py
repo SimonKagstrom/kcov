@@ -1,7 +1,8 @@
-import testbase
-import unittest
-import parse_cobertura
 import os
+import unittest
+
+import parse_cobertura
+import testbase
 
 
 class TooFewArguments(testbase.KcovTestCase):

@@ -1,6 +1,7 @@
-import testbase
 import unittest
+
 import parse_cobertura
+import testbase
 
 
 class python_exit_status(testbase.KcovTestCase):
