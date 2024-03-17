@@ -26,7 +26,7 @@ class system_mode_can_start_and_stop_daemon(SystemModeBase):
 
         time.sleep(2)
 
-        assert os.path.isfile(pf) == False
+        assert os.path.isfile(pf) is False
 
 
 class system_mode_can_instrument_binary(SystemModeBase):
@@ -87,5 +87,5 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov-report/main-tests/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 14) == None
+        assert parse_cobertura.hitsPerLine(dom, "main.cc", 14) is None
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 18) >= 1

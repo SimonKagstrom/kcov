@@ -36,18 +36,18 @@ class bash_coverage(testbase.KcovTestCase):
         )
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 3) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 3) is None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 4) == 1
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 13) == 0
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 26) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 26) is None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 30) == 5
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 34) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 38) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 34) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 38) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 5) == 1
 
         assert parse_cobertura.hitsPerLine(dom, "short-test.sh", 5) == 11
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 128) == 1
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 132) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 132) is None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 135) == 1
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 136) == 1
 
@@ -68,7 +68,7 @@ class bash_coverage_debug_trap(testbase.KcovTestCase):
         )
 
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 3) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 3) is None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 4) == 1
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 22) == 1
 
@@ -94,11 +94,11 @@ class bash_heredoc_backslashes(BashBase):
         dom = self.doTest("5")
 
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 52) == 4
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 53) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 55) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 53) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 55) is None
         assert parse_cobertura.hitsPerLine(dom, "shell-main", 59) == 1
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 61) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 62) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 61) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 62) is None
 
 
 class bash_heredoc_special_cases_issue_44(BashBase):
@@ -122,9 +122,9 @@ class bash_non_empty_braces(BashBase):
 class bash_coverage_tricky(BashBase):
     def runTest(self):
         dom = self.doTest("5")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 36) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 44) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 7) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 36) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 44) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 7) is None
 
 
 class bash_honor_signal(testbase.KcovTestCase):
@@ -372,8 +372,8 @@ class bash_done_eof(testbase.KcovTestCase):
             + "/tests/bash/shell-main 5"
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 163) == None
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 169) == None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 163) is None
+        assert parse_cobertura.hitsPerLine(dom, "shell-main", 169) is None
 
 
 # Issue #154
@@ -456,31 +456,31 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
             + "/tests/bash/other.sh"
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/other.sh/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 22) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 22) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 23) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 26) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 27) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 28) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 26) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 27) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 28) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 29) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 32) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 34) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 35) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 36) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 32) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 34) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 35) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 36) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 37) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 40) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 42) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 40) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 42) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 43) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 47) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 48) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 49) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 47) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 48) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 49) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 51) == 1
 
         # Rust stuff
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 54) == None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 54) is None
         assert parse_cobertura.hitsPerLine(dom, "other.sh", 55) == 1
 
 
@@ -538,8 +538,8 @@ class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "a.sh", 5) == 1
         # Not included in report
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) == None
-        assert parse_cobertura.hitsPerLine(dom, "other.sh", 3) == None
+        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) is None
+        assert parse_cobertura.hitsPerLine(dom, "other.sh", 3) is None
 
 
 class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
@@ -556,10 +556,10 @@ class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(
             testbase.outbase + "/kcov/function-with-spaces.sh/cobertura.xml"
         )
-        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 5) == None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 5) is None
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 6) == 1
-        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 9) == None
-        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 10) == None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 9) is None
+        assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 10) is None
         assert parse_cobertura.hitsPerLine(dom, "function-with-spaces.sh", 11) == 1
 
 

@@ -587,7 +587,7 @@ class debuglink(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(
             testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml"
         )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == None
+        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) is None
 
 
 # Todo: Look in /usr/lib/debug as well

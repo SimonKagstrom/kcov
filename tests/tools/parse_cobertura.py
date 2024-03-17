@@ -55,9 +55,9 @@ def hitsPerLine(dom, fileName, lineNr):
     fileName = fileName.replace(".", "_").replace("-", "_")
     fileTag = lookupClassName(dom, fileName)
 
-    if fileTag != None:
+    if fileTag is not None:
         hits = lookupHitsByLine(fileTag, lineNr)
-        if hits != None:
+        if hits is not None:
             return hits
 
     return None
@@ -76,9 +76,9 @@ if __name__ == "__main__":
     dom = parse(data)
     fileTag = lookupClassName(dom, fileName)
 
-    if fileTag != None:
+    if fileTag is not None:
         hits = lookupHitsByLine(fileTag, line)
-        if hits != None:
+        if hits is not None:
             print(hits)
             sys.exit(0)
 

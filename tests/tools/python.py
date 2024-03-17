@@ -113,19 +113,19 @@ class PythonBase(testbase.KcovTestCase):
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
         assert parse_cobertura.hitsPerLine(dom, "main", 10) == 2
         assert parse_cobertura.hitsPerLine(dom, "main", 17) == 0
-        assert parse_cobertura.hitsPerLine(dom, "main", 22) == None
+        assert parse_cobertura.hitsPerLine(dom, "main", 22) is None
         assert parse_cobertura.hitsPerLine(dom, "second.py", 2) == 1
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 4) == None
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 11) == None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 4) is None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 11) is None
         assert parse_cobertura.hitsPerLine(dom, "second.py", 31) == 0
         assert parse_cobertura.hitsPerLine(dom, "second.py", 38) == 1
         assert parse_cobertura.hitsPerLine(dom, "second.py", 39) == 0
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 40) == None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 40) is None
         assert parse_cobertura.hitsPerLine(dom, "second.py", 41) == 1
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 56) == None
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 60) == None
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 65) == None
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 77) == None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 56) is None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 60) is None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 65) is None
+        assert parse_cobertura.hitsPerLine(dom, "second.py", 77) is None
 
 
 class python_coverage(PythonBase):
