@@ -31,6 +31,10 @@ class LookupBinaryInPath(testbase.KcovTestCase):
 class OutDirectoryIsExecutable(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
-        rv,o = self.do(testbase.kcov + " echo python -V")
+        # Running a system executable on Linux may cause ptrace to fails with
+        # "Operation not permitted", even with ptrace_scope set to 0.
+        # See https://www.kernel.org/doc/Documentation/security/Yama.txt
+        executable = testbase.sources + "/tests/python/short-test.py"
+        rv,o = self.do(testbase.kcov + " echo " + executable)
 
         assert rv == 0
