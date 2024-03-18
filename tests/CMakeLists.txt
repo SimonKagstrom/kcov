@@ -29,6 +29,8 @@ find_package (Threads REQUIRED)
 find_package (ZLIB REQUIRED)
 find_package (CURL REQUIRED)
 
+find_package (Python3 3.8 REQUIRED)
+
 if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 set (DL_LIBRARY "")
 else (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
