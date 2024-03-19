@@ -239,6 +239,7 @@ set (${KCOV}_SRCS
     writers/html-writer.cc
     writers/sonarqube-xml-writer.cc
     writers/writer-base.cc
+    writers/nocover.cc
     ${ELF_SRCS}
     ${MACHO_SRCS}
     include/capabilities.hh
