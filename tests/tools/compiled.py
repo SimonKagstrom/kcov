@@ -11,7 +11,6 @@ class illegal_insn(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         rv, output = self.do(
             testbase.kcov
             + " "
@@ -28,7 +27,6 @@ class illegal_insn(testbase.KcovTestCase):
 class fork_no_wait(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/fork_no_wait", False)
         rv, o = self.do(
             testbase.kcov
@@ -49,7 +47,6 @@ class fork_no_wait(testbase.KcovTestCase):
 
 class ForkBase(testbase.KcovTestCase):
     def doTest(self, binary):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/" + binary, False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/" + binary,
@@ -86,7 +83,6 @@ class vfork(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/vfork", False
         )
@@ -100,7 +96,6 @@ class vfork(testbase.KcovTestCase):
 class popen_test(testbase.KcovTestCase):
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_popen", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/test_popen",
@@ -114,14 +109,12 @@ class popen_test(testbase.KcovTestCase):
 class short_filename(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv, o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov ./s", False)
         assert rv == 99
 
 
 class Pie(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/pie", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie", False
@@ -134,7 +127,6 @@ class Pie(testbase.KcovTestCase):
 
 class pie_argv_basic(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test",
             False,
@@ -152,7 +144,6 @@ class pie_accumulate(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test",
             False,
@@ -176,7 +167,6 @@ class pie_accumulate(testbase.KcovTestCase):
 
 class global_ctors(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/global-constructors", False)
         rv, o = self.do(
             testbase.kcov
@@ -199,7 +189,6 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_daemon", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/test_daemon",
@@ -235,7 +224,6 @@ class SignalsBase(testbase.KcovTestCase):
         return parse_cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
 
     def doTest(self):
-        self.setUp()
 
         dom = self.cmpOne("hup")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 14) == 1
@@ -272,7 +260,6 @@ class signals_self(SignalsBase):
 class signals_crash(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (macho-parser for now)")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -300,7 +287,6 @@ class collect_and_report_only(testbase.KcovTestCase):
     # Cannot work with combined Engine / Parser
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests ", False)
         rv, o = self.do(
             testbase.kcov
@@ -337,7 +323,6 @@ class collect_and_report_only(testbase.KcovTestCase):
 
 class setpgid_kill(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(
             testbase.sources
             + "/tests/setpgid-kill/test-script.sh "
@@ -363,7 +348,6 @@ class setpgid_kill(testbase.KcovTestCase):
 class attach_process_with_threads(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.sources
             + "/tests/daemon/test-script.sh "
@@ -386,7 +370,6 @@ class attach_process_with_threads(testbase.KcovTestCase):
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.sources
             + "/tests/daemon/test-script.sh "
@@ -407,7 +390,6 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
 
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/multi_1",
             False,
@@ -437,7 +419,6 @@ class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
 class debuglink(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         os.system(f"rm -rf {(testbase.outbase)}/.debug")
         os.system(f"cp {testbase.testbuild}/main-tests {testbase.testbuild}/main-tests-debug-file")
         os.system(
@@ -583,7 +564,6 @@ class debuglink(testbase.KcovTestCase):
 class collect_no_source(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
 
         os.system(f"cp {testbase.sources}/tests/short-file.c {testbase.testbuild}/main.cc")
         os.system(f"gcc -g -o {testbase.testbuild}/main-collect-only {testbase.testbuild}/main.cc")
@@ -616,7 +596,6 @@ class collect_no_source(testbase.KcovTestCase):
 class dlopen(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/dlopen", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/dlopen",
@@ -634,7 +613,6 @@ class dlopen(testbase.KcovTestCase):
 class dlopen_in_ignored_source_file(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --exclude-pattern=dlopen.cc "
@@ -654,7 +632,6 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_daemon", False)
         rv, o = self.do(
             testbase.kcov
@@ -680,7 +657,6 @@ class address_sanitizer_coverage(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         if not os.path.isfile(testbase.testbuild + "/sanitizer-coverage"):
             print("Clang-only")
             assert False

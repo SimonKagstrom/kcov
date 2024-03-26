@@ -4,7 +4,6 @@ import testbase
 
 class accumulate_data(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -35,7 +34,6 @@ class accumulate_data(testbase.KcovTestCase):
 
 class dont_accumulate_data_with_clean(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -66,7 +64,6 @@ class dont_accumulate_data_with_clean(testbase.KcovTestCase):
 
 class merge_basic(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -91,7 +88,6 @@ class merge_basic(testbase.KcovTestCase):
 
 class merge_multiple_output_directories(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -125,7 +121,6 @@ class merge_multiple_output_directories(testbase.KcovTestCase):
 
 class merge_merged_output(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -181,7 +176,6 @@ class merge_merged_output(testbase.KcovTestCase):
 
 class merge_coveralls(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --coveralls-id=dry-run "

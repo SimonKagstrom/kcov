@@ -9,7 +9,6 @@ import testbase
 
 class BashBase(testbase.KcovTestCase):
     def doTest(self, args):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -25,7 +24,6 @@ class BashBase(testbase.KcovTestCase):
 
 class bash_coverage(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -57,7 +55,6 @@ class bash_coverage(testbase.KcovTestCase):
 # Very limited, will expand once it's working better
 class bash_coverage_debug_trap(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-method=DEBUG "
@@ -75,7 +72,6 @@ class bash_coverage_debug_trap(testbase.KcovTestCase):
 
 class bash_short_file(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -129,7 +125,6 @@ class bash_coverage_tricky(BashBase):
 
 class bash_honor_signal(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.sources
             + "/tests/setpgid-kill/test-script.sh "
@@ -148,7 +143,6 @@ class bash_honor_signal(testbase.KcovTestCase):
 
 class bash_accumulate_data(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -179,7 +173,6 @@ class bash_accumulate_changed_data(testbase.KcovTestCase):
     # Not sure why, but for now...
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         os.system("mkdir -p /tmp/test-kcov")
         os.system("cp " + testbase.sources + "/tests/bash/shell-main /tmp/test-kcov")
         os.system("cp " + testbase.sources + "/tests/bash/other.sh /tmp/test-kcov")
@@ -204,7 +197,6 @@ class bash_accumulate_changed_data(testbase.KcovTestCase):
 
 class bash_merge_data_issue_38(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -247,7 +239,6 @@ class bash_merge_data_issue_38(testbase.KcovTestCase):
 
 class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -266,7 +257,6 @@ class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(test
 
 class bash_multiline_quotes(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -283,7 +273,6 @@ class bash_multiline_quotes(testbase.KcovTestCase):
 
 class bash_multiline_backslashes(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -298,7 +287,6 @@ class bash_multiline_backslashes(testbase.KcovTestCase):
 
 class bash_no_executed_lines(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -317,7 +305,6 @@ class bash_no_executed_lines(testbase.KcovTestCase):
 
 class bash_stderr_redirection(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -341,7 +328,6 @@ class bash_stderr_redirection(testbase.KcovTestCase):
 
 class bash_dollar_var_replacement(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -362,7 +348,6 @@ class bash_dollar_var_replacement(testbase.KcovTestCase):
 # Issue #152
 class bash_done_eof(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -379,7 +364,6 @@ class bash_done_eof(testbase.KcovTestCase):
 # Issue #154
 class bash_eof_backtick(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -429,7 +413,6 @@ class bash_handle_all_output(testbase.KcovTestCase):
 
 class bash_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.sources + "/tests/bash/shell-main 5", False)
         rv, o = self.do(
             testbase.kcov
@@ -446,7 +429,6 @@ class bash_exit_status(testbase.KcovTestCase):
 # Issue 180
 class bash_ignore_uncovered(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --exclude-region=CUSTOM_RANGE_START:CUSTOM_RANGE_END "
@@ -487,7 +469,6 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
 # Issue #224
 class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -505,7 +486,6 @@ class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
 
 class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-parse-files-in-dir="
@@ -525,7 +505,6 @@ class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
 
 class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-dont-parse-binary-dir "

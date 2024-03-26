@@ -16,7 +16,6 @@ class SystemModeBase(testbase.KcovTestCase):
 
 class system_mode_can_start_and_stop_daemon(SystemModeBase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(testbase.kcov_system_daemon + " -d", False)
 
         pf = "/tmp/kcov-system.pid"
@@ -31,7 +30,6 @@ class system_mode_can_start_and_stop_daemon(SystemModeBase):
 
 class system_mode_can_instrument_binary(SystemModeBase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --system-record "
@@ -55,7 +53,6 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
     @unittest.skipIf(platform.machine() == "i686", "x86_64-only")
     def runTest(self):
         print(platform.machine())
-        self.setUp()
         try:
             os.makedirs(testbase.outbase + "/kcov")
         except:

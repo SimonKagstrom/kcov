@@ -4,7 +4,6 @@ import testbase
 
 class bash_sh_shebang(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-handle-sh-invocation "

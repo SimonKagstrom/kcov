@@ -11,7 +11,6 @@ class shared_library(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/shared_library_test", False)
         rv, o = self.do(
             testbase.kcov
@@ -34,7 +33,6 @@ class shared_library(testbase.KcovTestCase):
 class shared_library_skip(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --skip-solibs "
@@ -58,7 +56,6 @@ class shared_library_skip(testbase.KcovTestCase):
 class shared_library_filter_out(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --exclude-pattern=solib "
@@ -80,7 +77,6 @@ class shared_library_filter_out(testbase.KcovTestCase):
 class shared_library_accumulate(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -102,7 +98,6 @@ class shared_library_accumulate(testbase.KcovTestCase):
 
 class MainTestBase(testbase.KcovTestCase):
     def doTest(self, verify):
-        self.setUp()
 
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests", False)
         rv, o = self.do(
