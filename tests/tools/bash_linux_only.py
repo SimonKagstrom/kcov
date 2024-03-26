@@ -1,4 +1,3 @@
-
 import parse_cobertura
 import testbase
 

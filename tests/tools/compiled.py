@@ -438,57 +438,44 @@ class debuglink(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         self.setUp()
-        os.system("rm -rf %s/.debug" % (testbase.outbase))
+        os.system(f"rm -rf {(testbase.outbase)}/.debug")
+        os.system(f"cp {testbase.testbuild}/main-tests {testbase.testbuild}/main-tests-debug-file")
         os.system(
-            "cp %s/main-tests %s/main-tests-debug-file" % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --only-keep-debug {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file.debug"
         )
         os.system(
-            "objcopy --only-keep-debug %s/main-tests-debug-file %s/main-tests-debug-file.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file1.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file1.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file12.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file12.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file123.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file123.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file1"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file1"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file2"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file2"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file3"
+        )
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file1")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file2")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file3")
+        os.system(
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file3"
-            % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system("strip -g %s/main-tests-debug-file" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file1" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file2" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file3" % (testbase.testbuild))
-        os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file.debug %s/main-tests-debug-file"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file1.debug {testbase.testbuild}/main-tests-debug-file1"
         )
         os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file1.debug %s/main-tests-debug-file1"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file12.debug {testbase.testbuild}/main-tests-debug-file2"
         )
         os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file12.debug %s/main-tests-debug-file2"
-            % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file123.debug %s/main-tests-debug-file3"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file123.debug {testbase.testbuild}/main-tests-debug-file3"
         )
 
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests-debug-file", False)
@@ -552,10 +539,10 @@ class debuglink(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         # Look in .debug
-        os.system("rm -rf %s/kcov" % (testbase.outbase))
-        os.system("mkdir -p %s/.debug" % (testbase.testbuild))
+        os.system(f"rm -rf {(testbase.outbase)}/kcov")
+        os.system(f"mkdir -p {(testbase.testbuild)}/.debug")
         os.system(
-            "mv %s/main-tests-debug-file.debug %s/.debug" % (testbase.testbuild, testbase.testbuild)
+            f"mv {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/.debug"
         )
 
         rv, o = self.do(
@@ -572,8 +559,8 @@ class debuglink(testbase.KcovTestCase):
         )
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
-        os.system("rm -rf %s/kcov" % (testbase.outbase))
-        os.system("echo 'abc' >> %s/.debug/main-tests-debug-file.debug" % (testbase.testbuild))
+        os.system(f"rm -rf {(testbase.outbase)}/kcov")
+        os.system(f"echo 'abc' >> {(testbase.testbuild)}/.debug/main-tests-debug-file.debug")
 
         rv, o = self.do(
             testbase.kcov
@@ -598,11 +585,9 @@ class collect_no_source(testbase.KcovTestCase):
     def runTest(self):
         self.setUp()
 
-        os.system("cp %s/tests/short-file.c %s/main.cc" % (testbase.sources, testbase.testbuild))
-        os.system(
-            "gcc -g -o %s/main-collect-only %s/main.cc" % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system("mv %s/main.cc %s/tmp-main.cc" % (testbase.testbuild, testbase.testbuild))
+        os.system(f"cp {testbase.sources}/tests/short-file.c {testbase.testbuild}/main.cc")
+        os.system(f"gcc -g -o {testbase.testbuild}/main-collect-only {testbase.testbuild}/main.cc")
+        os.system(f"mv {testbase.testbuild}/main.cc {testbase.testbuild}/tmp-main.cc")
 
         rv, o = self.do(
             testbase.kcov
@@ -614,7 +599,7 @@ class collect_no_source(testbase.KcovTestCase):
             False,
         )
 
-        os.system("mv %s/tmp-main.cc %s/main.cc" % (testbase.testbuild, testbase.testbuild))
+        os.system(f"mv {testbase.testbuild}/tmp-main.cc {testbase.testbuild}/main.cc")
         rv, o = self.do(
             testbase.kcov
             + " --report-only "

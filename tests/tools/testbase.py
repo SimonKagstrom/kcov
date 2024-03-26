@@ -38,8 +38,8 @@ def configure(k, o, t, s):
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
         if outbase != "":
-            os.system("/bin/rm -rf %s/kcov" % (outbase))
-        os.system("/bin/mkdir -p %s/kcov/" % (outbase))
+            os.system(f"/bin/rm -rf {(outbase)}/kcov")
+        os.system(f"/bin/mkdir -p {(outbase)}/kcov/")
 
     def doShell(self, cmdline):
         child = subprocess.Popen(
@@ -75,7 +75,7 @@ class KcovTestCase(unittest.TestCase):
         if timeout is not None:
 
             def stopChild():
-                print("\n  didn't finish within %s seconds; killing ..." % timeout)
+                print(f"\n  didn't finish within {timeout} seconds; killing ...")
                 if kill:
                     child.kill()
                 else:

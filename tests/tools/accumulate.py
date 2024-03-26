@@ -1,4 +1,3 @@
-
 import parse_cobertura
 import testbase
 
@@ -200,9 +199,7 @@ class merge_coveralls(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        rv, o = self.doShell("grep second.py %s/kcov/main/coveralls.out" % (testbase.outbase))
+        rv, o = self.doShell(f"grep second.py {(testbase.outbase)}/kcov/main/coveralls.out")
         assert rv == 0
-        rv, o = self.doShell(
-            "grep shell-main %s/kcov/shell-main/coveralls.out" % (testbase.outbase)
-        )
+        rv, o = self.doShell(f"grep shell-main {(testbase.outbase)}/kcov/shell-main/coveralls.out")
         assert rv == 0
