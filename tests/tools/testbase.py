@@ -3,6 +3,7 @@
 import os
 import os.path
 import platform
+import shutil
 import subprocess
 import sys
 import threading
@@ -37,9 +38,10 @@ def configure(k, o, t, s):
 
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
-        if outbase != "":
-            os.system(f"/bin/rm -rf {(outbase)}/kcov")
-        os.system(f"/bin/mkdir -p {(outbase)}/kcov/")
+        os.makedirs(outbase + "/" + "kcov")
+
+    def tearDown(self):
+        shutil.rmtree(outbase + "/" + "kcov")
 
     def doShell(self, cmdline):
         child = subprocess.Popen(

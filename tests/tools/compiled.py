@@ -223,7 +223,6 @@ class SignalsBase(testbase.KcovTestCase):
         return parse_cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
 
     def doTest(self):
-
         dom = self.cmpOne("hup")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 14) == 1
 
@@ -560,7 +559,6 @@ class debuglink(testbase.KcovTestCase):
 class collect_no_source(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-
         os.system(f"cp {testbase.sources}/tests/short-file.c {testbase.testbuild}/main.cc")
         os.system(f"gcc -g -o {testbase.testbuild}/main-collect-only {testbase.testbuild}/main.cc")
         os.system(f"mv {testbase.testbuild}/main.cc {testbase.testbuild}/tmp-main.cc")

@@ -97,7 +97,6 @@ class shared_library_accumulate(testbase.KcovTestCase):
 
 class MainTestBase(testbase.KcovTestCase):
     def doTest(self, verify):
-
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests", False)
         rv, o = self.do(
             testbase.kcov
