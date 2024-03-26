@@ -42,8 +42,7 @@ class shared_library_skip(testbase.KcovTestCase):
             + "/shared_library_test",
             False,
         )
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert rv == 0
 
         dom = parse_cobertura.parseFile(

@@ -72,8 +72,7 @@ class fork_32(ForkBase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.skipUnless(platform.machine().startswith("x86_64"), "Only for x86_64")
     def runTest(self):
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         self.doTest("fork-32")
 
 
@@ -297,8 +296,7 @@ class collect_and_report_only(testbase.KcovTestCase):
             + "/main-tests",
             False,
         )
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert rv == noKcovRv
 
         try:
@@ -360,8 +358,7 @@ class attach_process_with_threads(testbase.KcovTestCase):
             False,
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
@@ -382,8 +379,7 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
             False,
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 21) >= 1
         assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
 
