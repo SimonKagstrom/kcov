@@ -66,8 +66,7 @@ class KcovTestCase(unittest.TestCase):
             extra = (
                 kcov
                 + " --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc "
-                + outbase
-                + "/kcov-kcov "
+                + "/tmp/kcov-kcov "
             )
 
         cmdline = extra + cmdline
