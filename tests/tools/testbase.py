@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import os.path
 import platform
 import subprocess
 import sys
@@ -14,13 +15,24 @@ testbuild = ""
 sources = ""
 
 
+# Normalize path, also ensuring that it is not empty.
+def normalize(path):
+    assert len(path) != 0, "path must be not empty"
+
+    path = os.path.normpath(path)
+    return path
+
+
 def configure(k, o, t, s):
     global kcov, outbase, testbuild, sources, kcov_system_daemon
-    kcov = k
+
+    kcov = normalize(k)
     kcov_system_daemon = k + "-system-daemon"
-    outbase = o
-    testbuild = t
-    sources = s
+    outbase = normalize(o)
+    testbuild = normalize(t)
+    sources = normalize(s)
+
+    assert os.path.abspath(outbase) != os.getcwd(), "'outbase' cannot be the current directory"
 
 
 class KcovTestCase(unittest.TestCase):
