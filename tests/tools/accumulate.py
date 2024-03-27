@@ -1,11 +1,9 @@
-
 import parse_cobertura
 import testbase
 
 
 class accumulate_data(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -36,7 +34,6 @@ class accumulate_data(testbase.KcovTestCase):
 
 class dont_accumulate_data_with_clean(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -67,7 +64,6 @@ class dont_accumulate_data_with_clean(testbase.KcovTestCase):
 
 class merge_basic(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -92,7 +88,6 @@ class merge_basic(testbase.KcovTestCase):
 
 class merge_multiple_output_directories(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -126,7 +121,6 @@ class merge_multiple_output_directories(testbase.KcovTestCase):
 
 class merge_merged_output(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -182,7 +176,6 @@ class merge_merged_output(testbase.KcovTestCase):
 
 class merge_coveralls(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --coveralls-id=dry-run "
@@ -200,9 +193,7 @@ class merge_coveralls(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        rv, o = self.doShell("grep second.py %s/kcov/main/coveralls.out" % (testbase.outbase))
+        rv, o = self.doShell(f"grep second.py {(testbase.outbase)}/kcov/main/coveralls.out")
         assert rv == 0
-        rv, o = self.doShell(
-            "grep shell-main %s/kcov/shell-main/coveralls.out" % (testbase.outbase)
-        )
+        rv, o = self.doShell(f"grep shell-main {(testbase.outbase)}/kcov/shell-main/coveralls.out")
         assert rv == 0

@@ -11,7 +11,6 @@ class illegal_insn(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         rv, output = self.do(
             testbase.kcov
             + " "
@@ -28,7 +27,6 @@ class illegal_insn(testbase.KcovTestCase):
 class fork_no_wait(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/fork_no_wait", False)
         rv, o = self.do(
             testbase.kcov
@@ -49,7 +47,6 @@ class fork_no_wait(testbase.KcovTestCase):
 
 class ForkBase(testbase.KcovTestCase):
     def doTest(self, binary):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/" + binary, False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/" + binary,
@@ -75,8 +72,7 @@ class fork_32(ForkBase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.skipUnless(platform.machine().startswith("x86_64"), "Only for x86_64")
     def runTest(self):
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         self.doTest("fork-32")
 
 
@@ -86,7 +82,6 @@ class vfork(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/vfork", False
         )
@@ -100,7 +95,6 @@ class vfork(testbase.KcovTestCase):
 class popen_test(testbase.KcovTestCase):
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_popen", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/test_popen",
@@ -114,14 +108,12 @@ class popen_test(testbase.KcovTestCase):
 class short_filename(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv, o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov ./s", False)
         assert rv == 99
 
 
 class Pie(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/pie", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie", False
@@ -134,7 +126,6 @@ class Pie(testbase.KcovTestCase):
 
 class pie_argv_basic(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test",
             False,
@@ -152,7 +143,6 @@ class pie_accumulate(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test",
             False,
@@ -176,7 +166,6 @@ class pie_accumulate(testbase.KcovTestCase):
 
 class global_ctors(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/global-constructors", False)
         rv, o = self.do(
             testbase.kcov
@@ -199,7 +188,6 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_daemon", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/test_daemon",
@@ -235,8 +223,6 @@ class SignalsBase(testbase.KcovTestCase):
         return parse_cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
 
     def doTest(self):
-        self.setUp()
-
         dom = self.cmpOne("hup")
         assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 14) == 1
 
@@ -272,7 +258,6 @@ class signals_self(SignalsBase):
 class signals_crash(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (macho-parser for now)")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -300,7 +285,6 @@ class collect_and_report_only(testbase.KcovTestCase):
     # Cannot work with combined Engine / Parser
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests ", False)
         rv, o = self.do(
             testbase.kcov
@@ -311,8 +295,7 @@ class collect_and_report_only(testbase.KcovTestCase):
             + "/main-tests",
             False,
         )
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert rv == noKcovRv
 
         try:
@@ -337,7 +320,6 @@ class collect_and_report_only(testbase.KcovTestCase):
 
 class setpgid_kill(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(
             testbase.sources
             + "/tests/setpgid-kill/test-script.sh "
@@ -363,7 +345,6 @@ class setpgid_kill(testbase.KcovTestCase):
 class attach_process_with_threads(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.sources
             + "/tests/daemon/test-script.sh "
@@ -376,8 +357,7 @@ class attach_process_with_threads(testbase.KcovTestCase):
             False,
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
         assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
@@ -386,7 +366,6 @@ class attach_process_with_threads(testbase.KcovTestCase):
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.sources
             + "/tests/daemon/test-script.sh "
@@ -399,15 +378,13 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
             False,
         )
         dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
-        print("Fickle test, ignoring")
-        return
+        self.skipTest("Fickle test, ignoring")
         assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 21) >= 1
         assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
 
 
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/multi_1",
             False,
@@ -437,58 +414,44 @@ class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
 class debuglink(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        self.setUp()
-        os.system("rm -rf %s/.debug" % (testbase.outbase))
+        os.system(f"rm -rf {(testbase.outbase)}/.debug")
+        os.system(f"cp {testbase.testbuild}/main-tests {testbase.testbuild}/main-tests-debug-file")
         os.system(
-            "cp %s/main-tests %s/main-tests-debug-file" % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --only-keep-debug {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file.debug"
         )
         os.system(
-            "objcopy --only-keep-debug %s/main-tests-debug-file %s/main-tests-debug-file.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file1.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file1.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file12.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file12.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file123.debug"
         )
         os.system(
-            "cp %s/main-tests-debug-file.debug %s/main-tests-debug-file123.debug"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file1"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file1"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file2"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file2"
-            % (testbase.testbuild, testbase.testbuild)
+            f"cp {testbase.testbuild}/main-tests-debug-file {testbase.testbuild}/main-tests-debug-file3"
+        )
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file1")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file2")
+        os.system(f"strip -g {(testbase.testbuild)}/main-tests-debug-file3")
+        os.system(
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/main-tests-debug-file"
         )
         os.system(
-            "cp %s/main-tests-debug-file %s/main-tests-debug-file3"
-            % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system("strip -g %s/main-tests-debug-file" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file1" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file2" % (testbase.testbuild))
-        os.system("strip -g %s/main-tests-debug-file3" % (testbase.testbuild))
-        os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file.debug %s/main-tests-debug-file"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file1.debug {testbase.testbuild}/main-tests-debug-file1"
         )
         os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file1.debug %s/main-tests-debug-file1"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file12.debug {testbase.testbuild}/main-tests-debug-file2"
         )
         os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file12.debug %s/main-tests-debug-file2"
-            % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system(
-            "objcopy --add-gnu-debuglink=%s/main-tests-debug-file123.debug %s/main-tests-debug-file3"
-            % (testbase.testbuild, testbase.testbuild)
+            f"objcopy --add-gnu-debuglink={testbase.testbuild}/main-tests-debug-file123.debug {testbase.testbuild}/main-tests-debug-file3"
         )
 
         noKcovRv, o = self.do(testbase.testbuild + "/main-tests-debug-file", False)
@@ -552,10 +515,10 @@ class debuglink(testbase.KcovTestCase):
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         # Look in .debug
-        os.system("rm -rf %s/kcov" % (testbase.outbase))
-        os.system("mkdir -p %s/.debug" % (testbase.testbuild))
+        os.system(f"rm -rf {(testbase.outbase)}/kcov")
+        os.system(f"mkdir -p {(testbase.testbuild)}/.debug")
         os.system(
-            "mv %s/main-tests-debug-file.debug %s/.debug" % (testbase.testbuild, testbase.testbuild)
+            f"mv {testbase.testbuild}/main-tests-debug-file.debug {testbase.testbuild}/.debug"
         )
 
         rv, o = self.do(
@@ -572,8 +535,8 @@ class debuglink(testbase.KcovTestCase):
         )
         assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
-        os.system("rm -rf %s/kcov" % (testbase.outbase))
-        os.system("echo 'abc' >> %s/.debug/main-tests-debug-file.debug" % (testbase.testbuild))
+        os.system(f"rm -rf {(testbase.outbase)}/kcov")
+        os.system(f"echo 'abc' >> {(testbase.testbuild)}/.debug/main-tests-debug-file.debug")
 
         rv, o = self.do(
             testbase.kcov
@@ -596,13 +559,9 @@ class debuglink(testbase.KcovTestCase):
 class collect_no_source(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
-
-        os.system("cp %s/tests/short-file.c %s/main.cc" % (testbase.sources, testbase.testbuild))
-        os.system(
-            "gcc -g -o %s/main-collect-only %s/main.cc" % (testbase.testbuild, testbase.testbuild)
-        )
-        os.system("mv %s/main.cc %s/tmp-main.cc" % (testbase.testbuild, testbase.testbuild))
+        os.system(f"cp {testbase.sources}/tests/short-file.c {testbase.testbuild}/main.cc")
+        os.system(f"gcc -g -o {testbase.testbuild}/main-collect-only {testbase.testbuild}/main.cc")
+        os.system(f"mv {testbase.testbuild}/main.cc {testbase.testbuild}/tmp-main.cc")
 
         rv, o = self.do(
             testbase.kcov
@@ -614,7 +573,7 @@ class collect_no_source(testbase.KcovTestCase):
             False,
         )
 
-        os.system("mv %s/tmp-main.cc %s/main.cc" % (testbase.testbuild, testbase.testbuild))
+        os.system(f"mv {testbase.testbuild}/tmp-main.cc {testbase.testbuild}/main.cc")
         rv, o = self.do(
             testbase.kcov
             + " --report-only "
@@ -631,7 +590,6 @@ class collect_no_source(testbase.KcovTestCase):
 class dlopen(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/dlopen", False)
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/dlopen",
@@ -649,7 +607,6 @@ class dlopen(testbase.KcovTestCase):
 class dlopen_in_ignored_source_file(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --exclude-pattern=dlopen.cc "
@@ -669,7 +626,6 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.testbuild + "/test_daemon", False)
         rv, o = self.do(
             testbase.kcov
@@ -695,7 +651,6 @@ class address_sanitizer_coverage(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         if not os.path.isfile(testbase.testbuild + "/sanitizer-coverage"):
             print("Clang-only")
             assert False

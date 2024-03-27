@@ -7,7 +7,6 @@ import testbase
 
 class TooFewArguments(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov")
 
         assert b"Usage: kcov" in output
@@ -16,7 +15,6 @@ class TooFewArguments(testbase.KcovTestCase):
 
 class WrongArguments(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, output = self.do(
             testbase.kcov
             + " --abc=efg "
@@ -33,7 +31,6 @@ class WrongArguments(testbase.KcovTestCase):
 class LookupBinaryInPath(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         os.environ["PATH"] += testbase.sources + "/tests/python"
         noKcovRv, o = self.do(testbase.sources + "/tests/python/main 5")
         rv, o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + "main 5")
@@ -46,7 +43,6 @@ class LookupBinaryInPath(testbase.KcovTestCase):
 # Issue #414
 class OutDirectoryIsExecutable(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         # Running a system executable on Linux may cause ptrace to fails with
         # "Operation not permitted", even with ptrace_scope set to 0.
         # See https://www.kernel.org/doc/Documentation/security/Yama.txt

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import os.path
 import platform
+import shutil
 import subprocess
 import sys
 import threading
@@ -14,20 +16,32 @@ testbuild = ""
 sources = ""
 
 
+# Normalize path, also ensuring that it is not empty.
+def normalize(path):
+    assert len(path) != 0, "path must be not empty"
+
+    path = os.path.normpath(path)
+    return path
+
+
 def configure(k, o, t, s):
     global kcov, outbase, testbuild, sources, kcov_system_daemon
-    kcov = k
+
+    kcov = normalize(k)
     kcov_system_daemon = k + "-system-daemon"
-    outbase = o
-    testbuild = t
-    sources = s
+    outbase = normalize(o)
+    testbuild = normalize(t)
+    sources = normalize(s)
+
+    assert os.path.abspath(outbase) != os.getcwd(), "'outbase' cannot be the current directory"
 
 
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
-        if outbase != "":
-            os.system("/bin/rm -rf %s/kcov" % (outbase))
-        os.system("/bin/mkdir -p %s/kcov/" % (outbase))
+        os.makedirs(outbase + "/" + "kcov")
+
+    def tearDown(self):
+        shutil.rmtree(outbase + "/" + "kcov")
 
     def doShell(self, cmdline):
         child = subprocess.Popen(
@@ -52,8 +66,7 @@ class KcovTestCase(unittest.TestCase):
             extra = (
                 kcov
                 + " --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc "
-                + outbase
-                + "/kcov-kcov "
+                + "/tmp/kcov-kcov "
             )
 
         cmdline = extra + cmdline
@@ -63,7 +76,7 @@ class KcovTestCase(unittest.TestCase):
         if timeout is not None:
 
             def stopChild():
-                print("\n  didn't finish within %s seconds; killing ..." % timeout)
+                print(f"\n  didn't finish within {timeout} seconds; killing ...")
                 if kill:
                     child.kill()
                 else:

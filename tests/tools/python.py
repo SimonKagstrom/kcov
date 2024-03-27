@@ -6,7 +6,6 @@ import testbase
 
 class python_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         noKcovRv, o = self.do(testbase.sources + "/tests/python/main 5")
         rv, o = self.do(
             testbase.kcov
@@ -22,7 +21,6 @@ class python_exit_status(testbase.KcovTestCase):
 
 class python_can_set_illegal_parser(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --python-parser=python7 "
@@ -37,7 +35,6 @@ class python_can_set_illegal_parser(testbase.KcovTestCase):
 
 class python_can_set_legal_parser(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --python-parser=python3 "
@@ -52,7 +49,6 @@ class python_can_set_legal_parser(testbase.KcovTestCase):
 
 class python2_can_set_legal_parser(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --python-parser=python2 "
@@ -67,7 +63,6 @@ class python2_can_set_legal_parser(testbase.KcovTestCase):
 
 class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --python-parser=python3 "
@@ -82,7 +77,6 @@ class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
 
 class python_unittest(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -98,7 +92,6 @@ class python_unittest(testbase.KcovTestCase):
 
 class PythonBase(testbase.KcovTestCase):
     def doTest(self, extra):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -135,7 +128,6 @@ class python_coverage(PythonBase):
 
 class python_accumulate_data(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -174,7 +166,6 @@ class python2_coverage(PythonBase):
 
 class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "
@@ -190,7 +181,6 @@ class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
 
 class python_select_parser(testbase.KcovTestCase):
     def disabledTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --python-parser="
@@ -208,7 +198,6 @@ class python_select_parser(testbase.KcovTestCase):
 class python_tricky_single_dict_assignment(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " "

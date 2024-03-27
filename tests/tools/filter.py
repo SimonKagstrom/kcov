@@ -1,11 +1,9 @@
-
 import parse_cobertura
 import testbase
 
 
 class include_exclude_pattern(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-dont-parse-binary-dir --exclude-pattern=first-dir "
@@ -47,7 +45,6 @@ class include_exclude_pattern(testbase.KcovTestCase):
 
 class include_path(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-dont-parse-binary-dir --include-path="
@@ -67,7 +64,6 @@ class include_path(testbase.KcovTestCase):
 
 class include_path_and_exclude_pattern(testbase.KcovTestCase):
     def runTest(self):
-        self.setUp()
         rv, o = self.do(
             testbase.kcov
             + " --bash-dont-parse-binary-dir --include-path="
