@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+import errno
 import os
 import os.path
 import platform
 import shutil
 import subprocess
 import sys
+import time
 import unittest
 
 PIPE = subprocess.PIPE
@@ -41,10 +43,24 @@ def configure(k, o, t, s):
 
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
-        os.makedirs(outbase + "/" + "kcov")
+        self.outdir = outbase + "/" + "kcov"
+
+        # Intentionally fails if target directory exists.
+        os.makedirs(self.outdir)
 
     def tearDown(self):
-        shutil.rmtree(outbase + "/" + "kcov")
+        # Don't ignore errors, since they may be caused by bugs in the test suite.
+        try:
+            shutil.rmtree(self.outdir)
+        except OSError as err:
+            if err.errno != errno.ENOTEMPTY:
+                raise
+
+            # See https://github.com/ansible/ansible/issues/34335 as an example.
+            # Sleeping is necessary to ensure no more files are created.
+            time.sleep(5)
+            sys.stderr.write(f"warning: retry rmtree: {err}\n")
+            shutil.rmtree(self.outdir)
 
     def doShell(self, cmdline):
         term = subprocess.run(
