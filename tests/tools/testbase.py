@@ -6,14 +6,17 @@ import platform
 import shutil
 import subprocess
 import sys
-import threading
 import unittest
+
+PIPE = subprocess.PIPE
 
 kcov = ""
 kcov_system_daemon = ""
 outbase = ""
 testbuild = ""
 sources = ""
+
+default_timeout = 10 * 60
 
 
 # Normalize path, also ensuring that it is not empty.
@@ -44,19 +47,15 @@ class KcovTestCase(unittest.TestCase):
         shutil.rmtree(outbase + "/" + "kcov")
 
     def doShell(self, cmdline):
-        child = subprocess.Popen(
-            cmdline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        term = subprocess.run(
+            cmdline, shell=True, stdout=PIPE, stderr=PIPE, timeout=default_timeout
         )
-        out, err = child.communicate()
-        output = out + err
-        rv = child.returncode
+        output = term.stdout + term.stderr
+        rv = term.returncode
 
         return rv, output
 
-    def do(self, cmdline, kcovKcov=True, timeout=None, kill=False):
-        output = ""
-        rv = 0
-
+    def do(self, cmdline, kcovKcov=True, timeout=default_timeout):
         extra = ""
         if (
             kcovKcov
@@ -70,25 +69,9 @@ class KcovTestCase(unittest.TestCase):
             )
 
         cmdline = extra + cmdline
-        child = subprocess.Popen(cmdline.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        timer = None
-
-        if timeout is not None:
-
-            def stopChild():
-                print(f"\n  didn't finish within {timeout} seconds; killing ...")
-                if kill:
-                    child.kill()
-                else:
-                    child.terminate()
-
-            timer = threading.Timer(timeout, stopChild)
-            timer.start()
-
-        out, err = child.communicate()
-        if timer is not None:
-            timer.cancel()
-        output = out + err
-        rv = child.returncode
+        args = cmdline.split()
+        term = subprocess.run(args, stdout=PIPE, stderr=PIPE, timeout=timeout)
+        output = term.stdout + term.stderr
+        rv = term.returncode
 
         return rv, output

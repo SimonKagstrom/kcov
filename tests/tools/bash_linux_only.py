@@ -29,7 +29,6 @@ class bash_exit_before_child(testbase.KcovTestCase):
             + "/tests/bash/background-child.sh",
             kcovKcov=False,
             timeout=3.0,
-            kill=True,
         )
         self.assertEqual(0, rv, "kcov exited unsuccessfully")
         dom = parse_cobertura.parseFile(
