@@ -53,10 +53,7 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
     @unittest.skipIf(platform.machine() == "i686", "x86_64-only")
     def runTest(self):
         self.write_message(platform.machine())
-        try:
-            os.makedirs(testbase.outbase + "/kcov")
-        except:
-            pass
+
         rv, o = self.do(
             testbase.kcov
             + " --system-record "
