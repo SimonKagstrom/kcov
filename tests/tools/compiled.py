@@ -3,7 +3,7 @@ import platform
 import sys
 import unittest
 
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -39,10 +39,10 @@ class fork_no_wait(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/fork_no_wait/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "fork-no-wait.c", 20) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "fork-no-wait.c", 22) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "fork-no-wait.c", 24) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/fork_no_wait/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "fork-no-wait.c", 20) >= 1
+        assert cobertura.hitsPerLine(dom, "fork-no-wait.c", 22) >= 1
+        assert cobertura.hitsPerLine(dom, "fork-no-wait.c", 24) >= 1
 
 
 class ForkBase(testbase.KcovTestCase):
@@ -54,12 +54,12 @@ class ForkBase(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/" + binary + "/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "fork.c", 21) == 0
-        assert parse_cobertura.hitsPerLine(dom, "fork.c", 26) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "fork.c", 34) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "fork.c", 37) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "fork.c", 46) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/" + binary + "/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "fork.c", 21) == 0
+        assert cobertura.hitsPerLine(dom, "fork.c", 26) >= 1
+        assert cobertura.hitsPerLine(dom, "fork.c", 34) >= 1
+        assert cobertura.hitsPerLine(dom, "fork.c", 37) >= 1
+        assert cobertura.hitsPerLine(dom, "fork.c", 46) >= 1
 
 
 class fork_64(ForkBase):
@@ -87,9 +87,9 @@ class vfork(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/vfork/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 12) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/vfork/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "vfork.c", 12) >= 1
+        assert cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
 
 
 class popen_test(testbase.KcovTestCase):
@@ -120,8 +120,8 @@ class Pie(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/pie/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "pie.c", 5) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/pie/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "pie.c", 5) == 1
 
 
 class pie_argv_basic(testbase.KcovTestCase):
@@ -132,9 +132,9 @@ class pie_argv_basic(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
 
 
 class pie_accumulate(testbase.KcovTestCase):
@@ -149,9 +149,9 @@ class pie_accumulate(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
 
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/pie-test a",
@@ -159,9 +159,9 @@ class pie_accumulate(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/pie-test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 1
 
 
 class global_ctors(testbase.KcovTestCase):
@@ -178,10 +178,8 @@ class global_ctors(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/global-constructors/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/global-constructors/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
 
 
 class daemon_wait_for_last_child(testbase.KcovTestCase):
@@ -196,8 +194,8 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
         assert rv == 4
         assert noKcovRv == 2
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
 
 class SignalsBase(testbase.KcovTestCase):
@@ -220,26 +218,26 @@ class SignalsBase(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        return parse_cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
+        return cobertura.parseFile(testbase.outbase + "/kcov/signals/cobertura.xml")
 
     def doTest(self):
         dom = self.cmpOne("hup")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 14) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 14) == 1
 
         dom = self.cmpOne("int")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 19) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 19) == 1
 
         dom = self.cmpOne("quit")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 24) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 24) == 1
 
         dom = self.cmpOne("bus")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 44) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 44) == 1
 
         dom = self.cmpOne("fpe")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 49) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 49) == 1
 
         dom = self.cmpOne("term")
-        assert parse_cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
+        assert cobertura.hitsPerLine(dom, "test-signals.c", 84) == 1
 
 
 class signals(SignalsBase):
@@ -299,7 +297,7 @@ class collect_and_report_only(testbase.KcovTestCase):
         assert rv == noKcovRv
 
         try:
-            dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
+            dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
             self.fail("File unexpectedly found")
         except:
             # Exception is expected here
@@ -314,8 +312,8 @@ class collect_and_report_only(testbase.KcovTestCase):
             + "/main-tests",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
 
 class setpgid_kill(testbase.KcovTestCase):
@@ -356,11 +354,11 @@ class attach_process_with_threads(testbase.KcovTestCase):
             + "/issue31",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/issue31/cobertura.xml")
         self.skipTest("Fickle test, ignoring")
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
+        assert cobertura.hitsPerLine(dom, "test-issue31.cc", 28) >= 1
+        assert cobertura.hitsPerLine(dom, "test-issue31.cc", 11) >= 1
+        assert cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
 
 
 class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
@@ -377,10 +375,10 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
             + "/thread-test",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/thread-test/cobertura.xml")
         self.skipTest("Fickle test, ignoring")
-        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 21) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
+        assert cobertura.hitsPerLine(dom, "thread-main.c", 21) >= 1
+        assert cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
 
 
 class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
@@ -389,26 +387,26 @@ class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/multi_1",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/multi_1/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main_1.c", 10) == 0
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 3) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/multi_1/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main_1.c", 10) == 0
+        assert cobertura.hitsPerLine(dom, "file.c", 3) == 0
 
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/multi_2",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main_2.c", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 3) == 0
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 8) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main_2.c", 9) == 1
+        assert cobertura.hitsPerLine(dom, "file.c", 3) == 0
+        assert cobertura.hitsPerLine(dom, "file.c", 8) == 0
 
         rv, o = self.do(
             testbase.kcov + " " + testbase.outbase + "/kcov " + testbase.testbuild + "/multi_2 1",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 3) == 0
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 8) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "file.c", 3) == 0
+        assert cobertura.hitsPerLine(dom, "file.c", 8) == 1
 
 
 class debuglink(testbase.KcovTestCase):
@@ -466,10 +464,8 @@ class debuglink(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         # Check alignment
         rv, o = self.do(
@@ -481,10 +477,8 @@ class debuglink(testbase.KcovTestCase):
             + "/main-tests-debug-file1",
             False,
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file1/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file1/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         rv, o = self.do(
             testbase.kcov
@@ -495,10 +489,8 @@ class debuglink(testbase.KcovTestCase):
             + "/main-tests-debug-file2",
             False,
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file2/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file2/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         rv, o = self.do(
             testbase.kcov
@@ -509,10 +501,8 @@ class debuglink(testbase.KcovTestCase):
             + "/main-tests-debug-file3",
             False,
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file3/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file3/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         # Look in .debug
         os.system(f"rm -rf {(testbase.outbase)}/kcov")
@@ -530,10 +520,8 @@ class debuglink(testbase.KcovTestCase):
             + "/main-tests-debug-file",
             False,
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
         os.system(f"rm -rf {(testbase.outbase)}/kcov")
         os.system(f"echo 'abc' >> {(testbase.testbuild)}/.debug/main-tests-debug-file.debug")
@@ -547,10 +535,8 @@ class debuglink(testbase.KcovTestCase):
             + "/main-tests-debug-file",
             False,
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) is None
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests-debug-file/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) is None
 
 
 # Todo: Look in /usr/lib/debug as well
@@ -583,8 +569,8 @@ class collect_no_source(testbase.KcovTestCase):
             + "/main-collect-only"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main-collect-only/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 1) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-collect-only/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 1) == 1
 
 
 class dlopen(testbase.KcovTestCase):
@@ -597,11 +583,11 @@ class dlopen(testbase.KcovTestCase):
         )
 
         assert noKcovRv == rv
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/dlopen/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "dlopen.cc", 11) == 1
-        assert parse_cobertura.hitsPerLine(dom, "dlopen.cc", 12) == 0
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 12) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/dlopen/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "dlopen.cc", 11) == 1
+        assert cobertura.hitsPerLine(dom, "dlopen.cc", 12) == 0
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
 
 
 class dlopen_in_ignored_source_file(testbase.KcovTestCase):
@@ -616,10 +602,10 @@ class dlopen_in_ignored_source_file(testbase.KcovTestCase):
             + "/dlopen",
             False,
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/dlopen/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "dlopen-main.cc", 10) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 12) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/dlopen/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "dlopen-main.cc", 10) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
 
 
 class daemon_no_wait_for_last_child(testbase.KcovTestCase):
@@ -639,12 +625,12 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
 
         assert noKcovRv == rv
         time.sleep(2)
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 0
 
         time.sleep(5)
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/test_daemon/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
 
 class address_sanitizer_coverage(testbase.KcovTestCase):
@@ -664,13 +650,13 @@ class address_sanitizer_coverage(testbase.KcovTestCase):
             False,
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/sanitizer-coverage/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 7) == 1
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 8) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/sanitizer-coverage/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 7) == 1
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 8) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 16) == 1
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 18) == 1
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 16) == 1
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 18) == 1
 
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 22) == 0
-        assert parse_cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 25) == 0
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 22) == 0
+        assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 25) == 0

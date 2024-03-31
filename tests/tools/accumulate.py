@@ -1,4 +1,4 @@
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -13,10 +13,10 @@ class accumulate_data(testbase.KcovTestCase):
             + "/tests/python/main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 16) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main", 19) == 0
-        assert parse_cobertura.hitsPerLine(dom, "main", 14) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 16) == 1
+        assert cobertura.hitsPerLine(dom, "main", 19) == 0
+        assert cobertura.hitsPerLine(dom, "main", 14) == 1
 
         rv, o = self.do(
             testbase.kcov
@@ -26,10 +26,10 @@ class accumulate_data(testbase.KcovTestCase):
             + testbase.sources
             + "/tests/python/main 5"
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 16) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main", 19) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main", 14) == 2
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 16) == 1
+        assert cobertura.hitsPerLine(dom, "main", 19) == 1
+        assert cobertura.hitsPerLine(dom, "main", 14) == 2
 
 
 class dont_accumulate_data_with_clean(testbase.KcovTestCase):
@@ -43,10 +43,10 @@ class dont_accumulate_data_with_clean(testbase.KcovTestCase):
             + "/tests/python/main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 16) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main", 19) == 0
-        assert parse_cobertura.hitsPerLine(dom, "main", 14) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 16) == 1
+        assert cobertura.hitsPerLine(dom, "main", 19) == 0
+        assert cobertura.hitsPerLine(dom, "main", 14) == 1
 
         rv, o = self.do(
             testbase.kcov
@@ -56,10 +56,10 @@ class dont_accumulate_data_with_clean(testbase.KcovTestCase):
             + testbase.sources
             + "/tests/python/main 5"
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 16) == 0
-        assert parse_cobertura.hitsPerLine(dom, "main", 19) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main", 14) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 16) == 0
+        assert cobertura.hitsPerLine(dom, "main", 19) == 1
+        assert cobertura.hitsPerLine(dom, "main", 14) == 1
 
 
 class merge_basic(testbase.KcovTestCase):
@@ -81,9 +81,9 @@ class merge_basic(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 10) == 1
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 4) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/kcov-merged/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 10) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
 
 
 class merge_multiple_output_directories(testbase.KcovTestCase):
@@ -114,9 +114,9 @@ class merge_multiple_output_directories(testbase.KcovTestCase):
             + testbase.outbase
             + "/kcov/second"
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/merged/kcov-merged/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main", 10) == 1
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 4) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/merged/kcov-merged/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 10) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
 
 
 class merge_merged_output(testbase.KcovTestCase):
@@ -166,12 +166,10 @@ class merge_merged_output(testbase.KcovTestCase):
             + testbase.outbase
             + "/kcov/third"
         )
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/merged2/kcov-merged/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main", 10) == 1
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 4) == 1
-        assert parse_cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 2) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/merged2/kcov-merged/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main", 10) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
+        assert cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 2) == 1
 
 
 class merge_coveralls(testbase.KcovTestCase):

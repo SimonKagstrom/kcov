@@ -1,4 +1,4 @@
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -13,9 +13,9 @@ class include_exclude_pattern(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 29) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) is None
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "shell-main", 29) >= 1
+        assert cobertura.hitsPerLine(dom, "c.sh", 3) is None
 
         rv, o = self.do(
             testbase.kcov
@@ -25,9 +25,9 @@ class include_exclude_pattern(testbase.KcovTestCase):
             + testbase.sources
             + "/tests/bash/shell-main"
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 29) is None
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "shell-main", 29) is None
+        assert cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
 
         rv, o = self.do(
             testbase.kcov
@@ -37,10 +37,10 @@ class include_exclude_pattern(testbase.KcovTestCase):
             + testbase.sources
             + "/tests/bash/shell-main"
         )
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 29) is None
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) is None
-        assert parse_cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "shell-main", 29) is None
+        assert cobertura.hitsPerLine(dom, "c.sh", 3) is None
+        assert cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
 
 
 class include_path(testbase.KcovTestCase):
@@ -56,10 +56,10 @@ class include_path(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 29) is None
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "shell-main", 29) is None
+        assert cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
+        assert cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
 
 
 class include_path_and_exclude_pattern(testbase.KcovTestCase):
@@ -75,7 +75,7 @@ class include_path_and_exclude_pattern(testbase.KcovTestCase):
             + "/tests/bash/shell-main"
         )
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "shell-main", 29) is None
-        assert parse_cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "b.sh", 3) is None
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "shell-main", 29) is None
+        assert cobertura.hitsPerLine(dom, "c.sh", 3) >= 1
+        assert cobertura.hitsPerLine(dom, "b.sh", 3) is None

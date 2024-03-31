@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -35,8 +35,8 @@ class LookupBinaryInPath(testbase.KcovTestCase):
         noKcovRv, o = self.do(testbase.sources + "/tests/python/main 5")
         rv, o = self.do(testbase.kcov + " " + testbase.outbase + "/kcov " + "main 5")
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "second.py", 34) == 2
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "second.py", 34) == 2
         assert noKcovRv, rv
 
 

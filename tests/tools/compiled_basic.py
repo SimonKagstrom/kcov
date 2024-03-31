@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -23,11 +23,9 @@ class shared_library(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/shared_library_test/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.c", 9) >= 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
 
 class shared_library_skip(testbase.KcovTestCase):
@@ -45,11 +43,9 @@ class shared_library_skip(testbase.KcovTestCase):
         self.skipTest("Fickle test, ignoring")
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/shared_library_test/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) is None
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
 
 class shared_library_filter_out(testbase.KcovTestCase):
@@ -66,11 +62,9 @@ class shared_library_filter_out(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/shared_library_test/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) is None
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
 
 class shared_library_accumulate(testbase.KcovTestCase):
@@ -87,12 +81,10 @@ class shared_library_accumulate(testbase.KcovTestCase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(
-            testbase.outbase + "/kcov/shared_library_test/cobertura.xml"
-        )
-        assert parse_cobertura.hitsPerLine(dom, "main.c", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert parse_cobertura.hitsPerLine(dom, "solib.c", 10) == 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 10) == 1
 
 
 class MainTestBase(testbase.KcovTestCase):
@@ -111,13 +103,13 @@ class MainTestBase(testbase.KcovTestCase):
         )
         assert rv == noKcovRv
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 14) is None
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 25) == 1
-        assert parse_cobertura.hitsPerLine(dom, "file.c", 6) >= 1
-        assert parse_cobertura.hitsPerLine(dom, "file2.c", 7) == 0
+        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        assert cobertura.hitsPerLine(dom, "main.cc", 14) is None
+        assert cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
+        assert cobertura.hitsPerLine(dom, "main.cc", 25) == 1
+        assert cobertura.hitsPerLine(dom, "file.c", 6) >= 1
+        assert cobertura.hitsPerLine(dom, "file2.c", 7) == 0
 
 
 class main_test(MainTestBase):

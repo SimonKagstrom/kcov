@@ -3,7 +3,7 @@ import platform
 import time
 import unittest
 
-import parse_cobertura
+import cobertura
 import testbase
 
 
@@ -81,7 +81,7 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
         )
         assert rv == 0
 
-        dom = parse_cobertura.parseFile(testbase.outbase + "/kcov-report/main-tests/cobertura.xml")
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 9) == 1
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 14) is None
-        assert parse_cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
+        dom = cobertura.parseFile(testbase.outbase + "/kcov-report/main-tests/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
+        assert cobertura.hitsPerLine(dom, "main.cc", 14) is None
+        assert cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
