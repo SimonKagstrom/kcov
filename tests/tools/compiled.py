@@ -652,7 +652,7 @@ class address_sanitizer_coverage(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
         if not os.path.isfile(testbase.testbuild + "/sanitizer-coverage"):
-            print("Clang-only")
+            self.write_message("Clang-only")
             assert False
         rv, o = self.do(
             testbase.kcov

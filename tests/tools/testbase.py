@@ -91,3 +91,8 @@ class KcovTestCase(unittest.TestCase):
         rv = term.returncode
 
         return rv, output
+
+    def write_message(self, msg):
+        """Add a custom message to the current test status line."""
+
+        sys.stderr.write(msg + " ")
