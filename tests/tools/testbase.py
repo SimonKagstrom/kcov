@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 
+import errno
 import os
 import os.path
 import platform
 import shutil
 import subprocess
 import sys
-import threading
+import time
 import unittest
 
+PIPE = subprocess.PIPE
+
 kcov = ""
-kcov_system_daemon = ""
 outbase = ""
 testbuild = ""
 sources = ""
+
+default_timeout = 10 * 60
 
 
 # Normalize path, also ensuring that it is not empty.
@@ -28,7 +32,6 @@ def configure(k, o, t, s):
     global kcov, outbase, testbuild, sources, kcov_system_daemon
 
     kcov = normalize(k)
-    kcov_system_daemon = k + "-system-daemon"
     outbase = normalize(o)
     testbuild = normalize(t)
     sources = normalize(s)
@@ -38,25 +41,41 @@ def configure(k, o, t, s):
 
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
-        os.makedirs(outbase + "/" + "kcov")
+        # Make the configuration values available as class members.
+        self.kcov = kcov
+        self.kcov_system_daemon = self.kcov + "-system-daemon"
+        self.outbase = outbase
+        self.outdir = self.outbase + "/" + "kcov"
+        self.testbuild = testbuild
+        self.sources = sources
+
+        # Intentionally fails if target directory exists.
+        os.makedirs(self.outdir)
 
     def tearDown(self):
-        shutil.rmtree(outbase + "/" + "kcov")
+        # Don't ignore errors, since they may be caused by bugs in the test suite.
+        try:
+            shutil.rmtree(self.outdir)
+        except OSError as err:
+            if err.errno != errno.ENOTEMPTY:
+                raise
+
+            # See https://github.com/ansible/ansible/issues/34335 as an example.
+            # Sleeping is necessary to ensure no more files are created.
+            time.sleep(5)
+            sys.stderr.write(f"warning: retry rmtree: {err}\n")
+            shutil.rmtree(self.outdir)
 
     def doShell(self, cmdline):
-        child = subprocess.Popen(
-            cmdline, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        term = subprocess.run(
+            cmdline, shell=True, stdout=PIPE, stderr=PIPE, timeout=default_timeout
         )
-        out, err = child.communicate()
-        output = out + err
-        rv = child.returncode
+        output = term.stdout + term.stderr
+        rv = term.returncode
 
         return rv, output
 
-    def do(self, cmdline, kcovKcov=True, timeout=None, kill=False):
-        output = ""
-        rv = 0
-
+    def do(self, cmdline, /, kcovKcov=True, *, timeout=default_timeout):
         extra = ""
         if (
             kcovKcov
@@ -70,25 +89,22 @@ class KcovTestCase(unittest.TestCase):
             )
 
         cmdline = extra + cmdline
-        child = subprocess.Popen(cmdline.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        timer = None
-
-        if timeout is not None:
-
-            def stopChild():
-                print(f"\n  didn't finish within {timeout} seconds; killing ...")
-                if kill:
-                    child.kill()
-                else:
-                    child.terminate()
-
-            timer = threading.Timer(timeout, stopChild)
-            timer.start()
-
-        out, err = child.communicate()
-        if timer is not None:
-            timer.cancel()
-        output = out + err
-        rv = child.returncode
+        args = cmdline.split()
+        term = subprocess.run(args, stdout=PIPE, stderr=PIPE, timeout=timeout)
+        output = term.stdout + term.stderr
+        rv = term.returncode
 
         return rv, output
+
+    def doCmd(self, cmdline):
+        args = cmdline.split()
+        term = subprocess.run(args, stdout=PIPE, stderr=PIPE, timeout=default_timeout)
+        output = term.stdout + term.stderr
+        rv = term.returncode
+
+        return rv, output
+
+    def write_message(self, msg):
+        """Add a custom message to the current test status line."""
+
+        sys.stderr.write(msg + " ")
