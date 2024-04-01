@@ -22,7 +22,7 @@ class illegal_insn(testbase.KcovTestCase):
 class fork_no_wait(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/fork_no_wait", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/fork_no_wait")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/fork_no_wait",
             False,
@@ -37,7 +37,7 @@ class fork_no_wait(testbase.KcovTestCase):
 
 class ForkBase(testbase.KcovTestCase):
     def doTest(self, binary):
-        noKcovRv, o = self.do(self.testbuild + "/" + binary, False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/" + binary)
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/" + binary,
             False,
@@ -85,7 +85,7 @@ class vfork(testbase.KcovTestCase):
 class popen_test(testbase.KcovTestCase):
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/test_popen", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/test_popen")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/test_popen",
             False,
@@ -104,7 +104,7 @@ class short_filename(testbase.KcovTestCase):
 
 class Pie(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/pie", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/pie")
         rv, o = self.do(self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/pie", False)
         assert rv == noKcovRv
 
@@ -154,7 +154,7 @@ class pie_accumulate(testbase.KcovTestCase):
 
 class global_ctors(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/global-constructors", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/global-constructors")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/global-constructors",
             False,
@@ -169,7 +169,7 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/test_daemon", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/test_daemon")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/test_daemon",
             False,
@@ -186,7 +186,7 @@ class SignalsBase(testbase.KcovTestCase):
         self.m_self = ""
 
     def cmpOne(self, sig):
-        noKcovRv, o = self.do(self.testbuild + "/signals " + sig + " " + self.m_self, False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/signals " + sig + " " + self.m_self)
         rv, o = self.do(
             self.kcov
             + " "
@@ -256,7 +256,7 @@ class collect_and_report_only(testbase.KcovTestCase):
     # Cannot work with combined Engine / Parser
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/main-tests ", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/main-tests ")
         rv, o = self.do(
             self.kcov
             + " --collect-only "
@@ -291,11 +291,11 @@ class collect_and_report_only(testbase.KcovTestCase):
 
 class setpgid_kill(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(
-            self.sources + "/tests/setpgid-kill/test-script.sh " + self.testbuild + "/setpgid-kill",
-            False,
+        noKcovRv, o = self.doCmd(
+            self.sources + "/tests/setpgid-kill/test-script.sh " + self.testbuild + "/setpgid-kill"
         )
         assert b"SUCCESS" in o
+
         rv, o = self.do(
             self.sources
             + "/tests/setpgid-kill/test-script.sh "
@@ -422,7 +422,7 @@ class debuglink(testbase.KcovTestCase):
             f"objcopy --add-gnu-debuglink={self.testbuild}/main-tests-debug-file123.debug {self.testbuild}/main-tests-debug-file3"
         )
 
-        noKcovRv, o = self.do(self.testbuild + "/main-tests-debug-file", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/main-tests-debug-file")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/main-tests-debug-file",
             False,
@@ -514,7 +514,7 @@ class collect_no_source(testbase.KcovTestCase):
 class dlopen(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/dlopen", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/dlopen")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/dlopen",
             False,
@@ -550,7 +550,7 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/test_daemon", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/test_daemon")
         rv, o = self.do(
             self.kcov
             + " --output-interval=1 --exit-first-process "
@@ -562,6 +562,7 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
         )
 
         assert noKcovRv == rv
+
         time.sleep(2)
         dom = cobertura.parseFile(self.outbase + "/kcov/test_daemon/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 0

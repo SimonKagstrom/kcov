@@ -11,7 +11,7 @@ class shared_library(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        noKcovRv, o = self.do(self.testbuild + "/shared_library_test", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/shared_library_test")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test",
             False,
@@ -79,7 +79,7 @@ class shared_library_accumulate(testbase.KcovTestCase):
 
 class MainTestBase(testbase.KcovTestCase):
     def doTest(self, verify):
-        noKcovRv, o = self.do(self.testbuild + "/main-tests", False)
+        noKcovRv, o = self.doCmd(self.testbuild + "/main-tests")
         rv, o = self.do(
             self.kcov
             + " "

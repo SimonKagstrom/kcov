@@ -6,7 +6,7 @@ import testbase
 
 class python_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(self.sources + "/tests/python/main 5")
+        noKcovRv, o = self.doCmd(self.sources + "/tests/python/main 5")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
         )

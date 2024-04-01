@@ -96,6 +96,14 @@ class KcovTestCase(unittest.TestCase):
 
         return rv, output
 
+    def doCmd(self, cmdline):
+        args = cmdline.split()
+        term = subprocess.run(args, stdout=PIPE, stderr=PIPE, timeout=default_timeout)
+        output = term.stdout + term.stderr
+        rv = term.returncode
+
+        return rv, output
+
     def write_message(self, msg):
         """Add a custom message to the current test status line."""
 

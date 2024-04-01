@@ -369,7 +369,7 @@ class bash_handle_all_output(testbase.KcovTestCase):
 
 class bash_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(self.sources + "/tests/bash/shell-main 5", False)
+        noKcovRv, o = self.doCmd(self.sources + "/tests/bash/shell-main 5")
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main 5"
         )
