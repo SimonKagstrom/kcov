@@ -5,7 +5,7 @@ import cobertura
 import testbase
 
 
-class TooFewArguments(testbase.KcovTestCase):
+class too_few_arguments(testbase.KcovTestCase):
     def runTest(self):
         rv, output = self.do(testbase.kcov + " " + testbase.outbase + "/kcov")
 
@@ -13,7 +13,7 @@ class TooFewArguments(testbase.KcovTestCase):
         assert rv == 1
 
 
-class WrongArguments(testbase.KcovTestCase):
+class wrong_arguments(testbase.KcovTestCase):
     def runTest(self):
         rv, output = self.do(
             testbase.kcov
@@ -28,7 +28,7 @@ class WrongArguments(testbase.KcovTestCase):
         assert rv == 1
 
 
-class LookupBinaryInPath(testbase.KcovTestCase):
+class lookup_binary_in_path(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
         os.environ["PATH"] += testbase.sources + "/tests/python"
@@ -41,7 +41,7 @@ class LookupBinaryInPath(testbase.KcovTestCase):
 
 
 # Issue #414
-class OutDirectoryIsExecutable(testbase.KcovTestCase):
+class outdir_is_executable(testbase.KcovTestCase):
     def runTest(self):
         # Running a system executable on Linux may cause ptrace to fails with
         # "Operation not permitted", even with ptrace_scope set to 0.
