@@ -6,14 +6,9 @@ import testbase
 
 class python_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(testbase.sources + "/tests/python/main 5")
+        noKcovRv, o = self.do(self.sources + "/tests/python/main 5")
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/python/main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
         )
 
         assert rv == noKcovRv
@@ -22,11 +17,11 @@ class python_exit_status(testbase.KcovTestCase):
 class python_can_set_illegal_parser(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --python-parser=python7 "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/main 5"
         )
 
@@ -36,11 +31,11 @@ class python_can_set_illegal_parser(testbase.KcovTestCase):
 class python_can_set_legal_parser(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --python-parser=python3 "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/main 5"
         )
 
@@ -50,11 +45,11 @@ class python_can_set_legal_parser(testbase.KcovTestCase):
 class python2_can_set_legal_parser(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --python-parser=python2 "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/main 5"
         )
 
@@ -64,11 +59,11 @@ class python2_can_set_legal_parser(testbase.KcovTestCase):
 class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --python-parser=python3 "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/link_main 5 --foo"
         )
 
@@ -78,32 +73,32 @@ class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
 class python_unittest(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/unittest/testdriver"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/testdriver/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/testdriver/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "testdriver", 14) == 1
 
 
 class PythonBase(testbase.KcovTestCase):
     def doTest(self, extra):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
             + extra
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/main 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main", 10) == 2
         assert cobertura.hitsPerLine(dom, "main", 17) == 0
         assert cobertura.hitsPerLine(dom, "main", 22) is None
@@ -129,27 +124,17 @@ class python_coverage(PythonBase):
 class python_accumulate_data(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/python/main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main", 16) == 0
         assert cobertura.hitsPerLine(dom, "main", 19) == 1
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/python/main"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main", 16) == 1
         assert cobertura.hitsPerLine(dom, "main", 19) == 1
 
@@ -167,28 +152,23 @@ class python2_coverage(PythonBase):
 class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/python/main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "second.py", 34) == 2
 
 
 class python_select_parser(testbase.KcovTestCase):
     def disabledTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --python-parser="
-            + testbase.sources
+            + self.sources
             + "/tests/tools/dummy-python.sh "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/python/main 5"
         )
 
@@ -199,14 +179,9 @@ class python_tricky_single_dict_assignment(testbase.KcovTestCase):
     @unittest.expectedFailure
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/python/main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "second.py", 57) == 1
         assert cobertura.hitsPerLine(dom, "second.py", 61) == 1

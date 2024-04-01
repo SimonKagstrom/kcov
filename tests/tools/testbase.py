@@ -13,7 +13,6 @@ import unittest
 PIPE = subprocess.PIPE
 
 kcov = ""
-kcov_system_daemon = ""
 outbase = ""
 testbuild = ""
 sources = ""
@@ -33,7 +32,6 @@ def configure(k, o, t, s):
     global kcov, outbase, testbuild, sources, kcov_system_daemon
 
     kcov = normalize(k)
-    kcov_system_daemon = k + "-system-daemon"
     outbase = normalize(o)
     testbuild = normalize(t)
     sources = normalize(s)
@@ -43,7 +41,13 @@ def configure(k, o, t, s):
 
 class KcovTestCase(unittest.TestCase):
     def setUp(self):
-        self.outdir = outbase + "/" + "kcov"
+        # Make the configuration values available as class members.
+        self.kcov = kcov
+        self.kcov_system_daemon = self.kcov + "-system-daemon"
+        self.outbase = outbase
+        self.outdir = self.outbase + "/" + "kcov"
+        self.testbuild = testbuild
+        self.sources = sources
 
         # Intentionally fails if target directory exists.
         os.makedirs(self.outdir)

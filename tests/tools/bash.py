@@ -10,30 +10,25 @@ import testbase
 class BashBase(testbase.KcovTestCase):
     def doTest(self, args):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/shell-main "
             + args
         )
 
-        return cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        return cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
 
 
 class bash_coverage(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/shell-main"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 3) is None
         assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
         assert cobertura.hitsPerLine(dom, "shell-main", 13) == 0
@@ -56,15 +51,15 @@ class bash_coverage(testbase.KcovTestCase):
 class bash_coverage_debug_trap(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --bash-method=DEBUG "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/shell-main 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 3) is None
         assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
         assert cobertura.hitsPerLine(dom, "shell-main", 22) == 1
@@ -73,15 +68,10 @@ class bash_coverage_debug_trap(testbase.KcovTestCase):
 class bash_short_file(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/short-test.sh"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/short-test.sh"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/short-test.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/short-test.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "short-test.sh", 5) == 11
 
 
@@ -126,45 +116,45 @@ class bash_coverage_tricky(BashBase):
 class bash_honor_signal(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.sources
+            self.sources
             + "/tests/setpgid-kill/test-script.sh "
-            + testbase.kcov
+            + self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/trap.sh",
             False,
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/trap.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/trap.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "trap.sh", 5) == 1
 
 
 class bash_accumulate_data(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/unitundertest.sh 1"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/unitundertest.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/unitundertest.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 6) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 16) == 0
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/unitundertest.sh 2"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/unitundertest.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/unitundertest.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 6) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 16) == 1
 
@@ -174,22 +164,18 @@ class bash_accumulate_changed_data(testbase.KcovTestCase):
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         os.system("mkdir -p /tmp/test-kcov")
-        os.system("cp " + testbase.sources + "/tests/bash/shell-main /tmp/test-kcov")
-        os.system("cp " + testbase.sources + "/tests/bash/other.sh /tmp/test-kcov")
-        rv, o = self.do(
-            testbase.kcov + " " + testbase.outbase + "/kcov /tmp/test-kcov/shell-main 5 9"
-        )
+        os.system("cp " + self.sources + "/tests/bash/shell-main /tmp/test-kcov")
+        os.system("cp " + self.sources + "/tests/bash/other.sh /tmp/test-kcov")
+        rv, o = self.do(self.kcov + " " + self.outbase + "/kcov /tmp/test-kcov/shell-main 5 9")
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 40) == 1
         assert cobertura.hitsPerLine(dom, "shell-main", 67) == 2
         assert cobertura.hitsPerLine(dom, "other.sh", 6) == 2
         os.system("echo \"echo 'arne-anka'\" >> /tmp/test-kcov/shell-main")
-        rv, o = self.do(
-            testbase.kcov + " " + testbase.outbase + "/kcov /tmp/test-kcov/shell-main 5"
-        )
+        rv, o = self.do(self.kcov + " " + self.outbase + "/kcov /tmp/test-kcov/shell-main 5")
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 40) == 0
         assert cobertura.hitsPerLine(dom, "shell-main", 67) == 0
         assert cobertura.hitsPerLine(dom, "other.sh", 6) == 3
@@ -198,39 +184,39 @@ class bash_accumulate_changed_data(testbase.KcovTestCase):
 class bash_merge_data_issue_38(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/unitundertest.sh 1"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/unitundertest.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/unitundertest.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 6) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 16) == 0
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/unitundertest.sh 2"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/unitundertest.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/unitundertest.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 6) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 16) == 1
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/unitundertest.sh all"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/unitundertest.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/unitundertest.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 36) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 30) == 1
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 33) == 1
@@ -240,15 +226,10 @@ class bash_merge_data_issue_38(testbase.KcovTestCase):
 class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/shell-main"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 142) == 1
         assert cobertura.hitsPerLine(dom, "shell-main", 149) == 1
         assert cobertura.hitsPerLine(dom, "shell-main", 151) == 1
@@ -258,27 +239,27 @@ class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(test
 class bash_multiline_quotes(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/multiline-alias.sh"
         )
 
         assert b"echo called test_alias" not in o
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/multiline-alias.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/multiline-alias.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "multiline-alias.sh", 6) == 1
 
 
 class bash_multiline_backslashes(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/multiline-backslash.sh"
         )
 
@@ -288,39 +269,37 @@ class bash_multiline_backslashes(testbase.KcovTestCase):
 class bash_no_executed_lines(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/no-executed-statements.sh"
         )
 
         assert b"echo called test_alias" not in o
-        dom = cobertura.parseFile(
-            testbase.outbase + "/kcov/no-executed-statements.sh/cobertura.xml"
-        )
+        dom = cobertura.parseFile(self.outbase + "/kcov/no-executed-statements.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "no-executed-statements.sh", 4) == 0
 
 
 class bash_stderr_redirection(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/redirect-stderr.sh"
         )
 
         assert b"kcov" not in o
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --debug-force-bash-stderr "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/redirect-stderr.sh"
         )
         assert b"kcov" not in o
@@ -329,17 +308,15 @@ class bash_stderr_redirection(testbase.KcovTestCase):
 class bash_dollar_var_replacement(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/dollar-var-replacements.sh"
         )
 
-        dom = cobertura.parseFile(
-            testbase.outbase + "/kcov/dollar-var-replacements.sh/cobertura.xml"
-        )
+        dom = cobertura.parseFile(self.outbase + "/kcov/dollar-var-replacements.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 2) == 1
         assert cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 4) == 1
         assert cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 5) == 1
@@ -349,14 +326,9 @@ class bash_dollar_var_replacement(testbase.KcovTestCase):
 class bash_done_eof(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/shell-main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main 5"
         )
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 163) is None
         assert cobertura.hitsPerLine(dom, "shell-main", 169) is None
 
@@ -365,28 +337,18 @@ class bash_done_eof(testbase.KcovTestCase):
 class bash_eof_backtick(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/shell-main"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
         )
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shell-main/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "shell-main", 180) == 1
 
 
 class bash_subshell(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/subshell.sh"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/subshell.sh"
         )
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/subshell.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/subshell.sh/cobertura.xml")
         self.assertIsNone(cobertura.hitsPerLine(dom, "subshell.sh", 1))
         self.assertEqual(2, cobertura.hitsPerLine(dom, "subshell.sh", 4))
         self.assertEqual(0, cobertura.hitsPerLine(dom, "subshell.sh", 8))
@@ -396,31 +358,20 @@ class bash_handle_all_output(testbase.KcovTestCase):
     def runTest(self):
         script = "handle-all-output.sh"
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/"
-            + script,
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/" + script,
             timeout=5.0,
         )
         self.assertEqual(0, rv, "kcov exited unsuccessfully")
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/" + script + "/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/" + script + "/cobertura.xml")
         self.assertIsNone(cobertura.hitsPerLine(dom, script, 1))
         self.assertEqual(1000, cobertura.hitsPerLine(dom, script, 4))
 
 
 class bash_exit_status(testbase.KcovTestCase):
     def runTest(self):
-        noKcovRv, o = self.do(testbase.sources + "/tests/bash/shell-main 5", False)
+        noKcovRv, o = self.do(self.sources + "/tests/bash/shell-main 5", False)
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.sources
-            + "/tests/bash/shell-main 5"
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main 5"
         )
 
         assert rv == noKcovRv
@@ -430,14 +381,14 @@ class bash_exit_status(testbase.KcovTestCase):
 class bash_ignore_uncovered(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --exclude-region=CUSTOM_RANGE_START:CUSTOM_RANGE_END "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/other.sh"
         )
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/other.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/other.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "other.sh", 22) is None
         assert cobertura.hitsPerLine(dom, "other.sh", 23) == 1
 
@@ -470,15 +421,15 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
 class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/first-dir/a.sh 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/a.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "a.sh", 5) == 1
         # Not executed
         assert cobertura.hitsPerLine(dom, "c.sh", 3) == 0
@@ -487,17 +438,17 @@ class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
 class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --bash-parse-files-in-dir="
-            + testbase.sources
+            + self.sources
             + "/tests/bash "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/first-dir/a.sh 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/a.sh/cobertura.xml")
         # Not executed
         assert cobertura.hitsPerLine(dom, "c.sh", 3) == 0
         assert cobertura.hitsPerLine(dom, "other.sh", 3) == 0
@@ -506,15 +457,15 @@ class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
 class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --bash-dont-parse-binary-dir "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/first-dir/a.sh 5"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/a.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/a.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "a.sh", 5) == 1
         # Not included in report
         assert cobertura.hitsPerLine(dom, "c.sh", 3) is None
@@ -524,15 +475,15 @@ class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
 class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --bash-dont-parse-binary-dir "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/function-with-spaces.sh"
         )
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/function-with-spaces.sh/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/function-with-spaces.sh/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "function-with-spaces.sh", 5) is None
         assert cobertura.hitsPerLine(dom, "function-with-spaces.sh", 6) == 1
         assert cobertura.hitsPerLine(dom, "function-with-spaces.sh", 9) is None
@@ -544,17 +495,17 @@ class bash_drain_stdout_without_return(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.sources
+            + self.sources
             + "/tests/bash/long-output-without-return.sh",
             timeout=5.0,
         )
         self.assertEqual(0, rv, "kcov exited unsuccessfully")
         dom = cobertura.parseFile(
-            testbase.outbase + "/kcov/long-output-without-return.sh/cobertura.xml"
+            self.outbase + "/kcov/long-output-without-return.sh/cobertura.xml"
         )
         self.assertIsNone(cobertura.hitsPerLine(dom, "long-output-without-return.sh", 1))
         self.assertEqual(32768, cobertura.hitsPerLine(dom, "long-output-without-return.sh", 4))

@@ -11,19 +11,14 @@ class shared_library(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        noKcovRv, o = self.do(testbase.testbuild + "/shared_library_test", False)
+        noKcovRv, o = self.do(self.testbuild + "/shared_library_test", False)
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.testbuild
-            + "/shared_library_test",
+            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test",
             False,
         )
         assert rv == noKcovRv
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.c", 9) >= 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
@@ -32,18 +27,18 @@ class shared_library_skip(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --skip-solibs "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.testbuild
+            + self.testbuild
             + "/shared_library_test",
             False,
         )
         self.skipTest("Fickle test, ignoring")
         assert rv == 0
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
@@ -52,17 +47,17 @@ class shared_library_filter_out(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " --exclude-pattern=solib "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.testbuild
+            + self.testbuild
             + "/shared_library_test",
             False,
         )
         assert rv == 0
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
@@ -71,17 +66,12 @@ class shared_library_accumulate(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
-            testbase.kcov
-            + " "
-            + testbase.outbase
-            + "/kcov "
-            + testbase.testbuild
-            + "/shared_library_test 5",
+            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test 5",
             False,
         )
         assert rv == 0
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/shared_library_test/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 10) == 1
@@ -89,21 +79,21 @@ class shared_library_accumulate(testbase.KcovTestCase):
 
 class MainTestBase(testbase.KcovTestCase):
     def doTest(self, verify):
-        noKcovRv, o = self.do(testbase.testbuild + "/main-tests", False)
+        noKcovRv, o = self.do(self.testbuild + "/main-tests", False)
         rv, o = self.do(
-            testbase.kcov
+            self.kcov
             + " "
             + verify
             + " "
-            + testbase.outbase
+            + self.outbase
             + "/kcov "
-            + testbase.testbuild
+            + self.testbuild
             + "/main-tests 5",
             False,
         )
         assert rv == noKcovRv
 
-        dom = cobertura.parseFile(testbase.outbase + "/kcov/main-tests/cobertura.xml")
+        dom = cobertura.parseFile(self.outbase + "/kcov/main-tests/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
         assert cobertura.hitsPerLine(dom, "main.cc", 14) is None
         assert cobertura.hitsPerLine(dom, "main.cc", 18) >= 1
