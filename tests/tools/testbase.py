@@ -75,7 +75,7 @@ class KcovTestCase(unittest.TestCase):
 
         return rv, output
 
-    def do(self, cmdline, kcovKcov=True, timeout=default_timeout):
+    def do(self, cmdline, /, kcovKcov=True, *, timeout=default_timeout):
         extra = ""
         if (
             kcovKcov
