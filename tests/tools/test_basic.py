@@ -1,8 +1,8 @@
 import os
 import unittest
 
-import cobertura
-import testbase
+import libkcov as testbase
+from libkcov import cobertura
 
 
 class too_few_arguments(testbase.KcovTestCase):

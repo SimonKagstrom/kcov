@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import errno
 import os
 import os.path
@@ -12,36 +10,13 @@ import unittest
 
 PIPE = subprocess.PIPE
 
-kcov = ""
-outbase = ""
-testbuild = ""
-sources = ""
-
 default_timeout = 10 * 60
 
 
-# Normalize path, also ensuring that it is not empty.
-def normalize(path):
-    assert len(path) != 0, "path must be not empty"
-
-    path = os.path.normpath(path)
-    return path
-
-
-def configure(k, o, t, s):
-    global kcov, outbase, testbuild, sources, kcov_system_daemon
-
-    kcov = normalize(k)
-    outbase = normalize(o)
-    testbuild = normalize(t)
-    sources = normalize(s)
-
-    assert os.path.abspath(outbase) != os.getcwd(), "'outbase' cannot be the current directory"
-
-
 class KcovTestCase(unittest.TestCase):
-    def setUp(self):
-        # Make the configuration values available as class members.
+    def __init__(self, kcov, outbase, testbuild, sources):
+        super().__init__()
+
         self.kcov = kcov
         self.kcov_system_daemon = self.kcov + "-system-daemon"
         self.outbase = outbase
@@ -49,6 +24,7 @@ class KcovTestCase(unittest.TestCase):
         self.testbuild = testbuild
         self.sources = sources
 
+    def setUp(self):
         # Intentionally fails if target directory exists.
         os.makedirs(self.outdir)
 
@@ -83,7 +59,7 @@ class KcovTestCase(unittest.TestCase):
             and platform.machine() in ["x86_64", "i386", "i686"]
         ):
             extra = (
-                kcov
+                self.kcov
                 + " --include-pattern=kcov --exclude-pattern=helper.cc,library.cc,html-data-files.cc "
                 + "/tmp/kcov-kcov "
             )

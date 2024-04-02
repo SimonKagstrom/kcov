@@ -1,5 +1,5 @@
-import cobertura
-import testbase
+import libkcov as testbase
+from libkcov import cobertura
 
 
 class bash_sh_shebang(testbase.KcovTestCase):

@@ -1,8 +1,8 @@
 import sys
 import unittest
 
-import cobertura
-import testbase
+import libkcov as testbase
+from libkcov import cobertura
 
 
 class shared_library(testbase.KcovTestCase):

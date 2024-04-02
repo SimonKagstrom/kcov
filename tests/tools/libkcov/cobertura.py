@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-
-import sys
 import xml.dom.minidom
-
-# all these imports are standard on most modern python implementations
 
 
 def readFile(name):
@@ -61,25 +56,3 @@ def hitsPerLine(dom, fileName, lineNr):
             return hits
 
     return None
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("Usage: lookup-class-line <in-file> <filename> <lineNr>")
-        sys.exit(1)
-
-    fileName = sys.argv[2]
-    line = int(sys.argv[3])
-
-    data = readFile(sys.argv[1])
-
-    dom = parse(data)
-    fileTag = lookupClassName(dom, fileName)
-
-    if fileTag is not None:
-        hits = lookupHitsByLine(fileTag, line)
-        if hits is not None:
-            print(hits)
-            sys.exit(0)
-
-    print("nocode")
