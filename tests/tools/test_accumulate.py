@@ -1,8 +1,8 @@
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class accumulate_data(testbase.KcovTestCase):
+class accumulate_data(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main"
@@ -22,7 +22,7 @@ class accumulate_data(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "main", 14) == 2
 
 
-class dont_accumulate_data_with_clean(testbase.KcovTestCase):
+class dont_accumulate_data_with_clean(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main"
@@ -47,7 +47,7 @@ class dont_accumulate_data_with_clean(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "main", 14) == 1
 
 
-class merge_basic(testbase.KcovTestCase):
+class merge_basic(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
@@ -61,7 +61,7 @@ class merge_basic(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
 
 
-class merge_multiple_output_directories(testbase.KcovTestCase):
+class merge_multiple_output_directories(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov/first " + self.sources + "/tests/python/main 5"
@@ -89,7 +89,7 @@ class merge_multiple_output_directories(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 4) == 1
 
 
-class merge_merged_output(testbase.KcovTestCase):
+class merge_merged_output(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov/first " + self.sources + "/tests/python/main 5"
@@ -137,7 +137,7 @@ class merge_merged_output(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "dollar-var-replacements.sh", 2) == 1
 
 
-class merge_coveralls(testbase.KcovTestCase):
+class merge_coveralls(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov

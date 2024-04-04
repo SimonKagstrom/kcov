@@ -3,11 +3,11 @@ import platform
 import sys
 import unittest
 
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class illegal_insn(testbase.KcovTestCase):
+class illegal_insn(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
@@ -19,7 +19,7 @@ class illegal_insn(testbase.KcovTestCase):
         assert b"Illegal instructions are" in output
 
 
-class fork_no_wait(testbase.KcovTestCase):
+class fork_no_wait(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/fork_no_wait")
@@ -35,7 +35,7 @@ class fork_no_wait(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "fork-no-wait.c", 24) >= 1
 
 
-class ForkBase(testbase.KcovTestCase):
+class ForkBase(libkcov.TestCase):
     def doTest(self, binary):
         noKcovRv, o = self.doCmd(self.binaries + "/" + binary)
         rv, o = self.do(
@@ -66,7 +66,7 @@ class fork_32(ForkBase):
         self.doTest("fork-32")
 
 
-class vfork(testbase.KcovTestCase):
+class vfork(libkcov.TestCase):
     @unittest.skipIf(
         sys.platform.startswith("darwin"),
         "Not for OSX (does not work with the mach-engine for now)",
@@ -80,7 +80,7 @@ class vfork(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "vfork.c", 18) >= 1
 
 
-class popen_test(testbase.KcovTestCase):
+class popen_test(libkcov.TestCase):
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/test_popen")
@@ -93,14 +93,14 @@ class popen_test(testbase.KcovTestCase):
         assert b"popen OK" in o
 
 
-class short_filename(testbase.KcovTestCase):
+class short_filename(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         rv, o = self.do(self.kcov + " " + self.outbase + "/kcov ./s", False)
         assert rv == 99
 
 
-class Pie(testbase.KcovTestCase):
+class Pie(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/pie")
         rv, o = self.do(self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/pie", False)
@@ -110,7 +110,7 @@ class Pie(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "pie.c", 5) == 1
 
 
-class pie_argv_basic(testbase.KcovTestCase):
+class pie_argv_basic(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/pie-test",
@@ -123,7 +123,7 @@ class pie_argv_basic(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 0
 
 
-class pie_accumulate(testbase.KcovTestCase):
+class pie_accumulate(libkcov.TestCase):
     @unittest.skipIf(
         sys.platform.startswith("darwin"),
         "Not for OSX (does not work with the mach-engine for now)",
@@ -150,7 +150,7 @@ class pie_accumulate(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 1
 
 
-class global_ctors(testbase.KcovTestCase):
+class global_ctors(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/global-constructors")
         rv, o = self.do(
@@ -163,7 +163,7 @@ class global_ctors(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
 
 
-class daemon_wait_for_last_child(testbase.KcovTestCase):
+class daemon_wait_for_last_child(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
@@ -179,7 +179,7 @@ class daemon_wait_for_last_child(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
 
-class SignalsBase(testbase.KcovTestCase):
+class SignalsBase(libkcov.TestCase):
     def SignalsBase():
         self.m_self = ""
 
@@ -234,7 +234,7 @@ class signals_self(SignalsBase):
         self.doTest()
 
 
-class signals_crash(testbase.KcovTestCase):
+class signals_crash(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (macho-parser for now)")
     def runTest(self):
         rv, o = self.do(
@@ -250,7 +250,7 @@ class signals_crash(testbase.KcovTestCase):
         assert b"kcov: Process exited with signal 6" in o
 
 
-class collect_and_report_only(testbase.KcovTestCase):
+class collect_and_report_only(libkcov.TestCase):
     # Cannot work with combined Engine / Parser
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
@@ -282,7 +282,7 @@ class collect_and_report_only(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
 
-class setpgid_kill(testbase.KcovTestCase):
+class setpgid_kill(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(
             self.sources + "/tests/setpgid-kill/test-script.sh " + self.binaries + "/setpgid-kill"
@@ -303,7 +303,7 @@ class setpgid_kill(testbase.KcovTestCase):
         assert b"SUCCESS" in o
 
 
-class attach_process_with_threads(testbase.KcovTestCase):
+class attach_process_with_threads(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv, o = self.do(
@@ -324,7 +324,7 @@ class attach_process_with_threads(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "test-issue31.cc", 9) == 0
 
 
-class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
+class attach_process_with_threads_creates_threads(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv, o = self.do(
@@ -344,7 +344,7 @@ class attach_process_with_threads_creates_threads(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "thread-main.c", 9) >= 1
 
 
-class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
+class merge_same_file_in_multiple_binaries(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/multi_1",
@@ -372,7 +372,7 @@ class merge_same_file_in_multiple_binaries(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "file.c", 8) == 1
 
 
-class debuglink(testbase.KcovTestCase):
+class debuglink(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         os.system(f"rm -rf {(self.outbase)}/.debug")
@@ -473,7 +473,7 @@ class debuglink(testbase.KcovTestCase):
 # Todo: Look in /usr/lib/debug as well
 
 
-class collect_no_source(testbase.KcovTestCase):
+class collect_no_source(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         os.system(f"cp {self.sources}/tests/short-file.c {self.binaries}/main.cc")
@@ -504,7 +504,7 @@ class collect_no_source(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "main.cc", 1) == 1
 
 
-class dlopen(testbase.KcovTestCase):
+class dlopen(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/dlopen")
@@ -521,7 +521,7 @@ class dlopen(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
 
 
-class dlopen_in_ignored_source_file(testbase.KcovTestCase):
+class dlopen_in_ignored_source_file(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         rv, o = self.do(
@@ -539,7 +539,7 @@ class dlopen_in_ignored_source_file(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
 
 
-class daemon_no_wait_for_last_child(testbase.KcovTestCase):
+class daemon_no_wait_for_last_child(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):
@@ -565,7 +565,7 @@ class daemon_no_wait_for_last_child(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "test-daemon.cc", 31) == 1
 
 
-class address_sanitizer_coverage(testbase.KcovTestCase):
+class address_sanitizer_coverage(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     @unittest.expectedFailure
     def runTest(self):

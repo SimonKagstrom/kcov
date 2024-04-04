@@ -3,11 +3,11 @@ import platform
 import time
 import unittest
 
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class SystemModeBase(testbase.KcovTestCase):
+class SystemModeBase(libkcov.TestCase):
     def writeToPipe(self, str):
         f = open("/tmp/kcov-system.pipe", "w")
         f.write(str)

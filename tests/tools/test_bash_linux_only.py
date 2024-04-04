@@ -1,8 +1,8 @@
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class bash_sh_shebang(testbase.KcovTestCase):
+class bash_sh_shebang(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -17,7 +17,7 @@ class bash_sh_shebang(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "sh-shebang.sh", 4) == 1
 
 
-class bash_exit_before_child(testbase.KcovTestCase):
+class bash_exit_before_child(libkcov.TestCase):
     def runTest(self):
         # kcovKcov shouldn't wait for the background process, so call it with kcovKcov = False
         rv, o = self.do(
@@ -37,7 +37,7 @@ class bash_exit_before_child(testbase.KcovTestCase):
         self.assertEqual(1, cobertura.hitsPerLine(dom, "background-child.sh", 4))
 
 
-class bash_ldpreload_multilib(testbase.KcovTestCase):
+class bash_ldpreload_multilib(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov

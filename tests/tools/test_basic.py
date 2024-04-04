@@ -1,11 +1,11 @@
 import os
 import unittest
 
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class too_few_arguments(testbase.KcovTestCase):
+class too_few_arguments(libkcov.TestCase):
     def runTest(self):
         rv, output = self.do(self.kcov + " " + self.outbase + "/kcov")
 
@@ -13,7 +13,7 @@ class too_few_arguments(testbase.KcovTestCase):
         assert rv == 1
 
 
-class wrong_arguments(testbase.KcovTestCase):
+class wrong_arguments(libkcov.TestCase):
     def runTest(self):
         rv, output = self.do(
             self.kcov + " --abc=efg " + self.outbase + "/kcov " + self.binaries + "/tests-stripped"
@@ -23,7 +23,7 @@ class wrong_arguments(testbase.KcovTestCase):
         assert rv == 1
 
 
-class lookup_binary_in_path(testbase.KcovTestCase):
+class lookup_binary_in_path(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         os.environ["PATH"] += self.sources + "/tests/python"
@@ -36,7 +36,7 @@ class lookup_binary_in_path(testbase.KcovTestCase):
 
 
 # Issue #414
-class outdir_is_executable(testbase.KcovTestCase):
+class outdir_is_executable(libkcov.TestCase):
     def runTest(self):
         # Running a system executable on Linux may cause ptrace to fails with
         # "Operation not permitted", even with ptrace_scope set to 0.

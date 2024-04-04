@@ -13,7 +13,7 @@ PIPE = subprocess.PIPE
 default_timeout = 10 * 60
 
 
-class KcovTestCase(unittest.TestCase):
+class TestCase(unittest.TestCase):
     def __init__(self, kcov, outbase, binaries, sources):
         super().__init__()
 

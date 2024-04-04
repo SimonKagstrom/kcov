@@ -1,8 +1,8 @@
-import libkcov as testbase
+import libkcov
 from libkcov import cobertura
 
 
-class include_exclude_pattern(testbase.KcovTestCase):
+class include_exclude_pattern(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -43,7 +43,7 @@ class include_exclude_pattern(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
 
 
-class include_path(testbase.KcovTestCase):
+class include_path(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -62,7 +62,7 @@ class include_path(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "b.sh", 3) >= 1
 
 
-class include_path_and_exclude_pattern(testbase.KcovTestCase):
+class include_path_and_exclude_pattern(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
