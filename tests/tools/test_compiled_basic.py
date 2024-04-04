@@ -11,9 +11,9 @@ class shared_library(testbase.KcovTestCase):
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        noKcovRv, o = self.doCmd(self.testbuild + "/shared_library_test")
+        noKcovRv, o = self.doCmd(self.binaries + "/shared_library_test")
         rv, o = self.do(
-            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test",
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/shared_library_test",
             False,
         )
         assert rv == noKcovRv
@@ -31,7 +31,7 @@ class shared_library_skip(testbase.KcovTestCase):
             + " --skip-solibs "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/shared_library_test",
             False,
         )
@@ -51,7 +51,7 @@ class shared_library_filter_out(testbase.KcovTestCase):
             + " --exclude-pattern=solib "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/shared_library_test",
             False,
         )
@@ -66,7 +66,7 @@ class shared_library_accumulate(testbase.KcovTestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
-            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test 5",
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/shared_library_test 5",
             False,
         )
         assert rv == 0
@@ -79,7 +79,7 @@ class shared_library_accumulate(testbase.KcovTestCase):
 
 class MainTestBase(testbase.KcovTestCase):
     def doTest(self, verify):
-        noKcovRv, o = self.doCmd(self.testbuild + "/main-tests")
+        noKcovRv, o = self.doCmd(self.binaries + "/main-tests")
         rv, o = self.do(
             self.kcov
             + " "
@@ -87,7 +87,7 @@ class MainTestBase(testbase.KcovTestCase):
             + " "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/main-tests 5",
             False,
         )

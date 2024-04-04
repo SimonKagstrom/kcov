@@ -49,7 +49,7 @@ class TestLoader:
                     continue
 
                 cfg = self.config
-                test = obj(cfg.kcov, cfg.outbase, cfg.testbuild, cfg.sources)
+                test = obj(cfg.kcov, cfg.outbase, cfg.binaries, cfg.sources)
                 self.tests.append(test)
 
     def match_test(self, test_case_class):
@@ -60,7 +60,7 @@ class TestLoader:
         return any(fnmatchcase(full_name, pattern) for pattern in self.patterns)
 
 
-Config = namedtuple("Config", ["kcov", "outbase", "testbuild", "sources"])
+Config = namedtuple("Config", ["kcov", "outbase", "binaries", "sources"])
 
 
 def fatal(msg):
@@ -120,7 +120,7 @@ def parse_args():
 
     parser.add_argument("kcov", type=normalized_not_empty)
     parser.add_argument("outbase", type=normalized_not_empty)
-    parser.add_argument("testbuild", type=normalized_not_empty)
+    parser.add_argument("binaries", type=normalized_not_empty)
     parser.add_argument("sources", type=normalized_not_empty)
 
     # Code copied from unittest.main.
@@ -201,7 +201,7 @@ def main():
         fatal("'outbase' cannot be the current directory")
 
     # Loads and configure tests
-    config = Config(args.kcov, args.outbase, args.testbuild, args.sources)
+    config = Config(args.kcov, args.outbase, args.binaries, args.sources)
     tests = addTests(config, args.patterns)
 
     if args.shuffle:

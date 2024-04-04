@@ -16,7 +16,7 @@ class too_few_arguments(testbase.KcovTestCase):
 class wrong_arguments(testbase.KcovTestCase):
     def runTest(self):
         rv, output = self.do(
-            self.kcov + " --abc=efg " + self.outbase + "/kcov " + self.testbuild + "/tests-stripped"
+            self.kcov + " --abc=efg " + self.outbase + "/kcov " + self.binaries + "/tests-stripped"
         )
 
         assert b"kcov: error: Unrecognized option: --abc=efg" in output

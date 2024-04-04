@@ -14,14 +14,14 @@ default_timeout = 10 * 60
 
 
 class KcovTestCase(unittest.TestCase):
-    def __init__(self, kcov, outbase, testbuild, sources):
+    def __init__(self, kcov, outbase, binaries, sources):
         super().__init__()
 
         self.kcov = kcov
         self.kcov_system_daemon = self.kcov + "-system-daemon"
         self.outbase = outbase
         self.outdir = self.outbase + "/" + "kcov"
-        self.testbuild = testbuild
+        self.binaries = binaries
         self.sources = sources
 
     def setUp(self):
