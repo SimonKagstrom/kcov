@@ -19,7 +19,7 @@ jobs:
         if: ${{ matrix.arch == 'amd64' }}
         run: |
           sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
-          sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
+          sudo .github/workflows/ci-run-tests.sh
           wget https://codecov.io/bash || true
           bash bash -s /tmp/kcov-kcov || true
 
