@@ -14,6 +14,7 @@ import platform
 import sys
 import unittest
 from collections import namedtuple
+from fnmatch import fnmatchcase
 
 # Copied from unittest.main.
 _NO_TESTS_EXITCODE = 5
@@ -26,9 +27,10 @@ class TestLoader:
     `runTest`.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, patterns):
         self.tests = []
         self.config = config
+        self.patterns = patterns
 
     def add_tests_from_module(self, name):
         """Add all test cases from the named module."""
@@ -42,12 +44,19 @@ class TestLoader:
                 and obj not in (unittest.TestCase, unittest.FunctionTestCase)
                 and hasattr(obj, "runTest")
             ):
+                if not self.match_test(obj):
+                    continue
+
                 cfg = self.config
-
-                # TODO: add support for filtering.
-
                 test = obj(cfg.kcov, cfg.outbase, cfg.testbuild, cfg.sources)
                 self.tests.append(test)
+
+    def match_test(self, test_case_class):
+        if not self.patterns:
+            return True
+
+        full_name = f"{test_case_class.__module__}.{test_case_class.__qualname__}"
+        return any(fnmatchcase(full_name, pattern) for pattern in self.patterns)
 
 
 Config = namedtuple("Config", ["kcov", "outbase", "testbuild", "sources"])
@@ -69,14 +78,22 @@ def normalized_not_empty(path):
     return path
 
 
-def addTests(config):
+# Implementation copied from unittest.main.
+def to_fnmatch(pattern):
+    if "*" not in pattern:
+        pattern = "*%s*" % pattern
+
+    return pattern
+
+
+def addTests(config, patterns):
     """Add all the kcov test modules.
 
     Discovery is not possible, since some modules need to be excluded,
     depending on the os and arch.
     """
 
-    test_loader = TestLoader(config)
+    test_loader = TestLoader(config, patterns)
 
     test_loader.add_tests_from_module("test_basic")
     test_loader.add_tests_from_module("test_compiled_basic")
@@ -147,6 +164,7 @@ def parse_args():
         "-k",
         dest="patterns",
         action="append",
+        type=to_fnmatch,
         help="Only run tests which match the given substring",
     )
     parser.add_argument(
@@ -170,7 +188,7 @@ def main():
 
     # Loads and configure tests
     config = Config(args.kcov, args.outbase, args.testbuild, args.sources)
-    tests = addTests(config)
+    tests = addTests(config, args.patterns)
 
     # Run the tests
     test_suite = unittest.TestSuite(tests)
