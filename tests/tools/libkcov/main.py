@@ -11,6 +11,7 @@ import importlib
 import os
 import os.path
 import platform
+import random
 import sys
 import unittest
 from collections import namedtuple
@@ -176,6 +177,19 @@ def parse_args():
 
     # TODO: The --duration argument was added in 3.12.
 
+    # kcov test runner options
+
+    parser.add_argument(
+        "--shuffle",
+        dest="shuffle",
+        action="store_true",
+        help="Randomize the execution order of tests",
+    )
+
+    # TODO: The --duration argument was added in 3.12.
+
+    # kcov test runner custom options
+
     return parser.parse_args()
 
 
@@ -189,6 +203,9 @@ def main():
     # Loads and configure tests
     config = Config(args.kcov, args.outbase, args.testbuild, args.sources)
     tests = addTests(config, args.patterns)
+
+    if args.shuffle:
+        random.shuffle(tests)
 
     # Run the tests
     test_suite = unittest.TestSuite(tests)
