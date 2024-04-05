@@ -568,8 +568,8 @@ class address_sanitizer_coverage(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         if not os.path.isfile(self.binaries + "/sanitizer-coverage"):
-            self.write_message("Clang-only")
-            assert False
+            self.skipTest("Clang only")
+
         rv, o = self.do(
             self.kcov
             + " --clang "
