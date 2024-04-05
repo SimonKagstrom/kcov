@@ -1,19 +1,19 @@
 import sys
 import unittest
 
-import cobertura
-import testbase
+import libkcov
+from libkcov import cobertura
 
 
-class shared_library(testbase.KcovTestCase):
+class shared_library(libkcov.TestCase):
     @unittest.skipIf(
         sys.platform.startswith("darwin"),
         "Not for OSX (does not work with the mach-engine for now)",
     )
     def runTest(self):
-        noKcovRv, o = self.doCmd(self.testbuild + "/shared_library_test")
+        noKcovRv, o = self.doCmd(self.binaries + "/shared_library_test")
         rv, o = self.do(
-            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test",
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/shared_library_test",
             False,
         )
         assert rv == noKcovRv
@@ -23,7 +23,7 @@ class shared_library(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
 
 
-class shared_library_skip(testbase.KcovTestCase):
+class shared_library_skip(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
@@ -31,7 +31,7 @@ class shared_library_skip(testbase.KcovTestCase):
             + " --skip-solibs "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/shared_library_test",
             False,
         )
@@ -43,7 +43,7 @@ class shared_library_skip(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
 
-class shared_library_filter_out(testbase.KcovTestCase):
+class shared_library_filter_out(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
@@ -51,7 +51,7 @@ class shared_library_filter_out(testbase.KcovTestCase):
             + " --exclude-pattern=solib "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/shared_library_test",
             False,
         )
@@ -62,11 +62,11 @@ class shared_library_filter_out(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
 
-class shared_library_accumulate(testbase.KcovTestCase):
+class shared_library_accumulate(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #157")
     def runTest(self):
         rv, o = self.do(
-            self.kcov + " " + self.outbase + "/kcov " + self.testbuild + "/shared_library_test 5",
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/shared_library_test 5",
             False,
         )
         assert rv == 0
@@ -77,9 +77,9 @@ class shared_library_accumulate(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "solib.c", 10) == 1
 
 
-class MainTestBase(testbase.KcovTestCase):
+class MainTestBase(libkcov.TestCase):
     def doTest(self, verify):
-        noKcovRv, o = self.doCmd(self.testbuild + "/main-tests")
+        noKcovRv, o = self.doCmd(self.binaries + "/main-tests")
         rv, o = self.do(
             self.kcov
             + " "
@@ -87,7 +87,7 @@ class MainTestBase(testbase.KcovTestCase):
             + " "
             + self.outbase
             + "/kcov "
-            + self.testbuild
+            + self.binaries
             + "/main-tests 5",
             False,
         )

@@ -3,7 +3,8 @@
 set -euo pipefail
 
 run () {
-  tests/tools/run-tests build/src/kcov /tmp/ build-tests/ "." -v "$@" || exit 64
+  export PYTHONPATH=tests/tools
+  python -m libkcov build/src/kcov /tmp/ build-tests/ "." -v "$@" || exit 64
 }
 
 run "$@"

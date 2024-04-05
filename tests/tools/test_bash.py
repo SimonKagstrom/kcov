@@ -3,11 +3,11 @@ import platform
 import sys
 import unittest
 
-import cobertura
-import testbase
+import libkcov
+from libkcov import cobertura
 
 
-class BashBase(testbase.KcovTestCase):
+class BashBase(libkcov.TestCase):
     def doTest(self, args):
         rv, o = self.do(
             self.kcov
@@ -22,7 +22,7 @@ class BashBase(testbase.KcovTestCase):
         return cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
 
 
-class bash_coverage(testbase.KcovTestCase):
+class bash_coverage(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
@@ -48,7 +48,7 @@ class bash_coverage(testbase.KcovTestCase):
 
 
 # Very limited, will expand once it's working better
-class bash_coverage_debug_trap(testbase.KcovTestCase):
+class bash_coverage_debug_trap(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -65,7 +65,7 @@ class bash_coverage_debug_trap(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 22) == 1
 
 
-class bash_short_file(testbase.KcovTestCase):
+class bash_short_file(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/short-test.sh"
@@ -113,7 +113,7 @@ class bash_coverage_tricky(BashBase):
         assert cobertura.hitsPerLine(dom, "shell-main", 7) is None
 
 
-class bash_honor_signal(testbase.KcovTestCase):
+class bash_honor_signal(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.sources
@@ -131,7 +131,7 @@ class bash_honor_signal(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "trap.sh", 5) == 1
 
 
-class bash_accumulate_data(testbase.KcovTestCase):
+class bash_accumulate_data(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -159,7 +159,7 @@ class bash_accumulate_data(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 16) == 1
 
 
-class bash_accumulate_changed_data(testbase.KcovTestCase):
+class bash_accumulate_changed_data(libkcov.TestCase):
     # Not sure why, but for now...
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
@@ -181,7 +181,7 @@ class bash_accumulate_changed_data(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "other.sh", 6) == 3
 
 
-class bash_merge_data_issue_38(testbase.KcovTestCase):
+class bash_merge_data_issue_38(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -223,7 +223,7 @@ class bash_merge_data_issue_38(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "unitundertest.sh", 36) == 1
 
 
-class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(testbase.KcovTestCase):
+class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
@@ -236,7 +236,7 @@ class bash_issue_116_arithmetic_and_heredoc_issue_117_comment_within_string(test
         assert cobertura.hitsPerLine(dom, "shell-main", 152) == 1
 
 
-class bash_multiline_quotes(testbase.KcovTestCase):
+class bash_multiline_quotes(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -252,7 +252,7 @@ class bash_multiline_quotes(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "multiline-alias.sh", 6) == 1
 
 
-class bash_multiline_backslashes(testbase.KcovTestCase):
+class bash_multiline_backslashes(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -266,7 +266,7 @@ class bash_multiline_backslashes(testbase.KcovTestCase):
         assert b"function_name" not in o
 
 
-class bash_no_executed_lines(testbase.KcovTestCase):
+class bash_no_executed_lines(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -282,7 +282,7 @@ class bash_no_executed_lines(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "no-executed-statements.sh", 4) == 0
 
 
-class bash_stderr_redirection(testbase.KcovTestCase):
+class bash_stderr_redirection(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -305,7 +305,7 @@ class bash_stderr_redirection(testbase.KcovTestCase):
         assert b"kcov" not in o
 
 
-class bash_dollar_var_replacement(testbase.KcovTestCase):
+class bash_dollar_var_replacement(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -323,7 +323,7 @@ class bash_dollar_var_replacement(testbase.KcovTestCase):
 
 
 # Issue #152
-class bash_done_eof(testbase.KcovTestCase):
+class bash_done_eof(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main 5"
@@ -334,7 +334,7 @@ class bash_done_eof(testbase.KcovTestCase):
 
 
 # Issue #154
-class bash_eof_backtick(testbase.KcovTestCase):
+class bash_eof_backtick(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
@@ -343,7 +343,7 @@ class bash_eof_backtick(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 180) == 1
 
 
-class bash_subshell(testbase.KcovTestCase):
+class bash_subshell(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/subshell.sh"
@@ -354,7 +354,7 @@ class bash_subshell(testbase.KcovTestCase):
         self.assertEqual(0, cobertura.hitsPerLine(dom, "subshell.sh", 8))
 
 
-class bash_handle_all_output(testbase.KcovTestCase):
+class bash_handle_all_output(libkcov.TestCase):
     def runTest(self):
         script = "handle-all-output.sh"
         rv, o = self.do(
@@ -367,7 +367,7 @@ class bash_handle_all_output(testbase.KcovTestCase):
         self.assertEqual(1000, cobertura.hitsPerLine(dom, script, 4))
 
 
-class bash_exit_status(testbase.KcovTestCase):
+class bash_exit_status(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(self.sources + "/tests/bash/shell-main 5")
         rv, o = self.do(
@@ -378,7 +378,7 @@ class bash_exit_status(testbase.KcovTestCase):
 
 
 # Issue 180
-class bash_ignore_uncovered(testbase.KcovTestCase):
+class bash_ignore_uncovered(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -418,7 +418,7 @@ class bash_ignore_uncovered(testbase.KcovTestCase):
 
 
 # Issue #224
-class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
+class bash_can_find_non_executed_scripts(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -435,7 +435,7 @@ class bash_can_find_non_executed_scripts(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "c.sh", 3) == 0
 
 
-class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
+class bash_can_find_non_executed_scripts_manually(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -454,7 +454,7 @@ class bash_can_find_non_executed_scripts_manually(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "other.sh", 3) == 0
 
 
-class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
+class bash_can_ignore_non_executed_scripts(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -472,7 +472,7 @@ class bash_can_ignore_non_executed_scripts(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "other.sh", 3) is None
 
 
-class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
+class bash_can_ignore_function_with_spaces(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -491,7 +491,7 @@ class bash_can_ignore_function_with_spaces(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "function-with-spaces.sh", 11) == 1
 
 
-class bash_drain_stdout_without_return(testbase.KcovTestCase):
+class bash_drain_stdout_without_return(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv, o = self.do(

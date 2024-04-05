@@ -3,11 +3,11 @@ import platform
 import time
 import unittest
 
-import cobertura
-import testbase
+import libkcov
+from libkcov import cobertura
 
 
-class SystemModeBase(testbase.KcovTestCase):
+class SystemModeBase(libkcov.TestCase):
     def writeToPipe(self, str):
         f = open("/tmp/kcov-system.pipe", "w")
         f.write(str)
@@ -31,11 +31,11 @@ class system_mode_can_start_and_stop_daemon(SystemModeBase):
 class system_mode_can_instrument_binary(SystemModeBase):
     def runTest(self):
         rv, o = self.do(
-            self.kcov + " --system-record " + self.outbase + "/kcov " + self.testbuild + "/"
+            self.kcov + " --system-record " + self.outbase + "/kcov " + self.binaries + "/"
         )
         assert rv == 0
 
-        src = self.testbuild + "/main-tests"
+        src = self.binaries + "/main-tests"
         dst = self.outbase + "/kcov/main-tests"
 
         assert os.path.isfile(src)
@@ -50,7 +50,7 @@ class system_mode_can_record_and_report_binary(SystemModeBase):
         self.write_message(platform.machine())
 
         rv, o = self.do(
-            self.kcov + " --system-record " + self.outbase + "/kcov " + self.testbuild + "/"
+            self.kcov + " --system-record " + self.outbase + "/kcov " + self.binaries + "/"
         )
 
         rv, o = self.do(self.kcov_system_daemon + " -d", False)

@@ -1,10 +1,10 @@
 import unittest
 
-import cobertura
-import testbase
+import libkcov
+from libkcov import cobertura
 
 
-class python_exit_status(testbase.KcovTestCase):
+class python_exit_status(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(self.sources + "/tests/python/main 5")
         rv, o = self.do(
@@ -14,7 +14,7 @@ class python_exit_status(testbase.KcovTestCase):
         assert rv == noKcovRv
 
 
-class python_can_set_illegal_parser(testbase.KcovTestCase):
+class python_can_set_illegal_parser(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -28,7 +28,7 @@ class python_can_set_illegal_parser(testbase.KcovTestCase):
         assert b"Cannot find Python parser 'python7'" in o
 
 
-class python_can_set_legal_parser(testbase.KcovTestCase):
+class python_can_set_legal_parser(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -42,7 +42,7 @@ class python_can_set_legal_parser(testbase.KcovTestCase):
         assert b"Cannot find Python parser 'python3'" not in o
 
 
-class python2_can_set_legal_parser(testbase.KcovTestCase):
+class python2_can_set_legal_parser(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -56,7 +56,7 @@ class python2_can_set_legal_parser(testbase.KcovTestCase):
         assert b"Cannot find Python parser 'python2'" not in o
 
 
-class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
+class python_issue_368_can_handle_symlink_target(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -70,7 +70,7 @@ class python_issue_368_can_handle_symlink_target(testbase.KcovTestCase):
         assert b"unrecognized option '--foo'" not in o
 
 
-class python_unittest(testbase.KcovTestCase):
+class python_unittest(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -85,7 +85,7 @@ class python_unittest(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "testdriver", 14) == 1
 
 
-class PythonBase(testbase.KcovTestCase):
+class PythonBase(libkcov.TestCase):
     def doTest(self, extra):
         rv, o = self.do(
             self.kcov
@@ -121,7 +121,7 @@ class python_coverage(PythonBase):
         self.doTest("")
 
 
-class python_accumulate_data(testbase.KcovTestCase):
+class python_accumulate_data(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
@@ -149,7 +149,7 @@ class python2_coverage(PythonBase):
         self.doTest("--python-parser=python2")
 
 
-class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
+class python_tricky_single_line_string_assignment(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/main 5"
@@ -159,7 +159,7 @@ class python_tricky_single_line_string_assignment(testbase.KcovTestCase):
         assert cobertura.hitsPerLine(dom, "second.py", 34) == 2
 
 
-class python_select_parser(testbase.KcovTestCase):
+class python_select_parser(libkcov.TestCase):
     def disabledTest(self):
         rv, o = self.do(
             self.kcov
@@ -175,7 +175,7 @@ class python_select_parser(testbase.KcovTestCase):
         assert rv == 99
 
 
-class python_tricky_single_dict_assignment(testbase.KcovTestCase):
+class python_tricky_single_dict_assignment(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
         rv, o = self.do(
