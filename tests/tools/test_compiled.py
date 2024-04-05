@@ -1,6 +1,7 @@
 import os
 import platform
 import sys
+import time
 import unittest
 
 import libkcov
@@ -180,9 +181,6 @@ class daemon_wait_for_last_child(libkcov.TestCase):
 
 
 class SignalsBase(libkcov.TestCase):
-    def SignalsBase():
-        self.m_self = ""
-
     def cmpOne(self, sig):
         noKcovRv, o = self.doCmd(self.binaries + "/signals " + sig + " " + self.m_self)
         rv, o = self.do(
@@ -270,7 +268,7 @@ class collect_and_report_only(libkcov.TestCase):
         try:
             dom = cobertura.parseFile(self.outbase + "/kcov/main-tests/cobertura.xml")
             self.fail("File unexpectedly found")
-        except:
+        except Exception:
             # Exception is expected here
             pass
 
