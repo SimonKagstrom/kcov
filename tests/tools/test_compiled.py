@@ -101,7 +101,7 @@ class short_filename(libkcov.TestCase):
         assert rv == 99
 
 
-class Pie(libkcov.TestCase):
+class pie(libkcov.TestCase):
     def runTest(self):
         noKcovRv, o = self.doCmd(self.binaries + "/pie")
         rv, o = self.do(self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/pie", False)
