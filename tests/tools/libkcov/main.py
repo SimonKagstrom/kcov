@@ -33,6 +33,14 @@ class TestLoader:
         self.config = config
         self.patterns = patterns
 
+    def add_test_case(self, test_case_class):
+        if not self.match_test(test_case_class):
+            return
+
+        cfg = self.config
+        test = test_case_class(cfg.kcov, cfg.outbase, cfg.binaries, cfg.sources)
+        self.tests.append(test)
+
     def add_tests_from_module(self, name):
         """Add all test cases from the named module."""
 
@@ -45,12 +53,7 @@ class TestLoader:
                 and obj not in (unittest.TestCase, unittest.FunctionTestCase)
                 and hasattr(obj, "runTest")
             ):
-                if not self.match_test(obj):
-                    continue
-
-                cfg = self.config
-                test = obj(cfg.kcov, cfg.outbase, cfg.binaries, cfg.sources)
-                self.tests.append(test)
+                self.add_test_case(obj)
 
     def match_test(self, test_case_class):
         if not self.patterns:
