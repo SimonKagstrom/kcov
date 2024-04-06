@@ -117,7 +117,7 @@ class PythonBase(libkcov.TestCase):
 
 
 class python_coverage(PythonBase):
-    def runTestTest(self):
+    def runTest(self):
         self.doTest("")
 
 
