@@ -6,6 +6,7 @@ jobs:
     name: Build and test Linux executable
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         arch: [amd64, armv7, aarch64, ppc64le, i386]
 
