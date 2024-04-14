@@ -58,7 +58,7 @@ jobs:
       - name: Build for OSX
         run: |
           sudo .github/workflows/osx-build.sh
-
+          sudo .github/workflows/ci-run-tests.sh
 
   build-freebsd:
     runs-on: ubuntu-22.04
