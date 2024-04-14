@@ -19,17 +19,21 @@ run () {
   apt-mark hold php* google* libobjc* libpq* libidn* postgresql* python3-httplib2 samba* >/dev/null
   apt-get upgrade -y
   apt-get install -y binutils-dev libcurl4-openssl-dev libdw-dev libiberty-dev gcc g++ make cmake libssl-dev git python3 python2 $EXTRA_PACKAGES
+
   export PATH="${PATH}:${HOME}/kcov/bin"
   mkdir build build-tests
+
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. || exit 64
   make || exit 64
   make install || exit 64
   cd ..
+
   cd build-tests
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../tests || exit 64
   make || exit 64
   cd ..
+
   tar czf kcov-"$1".tar.gz /usr/local/bin/kcov* /usr/local/share/doc/kcov/* /usr/local/share/man/man1/kcov.1
   readelf -h /usr/local/bin/kcov
   if [[ -e "kcov-$1.tar.gz" ]]; then
