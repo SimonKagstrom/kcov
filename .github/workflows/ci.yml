@@ -32,7 +32,7 @@ jobs:
 
       - name: Build for matrix.arch == armv7, aarch64, ppc64le
         if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
-        uses: uraimo/run-on-arch-action@v2.6.0
+        uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
           distro: ubuntu22.04
