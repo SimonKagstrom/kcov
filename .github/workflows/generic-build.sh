@@ -30,7 +30,7 @@ run () {
   cd ..
 
   cd build-tests
-  cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../tests || exit 64
+  cmake ../tests || exit 64
   make || exit 64
   cd ..
 
