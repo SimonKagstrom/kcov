@@ -1,7 +1,10 @@
+import shutil
 import unittest
 
 import libkcov
 from libkcov import cobertura
+
+skip_python2 = shutil.which("python2") is None
 
 
 class python_exit_status(libkcov.TestCase):
@@ -43,6 +46,7 @@ class python_can_set_legal_parser(libkcov.TestCase):
 
 
 class python2_can_set_legal_parser(libkcov.TestCase):
+    @unittest.skipIf(skip_python2, "python2 not available")
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -145,6 +149,7 @@ class python3_coverage(PythonBase):
 
 
 class python2_coverage(PythonBase):
+    @unittest.skipIf(skip_python2, "python2 not available")
     def runTest(self):
         self.doTest("--python-parser=python2")
 

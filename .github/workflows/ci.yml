@@ -6,6 +6,7 @@ jobs:
     name: Build and test Linux executable
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         arch: [amd64, armv7, aarch64, ppc64le, i386]
 
@@ -32,7 +33,7 @@ jobs:
 
       - name: Build for matrix.arch == armv7, aarch64, ppc64le
         if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
-        uses: uraimo/run-on-arch-action@v2.6.0
+        uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
           distro: ubuntu22.04
@@ -57,7 +58,7 @@ jobs:
       - name: Build for OSX
         run: |
           sudo .github/workflows/osx-build.sh
-
+          sudo .github/workflows/ci-run-tests.sh
 
   build-freebsd:
     runs-on: ubuntu-22.04
