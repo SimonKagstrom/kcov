@@ -159,10 +159,16 @@ public:
                                           mach_exception_data_t codes,
                                           mach_msg_type_number_t num_codes)
     {
+        kcov_debug(BP_MSG, "Mach exception 0x%x, 0x%llx\n", exception_type, codes[0]);
         if (exception_type == EXC_SOFTWARE && codes[0] == EXC_SOFT_SIGNAL)
         {
             // Forward signals
             ptrace(PT_THUPDATE, m_pid, (caddr_t)(uintptr_t)thread_port, codes[1]);
+        }
+        else if (exception_type == EXC_BAD_ACCESS)
+        {
+            m_listener->onEvent(IEngine::Event(ev_signal, codes[0], 0));
+            return KERN_ABORTED;
         }
         else if (exception_type == EXC_BREAKPOINT)
         {
