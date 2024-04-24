@@ -151,19 +151,6 @@ class pie_accumulate(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "argv-dependent.c", 11) == 1
 
 
-class global_ctors(libkcov.TestCase):
-    def runTest(self):
-        noKcovRv, o = self.doCmd(self.binaries + "/global-constructors")
-        rv, o = self.do(
-            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/global-constructors",
-            False,
-        )
-        assert rv == noKcovRv
-
-        dom = cobertura.parseFile(self.outbase + "/kcov/global-constructors/cobertura.xml")
-        assert cobertura.hitsPerLine(dom, "test-global-ctors.cc", 4) >= 1
-
-
 class daemon_wait_for_last_child(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #158")
     @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")

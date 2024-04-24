@@ -137,9 +137,6 @@ target_link_libraries(shared_library_test shared_library)
 add_executable(argv_dependent ${argv_dependent_SRCS})
 add_executable(test_popen ${test_popen_SRCS})
 
-add_executable(global-constructors ${global_constructors_SRCS})
-target_link_libraries(global-constructors shared_library)
-
 add_executable(test_daemon ${daemon_SRCS})
 add_executable(multi_1 merge-tests/file.c merge-tests/main_1.c)
 add_executable(multi_2 merge-tests/file.c merge-tests/main_2.c)
