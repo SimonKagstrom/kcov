@@ -16,6 +16,7 @@
 #include <fstream>
 
 #include "writer-base.hh"
+#include "nocover.hh"
 
 using namespace kcov;
 
@@ -72,6 +73,11 @@ private:
 					"\"line\":\"", n);
 			outJson << escape_json(line) << "\"";
 
+			std::string& line_str = file->m_lineMap[n];
+			std::string& file_name = file->m_name;
+			bool should_cover = shouldCover(line_str, file_name);
+			const std::string& no_cover_class = "lineNoCov";
+
 			if (m_reporter.lineIsCode(file->m_name, n))
 			{
 				IReporter::LineExecutionCount cnt = m_reporter.getLineExecutionCount(file->m_name, n);
@@ -90,18 +96,21 @@ private:
 						lineClass = "linePartCov";
 				}
 
-				outJson << fmt(",\"class\":\"%s\","
-						"\"hits\":\"%u\",", lineClass.c_str(), cnt.m_hits);
+				if (lineClass == no_cover_class && !should_cover) {
+					// should not cover, so skip, but if there are some hits (when lineClass is not no cov), go else for normal marking
+				} else {
+					outJson << fmt(",\"class\":\"%s\","
+							"\"hits\":\"%u\",", lineClass.c_str(), cnt.m_hits);
+					// Don't report order for zeroes
+					if (cnt.m_order)
+						outJson << fmt("\"order\":\"%llu\",", (unsigned long long) cnt.m_order);
 
-				// Don't report order for zeroes
-				if (cnt.m_order)
-					outJson << fmt("\"order\":\"%llu\",", (unsigned long long) cnt.m_order);
+					if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
+						outJson << fmt("\"possible_hits\":\"%u\",", cnt.m_possibleHits);
 
-				if (m_maxPossibleHits != IFileParser::HITS_SINGLE)
-					outJson << fmt("\"possible_hits\":\"%u\",", cnt.m_possibleHits);
-
-				nExecutedLines += !!cnt.m_hits;
-				nCodeLines++;
+					nExecutedLines += !!cnt.m_hits;
+					nCodeLines++;
+				}
 			}
 			outJson << "},\n";
 
@@ -252,15 +261,29 @@ private:
 			if (!res)
 				continue;
 
+			// since we may ignored some from previous individual writeOne functions for each file, here use the sum from
+			// files instead of summary
+			int inFilesTotalCodeLines = 0;
+			int inFilesTotalExecutedLines = 0;
+			for (FileMap_t::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
+			{
+				inFilesTotalCodeLines += it->second->m_codeLines;
+				inFilesTotalExecutedLines += it->second->m_executedLines;
+			}
+
 			// Skip entries (merged ones) that shouldn't be included in the totals
 			if (summary.m_includeInTotals)
 			{
-				nTotalCodeLines += summary.m_lines;
-				nTotalExecutedLines += summary.m_executedLines;
+					nTotalCodeLines += inFilesTotalCodeLines;
+					nTotalExecutedLines += inFilesTotalExecutedLines;
+					// nTotalCodeLines += summary.m_lines;
+					// nTotalExecutedLines += summary.m_executedLines;
 			}
 
-			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines,
-					summary.m_executedLines);
+			std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, inFilesTotalCodeLines,
+					inFilesTotalExecutedLines);
+			// std::string datum = getIndexHeader(fmt("%s/index.html", de->d_name), name, name, summary.m_lines,
+			// summary.m_executedLines);
 
 			if (name == conf.keyAsString("merged-name"))
 				merged += datum;
