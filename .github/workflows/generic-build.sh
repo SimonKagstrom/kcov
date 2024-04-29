@@ -11,6 +11,8 @@ run () {
     DEB_ARCH="armhf"
   elif [ "$DEB_ARCH" = "aarch64" ]; then
     DEB_ARCH="arm64"
+  elif [ "$DEB_ARCH" = "riscv64" ]; then
+    DEB_ARCH="riscv64"
   else
     EXTRA_PACKAGES="g++-multilib"
   fi
