@@ -83,6 +83,7 @@ class MainTestBase(libkcov.TestCase):
         rv, o = self.do(
             self.kcov
             + " "
+            + " --debug=31 "
             + verify
             + " "
             + self.outbase
@@ -91,6 +92,8 @@ class MainTestBase(libkcov.TestCase):
             + "/main-tests 5",
             False,
         )
+        print("rv", rv, " vs no-kcov rv", noKcovRv)
+        print(o)
         assert rv == noKcovRv
 
         dom = cobertura.parseFile(self.outbase + "/kcov/main-tests/cobertura.xml")
