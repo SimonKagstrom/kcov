@@ -200,7 +200,7 @@ bool ptrace_sys::disable_aslr(void)
 	if (personality(persona) < 0)
 	{
 		perror("Can't set personality");
-		return false;
+		// But still return OK, to try to run the program
 	}
 	return true;
 }
