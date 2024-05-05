@@ -36,6 +36,8 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
+          dockerRunArgs: |
+            --rm --security-opt seccomp=unconfined
           distro: ubuntu22.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
