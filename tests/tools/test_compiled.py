@@ -249,7 +249,6 @@ class collect_and_report_only(libkcov.TestCase):
             + "/main-tests",
             False,
         )
-        self.skipTest("Fickle test, ignoring")
         assert rv == noKcovRv
 
         try:
