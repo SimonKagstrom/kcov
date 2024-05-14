@@ -262,6 +262,7 @@ class collect_and_report_only(libkcov.TestCase):
             self.kcov + " --report-only " + self.outbase + "/kcov " + self.binaries + "/main-tests",
             False,
         )
+        print(self.outbase + "/kcov/main-tests/cobertura.xml")
         dom = cobertura.parseFile(self.outbase + "/kcov/main-tests/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.cc", 9) == 1
 
