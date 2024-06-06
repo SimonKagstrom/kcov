@@ -155,6 +155,7 @@ public:
 		{ "system-record", no_argument, 0, '8' },
 		{ "system-report", no_argument, 0, '9' },
 		{ "verify", no_argument, 0, 'V' },
+		{ "dump-summary", no_argument, 0, '5' },
 		{ "version", no_argument, 0, 'v' },
 		{ "uncommon-options", no_argument, 0, 'U' },
 		/*{"write-file", required_argument, 0, 'w'}, Take back when the kernel stuff works */
@@ -362,6 +363,9 @@ public:
 				break;
 			case 'm':
 				setKey("running-mode", IConfiguration::MODE_MERGE_ONLY);
+				break;
+			case '5':
+				setKey("dump-summary", 1);
 				break;
 			case '8': // Full system record
 				setKey("running-mode", IConfiguration::MODE_SYSTEM_RECORD);
@@ -575,6 +579,7 @@ public:
 		setKey("high-limit", 75);
 		setKey("output-interval", 5000);
 		setKey("daemonize-on-first-process-exit", 0);
+		setKey("dump-summary", 0);
 		setKey("coveralls-id", "");
 		setKey("strip-path", "");
 		setKey("exclude-line", "");
@@ -704,6 +709,7 @@ public:
 						" --cobertura-only        Only produce cobertura output in the output dir\n"
 						" --gcov                  use gcov parser instead of DWARF debugging info\n"
 						" --clang                 use Clang Sanitizer-coverage parser\n"
+						" --dump-summary          dump a summary of coverage on stdout\n"
 						" --system-record         perform full-system instrumentation\n"
 						" --system-report         report full-system coverage data\n"
 						" --skip-solibs           don't parse shared libraries (default: parse solibs)\n"
