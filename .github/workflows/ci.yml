@@ -83,6 +83,9 @@ jobs:
   build-and-push-docker-image:
     needs: [build-linux, build-osx, build-freebsd]
     runs-on: ubuntu-latest
+    environment:
+      name: "Docker Hub"
+      url: https://hub.docker.com/r/kcov/kcov
     if: github.ref == 'refs/heads/master'
     steps:
     - uses: actions/checkout@v4

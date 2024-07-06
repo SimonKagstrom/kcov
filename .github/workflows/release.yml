@@ -36,6 +36,9 @@ jobs:
   build-and-push-docker-image:
     needs: [build]
     runs-on: ubuntu-latest
+    environment:
+      name: "Docker Hub"
+      url: https://hub.docker.com/r/kcov/kcov
     steps:
     - uses: actions/checkout@v4
       with:
