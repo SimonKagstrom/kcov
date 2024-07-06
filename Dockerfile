@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim AS builder
+FROM debian:bookworm-slim AS builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -9,7 +9,7 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         libdw-dev \
         libiberty-dev \
-    libssl-dev \
+        libssl-dev \
         ninja-build \
         python3 \
         zlib1g-dev \
@@ -23,11 +23,10 @@ RUN mkdir /src/build && \
     cmake --build . && \
     cmake --build . --target install
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update && \
     apt-get install -y \
-        binutils \
         libcurl4 \
         libdw1 \
         zlib1g \
