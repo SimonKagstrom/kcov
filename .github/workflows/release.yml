@@ -1,4 +1,8 @@
 name: Release
+
+permissions:
+  contents: read
+
 on:
   push:
     tags:
@@ -23,7 +27,7 @@ jobs:
           sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
           sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: kcov-${{ matrix.arch }}.tar.gz
           path: kcov-${{ matrix.arch }}.tar.gz
@@ -38,27 +42,28 @@ jobs:
         fetch-depth: 0
 
     - name: Get git tag
-      id: tag
-      uses: dawidd6/action-get-tag@v1
+      run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
     - name: Docker Hub login
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build docker image
-      run: docker build -t kcov/kcov:${{ steps.tag.outputs.tag }} .
+      run: docker build -t kcov/kcov:${{ env.RELEASE_TAG }} .
 
     - name: Push to Docker Hub
-      run: docker push kcov/kcov:${{ steps.tag.outputs.tag }}
+      run: docker push kcov/kcov:${{ env.RELEASE_TAG }}
 
   create_release:
     name: Create release
     needs: [build-and-push-docker-image]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
 
       - name: Create release
         uses: ncipollo/release-action@v1
