@@ -11,7 +11,7 @@ jobs:
         arch: [amd64, armv7, aarch64, ppc64le, i386]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: chmod u+x .github/workflows/*.sh
@@ -48,7 +48,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: |
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build and test FreeBSD executable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v1
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
