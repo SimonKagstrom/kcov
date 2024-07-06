@@ -99,7 +99,25 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build docker image
-      run: docker build -t kcov/kcov:latest .
+      # https://github.com/docker/buildx#building
+      run: |
+          docker buildx build \
+            --tag $IMAGE_TAG \
+            --platform $PLATFORM \
+            --push \
+            .
+      env:
+        IMAGE_TAG: kcov/kcov:latest
+        # All (build on the base image):
+        # - linux/386
+        # - linux/amd64
+        # - linux/arm/v5
+        # - linux/arm/v7
+        # - linux/arm64/v8
+        # - linux/mips64le
+        # - linux/ppc64le
+        # - linux/s390x
+        PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/mips64le,linux/ppc64le,linux/s390x
 
     - name: Push to Docker Hub
       run: docker push kcov/kcov:latest
