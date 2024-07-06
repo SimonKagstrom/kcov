@@ -34,30 +34,52 @@ jobs:
 
 
   build-and-push-docker-image:
-    needs: [build]
-    runs-on: ubuntu-latest
-    environment:
-      name: "Docker Hub"
-      url: https://hub.docker.com/r/kcov/kcov
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      name: Build and push to Docker Hub
+      needs: [build]
+      runs-on: ubuntu-latest
+      environment:
+        name: "Docker Hub"
+        url: https://hub.docker.com/r/kcov/kcov
+      steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Get git tag
-      run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - name: Docker Hub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Docker Hub login
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build docker image
-      run: docker build -t kcov/kcov:${{ env.RELEASE_TAG }} .
-
-    - name: Push to Docker Hub
-      run: docker push kcov/kcov:${{ env.RELEASE_TAG }}
+      - name: Build and push the docker image (${{ env.RELEASE_TAG }})
+        # https://github.com/docker/buildx#building
+        run: |
+            docker buildx build \
+              --tag $IMAGE_TAG \
+              --platform $PLATFORM \
+              --push \
+              .
+        env:
+          IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}
+          # All (build on the base image):
+          # - linux/386
+          # - linux/amd64
+          # - linux/arm/v5
+          # - linux/arm/v7
+          # - linux/arm64/v8
+          # - linux/ppc64le
+          # - linux/s390x
+          # Does not build:
+          # - linux/s390x
+          # - linux/mips64le
+          PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le
 
   create_release:
     name: Create release

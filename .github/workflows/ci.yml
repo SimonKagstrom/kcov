@@ -106,7 +106,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build docker image
+    - name: Build and push the docker image (latest)
       # https://github.com/docker/buildx#building
       run: |
           docker buildx build \
@@ -126,9 +126,5 @@ jobs:
         # - linux/s390x
         # Does not build:
         # - linux/s390x
-        # Does not build:
         # - linux/mips64le
         PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le
-
-    - name: Push to Docker Hub
-      run: docker push kcov/kcov:latest
