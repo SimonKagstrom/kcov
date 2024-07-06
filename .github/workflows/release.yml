@@ -79,6 +79,8 @@ jobs:
           # Does not build:
           # - linux/s390x
           # - linux/mips64le
+          # No users on this platform:
+          # - linux/ppc64le
           PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le
 
   create_release:
