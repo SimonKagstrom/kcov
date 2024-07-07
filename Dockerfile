@@ -49,7 +49,7 @@ RUN set -eux; \
         libstdc++ \
     ; \
     # Write a test script
-    echo '#!/usr/bin/env bash\nif [[ true ]]; then\necho "Hello, kcov!"\nfi' > /tmp/test-executable.sh; \
+    echo -e '#!/usr/bin/env bash\nif [[ true ]]; then\necho "Hello, kcov!"\nfi' > /tmp/test-executable.sh; \
     # Test kcov
     kcov --include-pattern=/tmp/test-executable.sh /tmp/coverage /tmp/test-executable.sh; \
     # Display
