@@ -21,6 +21,8 @@ RUN apk add --update --no-cache \
         zlib-dev \
         # Debian: libelf-dev
         elfutils-dev \
+        # Debian: libstdc++-12-dev
+        libstdc++-dev \
     ;
 
 ADD . /src/
@@ -39,9 +41,12 @@ COPY --from=builder /usr/local/share/doc/kcov /usr/local/share/doc/kcov
 
 RUN set -eux; \
     apk add --update --no-cache \
+        bash \
         libcurl \
         libdw \
         zlib \
+        libgcc \
+        libstdc++ \
     ; \
     # Write a test script
     echo '#!/usr/bin/env bash\nif [[ true ]]; then\necho "Hello, kcov!"\nfi' > /tmp/test-executable.sh; \
