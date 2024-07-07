@@ -1,4 +1,8 @@
 name: CI
+
+permissions:
+  contents: read
+
 on: [push, pull_request]
 
 jobs:
@@ -11,7 +15,7 @@ jobs:
         arch: [amd64, armv7, aarch64, ppc64le, i386]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: chmod u+x .github/workflows/*.sh
@@ -48,7 +52,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: |
@@ -64,7 +68,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build and test FreeBSD executable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v1
@@ -77,22 +81,51 @@ jobs:
           .github/workflows/ci-run-tests.sh
 
   build-and-push-docker-image:
+    name: Build and push to Docker Hub
     needs: [build-linux, build-osx, build-freebsd]
     runs-on: ubuntu-latest
+    environment:
+      name: "Docker Hub"
+      url: https://hub.docker.com/r/kcov/kcov
     if: github.ref == 'refs/heads/master'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Docker Hub login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # https://github.com/docker/setup-qemu-action
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    # https://github.com/docker/setup-buildx-action
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push the docker image (latest)
+      # https://github.com/docker/buildx#building
+      run: |
+          docker buildx build \
+            --tag $IMAGE_TAG \
+            --platform $PLATFORM \
+            --push \
+            .
       env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-
-    - name: Build docker image
-      run: docker build -t kcov/kcov:latest .
-
-    - name: Push to Docker Hub
-      run: docker push kcov/kcov:latest
+        IMAGE_TAG: kcov/kcov:latest
+        # All (build on the base image):
+        # - linux/386
+        # - linux/amd64
+        # - linux/arm/v5
+        # - linux/arm/v7
+        # - linux/arm64/v8
+        # - linux/s390x
+        # Does not build:
+        # - linux/s390x
+        # - linux/mips64le
+        # No users on this platform:
+        # - linux/ppc64le
+        PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8

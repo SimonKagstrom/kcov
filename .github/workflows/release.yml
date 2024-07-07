@@ -1,4 +1,8 @@
 name: Release
+
+permissions:
+  contents: read
+
 on:
   push:
     tags:
@@ -13,7 +17,7 @@ jobs:
         arch: [amd64]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: chmod u+x .github/workflows/generic-build.sh .github/workflows/ci-run-tests.sh
@@ -23,42 +27,70 @@ jobs:
           sudo .github/workflows/generic-build.sh ${{ matrix.arch }}
           sudo .github/workflows/ci-run-tests.sh ${{ matrix.arch }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: kcov-${{ matrix.arch }}.tar.gz
           path: kcov-${{ matrix.arch }}.tar.gz
 
 
   build-and-push-docker-image:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      name: Build and push to Docker Hub
+      needs: [build]
+      runs-on: ubuntu-latest
+      environment:
+        name: "Docker Hub"
+        url: https://hub.docker.com/r/kcov/kcov
+      steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Get git tag
-      id: tag
-      uses: dawidd6/action-get-tag@v1
+      - name: Docker Hub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Docker Hub login
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build docker image
-      run: docker build -t kcov/kcov:${{ steps.tag.outputs.tag }} .
-
-    - name: Push to Docker Hub
-      run: docker push kcov/kcov:${{ steps.tag.outputs.tag }}
+      - name: Build and push the docker image (${{ env.RELEASE_TAG }})
+        # https://github.com/docker/buildx#building
+        run: |
+            docker buildx build \
+              --tag $IMAGE_TAG \
+              --platform $PLATFORM \
+              --push \
+              .
+        env:
+          IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}
+          # All (build on the base image):
+          # - linux/386
+          # - linux/amd64
+          # - linux/arm/v5
+          # - linux/arm/v7
+          # - linux/arm64/v8
+          # - linux/ppc64le
+          # - linux/s390x
+          # Does not build:
+          # - linux/s390x
+          # - linux/mips64le
+          # No users on this platform:
+          # - linux/ppc64le
+          PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le
 
   create_release:
     name: Create release
     needs: [build-and-push-docker-image]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
 
       - name: Create release
         uses: ncipollo/release-action@v1
