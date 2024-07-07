@@ -71,7 +71,7 @@ jobs:
           # All (build on the base image):
           # - linux/386
           # - linux/amd64
-          # - linux/arm/v5
+          # - linux/arm/v6
           # - linux/arm/v7
           # - linux/arm64/v8
           # - linux/ppc64le
@@ -82,7 +82,7 @@ jobs:
           # - linux/mips64le
           # No users on this platform:
           # - linux/ppc64le
-          PLATFORM: linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64
+          PLATFORM: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64
 
   create_release:
     name: Create release
