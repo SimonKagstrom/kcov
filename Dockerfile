@@ -30,7 +30,7 @@ ADD . /src/
 RUN mkdir /src/build && \
     cd /src/build && \
     export PATH="$PATH:/usr/lib/ninja-build/bin/" && \
-    CXXFLAGS="-D__ptrace_request=int" cmake -G 'Ninja' .. && \
+    cmake -G 'Ninja' .. && \
     cmake --build . && \
     cmake --build . --target install
 
