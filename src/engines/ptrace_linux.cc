@@ -329,7 +329,7 @@ static long getRegs(pid_t pid, void *addr, void *regs, size_t len)
 	return ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov);
 #else
 	(void) len;
-	return ptrace((__ptrace_request ) PTRACE_GETREGS, pid, NULL, regs);
+	return ptrace(PTRACE_GETREGS, pid, NULL, regs);
 #endif
 }
 
@@ -361,12 +361,12 @@ static int kill_lwp(unsigned long lwpid, int signo)
 unsigned long ptrace_sys::peekWord(pid_t pid, unsigned long aligned_addr)
 {
 
-	return ptrace((__ptrace_request ) PTRACE_PEEKTEXT, pid, aligned_addr, 0);
+	return ptrace(PTRACE_PEEKTEXT, pid, aligned_addr, 0);
 }
 
 void ptrace_sys::pokeWord(pid_t pid, unsigned long aligned_addr, unsigned long value)
 {
-	ptrace((__ptrace_request ) PTRACE_POKETEXT, pid, aligned_addr, value);
+	ptrace(PTRACE_POKETEXT, pid, aligned_addr, value);
 }
 
 static long setRegs(pid_t pid, void *addr, void *regs, size_t len)
@@ -377,7 +377,7 @@ static long setRegs(pid_t pid, void *addr, void *regs, size_t len)
 	return ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov);
 #else
 	(void) len;
-	return ptrace((__ptrace_request ) PTRACE_SETREGS, pid, NULL, regs);
+	return ptrace(PTRACE_SETREGS, pid, NULL, regs);
 #endif
 }
 
