@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, armv7, aarch64, ppc64le, i386]
+        arch: [amd64, armv7, aarch64, ppc64le, riscv64, i386]
 
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
           sudo schroot -c mychroot -- ./.github/workflows/generic-build.sh ${{ matrix.arch }}
 
       - name: Build for matrix.arch == armv7, aarch64, ppc64le
-        if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' }}
+        if: ${{ matrix.arch == 'armv7' || matrix.arch == 'aarch64' || matrix.arch == 'ppc64le' || matrix.arch == 'riscv64' }}
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
