@@ -15,7 +15,7 @@ Instrumenting binaries for a target system
 ------------------------------------------
 If your binaries (with debug symbols) are in e.g., sysroot, you can instrument binaries using
 
-```
+```sh
 kcov-system --system-record /tmp/out-sysroot sysroot
 ```
 

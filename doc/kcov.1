@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH KCOV 1 "November  24, 2011"
+.TH KCOV 1 "July  8, 2024"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -19,7 +19,7 @@
 kcov \- Code coverage analysis for compiled programs and Python scripts
 .SH SYNOPSIS
 .B kcov
-.RI [ options ] " outdir executable [args-for-executable...]
+.RI [ options ] " out-dir in-file [args-for-executable...]
 .PP
 .B kcov
 .RI --merge " outdir <path-to-coverage> [path-to-more-coverage...]
@@ -41,7 +41,7 @@ Trace PID instead of executing executable (passing the executable is optional
 for this case). Under this mode, coverage collection for shared libraries will not work.
 .TP
 \fB\-l\fP, \fB\-\-limits\fP=\fIlow,high\fP
-Setup limits for low/high coverage (default: 16,50).
+Setup limits for low/high coverage (default: 25,75).
 .TP
 \fB\-\-include\-path\fP=\fIP1\fP[\fI,P2\fP...]
 Comma-separated list of paths to include in the report.
@@ -61,6 +61,9 @@ Comma-separated list of line patterns to exclude (mark as non-code)
 \fB\-\-exclude\-region\fP=\fISTART:END\fP[\fI,START1:END1\fP...]
 Comma-separated list of regions of lines patterns to exclude (mark as non-code). The region begins with START and ends with END.
 .TP
+\fB\-\-clean
+Don't accumulate data from multiple runs.
+.TP
 \fB\-\-collect\-only
 Only collect coverage data, don't produce HTML/Cobertura output.
 .TP
@@ -73,6 +76,9 @@ Merge the result of multiple kcov runs. Instead of a program to test, the output
 \fB\-\-coveralls\-id\fP=\fIid\fP
 Upload data to coveralls.io using secret repo_token or Travis CI service job ID \fIid\fP.
 The ID is taken as a repo_token if it's longer or equal to 32 characters.
+.TP
+\fB\-\-strip\-path\fP=\fIpath\fP
+If not set, max common path will be stripped away.
 .SH UNCOMMON OPTIONS
 .TP
 \fB\-\-path\-strip\-level\fP=\fIN\fP
@@ -160,7 +166,7 @@ share a subset of source files.
 .SH COBERTURA OUTPUT
 .PP
 Kcov also outputs data in the Cobertura XML format, which allows integrating kcov
-output in Jenkins (see http://cobertura.sf.net and http://jenkins-ci.org).
+output in Jenkins (see https://cobertura.github.io/cobertura/ and https://www.jenkins.io/).
 .PP
 The Cobertura output is placed in a file named out-path/exec-filename/cobertura.xml.
 .SH JSON OUTPUT

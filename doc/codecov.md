@@ -1,15 +1,15 @@
 Travis-ci / codecov integration
 ---------------------------------
-Integrating with [codecov](http://codecov.io) is easy to do. To upload data from the travis build to codecov, run kcov normally, and then upload using the codecov uploader
+Integrating with [codecov](https://codecov.io) is easy to do. To upload data from the travis build to codecov, run kcov normally, and then upload using the codecov uploader
 
-```
+```sh
 kcov /path/to/outdir executable
 bash <(curl -s https://codecov.io/bash) -s /path/to/outdir
 ```
 
 The easiest way to achieve this is to run the codecov uploader on travis success:
 
-```
+```yml
 after_success:
   - bash <(curl -s https://codecov.io/bash) -s /path/to/outdir
 ```
