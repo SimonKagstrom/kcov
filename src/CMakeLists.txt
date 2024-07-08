@@ -57,6 +57,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
             "--git-dir=${CMAKE_SOURCE_DIR}/.git"
             describe
             --abbrev=4
+            --tags
             HEAD
         OUTPUT_VARIABLE POD_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
