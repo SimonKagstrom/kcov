@@ -157,6 +157,12 @@ set (MACHO_SRCS
 )
 set (SOLIB_generated )
 
+
+# Avoid error: invalid conversion from 'int' to '__ptrace_request' on PowerPC
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_TARGET_ARCHITECTURES MATCHES "ppc64")
+    add_compile_options(-fpermissive)
+endif()
+
 # Linux-specific sources
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package (LibElf)
