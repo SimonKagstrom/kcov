@@ -1,10 +1,10 @@
 Travis-ci / coveralls integration
 ---------------------------------
-kcov is easy to integrate with [travis-ci](http://travis-ci.org) and
-[coveralls.io](http://coveralls.io). To upload data from the travis build to coveralls,
+kcov is easy to integrate with [travis-ci](https://www.travis-ci.com/) and
+[coveralls.io](https://coveralls.io). To upload data from the travis build to coveralls,
 run kcov with
 
-```
+```sh
 kcov --coveralls-id=$TRAVIS_JOB_ID /path/to/outdir executable
 ```
 

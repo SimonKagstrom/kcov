@@ -44,7 +44,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (KCOV kcov)
 
 
-# See http://eatmyrandom.blogspot.se/2010/06/automate-version-numbering-using-git.html
+# See https://eatmyrandom.blogspot.com/2010/06/automate-version-numbering-using-git.html
 if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
     find_program (GIT_EXECUTABLE NAMES git)
     if (GIT_EXECUTABLE)
@@ -57,6 +57,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
             "--git-dir=${CMAKE_SOURCE_DIR}/.git"
             describe
             --abbrev=4
+            --tags
             HEAD
         OUTPUT_VARIABLE POD_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
