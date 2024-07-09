@@ -36,8 +36,7 @@ public:
 		memset(&m_solibThread, 0, sizeof(m_solibThread));
 
 		// Only useful for ELF binaries
-		if (parser.getParserType() == "ELF" && !IConfiguration::getInstance().keyAsInt("gcov")
-				&& !IConfiguration::getInstance().keyAsInt("clang-sanitizer"))
+		if (parser.getParserType() == "ELF")
 			collector.registerEventTickListener(*this);
 	}
 

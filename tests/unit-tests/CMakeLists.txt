@@ -41,7 +41,6 @@ set (${TGT}_SRCS
     ../../src/collector.cc
     ../../src/engine-factory.cc
     ../../src/engines/system-mode-file-format.cc
-    ../../src/gcov.cc
     ../../src/output-handler.cc
     ../../src/parser-manager.cc
     ../../src/source-file-cache.cc

@@ -40,7 +40,6 @@ set (${LINE2ADDR}_SRCS
     ../src/capabilities.cc
     ../src/configuration.cc
     ../src/filter.cc
-    ../src/gcov.cc
     ../src/parsers/dwarf.cc
     ../src/parsers/elf-parser.cc
     ../src/parsers/elf.cc

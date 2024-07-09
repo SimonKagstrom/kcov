@@ -68,13 +68,14 @@ kcov --merge /tmp/merged-output /tmp/kcov-output1 /tmp/kcov-output2
 kcov --merge /tmp/merged-output /tmp/kcov-output*    # With a wildcard
 ```
 
-Use from continuous integration systems
----------------------------------------
+Integration with other systems
+------------------------------
 kcov is easy to integrate with [travis-ci](http://travis-ci.org) together with
 [coveralls.io](http://coveralls.io) or [codecov.io](http://codecov.io). It can also
 be used from Jenkins, [SonarQube](http://sonarqube.org) and [GitLab CI](http://gitlab.com).
 Refer to
 
+* [vscode](doc/vscode.md) for details about vscode + coverage gutters
 * [coveralls](doc/coveralls.md) for details about travis-ci + coveralls, or
 * [codecov](doc/codecov.md) for details about travis-ci + codecov
 * [jenkins](doc/jenkins.md) for details about how to integrate in Jenkins

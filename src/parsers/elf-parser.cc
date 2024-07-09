@@ -2,7 +2,6 @@
 #include <engine.hh>
 #include <utils.hh>
 #include <capabilities.hh>
-#include <gcov.hh>
 #include <phdr_data.h>
 #include <disassembler.hh>
 #include <elf.hh>
@@ -221,11 +220,7 @@ public:
 
 		setupSections();
 
-		// Gcov data?
-		if (IConfiguration::getInstance().keyAsInt("gcov") && !m_gcnoFiles.empty())
-			parseGcnoFiles(relocation);
-		else
-			parseOneDwarf(relocation);
+		parseOneDwarf(relocation);
 
 		return true;
 	}
@@ -251,50 +246,6 @@ public:
 		}
 
 		return true;
-	}
-
-	void parseGcnoFiles(unsigned long relocation)
-	{
-		for (FileList_t::const_iterator it = m_gcnoFiles.begin(); it != m_gcnoFiles.end(); ++it)
-		{
-			const std::string &cur = *it;
-
-			parseOneGcno(cur, relocation);
-		}
-	}
-
-	void parseOneGcno(const std::string &filename, unsigned long relocation)
-	{
-		size_t sz;
-		void *data;
-
-		// The data is freed by the parser
-		data = read_file(&sz, "%s", filename.c_str());
-		if (!data)
-			return;
-
-		// Parse this gcno file!
-		GcnoParser parser((uint8_t *) data, sz);
-
-		// Parsing error?
-		if (!parser.parse())
-		{
-			warning("Can't parse %s\n", filename.c_str());
-
-			return;
-		}
-
-		const GcnoParser::BasicBlockList_t &bbs = parser.getBasicBlocks();
-
-		for (GcnoParser::BasicBlockList_t::const_iterator it = bbs.begin(); it != bbs.end(); ++it)
-		{
-			const GcnoParser::BasicBlockMapping &cur = *it;
-
-			// Report a generated address
-			for (LineListenerList_t::const_iterator it = m_lineListeners.begin(); it != m_lineListeners.end(); ++it)
-				(*it)->onLine(cur.m_file, cur.m_line,
-						gcovGetAddress(cur.m_file, cur.m_function, cur.m_basicBlock, cur.m_index) + relocation);
-		}
 	}
 
 	void setupSections()
@@ -378,15 +329,6 @@ public:
 		for (SegmentList_t::iterator it = segments.begin(); it != segments.end(); ++it)
 			m_executableSegments.push_back(*it);
 
-		// Gcov data
-		std::vector<std::string> gcdaFiles = m_elf->getGcovGcdaFiles();
-		for (std::vector<std::string>::iterator it = gcdaFiles.begin(); it != gcdaFiles.end(); ++it)
-		{
-			for (FileListenerList_t::const_iterator lit = m_fileListeners.begin(); lit != m_fileListeners.end(); ++lit)
-				(*lit)->onFile(File(*it, IFileParser::FLG_TYPE_COVERAGE_DATA));
-		}
-
-		m_gcnoFiles = m_elf->getGcovGcnoFiles();
 		m_buildId = m_elf->getBuildId();
 
 		const std::pair<std::string, uint32_t> *dbgLink = m_elf->getDebugLink();
@@ -556,7 +498,6 @@ private:
 
 	SegmentList_t m_curSegments;
 	SegmentList_t m_executableSegments;
-	FileList_t m_gcnoFiles;
 
 	IDisassembler &m_addressVerifier;
 	bool m_verifyAddresses;
