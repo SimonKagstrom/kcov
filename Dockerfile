@@ -57,7 +57,6 @@ RUN set -eux; \
     # Make assertions
     grep -q -c '"percent_covered": "100.00"' /tmp/coverage/test-executable.sh/coverage.json; \
     grep -q -c '"total_lines": 2' /tmp/coverage/test-executable.sh/coverage.json; \
-    kcov --help --uncommon-options; \
     # Cleanup
     rm -r /tmp/coverage /tmp/test-executable.sh;
 
