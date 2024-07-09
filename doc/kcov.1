@@ -67,6 +67,9 @@ Don't accumulate data from multiple runs.
 \fB\-\-collect\-only
 Only collect coverage data, don't produce HTML/Cobertura output.
 .TP
+\fB\-\-dump\-summary
+Dump a brief coverage summary on stdout after execution
+.TP
 \fB\-\-report\-only
 Only report HTML/Cobertura output, don't collect data.
 .TP
@@ -121,6 +124,10 @@ want this behavior, this option turns that off.
 \fB\-\-bash\-parse\-files\-in\-dir\fP=\fIP1\fP[\fI,P2\fP...]
 Parse directories for bash scripts.
 .TP
+\fB\-\-bash\-tracefd\-closeexec
+Force children to not be traced by configuring the trace fd as non-cloneable with
+LD_PRELOAD. Buggy on some systems.
+.TP
 \fB\-\-replace\-src\-path\fP=\fIP1\fP:\fIP2\fP
 Replace source file path P1 with P2, if found.
 .TP
@@ -130,6 +137,18 @@ for more information on full-system instrumentation.
 .TP
 \fB\-\-system\-report
 Produce coverage output for a full-system coverage run.
+.TP
+\fB\-\-debug\fP=\fIlevel\fP
+Set the debug level, 0...31 (as a mask). Default is 0 for no debug output.
+.TP
+\fB\-\-output\-interval\fP=\fIMS\fP
+Set the output writing interval in milliseconds. The default is 5000.
+.TP
+\fB\-\-configure\fP=\fIKEY=VAL\fP
+Configure key/value pairs of internal options. See -\-help \-\-uncommon\-options for possible configuration options.
+.TP
+\fB\-\-patchelf\fP=\fPCMD\fP
+For system mode, set the patchelf command (default patchelf).
 .RE
 .SH EXAMPLES
 .PP
