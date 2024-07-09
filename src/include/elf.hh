@@ -107,10 +107,6 @@ namespace kcov
 		{
 		}
 
-		virtual const std::vector<std::string> &getGcovGcnoFiles() = 0;
-
-		virtual const std::vector<std::string> &getGcovGcdaFiles() = 0;
-
 		virtual const std::string &getBuildId() = 0;
 
 		/**

@@ -19,16 +19,6 @@ public:
 	{
 	}
 
-	virtual const std::vector<std::string> &getGcovGcdaFiles()
-	{
-		return m_gcdaFiles;
-	}
-
-	virtual const std::vector<std::string> &getGcovGcnoFiles()
-	{
-		return m_gcnoFiles;
-	}
-
 	virtual const std::string &getBuildId()
 	{
 		return m_buildId;
@@ -64,7 +54,6 @@ private:
 		Elf_Scn *scn = NULL;
 		size_t shstrndx;
 		bool ret = false;
-		bool doScanForGcda = IConfiguration::getInstance().keyAsInt("gcov");
 		unsigned int i;
 		char *raw;
 		size_t sz;
@@ -139,34 +128,6 @@ private:
 				goto out_elf_begin;
 			}
 
-			// Parse rodata to find gcda files
-			if (doScanForGcda && strcmp(name, ".rodata") == 0)
-			{
-				const char *dataPtr = (const char *) data->d_buf;
-
-				for (size_t i = 0; i < data->d_size - 5; i++)
-				{
-					const char *p = &dataPtr[i];
-
-					if (memcmp(p, (const void *) "gcda\0", 5) != 0)
-						continue;
-
-					const char *gcda = p;
-
-					// Rewind to start of string
-					while (gcda != dataPtr && *gcda != '\0')
-						gcda--;
-
-					// Rewound until start of rodata?
-					if (gcda == dataPtr)
-						continue;
-
-					std::string file(gcda + 1);
-
-					m_gcdaFiles.push_back(file);
-				}
-			}
-
 			if (sh_type == SHT_NOTE)
 			{
 				if (elfIs32Bit)
@@ -228,20 +189,6 @@ private:
 			m_segments.push_back(seg);
 		}
 
-		// If we have gcda files, try to find the corresponding gcno dittos
-		for (FileList_t::iterator it = m_gcdaFiles.begin(); it != m_gcdaFiles.end(); ++it)
-		{
-			std::string &gcno = *it; // Modify in-place
-			size_t sz = gcno.size();
-
-			// .gcda -> .gcno
-			gcno[sz - 2] = 'n';
-			gcno[sz - 1] = 'o';
-
-			if (file_exists(gcno))
-				m_gcnoFiles.push_back(gcno);
-		}
-
 		ret = true;
 
 out_elf_begin:
@@ -250,8 +197,6 @@ out_elf_begin:
 		return ret;
 	}
 
-	std::vector<std::string> m_gcnoFiles;
-	std::vector<std::string> m_gcdaFiles;
 	std::string m_buildId;
 	bool m_debugLinkValid;
 	std::pair<std::string, uint32_t> m_debugLink;

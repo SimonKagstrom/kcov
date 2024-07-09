@@ -169,7 +169,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package (LibElf)
 	find_package (ElfUtils)
 	set (ELF_SRCS
-		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
 		engines/ptrace_linux.cc
 		engines/kernel-engine.cc
@@ -187,7 +186,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	find_package (LibElf)
 	find_package (ElfUtils)
 	set (ELF_SRCS
-		engines/clang-coverage-engine.cc
 		engines/ptrace.cc
 		engines/ptrace_freebsd.cc
 		parsers/elf.cc
@@ -230,7 +228,6 @@ set (${KCOV}_SRCS
     engines/system-mode-file-format.cc
     engines/python-engine.cc
     filter.cc
-    gcov.cc
     main.cc
     merge-file-parser.cc
     output-handler.cc
@@ -249,7 +246,6 @@ set (${KCOV}_SRCS
     ${ELF_SRCS}
     ${MACHO_SRCS}
     include/capabilities.hh
-    include/gcov.hh
     include/reporter.hh
     include/collector.hh
     include/generated-data-base.hh
@@ -276,14 +272,12 @@ set (KCOV_SYSTEM_MODE_SRCS
     engines/ptrace.cc
     engines/ptrace_linux.cc
     filter.cc
-    gcov.cc
     include/capabilities.hh
     include/collector.hh
     include/configuration.hh
     include/engine.hh
     include/file-parser.hh
     include/filter.hh
-    include/gcov.hh
     include/generated-data-base.hh
     include/lineid.hh
     include/manager.hh

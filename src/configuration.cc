@@ -125,7 +125,6 @@ public:
 		{ "path-strip-level", required_argument, 0, 'S' },
 		{ "skip-solibs", no_argument, 0, 'L' },
 		{ "exit-first-process", no_argument, 0, 'F' },
-		{ "gcov", no_argument, 0, 'g' },
 		{ "clang", no_argument, 0, 'c' },
 		{ "configure", required_argument, 0, 'M' },
 		{ "clean", no_argument, 0, 'E' },
@@ -216,12 +215,6 @@ public:
 				break;
 			case 'F':
 				setKey("daemonize-on-first-process-exit", 1);
-				break;
-			case 'g':
-				setKey("gcov", 1);
-				break;
-			case 'c':
-				setKey("clang-sanitizer", 1);
 				break;
 			case 'E':
 				setKey("clean-output", 1);
@@ -572,8 +565,6 @@ public:
 		setKey("path-strip-level", 2);
 		setKey("attach-pid", 0);
 		setKey("parse-solibs", 1);
-		setKey("gcov", 0);
-		setKey("clang-sanitizer", 0);
 		setKey("clean-output", 0);
 		setKey("low-limit", 25);
 		setKey("high-limit", 75);
@@ -707,8 +698,6 @@ public:
 						" --path-strip-level=num  path levels to show for common paths (default: %d)\n"
 						"\n"
 						" --cobertura-only        Only produce cobertura output in the output dir\n"
-						" --gcov                  use gcov parser instead of DWARF debugging info\n"
-						" --clang                 use Clang Sanitizer-coverage parser\n"
 						" --dump-summary          dump a summary of coverage on stdout\n"
 						" --system-record         perform full-system instrumentation\n"
 						" --system-report         report full-system coverage data\n"
