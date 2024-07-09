@@ -224,16 +224,6 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 		return 1;
 	}
 
-	if ((parser->getParserType() == "bash" ||
-		parser->getParserType() == "python") &&
-		!conf.keyAsInt("cobertura-only"))
-	{
-		// Use the path as the hash for non-compiled languages
-		conf.setKey("target-directory",
-				fmt("%s/%s.%08zx", conf.keyAsString("out-directory").c_str(), conf.keyAsString("binary-name").c_str(),
-				std::hash<std::string>()(conf.keyAsString("binary-name").c_str())));
-	}
-
 	// Match and create an engine
 	IEngineFactory::IEngineCreator &engineCreator =
 			IEngineFactory::getInstance().matchEngine(file);

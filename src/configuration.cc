@@ -493,11 +493,26 @@ public:
 			setKey("binary-path", tmp.first);
 			binaryName = tmp.second;
 
+			setKey("binary-name", binaryName);
+
 			if (!keyAsInt("cobertura-only"))
 			{
-				setKey("target-directory",
-						fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
-								(size_t)hash_file(get_real_path(binaryPath))));
+					IFileParser *parser = IParserManager::getInstance().matchParser(binaryPath);
+
+				if (parser && (parser->getParserType() == "bash" ||
+					parser->getParserType() == "python"))
+				{
+					// Use the path as the hash for non-compiled languages
+					setKey("target-directory",
+							fmt("%s/%s.%08zx", keyAsString("out-directory").c_str(), keyAsString("binary-name").c_str(),
+							std::hash<std::string>()(keyAsString("binary-name").c_str())));
+				}
+				else
+				{
+					setKey("target-directory",
+							fmt("%s/%s.%08zx", outDirectory.c_str(), binaryName.c_str(),
+									(size_t)hash_file(get_real_path(binaryPath))));
+				}
 			}
 			else
 			{
@@ -510,8 +525,6 @@ public:
 				error("report-only selected, but the target directory %s does not exist\n", keyAsString("target-directory").c_str());
 				return usage();
 			}
-
-			setKey("binary-name", binaryName);
 
 			if (keyAsString("command-name") == "")
 				setKey("command-name", binaryName);
