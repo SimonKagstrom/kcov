@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <file-parser.hh>
 #include <filter.hh>
+#include <iostream>
 #include <libdwarf.h>
 #include <mach-o/fat.h>
 #include <mach-o/loader.h>
@@ -21,7 +22,6 @@
 #include <unistd.h>
 #include <utils.hh>
 #include <vector>
-#include <iostream>
 
 using namespace kcov;
 
@@ -45,6 +45,11 @@ private:
     bool addFile(const std::string& filename, struct phdr_data_entry* phdr_data) final
     {
         m_filename = filename;
+
+        for (const auto l : m_fileListeners)
+        {
+            l->onFile(File(m_filename, IFileParser::FLG_NONE));
+        }
 
         return true;
     }
@@ -76,10 +81,11 @@ private:
                         conf.keyAsString("binary-path").c_str(),
                         conf.keyAsString("binary-name").c_str(),
                         conf.keyAsString("binary-name").c_str());
-        if (conf.keyAsInt("is-go-binary")) {
+        if (conf.keyAsInt("is-go-binary"))
+        {
             name = fmt("%s/%s",
-                        conf.keyAsString("binary-path").c_str(),
-                        conf.keyAsString("binary-name").c_str());
+                       conf.keyAsString("binary-path").c_str(),
+                       conf.keyAsString("binary-name").c_str());
         }
 
         m_fileData = static_cast<uint8_t*>(read_file(&m_fileSize, "%s", name.c_str()));
@@ -258,9 +264,11 @@ private:
     }
 
     // Search for the "__go_buildinfo" section in the "__DATA" segment.
-    bool isGoBinary(const std::string& filename) {
+    bool isGoBinary(const std::string& filename)
+    {
         size_t read_size = 0;
-        auto full_file_content = static_cast<uint8_t*>(read_file(&read_size, "%s", filename.c_str()));
+        auto full_file_content =
+            static_cast<uint8_t*>(read_file(&read_size, "%s", filename.c_str()));
         auto hdr = reinterpret_cast<mach_header_64*>(full_file_content);
         auto cmd_ptr = full_file_content + sizeof(mach_header_64);
         for (auto i = 0; i < hdr->ncmds; i++)
@@ -268,30 +276,30 @@ private:
             auto cmd = reinterpret_cast<load_command*>(cmd_ptr);
             switch (cmd->cmd)
             {
-            case LC_SEGMENT_64:
+            case LC_SEGMENT_64: {
+                auto segment = reinterpret_cast<const struct segment_command_64*>(cmd_ptr);
+                if (strcmp(segment->segname, "__DATA") == 0)
                 {
-                    auto segment = reinterpret_cast<const struct segment_command_64*>(cmd_ptr);
-                    if (strcmp(segment->segname, "__DATA") == 0) {
-                        auto section_ptr = cmd_ptr + sizeof(struct segment_command_64);
-                        for (auto i = 0; i < segment->nsects; i++)
+                    auto section_ptr = cmd_ptr + sizeof(struct segment_command_64);
+                    for (auto i = 0; i < segment->nsects; i++)
+                    {
+                        auto section = reinterpret_cast<struct section_64*>(section_ptr);
+                        if (strcmp(section->sectname, "__go_buildinfo") == 0)
                         {
-                            auto section = reinterpret_cast<struct section_64*>(section_ptr);
-                            if (strcmp(section->sectname, "__go_buildinfo") == 0)
-                            {
-                                free((void *) full_file_content);
-                                return true;
-                            }
-                            section_ptr += sizeof(*section);
+                            free((void*)full_file_content);
+                            return true;
                         }
+                        section_ptr += sizeof(*section);
                     }
                 }
-                break;
+            }
+            break;
             default:
                 break;
             }
             cmd_ptr += cmd->cmdsize;
         }
-        free((void *) full_file_content);
+        free((void*)full_file_content);
         return false;
     }
 
@@ -308,7 +316,8 @@ private:
         if (hdr->magic == MH_MAGIC_64)
         {
             auto& conf = IConfiguration::getInstance();
-            if (!conf.keyAsInt("is-go-binary") && isGoBinary(filename)) {
+            if (!conf.keyAsInt("is-go-binary") && isGoBinary(filename))
+            {
                 conf.setKey("is-go-binary", 1);
             }
             return match_perfect;
@@ -320,11 +329,14 @@ private:
     void setupParser(IFilter* filter) final
     {
         auto& conf = IConfiguration::getInstance();
-        if (conf.keyAsInt("is-go-binary")) {
+        if (conf.keyAsInt("is-go-binary"))
+        {
             // Do nothing, because the Go linker puts dwarf info in the binary instead of a seperated dSYM file.
             // This can be removed if this proposal passed.
             // https://github.com/golang/go/issues/62577
-        } else {
+        }
+        else
+        {
             // Run dsymutil to make sure the DWARF info is avaiable
             auto dsymutil_command = fmt("dsymutil %s/%s",
                                         conf.keyAsString("binary-path").c_str(),

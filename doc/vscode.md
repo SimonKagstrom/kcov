@@ -8,7 +8,7 @@ extension when the coverage changes.
 
 To produce this output, just run
 
-```
+```sh
 kcov --cobertura-only [other options] /path/to/your/folder/.vscode /path/to/the/binary
 ```
 
