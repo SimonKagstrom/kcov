@@ -73,6 +73,7 @@ jobs:
       - name: Build and push the docker image (v${{ env.RELEASE_TAG }}/${{ matrix.BUILD_OS }})
         run: .github/workflows/docker-build.sh ${{ matrix.BUILD_OS }}
         env:
+          ACTION: push
           IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}${{ matrix.IMAGE_TAG_SUFFIX }}
           # All (build on the base image):
           # - linux/386

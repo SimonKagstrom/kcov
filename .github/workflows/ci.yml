@@ -81,7 +81,9 @@ jobs:
           .github/workflows/ci-run-tests.sh
 
   build-alpine:
-      runs-on: alpine:3.20
+      runs-on: ubuntu-22.04
+      container:
+        image: alpine:3.20
       name: Build and test Alpine executable
       steps:
       - uses: actions/checkout@v4
@@ -148,6 +150,7 @@ jobs:
     - name: Build and push the docker image (latest/${{ matrix.BUILD_OS }})
       run: .github/workflows/docker-build.sh ${{ matrix.BUILD_OS }}
       env:
+        ACTION: push
         IMAGE_TAG: kcov/kcov:latest${{ matrix.IMAGE_TAG_SUFFIX }}
         # All (build on the base image):
         # - linux/386
