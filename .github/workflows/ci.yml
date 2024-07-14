@@ -3,7 +3,7 @@ name: CI
 permissions:
   contents: read
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build-linux:
@@ -99,7 +99,7 @@ jobs:
     environment:
       name: "Docker Hub"
       url: https://hub.docker.com/r/kcov/kcov
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' or ${{ github.event_name == 'workflow_dispatch' }}
     steps:
     - uses: actions/checkout@v4
       with:
