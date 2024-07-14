@@ -77,6 +77,8 @@ RUN set -eux; \
         zlib \
         libgcc \
         libstdc++ \
+        # libbfd.so
+        binutils-dev \
     ; \
     elif [ "${BUILD_OS}" = "debian" ]; then \
     apt-get update; \
@@ -84,6 +86,7 @@ RUN set -eux; \
         libcurl4 \
         libdw1 \
         zlib1g \
+        libbfd-dev \
     ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \
