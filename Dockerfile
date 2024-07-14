@@ -100,4 +100,29 @@ RUN set -eux; \
     # Cleanup
     rm -r /tmp/coverage /tmp/test-executable.sh;
 
+# Metadata
+LABEL org.label-schema.vendor="Kcov" \
+    org.label-schema.url="https://github.com/SimonKagstrom/kcov#readme" \
+    org.label-schema.name="The docker image for kcov" \
+    org.label-schema.description="A docker image for kcov" \
+    org.label-schema.version=${RELEASE_VERSION} \
+    org.label-schema.vcs-url="https://github.com/SimonKagstrom/kcov.git" \
+    org.label-schema.vcs-ref=${VCS_REF} \
+    org.label-schema.build-date=${BUILD_DATE} \
+    org.label-schema.docker.schema-version="1.0" \
+    \
+    com.docker.extension.publisher-url="https://github.com/SimonKagstrom" \
+    \
+    org.opencontainers.image.title="The docker image for kcov" \
+    org.opencontainers.image.description="A docker image for kcov" \
+    org.opencontainers.image.authors="https://github.com/SimonKagstrom" \
+    org.opencontainers.image.url="https://github.com/SimonKagstrom/kcov#readme" \
+    org.opencontainers.image.documentation="https://github.com/SimonKagstrom/kcov#readme" \
+    org.opencontainers.image.source="https://github.com/SimonKagstrom/kcov" \
+    org.opencontainers.image.vendor="Kcov" \
+    org.opencontainers.image.licenses="GPL-2.0" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.version=${RELEASE_VERSION} \
+    org.opencontainers.image.revision=${VCS_REF}
+
 CMD ["/usr/local/bin/kcov"]

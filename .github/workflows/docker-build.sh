@@ -14,6 +14,10 @@ else
     exit 1
 fi
 
+if [ -z "${RELEASE_VERSION:-}" ]; then
+    RELEASE_VERSION="$(git describe --abbrev=4 --tags HEAD)"
+fi
+
 set -x
 
 echo "Building for: ${BUILD_OS}"
@@ -23,6 +27,7 @@ docker buildx build \
     --build-arg VCS_REF="$(git rev-parse HEAD)" \
     --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
     --build-arg BUILD_OS="${BUILD_OS}" \
+    --build-arg RELEASE_VERSION="${RELEASE_VERSION}" \
     --build-arg BUILD_BASE="${BUILD_BASE}" \
     --tag ${IMAGE_TAG:-kcov} \
     --progress ${PROGRESS_MODE:-plain} \
