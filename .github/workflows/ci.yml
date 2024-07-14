@@ -80,6 +80,33 @@ jobs:
           .github/workflows/freebsd-build.sh x86_64
           .github/workflows/ci-run-tests.sh
 
+  build-alpine:
+      runs-on: alpine:3.20
+      name: Build and test Alpine executable
+      steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies and tools
+        run: |
+          apk add --update --no-cache \
+            binutils-dev \
+            build-base \
+            cmake \
+            git \
+            curl-dev \
+            curl-static \
+            libdw \
+            openssl-dev \
+            ninja-build \
+            python3 \
+            zlib-dev \
+            elfutils-dev \
+            libstdc++-dev
+      - name: Run the tests
+        run: |
+            chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
+            .github/workflows/freebsd-build.sh x86_64
+            .github/workflows/ci-run-tests.sh
+
   build-and-push-docker-image:
     name: Build and push to Docker Hub
     needs: [build-linux, build-osx, build-freebsd]
