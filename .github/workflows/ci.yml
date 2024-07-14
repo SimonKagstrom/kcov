@@ -102,6 +102,7 @@ jobs:
             patchelf \
             binutils \
             python3 \
+            coreutils-env \
             \
             binutils-dev \
             build-base \
