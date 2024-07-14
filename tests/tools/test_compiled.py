@@ -292,6 +292,8 @@ class attach_process_with_threads(libkcov.TestCase):
             + self.binaries
             + "/issue31",
             False,
+            # 60 seconds
+            timeout=60
         )
         dom = cobertura.parseFile(self.outbase + "/kcov/issue31/cobertura.xml")
         self.skipTest("Fickle test, ignoring")
@@ -313,6 +315,8 @@ class attach_process_with_threads_creates_threads(libkcov.TestCase):
             + self.binaries
             + "/thread-test",
             False,
+            # 60 seconds
+            timeout=60
         )
         dom = cobertura.parseFile(self.outbase + "/kcov/thread-test/cobertura.xml")
         self.skipTest("Fickle test, ignoring")

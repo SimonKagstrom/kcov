@@ -26,7 +26,7 @@ class wrong_arguments(libkcov.TestCase):
 class lookup_binary_in_path(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):
-        os.environ["PATH"] += self.sources + "/tests/python"
+        os.environ["PATH"] += os.pathsep + self.sources + "/tests/python"
         noKcovRv, o = self.do(self.sources + "/tests/python/main 5")
         rv, o = self.do(self.kcov + " " + self.outbase + "/kcov " + "main 5")
 

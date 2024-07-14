@@ -18,7 +18,7 @@ For a video introduction, [look at this presentation from SwedenCPP](https://www
 
 Installing
 ----------
-Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our official Docker images:
+Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our official Docker image (`kcov/kcov`):
 
 * [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
 
@@ -27,7 +27,7 @@ How to use it
 -------------
 Basic usage is straight-forward:
 
-```
+```sh
 kcov /path/to/outdir executable [args for the executable]
 ```
 
@@ -41,7 +41,7 @@ Filtering output
 It's often useful to filter output, since e.g., /usr/include is seldom of interest.
 This can be done in two ways:
 
-```
+```sh
 kcov --exclude-pattern=/usr/include --include-pattern=part/of/path,other/path \
       /path/to/outdir executable
 ```
@@ -50,7 +50,7 @@ which will do a string-comparison and include everything which contains
 *part/of/path* or *other/path* but exclude everything that has the
 */usr/include* string in it.
 
-```
+```sh
 kcov --include-path=/my/src/path /path/to/outdir executable
 kcov --exclude-path=/usr/include /path/to/outdir executable
 ```
@@ -63,7 +63,7 @@ Kcov can also merge the results of multiple earlier runs. To use this mode,
 call kcov with `--merge`, an output path and one or more paths to an earlier
 run, e.g.,
 
-```
+```sh
 kcov --merge /tmp/merged-output /tmp/kcov-output1 /tmp/kcov-output2
 kcov --merge /tmp/merged-output /tmp/kcov-output*    # With a wildcard
 ```

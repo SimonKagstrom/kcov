@@ -3,7 +3,7 @@ name: CI
 permissions:
   contents: read
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build-linux:
@@ -87,18 +87,76 @@ jobs:
           .github/workflows/freebsd-build.sh x86_64
           .github/workflows/ci-run-tests.sh
 
+  build-alpine:
+      runs-on: ubuntu-22.04
+      container:
+        image: alpine:3.20
+        # Needed to attach to a binary
+        options: --security-opt seccomp=unconfined
+      name: Build and test Alpine executable
+      steps:
+      - uses: actions/checkout@v4
+      - name: Install tools and dependencies
+        run: |
+          apk add --update --no-cache \
+            libcurl \
+            libdw \
+            zlib \
+            libgcc \
+            libstdc++ \
+            \
+            bash \
+            patchelf \
+            binutils \
+            python3 \
+            coreutils-env \
+            \
+            binutils-dev \
+            build-base \
+            cmake \
+            git \
+            curl-dev \
+            curl-static \
+            libdw \
+            openssl-dev \
+            ninja-build \
+            python3 \
+            zlib-dev \
+            elfutils-dev \
+            libstdc++-dev
+      - name: Run the tests
+        run: |
+            chmod u+x .github/workflows/freebsd-build.sh .github/workflows/ci-run-tests.sh
+            .github/workflows/freebsd-build.sh x86_64
+            .github/workflows/ci-run-tests.sh
+
   build-and-push-docker-image:
     name: Build and push to Docker Hub
     needs: [build-linux, build-osx, build-freebsd]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {
+              BUILD_OS: "alpine",
+              IMAGE_TAG_SUFFIX: "-alpine",
+              PLATFORM: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/riscv64"
+            }
+          - {
+              BUILD_OS: "debian",
+              IMAGE_TAG_SUFFIX: "",
+              PLATFORM: "linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8"
+            }
     environment:
       name: "Docker Hub"
       url: https://hub.docker.com/r/kcov/kcov
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.ref == 'refs/heads/master' }} or ${{ github.event_name == 'workflow_dispatch' }}
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        fetch-tags: true
 
     - name: Docker Hub login
       uses: docker/login-action@v3
@@ -113,29 +171,25 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and push the docker image (latest)
-      # https://github.com/docker/buildx#building
-      run: |
-          docker buildx build \
-            --tag $IMAGE_TAG \
-            --platform $PLATFORM \
-            --push \
-            .
+    - name: Build and push the docker image (latest/${{ matrix.BUILD_OS }})
+      run: .github/workflows/docker-build.sh ${{ matrix.BUILD_OS }}
       env:
-        IMAGE_TAG: kcov/kcov:latest
-        # All (build on the base image):
+        ACTION: push
+        IMAGE_TAG: kcov/kcov:latest${{ matrix.IMAGE_TAG_SUFFIX }}
+        # All (built on the base image):
         # - linux/386
         # - linux/amd64
-        # - linux/arm/v6
+        # - linux/arm/v6 -> Only Alpine
+        # - linux/arm/v5 -> Only Debian
         # - linux/arm/v7
         # - linux/arm64/v8
         # - linux/ppc64le
         # - linux/mips64le
-        # - linux/riscv64
+        # - linux/riscv64 -> Only Alpine
         # - linux/s390x
         # Does not build:
         # - linux/s390x
         # - linux/mips64le
         # No users on this platform:
         # - linux/ppc64le
-        PLATFORM: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/riscv64
+        PLATFORM: ${{ matrix.PLATFORM }}
