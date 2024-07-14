@@ -87,10 +87,16 @@ jobs:
       name: Build and test Alpine executable
       steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies and tools
+      - name: Install tools and dependencies
         run: |
           apk add --update --no-cache \
             bash \
+            libcurl \
+            libdw \
+            zlib \
+            libgcc \
+            libstdc++ \
+            \
             binutils-dev \
             build-base \
             cmake \
