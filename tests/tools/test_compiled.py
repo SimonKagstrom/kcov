@@ -58,15 +58,6 @@ class fork_64(ForkBase):
     def runTest(self):
         self.doTest("fork")
 
-
-class fork_32(ForkBase):
-    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
-    @unittest.skipUnless(platform.machine().startswith("x86_64"), "Only for x86_64")
-    def runTest(self):
-        self.skipTest("Fickle test, ignoring")
-        self.doTest("fork-32")
-
-
 class vfork(libkcov.TestCase):
     @unittest.skipIf(
         sys.platform.startswith("darwin"),

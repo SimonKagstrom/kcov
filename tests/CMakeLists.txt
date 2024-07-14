@@ -177,12 +177,6 @@ if (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
                 "${CMAKE_CURRENT_SOURCE_DIR}/assembly/illegal-insn.S"
                 -o "${CMAKE_CURRENT_BINARY_DIR}/illegal-insn"
         )
-
-        add_custom_target (fork-32 ALL
-            COMMAND "${CMAKE_C_COMPILER}" -g -m32
-                "${CMAKE_CURRENT_SOURCE_DIR}/fork/fork.c"
-                -o "${CMAKE_CURRENT_BINARY_DIR}/fork-32"
-        )
     endif()
 endif (NOT(CMAKE_SYSTEM_NAME STREQUAL "Darwin"))
 
