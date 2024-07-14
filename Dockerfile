@@ -1,53 +1,44 @@
-FROM alpine:3.20 AS builder
+FROM debian:bookworm-slim AS builder
 
-RUN apk add --update --no-cache \
+RUN apt-get update && \
+    apt-get install -y \
         binutils-dev \
-        # Debian: build-essential
-        build-base \
+        build-essential \
         cmake \
         git \
-        # Debian: libcurl4-openssl-dev
-        curl-dev \
-        curl-static \
-        # Debian: libdw-dev
-        libdw \
-        # Debian, alpine bundled in binutils-dev
-        # libiberty-dev \
-        # Debian: libssl-dev
-        openssl-dev \
+        libcurl4-openssl-dev \
+        libdw-dev \
+        libiberty-dev \
+        libssl-dev \
         ninja-build \
         python3 \
-        # Debian: zlib1g-dev
-        zlib-dev \
-        # Debian: libelf-dev
-        elfutils-dev \
-        # Debian: libstdc++-12-dev
-        libstdc++-dev \
+        zlib1g-dev \
+        libelf-dev \
+        libstdc++-12-dev \
     ;
 
 ADD . /src/
 
 RUN mkdir /src/build && \
     cd /src/build && \
-    export PATH="$PATH:/usr/lib/ninja-build/bin/" && \
     cmake -G 'Ninja' .. && \
     cmake --build . && \
     cmake --build . --target install
 
-FROM alpine:3.20
+FROM debian:bookworm-slim
 
 COPY --from=builder /usr/local/bin/kcov* /usr/local/bin/
 COPY --from=builder /usr/local/share/doc/kcov /usr/local/share/doc/kcov
 
 RUN set -eux; \
-    apk add --update --no-cache \
-        bash \
-        libcurl \
-        libdw \
-        zlib \
-        libgcc \
-        libstdc++ \
+    apt-get update; \
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        libcurl4 \
+        libdw1 \
+        zlib1g \
     ; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
     # Write a test script
     echo -e '#!/usr/bin/env bash\nif [[ true ]]; then\necho "Hello, kcov!"\nfi' > /tmp/test-executable.sh; \
     # Test kcov
