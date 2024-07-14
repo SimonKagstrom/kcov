@@ -92,12 +92,14 @@ jobs:
       - name: Install tools and dependencies
         run: |
           apk add --update --no-cache \
-            bash \
             libcurl \
             libdw \
             zlib \
             libgcc \
             libstdc++ \
+            \
+            bash \
+            patchelf \
             \
             binutils-dev \
             build-base \
