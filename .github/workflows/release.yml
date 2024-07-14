@@ -43,11 +43,13 @@ jobs:
           include:
             - {
                 BUILD_OS: "alpine",
-                IMAGE_TAG_SUFFIX: "-alpine"
+                IMAGE_TAG_SUFFIX: "-alpine",
+                PLATFORM: "linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/riscv64"
               }
             - {
                 BUILD_OS: "debian",
-                IMAGE_TAG_SUFFIX: ""
+                IMAGE_TAG_SUFFIX: "",
+                PLATFORM: "linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8"
               }
       environment:
         name: "Docker Hub"
@@ -76,22 +78,23 @@ jobs:
         env:
           ACTION: push
           IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}${{ matrix.IMAGE_TAG_SUFFIX }}
-          # All (build on the base image):
+          # All (built on the base image):
           # - linux/386
           # - linux/amd64
-          # - linux/arm/v6
+          # - linux/arm/v6 -> Only Alpine
+          # - linux/arm/v5 -> Only Debian
           # - linux/arm/v7
           # - linux/arm64/v8
           # - linux/ppc64le
           # - linux/mips64le
-          # - linux/riscv64
+          # - linux/riscv64 -> Only Alpine
           # - linux/s390x
           # Does not build:
           # - linux/s390x
           # - linux/mips64le
           # No users on this platform:
           # - linux/ppc64le
-          PLATFORM: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/riscv64
+          PLATFORM: ${{ matrix.PLATFORM }}
 
   create_release:
     name: Create release
