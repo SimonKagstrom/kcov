@@ -84,6 +84,8 @@ jobs:
       runs-on: ubuntu-22.04
       container:
         image: alpine:3.20
+        # Needed to attach to a binary
+        options: --security-opt seccomp=unconfined
       name: Build and test Alpine executable
       steps:
       - uses: actions/checkout@v4
