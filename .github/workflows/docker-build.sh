@@ -15,7 +15,7 @@ else
 fi
 
 if [ -z "${RELEASE_VERSION:-}" ]; then
-    RELEASE_VERSION="$(git describe --abbrev=4 --tags HEAD)"
+    RELEASE_VERSION="$(git describe --abbrev=4 --tags HEAD || git describe --abbrev=4 HEAD)"
 fi
 
 set -x
