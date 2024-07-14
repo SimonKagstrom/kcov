@@ -15,12 +15,13 @@ else
 fi
 
 if [ -z "${RELEASE_VERSION:-}" ]; then
-    RELEASE_VERSION="$(git describe --abbrev=4 --tags HEAD || git describe --abbrev=4 HEAD)"
+    RELEASE_VERSION="$(git describe --abbrev=4 --tags HEAD || git describe --abbrev=4 HEAD || git rev-parse HEAD)"
 fi
 
 set -x
 
 echo "Building for: ${BUILD_OS}"
+echo "Release: ${RELEASE_VERSION}"
 
 # https://github.com/docker/buildx#building
 docker buildx build \
