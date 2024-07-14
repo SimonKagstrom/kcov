@@ -84,6 +84,18 @@ jobs:
     name: Build and push to Docker Hub
     needs: [build-linux, build-osx, build-freebsd]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {
+              BUILD_OS: "alpine",
+              IMAGE_TAG_SUFFIX: "-alpine"
+            }
+          - {
+              BUILD_OS: "debian",
+              IMAGE_TAG_SUFFIX: ""
+            }
     environment:
       name: "Docker Hub"
       url: https://hub.docker.com/r/kcov/kcov
@@ -106,16 +118,10 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and push the docker image (latest)
-      # https://github.com/docker/buildx#building
-      run: |
-          docker buildx build \
-            --tag $IMAGE_TAG \
-            --platform $PLATFORM \
-            --push \
-            .
+    - name: Build and push the docker image (latest/${{ matrix.BUILD_OS }})
+      run: .github/workflows/docker-build.sh ${{ matrix.BUILD_OS }}
       env:
-        IMAGE_TAG: kcov/kcov:latest
+        IMAGE_TAG: kcov/kcov:latest${{ matrix.IMAGE_TAG_SUFFIX }}
         # All (build on the base image):
         # - linux/386
         # - linux/amd64

@@ -37,6 +37,18 @@ jobs:
       name: Build and push to Docker Hub
       needs: [build]
       runs-on: ubuntu-latest
+      strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - {
+                BUILD_OS: "alpine",
+                IMAGE_TAG_SUFFIX: "-alpine"
+              }
+            - {
+                BUILD_OS: "debian",
+                IMAGE_TAG_SUFFIX: ""
+              }
       environment:
         name: "Docker Hub"
         url: https://hub.docker.com/r/kcov/kcov
@@ -58,16 +70,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push the docker image (${{ env.RELEASE_TAG }})
-        # https://github.com/docker/buildx#building
-        run: |
-            docker buildx build \
-              --tag $IMAGE_TAG \
-              --platform $PLATFORM \
-              --push \
-              .
+      - name: Build and push the docker image (v${{ env.RELEASE_TAG }}/${{ matrix.BUILD_OS }})
+        run: .github/workflows/docker-build.sh ${{ matrix.BUILD_OS }}
         env:
-          IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}
+          IMAGE_TAG: kcov/kcov:${{ env.RELEASE_TAG }}${{ matrix.IMAGE_TAG_SUFFIX }}
           # All (build on the base image):
           # - linux/386
           # - linux/amd64
@@ -83,7 +89,7 @@ jobs:
           # - linux/mips64le
           # No users on this platform:
           # - linux/ppc64le
-          PLATFORM: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64
+          PLATFORM: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/riscv64
 
   create_release:
     name: Create release
