@@ -64,6 +64,11 @@ FROM ${BUILD_OS}:${BUILD_BASE}
 ARG BUILD_OS
 ARG BUILD_BASE
 
+# For metadata
+ARG RELEASE_VERSION
+ARG VCS_REF
+ARG BUILD_DATE
+
 COPY --from=builder /usr/local/bin/kcov* /usr/local/bin/
 COPY --from=builder /usr/local/share/doc/kcov /usr/local/share/doc/kcov
 
