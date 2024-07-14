@@ -1,11 +1,50 @@
 cmake_minimum_required (VERSION 3.12)
 project (kcov)
 
-set (PROJECT_VERSION_MAJOR 39)
+
+# See https://eatmyrandom.blogspot.com/2010/06/automate-version-numbering-using-git.html
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    find_program (GIT_EXECUTABLE NAMES git)
+    if (GIT_EXECUTABLE)
+        message (STATUS "Found Git: ${GIT_EXECUTABLE}")
+    else (GIT_EXECUTABLE)
+        message (FATAL_ERROR "Could NOT find Git")
+    endif (GIT_EXECUTABLE)
+
+    execute_process (COMMAND "${GIT_EXECUTABLE}"
+            "--git-dir=${CMAKE_SOURCE_DIR}/.git"
+            describe
+            --abbrev=4
+            --tags
+            HEAD
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    message (STATUS "kcov version: ${POD_VERSION}")
+else (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process (COMMAND head
+            -n 1
+            "${CMAKE_SOURCE_DIR}/ChangeLog"
+        COMMAND cut -d \( -f 2
+        COMMAND cut -d \) -f 1
+        OUTPUT_VARIABLE POD_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    message (STATUS "kcov version: ${POD_VERSION} (from changelog)")
+endif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+
+# Example POD_VERSION format: v42-148-g29ae1
+string(REGEX REPLACE "v([0-9]+).*" "\\1" PROJECT_VERSION_MAJOR ${POD_VERSION})
+
+# Set the PROJECT_VERSION_MAJOR with the extracted version
+set (PROJECT_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set (PROJECT_VERSION_MINOR 0)
 set (PROJECT_VERSION_PATCH 0)
 set (PROJECT_VERSION
      "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
 
 if (POLICY CMP0042)
   # MACOSX_RPATH is enabled by default.
