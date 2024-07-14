@@ -79,6 +79,8 @@ RUN set -eux; \
         libstdc++ \
         # libbfd.so
         binutils-dev \
+        # To avoid changing the value of --python-parser
+        python3 \
     ; \
     elif [ "${BUILD_OS}" = "debian" ]; then \
     apt-get update; \
@@ -87,6 +89,8 @@ RUN set -eux; \
         libdw1 \
         zlib1g \
         libbfd-dev \
+        # To avoid changing the value of --python-parser
+        python-is-python3 \
     ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \

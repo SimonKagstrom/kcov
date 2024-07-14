@@ -100,6 +100,7 @@ jobs:
             \
             bash \
             patchelf \
+            python3 \
             \
             binutils-dev \
             build-base \
