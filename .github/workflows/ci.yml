@@ -90,6 +90,7 @@ jobs:
       - name: Install dependencies and tools
         run: |
           apk add --update --no-cache \
+            bash \
             binutils-dev \
             build-base \
             cmake \
