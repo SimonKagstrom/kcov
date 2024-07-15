@@ -7,7 +7,7 @@
 
 ## *kcov*
 Kcov is a FreeBSD/Linux/OSX code coverage tester for compiled languages, Python
-and Bash.  Kcov was originally a fork of [Bcov](http://bcov.sf.net), but has
+and Bash.  Kcov was originally a fork of [Bcov](https://bcov.sourceforge.net/), but has
 since evolved to support a large feature set in addition to that of Bcov.
 
 Kcov, like Bcov, uses DWARF debugging information for compiled programs to
@@ -70,9 +70,9 @@ kcov --merge /tmp/merged-output /tmp/kcov-output*    # With a wildcard
 
 Integration with other systems
 ------------------------------
-kcov is easy to integrate with [travis-ci](http://travis-ci.org) together with
-[coveralls.io](http://coveralls.io) or [codecov.io](http://codecov.io). It can also
-be used from Jenkins, [SonarQube](http://sonarqube.org) and [GitLab CI](http://gitlab.com).
+kcov is easy to integrate with [travis-ci](https://travis-ci.com/)/[GitHub actions](https://docs.github.com/en/actions) together with
+[coveralls.io](https://coveralls.io) or [codecov.io](https://codecov.io). It can also
+be used from [Jenkins](https://www.jenkins.io/), [SonarQube](https://sonarqube.org) and [GitLab CI](https://gitlab.com).
 Refer to
 
 * [vscode](doc/vscode.md) for details about vscode + coverage gutters
@@ -80,9 +80,10 @@ Refer to
 * [codecov](doc/codecov.md) for details about travis-ci + codecov
 * [jenkins](doc/jenkins.md) for details about how to integrate in Jenkins
 * [sonarqube](doc/sonarqube.md) for how to use kcov and sonarqube together
+* [GitHub](doc/github.md) for use with GitHub
 * [gitlab](doc/gitlab.md) for use with GitLab
 
 More information
 ----------------
 kcov is written by Simon Kagstrom <simon.kagstrom@gmail.com> and more
-information can be found at [the web page](http://simonkagstrom.github.io/kcov/index.html)
+information can be found at [the web page](https://simonkagstrom.github.io/kcov/index.html)
