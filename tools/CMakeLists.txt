@@ -11,7 +11,7 @@ option (SPECIFY_RPATH  "Specify RPATH for installed executables" OFF)
 mark_as_advanced (SPECIFY_RPATH)
 
 find_package (LibElf REQUIRED)
-find_package (Elfutils REQUIRED)
+find_package (ElfUtils REQUIRED)
 find_package (PkgConfig REQUIRED)
 find_package (Threads)
 find_package (ZLIB REQUIRED)

@@ -19,7 +19,7 @@ endif (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 find_package (LibCRPCUT REQUIRED)
 find_package (LibElf REQUIRED)
-find_package (Elfutils REQUIRED)
+find_package (ElfUtils REQUIRED)
 
 set (CMAKE_THREAD_PREFER_PTHREAD ON)
 find_package (Threads REQUIRED)
