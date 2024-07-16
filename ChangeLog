@@ -1,4 +1,24 @@
 Kcov (43):
+	* docker: Build for multiple architectures with modern debian +
+	  alpine Linux (William Desportes)
+
+	* output: Add --dump-summary to get JSON output on stdout
+
+	* tests: Update to modern Python and refactor code (Manilo Perillo)
+
+	* configuration: Improve positional argument handling (Manilo Perillo)
+
+	* FreeBSD: Don't use RLIMIT_NOFILE for bash
+
+	* python: Remove deprecated code for the helper (Manilo Perillo)
+
+	* ci: Repair builds, upgrade to newer distributions (William Desportes, Shail
+	  Patel)
+
+	* cobertura-writer: Use unique class name for newer Jenkins plugins
+
+	* Issue #408: MacOS: Support GO binaries (myzhan)
+
 	* cmake: Correct FindXXX package names
 
     -- Simon Kagstrom <simon.kagstrom@gmail.com>
