@@ -7,7 +7,10 @@ int vobb(int a)
 	a = a + 1;
 
 	if (a > 2)
+	{
+		printf("a is greater than 2\n");
 		return 1;
+	}
 
 	return 0;
 }
