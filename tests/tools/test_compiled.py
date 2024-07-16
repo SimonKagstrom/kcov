@@ -498,7 +498,7 @@ class dlopen(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "dlopen.cc", 11) == 1
         assert cobertura.hitsPerLine(dom, "dlopen.cc", 12) == 0
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
+        assert cobertura.hitsPerLine(dom, "solib.c", 15) == 0
 
 
 class dlopen_in_ignored_source_file(libkcov.TestCase):
@@ -516,7 +516,7 @@ class dlopen_in_ignored_source_file(libkcov.TestCase):
         dom = cobertura.parseFile(self.outbase + "/kcov/dlopen/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "dlopen-main.cc", 10) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert cobertura.hitsPerLine(dom, "solib.c", 12) == 0
+        assert cobertura.hitsPerLine(dom, "solib.c", 15) == 0
 
 
 class daemon_no_wait_for_last_child(libkcov.TestCase):

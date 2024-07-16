@@ -133,6 +133,8 @@ target_link_libraries(multi_fork "${M_LIBRARY}")
 
 add_executable(shared_library_test ${shared_library_test_SRCS})
 target_link_libraries(shared_library_test shared_library)
+# This doesn't appear to work, unfortunately, but will be needed for the --skip-solibs test
+set_target_properties (shared_library_test PROPERTIES POSITION_INDEPENDENT_CODE False)
 
 add_executable(argv_dependent ${argv_dependent_SRCS})
 add_executable(test_popen ${test_popen_SRCS})

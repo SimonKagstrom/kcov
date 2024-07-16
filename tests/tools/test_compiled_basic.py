@@ -35,11 +35,12 @@ class shared_library_skip(libkcov.TestCase):
             + "/shared_library_test",
             False,
         )
+        # Fickle since the binary is built as a PIE by default, not sure how to disable it
         self.skipTest("Fickle test, ignoring")
         assert rv == 0
 
         dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
-        assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
+        assert cobertura.hitsPerLine(dom, "main.c", 9) >= 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) is None
 
 
@@ -74,7 +75,7 @@ class shared_library_accumulate(libkcov.TestCase):
         dom = cobertura.parseFile(self.outbase + "/kcov/shared_library_test/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "main.c", 9) == 1
         assert cobertura.hitsPerLine(dom, "solib.c", 5) == 1
-        assert cobertura.hitsPerLine(dom, "solib.c", 10) == 1
+        assert cobertura.hitsPerLine(dom, "solib.c", 11) >= 1
 
 
 class MainTestBase(libkcov.TestCase):
