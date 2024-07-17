@@ -33,15 +33,3 @@ class lookup_binary_in_path(libkcov.TestCase):
         dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "second.py", 34) == 2
         assert noKcovRv, rv
-
-
-# Issue #414
-class outdir_is_executable(libkcov.TestCase):
-    def runTest(self):
-        # Running a system executable on Linux may cause ptrace to fails with
-        # "Operation not permitted", even with ptrace_scope set to 0.
-        # See https://www.kernel.org/doc/Documentation/security/Yama.txt
-        executable = self.sources + "/tests/python/short-test.py"
-        rv, o = self.do(self.kcov + " echo " + executable)
-
-        assert rv == 0

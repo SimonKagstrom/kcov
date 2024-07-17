@@ -45,6 +45,7 @@ jobs:
           distro: ubuntu22.04
           run: |
             .github/workflows/generic-build.sh ${{ matrix.arch }}
+            .github/workflows/ci-run-tests.sh --no-ptrace
 
   build-osx:
     name: Build OSX executable (macos-latest)

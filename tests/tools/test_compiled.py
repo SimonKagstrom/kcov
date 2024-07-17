@@ -572,3 +572,15 @@ class address_sanitizer_coverage(libkcov.TestCase):
 
         assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 22) == 0
         assert cobertura.hitsPerLine(dom, "sanitizer-coverage.c", 25) == 0
+
+
+# Issue #414
+class outdir_is_executable(libkcov.TestCase):
+    def runTest(self):
+        # Running a system executable on Linux may cause ptrace to fails with
+        # "Operation not permitted", even with ptrace_scope set to 0.
+        # See https://www.kernel.org/doc/Documentation/security/Yama.txt
+        executable = self.sources + "/tests/python/short-test.py"
+        rv, o = self.do(self.kcov + " echo " + executable)
+
+        assert rv == 0

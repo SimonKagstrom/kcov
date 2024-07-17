@@ -90,7 +90,7 @@ def to_fnmatch(pattern):
     return pattern
 
 
-def addTests(config, patterns):
+def addTests(config, args, patterns):
     """Add all the kcov test modules.
 
     Discovery is not possible, since some modules need to be excluded,
@@ -100,20 +100,25 @@ def addTests(config, patterns):
     test_loader = TestLoader(config, patterns)
 
     test_loader.add_tests_from_module("test_basic")
-    test_loader.add_tests_from_module("test_compiled_basic")
+    if not args.no_ptrace:
+        test_loader.add_tests_from_module("test_compiled_basic")
 
     if platform.machine() in ["x86_64", "i386", "i686"]:
-        test_loader.add_tests_from_module("test_compiled")
+        if not args.no_ptrace:
+            test_loader.add_tests_from_module("test_compiled")
     if sys.platform.startswith("linux"):
         test_loader.add_tests_from_module("test_bash_linux_only")
 
         if platform.machine() in ["x86_64", "i386", "i686"]:
-            test_loader.add_tests_from_module("test_system_mode")
+            if not args.no_ptrace:
+                test_loader.add_tests_from_module("test_system_mode")
 
-    test_loader.add_tests_from_module("test_accumulate")
+    if not args.no_ptrace:
+        test_loader.add_tests_from_module("test_accumulate")
     test_loader.add_tests_from_module("test_bash")
     test_loader.add_tests_from_module("test_filter")
-    test_loader.add_tests_from_module("test_python")
+    if not args.no_ptrace:
+        test_loader.add_tests_from_module("test_python")
 
     return test_loader.tests
 
@@ -189,6 +194,14 @@ def parse_args():
         help="Randomize the execution order of tests",
     )
 
+    parser.add_argument(
+        "--no-ptrace",
+        dest="no_ptrace",
+        action="store_true",
+        help="Don't run tests which require ptrace",
+    )
+
+
     # TODO: The --duration argument was added in 3.12.
 
     # kcov test runner custom options
@@ -205,7 +218,7 @@ def main():
 
     # Loads and configure tests
     config = Config(args.kcov, args.outbase, args.binaries, args.sources)
-    tests = addTests(config, args.patterns)
+    tests = addTests(config, args, args.patterns)
 
     if args.shuffle:
         random.shuffle(tests)

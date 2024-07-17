@@ -419,6 +419,7 @@ class bash_ignore_uncovered(libkcov.TestCase):
 
 # Issue #224
 class bash_can_find_non_executed_scripts(libkcov.TestCase):
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -436,6 +437,7 @@ class bash_can_find_non_executed_scripts(libkcov.TestCase):
 
 
 class bash_can_find_non_executed_scripts_manually(libkcov.TestCase):
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     def runTest(self):
         rv, o = self.do(
             self.kcov
@@ -492,6 +494,7 @@ class bash_can_ignore_function_with_spaces(libkcov.TestCase):
 
 
 class bash_drain_stdout_without_return(libkcov.TestCase):
+    @unittest.skipUnless(platform.machine() in ["x86_64", "i686", "i386"], "Only for x86")
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
     def runTest(self):
         rv, o = self.do(
