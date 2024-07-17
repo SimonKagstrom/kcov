@@ -113,10 +113,12 @@ def addTests(config, args, patterns):
             if not args.no_ptrace:
                 test_loader.add_tests_from_module("test_system_mode")
 
-    test_loader.add_tests_from_module("test_accumulate")
+    if not args.no_ptrace:
+        test_loader.add_tests_from_module("test_accumulate")
     test_loader.add_tests_from_module("test_bash")
     test_loader.add_tests_from_module("test_filter")
-    test_loader.add_tests_from_module("test_python")
+    if not args.no_ptrace:
+        test_loader.add_tests_from_module("test_python")
 
     return test_loader.tests
 
