@@ -34,7 +34,7 @@ Fedora / Centos / RHEL
 ----------------------
 Install elfutils-libelf-devel libcurl-devel binutils-devel elfutils-devel
 
-Mac OS X
+Mac OS
 --------
 Install dependencies:
 
@@ -42,7 +42,7 @@ Install dependencies:
 brew install zlib bash cmake pkgconfig dwarfutils openssl
 ```
 
-OSX build instructions (see Issue #166 / Issue #357):
+Mac OS build instructions (see Issue #166 / Issue #357):
 
 Create an empty build dir and do the following steps (adjust openssl path, can also be in /opt):
 

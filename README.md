@@ -6,7 +6,7 @@
 [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=simon.kagstrom%40gmail%2ecom&lc=US&item_name=Simon%20Kagstrom&item_number=kcov&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted) [![Github All Releases](https://img.shields.io/github/downloads/atom/atom/total.svg)](https://github.com/SimonKagstrom/kcov/)
 
 ## *kcov*
-Kcov is a FreeBSD/Linux/OSX code coverage tester for compiled languages, Python
+Kcov is a FreeBSD/Linux/Mac OS code coverage tester for compiled languages, Python
 and Bash.  Kcov was originally a fork of [Bcov](https://bcov.sourceforge.net/), but has
 since evolved to support a large feature set in addition to that of Bcov.
 
