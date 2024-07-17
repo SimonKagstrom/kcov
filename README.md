@@ -22,6 +22,7 @@ Refer to the [INSTALL](INSTALL.md) file for build instructions, or use our offic
 
 * [kcov/kcov](https://hub.docker.com/r/kcov/kcov/) for releases since v31.
 
+Docker images and usage is explained more [in the docker page](doc/docker.md).
 
 How to use it
 -------------
