@@ -21,7 +21,7 @@ Kcov (43):
 
 	* cmake: Correct FindXXX package names
 
-    -- Simon Kagstrom <simon.kagstrom@gmail.com>
+    -- Simon Kagstrom <simon.kagstrom@gmail.com>, Tue Jul 23 20:30:40 CEST 2024
 
 
 Kcov (42):
