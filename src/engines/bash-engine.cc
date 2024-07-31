@@ -619,7 +619,7 @@ private:
 				continue;
 
 			// While, if, switch endings
-			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then" || s == "}" || s == "{")
+			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then" || s == "}" || s == "{" || s == ")" || s == "(")
 				continue;
 
 			// Functions
@@ -682,6 +682,10 @@ private:
 
 			// Empty braces
 			if ((s[0] == '{' || s[0] == '}') && s.size() == 1)
+				continue;
+
+			// Empty parentheses
+			if ((s[0] == '(' || s[0] == ')') && s.size() == 1)
 				continue;
 
 			// While, if, switch endings
