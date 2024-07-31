@@ -512,3 +512,48 @@ class bash_drain_stdout_without_return(libkcov.TestCase):
         )
         self.assertIsNone(cobertura.hitsPerLine(dom, "long-output-without-return.sh", 1))
         self.assertEqual(32768, cobertura.hitsPerLine(dom, "long-output-without-return.sh", 4))
+
+
+# Issue 457
+class bash_heredoc_with_space(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 184) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 185) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 186) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 187) is None
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 189) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 190) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 191) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 192) is None
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 194) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 195) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 196) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 197) is None
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 199) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 200) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 201) is None
+        assert cobertura.hitsPerLine(dom, "shell-main", 202) is None
+
+
+class bash_subshell_function(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/subshell.sh"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/subshell.sh/cobertura.xml")
+
+        assert cobertura.hitsPerLine(dom, "subshell.sh", 12) is None
+        assert cobertura.hitsPerLine(dom, "subshell.sh", 13) == 1
+        assert cobertura.hitsPerLine(dom, "subshell.sh", 14) is None
+
+        assert cobertura.hitsPerLine(dom, "subshell.sh", 16) == 1
