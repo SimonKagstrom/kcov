@@ -178,3 +178,25 @@ booknames=`sqlplus -S -R 3 "$LOGON_STR" <<-EOF
        exit;
 EOF`
 echo $booknames
+
+# Issue 457
+
+cat << EOF
+foo
+bar
+EOF
+
+cat << "EOF"
+foo
+bar
+EOF
+
+cat <<- EOF
+foo
+bar
+EOF
+
+cat <<- "EOF"
+foo
+bar
+EOF

@@ -619,7 +619,7 @@ private:
 				continue;
 
 			// While, if, switch endings
-			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then" || s == "}" || s == "{")
+			if (s == "esac" || s == "fi" || s == "do" || s == "done" || s == "else" || s == "then" || s == "}" || s == "{" || s == ")" || s == "(")
 				continue;
 
 			// Functions
@@ -682,6 +682,10 @@ private:
 
 			// Empty braces
 			if ((s[0] == '{' || s[0] == '}') && s.size() == 1)
+				continue;
+
+			// Empty parentheses
+			if ((s[0] == '(' || s[0] == ')') && s.size() == 1)
 				continue;
 
 			// While, if, switch endings
@@ -756,8 +760,17 @@ private:
 				if (!arithmeticActive && s.find("let ") != 0 && s.find("$((") == std::string::npos
 						&& s.find("))") == std::string::npos && heredocStart != std::string::npos)
 				{
-					// Skip << and remove spaces before and after "EOF"
-					heredocMarker = trim_string(s.substr(heredocStart + 2, s.size()));
+					// Skip <<
+					heredocMarker = s.substr(heredocStart + 2, s.size());
+
+					if (heredocMarker[0] == '-')
+					{
+						// '-' marks tab-suppression in heredoc
+						heredocMarker = heredocMarker.substr(1);
+					}
+
+					// Remove spaces before and after "EOF"
+					heredocMarker = trim_string(heredocMarker);
 
 					// Make sure the heredoc marker is a word
 					for (unsigned int i = 0; i < heredocMarker.size(); i++)
@@ -767,12 +780,6 @@ private:
 							heredocMarker = heredocMarker.substr(0, i);
 							break;
 						}
-					}
-
-					if (heredocMarker[0] == '-')
-					{
-						// '-' marks tab-suppression in heredoc
-						heredocMarker = heredocMarker.substr(1);
 					}
 
 					if (heredocMarker.length() > 2 && (heredocMarker[0] == '"' || heredocMarker[0] == '\'')
