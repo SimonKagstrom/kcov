@@ -1,0 +1,4 @@
+kcov: GPL-2.0-only
+handlebars.js: MIT
+tablesorter (mottie): GPL-2.0-only OR MIT
+jquery: MIT
