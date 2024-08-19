@@ -79,7 +79,7 @@ set (KCOV_INSTALL_DOCDIR "share/doc/kcov" CACHE STRING "Install destination for 
 set (KCOV_INSTALL_MANDIR "share/man" CACHE STRING "Install destination for man documentation")
 mark_as_advanced (KCOV_INSTALL_BINDIR KCOV_INSTALL_DOCDIR KCOV_INSTALL_MANDIR)
 
-install (FILES ChangeLog COPYING COPYING.externals
+install (FILES ChangeLog COPYING COPYING.spdx
          DESTINATION "${KCOV_INSTALL_DOCDIR}")
 
 # ====================================
