@@ -39,7 +39,7 @@ Mac OS
 Install dependencies:
 
 ```sh
-brew install zlib bash cmake pkgconfig dwarfutils openssl
+brew install zlib bash cmake pkgconfig dwarfutils openssl ninja
 ```
 
 Mac OS build instructions (see Issue #166 / Issue #357):
@@ -48,7 +48,7 @@ Create an empty build dir and do the following steps (adjust openssl path, can a
 
 ```sh
   cd <build-dir>
-  cmake -G make -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib <path/to/kcov/source/dir>
+  cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) <path/to/kcov/source/dir>
   make
 ```
 

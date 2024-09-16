@@ -7,7 +7,7 @@ run () {
   mkdir build build-tests
 
   cd build
-  cmake -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCMAKE_INSTALL_PREFIX=/usr/local .. || exit 64
+  cmake -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCMAKE_INSTALL_PREFIX=/usr/local .. || exit 64
   make || exit 64
   make install || exit 64
   cd ..
