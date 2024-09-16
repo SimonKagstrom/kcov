@@ -199,7 +199,10 @@ public:
 			if (usePS4)
 			{
 				doSetenv(fmt("BASH_ENV=%s", helperPath.c_str()));
-				doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
+				if (m_bashSupportsXtraceFd)
+				{
+					doSetenv(fmt("BASH_XTRACEFD=%d", xtraceFd));
+				}
 			}
 			else
 			{
