@@ -78,7 +78,8 @@ public:
 			return false;
 		}
 
-		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
+		const std::string command = path_to_executable(conf.keyAsString("bash-command"));
+		m_bashSupportsXtraceFd = bashCanHandleXtraceFd(command);
 
 		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
 		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
@@ -165,7 +166,6 @@ public:
 				xtraceFd = rlim.rlim_cur / 4;
 #endif
 			}
-			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");
 
 			// Revert to stderr if this bash version can't handle BASH_XTRACE
@@ -228,7 +228,7 @@ public:
 			char **vec;
 			int argcStart = 1;
 			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
-			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
+			vec[0] = xstrdup(command.c_str());
 
 			for (unsigned i = 0; i < argc; i++)
 				vec[argcStart + i] = xstrdup(argv[i]);
@@ -505,12 +505,12 @@ private:
 		free(curLine);
 	}
 
-	bool bashCanHandleXtraceFd()
+	bool bashCanHandleXtraceFd(std::string bash_executable)
 	{
 		FILE *fp;
 		bool out = false;
 		IConfiguration &conf = IConfiguration::getInstance();
-		std::string cmd = conf.keyAsString("bash-command") + " -c 'echo \"$BASH_VERSION\"'";
+		std::string cmd = bash_executable + " -c 'echo \"$BASH_VERSION\"'";
 
 		/* Has input via stderr been forced regardless of bash version?
 		 * Basically for testing only
