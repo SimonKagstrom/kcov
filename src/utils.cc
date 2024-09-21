@@ -331,16 +331,10 @@ bool file_exists(const std::string &path)
 
 bool executable_exists_in_path(const std::string &executableName)
 {
-	// Return boolean based on whether we found an executable or not
-	return path_to_executable(executableName) != "";
-}
-
-std::string path_to_executable(const std::string &executableName)
-{
 	// Full path to it
 	if (file_exists(executableName))
 	{
-		return executableName;
+		return true;
 	}
 
 	std::string path = getenv("PATH");
@@ -354,11 +348,11 @@ std::string path_to_executable(const std::string &executableName)
 
 		if (file_exists(cur))
 		{
-			return cur;
+			return true;
 		}
 	}
 
-	return "";
+	return false;
 }
 
 void mock_read_file(void *(*callback)(size_t *out_size, const char *path))

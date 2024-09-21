@@ -78,8 +78,15 @@ public:
 			return false;
 		}
 
-		const std::string command = path_to_executable(conf.keyAsString("bash-command"));
-		m_bashSupportsXtraceFd = bashCanHandleXtraceFd(command);
+		const std::string command = conf.keyAsString("bash-command");
+		if (!executable_exists_in_path(command))
+		{
+			error("Cannot find Bash parser '%s'", command.c_str());
+
+			return false;
+		}
+
+		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
 
 		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
 		std::string helperDebugTrapPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper-debug-trap.sh";
@@ -234,7 +241,7 @@ public:
 				vec[argcStart + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
-			if (execv(vec[0], vec))
+			if (execvp(vec[0], vec))
 			{
 				perror("Failed to execute script");
 
@@ -505,12 +512,12 @@ private:
 		free(curLine);
 	}
 
-	bool bashCanHandleXtraceFd(std::string bash_executable)
+	bool bashCanHandleXtraceFd()
 	{
 		FILE *fp;
 		bool out = false;
 		IConfiguration &conf = IConfiguration::getInstance();
-		std::string cmd = bash_executable + " -c 'echo \"$BASH_VERSION\"'";
+		std::string cmd = conf.keyAsString("bash-command") + " -c 'echo \"$BASH_VERSION\"'";
 
 		/* Has input via stderr been forced regardless of bash version?
 		 * Basically for testing only
