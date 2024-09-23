@@ -14,6 +14,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process (COMMAND "${GIT_EXECUTABLE}"
             "--git-dir=${CMAKE_SOURCE_DIR}/.git"
             describe
+            --always
             --abbrev=4
             --tags
             HEAD
