@@ -78,6 +78,14 @@ public:
 			return false;
 		}
 
+		const std::string command = conf.keyAsString("bash-command");
+		if (!executable_exists_in_path(command))
+		{
+			error("Cannot find Bash parser '%s'", command.c_str());
+
+			return false;
+		}
+
 		m_bashSupportsXtraceFd = bashCanHandleXtraceFd();
 
 		std::string helperPath = IOutputHandler::getInstance().getBaseDirectory() + "bash-helper.sh";
@@ -165,7 +173,6 @@ public:
 				xtraceFd = rlim.rlim_cur / 4;
 #endif
 			}
-			const std::string command = conf.keyAsString("bash-command");
 			bool usePS4 = conf.keyAsInt("bash-use-ps4");
 
 			// Revert to stderr if this bash version can't handle BASH_XTRACE
@@ -228,13 +235,13 @@ public:
 			char **vec;
 			int argcStart = 1;
 			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
-			vec[0] = xstrdup(conf.keyAsString("bash-command").c_str());
+			vec[0] = xstrdup(command.c_str());
 
 			for (unsigned i = 0; i < argc; i++)
 				vec[argcStart + i] = xstrdup(argv[i]);
 
 			/* Execute the script */
-			if (execv(vec[0], vec))
+			if (execvp(vec[0], vec))
 			{
 				perror("Failed to execute script");
 

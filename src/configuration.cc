@@ -572,7 +572,7 @@ public:
 #ifdef __FreeBSD__
 		setKey("bash-command", "/usr/local/bin/bash");
 #else
-		setKey("bash-command", "/bin/bash");
+		setKey("bash-command", "bash");
 #endif
 		setKey("kernel-coverage-path", "/sys/kernel/debug/kprobe-coverage");
 		setKey("path-strip-level", 2);
