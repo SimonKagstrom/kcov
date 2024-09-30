@@ -96,16 +96,25 @@ public:
 			const char **argv = conf.getArgv();
 			unsigned int argc = conf.getArgc();
 
-			std::string s = fmt("%s %s ", command.c_str(), kcov_python_path.c_str());
-			for (unsigned int i = 0; i < argc; i++)
-				s += "'" + std::string(argv[i]) + "' ";
+			// Make a copy of the vector, with python + helper script first
+			char **vec;
+			int argcStart = 2;
+			vec = (char **) xmalloc(sizeof(char *) * (argc + 3));
+			vec[0] = xstrdup(command.c_str());
+			vec[1] = xstrdup(kcov_python_path.c_str());
 
-			int res;
+			for (unsigned i = 0; i < argc; i++)
+				vec[argcStart + i] = xstrdup(argv[i]);
 
-			res = system(s.c_str());
-			panic_if(res < 0, "Can't execute python helper");
+			/* Execute the script */
+			if (execvp(vec[0], vec))
+			{
+				perror("Failed to execute python helper");
 
-			exit(WEXITSTATUS(res));
+				free(vec);
+
+				return false;
+			}
 		}
 		else if (m_child < 0)
 		{

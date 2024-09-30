@@ -190,3 +190,14 @@ class python_tricky_single_dict_assignment(libkcov.TestCase):
         dom = cobertura.parseFile(self.outbase + "/kcov/main/cobertura.xml")
         assert cobertura.hitsPerLine(dom, "second.py", 57) == 1
         assert cobertura.hitsPerLine(dom, "second.py", 61) == 1
+
+
+class python_single_quote_arg(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/python/echo.py 1 two a'b"
+        )
+
+        assert b"1" in o
+        assert b"two" in o
+        assert b"a'b" in o
