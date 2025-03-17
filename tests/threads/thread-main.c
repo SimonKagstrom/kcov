@@ -11,7 +11,7 @@ void *thread_cb(void *ptr)
 	return NULL;
 }
 
-void* real_thread_create()
+void* real_thread_create(void *ptr)
 {
 	pthread_t thr;
 	int i;
