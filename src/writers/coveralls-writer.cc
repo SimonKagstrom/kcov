@@ -8,6 +8,9 @@
 #include <utils.hh>
 
 #include <string>
+#include <vector>
+#include <array>
+#include <cstdio>
 #include <list>
 #include <unordered_map>
 #include <iostream>
@@ -17,6 +20,29 @@
 #include <string.h>
 
 #include "writer-base.hh"
+
+static std::vector<std::string> run_command(const std::string& command)
+{
+	std::array<char, 128> buffer;
+	std::vector<std::string> stdoutLines;
+
+	FILE* pipe = popen(command.c_str(), "r");
+
+	if (!pipe) {
+		std::cerr << "[run_command] Failed calling popen()\n";
+		return stdoutLines;
+	}
+
+	while(fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
+		std::string line(buffer.data());
+		if (line.empty()) continue;
+		if (line.back() == '\n') line.pop_back();
+		stdoutLines.push_back(line);
+	}
+
+	pclose(pipe);
+	return stdoutLines;
+}
 
 using namespace kcov;
 
@@ -121,6 +147,7 @@ public:
 
 	void onStartup()
 	{
+        m_gitInfo = getGitInfoMap();
 	}
 
 	void onStop()
@@ -160,15 +187,33 @@ public:
 			out << " \"service_name\": \"" + conf.keyAsString("coveralls-service-name") + "\",\n";
 			out << " \"service_job_id\": \"" + id + "\",\n";
 		}
+
+		if (!m_gitInfo.empty())
+		{
+			out << " \"git\": {\n  \"head\": {\n";
+			out << "   \"id\": \"" + m_gitInfo["commitHash"] + "\",\n";
+			out << "   \"author_name\": \"" + m_gitInfo["authorName"] + "\",\n";
+			out << "   \"author_email\": \"" + m_gitInfo["authorEmail"] + "\",\n";
+			out << "   \"committer_name\": \"" + m_gitInfo["committerName"] + "\",\n";
+			out << "   \"committer_email\": \"" + m_gitInfo["committerEmail"] + "\",\n";
+			out << "   \"message\": \"" + m_gitInfo["commitMessage"] + "\"\n";
+			out << "  },\n";
+			out << "  \"branch\": \"" + m_gitInfo["gitBranch"] + "\"\n";
+			out << " },\n";
+		}
+
 		out << " \"source_files\": [\n";
 		setupCommonPaths();
-		
+
 		std::string strip_path = conf.keyAsString("strip-path");
 		if (strip_path.size() == 0)
 		{
 			setupCommonPaths();
 			strip_path = m_commonPath + "/";
 		}
+
+		if (!m_gitInfo.empty() && !m_gitInfo["gitRootPath"].empty())
+            strip_path = m_gitInfo["gitRootPath"] + "/";
 
 		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -236,7 +281,30 @@ private:
 		return str.size() >= 32;
 	}
 
+	std::unordered_map<std::string, std::string> getGitInfoMap()
+	{
+	    std::unordered_map<std::string, std::string> gitInfoMap;
+
+		auto optionalGitInfo = run_command("git log -1 --pretty=format:'%H%n%aN%n%aE%n%cN%n%cE%n%s'");
+		auto optionalGitBranch = run_command("git rev-parse --abbrev-ref HEAD");
+		auto optionalGitRootPath = run_command("git rev-parse --show-toplevel");
+		if (6 != optionalGitInfo.size())
+		    return gitInfoMap;
+
+		gitInfoMap["commitHash"] = optionalGitInfo[0];
+		gitInfoMap["authorName"] = optionalGitInfo[1];
+		gitInfoMap["authorEmail"] = optionalGitInfo[2];
+		gitInfoMap["committerName"] = optionalGitInfo[3];
+		gitInfoMap["committerEmail"] = optionalGitInfo[4];
+		gitInfoMap["commitMessage"] = optionalGitInfo[5];
+		gitInfoMap["gitBranch"] = !optionalGitBranch.empty() ? optionalGitBranch.front() : "";
+		gitInfoMap["gitRootPath"] = !optionalGitRootPath.empty() ? optionalGitRootPath.front() : "";
+
+		return gitInfoMap;
+	}
+
 	bool m_doWrite;
+	std::unordered_map<std::string, std::string> m_gitInfo;
 };
 
 namespace kcov
