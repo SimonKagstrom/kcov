@@ -8,8 +8,8 @@ find_path (DWARFUTILS_INCLUDE_DIR
     NAMES
         libdwarf.h
     PATHS
-        /usr/local/opt/dwarfutils/include/libdwarf-0/
-        /opt/homebrew/opt/dwarfutils/include/libdwarf-0/
+        /usr/local/opt/dwarfutils/include/libdwarf-2/
+        /opt/homebrew/opt/dwarfutils/include/libdwarf-2/
     ENV CPATH)
 
 find_library (DWARFUTILS_LIBRARY
