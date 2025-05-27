@@ -27,7 +27,7 @@ Ubuntu / Debian
 Install
 
 ```sh
-apt-get install binutils-dev libssl-dev libcurl4-openssl-dev libelf-dev libstdc++-12-dev zlib1g-dev libdw-dev libiberty-dev
+apt-get install binutils-dev cmake libssl-dev libcurl4-openssl-dev libelf-dev libstdc++-12-dev zlib1g-dev libdw-dev libiberty-dev
 ```
 
 Fedora / Centos / RHEL
