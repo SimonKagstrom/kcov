@@ -21,12 +21,16 @@
 
 #include "writer-base.hh"
 
-static std::vector<std::string> run_command(const std::string& command)
+static std::vector<std::string> run_command(const std::string& command, bool stderr_enabled = true)
 {
 	std::array<char, 128> buffer;
 	std::vector<std::string> stdoutLines;
 
-	FILE* pipe = popen(command.c_str(), "r");
+	std::string full_command = command;
+	if (!stderr_enabled)
+		full_command += " 2>/dev/null";
+
+	FILE* pipe = popen(full_command.c_str(), "r");
 
 	if (!pipe) {
 		std::cerr << "[run_command] Failed calling popen()\n";
@@ -147,7 +151,7 @@ public:
 
 	void onStartup()
 	{
-        m_gitInfo = getGitInfoMap();
+		m_gitInfo = getGitInfoMap();
 	}
 
 	void onStop()
@@ -213,7 +217,7 @@ public:
 		}
 
 		if (!m_gitInfo.empty() && !m_gitInfo["gitRootPath"].empty())
-            strip_path = m_gitInfo["gitRootPath"] + "/";
+			strip_path = m_gitInfo["gitRootPath"] + "/";
 
 		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -283,13 +287,18 @@ private:
 
 	std::unordered_map<std::string, std::string> getGitInfoMap()
 	{
-	    std::unordered_map<std::string, std::string> gitInfoMap;
+		std::unordered_map<std::string, std::string> gitInfoMap;
+
+		// check whether we are inside a git work tree before collecting git metadata
+		auto insideWorkTree = run_command("git rev-parse --is-inside-work-tree", false);
+		if (insideWorkTree.size() != 1 || insideWorkTree[0] != "true")
+			return gitInfoMap;
 
 		auto optionalGitInfo = run_command("git log -1 --pretty=format:'%H%n%aN%n%aE%n%cN%n%cE%n%s'");
 		auto optionalGitBranch = run_command("git rev-parse --abbrev-ref HEAD");
 		auto optionalGitRootPath = run_command("git rev-parse --show-toplevel");
 		if (6 != optionalGitInfo.size())
-		    return gitInfoMap;
+			return gitInfoMap;
 
 		gitInfoMap["commitHash"] = optionalGitInfo[0];
 		gitInfoMap["authorName"] = optionalGitInfo[1];
