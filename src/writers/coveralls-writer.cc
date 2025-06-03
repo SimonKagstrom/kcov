@@ -21,12 +21,12 @@
 
 #include "writer-base.hh"
 
-static std::vector<std::string> run_command(const std::string& command)
+static std::vector<std::string> run_command_silent_stderr(const std::string& command)
 {
 	std::array<char, 128> buffer;
 	std::vector<std::string> stdoutLines;
 
-	FILE* pipe = popen(command.c_str(), "r");
+	FILE* pipe = popen((command + " 2>/dev/null").c_str(), "r");
 
 	if (!pipe) {
 		std::cerr << "[run_command] Failed calling popen()\n";
@@ -147,7 +147,7 @@ public:
 
 	void onStartup()
 	{
-        m_gitInfo = getGitInfoMap();
+		m_gitInfo = getGitInfoMap();
 	}
 
 	void onStop()
@@ -213,7 +213,7 @@ public:
 		}
 
 		if (!m_gitInfo.empty() && !m_gitInfo["gitRootPath"].empty())
-            strip_path = m_gitInfo["gitRootPath"] + "/";
+			strip_path = m_gitInfo["gitRootPath"] + "/";
 
 		unsigned int filesLeft = m_files.size();
 		for (FileMap_t::const_iterator it = m_files.begin();
@@ -283,11 +283,11 @@ private:
 
 	std::unordered_map<std::string, std::string> getGitInfoMap()
 	{
-	    std::unordered_map<std::string, std::string> gitInfoMap;
+		std::unordered_map<std::string, std::string> gitInfoMap;
 
-		auto optionalGitInfo = run_command("git log -1 --pretty=format:'%H%n%aN%n%aE%n%cN%n%cE%n%s'");
-		auto optionalGitBranch = run_command("git rev-parse --abbrev-ref HEAD");
-		auto optionalGitRootPath = run_command("git rev-parse --show-toplevel");
+		auto optionalGitInfo = run_command_silent_stderr("git log -1 --pretty=format:'%H%n%aN%n%aE%n%cN%n%cE%n%s'");
+		auto optionalGitBranch = run_command_silent_stderr("git rev-parse --abbrev-ref HEAD");
+		auto optionalGitRootPath = run_command_silent_stderr("git rev-parse --show-toplevel");
 		if (6 != optionalGitInfo.size())
 		    return gitInfoMap;
 
