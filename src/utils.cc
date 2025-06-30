@@ -587,9 +587,9 @@ const std::string &get_real_path(const std::string &path)
 	rp = ::realpath(path.c_str(), NULL);
 
 	if (!rp)
-		return path;
-
-	realPathCache[path] = rp;
+		realPathCache[path] = path;
+	else
+		realPathCache[path] = rp;
 	free(rp);
 
 	return realPathCache[path];
