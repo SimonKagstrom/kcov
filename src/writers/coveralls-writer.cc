@@ -86,21 +86,15 @@ public:
 	{
 		m_writtenData = "";
 
-		struct curl_httppost *formpost = NULL;
-		struct curl_httppost *lastptr = NULL;
 		CURLcode res;
 
-		curl_formadd(&formpost,
-				&lastptr,
-				CURLFORM_COPYNAME, "json_file",
-				CURLFORM_FILE, fileName.c_str(),
-				CURLFORM_END);
-
-		curl_easy_setopt(m_curl, CURLOPT_HTTPPOST, formpost);
-
+		curl_mime *mime = curl_mime_init(m_curl);
+		curl_mimepart *mimePart = curl_mime_addpart(mime);
+		curl_mime_name(mimePart, "json_file");
+		curl_mime_filedata(mimePart, fileName.c_str());
+		curl_easy_setopt(m_curl, CURLOPT_MIMEPOST, mime);
 		res = curl_easy_perform(m_curl);
-
-		curl_formfree(formpost);
+		curl_mime_free(mime);
 
 		if (res != CURLE_OK)
 			return false;
