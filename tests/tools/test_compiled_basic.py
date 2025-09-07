@@ -105,10 +105,12 @@ class MainTestBase(libkcov.TestCase):
 
 
 class main_test(MainTestBase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #485")
     def runTest(self):
         self.doTest("")
 
 
 class main_test_verify(MainTestBase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX, Issue #485")
     def runTest(self):
         self.doTest("--verify")

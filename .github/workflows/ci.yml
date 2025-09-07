@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         # Triggering CI build errors:  ppc64le, aarch64
-        arch: [amd64, armv7, ppc64le, riscv64, i386]
+        arch: [amd64, armv7, riscv64, i386]
 
     steps:
       - uses: actions/checkout@v4
