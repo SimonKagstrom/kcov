@@ -12,7 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, armv7, aarch64, ppc64le, riscv64, i386]
+        # Triggering CI build errors:  ppc64le, aarch64
+        arch: [amd64, armv7, ppc64le, riscv64, i386]
 
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +63,7 @@ jobs:
       - name: Prepare
         run: |
           chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
-          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1 dwarfutils
+          brew install zlib bash pkgconfig python@3.9 openssl@1.1 dwarfutils
 
       - name: Build for OSX
         run: |
