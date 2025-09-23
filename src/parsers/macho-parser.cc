@@ -27,7 +27,11 @@ using namespace kcov;
 
 namespace
 {
-
+static void dwarf_error_handler(Dwarf_Error error, Dwarf_Ptr userData)
+{
+    char *msg = dwarf_errmsg(error);
+    printf("Dwarf ERROR: %s\n", msg);
+}
 class MachoParser : public IFileParser
 {
 public:
@@ -127,20 +131,13 @@ private:
         }
 
         // Parse DWARF
-        auto intfc = std::make_unique<Dwarf_Obj_Access_Interface_a>();
-
-        intfc->ai_object = static_cast<void*>(this);
-        intfc->ai_methods = &dwarfCb_object_access_methods;
 
         Dwarf_Debug dbg;
         Dwarf_Error err;
-        auto ret = dwarf_object_init_b(
-            intfc.get(),
-            [](Dwarf_Error err, Dwarf_Ptr errarg) { panic("DWARF error: %s", dwarf_errmsg(err)); },
-            nullptr,
-            0,
-            &dbg,
-            &err);
+
+        constexpr auto kPathLen = 400;
+        char pathbuf[kPathLen];
+        auto ret = dwarf_init_path(name.c_str(),pathbuf,kPathLen,DW_GROUPNUMBER_ANY, dwarf_error_handler, 0, &dbg,&err);
         if (ret != DW_DLV_OK)
         {
             error("Failed to init DWARF: %s", dwarf_errmsg(err));
@@ -174,10 +171,12 @@ private:
 
             Dwarf_Small table_count = 0;
             Dwarf_Line_Context line_context = NULL;
+            Dwarf_Unsigned version = 0;
 
-            ret = dwarf_srclines_b(cu_die, nullptr, &table_count, &line_context, &err);
+            ret = dwarf_srclines_b(cu_die, &version, &table_count, &line_context, &err);
             if (ret != DW_DLV_OK)
             {
+                printf("ERROR: %s\n", dwarf_errmsg(err));
                 continue;
             }
 
@@ -375,150 +374,6 @@ private:
     }
 
     // libdwarf callbacks for the class
-    Dwarf_Unsigned dwarfCb_do_object_access_get_section_count() const
-    {
-        return m_dwarfSections.size();
-    }
-
-    int dwarfCb_object_access_get_section_info(Dwarf_Unsigned section_index,
-                                               Dwarf_Obj_Access_Section_a* ret_scn,
-                                               int* error)
-    {
-        if (section_index >= m_dwarfSections.size())
-        {
-            *error = DW_DLE_MDE;
-            return DW_DLV_ERROR;
-        }
-
-        auto sec = m_dwarfSections[section_index];
-        sec->sectname[1] = '.';
-        ret_scn->as_size = sec->size;
-        ret_scn->as_addr = sec->addr;
-        ret_scn->as_name = sec->sectname + 1;
-        if (strcmp(ret_scn->as_name, ".debug_pubnames__DWARF") == 0)
-        {
-            ret_scn->as_name = ".debug_pubnames";
-        }
-
-        ret_scn->as_link = 0;
-        ret_scn->as_entrysize = 0;
-
-        return DW_DLV_OK;
-    }
-
-    int dwarfCb_object_access_load_section(Dwarf_Unsigned section_index,
-                                           Dwarf_Small** section_data,
-                                           int* error)
-    {
-        if (section_index >= m_dwarfSections.size())
-        {
-            *error = DW_DLE_MDE;
-            return DW_DLV_ERROR;
-        }
-
-        auto sec = m_dwarfSections[section_index];
-
-        // Does not handle FAT binaries, which has an arch offset
-        m_readPtr = m_fileData + sec->offset;
-        auto data = static_cast<uint8_t*>(xmalloc(sec->size));
-        memcpy(data, m_readPtr, sec->size);
-
-        *section_data = data;
-        m_readPtr += sec->size;
-
-        return DW_DLV_OK;
-    }
-
-    Dwarf_Small dwarfCb_object_access_get_length_size() const
-    {
-        return 4;
-    }
-
-    Dwarf_Small dwarfCb_object_access_get_pointer_size() const
-    {
-        return 8;
-    }
-
-    Dwarf_Unsigned dwarfCb_object_access_get_file_size() const
-    {
-        return m_fileSize;
-    }
-
-
-    // --- The implementation of libdwarf callbacks --
-    static Dwarf_Small staticDwarfCb_object_access_get_byte_order(void* obj_in)
-    {
-        // Little endian always
-        return 0;
-    }
-
-    static Dwarf_Unsigned staticDwarfCb_object_access_get_section_count(void* obj_in)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_do_object_access_get_section_count();
-    }
-
-    static int staticDwarfCb_object_access_get_section_info(void* obj_in,
-                                                            Dwarf_Unsigned section_index,
-                                                            Dwarf_Obj_Access_Section_a* ret_scn,
-                                                            int* error)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_object_access_get_section_info(section_index, ret_scn, error);
-    }
-
-    static int staticDwarfCb_object_access_load_section(void* obj_in,
-                                                        Dwarf_Unsigned section_index,
-                                                        Dwarf_Small** section_data,
-                                                        int* error)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_object_access_load_section(section_index, section_data, error);
-    }
-
-    static int staticDwarfCb_object_relocate_a_section(void* obj_in,
-                                                       Dwarf_Unsigned section_index,
-                                                       Dwarf_Debug dbg,
-                                                       int* error)
-    {
-        return DW_DLV_NO_ENTRY;
-    }
-
-    static Dwarf_Small staticDwarfCb_object_access_get_length_size(void* obj_in)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_object_access_get_length_size();
-    }
-
-    static Dwarf_Small staticDwarfCb_object_access_get_pointer_size(void* obj_in)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_object_access_get_pointer_size();
-    }
-
-    static Dwarf_Unsigned staticDwarfCb_object_access_get_file_size(void* obj_in)
-    {
-        auto pThis = static_cast<MachoParser*>(obj_in);
-
-        return pThis->dwarfCb_object_access_get_file_size();
-    }
-
-    static constexpr Dwarf_Obj_Access_Methods_a dwarfCb_object_access_methods = {
-        staticDwarfCb_object_access_get_section_info,
-        staticDwarfCb_object_access_get_byte_order,
-        staticDwarfCb_object_access_get_length_size,
-        staticDwarfCb_object_access_get_pointer_size,
-        staticDwarfCb_object_access_get_file_size,
-        staticDwarfCb_object_access_get_section_count,
-        staticDwarfCb_object_access_load_section,
-        staticDwarfCb_object_relocate_a_section,
-    };
-
 
     std::vector<ILineListener*> m_lineListeners;
     std::vector<IFileListener*> m_fileListeners;
