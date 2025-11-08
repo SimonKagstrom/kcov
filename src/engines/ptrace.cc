@@ -58,6 +58,12 @@ static unsigned long arch_setupBreakpoint(unsigned long addr, unsigned long old_
 	unsigned long shift = 8 * offs;
 
 	val = (old_data & ~(0xffffffffUL << shift)) | (0x002a0004UL << shift); /* break 0x4 */
+#elif defined(__sparc__) && defined(__arch64__)
+	unsigned long aligned_addr = getAligned(addr);
+	unsigned long offs = addr - aligned_addr;
+	unsigned long shift = 8 * offs;
+
+	val = (old_data & ~(0xffffffffUL << shift)) | (0x91d02001UL << shift); /* ta 0x01 */
 #else
 # error Unsupported architecture
 #endif

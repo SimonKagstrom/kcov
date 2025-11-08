@@ -20,7 +20,7 @@
 enum
 {
 	i386_EIP = 12, x86_64_RIP = 16, ppc_NIP = 32, arm_PC = 15, aarch64_PC = 32, // See Linux arch/arm64/include/asm/ptrace.h
-	riscv_EPC = 0, loongarch_ERA = 33
+	riscv_EPC = 0, loongarch_ERA = 33, sparc64_TPC = 2
 };
 
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs);
@@ -41,7 +41,7 @@ static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 	regs[i386_EIP]--;
 #elif defined(__x86_64__)
 	regs[x86_64_RIP]--;
-#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv) || defined(__loongarch__)
+#elif defined(__powerpc__) || defined(__arm__) || defined(__aarch64__) || defined(__riscv) || defined(__loongarch__) || (defined(__sparc__) && defined(__arch64__))
 	// Do nothing
 #else
 # error Unsupported architecture
@@ -66,6 +66,8 @@ static unsigned long arch_getPcFromRegs(unsigned long *regs)
 	out = regs[riscv_EPC];
 #elif defined(__loongarch__)
 	out = regs[loongarch_ERA];
+#elif defined(__sparc__) && defined(__arch64__)
+	out = regs[sparc64_TPC];
 #else
 # error Unsupported architecture
 #endif
@@ -405,8 +407,10 @@ void ptrace_sys::skipInstruction(pid_t pid)
 	regs[aarch64_PC] += 4;
 # elif defined(__arm__)
 	regs[arm_PC] += 4;
-# else
+# elif defined(__loongarch__)
 	regs[loongarch_ERA] += 4;
+# elif defined(__sparc__) && defined(__arch64__)
+	regs[sparc64_TPC] += 4;
 # endif
 	setRegs(pid, NULL, regs, sizeof regs);
 #endif
