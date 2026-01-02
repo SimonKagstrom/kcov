@@ -99,6 +99,8 @@ static void force_breakpoint(void)
 			"ebreak\n"
 #elif defined(__loongarch__)
 			"break 0x4\n"
+#elif defined(__sparc__) && defined(__arch64__)
+			"ta 0x01\n"
 #else
 # error Unsupported architecture
 #endif

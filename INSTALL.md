@@ -49,7 +49,7 @@ Create an empty build dir and do the following steps (adjust openssl path, can a
 ```sh
   cd <build-dir>
   cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) <path/to/kcov/source/dir>
-  make
+  ninja
 ```
 
 The binary will be `src/Release/kcov`
