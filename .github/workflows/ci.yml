@@ -134,7 +134,7 @@ jobs:
 
   build-and-push-docker-image:
     name: Build and push to Docker Hub
-    needs: [build-linux, build-osx, build-freebsd]
+    needs: [build-linux, build-osx, build-freebsd, build-alpine]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
