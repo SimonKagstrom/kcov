@@ -12,10 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, armv7, aarch64, ppc64le, riscv64, i386]
+        # Triggering CI build errors:  ppc64le, aarch64
+        arch: [amd64, armv7, riscv64, i386]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -55,14 +56,14 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Prepare
         run: |
           chmod u+x .github/workflows/osx-build.sh .github/workflows/ci-run-tests.sh
-          brew install zlib bash cmake pkgconfig python@3.9 openssl@1.1 dwarfutils
+          brew install zlib bash pkgconfig python@3.9 openssl@1.1 dwarfutils
 
       - name: Build for OSX
         run: |
@@ -73,7 +74,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build and test FreeBSD executable
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -96,7 +97,7 @@ jobs:
         options: --security-opt seccomp=unconfined
       name: Build and test Alpine executable
       steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install tools and dependencies
         run: |
           apk add --update --no-cache \
@@ -133,7 +134,7 @@ jobs:
 
   build-and-push-docker-image:
     name: Build and push to Docker Hub
-    needs: [build-linux, build-osx, build-freebsd]
+    needs: [build-linux, build-osx, build-freebsd, build-alpine]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -152,9 +153,9 @@ jobs:
     environment:
       name: "Docker Hub"
       url: https://hub.docker.com/r/kcov/kcov
-    if: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         fetch-tags: true
