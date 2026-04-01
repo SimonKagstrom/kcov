@@ -125,6 +125,7 @@ add_library(shared_library SHARED
 add_executable(main-tests ${main_tests_SRCS})
 add_executable(fork ${fork_SRCS})
 add_executable(fork_no_wait ${fork_no_wait_SRCS})
+add_executable(fork_crash fork/fork-crash.c)
 add_executable(vfork fork/vfork.c)
 add_executable(signals ${signals_SRCS})
 

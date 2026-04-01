@@ -210,6 +210,16 @@ class signals_self(SignalsBase):
         self.doTest()
 
 
+class fork_crash(libkcov.TestCase):
+    @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX")
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/fork_crash",
+            False,
+        )
+        assert rv != 0
+
+
 class signals_crash(libkcov.TestCase):
     @unittest.skipIf(sys.platform.startswith("darwin"), "Not for OSX (macho-parser for now)")
     def runTest(self):
@@ -218,12 +228,14 @@ class signals_crash(libkcov.TestCase):
             False,
         )
         assert b"kcov: Process exited with signal 11" in o
+        assert rv == 11
 
         rv, o = self.do(
             self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/signals abrt self",
             False,
         )
         assert b"kcov: Process exited with signal 6" in o
+        assert rv == 6
 
 
 class collect_and_report_only(libkcov.TestCase):

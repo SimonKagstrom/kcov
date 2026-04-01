@@ -18,8 +18,8 @@ class Collector : public ICollector,
 {
 public:
 	Collector(IFileParser &fileParser, IEngine &engine, IFilter &filter) :
-			m_fileParser(fileParser), m_engine(engine), m_exitCode(-1), m_filter(
-					filter)
+			m_fileParser(fileParser), m_engine(engine), m_exitCode(-1),
+					m_signalExit(false), m_filter(filter)
 	{
 		m_fileParser.registerLineListener(*this);
 	}
@@ -136,6 +136,7 @@ private:
 #endif
 						);
 			m_exitCode = ev.data;
+			m_signalExit = true;
 			break;
 
 		case ev_exit_first_process:
@@ -154,7 +155,8 @@ private:
 			m_exitCode = ev.data;
 			break;
 		case ev_exit:
-			m_exitCode = ev.data;
+			if (!m_signalExit)
+				m_exitCode = ev.data;
 			break;
 		case ev_breakpoint:
 			for (ListenerList_t::const_iterator it = m_listeners.begin();
@@ -187,6 +189,7 @@ private:
 	ListenerList_t m_listeners;
 	EventTickListenerList_t m_eventTickListeners;
 	int m_exitCode;
+	bool m_signalExit;
 
 	IFilter &m_filter;
 };
