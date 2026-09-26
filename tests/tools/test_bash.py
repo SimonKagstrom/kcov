@@ -305,6 +305,20 @@ class bash_stderr_redirection(libkcov.TestCase):
         assert b"kcov" not in o
 
 
+class bash_multiline_trace_not_printed(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov
+            + " "
+            + self.outbase
+            + "/kcov "
+            + self.sources
+            + "/tests/bash/multiline-trace.sh"
+        )
+
+        assert b"nomatch" not in o
+
+
 class bash_dollar_var_replacement(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(

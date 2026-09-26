@@ -298,7 +298,12 @@ public:
 		size_t kcovStr = cur.find("kcov@");
 		if (kcovStr == std::string::npos)
 		{
-			fprintf(stderr, "%s", cur.c_str());
+			// With BASH_XTRACEFD, the pipe only carries trace output. A line without
+			// a marker is part of a multi-line trace entry, or traced with a different
+			// PS4. Otherwise the pipe is also the script's stderr, and this may be the
+			// script's own output.
+			if (!m_bashSupportsXtraceFd)
+				fprintf(stderr, "%s", cur.c_str());
 			return true;
 		}
 		m_inputType = getInputType(cur);
