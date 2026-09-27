@@ -218,3 +218,6 @@ echo "after subscript left shift"
 # Bash traces this assignment as $'line\n\'quoted\'', with escaped quotes
 ansi_c_quote=$(printf "line\n\047quoted\047")
 echo "after ansi-c quote"
+
+# Arguments must reach #!/bin/sh scripts unchanged
+`dirname $0`/sh-shebang-args.sh first

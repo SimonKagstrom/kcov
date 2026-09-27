@@ -17,6 +17,21 @@ class bash_sh_shebang(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "sh-shebang.sh", 4) == 1
 
 
+class bash_sh_shebang_arguments(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov
+            + " --bash-handle-sh-invocation "
+            + self.outbase
+            + "/kcov "
+            + self.sources
+            + "/tests/bash/shell-main"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "sh-shebang-args.sh", 4) == 1
+
+
 class bash_exit_before_child(libkcov.TestCase):
     def runTest(self):
         # kcovKcov shouldn't wait for the background process, so call it with kcovKcov = False
