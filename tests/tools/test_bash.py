@@ -568,6 +568,17 @@ class bash_subscript_left_shift_is_not_heredoc(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 216) == 1
 
 
+class bash_ansi_c_quote_with_escaped_single_quote(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 220) == 1
+
+
 class bash_subshell_function(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(

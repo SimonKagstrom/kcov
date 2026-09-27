@@ -551,6 +551,17 @@ private:
 		for(std::string::size_type i = 0; i < str.size(); ++i) {
 			if (str[i] == '\\' && out == INPUT_NORMAL)
 				i++;
+			else if (str[i] == '$' && out == INPUT_NORMAL &&
+					i + 1 < str.size() && str[i + 1] == '\'') {
+				// ANSI-C quoted $'...' strings may contain escaped single
+				// quotes (\'). Bash produces these with ansic_quote(), so
+				// they never span lines and every embedded quote is
+				// escaped. Skip ahead to the closing quote.
+				for (i += 2; i < str.size() && str[i] != '\''; ++i) {
+					if (str[i] == '\\')
+						i++;
+				}
+			}
 			else if (str[i] == '\'')
 				out = (out == INPUT_NORMAL ? INPUT_SINGLE_QUOTE : INPUT_NORMAL);
 		}
