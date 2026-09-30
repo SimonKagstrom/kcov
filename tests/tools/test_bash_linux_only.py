@@ -32,6 +32,20 @@ class bash_sh_shebang_arguments(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "sh-shebang-args.sh", 4) == 1
 
 
+class bash_sh_shebang_no_untraced_ps4(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov
+            + " --bash-handle-sh-invocation "
+            + self.outbase
+            + "/kcov "
+            + self.sources
+            + "/tests/bash/shell-main"
+        )
+
+        assert b"is not an integer" not in o
+
+
 class bash_exit_before_child(libkcov.TestCase):
     def runTest(self):
         # kcovKcov shouldn't wait for the background process, so call it with kcovKcov = False
