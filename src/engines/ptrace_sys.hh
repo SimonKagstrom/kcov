@@ -12,6 +12,8 @@ bool eventIsNewChild(int signal, int event);
 int follow_child(pid_t pid);
 int follow_fork(pid_t pid);
 int get_current_cpu(void);
+// Get the entry address of the process' executable as loaded, or 0 if unknown
+unsigned long get_entry_address(pid_t pid);
 // Get the event that caused a trap.  The event is opaque to the caller.
 int getEvent(pid_t pid, int status);
 unsigned long getPc(int pid);

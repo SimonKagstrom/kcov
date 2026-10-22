@@ -45,6 +45,10 @@ public:
 		// This will set all breakpoints
 		m_fileParser.parse();
 
+		// The solib library reports where the main file was loaded, so without it, ask the engine
+		if (!IConfiguration::getInstance().keyAsInt("parse-solibs"))
+			m_fileParser.setMainFileRelocation(m_engine.getMainFileRelocation());
+
 		while (1)
 		{
 			bool shouldContinue = m_engine.continueExecution();

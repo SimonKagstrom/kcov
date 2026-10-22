@@ -105,6 +105,7 @@ public:
 	bool start(IEventListener &listener, const std::string &executable)
 	{
 		m_listener = &listener;
+		m_executable = executable;
 
 		m_parentCpu = ptrace_sys::get_current_cpu();
 		ptrace_sys::tie_process_to_cpu(getpid(), m_parentCpu);
@@ -303,6 +304,32 @@ public:
 		return m_children.size() > 0 && m_children.find(m_firstChild) != m_children.end();
 	}
 
+	unsigned long getMainFileRelocation()
+	{
+		size_t sz;
+		unsigned char *data = (unsigned char *) peek_file(&sz, "%s", m_executable.c_str());
+		unsigned long fileEntry = 0;
+
+		if (!data)
+			return 0;
+
+		// The process' auxiliary vector is only in our format for ELFs of our word size
+		if (sizeof(unsigned long) == 8 && sz >= sizeof(Elf64_Ehdr) && data[EI_CLASS] == ELFCLASS64)
+			fileEntry = ((Elf64_Ehdr *) data)->e_entry;
+		else if (sizeof(unsigned long) == 4 && sz >= sizeof(Elf32_Ehdr) && data[EI_CLASS] == ELFCLASS32)
+			fileEntry = ((Elf32_Ehdr *) data)->e_entry;
+		free(data);
+
+		unsigned long loadedEntry = ptrace_sys::get_entry_address(m_firstChild);
+
+		if (!fileEntry || !loadedEntry)
+			return 0;
+
+		kcov_debug(ENGINE_MSG, "PT main file entry 0x%lx loaded at 0x%lx\n", fileEntry, loadedEntry);
+
+		return loadedEntry - fileEntry;
+	}
+
 	/**
 	 * Continue execution with an event
 	 */
@@ -466,6 +493,7 @@ private:
 	pid_t m_child;
 	pid_t m_firstChild;
 	ChildMap_t m_children;
+	std::string m_executable;
 
 	int m_parentCpu;
 

@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <sys/auxv.h>
 #include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
@@ -302,6 +303,28 @@ static int linux_proc_get_tgid(pid_t lwpid)
 int ptrace_sys::get_current_cpu(void)
 {
 	return sched_getcpu();
+}
+
+unsigned long ptrace_sys::get_entry_address(pid_t pid)
+{
+	unsigned long entry = 0;
+	unsigned long auxv[2];
+	FILE *fp = fopen(fmt("/proc/%d/auxv", pid).c_str(), "r");
+
+	if (!fp)
+		return 0;
+
+	while (fread(auxv, sizeof(auxv), 1, fp) == 1 && auxv[0] != AT_NULL)
+	{
+		if (auxv[0] == AT_ENTRY)
+		{
+			entry = auxv[1];
+			break;
+		}
+	}
+	fclose(fp);
+
+	return entry;
 }
 
 int ptrace_sys::getEvent(pid_t pid, int status)
