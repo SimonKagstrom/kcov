@@ -155,6 +155,7 @@ target_link_libraries(dlopen "${DL_LIBRARY}")
 
 add_executable(s short-file.c)
 add_executable(fork+exec fork/fork+exec.c)
+add_executable(exec_affinity fork/exec-affinity.c)
 
 add_executable(thread-test threads/thread-main.c)
 target_link_libraries(thread-test ${CMAKE_THREAD_LIBS_INIT})

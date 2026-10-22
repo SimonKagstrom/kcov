@@ -35,6 +35,9 @@ static int linux_proc_pid_is_stopped(pid_t pid);
 static int linux_proc_get_tgid(pid_t lwpid);
 static long setRegs(pid_t pid, void *addr, void *regs, size_t len);
 
+static const int max_cpu = 4096;
+static cpu_set_t *saved_cpu_affinity;
+
 static void arch_adjustPcAfterBreakpoint(unsigned long *regs)
 {
 #if defined(__i386__)
@@ -162,7 +165,7 @@ static int attachLwp(int lwpid)
 
 	if (rv < 0)
 		return errno;
-	ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
+	ptrace(PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC);
 
 	if (!linux_proc_pid_is_stopped(lwpid))
 	{
@@ -212,6 +215,11 @@ bool ptrace_sys::eventIsForky(int signal, int event)
 	return (signal == SIGTRAP && (event == PTRACE_EVENT_CLONE || event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK));
 }
 
+bool ptrace_sys::eventIsExec(int signal, int event)
+{
+	return (signal == SIGTRAP && event == PTRACE_EVENT_EXEC);
+}
+
 bool ptrace_sys::eventIsNewChild(int signal, int event)
 {
 	return false;
@@ -224,7 +232,7 @@ int ptrace_sys::follow_child(pid_t pid)
 
 int ptrace_sys::follow_fork(pid_t pid)
 {
-	return ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK);
+	return ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC);
 }
 
 /* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
@@ -416,12 +424,26 @@ void ptrace_sys::skipInstruction(pid_t pid)
 #endif
 }
 
+void ptrace_sys::restore_cpu_affinity(pid_t pid)
+{
+	// Not fatal, the process might already be gone
+	if (saved_cpu_affinity)
+		sched_setaffinity(pid, CPU_ALLOC_SIZE(max_cpu), saved_cpu_affinity);
+}
+
+void ptrace_sys::save_cpu_affinity(void)
+{
+	if (!saved_cpu_affinity)
+		saved_cpu_affinity = CPU_ALLOC(max_cpu);
+	panic_if(!saved_cpu_affinity, "Can't allocate CPU set!\n");
+	panic_if(sched_getaffinity(0, CPU_ALLOC_SIZE(max_cpu), saved_cpu_affinity) < 0, "Can't get CPU affinity");
+}
+
 void ptrace_sys::tie_process_to_cpu(pid_t pid, int cpu)
 {
 	// Switching CPU while running will cause icache
 	// conflicts. So let's just forbid that.
 
-	int max_cpu = 4096;
 	cpu_set_t *set = CPU_ALLOC(max_cpu);
 	panic_if(!set, "Can't allocate CPU set!\n");
 	CPU_ZERO_S(CPU_ALLOC_SIZE(max_cpu), set);

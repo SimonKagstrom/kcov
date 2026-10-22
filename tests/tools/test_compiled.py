@@ -85,6 +85,23 @@ class popen_test(libkcov.TestCase):
         assert b"popen OK" in o
 
 
+class exec_restores_cpu_affinity(libkcov.TestCase):
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Only for Linux")
+    def runTest(self):
+        cpus = len(os.sched_getaffinity(0))
+        if cpus < 2:
+            self.skipTest("Needs more than one CPU")
+
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.binaries + "/exec_affinity",
+            False,
+        )
+        assert rv == 0
+
+        # kcov pins the traced program to one CPU, but a program it execs gets back the affinity kcov started with
+        assert b"%d" % cpus in o.splitlines()
+
+
 class short_filename(libkcov.TestCase):
     @unittest.expectedFailure
     def runTest(self):

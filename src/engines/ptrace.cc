@@ -107,6 +107,7 @@ public:
 		m_listener = &listener;
 
 		m_parentCpu = ptrace_sys::get_current_cpu();
+		ptrace_sys::save_cpu_affinity();
 		ptrace_sys::tie_process_to_cpu(getpid(), m_parentCpu);
 
 		m_instructionMap.clear();
@@ -228,6 +229,13 @@ public:
 			else if (ptrace_sys::eventIsForky(sig, event))
 			{
 				kcov_debug(ENGINE_MSG, "PT fork/clone at 0x%llx for %d\n", (unsigned long long) out.addr, m_activeChild);
+				out.data = 0;
+			}
+			else if (ptrace_sys::eventIsExec(sig, event))
+			{
+				// The new program isn't going to have any of our breakpoints, so we can restore it back to the CPU affinity kcov started with
+				kcov_debug(ENGINE_MSG, "PT exec for %d\n", m_activeChild);
+				ptrace_sys::restore_cpu_affinity(m_activeChild);
 				out.data = 0;
 			}
 			else if (sig == SIGTRAP || sig == SIGSTOP || sig == sigill)
