@@ -8,6 +8,7 @@
 #include <phdr_data.h>
 #include <generated-data-base.hh>
 
+#include <memory>
 #include <mutex>
 #include <vector>
 #include <unordered_map>
@@ -138,8 +139,11 @@ public:
 
 	void solibThreadParse()
 	{
-                auto buf_ = std::vector<uint8_t>(1024 * 1024 * 100);
-		uint8_t* buf = buf_.data();
+		// Not zero-initialized: this runs again for every process that reports its solibs
+		// (each program a traced process execs), and zeroing all of it each time is slow
+		const size_t bufSize = 1024 * 1024 * 100;
+		auto buf_ = std::unique_ptr<uint8_t[]>(new uint8_t[bufSize]);
+		uint8_t* buf = buf_.get();
 
 		m_solibFd = ::open(m_solibPath.c_str(), O_RDONLY);
 		m_solibThreadValid = true;
@@ -149,13 +153,13 @@ public:
 
 		while (1)
 		{
-			int r = read(m_solibFd, buf, buf_.size());
+			int r = read(m_solibFd, buf, bufSize);
 
 			// The destructor will close m_solibFd, so we'll exit here in that case
 			if (r <= 0)
 				break;
 
-			panic_if((unsigned )r >= buf_.size(), "Too much solib data read");
+			panic_if((unsigned )r >= bufSize, "Too much solib data read");
 
 			struct phdr_data *p = phdr_data_unmarshal(buf);
 
