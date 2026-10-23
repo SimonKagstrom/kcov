@@ -63,6 +63,12 @@ ptrace_sys::eventIsForky(int signal, int event)
 }
 
 bool
+ptrace_sys::eventIsExec(int signal, int event)
+{
+	return (signal == SIGTRAP && (event & PL_FLAG_EXEC));
+}
+
+bool
 ptrace_sys::eventIsNewChild(int signal, int event)
 {
 	return (signal == SIGSTOP && (event & PL_FLAG_CHILD));
@@ -164,6 +170,16 @@ void
 ptrace_sys::skipInstruction(pid_t pid)
 {
 	// Nop on x86 and x86_64
+}
+
+void
+ptrace_sys::restore_cpu_affinity(pid_t pid)
+{
+}
+
+void
+ptrace_sys::save_cpu_affinity(void)
+{
 }
 
 void
