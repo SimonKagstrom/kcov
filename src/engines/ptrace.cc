@@ -165,8 +165,10 @@ public:
 		{
 			kcov_debug(BP_MSG, "Can't find breakpoint at 0x%lx\n", addr);
 
-			// Stupid workaround for avoiding the solib thread race
-			msleep(1);
+			// Stupid workaround for avoiding the solib thread race.
+			// Without solib parsing, there's no solib data to wait for.
+			if (IConfiguration::getInstance().keyAsInt("parse-solibs"))
+				msleep(1);
 
 			return false;
 		}
