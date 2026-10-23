@@ -344,6 +344,9 @@ static int runKcov(IConfiguration::RunMode_t runningMode)
 	else
 	{
 		parser->parse();
+
+		if (!conf.keyAsInt("parse-solibs"))
+			parser->setMainFileRelocation(0);
 	}
 
 	do_cleanup();

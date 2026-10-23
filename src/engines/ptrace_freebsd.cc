@@ -86,6 +86,12 @@ ptrace_sys::follow_fork(pid_t pid)
 	return ptrace(PT_FOLLOW_FORK, pid, NULL, 1);
 }
 
+unsigned long
+ptrace_sys::get_entry_address(pid_t pid)
+{
+	return 0;
+}
+
 int
 ptrace_sys::getEvent(pid_t pid, int status)
 {

@@ -119,6 +119,18 @@ class pie(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "pie.c", 5) == 1
 
 
+class pie_skip_solibs(libkcov.TestCase):
+    def runTest(self):
+        noKcovRv, o = self.doCmd(self.binaries + "/pie")
+        rv, o = self.do(
+            self.kcov + " --skip-solibs " + self.outbase + "/kcov " + self.binaries + "/pie", False
+        )
+        assert rv == noKcovRv
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/pie/cobertura.xml")
+        assert cobertura.hitsPerLine(dom, "pie.c", 5) == 1
+
+
 class pie_argv_basic(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(

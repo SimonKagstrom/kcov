@@ -81,6 +81,16 @@ namespace kcov
 		 * @return true if the process should continue, false otherwise
 		 */
 		virtual bool continueExecution() = 0;
+
+		/**
+		 * Get the offset the main file was loaded at, for position-independent executables (PIE)
+		 *
+		 * @return the offset, or 0 if unknown
+		 */
+		virtual unsigned long getMainFileRelocation()
+		{
+			return 0;
+		}
 	};
 
 	/**
