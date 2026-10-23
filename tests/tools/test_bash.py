@@ -606,3 +606,32 @@ class bash_subshell_function(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "subshell.sh", 14) is None
 
         assert cobertura.hitsPerLine(dom, "subshell.sh", 16) == 1
+
+class bash_done_with_redirects(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/done-with-redirects.sh"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/done-with-redirects.sh/cobertura.xml")
+
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 8) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 12) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 16) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 20) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 24) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 28) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 32) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 36) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 40) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 44) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 48) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 53) is None
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 57) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 62) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 67) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 71) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 75) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 79) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 83) == 1
+        assert cobertura.hitsPerLine(dom, "done-with-redirects.sh", 87) == 1

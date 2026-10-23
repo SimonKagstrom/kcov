@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <cctype>
 
 #include <list>
 #include <unordered_map>
@@ -884,6 +885,50 @@ private:
 					 * where the done statement is nocode (as above)
 					 */
 					if (beforeHeredoc == "done")
+						continue;
+				}
+			}
+
+			// Special case to ignore 'done' followed by input / output redirection operators
+			// ('<', '>', '>>', optionally preceded by file descriptors) when the input is a
+			// static string (not a substitution).
+			// Heredocs and herestrings are handled later.
+			if (s.compare(0, 4, "done") == 0)
+			{
+				// Work out if there is input / output redirection, and if so, how long the
+				// redirection operator is
+				std::string remainder = trim_string(s.substr(4));
+				std::size_t redirectLen = 0;
+
+				// If the trimmed string starts with '&>', it's a redirect - trim the &.
+				if (remainder.length() > 1 && remainder[0] == '&' && remainder[1] == '>')
+					remainder = remainder.substr(1);
+				// If it begins with digits, remove them - if followed by a > or a <, they
+				// represent file descriptors.
+				else while (!remainder.empty() && std::isdigit(static_cast<unsigned char>(remainder[0])))
+					remainder = remainder.substr(1);
+
+				// Handle all redirection operators
+				if (!remainder.empty() && remainder[0] == '<' && (remainder.length() == 1 || remainder[1] != '<')) // <
+					redirectLen = 1;
+				else if (remainder.length() > 1 && remainder[0] == '>' && remainder[1] == '>') // >>
+					redirectLen = 2;
+				else if (!remainder.empty() && remainder[0] == '>')
+					redirectLen = 1; // >
+
+				if (redirectLen)
+				{
+					// Check if the redirection descriptor includes command / process
+					// substitution (those should not be ignored)
+					std::string redirection = trim_string(remainder.substr(redirectLen));
+					bool hasSubstitution = redirection.find("$(") != std::string::npos ||
+					                       redirection.find("<(") != std::string::npos ||
+					                       redirection.find(">(") != std::string::npos ||
+					                       redirection.find("`") != std::string::npos;
+
+					// If it doesn't, the given redirection is a string file-path or a
+					// variable - ignore
+					if (!hasSubstitution)
 						continue;
 				}
 			}
