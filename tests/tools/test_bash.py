@@ -593,6 +593,20 @@ class bash_ansi_c_quote_with_escaped_single_quote(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 220) == 1
 
 
+class bash_cobertura_reports_no_branches(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/short-test.sh"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/short-test.sh/cobertura.xml")
+        coverage = dom.documentElement
+
+        assert coverage.getAttribute("branches-covered") == "0"
+        assert coverage.getAttribute("branches-valid") == "0"
+        assert not coverage.hasAttribute("branches-rate")
+
+
 class bash_subshell_function(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
