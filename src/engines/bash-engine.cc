@@ -657,10 +657,13 @@ private:
 		}
 	}
 
-	size_t findHeredocStart(const std::string &s, char &quoteChar)
+	size_t findHeredocStart(const std::string &s, char &quoteChar, size_t &commentStart)
 	{
 		bool escaped = false;
 		int bracketDepth = 0;
+		int braceDepth = 0;
+
+		commentStart = std::string::npos;
 
 		for (size_t i = 0; i < s.size(); i++)
 		{
@@ -689,6 +692,19 @@ private:
 			{
 				quoteChar = c;
 				continue;
+			}
+
+			if (c == '$' && i + 1 < s.size() && s[i + 1] == '{')
+				braceDepth++;
+			else if (c == '}' && braceDepth > 0)
+				braceDepth--;
+
+			// A comment starts a word: a#b, $# and ${#x} are not comments
+			if (c == '#' && braceDepth == 0
+					&& (i == 0 || std::string(" \t;&|()<>").find(s[i - 1]) != std::string::npos))
+			{
+				commentStart = i;
+				break;
 			}
 
 			// Array subscripts are arithmetic contexts, so a '<<' inside one
@@ -822,7 +838,11 @@ private:
 				continue;
 			}
 
-			size_t heredocStart = findHeredocStart(s, quoteChar);
+			size_t commentStart;
+			size_t heredocStart = findHeredocStart(s, quoteChar, commentStart);
+
+			if (commentStart != std::string::npos)
+				s = trim_string(s.substr(0, commentStart));
 
 			// Multi-line quote - only the last line is code
 			if (quoteChar != '\0')
