@@ -621,6 +621,18 @@ class bash_quotes_in_trailing_comments(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "quotes-and-comments.sh", 20) is None
 
 
+class bash_ansi_c_string_with_escaped_quote(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/ansi-c-string.sh"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/ansi-c-string.sh/cobertura.xml")
+
+        for line in (2, 3, 4):
+            assert cobertura.hitsPerLine(dom, "ansi-c-string.sh", line) == 1, line
+
+
 class bash_subshell_function(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(

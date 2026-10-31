@@ -683,8 +683,16 @@ private:
 
 			if (quoteChar != '\0')
 			{
-				if (c == quoteChar)
+				if (c == (quoteChar == '$' ? '\'' : quoteChar))
 					quoteChar = '\0';
+				continue;
+			}
+
+			// $'...' closes on an apostrophe, but unlike '...' has backslash escapes
+			if (c == '$' && i + 1 < s.size() && s[i + 1] == '\'')
+			{
+				quoteChar = '$';
+				i++;
 				continue;
 			}
 
